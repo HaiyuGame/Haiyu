@@ -8,9 +8,8 @@
     <!--  using:https://github.com/Richasy/winui-kernel/tree/main/src/WinUIKernel.Share/Base/DraggableCardControl  -->
     <media:AttachedCardShadow
         x:Key="CardShadow"
-        BlurRadius="4"
-        CornerRadius="8"
-        InnerContentClipMode="CompositionMaskBrush" />
+        BlurRadius="3"
+        Opacity="0.2" />
 
     <Style x:Key="DefaultDraggableCardControlStyle" TargetType="local:DraggableCardControl">
         <Setter Property="Background" Value="{ThemeResource ButtonBackground}" />

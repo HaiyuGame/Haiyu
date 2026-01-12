@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:a="using:CommunityToolkit.WinUI.Animations"
     xmlns:b="using:CommunityToolkit.WinUI.Behaviors"
+    xmlns:cui="using:CommunityToolkit.WinUI"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:local="using:Haiyu.Pages.Communitys"
@@ -53,6 +54,7 @@
                             Margin="2"
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Stretch"
+                            cui:Effects.Shadow="{StaticResource CardShadow}"
                             Command="{x:Bind ClickShowCommand}"
                             CornerRadius="5">
                             <Grid>
@@ -94,9 +96,12 @@
                                     Margin="0,8,0,0"
                                     VerticalAlignment="Stretch"
                                     CornerRadius="5">
-                                    <ui:ImageEx Stretch="Uniform" >
+                                    <ui:ImageEx Stretch="Uniform">
                                         <ui:ImageEx.Source>
-                                            <BitmapImage UriSource="{x:Bind RoleIconUrl}" DecodePixelWidth="120" DecodePixelHeight="120" />
+                                            <BitmapImage
+                                                DecodePixelHeight="120"
+                                                DecodePixelWidth="120"
+                                                UriSource="{x:Bind RoleIconUrl}" />
                                         </ui:ImageEx.Source>
                                     </ui:ImageEx>
                                 </Border>

@@ -8,6 +8,7 @@
     xmlns:b="using:CommunityToolkit.WinUI.Behaviors"
     xmlns:bs="using:Haiyu.Behaviors"
     xmlns:control="using:Haiyu.Controls"
+    xmlns:cui="using:CommunityToolkit.WinUI"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:local="using:Haiyu.Pages"
@@ -21,6 +22,12 @@
     property:CursorProperty.CursorName="{x:Bind ViewModel.CursorName, Mode=OneWay}"
     property:CursorProperty.CursorType="Normal"
     mc:Ignorable="d">
+    <Page.Resources>
+        <media:AttachedCardShadow
+            x:Key="PanelEffect"
+            BlurRadius="5"
+            Color="{ThemeResource TextFillColorPrimary}" />
+    </Page.Resources>
     <i:Interaction.Behaviors>
         <i:EventTriggerBehavior EventName="Loaded">
             <i:InvokeCommandAction Command="{x:Bind ViewModel.LoadedCommand}" />
@@ -84,6 +91,7 @@
                             Padding="5"
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Center"
+                            cui:Effects.Shadow="{StaticResource PanelEffect}"
                             CornerRadius="48"
                             Style="{ThemeResource TransparentButtonStyle}">
                             <ui:ImageEx CornerRadius="40">
@@ -275,7 +283,7 @@
                             <ImageIcon Source="ms-appx:///Assets/GameIcons/pgr.ico" />
                         </NavigationViewItem.Icon>
                     </NavigationViewItem>
-                    
+
                     <NavigationViewItem property:NavigationItemClickHelper.NavigationKey="Haiyu.ViewModel.CloudGameViewModel" Content="云工具">
                         <NavigationViewItem.Icon>
                             <FontIcon FontFamily="Segoe UI Emoji" Glyph="&#x2601;" />

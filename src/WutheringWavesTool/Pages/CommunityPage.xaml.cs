@@ -10,6 +10,7 @@ public sealed partial class CommunityPage : Page, IPage, IDisposable,IWindowPage
     {
         this.InitializeComponent();
         this.ViewModel = Instance.Host.Services.GetRequiredService<CommunityViewModel>();
+        this.RequestedTheme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
     }
 
     protected override void OnNavigatedFrom(NavigationEventArgs e)
