@@ -19,8 +19,6 @@
     xmlns:ui="using:Haiyu.Controls"
     xmlns:wrapper="using:Haiyu.Models.Wrapper"
     xmlns:wui="using:CommunityToolkit.WinUI"
-    property:CursorProperty.CursorName="{x:Bind ViewModel.CursorName, Mode=OneWay}"
-    property:CursorProperty.CursorType="Normal"
     mc:Ignorable="d">
     <Page.Resources>
         <media:AttachedCardShadow

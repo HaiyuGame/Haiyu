@@ -10,6 +10,8 @@
 		<PublishProfile>win-x64.pubxml</PublishProfile>
 		<UseWinUI>true</UseWinUI>
 		<LangVersion>preview</LangVersion>
+		<SatelliteResourceLanguages></SatelliteResourceLanguages>
+		<InvariantGlobalization>true</InvariantGlobalization>
 		<WinUISDKReferences>false</WinUISDKReferences>
 		<EnableMsixTooling>true</EnableMsixTooling>
 		<PublishAot>true</PublishAot>
@@ -240,8 +242,9 @@
 		<AppxBundle>Auto</AppxBundle>		
 		<AppxBundlePlatforms>x64</AppxBundlePlatforms>
 		<HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
-		<Win32Resource>./Assets/Cursor/CursorResource.res</Win32Resource>
 		<AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
+		<ApplicationIcon>Assets\appLogo.ico</ApplicationIcon>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
 	
 	</PropertyGroup>
 	<ItemGroup>

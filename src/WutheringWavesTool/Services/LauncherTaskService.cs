@@ -7,17 +7,19 @@ public sealed class LauncherTaskService : ILauncherTaskService
     public LauncherTaskService(
         ITipShow tipShow,
         [FromKeyedServices("AppLog")] LoggerService loggerService,
-        IKuroClient wavesClient
+        IKuroClient wavesClient,AppSettings appSettings
     )
     {
         TipShow = tipShow;
         LoggerService = loggerService;
         WavesClient = wavesClient;
+        AppSettings = appSettings;
     }
 
     public ITipShow TipShow { get; }
     public LoggerService LoggerService { get; }
     public IKuroClient WavesClient { get; }
+    public AppSettings AppSettings { get; }
 
     public async Task RunAsync(CancellationToken token)
     {

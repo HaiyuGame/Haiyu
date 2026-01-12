@@ -8,12 +8,14 @@ namespace Haiyu.Services;
 
 public sealed class ThemeService : IThemeService
 {
-    public ThemeService(IAppContext<App> appContext)
+    public ThemeService(IAppContext<App> appContext,AppSettings appSettings)
     {
         AppContext = appContext;
+        AppSettings = appSettings;
     }
 
     public IAppContext<App> AppContext { get; }
+    public AppSettings AppSettings { get; }
 
     public ElementTheme CurrentTheme
     {

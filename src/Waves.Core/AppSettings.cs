@@ -1,10 +1,11 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Text.Json;
+using Waves.Core.Common;
 using Waves.Core.Models;
 
 namespace Waves.Core;
 
-public class AppSettings
+public class AppSettings:SettingBase
 {
     public static string BassFolder =>
         Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Waves";
@@ -29,185 +30,103 @@ public class AppSettings
 
     public const string RpcVersion = "1.0";
 
-    // 存储所有设置的内存缓存
-    private static List<LocalSettings> _settingsCache;
 
-    static AppSettings()
+    public AppSettings():base(SettingsFilePath)
     {
         LoadSettings();
     }
 
-    private static void LoadSettings()
-    {
-        if (File.Exists(SettingsFilePath))
-        {
-            var json = File.ReadAllText(SettingsFilePath);
-            try
-            {
-                _settingsCache = JsonSerializer.Deserialize<List<LocalSettings>>(
-                    json,
-                    LocalSettingsJsonContext.Default.ListLocalSettings
-                );
-            }
-            catch (Exception)
-            {
-                _settingsCache = new();
-            }
-
-            SaveSettings();
-        }
-        else
-        {
-            _settingsCache = new List<LocalSettings>();
-        }
-    }
-
-    private static void SaveSettings()
-    {
-        var json = JsonSerializer.Serialize(
-            _settingsCache,
-            LocalSettingsJsonContext.Default.ListLocalSettings
-        );
-        File.WriteAllText(SettingsFilePath, json);
-    }
-#nullable enable
-   
-
-    public static string? WallpaperType
+    
+    public string? WallpaperType
     {
         get => Read();
         set => Write(value);
     }
 
-    public static string? AreaCounterPostion
+    public string? AreaCounterPostion
     {
         get => Read();
         set => Write(value);
     }
 
-    public static string? AutoSignCommunity
+    public string? AutoSignCommunity
     {
         get => Read();
         set => Write(value);
     }
     
-    public static string? LastSelectUser
+    public string? LastSelectUser
     {
         get => Read();
         set=>Write(value);
     }
 
-    public static string? WallpaperPath
+    public string? WallpaperPath
     {
         get => Read();
         set => Write(value);
     }
-    public static string? CloseWindow
-    {
-        get => Read();
-        set => Write(value);
-    }
-
-    public static string? SelectCursor
+    public string? CloseWindow
     {
         get => Read();
         set => Write(value);
     }
 
-    public static string? CaptureModifierKey
+    public string? SelectCursor
     {
         get => Read();
         set => Write(value);
     }
 
-    public static string? CaptureKey
+    public string? CaptureModifierKey
     {
         get => Read();
         set => Write(value);
     }
 
-    public static string? IsCapture
+    public string? CaptureKey
     {
         get => Read();
         set => Write(value);
     }
 
-    public static string? Language
+    public string? IsCapture
     {
         get => Read();
         set => Write(value);
     }
 
-    public static string? AutoOOBE
-    {
-        get => Read();
-        set => Write(value);
-    }
-    public static string ElementTheme
+    public string? Language
     {
         get => Read();
         set => Write(value);
     }
 
-    public static string? RpcToken
+    public string? AutoOOBE
     {
         get => Read();
         set => Write(value);
     }
-    public static string? WavesAutoOpenContext
-    {
-        get => Read();
-        set => Write(value);
-    }
-    public static string? PunishAutoOpenContext
+    public string ElementTheme
     {
         get => Read();
         set => Write(value);
     }
 
-
-    internal static string? Read([CallerMemberName] string key = null)
+    public string? RpcToken
     {
-        try
-        {
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                return null;
-            }
-
-            var item = _settingsCache.FirstOrDefault(x => x.Key == key);
-            return item?.Value;
-        }
-        catch (Exception)
-        {
-            return null;
-        }
+        get => Read();
+        set => Write(value);
+    }
+    public string? WavesAutoOpenContext
+    {
+        get => Read();
+        set => Write(value);
+    }
+    public string? PunishAutoOpenContext
+    {
+        get => Read();
+        set => Write(value);
     }
 
-    internal static void Write(string? value, [CallerMemberName] string key = null)
-    {
-        if (string.IsNullOrWhiteSpace(key))
-        {
-            throw new IOException("找不到相关Key");
-        }
-
-        if (value == null)
-        {
-            _settingsCache.RemoveAll(x => x.Key == key);
-        }
-        else
-        {
-            var existing = _settingsCache.FirstOrDefault(x => x.Key == key);
-            if (existing != null)
-            {
-                existing.Value = value;
-            }
-            else
-            {
-                _settingsCache.Add(new LocalSettings { Key = key, Value = value });
-            }
-        }
-
-        SaveSettings();
-    }
 }

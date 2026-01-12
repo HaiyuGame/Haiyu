@@ -61,6 +61,8 @@ public static class InstanceBuilderExtensions
                             return service;
                         }
                     )
+                    .AddSingleton<AppSettings>()
+                    .AddHostedService<XBoxService>()
                     .AddTransient<IRpcMethodService, RpcMethodService>()
                     .AddSingleton<ShellPage>()
                     .AddSingleton<ShellViewModel>()

@@ -11,9 +11,10 @@ namespace Waves.Core.Services;
 
 public class KuroAccountService : IKuroAccountService
 {
-    public KuroAccountService([FromKeyedServices("AppLog")] LoggerService loggerService)
+    public KuroAccountService([FromKeyedServices("AppLog")] LoggerService loggerService,AppSettings appSettings)
     {
         LoggerService = loggerService;
+        AppSettings = appSettings;
     }
 
     const int BufferSize = 1024 * 1024;
@@ -21,7 +22,7 @@ public class KuroAccountService : IKuroAccountService
     readonly Dictionary<string, Tuple<string, LocalAccount>> _cache = new();
 
     public LoggerService LoggerService { get; }
-
+    public AppSettings AppSettings { get; }
     public LocalAccount? Current { get; private set; }
 
     public async Task<LocalAccount?> GetUserAsync(string userId)

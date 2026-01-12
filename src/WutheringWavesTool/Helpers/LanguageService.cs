@@ -7,6 +7,8 @@ public static class LanguageService
 {
     public static IReadOnlyCollection<string> Languages => ["en-us","zh-Hans","zh-Hant","ja-jp"];
 
+    public static AppSettings AppSettings { get; private set; }
+
     private static Dictionary<string, string> Zh_Hans  = [];
     private static Dictionary<string, string> Zh_Hant = [];
     private static Dictionary<string, string> En_Us = [];
@@ -14,6 +16,7 @@ public static class LanguageService
 
     public static string GetLanguage()
     {
+        AppSettings = Instance.Host.Services.GetRequiredService<AppSettings>();
         return AppSettings.Language??"";
     }
 

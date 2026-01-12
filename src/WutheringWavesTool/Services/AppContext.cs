@@ -14,13 +14,15 @@ public class AppContext<T> : IAppContext<T>
         IKuroClient wavesClient,
         IWallpaperService wallpaperService,
         [FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager,
-        [FromKeyedServices("AppLog")] LoggerService loggerService
+        [FromKeyedServices("AppLog")] LoggerService loggerService,
+        AppSettings appSettings
     )
     {
         KuroClient = wavesClient;
         WallpaperService = wallpaperService;
         DialogManager = dialogManager;
         LoggerService = loggerService;
+        AppSettings = appSettings;
         WallpaperService.WallpaperPletteChanged += WallpaperService_WallpaperPletteChanged;
     }
 
@@ -32,6 +34,7 @@ public class AppContext<T> : IAppContext<T>
     public IWallpaperService WallpaperService { get; }
     public IDialogManager DialogManager { get; }
     public LoggerService LoggerService { get; }
+    public AppSettings AppSettings { get; }
 
     public async Task LauncherAsync(T app)
     {

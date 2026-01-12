@@ -46,7 +46,6 @@ public interface IKuroGameContextViewModelBase
     Color StressShadowColor { get; set; }
 
 
-    CursorName CursorName { get; set; }
     #endregion
 
 

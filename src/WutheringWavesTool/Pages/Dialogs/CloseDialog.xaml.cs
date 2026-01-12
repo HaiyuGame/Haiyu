@@ -13,9 +13,13 @@ namespace Haiyu.Pages.Dialogs
         {
             this.InitializeComponent();
             this.RequestedTheme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
+            this.AppSettings = Instance.Host.Services.GetRequiredService<AppSettings>();
         }
 
         private bool isExit = false, isMin = false;
+
+        public AppSettings AppSettings { get; }
+
         public CloseWindowResult GetResult()
         {
             return new CloseWindowResult() { IsExit = this.isExit, IsMinTaskBar = this.isMin };

@@ -15,7 +15,6 @@ namespace Haiyu.ServiceHost;
 
 public static class TaskExtensions
 {
-    // 修复：恢复无限等待，但优化资源释放（核心是保留原逻辑，仅添加ConfigureAwait(false)）
     public static async Task<T> WithCancellation<T>(
         this Task<T> task,
         CancellationToken cancellationToken
@@ -85,10 +84,12 @@ public class RpcService : IHostedService
     public HttpListener SocketServer { get; private set; }
     public Dictionary<string, Func<string, List<RpcParams>, Task<string>>> Method { get; private set; }
 
+    public int Port => 9084;
+
     public RpcService(ILogger<RpcService> logger)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _listenPrefix = "http://localhost:9084/rpc/";
+        _listenPrefix = $"http://localhost:{Port}/rpc/";
         int maxConnections = 100;
         _connectionLimiter = new SemaphoreSlim(maxConnections, maxConnections);
         _serviceCts = new CancellationTokenSource();
@@ -129,9 +130,9 @@ public class RpcService : IHostedService
             SocketServer = new HttpListener();
             SocketServer.Prefixes.Add(_listenPrefix);
             SocketServer.Start();
-            // 核心：Task.Run + ConfigureAwait(false) 确保后台执行，不卡UI
             _listenLoopTask = Task.Run(() => ListenForConnectionsAsync(token), token);
-            _logger.LogInformation("Rpc WebSocket service started on {Prefix}", _listenPrefix);
+            _logger.LogInformation($"Rpc WebSocket 开始监听端口:{this.Port}", _listenPrefix);
+            _logger.LogInformation($"Rpc WebSocket 地址:{_listenPrefix}", _listenPrefix);
         }
         catch (Exception ex)
         {

@@ -18,8 +18,13 @@ public partial class App : ClientApplication
     private AppInstance mainInstance;
 
     public static string AppVersion => "1.2.18-preview2";
+
+    public AppSettings AppSettings { get; }
+
     public App()
     {
+        Instance.InitService();
+        this.AppSettings = Instance.Host.Services.GetRequiredService<AppSettings>();
         this.UnhandledException += App_UnhandledException;
         CreateFolder();
         if (AppSettings.WallpaperType == null)
@@ -34,7 +39,6 @@ public partial class App : ClientApplication
         SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
         #endregion
         GameContextFactory.GameBassPath = Waves.Core.AppSettings.BassFolder;
-        Instance.InitService();
         this.InitializeComponent();
     }
 

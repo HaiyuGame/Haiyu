@@ -33,16 +33,18 @@ public enum RpcMethodKey:int
 
 public partial class RpcMethodService : IRpcMethodService
 {
-    public RpcMethodService(IKuroClient kuroClient, ICloudGameService cloudGameService, CloudConfigManager cloudConfigManager)
+    public RpcMethodService(IKuroClient kuroClient, ICloudGameService cloudGameService, CloudConfigManager cloudConfigManager, AppSettings appSettings)
     {
         KuroClient = kuroClient;
         CloudGameService = cloudGameService;
         CloudConfigManager = cloudConfigManager;
+        AppSettings = appSettings;
     }
 
     public IKuroClient KuroClient { get; }
     public ICloudGameService CloudGameService { get; }
     public CloudConfigManager CloudConfigManager { get; }
+    public AppSettings AppSettings { get; }
 
     public Dictionary<string, Func<string, List<RpcParams>?, Task<string>>> Method =>
         new Dictionary<string, Func<string, List<RpcParams>?, Task<string>>>()

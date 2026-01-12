@@ -313,8 +313,6 @@
                             Height="60"
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Stretch"
-                            property:CursorProperty.CursorName="{x:Bind ViewModel.CursorName}"
-                            property:CursorProperty.CursorType="Link"
                             BorderThickness="0"
                             Command="{x:Bind ViewModel.UpdateGameCommand}"
                             CornerRadius="4"

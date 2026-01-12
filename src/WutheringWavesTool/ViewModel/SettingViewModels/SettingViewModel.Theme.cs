@@ -5,10 +5,6 @@ namespace Haiyu.ViewModel;
 
 partial class SettingViewModel
 {
-    public string OldCursorName { get; set; }
-
-    [ObservableProperty]
-    public partial string SelectCursorName { get; set; }
 
     [ObservableProperty]
     public partial List<string> Themes { get; set; } = ["Default", "Light", "Dark"];
@@ -16,26 +12,8 @@ partial class SettingViewModel
     [ObservableProperty]
     public partial string SelectTheme { get; set; }
 
-    public List<string> Cursors { get; set; } = ["默认", "弗糯糯", "卡提西亚", "守岸人"];
 
-    async partial void OnSelectCursorNameChanging(string value)
-    {
-        if (value == OldCursorName)
-            return;
-        if (
-            (await DialogManager.ShowMessageDialog("该选项需要重启", "重启", "取消"))
-            == ContentDialogResult.Primary
-        )
-        {
-            AppSettings.SelectCursor = value;
-            AppRestartFailureReason restartError = AppInstance.Restart(null);
-        }
-        else
-        {
-            SelectCursorName = Cursors.Find(x => x == OldCursorName);
-        }
-    }
-
+    
     partial void OnSelectThemeChanged(string value)
     {
         if (AppSettings.ElementTheme != null && AppSettings.ElementTheme == value)

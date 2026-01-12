@@ -1,6 +1,5 @@
 ﻿using System.Security.Principal;
 using Haiyu.Plugin.Extensions;
-using Microsoft.WindowsAppSDK;
 using Windows.Management.Deployment;
 
 namespace Haiyu.ViewModel;
@@ -26,7 +25,7 @@ partial class SettingViewModel
     {
         WebViewVersion = CoreWebView2Environment.GetAvailableBrowserVersionString() ?? "未安装";
         this.WindowsAppSdkVersion =
-            $"{Release.Major}.{Release.Minor}.{Release.Patch}-{Release.Channel}";
+            $"1.8.251106002";
         this.RunType = RuntimeFeature.IsDynamicCodeCompiled ? "JIT" : "AOT";
         this.FrameworkType = RuntimeInformation.FrameworkDescription;
     }
