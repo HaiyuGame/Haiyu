@@ -228,6 +228,11 @@
                         </ComboBox>
                     </ui:SettingsCard.Content>
                 </ui:SettingsCard>
+                <ui:SettingsCard Margin="0 5 0 0" Header="游戏监控工具" IsClickEnabled="True">
+                    <ui:SettingsCard.HeaderIcon>
+                        <SymbolIcon Symbol="Find"/>
+                    </ui:SettingsCard.HeaderIcon>
+                </ui:SettingsCard>
                 <TextBlock
                     Margin="0,5,0,0"
                     FontFamily="{StaticResource DefaultFont}"

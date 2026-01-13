@@ -101,7 +101,7 @@ public class XBoxController
 
     public XBoxController()
     {
-        controller = new Controller(UserIndex.Any);
+        controller = new Controller(UserIndex.One);
         LeftRumble.ValueChanged += (s, e) =>
         {
             if (!controller.IsConnected)

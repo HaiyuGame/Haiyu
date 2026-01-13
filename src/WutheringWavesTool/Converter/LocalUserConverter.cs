@@ -1,7 +1,7 @@
 ﻿
 namespace Haiyu.Converter;
 
-public sealed partial class LocalUserColorConverter : IValueConverter
+public sealed partial class LocalUserBorderThicknessConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language)
     {
@@ -9,13 +9,13 @@ public sealed partial class LocalUserColorConverter : IValueConverter
         {
             if(b)
             {
-                return Microsoft.UI.Xaml.Application.Current.Resources["SystemFillColorSuccessBackgroundBrush"];
+                return new Thickness(1);
             }
             else
             {
             }
         }
-        return Microsoft.UI.Xaml.Application.Current.Resources["CardBackgroundFillColorDefaultBrush"];
+        return new Thickness(0);
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, string language)

@@ -20,6 +20,7 @@ public sealed partial class LocalUserManagerDialog : ContentDialog,IDialog
     {
         InitializeComponent();
         this.ViewModel = Instance.Host.Services.GetRequiredService<LocalUserManagerViewModel>();
+        this.RequestedTheme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
     }
 
     public LocalUserManagerViewModel ViewModel { get; }

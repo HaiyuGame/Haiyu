@@ -17,7 +17,7 @@
     Style="{ThemeResource DefaultContentDialogStyle}"
     mc:Ignorable="d">
     <ContentDialog.Resources>
-        <converter:LocalUserColorConverter x:Key="LocalUserColorConverter" />
+        <converter:LocalUserBorderThicknessConverter x:Key="LocalUserBorderThicknessConverter" />
     </ContentDialog.Resources>
     <i:Interaction.Behaviors>
         <i:EventTriggerBehavior EventName="Loaded">
@@ -40,9 +40,9 @@
                     <DataTemplate x:DataType="w:LocalAccount">
                         <Border
                             Margin="4"
-                            Background="{x:Bind IsSelect, Mode=OneWay, Converter={StaticResource LocalUserColorConverter}}"
-                            BorderBrush="{ThemeResource LayerOnMicaBaseAltFillColorSecondaryBrush}"
-                            BorderThickness="1"
+                            BorderThickness="{x:Bind IsSelect, Mode=OneWay, Converter={StaticResource LocalUserBorderThicknessConverter}}"
+                            Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+                            BorderBrush="{ThemeResource AccentAAFillColorDefaultBrush}"
                             CornerRadius="5">
                             <Border.ContextFlyout>
                                 <MenuFlyout>

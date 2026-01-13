@@ -66,11 +66,11 @@ public class XBoxService : IHostedService
         {
             while (!token.IsCancellationRequested)
             {
-                if(Config.IsEnable == false)
-                {
-                    await Task.Delay(10000);
-                    continue;
-                }
+                //if(Config.IsEnable == false)
+                //{
+                //    await Task.Delay(10000);
+                //    continue;
+                //}
                 if (_controller != null)
                 {
                     // 按键控制模拟
