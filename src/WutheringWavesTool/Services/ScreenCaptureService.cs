@@ -1,4 +1,5 @@
 ﻿using Haiyu.Plugin.Extensions;
+using Waves.Core.Settings;
 using Windows.Graphics.Imaging;
 using WinUIEx.Messaging;
 

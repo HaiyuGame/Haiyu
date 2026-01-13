@@ -1,5 +1,6 @@
 ﻿using Haiyu.Helpers;
 using Haiyu.ServiceHost;
+using Haiyu.ServiceHost.XBox.Commons;
 using Haiyu.Services.DialogServices;
 using Haiyu.Services.Navigations.NavigationViewServices;
 using Haiyu.ViewModel.GameViewModels;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Waves.Api.Models.Rpc;
 using Waves.Core.Services;
+using Waves.Core.Settings;
 
 namespace Haiyu;
 
@@ -62,7 +64,11 @@ public static class InstanceBuilderExtensions
                         }
                     )
                     .AddSingleton<AppSettings>()
+                #region XBox
+                    .AddSingleton<XBoxConfig>()
+                    .AddSingleton<XBoxController>()
                     .AddHostedService<XBoxService>()
+                #endregion
                     .AddTransient<IRpcMethodService, RpcMethodService>()
                     .AddSingleton<ShellPage>()
                     .AddSingleton<ShellViewModel>()

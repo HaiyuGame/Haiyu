@@ -2,6 +2,7 @@
 using System.IO;
 using Waves.Api.Models.Rpc;
 using Waves.Api.Models.Rpc.CloudGame;
+using Waves.Core.Settings;
 
 namespace Haiyu.Services;
 

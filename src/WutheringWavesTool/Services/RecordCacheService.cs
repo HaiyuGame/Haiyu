@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Waves.Core.Settings;
 
 namespace Haiyu.Services;
 

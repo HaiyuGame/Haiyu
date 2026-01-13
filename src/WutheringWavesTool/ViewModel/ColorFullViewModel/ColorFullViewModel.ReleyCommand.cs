@@ -3,6 +3,7 @@ using Haiyu.Models.ColorFullGame;
 using Haiyu.Models.ColorGames;
 using Haiyu.Models.Enums;
 using Microsoft.Windows.Storage.Pickers;
+using Waves.Core.Settings;
 
 namespace Haiyu.ViewModel;
 

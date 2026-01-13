@@ -1,5 +1,6 @@
 using Haiyu.Models.Dialogs;
 using Haiyu.Services.DialogServices;
+using Waves.Core.Settings;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.

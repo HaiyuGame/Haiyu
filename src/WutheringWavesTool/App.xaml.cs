@@ -3,6 +3,7 @@ using Haiyu.Helpers;
 using Microsoft.Windows.ApplicationModel.Resources;
 using Microsoft.Windows.AppLifecycle;
 using Waves.Core.Services;
+using Waves.Core.Settings;
 using Windows.Globalization;
 
 namespace Haiyu;
@@ -38,7 +39,7 @@ public partial class App : ClientApplication
         #region PE DPI Resource
         SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
         #endregion
-        GameContextFactory.GameBassPath = Waves.Core.AppSettings.BassFolder;
+        GameContextFactory.GameBassPath = AppSettings.BassFolder;
         this.InitializeComponent();
     }
 
@@ -50,12 +51,12 @@ public partial class App : ClientApplication
     void CreateFolder()
     {
 
-        Directory.CreateDirectory(Waves.Core.AppSettings.BassFolder);
-        Directory.CreateDirectory(Waves.Core.AppSettings.RecordFolder);
-        Directory.CreateDirectory(Waves.Core.AppSettings.ColorGameFolder);
-        Directory.CreateDirectory(Waves.Core.AppSettings.WrallpaperFolder);
-        Directory.CreateDirectory(Waves.Core.AppSettings.ScreenCaptures);
-        Directory.CreateDirectory(Waves.Core.AppSettings.LocalUserFolder);
+        Directory.CreateDirectory(AppSettings.BassFolder);
+        Directory.CreateDirectory(AppSettings.RecordFolder);
+        Directory.CreateDirectory(AppSettings.ColorGameFolder);
+        Directory.CreateDirectory(AppSettings.WrallpaperFolder);
+        Directory.CreateDirectory(AppSettings.ScreenCaptures);
+        Directory.CreateDirectory(AppSettings.LocalUserFolder);
         Directory.CreateDirectory(Path.GetDirectoryName(AppSettings.LogPath));
         Directory.CreateDirectory(AppSettings.CloudFolderPath);
     }

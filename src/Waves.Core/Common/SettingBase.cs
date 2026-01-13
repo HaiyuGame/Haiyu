@@ -1,100 +1,140 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.Json;
 using Waves.Core.Models;
 
-namespace Waves.Core.Common
+namespace Waves.Core.Common;
+
+public class SettingBase
 {
-    public class SettingBase
+    public SettingBase(string configPath)
     {
-        public SettingBase(string configPath)
+        this.configPath = configPath;
+        _settingsCache = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        _lockObj = new object();
+    }
+    private Dictionary<string, string> _settingsCache;
+    private readonly string configPath;
+    private bool _isLoaded = false;
+    private readonly object _lockObj;
+
+    internal virtual string? Read([CallerMemberName] string key = null)
+    {
+        if (string.IsNullOrWhiteSpace(key)) return null;
+        LoadSettingsOnce();
+        try
         {
-            this.configPath = configPath;
+            lock (_lockObj)
+            {
+                _settingsCache.TryGetValue(key, out var value);
+                return value;
+            }
         }
-
-        // 存储所有设置的内存缓存
-        private static List<LocalSettings> _settingsCache;
-        private readonly string configPath;
-
-        internal virtual string? Read([CallerMemberName] string key = null)
+        catch (Exception)
         {
+            return null;
+        }
+    }
+
+    internal virtual void Write(string? value, [CallerMemberName] string key = null)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            throw new ArgumentException("配置键名不能为空", nameof(key));
+        }
+        LoadSettingsOnce();
+
+        lock (_lockObj)
+        {
+            if (value == null)
+            {
+                _settingsCache.Remove(key);
+            }
+            else
+            {
+                _settingsCache[key] = value;
+            }
+            SaveSettings();
+        }
+    }
+
+    private void SaveSettings()
+    {
+        try
+        {
+            lock (_lockObj)
+            {
+                var settingsList = _settingsCache.Select(kv => new LocalSettings
+                {
+                    Key = kv.Key,
+                    Value = kv.Value
+                }).ToList();
+
+                var json = JsonSerializer.Serialize(
+                    settingsList,
+                    LocalSettingsJsonContext.Default.ListLocalSettings
+                );
+                File.WriteAllText(configPath, json);
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new IOException("配置文件写入失败", ex);
+        }
+    }
+
+    private void LoadSettingsOnce()
+    {
+        if (!_isLoaded)
+        {
+            lock (_lockObj)
+            {
+                if (!_isLoaded)
+                {
+                    DoLoadSettings();
+                    _isLoaded = true;
+                }
+            }
+        }
+    }
+
+    private void DoLoadSettings()
+    {
+        if (File.Exists(configPath))
+        {
+            var json = File.ReadAllText(configPath);
             try
             {
-                if (string.IsNullOrWhiteSpace(key))
+                var settingsList = JsonSerializer.Deserialize<List<LocalSettings>>(
+                    json,
+                    LocalSettingsJsonContext.Default.ListLocalSettings
+                );
+                if (settingsList != null && settingsList.Count > 0)
                 {
-                    return null;
+                    _settingsCache = settingsList.ToDictionary(
+                        x => x.Key,
+                        x => x.Value,
+                        StringComparer.OrdinalIgnoreCase
+                    );
                 }
-
-                var item = _settingsCache.FirstOrDefault(x => x.Key == key);
-                return item?.Value;
             }
             catch (Exception)
             {
-                return null;
+                _settingsCache = new Dictionary<string, string>();
             }
         }
-
-        internal virtual void Write(string? value, [CallerMemberName] string key = null)
+        else
         {
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new IOException("找不到相关Key");
-            }
-
-            if (value == null)
-            {
-                _settingsCache.RemoveAll(x => x.Key == key);
-            }
-            else
-            {
-                var existing = _settingsCache.FirstOrDefault(x => x.Key == key);
-                if (existing != null)
-                {
-                    existing.Value = value;
-                }
-                else
-                {
-                    _settingsCache.Add(new LocalSettings { Key = key, Value = value });
-                }
-            }
-
-            SaveSettings();
+            _settingsCache = new Dictionary<string, string>();
         }
+    }
 
-        private void SaveSettings()
+    public void LoadSettings()
+    {
+        lock (_lockObj)
         {
-            var json = JsonSerializer.Serialize(
-                _settingsCache,
-                LocalSettingsJsonContext.Default.ListLocalSettings
-            );
-            File.WriteAllText(configPath, json);
-        }
-
-        public void LoadSettings()
-        {
-            if (File.Exists(configPath))
-            {
-                var json = File.ReadAllText(configPath);
-                try
-                {
-                    _settingsCache = JsonSerializer.Deserialize<List<LocalSettings>>(
-                        json,
-                        LocalSettingsJsonContext.Default.ListLocalSettings
-                    );
-                }
-                catch (Exception)
-                {
-                    _settingsCache = new();
-                }
-
-                SaveSettings();
-            }
-            else
-            {
-                _settingsCache = new List<LocalSettings>();
-            }
+            DoLoadSettings();
+            _isLoaded = true;
         }
     }
 }

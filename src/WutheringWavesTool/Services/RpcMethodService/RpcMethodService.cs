@@ -1,5 +1,6 @@
 ﻿using System.Security.Cryptography;
 using Waves.Api.Models.Rpc;
+using Waves.Core.Settings;
 
 namespace Haiyu.Services;
 

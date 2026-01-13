@@ -6,6 +6,7 @@ using System.Buffers;
 using Waves.Api.Models.Messanger;
 using Waves.Core.Contracts;
 using Waves.Core.Models;
+using Waves.Core.Settings;
 
 namespace Waves.Core.Services;
 

@@ -6,6 +6,7 @@ using Haiyu.Services.DialogServices;
 using LiveChartsCore.Defaults;
 using MemoryPack;
 using Waves.Api.Models.CloudGame;
+using Waves.Core.Settings;
 
 namespace Haiyu.ViewModel;
 

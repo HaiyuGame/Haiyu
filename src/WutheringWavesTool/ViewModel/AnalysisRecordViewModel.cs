@@ -4,6 +4,7 @@ using LiveChartsCore.Defaults;
 using LiveChartsCore.Kernel;
 using MemoryPack;
 using Waves.Api.Models.CloudGame;
+using Waves.Core.Settings;
 using ZLinq;
 
 namespace Haiyu.ViewModel;

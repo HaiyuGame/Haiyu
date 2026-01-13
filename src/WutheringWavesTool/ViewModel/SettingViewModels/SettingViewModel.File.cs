@@ -1,5 +1,6 @@
 ﻿using System.Security.Principal;
 using Haiyu.Plugin.Extensions;
+using Waves.Core.Settings;
 using Windows.Management.Deployment;
 
 namespace Haiyu.ViewModel;

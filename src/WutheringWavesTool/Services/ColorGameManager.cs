@@ -1,4 +1,5 @@
 ﻿using Haiyu.Models.ColorGames;
+using Waves.Core.Settings;
 
 namespace Haiyu.Services;
 

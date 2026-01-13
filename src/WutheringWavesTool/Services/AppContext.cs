@@ -3,6 +3,7 @@ using Haiyu.Services.DialogServices;
 using Microsoft.UI.Dispatching;
 using Waves.Core.GameContext.Contexts.PRG;
 using Waves.Core.Services;
+using Waves.Core.Settings;
 using TitleBar = Haiyu.Controls.TitleBar;
 
 namespace Haiyu.Services;

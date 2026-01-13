@@ -99,14 +99,7 @@ public sealed partial class SettingViewModel : ViewModelBase
                     this.SelectWallpaperName = WallpaperTypes[1];
                 }
             }
-            if (bool.TryParse(AppSettings.AutoSignCommunity, out var isSign))
-            {
-                this.AutoCommunitySign = isSign;
-            }
-            else
-            {
-                this.AutoCommunitySign = false;
-            }
+            this.AutoCommunitySign = AppSettings.AutoSignCommunity;
             switch (AppSettings.ElementTheme)
             {
                 case "Light":
@@ -172,9 +165,7 @@ public sealed partial class SettingViewModel : ViewModelBase
 
     partial void OnAutoCommunitySignChanged(bool? value)
     {
-        if (value == null)
-            return;
-        AppSettings.AutoSignCommunity = value.ToString();
+        AppSettings.AutoSignCommunity = value;
     }
 
     public override void Dispose()

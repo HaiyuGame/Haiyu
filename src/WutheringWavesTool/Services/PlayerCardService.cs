@@ -1,5 +1,6 @@
 ﻿
 using MemoryPack;
+using Waves.Core.Settings;
 
 namespace Haiyu.Services;
 

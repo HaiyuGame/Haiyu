@@ -1,9 +1,10 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Text.Json;
+using Waves.Core.Adaptives;
 using Waves.Core.Common;
 using Waves.Core.Models;
 
-namespace Waves.Core;
+namespace Waves.Core.Settings;
 
 public class AppSettings:SettingBase
 {
@@ -49,10 +50,10 @@ public class AppSettings:SettingBase
         set => Write(value);
     }
 
-    public string? AutoSignCommunity
+    public bool? AutoSignCommunity
     {
-        get => Read();
-        set => Write(value);
+        get => NullBoolAdaptive.Instance.GetForward(Read());
+        set => Write(NullBoolAdaptive.Instance.GetBack(value));
     }
     
     public string? LastSelectUser
