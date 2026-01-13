@@ -22,7 +22,6 @@ public sealed partial class ShellViewModel : ViewModelBase
         [FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager,
         IViewFactorys viewFactorys,
         IKuroClient wavesClient,
-        ILauncherTaskService launcherTaskService,
         IWallpaperService wallpaperService,IKuroClient kuroClient
     )
     {
@@ -33,7 +32,6 @@ public sealed partial class ShellViewModel : ViewModelBase
         DialogManager = dialogManager;
         ViewFactorys = viewFactorys;
         WavesClient = wavesClient;
-        LauncherTaskService = launcherTaskService;
         WallpaperService = wallpaperService;
         KuroClient = kuroClient;
         RegisterMessanger();
@@ -57,7 +55,6 @@ public sealed partial class ShellViewModel : ViewModelBase
     public IDialogManager DialogManager { get; }
     public IViewFactorys ViewFactorys { get; }
     public IKuroClient WavesClient { get; }
-    public ILauncherTaskService LauncherTaskService { get; }
     public IWallpaperService WallpaperService { get; }
     public IKuroClient KuroClient { get; }
     [ObservableProperty]

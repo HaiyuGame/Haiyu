@@ -99,7 +99,7 @@ public class AppContext<T> : IAppContext<T>
                 page.titlebar.Window = win;
                 win.Content = page;
             }
-            catch
+            catch(Exception ex)
             {
                 win.MaxWidth = 1100;
                 win.MaxHeight = 700;

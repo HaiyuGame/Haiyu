@@ -173,9 +173,6 @@ public class KuroAccountService : IKuroAccountService
     {
         this.Current = localAccount;
         AppSettings.LastSelectUser = localAccount.TokenId;
-        WeakReferenceMessenger.Default.Send(
-            new SelectUserMessanger(true)
-        );
     }
 
     public async Task SetAutoUser()

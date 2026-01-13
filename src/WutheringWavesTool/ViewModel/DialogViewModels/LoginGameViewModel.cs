@@ -133,7 +133,11 @@ public sealed partial class LoginGameViewModel : DialogViewModelBase
             account.TokenId = login.Data.UserId;
             account.TokenDid = IdV2;
             await KuroAccountService.SaveUserAsync(account);
+
             this.KuroAccountService.SetCurrentUser(account);
+            WeakReferenceMessenger.Default.Send(
+                new SelectUserMessanger(true)
+            );
             DialogManager.CloseDialog();
         }
         else
@@ -149,6 +153,9 @@ public sealed partial class LoginGameViewModel : DialogViewModelBase
                     account.TokenDid = TokenDid;
                     await KuroAccountService.SaveUserAsync(account);
                     this.KuroAccountService.SetCurrentUser(account);
+                    WeakReferenceMessenger.Default.Send(
+                        new SelectUserMessanger(true)
+                    );
                     DialogManager.CloseDialog();
                 }
                 else if (mine != null)

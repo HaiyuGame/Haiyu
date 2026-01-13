@@ -22,7 +22,6 @@ public static class Instance
     public static void InitService()
     {
         Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder().AppBuilder().Build();
-        Task.Run(async () => await Host.RunAsync());
     }
 
     public static T? GetService<T>()
@@ -160,7 +159,8 @@ public static class InstanceBuilderExtensions
                     .AddTransient<IViewFactorys, ViewFactorys>()
                     .AddSingleton<IThemeService, ThemeService>()
                     .AddSingleton<IKuroAccountService,KuroAccountService>()
-                    .AddTransient<ILauncherTaskService, LauncherTaskService>()
+                    .AddKeyedTransient<IKuroAccountService,KuroAccountService>("Sign")
+                    .AddHostedService<AutoSignService>()
                     .AddSingleton<CloudConfigManager>(
                         (s) =>
                         {
@@ -200,6 +200,8 @@ public static class InstanceBuilderExtensions
                     #region Plugin
 
                     #endregion
+                    // 签到专属Client
+                    .AddKeyedTransient<IKuroClient,KuroClient>("Sign")
                     .AddKeyedSingleton<IDialogManager, MainDialogService>(nameof(MainDialogService))
                     .AddKeyedSingleton<LoggerService>(
                         "AppLog",

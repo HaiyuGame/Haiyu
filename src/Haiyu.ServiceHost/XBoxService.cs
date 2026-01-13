@@ -68,7 +68,7 @@ public class XBoxService : IHostedService
             {
                 if(Config.IsEnable == false)
                 {
-                    await Task.Delay(10);
+                    await Task.Delay(10000);
                     continue;
                 }
                 if (_controller != null)

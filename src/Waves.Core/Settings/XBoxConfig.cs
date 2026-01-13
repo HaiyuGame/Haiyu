@@ -13,8 +13,8 @@ public class XBoxConfig : SettingBase
         "xbox.json"
     );
 
-    public XBoxConfig(string configPath)
-        : base(configPath) { }
+    public XBoxConfig()
+        : base(XboxConfigFilelPath) { }
 
     /// <summary>
     /// 是否启用模拟鼠标控制
