@@ -8,7 +8,7 @@ public static class SystemHelper
     /// 管理员模式启动
     /// </summary>
     /// <returns></returns>
-    static bool IsAdministrator()
+    public static bool IsAdministrator()
     {
         using var identity = WindowsIdentity.GetCurrent();
         var principal = new WindowsPrincipal(identity);

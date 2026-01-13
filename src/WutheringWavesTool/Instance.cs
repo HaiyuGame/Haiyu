@@ -78,6 +78,8 @@ public static class InstanceBuilderExtensions
                     .AddTransient<PlayerRecordViewModel>()
                     .AddTransient<SettingViewModel>()
                     .AddTransient<CommunityViewModel>()
+                    .AddTransient<GameEnhancedDialog>()
+                    .AddTransient<GameEnhancedViewModel>()
                     .AddTransient<GameResourceDialog>()
                     .AddTransient<GameResourceViewModel>()
                     .AddTransient<DeviceInfoPage>()

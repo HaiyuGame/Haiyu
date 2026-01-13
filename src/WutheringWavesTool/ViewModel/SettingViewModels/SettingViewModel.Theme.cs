@@ -28,6 +28,12 @@ partial class SettingViewModel
         AppSettings.ElementTheme = value.ToString();
     }
 
+    [RelayCommand]
+    async Task ShowGameEnhancedDialog()
+    {
+        await DialogManager.ShowGameEnhancedDialogAsync();
+    }
+
     [ObservableProperty]
     public partial WallpaperType SelectWallpaperName { get; set; }
 

@@ -198,6 +198,9 @@
 		<None Update="Assets\HpatchzResource\hpatchz.exe">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
+		<Page Update="Pages\Dialogs\GameEnhancedDialog.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</Page>
 		<Page Update="Pages\Dialogs\LocalUserManagerDialog.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</Page>
@@ -263,6 +266,7 @@
 	  <None Remove="Controls\Styles\Colors.xaml" />
 	  <None Remove="Controls\Styles\HeaderTileCard.xaml" />
 	  <None Remove="Controls\Styles\LoadingCard.xaml" />
+	  <None Remove="Pages\Dialogs\GameEnhancedDialog.xaml" />
 	  <None Remove="Pages\Dialogs\LocalUserManagerDialog.xaml" />
 	  <None Remove="Pages\Dialogs\UpdateGameDialog.xaml" />
 	</ItemGroup>

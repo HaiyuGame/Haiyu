@@ -228,7 +228,7 @@
                         </ComboBox>
                     </ui:SettingsCard.Content>
                 </ui:SettingsCard>
-                <ui:SettingsCard Margin="0 5 0 0" Header="游戏监控工具" IsClickEnabled="True">
+                <ui:SettingsCard Margin="0 5 0 0" Header="游戏监控工具" Command="{x:Bind ViewModel.ShowGameEnhancedDialogCommand}" IsClickEnabled="True">
                     <ui:SettingsCard.HeaderIcon>
                         <SymbolIcon Symbol="Find"/>
                     </ui:SettingsCard.HeaderIcon>

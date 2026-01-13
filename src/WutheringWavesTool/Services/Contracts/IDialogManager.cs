@@ -27,4 +27,6 @@ public interface IDialogManager
     Task ShowGameLauncherChacheDialogAsync(GameLauncherCacheArgs args);
 
     Task<ContentDialogResult> ShowOKDialogAsync(string header, string content);
+
+    Task ShowGameEnhancedDialogAsync();
 }

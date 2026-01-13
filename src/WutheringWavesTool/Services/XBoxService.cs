@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using System.Runtime.InteropServices;
+using Haiyu.ServiceHost;
 using Haiyu.ServiceHost.XBox;
 using Haiyu.ServiceHost.XBox.Commons;
 using Haiyu.ServiceHost.XBox.helpers;
@@ -7,13 +8,14 @@ using Microsoft.Extensions.Hosting;
 using Waves.Api.Models;
 using Waves.Core.Settings;
 
-namespace Haiyu.ServiceHost;
+namespace Haiyu.Services;
 
 public class XBoxService : IHostedService
 {
     private XBoxController _controller;
 
     public XBoxConfig Config { get; }
+    public ITipShow TipShow { get; }
 
     private CancellationTokenSource? _cts;
     private Task? _pollTask;
@@ -27,19 +29,24 @@ public class XBoxService : IHostedService
     private bool _xPressed;
     private bool _bPressed;
 
-    public XBoxService(XBoxController xBoxController,XBoxConfig xBoxConfig)
+    public XBoxService(XBoxController xBoxController,XBoxConfig xBoxConfig,ITipShow tipShow)
     {
         _controller = xBoxController;
         Config = xBoxConfig;
+        TipShow = tipShow;
     }
 
 
-    public Task StartAsync(CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
+        if (!SystemHelper.IsAdministrator() && Config.IsEnable)
+        {
+            await TipShow.ShowMessageAsync("请在管理员模式下启用XBox手柄支持", Symbol.Clear);
+            return;
+        }
         _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         _controller = new XBoxController();
         _pollTask = Task.Run(() => PollLoopAsync(_cts.Token), _cts.Token);
-        return Task.CompletedTask;
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
@@ -66,11 +73,11 @@ public class XBoxService : IHostedService
         {
             while (!token.IsCancellationRequested)
             {
-                //if(Config.IsEnable == false)
-                //{
-                //    await Task.Delay(10000);
-                //    continue;
-                //}
+                if (Config.IsEnable == false)
+                {
+                    await Task.Delay(3000);
+                    continue;
+                }
                 if (_controller != null)
                 {
                     // 按键控制模拟
