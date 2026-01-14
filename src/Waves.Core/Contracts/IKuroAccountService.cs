@@ -39,7 +39,7 @@ public interface IKuroAccountService
     /// 设置当前账号
     /// </summary>
     /// <param name="localAccount"></param>
-    public void SetCurrentUser(string userId);
-    public void SetCurrentUser(LocalAccount user);
+    public void SetCurrentUser(string userId, bool isWrite = true);
+    public void SetCurrentUser(LocalAccount user, bool isWrite = true);
     Task SetAutoUser();
 }

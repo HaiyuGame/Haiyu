@@ -18,9 +18,9 @@ public sealed class AutoSignService : IHostedService
     public AutoSignService(
         ITipShow tipShow,
         [FromKeyedServices("AppLog")] LoggerService loggerService,
-        [FromKeyedServices("Sign")] IKuroClient wavesClient,
+        IKuroClient wavesClient,
         AppSettings appSettings,
-        [FromKeyedServices("Sign")] IKuroAccountService kuroAccountService
+        IKuroAccountService kuroAccountService
     )
     {
         TipShow = tipShow;
@@ -48,7 +48,7 @@ public sealed class AutoSignService : IHostedService
             var accounts = await KuroAccountService.GetUsersAsync();
             foreach (var account in accounts)
             {
-                SignKuroClient.AccountService.SetCurrentUser(account);
+                SignKuroClient.AccountService.SetCurrentUser(account,false);
                 var wavesGamers = await SignKuroClient.GetGamerAsync(
                     Waves.Core.Models.Enums.GameType.Waves,
                     token
@@ -77,6 +77,7 @@ public sealed class AutoSignService : IHostedService
                 $"签到结果{successCount}个成功，总数{successCount + errorCount}",
                 Symbol.Bookmarks
             );
+            await SignKuroClient.AccountService.SetAutoUser();
         }
         catch (Exception ex)
         {

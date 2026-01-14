@@ -156,7 +156,7 @@ public class KuroAccountService : IKuroAccountService
         }
     }
 
-    public void SetCurrentUser(string userId)
+    public void SetCurrentUser(string userId, bool isWrite = true)
     {
         if (this._cache.TryGetValue(userId, out var value))
         {
@@ -169,10 +169,11 @@ public class KuroAccountService : IKuroAccountService
         }
     }
 
-    public void SetCurrentUser(LocalAccount localAccount)
+    public void SetCurrentUser(LocalAccount localAccount, bool isWrite = true)
     {
         this.Current = localAccount;
-        AppSettings.LastSelectUser = localAccount.TokenId;
+        if(isWrite)
+            AppSettings.LastSelectUser = localAccount.TokenId;
     }
 
     public async Task SetAutoUser()

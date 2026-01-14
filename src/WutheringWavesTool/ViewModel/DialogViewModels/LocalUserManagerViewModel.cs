@@ -36,7 +36,7 @@ public sealed partial class LocalUserManagerViewModel : DialogViewModelBase
 
     private async void SetCurrentAccountMethod(object recipient, SetCurrentAccount message)
     {
-        this.KuroAccountService.SetCurrentUser(message.userId);
+        this.KuroAccountService.SetCurrentUser(message.userId,true);
         await RefreshAsync();
     }
 

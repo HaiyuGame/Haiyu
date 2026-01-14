@@ -11,13 +11,12 @@
     xmlns:ui="using:Haiyu.Controls"
     xmlns:w="using:Waves.Core.Models"
     Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
-    BorderBrush="{ThemeResource AccentAAFillColorDefaultBrush}"
     BorderThickness="1"
     CornerRadius="5"
     Style="{ThemeResource DefaultContentDialogStyle}"
     mc:Ignorable="d">
     <ContentDialog.Resources>
-        <converter:LocalUserColorConverter x:Key="LocalUserColorConverter" />
+        <converter:LocalUserBorderConverter x:Key="LocalUserBorderConverter" />
     </ContentDialog.Resources>
     <i:Interaction.Behaviors>
         <i:EventTriggerBehavior EventName="Loaded">
@@ -40,9 +39,9 @@
                     <DataTemplate x:DataType="w:LocalAccount">
                         <Border
                             Margin="4"
-                            Background="{x:Bind IsSelect, Mode=OneWay, Converter={StaticResource LocalUserColorConverter}}"
-                            BorderBrush="{ThemeResource LayerOnMicaBaseAltFillColorSecondaryBrush}"
-                            BorderThickness="1"
+                            Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+                            BorderBrush="{ThemeResource AccentAAFillColorDefaultBrush}"
+                            BorderThickness="{x:Bind IsSelect, Mode=OneWay, Converter={StaticResource LocalUserBorderConverter}}"
                             CornerRadius="5">
                             <Border.ContextFlyout>
                                 <MenuFlyout>
