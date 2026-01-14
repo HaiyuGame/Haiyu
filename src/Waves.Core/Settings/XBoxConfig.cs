@@ -95,4 +95,9 @@ public class XBoxConfig : SettingBase
         get => Read();
         set => Write(value);
     }
+    public bool FpsEnable
+    {
+        get => BoolAdaptive.Instance.GetForward(Read());
+        set => Write(BoolAdaptive.Instance.GetBack(value));
+    }
 }

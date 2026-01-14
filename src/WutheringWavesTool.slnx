@@ -72,6 +72,13 @@
     <Project Path="KuroGameDownloadProgram/KuroGameDownloadProgram.csproj" Id="3d00fcfd-9df9-4241-b422-ce04accdfa6f">
       <BuildType Solution="All|*" Project="Debug" />
     </Project>
+    <Project Path="WinUIUnitTestApp1/WinUIUnitTestApp1.csproj" Id="208babd8-72b5-4a5f-92fd-6896f91000f0">
+      <BuildType Solution="All|*" Project="Debug" />
+      <Platform Solution="*|Any CPU" Project="x64" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Deploy />
+    </Project>
   </Folder>
   <Project Path="Haiyu.Config/Haiyu.Config.csproj" Id="e012abb1-1039-41e6-bc54-64984ffbe1b4">
     <BuildType Solution="All|*" Project="Debug" />
