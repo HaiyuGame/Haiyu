@@ -19,6 +19,7 @@ public sealed partial class LocalUserManagerDialog : ContentDialog,IDialog
     public LocalUserManagerDialog()
     {
         InitializeComponent();
+        this.RequestedTheme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
         this.ViewModel = Instance.Host.Services.GetRequiredService<LocalUserManagerViewModel>();
         this.RequestedTheme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
     }

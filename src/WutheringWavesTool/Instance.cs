@@ -161,7 +161,6 @@ public static class InstanceBuilderExtensions
                     .AddTransient<IViewFactorys, ViewFactorys>()
                     .AddSingleton<IThemeService, ThemeService>()
                     .AddSingleton<IKuroAccountService,KuroAccountService>()
-                    .AddKeyedTransient<IKuroAccountService,KuroAccountService>("Sign")
                     .AddHostedService<AutoSignService>()
                     .AddSingleton<CloudConfigManager>(
                         (s) =>
@@ -202,8 +201,6 @@ public static class InstanceBuilderExtensions
                     #region Plugin
 
                     #endregion
-                    // 签到专属Client
-                    .AddKeyedTransient<IKuroClient,KuroClient>("Sign")
                     .AddKeyedSingleton<IDialogManager, MainDialogService>(nameof(MainDialogService))
                     .AddKeyedSingleton<LoggerService>(
                         "AppLog",

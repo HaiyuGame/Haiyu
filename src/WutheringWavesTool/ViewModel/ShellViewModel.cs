@@ -22,7 +22,8 @@ public sealed partial class ShellViewModel : ViewModelBase
         [FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager,
         IViewFactorys viewFactorys,
         IKuroClient wavesClient,
-        IWallpaperService wallpaperService,IKuroClient kuroClient
+        IWallpaperService wallpaperService,
+        IKuroClient kuroClient
     )
     {
         HomeNavigationService = homeNavigationService;
@@ -57,6 +58,7 @@ public sealed partial class ShellViewModel : ViewModelBase
     public IKuroClient WavesClient { get; }
     public IWallpaperService WallpaperService { get; }
     public IKuroClient KuroClient { get; }
+
     [ObservableProperty]
     public partial string ServerName { get; set; }
 
@@ -81,7 +83,8 @@ public sealed partial class ShellViewModel : ViewModelBase
     public Border BackControl { get; internal set; }
 
     [ObservableProperty]
-    public partial string HeaderCover { get; set; } = "https://prod-alicdn-community.kurobbs.com/newHead/aki/yangyang.png?x-oss-process=image/resize,w_240,h_240";
+    public partial string HeaderCover { get; set; } =
+        "https://prod-alicdn-community.kurobbs.com/newHead/aki/yangyang.png?x-oss-process=image/resize,w_240,h_240";
 
     [ObservableProperty]
     public partial string HeaderUserName { get; set; }
@@ -89,13 +92,10 @@ public sealed partial class ShellViewModel : ViewModelBase
     [ObservableProperty]
     public partial CollectionViewSource RoleViewSource { get; set; }
 
-
     private void RegisterMessanger()
     {
         this.Messenger.Register<SelectUserMessanger>(this, LoginMessangerMethod);
     }
-
-   
 
     [RelayCommand]
     void OpenMain()
@@ -165,7 +165,6 @@ public sealed partial class ShellViewModel : ViewModelBase
         Environment.Exit(0);
     }
 
-
     [RelayCommand]
     void OpenSetting()
     {
@@ -227,10 +226,15 @@ public sealed partial class ShellViewModel : ViewModelBase
         if (KuroClient.AccountService.Current == null)
             return;
         var current = KuroClient.AccountService.Current;
-        if(long.TryParse(current.TokenId,out var _id))
+        if (long.TryParse(current.TokenId, out var _id))
         {
-            var result = await KuroClient.GetWavesMineAsync(_id, current.TokenId, current.Token, this.CTS.Token);
-            if(result == null)
+            var result = await KuroClient.GetWavesMineAsync(
+                _id,
+                current.TokenId,
+                current.Token,
+                this.CTS.Token
+            );
+            if (result == null)
             {
                 TipShow.ShowMessage("检查一下你的网络", Symbol.Clear);
                 return;
@@ -255,7 +259,8 @@ public sealed partial class ShellViewModel : ViewModelBase
             Logger.WriteError($"检查库洛CDN服务器失败！，地址为:{GameAPIConfig.BaseAddress[0]}");
             Environment.Exit(0);
         }
-        await KuroClient.AccountService.SetAutoUser();
+        if (AppSettings.AutoSignCommunity == false)
+            await KuroClient.AccountService.SetAutoUser();
         var result = await WavesClient.IsLoginAsync(this.CTS.Token);
         if (!result)
         {
@@ -271,7 +276,10 @@ public sealed partial class ShellViewModel : ViewModelBase
             await this.RefreshHeaderUser();
         }
         this.AppContext.MainTitle.UpDate();
-        WallpaperService.SetMediaForUrl(WallpaperShowType.Image, AppDomain.CurrentDomain.BaseDirectory+ "Assets\\background.png");
+        WallpaperService.SetMediaForUrl(
+            WallpaperShowType.Image,
+            AppDomain.CurrentDomain.BaseDirectory + "Assets\\background.png"
+        );
         OpenMain();
     }
 
@@ -285,7 +293,7 @@ public sealed partial class ShellViewModel : ViewModelBase
     [RelayCommand]
     async Task UnLogin()
     {
-       await Task.CompletedTask;
+        await Task.CompletedTask;
     }
 
     [RelayCommand]
@@ -296,5 +304,4 @@ public sealed partial class ShellViewModel : ViewModelBase
         var page = this.HomeNavigationViewService.GetSelectItem(sourcePageType);
         SelectItem = page;
     }
-
 }
