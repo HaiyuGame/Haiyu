@@ -9,15 +9,15 @@ namespace Haiyu.ViewModel.DialogViewModels;
 
 public sealed partial class GameEnhancedViewModel : DialogViewModelBase
 {
-    public XBoxController XboxGameController { get; }
+    public XBoxService XBoxService { get; }
     public XBoxConfig XboxConfig { get; }
     public ITipShow TipShow { get; }
 
-    public GameEnhancedViewModel([FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager, XBoxController xBoxController, XBoxConfig xBoxConfig,ITipShow tipShow)
+    public GameEnhancedViewModel([FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager, XBoxService xboxService, XBoxConfig xBoxConfig,ITipShow tipShow)
         : base(dialogManager)
     {
         TipShow = tipShow;
-        XboxGameController = xBoxController;
+        this.XBoxService = xboxService;
         XboxConfig = xBoxConfig;
     }
 
@@ -40,6 +40,14 @@ public sealed partial class GameEnhancedViewModel : DialogViewModelBase
                 if (box.Tag.ToString() == "Xbox")
                 {
                     XboxConfig.IsEnable = box.IsChecked ?? false;
+                    if (box.IsChecked == true)
+                    {
+                        await XBoxService.StartAsync();
+                    }
+                    else
+                    {
+                        await XBoxService.StopAsync();
+                    }
                 }
             }
             else

@@ -41,7 +41,12 @@ public class AppContext<T> : IAppContext<T>
     {
         try
         {
-            await Instance.Host.Services.GetService<IKuroClient>().InitAsync();
+            var xboxConfig = Instance.Host.Services.GetRequiredService<XBoxConfig>();
+            if (xboxConfig.IsEnable)
+            {
+                await Instance.Host.Services.GetRequiredService<XBoxService>().StartAsync();
+            }
+            await Instance.Host.Services.GetRequiredService<IKuroClient>().InitAsync();
             await Instance.Host.Services!.GetRequiredKeyedService<IGameContext>(nameof(WavesMainGameContext))
                 .InitAsync();
             await Instance.Host.Services!.GetRequiredKeyedService<IGameContext>(nameof(WavesBiliBiliGameContext))

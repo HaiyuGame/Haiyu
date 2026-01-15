@@ -66,7 +66,7 @@ public static class InstanceBuilderExtensions
                 #region XBox
                     .AddSingleton<XBoxConfig>()
                     .AddSingleton<XBoxController>()
-                    .AddHostedService<XBoxService>()
+                    .AddSingleton<XBoxService>()
                 #endregion
                     .AddTransient<IRpcMethodService, RpcMethodService>()
                     .AddSingleton<ShellPage>()

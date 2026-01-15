@@ -24,6 +24,8 @@ public abstract partial class DialogViewModelBase : ViewModelBase
             this.Result = ContentDialogResult.None;
         BeforeClose();
         DialogManager.CloseDialog();
+        WeakReferenceMessenger.Default.UnregisterAll(this);
+        this.CTS.Cancel();
         AfterClose();
 
         GC.SuppressFinalize(this);

@@ -10,9 +10,9 @@ using Waves.Core.Settings;
 
 namespace Haiyu.Services;
 
-public class XBoxService : IHostedService
+public class XBoxService
 {
-    private XBoxController _controller;
+    public XBoxController Controller { get; private set; }
 
     public XBoxConfig Config { get; }
     public ITipShow TipShow { get; }
@@ -31,25 +31,25 @@ public class XBoxService : IHostedService
 
     public XBoxService(XBoxController xBoxController,XBoxConfig xBoxConfig,ITipShow tipShow)
     {
-        _controller = xBoxController;
+        Controller = xBoxController;
         Config = xBoxConfig;
         TipShow = tipShow;
     }
 
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+    public async Task StartAsync()
     {
         if (!SystemHelper.IsAdministrator() && Config.IsEnable)
         {
             await TipShow.ShowMessageAsync("请在管理员模式下启用XBox手柄支持", Symbol.Clear);
             return;
         }
-        _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        _controller = new XBoxController();
+        _cts = new CancellationTokenSource();
+        Controller = new XBoxController();
         _pollTask = Task.Run(() => PollLoopAsync(_cts.Token), _cts.Token);
     }
 
-    public async Task StopAsync(CancellationToken cancellationToken)
+    public async Task StopAsync()
     {
         try
         {
@@ -58,7 +58,7 @@ public class XBoxService : IHostedService
                 _cts.Cancel();
                 if (_pollTask != null)
                 {
-                    await Task.WhenAny(_pollTask, Task.Delay(3000, cancellationToken));
+                    await Task.WhenAny(_pollTask, Task.Delay(3000, _cts.Token));
                 }
                 _cts.Dispose();
                 _cts = null;
@@ -78,21 +78,21 @@ public class XBoxService : IHostedService
                     await Task.Delay(3000);
                     continue;
                 }
-                if (_controller != null)
+                if (Controller != null)
                 {
                     // 按键控制模拟
-                    var leftClick = _controller.LeftThumbclick.Value;
-                    var rightClick = _controller.LeftThumbclick.Value;
+                    var leftClick = Controller.LeftThumbclick.Value;
+                    var rightClick = Controller.LeftThumbclick.Value;
                     if(leftClick && rightClick)
                     {
-                        this._controller.BoxTrigger = !this._controller.BoxTrigger;
+                        this.Controller.BoxTrigger = !this.Controller.BoxTrigger;
                     }
-                    if (!this._controller.BoxTrigger)
+                    if (!this.Controller.BoxTrigger)
                     {
                         await Task.Delay(10);
                         continue;
                     }
-                    Vector2 left = _controller.LeftThumbstick.Value;
+                    Vector2 left = Controller.LeftThumbstick.Value;
                     if (Math.Abs(left.X) > LeftThumbDeadZone || Math.Abs(left.Y) > LeftThumbDeadZone)
                     {
                         int dx = (int)(left.X * MouseSensitivity);
@@ -102,7 +102,7 @@ public class XBoxService : IHostedService
                             RealKey.SendMouseMove(dx, dy);
                         }
                     }
-                    Vector2 right = _controller.RightThumbstick.Value;
+                    Vector2 right = Controller.RightThumbstick.Value;
                     if (Math.Abs(right.Y) > RightThumbDeadZone)
                     {
                         int wheel = (int)(right.Y * ScrollSensitivity * RealKey.WHEEL_DELTA);
@@ -111,7 +111,7 @@ public class XBoxService : IHostedService
                             RealKey.SendMouseWheel(wheel);
                         }
                     }
-                    bool xState = _controller.X.Value;
+                    bool xState = Controller.X.Value;
                     if (xState && !_xPressed)
                     {
                         RealKey.SendMouseLeftDown();
@@ -122,7 +122,7 @@ public class XBoxService : IHostedService
                         RealKey.SendMouseLeftUp();
                         _xPressed = false;
                     }
-                    bool bState = _controller.B.Value;
+                    bool bState = Controller.B.Value;
                     if (bState && !_bPressed)
                     {
                         RealKey.SendMouseRightDown();

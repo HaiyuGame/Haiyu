@@ -7,7 +7,7 @@
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+    mc:Ignorable="d" CornerRadius="5">
 
     <Grid Height="250" Width="400">
         <Grid.RowDefinitions>
@@ -15,17 +15,18 @@
             <RowDefinition />
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
-        <Button Style="{ThemeResource TransparentButtonStyle}" HorizontalAlignment="Right" Command="{x:Bind ViewModel.CloseCommand}">
-            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE894;" />
-        </Button>
-        <StackPanel Grid.Row="1" HorizontalAlignment="Stretch"  Orientation="Vertical">
-            <Grid Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" Padding="10">
+        <StackPanel HorizontalAlignment="Center"  Orientation="Vertical">
+            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xEA6B;"  Foreground="{ThemeResource SystemColorGrayTextBrush}"/>
+            <TextBlock Text="以下功能需要使用管理员权限启动" Margin="0 10 0 0" Foreground="{ThemeResource SystemColorGrayTextBrush}"/>
+        </StackPanel>
+        <StackPanel Margin="0 10 0 0" Grid.Row="1"  HorizontalAlignment="Stretch"  Orientation="Vertical">
+            <Grid CornerRadius="3" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" Padding="10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
                 <TextBlock VerticalAlignment="Center"  Text="启用Xbox增强"/>
-                <Border HorizontalAlignment="Right" Width="60" MaxWidth="60" Grid.Column="1">
+                <Border HorizontalAlignment="Right" Width="30" MaxWidth="30" Grid.Column="1">
                     <CheckBox  x:Name="xboxEnable" Tag="Xbox" >
                         <i:Interaction.Behaviors>
                             <i:EventTriggerBehavior EventName="Checked">
@@ -39,5 +40,8 @@
                 </Border>
             </Grid>
         </StackPanel>
+        <Button Content="关闭" Grid.Row="2" HorizontalAlignment="Stretch"  Command="{x:Bind ViewModel.CloseCommand}">
+            
+        </Button>
     </Grid>
 </ContentDialog>

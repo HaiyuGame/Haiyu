@@ -22,8 +22,13 @@ partial class KuroGameContextViewModel
                 GameLocalSettingName.LocalGameVersion
             );
             var result = await DialogManager.ShowUpateGameDialogAsync(this.GameContext.ContextName);
+            
             if (result == null)
+                return; 
+            if (result.IsOk == false)
+            {
                 return;
+            }
             await GameContext.UpdataGameAsync(result.DiffSavePath);
         }
     }
