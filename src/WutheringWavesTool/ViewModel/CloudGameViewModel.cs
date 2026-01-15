@@ -133,7 +133,7 @@ public partial class CloudGameViewModel : ViewModelBase
     [RelayCommand]
     public void ShowAnalysis()
     {
-        ViewFactorys.ShowAnalysisRecord(this.SelectedUser).Show();
+        ViewFactorys.ShowAnalysisRecord(this.SelectedUser).AppWindow.Show();
     }
 
     async partial void OnSelectedUserChanged(LoginData value)

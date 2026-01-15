@@ -16,9 +16,13 @@
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
             base.OnNavigatedFrom(e);
-            ViewModel.Dispose();
-
+            if(frame.Content is IDisposable disposable)
+            {
+                disposable.Dispose();
+                frame.Content = null;
+            }
             this.ViewModel.NavigationService.UnRegisterView();
+            ViewModel.Dispose();
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)

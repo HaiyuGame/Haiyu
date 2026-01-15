@@ -3,7 +3,7 @@
 
 namespace Haiyu.Pages.GameWikis;
 
-public sealed partial class PunishWikiPage : Page, IPage
+public sealed partial class PunishWikiPage : Page, IPage,IDisposable
 {
     public PunishWikiPage()
     {
@@ -13,6 +13,10 @@ public sealed partial class PunishWikiPage : Page, IPage
     public PunishWikiViewModel ViewModel { get; private set; }
     public Type PageType => typeof(PunishWikiPage);
 
+    public void Dispose()
+    {
+        this.ViewModel.Dispose();
+    }
 
     protected override void OnNavigatedFrom(NavigationEventArgs e)
     {

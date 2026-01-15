@@ -182,10 +182,12 @@ public partial class WavesWikiViewModel : WikiViewModelBase
     public override void Dispose()
     {
         Actives.Clear();
+        Actives = null;
         Stamina = null;
         WeaponActive?.Clear();
         RoleActive?.Clear();
-        WeakReferenceMessenger.Default.UnregisterAll(this);
+        WeaponActive = null;
+        RoleActive = null;
         base.Dispose();
     }
 }

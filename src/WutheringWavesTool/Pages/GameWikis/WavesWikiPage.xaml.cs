@@ -2,7 +2,7 @@
 
 namespace Haiyu.Pages.GameWikis;
 
-public sealed partial class WavesWikiPage : Page, IPage
+public sealed partial class WavesWikiPage : Page, IPage,IDisposable
 {
     public WavesWikiPage()
     {
@@ -16,5 +16,11 @@ public sealed partial class WavesWikiPage : Page, IPage
         this.ViewModel.Dispose();
         base.OnNavigatedFrom(e);
     }
+
+    public void Dispose()
+    {
+        this.ViewModel.Dispose();
+    }
+
     public Type PageType => typeof(WavesWikiPage);
 }
