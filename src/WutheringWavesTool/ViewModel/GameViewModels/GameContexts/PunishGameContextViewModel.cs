@@ -100,6 +100,7 @@ namespace Haiyu.ViewModel.GameViewModels.GameContexts
                 this.News = starter.Guidance.News;
                 this.Activity = starter.Guidance.Activity;
                 PlayerCardVisibility = Visibility.Visible;
+                this.SelectTab = null;
                 this.SelectTab = Tabs[0];
             }
             else
