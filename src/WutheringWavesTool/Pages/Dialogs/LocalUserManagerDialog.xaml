@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog
+    x:Class="Haiyu.Pages.Dialogs.LocalUserManagerDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converter="using:Haiyu.Converter"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i="using:Microsoft.Xaml.Interactivity"
+    xmlns:local="using:Haiyu.Pages.Dialogs"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="using:Haiyu.Controls"
+    xmlns:w="using:Waves.Core.Models"
+    Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+    BorderThickness="1"
+    CornerRadius="5"
+    Style="{ThemeResource DefaultContentDialogStyle}"
+    mc:Ignorable="d">
+    <ContentDialog.Resources>
+        <converter:LocalUserBorderThicknessConverter x:Key="LocalUserBorderThicknessConverter" />
+    </ContentDialog.Resources>
+    <i:Interaction.Behaviors>
+        <i:EventTriggerBehavior EventName="Loaded">
+            <i:InvokeCommandAction Command="{x:Bind ViewModel.LoadedCommand}" />
+        </i:EventTriggerBehavior>
+    </i:Interaction.Behaviors>
+    <Grid Width="400" Height="400">
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <ScrollView Grid.Row="0">
+            <ItemsControl ItemsSource="{x:Bind ViewModel.Accounts, Mode=OneWay}">
+                <ItemsControl.ItemContainerTransitions>
+                    <TransitionCollection>
+                        <AddDeleteThemeTransition />
+                    </TransitionCollection>
+                </ItemsControl.ItemContainerTransitions>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="w:LocalAccount">
+                        <Border
+                            Margin="4"
+                            BorderThickness="{x:Bind IsSelect, Mode=OneWay, Converter={StaticResource LocalUserBorderThicknessConverter}}"
+                            Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+                            BorderBrush="{ThemeResource AccentAAFillColorDefaultBrush}"
+                            CornerRadius="5">
+                            <Border.ContextFlyout>
+                                <MenuFlyout>
+                                    <MenuFlyoutItem
+                                        Command="{x:Bind SetCurrentAccountCommand}"
+                                        Text="选择"
+                                        Visibility="{x:Bind IsSelect, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}" />
+                                </MenuFlyout>
+                            </Border.ContextFlyout>
+                            <Grid Padding="20">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="auto" />
+                                    <ColumnDefinition />
+                                    <ColumnDefinition Width="auto" />
+                                </Grid.ColumnDefinitions>
+                                <ui:ImageEx
+                                    Grid.RowSpan="2"
+                                    Width="40"
+                                    Height="40"
+                                    CornerRadius="35">
+                                    <ui:ImageEx.Source>
+                                        <BitmapImage
+                                            DecodePixelHeight="40"
+                                            DecodePixelWidth="40"
+                                            UriSource="{x:Bind Cover, Mode=OneWay}" />
+                                    </ui:ImageEx.Source>
+                                </ui:ImageEx>
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Margin="15,0,0,0"
+                                    VerticalAlignment="Top"
+                                    FontFamily="{ThemeResource DefaultFont}"
+                                    FontSize="15"
+                                    Text="{x:Bind DisplayName, Mode=OneWay}" />
+                                <TextBlock
+                                    Grid.Row="1"
+                                    Grid.Column="1"
+                                    Margin="15,0,0,0"
+                                    VerticalAlignment="Bottom"
+                                    FontFamily="{ThemeResource DefaultFont}"
+                                    FontSize="10"
+                                    Foreground="{ThemeResource SystemColorGrayTextBrush}"
+                                    Text="{x:Bind Phone, Mode=OneWay}" />
+                                <FontIcon
+                                    Grid.RowSpan="2"
+                                    Grid.Column="2"
+                                    FontFamily="Segoe Fluent Icons"
+                                    Glyph="&#xF78C;"
+                                    Visibility="{x:Bind IsSelect, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollView>
+
+        <Button
+            Grid.Row="1"
+            HorizontalAlignment="Center"
+            Command="{x:Bind ViewModel.CloseCommand}"
+            Content="完成" />
+    </Grid>
+</ContentDialog>

@@ -18,7 +18,7 @@ public partial class DataCenterRoilItemWrapper : ObservableObject
     public long RoilId { get; }
 
     [ObservableProperty]
-    public partial BitmapImage RoleIconUrl { get; set; }
+    public partial string RoleIconUrl { get; set; }
 
     [ObservableProperty]
     public partial string AttributeName { get; set; }
@@ -41,7 +41,7 @@ public partial class DataCenterRoilItemWrapper : ObservableObject
         this.RoleName = roleData.RoleName;
         this.AttibuteId = roleData.AttributeId;
         TypeImage = new BitmapImage(new(RoleHelper.SwitchType(roleData.AttributeId)));
-        RoleIconUrl = new BitmapImage(new(roleData.RoleIconUrl));
+        RoleIconUrl = roleData.RoleIconUrl;
         User = user;
     }
 
@@ -53,7 +53,7 @@ public partial class DataCenterRoilItemWrapper : ObservableObject
         this.RoleName = roleData.RoleName;
         this.AttibuteId = roleData.AttributeId;
         TypeImage = new BitmapImage(new(RoleHelper.SwitchType(roleData.AttributeId)));
-        RoleIconUrl = new BitmapImage(new(roleData.RoleIconUrl));
+        RoleIconUrl = roleData.RoleIconUrl;
     }
 
     [RelayCommand]

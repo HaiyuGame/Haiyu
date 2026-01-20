@@ -13,6 +13,7 @@ public interface IViewFactorys
 
     public WindowModelBase ShowPlayerRecordWindow();
 
+    public WindowModelBase ShowWavesDataCenter(GameRoilDataItem item);
     public Window ShowAnalysisRecord(LoginData data);
     public TransparentWindow CreateTransperentWindow();
     public WindowModelBase ShowAdminDevice();

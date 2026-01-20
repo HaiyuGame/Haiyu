@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Haiyu.Config\Haiyu.Config.csproj" />
     <ProjectReference Include="..\Waves.Core\Waves.Core.csproj" />
   </ItemGroup>
 

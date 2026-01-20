@@ -58,10 +58,11 @@ public sealed partial class UpdateGameViewModel : DialogViewModelBase
     [ObservableProperty]
     public partial ObservableCollection<object> DiskPipePoint { get; set; }
     public IPickersService PickersService { get; }
+    public bool IsOk { get; private set; }
 
     public UpdateGameResult? GameResult()
     {
-        return new UpdateGameResult() { DiffSavePath = DiffSavePath };
+        return new UpdateGameResult() { DiffSavePath = DiffSavePath,IsOk = this.IsOk };
     }
 
     [RelayCommand]
@@ -181,6 +182,8 @@ public sealed partial class UpdateGameViewModel : DialogViewModelBase
     [RelayCommand]
     void Invoke()
     {
+        this.IsOk = true;
         this.Close();
     }
+
 }

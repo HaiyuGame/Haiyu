@@ -1,4 +1,5 @@
 ﻿using Haiyu.Plugin.Extensions;
+using Waves.Core.Settings;
 using Windows.Graphics.Imaging;
 using WinUIEx.Messaging;
 
@@ -10,10 +11,12 @@ public class ScreenCaptureService : IScreenCaptureService
 
     private const int HOTKEY_ID = 141;
     public IAppContext<App> AppContext { get; }
+    public AppSettings AppSettings { get; }
 
-    public ScreenCaptureService(IAppContext<App> appContext)
+    public ScreenCaptureService(IAppContext<App> appContext,AppSettings appSettings)
     {
         AppContext = appContext;
+        AppSettings = appSettings;
         _monitor = new WindowMessageMonitor(AppContext.App.MainWindow);
         _monitor.WindowMessageReceived += Monitor_WindowMessageReceived;
     }

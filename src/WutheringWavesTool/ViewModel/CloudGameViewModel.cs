@@ -6,6 +6,7 @@ using Haiyu.Services.DialogServices;
 using LiveChartsCore.Defaults;
 using MemoryPack;
 using Waves.Api.Models.CloudGame;
+using Waves.Core.Settings;
 
 namespace Haiyu.ViewModel;
 
@@ -132,7 +133,7 @@ public partial class CloudGameViewModel : ViewModelBase
     [RelayCommand]
     public void ShowAnalysis()
     {
-        ViewFactorys.ShowAnalysisRecord(this.SelectedUser).Show();
+        ViewFactorys.ShowAnalysisRecord(this.SelectedUser).AppWindow.Show();
     }
 
     async partial void OnSelectedUserChanged(LoginData value)

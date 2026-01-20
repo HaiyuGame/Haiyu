@@ -1,5 +1,6 @@
 using Haiyu.Models.Dialogs;
 using Haiyu.Services.DialogServices;
+using Waves.Core.Settings;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -13,9 +14,13 @@ namespace Haiyu.Pages.Dialogs
         {
             this.InitializeComponent();
             this.RequestedTheme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
+            this.AppSettings = Instance.Host.Services.GetRequiredService<AppSettings>();
         }
 
         private bool isExit = false, isMin = false;
+
+        public AppSettings AppSettings { get; }
+
         public CloseWindowResult GetResult()
         {
             return new CloseWindowResult() { IsExit = this.isExit, IsMinTaskBar = this.isMin };

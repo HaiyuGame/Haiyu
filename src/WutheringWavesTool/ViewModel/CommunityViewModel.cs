@@ -38,9 +38,10 @@ public partial class CommunityViewModel : ViewModelBase, IDisposable
     [ObservableProperty]
     public partial bool DataLoad { get; set; } = false;
 
+    public GameRoilDataItem Item { get; set; }
     private void RegisterMessanger()
     {
-        this.Messenger.Register<LoginMessanger>(this, LoginMessangerMethod);
+        this.Messenger.Register<SelectUserMessanger>(this, LoginMessangerMethod);
         this.Messenger.Register<UnLoginMessager>(this, UnLoginMethod);
         this.Messenger.Register<ShowRoleData>(this, ShowRoleMethod);
     }
@@ -56,49 +57,49 @@ public partial class CommunityViewModel : ViewModelBase, IDisposable
         {
             case "DataGamer":
                 NavigationService.NavigationTo<GameRoilsViewModel>(
-                    WavesClient.CurrentRoil,
+                    Item,
                     new Microsoft.UI.Xaml.Media.Animation.DrillInNavigationTransitionInfo()
                 );
                 break;
             case "DataDock":
                 NavigationService.NavigationTo<GamerDockViewModel>(
-                    WavesClient.CurrentRoil,
+                    Item,
                     new Microsoft.UI.Xaml.Media.Animation.DrillInNavigationTransitionInfo()
                 );
                 break;
             case "DataChallenge":
                 NavigationService.NavigationTo<GamerChallengeViewModel>(
-                    WavesClient.CurrentRoil,
+                    Item,
                     new Microsoft.UI.Xaml.Media.Animation.DrillInNavigationTransitionInfo()
                 );
                 break;
             case "DataAbyss":
                 NavigationService.NavigationTo<GamerTowerViewModel>(
-                    WavesClient.CurrentRoil,
+                    null,
                     new Microsoft.UI.Xaml.Media.Animation.DrillInNavigationTransitionInfo()
                 );
                 break;
             case "DataWorld":
                 NavigationService.NavigationTo<GamerExploreIndexViewModel>(
-                    WavesClient.CurrentRoil,
+                    Item,
                     new Microsoft.UI.Xaml.Media.Animation.DrillInNavigationTransitionInfo()
                 );
                 break;
             case "Skin":
                 NavigationService.NavigationTo<GamerSkinViewModel>(
-                    WavesClient.CurrentRoil,
+                    Item,
                     new Microsoft.UI.Xaml.Media.Animation.DrillInNavigationTransitionInfo()
                 );
                 break;
             case "Boss2":
                 NavigationService.NavigationTo<GamerSlashDetailViewModel>(
-                    WavesClient.CurrentRoil,
+                    Item,
                     new Microsoft.UI.Xaml.Media.Animation.DrillInNavigationTransitionInfo()
                 );
                 break;
             case "Resource":
                 NavigationService.NavigationTo<ResourceBriefViewModel>(
-                    WavesClient.CurrentRoil,
+                    Item,
                     new Microsoft.UI.Xaml.Media.Animation.DrillInNavigationTransitionInfo()
                 );
                 break;
@@ -110,7 +111,7 @@ public partial class CommunityViewModel : ViewModelBase, IDisposable
         ViewFactorys.ShowRolesDataWindow(message).Activate();
     }
 
-    private async void LoginMessangerMethod(object recipient, LoginMessanger message)
+    private async void LoginMessangerMethod(object recipient, SelectUserMessanger message)
     {
         await LoadedAsync();
     }
@@ -122,9 +123,6 @@ public partial class CommunityViewModel : ViewModelBase, IDisposable
             this.NavigationService.RegisterView(frame);
         this.IsLogin = (await WavesClient.IsLoginAsync());
         if (!IsLogin)
-            return;
-        var gamers = await WavesClient.GetGamerAsync(Waves.Core.Models.Enums.GameType.Waves,this.CTS.Token);
-        if (gamers == null || gamers.Code != 200)
             return;
         this.SelectPageItem = Pages[0];
         this.DataLoad = true;

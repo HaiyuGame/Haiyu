@@ -11,12 +11,10 @@ namespace WavesLauncher.Core.Contracts;
 
 public interface IKuroClient
 {
-    public string Token { get; }
-
-    public long Id { get; }
 
     public Task<bool> IsLoginAsync(CancellationToken token = default);
 
+    public IKuroAccountService AccountService { get; }
     public IHttpClientService HttpClientService { get; }
 
     public Task<GamerDataModel?> GetGamerDataAsync(
@@ -28,6 +26,7 @@ public interface IKuroClient
     public Task<SMSResultModel?> SendSMSAsync(
         string mobile,
         string geeTestData,
+        string tokenDid,
         CancellationToken token = default
     );
 
@@ -36,6 +35,7 @@ public interface IKuroClient
     public Task<AccountModel?> LoginAsync(
         string mobile,
         string code,
+        string tokenDid,
         CancellationToken token = default
     );
 
@@ -45,6 +45,8 @@ public interface IKuroClient
         CancellationToken token = default
     );
     public Task<AccountMine?> GetWavesMineAsync(long id, CancellationToken token = default);
+
+    public Task<AccountMine?> GetWavesMineAsync(long id, string tokenDid,string tokenValue, CancellationToken token = default);
 
     public Task<ScanScreenModel?> PostQrValueAsync(
         string qrText,
@@ -80,7 +82,6 @@ public interface IKuroClient
         string verifyCode,
         CancellationToken token = default
     );
-    public GameRoilDataItem CurrentRoil { get; set; }
 
     #region 数据终端
     Task<GamerBassData?> GetGamerBassDataAsync(

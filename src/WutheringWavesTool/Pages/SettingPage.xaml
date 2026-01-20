@@ -39,6 +39,7 @@
                 <StackPanel.ChildrenTransitions>
                     <TransitionCollection>
                         <EntranceThemeTransition FromVerticalOffset="50" IsStaggeringEnabled="True" />
+                        <RepositionThemeTransition />
                     </TransitionCollection>
                 </StackPanel.ChildrenTransitions>
                 <Grid Height="200">
@@ -153,21 +154,6 @@
                         </ComboBox>
                     </ui:SettingsCard.Content>
                 </ui:SettingsCard>
-
-                <ui:SettingsCard
-                    Margin="0,5,0,0"
-                    HorizontalAlignment="Stretch"
-                    HorizontalContentAlignment="Stretch"
-                    Description="更改选项需要重启生效"
-                    Header="元素鼠标指针"
-                    Visibility="Visible">
-                    <ui:SettingsCard.HeaderIcon>
-                        <FontIcon FontFamily="Segoe UI Emoji" Glyph="&#x270C;" />
-                    </ui:SettingsCard.HeaderIcon>
-                    <ui:SettingsCard.Content>
-                        <ComboBox ItemsSource="{x:Bind ViewModel.Cursors, Mode=OneTime}" SelectedItem="{x:Bind ViewModel.SelectCursorName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    </ui:SettingsCard.Content>
-                </ui:SettingsCard>
                 <ui:SettingsCard
                     Margin="0,5,0,0"
                     Description="{x:Bind a:App.AppVersion}"
@@ -242,6 +228,11 @@
                             <ComboBoxItem Content="退出" />
                         </ComboBox>
                     </ui:SettingsCard.Content>
+                </ui:SettingsCard>
+                <ui:SettingsCard Margin="0 5 0 0" Header="游戏监控工具" Command="{x:Bind ViewModel.ShowGameEnhancedDialogCommand}" IsClickEnabled="True">
+                    <ui:SettingsCard.HeaderIcon>
+                        <SymbolIcon Symbol="Find"/>
+                    </ui:SettingsCard.HeaderIcon>
                 </ui:SettingsCard>
                 <TextBlock
                     Margin="0,5,0,0"

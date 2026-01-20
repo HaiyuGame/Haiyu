@@ -12,7 +12,7 @@ partial class KuroClient
     {
         var header = new Dictionary<string, string>()
         {
-            { "devcode", HardwareIdGenerator.GenerateUniqueId() },
+            { "devcode", AccountService.Current?.TokenDid?? "" },
             { "wiki_type", "9" },
         };
         var request = await BuildRequestAsync(

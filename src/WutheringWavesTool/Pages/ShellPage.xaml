@@ -8,6 +8,7 @@
     xmlns:b="using:CommunityToolkit.WinUI.Behaviors"
     xmlns:bs="using:Haiyu.Behaviors"
     xmlns:control="using:Haiyu.Controls"
+    xmlns:cui="using:CommunityToolkit.WinUI"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:local="using:Haiyu.Pages"
@@ -18,9 +19,13 @@
     xmlns:ui="using:Haiyu.Controls"
     xmlns:wrapper="using:Haiyu.Models.Wrapper"
     xmlns:wui="using:CommunityToolkit.WinUI"
-    property:CursorProperty.CursorName="{x:Bind ViewModel.CursorName, Mode=OneWay}"
-    property:CursorProperty.CursorType="Normal"
     mc:Ignorable="d">
+    <Page.Resources>
+        <media:AttachedCardShadow
+            x:Key="PanelEffect"
+            BlurRadius="5"
+            Color="{ThemeResource TextFillColorPrimary}" />
+    </Page.Resources>
     <i:Interaction.Behaviors>
         <i:EventTriggerBehavior EventName="Loaded">
             <i:InvokeCommandAction Command="{x:Bind ViewModel.LoadedCommand}" />
@@ -64,121 +69,95 @@
                             Source="ms-appx:///Assets/appLogo.ico"
                             Stretch="UniformToFill" />
                     </Button>
-                    <Button
-                        Margin="10,0,0,0"
-                        VerticalAlignment="Center"
-                        Command="{x:Bind ViewModel.LoginCommand}"
-                        CornerRadius="5"
-                        Style="{ThemeResource DefaultAcrylicButtonStyle}"
-                        ToolTipService.ToolTip="登录"
-                        Visibility="{x:Bind ViewModel.LoginBthVisibility, Mode=OneWay}">
-                        <FontIcon
-                            FontFamily="Segoe Fluent Icons"
-                            FontSize="14"
-                            Glyph="&#xE631;" />
-                    </Button>
-                    <ComboBox
-                        Margin="10,0,0,0"
-                        Padding="10,5"
-                        VerticalAlignment="Center"
-                        CornerRadius="10 3 10 3"
-                        ItemsSource="{x:Bind ViewModel.Roles, Mode=OneWay}"
-                        SelectedItem="{x:Bind ViewModel.SelectRoles, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        SizeChanged="ComboBox_SizeChanged"
-                        Style="{ThemeResource AcrylicComboBoxStyle}"
-                        ToolTipService.ToolTip="选择角色"
-                        Visibility="{x:Bind ViewModel.GamerRoleListsVisibility, Mode=OneWay}">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate x:DataType="wrapper:GameRoilDataWrapper">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="auto" />
-                                        <ColumnDefinition />
-                                    </Grid.ColumnDefinitions>
-                                    <Border CornerRadius="5">
-                                        <Image
-                                            Width="25"
-                                            Height="25"
-                                            Source="{x:Bind GameHeadUrl}" />
-                                    </Border>
-                                    <Grid
-                                        Grid.Column="1"
-                                        Margin="10,0,0,0"
-                                        VerticalAlignment="Center">
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition />
-                                            <RowDefinition />
-                                        </Grid.RowDefinitions>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="auto" />
-                                            <ColumnDefinition />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text="{x:Bind RoleName}" />
-                                        <TextBlock
-                                            Grid.Column="1"
-                                            VerticalAlignment="Center"
-                                            FontSize="10">
-                                            <Run Text="-" />
-                                            <Run Text="{x:Bind ServerName}" />
-                                        </TextBlock>
-                                    </Grid>
-                                </Grid>
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-                    <Button
-                        Margin="5,0,0,0"
-                        Padding="8"
-                        VerticalAlignment="Center"
-                        Command="{x:Bind ViewModel.RefreshRoleListsCommand}"
-                        CornerRadius="5"
-                        Style="{ThemeResource DefaultAcrylicButtonStyle}"
-                        Visibility="{x:Bind ViewModel.GamerRoleListsVisibility, Mode=OneWay}">
-                        <FontIcon
-                            FontFamily="Segoe Fluent Icons"
-                            FontSize="18"
-                            Glyph="&#xE72C;" />
-                    </Button>
-                    <Button
-                        Margin="5,0,0,0"
-                        Padding="7"
-                        VerticalAlignment="Center"
-                        CornerRadius="3"
-                        Style="{ThemeResource DefaultAcrylicButtonStyle}"
-                        ToolTipService.ToolTip="工具箱"
-                        Visibility="{x:Bind ViewModel.GamerRoleListsVisibility, Mode=OneWay}">
-                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE712;" />
-                        <Button.Flyout>
-                            <MenuFlyout Placement="Bottom">
-                                <MenuFlyoutItem Command="{x:Bind ViewModel.OpenSignWindowCommand}" Text="签到">
 
-                                    <MenuFlyoutItem.Icon>
-                                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE929;" />
-                                    </MenuFlyoutItem.Icon>
-                                </MenuFlyoutItem>
-                                <MenuFlyoutSeparator />
-                                <MenuFlyoutItem Command="{x:Bind ViewModel.OpenScreenCaptureCommand}" Text="扫描屏幕登录游戏">
-                                    <MenuFlyoutItem.Icon>
-                                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xED14;" />
-                                    </MenuFlyoutItem.Icon>
-                                </MenuFlyoutItem>
-                                <MenuFlyoutItem Command="{x:Bind ViewModel.ShowDeviceInfoCommand}" Text="授权管理">
-                                    <MenuFlyoutItem.Icon>
-                                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8CC;" />
-                                    </MenuFlyoutItem.Icon>
-                                </MenuFlyoutItem>
-                                <MenuFlyoutSeparator />
-                                <MenuFlyoutItem
-                                    Command="{x:Bind ViewModel.UnLoginCommand}"
-                                    Foreground="{ThemeResource SystemFillColorCriticalBrush}"
-                                    Text="退出登录">
-                                    <MenuFlyoutItem.Icon>
-                                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xF3B1;" />
-                                    </MenuFlyoutItem.Icon>
-                                </MenuFlyoutItem>
-                            </MenuFlyout>
-                        </Button.Flyout>
-                    </Button>
+                    <StackPanel
+                        Margin="5,5,0,0"
+                        Padding="5"
+                        Background="{ThemeResource AcrylicInAppFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource AccentAAFillColorDisabled}"
+                        BorderThickness="1"
+                        CornerRadius="5"
+                        Orientation="Horizontal">
+                        <StackPanel.ChildrenTransitions>
+                            <TransitionCollection>
+                                <RepositionThemeTransition />
+                            </TransitionCollection>
+                        </StackPanel.ChildrenTransitions>
+                        <Button
+                            Width="40"
+                            Height="40"
+                            Padding="5"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Center"
+                            cui:Effects.Shadow="{StaticResource PanelEffect}"
+                            CornerRadius="48"
+                            Style="{ThemeResource TransparentButtonStyle}">
+                            <ui:ImageEx CornerRadius="40">
+                                <ui:ImageEx.Source>
+                                    <BitmapImage UriSource="{x:Bind ViewModel.HeaderCover, Mode=OneWay}" />
+                                </ui:ImageEx.Source>
+                            </ui:ImageEx>
+
+                        </Button>
+                        <Button
+                            Width="40"
+                            VerticalAlignment="Center"
+                            Command="{x:Bind ViewModel.LoginCommand}"
+                            CornerRadius="5"
+                            Style="{ThemeResource TransparentButtonStyle}"
+                            ToolTipService.ToolTip="添加账号">
+
+                            <FontIcon
+                                FontFamily="Segoe Fluent Icons"
+                                FontSize="14"
+                                Glyph="&#xE710;" />
+                        </Button>
+                        <Button
+                            Width="40"
+                            Padding="0"
+                            Command="{x:Bind ViewModel.ShowOpenLocalUserCommand}"
+                            CornerRadius="5"
+                            Style="{ThemeResource TransparentButtonStyle}"
+                            ToolTipService.ToolTip="本地账号管理">
+
+                            <FontIcon
+                                FontFamily="Segoe Fluent Icons"
+                                FontSize="14"
+                                Glyph="&#xEC7A;" />
+                        </Button>
+                        <Button
+                            CornerRadius="5"
+                            Style="{ThemeResource TransparentButtonStyle}"
+                            ToolTipService.ToolTip="工具箱"
+                            Visibility="{x:Bind ViewModel.GamerRoleListsVisibility, Mode=OneWay}">
+                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE712;" />
+                            <Button.Flyout>
+                                <MenuFlyout Placement="Bottom">
+                                    <MenuFlyoutSeparator />
+                                    <MenuFlyoutItem Command="{x:Bind ViewModel.OpenScreenCaptureCommand}" Text="扫描屏幕登录游戏">
+                                        <MenuFlyoutItem.Icon>
+                                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xED14;" />
+                                        </MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                    <MenuFlyoutItem Command="{x:Bind ViewModel.ShowDeviceInfoCommand}" Text="授权管理">
+                                        <MenuFlyoutItem.Icon>
+                                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8CC;" />
+                                        </MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                    <MenuFlyoutSeparator />
+                                    <MenuFlyoutItem
+                                        Command="{x:Bind ViewModel.UnLoginCommand}"
+                                        Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                        Text="退出登录">
+                                        <MenuFlyoutItem.Icon>
+                                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xF3B1;" />
+                                        </MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                </MenuFlyout>
+                            </Button.Flyout>
+                        </Button>
+                    </StackPanel>
+
                 </StackPanel>
             </ui:TitleBar.Header>
             <ui:TitleBar.Footer>
@@ -228,7 +207,8 @@
                         Command="{x:Bind ViewModel.MinCommand}"
                         CornerRadius="40"
                         Style="{ThemeResource DefaultAcrylicButtonStyle}"
-                        ToolTipService.ToolTip="最小化">
+                        ToolTipService.ToolTip="最小化"
+                        Visibility="Visible">
                         <FontIcon
                             FontFamily="Segoe Fluent Icons"
                             FontSize="12"
@@ -241,7 +221,8 @@
                         Command="{x:Bind ViewModel.CloseWindowCommand}"
                         CornerRadius="40"
                         Style="{ThemeResource DefaultAcrylicButtonStyle}"
-                        ToolTipService.ToolTip="关闭">
+                        ToolTipService.ToolTip="关闭"
+                        Visibility="Visible">
 
                         <FontIcon
                             FontFamily="Segoe Fluent Icons"
@@ -300,23 +281,7 @@
                             <ImageIcon Source="ms-appx:///Assets/GameIcons/pgr.ico" />
                         </NavigationViewItem.Icon>
                     </NavigationViewItem>
-                    <NavigationViewItem
-                        property:NavigationItemClickHelper.NavigationKey="Haiyu.ViewModel.CommunityViewModel"
-                        Content="鸣潮数据"
-                        Visibility="{x:Bind ViewModel.WavesCommunitySelectItemVisiblity, Mode=OneWay}">
-                        <NavigationViewItem.Icon>
-                            <FontIcon FontFamily="Segoe UI Emoji" Glyph="&#x1F4E6;" />
-                        </NavigationViewItem.Icon>
-                    </NavigationViewItem>
-                    <NavigationViewItem
-                        property:NavigationItemClickHelper.NavigationKey="Haiyu.ViewModel.CommunityViewModel"
-                        Content="战双数据"
-                        IsEnabled="False"
-                        Visibility="{x:Bind ViewModel.PunishCommunitySelectItemVisiblity, Mode=OneWay}">
-                        <NavigationViewItem.Icon>
-                            <FontIcon FontFamily="Segoe UI Emoji" Glyph="&#x1F4E6;" />
-                        </NavigationViewItem.Icon>
-                    </NavigationViewItem>
+
                     <NavigationViewItem property:NavigationItemClickHelper.NavigationKey="Haiyu.ViewModel.CloudGameViewModel" Content="云工具">
                         <NavigationViewItem.Icon>
                             <FontIcon FontFamily="Segoe UI Emoji" Glyph="&#x2601;" />

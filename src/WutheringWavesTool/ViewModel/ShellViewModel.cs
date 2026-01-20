@@ -22,8 +22,8 @@ public sealed partial class ShellViewModel : ViewModelBase
         [FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager,
         IViewFactorys viewFactorys,
         IKuroClient wavesClient,
-        ILauncherTaskService launcherTaskService,
-        IWallpaperService wallpaperService
+        IWallpaperService wallpaperService,
+        IKuroClient kuroClient
     )
     {
         HomeNavigationService = homeNavigationService;
@@ -33,8 +33,8 @@ public sealed partial class ShellViewModel : ViewModelBase
         DialogManager = dialogManager;
         ViewFactorys = viewFactorys;
         WavesClient = wavesClient;
-        LauncherTaskService = launcherTaskService;
         WallpaperService = wallpaperService;
+        KuroClient = kuroClient;
         RegisterMessanger();
         SystemMenu = new NotifyIconMenu()
         {
@@ -56,8 +56,8 @@ public sealed partial class ShellViewModel : ViewModelBase
     public IDialogManager DialogManager { get; }
     public IViewFactorys ViewFactorys { get; }
     public IKuroClient WavesClient { get; }
-    public ILauncherTaskService LauncherTaskService { get; }
     public IWallpaperService WallpaperService { get; }
+    public IKuroClient KuroClient { get; }
 
     [ObservableProperty]
     public partial string ServerName { get; set; }
@@ -83,35 +83,18 @@ public sealed partial class ShellViewModel : ViewModelBase
     public Border BackControl { get; internal set; }
 
     [ObservableProperty]
-    public partial ObservableCollection<GameRoilDataWrapper> Roles { get; set; }
+    public partial string HeaderCover { get; set; } =
+        "https://prod-alicdn-community.kurobbs.com/newHead/aki/yangyang.png?x-oss-process=image/resize,w_240,h_240";
+
+    [ObservableProperty]
+    public partial string HeaderUserName { get; set; }
 
     [ObservableProperty]
     public partial CollectionViewSource RoleViewSource { get; set; }
 
-    [ObservableProperty]
-    public partial GameRoilDataWrapper SelectRoles { get; set; }
-
     private void RegisterMessanger()
     {
-        this.Messenger.Register<LoginMessanger>(this, LoginMessangerMethod);
-    }
-
-    partial void OnSelectRolesChanged(GameRoilDataWrapper value)
-    {
-        if (value == null)
-            return;
-        this.WavesClient.CurrentRoil = value.Item;
-        if (value.Type == Waves.Core.Models.Enums.GameType.Waves)
-        {
-            this.WavesCommunitySelectItemVisiblity = Visibility.Visible;
-            this.PunishCommunitySelectItemVisiblity = Visibility.Collapsed;
-        }
-        else if (value.Type == Waves.Core.Models.Enums.GameType.Punish)
-        {
-            this.WavesCommunitySelectItemVisiblity = Visibility.Collapsed;
-            this.PunishCommunitySelectItemVisiblity = Visibility.Visible;
-        }
-        WeakReferenceMessenger.Default.Send<SwitchRoleMessager>(new SwitchRoleMessager(value));
+        this.Messenger.Register<SelectUserMessanger>(this, LoginMessangerMethod);
     }
 
     [RelayCommand]
@@ -146,6 +129,12 @@ public sealed partial class ShellViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    async Task ShowOpenLocalUser()
+    {
+        await DialogManager.ShowLocalUserManagerAsync();
+    }
+
+    [RelayCommand]
     void BackPage()
     {
         if (HomeNavigationService.CanGoBack)
@@ -174,17 +163,6 @@ public sealed partial class ShellViewModel : ViewModelBase
     void ExitWindow()
     {
         Environment.Exit(0);
-    }
-
-    [RelayCommand]
-    void OpenCommunity()
-    {
-        this.HomeNavigationService.NavigationTo<CommunityViewModel>(
-            "Community",
-            new EntranceNavigationTransitionInfo()
-        );
-
-        ServerName = "库街区";
     }
 
     [RelayCommand]
@@ -233,32 +211,42 @@ public sealed partial class ShellViewModel : ViewModelBase
         await DialogManager.ShowWebGameDialogAsync();
     }
 
-    private async void LoginMessangerMethod(object recipient, LoginMessanger message)
+    private async void LoginMessangerMethod(object recipient, SelectUserMessanger message)
     {
         this.LoginBthVisibility = Visibility.Collapsed;
         WavesCommunitySelectItemVisiblity = Visibility.Visible;
-        await RefreshRoleLists();
+        await RefreshHeaderUser();
         await Task.Delay(800);
         this.AppContext.MainTitle.UpDate();
     }
 
     [RelayCommand]
-    public async Task RefreshRoleLists()
+    public async Task RefreshHeaderUser()
     {
-        var gamers = await WavesClient.GetGamerAsync(GameType.Waves,this.CTS.Token);
-        var punishs = await WavesClient.GetGamerAsync(GameType.Punish,this.CTS.Token);
-        if (gamers == null || gamers.Code != 200 || punishs == null || punishs.Code != 200)
+        if (KuroClient.AccountService.Current == null)
             return;
-        this.Roles = gamers
-            .Data.FormatRoil(Waves.Core.Models.Enums.GameType.Waves)
-            .Concat(punishs.Data.FormatRoil(Waves.Core.Models.Enums.GameType.Punish))
-            .ToObservableCollection();
-        if (Roles != null)
+        var current = KuroClient.AccountService.Current;
+        if (long.TryParse(current.TokenId, out var _id))
         {
-            if (Roles.Count > 0)
-                this.SelectRoles = Roles[0];
+            var result = await KuroClient.GetWavesMineAsync(
+                _id,
+                current.TokenId,
+                current.Token,
+                this.CTS.Token
+            );
+            if (result == null)
+            {
+                TipShow.ShowMessage("检查一下你的网络", Symbol.Clear);
+                return;
+            }
+            if (!result.Success)
+            {
+                TipShow.ShowMessage(result.Msg, Symbol.Clear);
+                return;
+            }
+            HeaderUserName = result.Data.Mine.UserName;
+            HeaderCover = result.Data.Mine.HeadUrl;
         }
-        this.GamerRoleListsVisibility = Visibility.Visible;
         this.AppContext.MainTitle.UpDate();
     }
 
@@ -271,6 +259,8 @@ public sealed partial class ShellViewModel : ViewModelBase
             Logger.WriteError($"检查库洛CDN服务器失败！，地址为:{GameAPIConfig.BaseAddress[0]}");
             Environment.Exit(0);
         }
+        if (AppSettings.AutoSignCommunity == false)
+            await KuroClient.AccountService.SetAutoUser();
         var result = await WavesClient.IsLoginAsync(this.CTS.Token);
         if (!result)
         {
@@ -283,12 +273,14 @@ public sealed partial class ShellViewModel : ViewModelBase
             this.LoginBthVisibility = Visibility.Collapsed;
             WavesCommunitySelectItemVisiblity = Visibility.Visible;
             this.GamerRoleListsVisibility = Visibility.Visible;
-            await this.RefreshRoleLists();
+            await this.RefreshHeaderUser();
         }
         this.AppContext.MainTitle.UpDate();
-        WallpaperService.SetMediaForUrl(WallpaperShowType.Image, AppDomain.CurrentDomain.BaseDirectory+ "Assets\\background.png");
+        WallpaperService.SetMediaForUrl(
+            WallpaperShowType.Image,
+            AppDomain.CurrentDomain.BaseDirectory + "Assets\\background.png"
+        );
         OpenMain();
-        await LauncherTaskService.RunAsync(this.CTS.Token);
     }
 
     [RelayCommand]
@@ -301,35 +293,15 @@ public sealed partial class ShellViewModel : ViewModelBase
     [RelayCommand]
     async Task UnLogin()
     {
-        AppSettings.Token = "";
-        AppSettings.TokenId = "";
-        WeakReferenceMessenger.Default.Send<UnLoginMessager>();
-        this.GamerRoleListsVisibility = Visibility.Collapsed;
-        
-
-        await Loaded();
-    }
-
-    [RelayCommand]
-    void OpenSignWindow()
-    {
-        var win = ViewFactorys.ShowSignWindow(this.SelectRoles.Item);
-        win.Manager.MaxHeight = 350;
-        win.Manager.MaxWidth = 350;
-        (win.AppWindow.Presenter as OverlappedPresenter)!.IsMaximizable = false;
-        (win.AppWindow.Presenter as OverlappedPresenter)!.IsMinimizable = false;
-        win.AppWindowApp.Show();
+        await Task.CompletedTask;
     }
 
     [RelayCommand]
     void OpenCounter(RoutedEventArgs args) { }
-
-    private void ComputerWin_Closed(object sender, WindowEventArgs args) { }
 
     internal void SetSelectItem(Type sourcePageType)
     {
         var page = this.HomeNavigationViewService.GetSelectItem(sourcePageType);
         SelectItem = page;
     }
-
 }

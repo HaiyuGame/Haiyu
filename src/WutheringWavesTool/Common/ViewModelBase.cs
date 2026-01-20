@@ -1,4 +1,5 @@
 ﻿using Waves.Core.Services;
+using Waves.Core.Settings;
 
 namespace Haiyu.Common;
 
@@ -6,20 +7,16 @@ public partial class ViewModelBase : ObservableRecipient, IDisposable
 {
     public CancellationTokenSource CTS { get; set; }
 
+
     public ViewModelBase()
     {
+        AppSettings = Instance.Host.Services.GetService<AppSettings>();
         CTS = new CancellationTokenSource();
-        this.CursorName =
-            AppSettings.SelectCursor == "默认" ? CursorName.None
-            : AppSettings.SelectCursor == "弗糯糯" ? CursorName.FuLuoLuo
-            : AppSettings.SelectCursor == "卡提西亚" ? CursorName.KaTiXiYa
-            : AppSettings.SelectCursor == "守岸人" ? CursorName.ShouAnRen
-            : CursorName.None;
         this.Logger = Instance.Host.Services.GetRequiredKeyedService<LoggerService>("AppLog");
     }
 
-    [ObservableProperty]
-    public partial CursorName CursorName { get; set; }
+    public AppSettings AppSettings { get; private set; }
+
     public LoggerService Logger { get; }
 
     /// <summary>

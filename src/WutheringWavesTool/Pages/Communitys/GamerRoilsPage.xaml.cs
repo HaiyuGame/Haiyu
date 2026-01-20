@@ -13,10 +13,12 @@ public sealed partial class GamerRoilsPage : Page, IPage,IDisposable
 
     protected override async void OnNavigatedTo(NavigationEventArgs e)
     {
+        
         if (e.Parameter is GameRoilDataItem item)
         {
             await this.ViewModel.SetDataAsync(item);
         }
+        
         base.OnNavigatedTo(e);
     }
 

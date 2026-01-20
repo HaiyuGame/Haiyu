@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Microsoft.Extensions.DependencyInjection;
 using Waves.Api.Models;
 using Waves.Api.Models.Communitys;
 using Waves.Api.Models.QRLogin;
@@ -15,26 +15,24 @@ namespace Waves.Core.Services;
 
 public sealed partial class KuroClient : IKuroClient
 {
-    public string Token => AppSettings.Token ?? "";
-
-    public long Id => long.Parse(AppSettings.TokenId ?? "0");
-
     public IHttpClientService HttpClientService { get; }
     public LoggerService LoggerService { get; }
-    public GameRoilDataItem CurrentRoil { get; set; }
     public string? BAT { get; private set; }
     public string Ip { get; private set; }
 
+    public IKuroAccountService AccountService { get; }
+
     public KuroClient(
         IHttpClientService httpClientService,
-        [FromKeyedServices("AppLog")] LoggerService loggerService
+        [FromKeyedServices("AppLog")] LoggerService loggerService,
+        IKuroAccountService accountService
     )
     {
         HttpClientService = httpClientService;
         LoggerService = loggerService;
+        AccountService = accountService;
         HttpClientService.BuildClient();
     }
-
 
     private Dictionary<string, string> GetDeviceHeader(bool isNeedToken, bool isNeedBAT = true)
     {
@@ -44,7 +42,7 @@ public sealed partial class KuroClient : IKuroClient
             { "Accept-Encoding", "gzip, deflate" },
             { "Accept-Language", "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7" },
             { "source", "android" },
-            { "devCode", HardwareIdGenerator.GenerateUniqueId() },
+            { "devCode", AccountService.Current?.TokenDid ?? "" },
             //{ "model","23117RK66C"},
             { "version", "2.5.3" },
             { "lang", "zh-Hans" },
@@ -57,13 +55,9 @@ public sealed partial class KuroClient : IKuroClient
         }
         if (isNeedToken)
         {
-            if (this.Token == null || string.IsNullOrWhiteSpace(Token))
+            if (AccountService.Current != null)
             {
-                dict.Add("token", this.Token);
-            }
-            else
-            {
-                dict.Add("token", Token);
+                dict.Add("token", this.AccountService.Current.Token);
             }
         }
         return dict;
@@ -80,7 +74,7 @@ public sealed partial class KuroClient : IKuroClient
                 "User-Agent",
                 "Mozilla/5.0 (Linux; Android 12; 23117RK66C Build/V417IR; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/101.0.4951.61 Safari/537.36 Kuro/2.5.3 KuroGameBox/2.5.3"
             },
-            { "did", HardwareIdGenerator.GenerateUniqueId() },
+            { "did", AccountService.Current?.TokenDid ?? "" },
             { "source", "android" },
             {
                 "devCode",
@@ -94,13 +88,9 @@ public sealed partial class KuroClient : IKuroClient
         }
         if (isNeedToken)
         {
-            if (this.Token == null || string.IsNullOrWhiteSpace(Token))
+            if (AccountService.Current != null)
             {
-                dict.Add("token", this.Token);
-            }
-            else
-            {
-                dict.Add("token", Token);
+                dict.Add("token", this.AccountService.Current.Token);
             }
         }
         return dict;
@@ -248,17 +238,51 @@ public sealed partial class KuroClient : IKuroClient
             JsonSerializer.Deserialize(jsonStr, typeof(AccountMine), CommunityContext.Default);
     }
 
+    public async Task<AccountMine?> GetWavesMineAsync(
+        long id,
+        string tokenDid,
+        string tokenValue,
+        CancellationToken token = default
+    )
+    {
+        var header = GetDeviceHeader(true);
+        header["devCode"] = tokenDid;
+        header["token"] = tokenValue;
+        var content = new Dictionary<string, string>() { { "otherUserId", id.ToString() } };
+        var request = await BuildRequestAsync(
+            "https://api.kurobbs.com/user/mineV2",
+            HttpMethod.Post,
+            header,
+            new MediaTypeHeaderValue("application/x-www-form-urlencoded", "utf-8"),
+            content,
+            true,
+            token
+        );
+        var result = await HttpClientService.HttpClient.SendAsync(request);
+        var jsonStr = await result.Content.ReadAsStringAsync();
+        return (AccountMine?)
+            JsonSerializer.Deserialize(jsonStr, typeof(AccountMine), CommunityContext.Default);
+    }
+
     public async Task<bool> IsLoginAsync(CancellationToken token = default)
     {
-        if (string.IsNullOrWhiteSpace(Token) || Id <= 0)
+        if (this.AccountService.Current == null)
         {
             return false;
         }
-        var mine = await GetWavesMineAsync(Id, token);
-        if (mine != null)
+        if (long.TryParse(AccountService.Current.TokenId, out var result))
         {
-            if (mine.Code == 200)
-                return true;
+            var mine = await GetWavesMineAsync(
+                result,
+                AccountService.Current.TokenDid,
+                AccountService.Current.Token,
+                token
+            );
+            if (mine != null)
+            {
+                if (mine.Code == 200)
+                    return true;
+            }
         }
         return false;
     }
@@ -268,6 +292,8 @@ public sealed partial class KuroClient : IKuroClient
         CancellationToken token = default
     )
     {
+        if (AccountService.Current == null)
+            return null;
         var url = "https://api.kurobbs.com/aki/roleBox/requestToken";
         var header = new Dictionary<string, string>()
         {
@@ -278,9 +304,9 @@ public sealed partial class KuroClient : IKuroClient
                 "devCode",
                 "Mozilla/5.0 (Linux; Android 12; 23117RK66C Build/V417IR; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/101.0.4951.61 Safari/537.36 Kuro/2.5.3 KuroGameBox/2.5.3"
             },
-            { "did", HardwareIdGenerator.GenerateUniqueId() },
+            { "did", AccountService.Current.TokenDid },
             { "source", "android" },
-            { "token", this.Token },
+            { "token", AccountService.Current.Token },
             { "Connection", "keep-alive" },
         };
         var request = await BuildRequestAsync(

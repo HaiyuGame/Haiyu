@@ -7,6 +7,7 @@
     xmlns:b="using:CommunityToolkit.WinUI.Behaviors"
     xmlns:bs="using:Haiyu.Behaviors"
     xmlns:control="using:Haiyu.Controls"
+    xmlns:cui="using:CommunityToolkit.WinUI"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:launcheModel="using:Waves.Api.Models"
@@ -40,7 +41,7 @@
             Background="Transparent"
             IsIndeterminate="{x:Bind ViewModel.ProcessAction, Mode=OneWay}" />
         <ComboBox
-            Margin="10,0,0,0"
+            Margin="10,10,0,0"
             Padding="10,5"
             CornerRadius="10 3 10 3"
             ItemsSource="{x:Bind ViewModel.Servers, Mode=OneWay}"
@@ -312,8 +313,6 @@
                             Height="60"
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Stretch"
-                            property:CursorProperty.CursorName="{x:Bind ViewModel.CursorName}"
-                            property:CursorProperty.CursorType="Link"
                             BorderThickness="0"
                             Command="{x:Bind ViewModel.UpdateGameCommand}"
                             CornerRadius="4"

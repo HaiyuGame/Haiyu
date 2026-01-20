@@ -1,5 +1,6 @@
 ﻿using Haiyu.Helpers;
 using Haiyu.ServiceHost;
+using Haiyu.ServiceHost.XBox.Commons;
 using Haiyu.Services.DialogServices;
 using Haiyu.Services.Navigations.NavigationViewServices;
 using Haiyu.ViewModel.GameViewModels;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Waves.Api.Models.Rpc;
 using Waves.Core.Services;
+using Waves.Core.Settings;
 
 namespace Haiyu;
 
@@ -20,7 +22,6 @@ public static class Instance
     public static void InitService()
     {
         Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder().AppBuilder().Build();
-        Task.Run(async () => await Host.RunAsync());
     }
 
     public static T? GetService<T>()
@@ -61,15 +62,24 @@ public static class InstanceBuilderExtensions
                             return service;
                         }
                     )
+                    .AddSingleton<AppSettings>()
+                #region XBox
+                    .AddSingleton<XBoxConfig>()
+                    .AddSingleton<XBoxController>()
+                    .AddSingleton<XBoxService>()
+                #endregion
                     .AddTransient<IRpcMethodService, RpcMethodService>()
                     .AddSingleton<ShellPage>()
                     .AddSingleton<ShellViewModel>()
                     .AddSingleton<OOBEPage>()
                     .AddSingleton<OOBEViewModel>()
+                    .AddTransient<CommunityPage>()
                     .AddTransient<PlayerRecordPage>()
                     .AddTransient<PlayerRecordViewModel>()
                     .AddTransient<SettingViewModel>()
                     .AddTransient<CommunityViewModel>()
+                    .AddTransient<GameEnhancedDialog>()
+                    .AddTransient<GameEnhancedViewModel>()
                     .AddTransient<GameResourceDialog>()
                     .AddTransient<GameResourceViewModel>()
                     .AddTransient<DeviceInfoPage>()
@@ -129,9 +139,11 @@ public static class InstanceBuilderExtensions
                     .AddTransient<QrLoginViewModel>()
                     .AddTransient<UpdateGameDialog>()
                     .AddTransient<UpdateGameViewModel>()
-                    #endregion
+                    .AddTransient<LocalUserManagerDialog>()
+                    .AddTransient<LocalUserManagerViewModel>()
                 #endregion
-                    #region More
+                #endregion
+                #region More
                     .AddTransient<IPageService, PageService>()
                     .AddTransient<IPickersService, PickersService>()
                     .AddSingleton<ITipShow, TipShow>()
@@ -148,7 +160,8 @@ public static class InstanceBuilderExtensions
                     .AddSingleton<IGameWikiClient, GameWikiClient>()
                     .AddTransient<IViewFactorys, ViewFactorys>()
                     .AddSingleton<IThemeService, ThemeService>()
-                    .AddTransient<ILauncherTaskService, LauncherTaskService>()
+                    .AddSingleton<IKuroAccountService,KuroAccountService>()
+                    .AddHostedService<AutoSignService>()
                     .AddSingleton<CloudConfigManager>(
                         (s) =>
                         {

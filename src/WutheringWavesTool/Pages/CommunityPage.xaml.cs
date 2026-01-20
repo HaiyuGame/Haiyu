@@ -1,6 +1,8 @@
-﻿namespace Haiyu.Pages;
+﻿
 
-public sealed partial class CommunityPage : Page, IPage, IDisposable
+namespace Haiyu.Pages;
+
+public sealed partial class CommunityPage : Page, IPage, IDisposable,IWindowPage
 {
     private bool disposedValue;
 
@@ -8,6 +10,7 @@ public sealed partial class CommunityPage : Page, IPage, IDisposable
     {
         this.InitializeComponent();
         this.ViewModel = Instance.Host.Services.GetRequiredService<CommunityViewModel>();
+        this.RequestedTheme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
     }
 
     protected override void OnNavigatedFrom(NavigationEventArgs e)
@@ -21,9 +24,18 @@ public sealed partial class CommunityPage : Page, IPage, IDisposable
         base.OnNavigatedFrom(e);
     }
 
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        if(e.Parameter is GameRoilDataItem item)
+        {
+            this.ViewModel.Item = item;
+        }
+    }
+
     public Type PageType => typeof(CommunityPage);
 
     public CommunityViewModel ViewModel { get; private set; }
+    public Window Window { get; private set; }
 
     private void dataSelect_SelectionChanged(
         SelectorBar sender,
@@ -32,48 +44,6 @@ public sealed partial class CommunityPage : Page, IPage, IDisposable
     {
         if (sender.SelectedItem.Tag == null)
             return;
-        #region 旧代码
-
-        //switch (sender.SelectedItem.Tag.ToString())
-        //{
-        //    case "DataGamer":
-        //        ViewModel.NavigationService.NavigationTo<GameRoilsViewModel>(
-        //            this.ViewModel.SelectRoil.Item,
-        //            new Microsoft.UI.Xaml.Media.Animation.DrillInNavigationTransitionInfo()
-        //        );
-        //        break;
-        //    case "DataDock":
-        //        ViewModel.NavigationService.NavigationTo<GamerDockViewModel>(
-        //            this.ViewModel.SelectRoil.Item,
-        //            new Microsoft.UI.Xaml.Media.Animation.DrillInNavigationTransitionInfo()
-        //        );
-        //        break;
-        //    case "DataChallenge":
-        //        ViewModel.NavigationService.NavigationTo<GamerChallengeViewModel>(
-        //            this.ViewModel.SelectRoil.Item,
-        //            new Microsoft.UI.Xaml.Media.Animation.DrillInNavigationTransitionInfo()
-        //        );
-        //        break;
-        //    case "DataAbyss":
-        //        ViewModel.NavigationService.NavigationTo<GamerTowerViewModel>(
-        //            this.ViewModel.SelectRoil.Item,
-        //            new Microsoft.UI.Xaml.Media.Animation.DrillInNavigationTransitionInfo()
-        //        );
-        //        break;
-        //    case "DataWorld":
-        //        ViewModel.NavigationService.NavigationTo<GamerExploreIndexViewModel>(
-        //            this.ViewModel.SelectRoil.Item,
-        //            new Microsoft.UI.Xaml.Media.Animation.DrillInNavigationTransitionInfo()
-        //        );
-        //        break;
-        //    case "Skin":
-        //        ViewModel.NavigationService.NavigationTo<GamerSkinViewModel>(
-        //            this.ViewModel.SelectRoil.Item,
-        //            new Microsoft.UI.Xaml.Media.Animation.DrillInNavigationTransitionInfo()
-        //        );
-        //        break;
-        //}
-        #endregion
     }
 
     private void Dispose(bool disposing)
@@ -92,5 +62,28 @@ public sealed partial class CommunityPage : Page, IPage, IDisposable
     {
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
+    }
+
+
+
+    public void SetData(object value)
+    {
+        if (value is GameRoilDataItem item)
+        {
+            this.ViewModel.Item = item;
+            this.title.Title = $"{item.RoleName}-{item.ServerName}";
+        }
+    }
+
+    public void SetWindow(Window window)
+    {
+        this.Window = window;
+        this.Window.AppWindow.Closing += AppWindow_Closing;
+    }
+
+    private void AppWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
+    {
+        Dispose();
+        this.Window.AppWindow.Closing -= AppWindow_Closing;
     }
 }

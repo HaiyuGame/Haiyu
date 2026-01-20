@@ -64,13 +64,14 @@ partial class KuroClient
     public async Task<SMSResultModel?> SendSMSAsync(
         string mobile,
         string geeTestData,
+        string tokenDid,
         CancellationToken token = default
     )
     {
         var header = new Dictionary<string, string>()
         {
             { "osVersion", "Android" },
-            { "devCode", HardwareIdGenerator.GenerateUniqueId() },
+            { "devCode", tokenDid },
             { "distinct_id", "e0f62c50-4c62-4983-9f6a-bf96f3566095" },
             { "countryCode", "CN" },
             { "model", "23127PN0CC" },
@@ -101,13 +102,14 @@ partial class KuroClient
     public async Task<AccountModel?> LoginAsync(
         string mobile,
         string code,
+        string tokenDid,
         CancellationToken token = default
     )
     {
         var header = new Dictionary<string, string>()
         {
             { "osVersion", "Android" },
-            { "devCode", HardwareIdGenerator.GenerateUniqueId() },
+            { "devCode",tokenDid },
             { "distinct_id", "96b1567b-b5e6-422f-a1dd-7cb1e58c5db7" },
             { "countryCode", "CN" },
             { "model", "android" },
@@ -122,7 +124,7 @@ partial class KuroClient
         var query = new Dictionary<string, string>()
         {
             { "mobile", mobile },
-            { "devCode", HardwareIdGenerator.GenerateUniqueId() },
+            { "devCode", tokenDid },
             { "code", code },
         };
         var request = await BuildLoginRequest(

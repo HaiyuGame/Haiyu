@@ -23,8 +23,16 @@
         </i:EventTriggerBehavior>
     </i:Interaction.Behaviors>
     <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <TitleBar x:Name="title" Subtitle="鸣潮数据面板">
+        </TitleBar>
+
         <!--  未登录  -->
         <Grid
+            Grid.Row="1"
             x:Name="loginBorder"
             Padding="20"
             HorizontalAlignment="Center"
@@ -46,6 +54,7 @@
         </Grid>
         <!--  未登录结束  -->
         <Grid
+            Grid.Row="1"
             x:Name="loginyes"
             Margin="25"
             Visibility="{x:Bind ViewModel.IsLogin, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">

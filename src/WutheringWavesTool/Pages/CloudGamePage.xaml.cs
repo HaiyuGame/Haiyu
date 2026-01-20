@@ -9,7 +9,6 @@ public sealed partial class CloudGamePage : Page, IPage
     {
         InitializeComponent();
         this.ViewModel = Instance.GetService<CloudGameViewModel>();
-        
     }
 
     public Type PageType => typeof(CloudGamePage);

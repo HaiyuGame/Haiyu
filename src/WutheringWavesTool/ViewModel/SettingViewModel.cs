@@ -84,8 +84,6 @@ public sealed partial class SettingViewModel : ViewModelBase
                     this.SelectCloseIndex = 0;
                     break;
             }
-            this.OldCursorName = AppSettings.SelectCursor ?? "默认";
-            this.SelectCursorName = Cursors.Find(x => x == AppSettings.SelectCursor) ?? Cursors[0];
             if (AppSettings.WallpaperType == null)
             {
                 this.SelectWallpaperName = WallpaperTypes[0];
@@ -101,14 +99,7 @@ public sealed partial class SettingViewModel : ViewModelBase
                     this.SelectWallpaperName = WallpaperTypes[1];
                 }
             }
-            if (bool.TryParse(AppSettings.AutoSignCommunity, out var isSign))
-            {
-                this.AutoCommunitySign = isSign;
-            }
-            else
-            {
-                this.AutoCommunitySign = false;
-            }
+            this.AutoCommunitySign = AppSettings.AutoSignCommunity;
             switch (AppSettings.ElementTheme)
             {
                 case "Light":
@@ -145,7 +136,7 @@ public sealed partial class SettingViewModel : ViewModelBase
         if (await WavesClient.IsLoginAsync())
         {
             DataPackage package = new();
-            package.SetText(WavesClient.Token);
+            package.SetText("NULL");
             Clipboard.SetContent(package);
         }
     }
@@ -174,9 +165,7 @@ public sealed partial class SettingViewModel : ViewModelBase
 
     partial void OnAutoCommunitySignChanged(bool? value)
     {
-        if (value == null)
-            return;
-        AppSettings.AutoSignCommunity = value.ToString();
+        AppSettings.AutoSignCommunity = value;
     }
 
     public override void Dispose()
