@@ -30,34 +30,21 @@ public sealed partial class GameEnhancedViewModel : DialogViewModelBase
     {
         if (e.OriginalSource is CheckBox box)
         {
-            
-            if (SystemHelper.IsAdministrator())
+            if (box.Tag.ToString() == "Fps")
             {
-                if (box.Tag.ToString() == "Fps")
-                {
-                    XboxConfig.FpsEnable = box.IsChecked ?? false;
-                }
-                if (box.Tag.ToString() == "Xbox")
-                {
-                    XboxConfig.IsEnable = box.IsChecked ?? false;
-                    if (box.IsChecked == true)
-                    {
-                        await XBoxService.StartAsync();
-                    }
-                    else
-                    {
-                        await XBoxService.StopAsync();
-                    }
-                }
+                XboxConfig.FpsEnable = box.IsChecked ?? false;
             }
-            else
+            if (box.Tag.ToString() == "Xbox")
             {
-                if (box.Tag.ToString() == "Fps")
-                    XboxConfig.FpsEnable = false;
-                if (box.Tag.ToString() == "Xbox")
-                    XboxConfig.IsEnable = false;
-                box.IsChecked = false;
-                await TipShow.ShowMessageAsync("请使用管理员模式启动Haiyu",Symbol.Clear);
+                XboxConfig.IsEnable = box.IsChecked ?? false;
+                if (box.IsChecked == true)
+                {
+                    await XBoxService.StartAsync();
+                }
+                else
+                {
+                    await XBoxService.StopAsync();
+                }
             }
         }
     }

@@ -1,4 +1,4 @@
-using Haiyu.ServiceHost;
+﻿using Haiyu.ServiceHost;
 
 namespace Haiyu.Pages.Dialogs;
 
@@ -8,19 +8,14 @@ public sealed partial class GameEnhancedDialog : ContentDialog,IDialog
     {
         InitializeComponent();
         this.ViewModel = Instance.Host.Services.GetRequiredService<GameEnhancedViewModel>();
+        this.RequestedTheme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
     }
 
     public GameEnhancedViewModel ViewModel { get; }
 
     public void SetData(object data)
     {
-        if (SystemHelper.IsAdministrator())
-        {
-            this.xboxEnable.IsChecked = ViewModel.XboxConfig.IsEnable;
-        }
-        else
-        {
-            this.xboxEnable.IsChecked = false;
-        }
+
+        this.xboxEnable.IsChecked = ViewModel.XboxConfig.IsEnable;
     }
 }

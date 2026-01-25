@@ -19,10 +19,10 @@ public class XBoxConfig : SettingBase
     /// <summary>
     /// 是否启用模拟鼠标控制
     /// </summary>
-    public bool IsEnable
+    public bool? IsEnable
     {
-        get => BoolAdaptive.Instance.GetForward(Read());
-        set => Write(BoolAdaptive.Instance.GetBack(value));
+        get => NullBoolAdaptive.Instance.GetForward(Read());
+        set => Write(NullBoolAdaptive.Instance.GetBack(value));
     }
 
     /// <summary>

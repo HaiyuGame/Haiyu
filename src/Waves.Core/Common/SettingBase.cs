@@ -85,17 +85,7 @@ public class SettingBase
 
     private void LoadSettingsOnce()
     {
-        if (!_isLoaded)
-        {
-            lock (_lockObj)
-            {
-                if (!_isLoaded)
-                {
-                    DoLoadSettings();
-                    _isLoaded = true;
-                }
-            }
-        }
+        DoLoadSettings();
     }
 
     private void DoLoadSettings()
@@ -120,6 +110,7 @@ public class SettingBase
             }
             catch (Exception)
             {
+                
                 _settingsCache = new Dictionary<string, string>();
             }
         }
