@@ -1,8 +1,8 @@
-﻿using Haiyu.ServiceHost;
+﻿using System.Threading.Tasks;
+using Haiyu.ServiceHost;
 using Haiyu.ServiceHost.XBox.Commons;
 using Haiyu.Services;
 using Haiyu.Services.DialogServices;
-using System.Threading.Tasks;
 using Waves.Core.Settings;
 
 namespace Haiyu.ViewModel.DialogViewModels;
@@ -13,7 +13,12 @@ public sealed partial class GameEnhancedViewModel : DialogViewModelBase
     public XBoxConfig XboxConfig { get; }
     public ITipShow TipShow { get; }
 
-    public GameEnhancedViewModel([FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager, XBoxService xboxService, XBoxConfig xBoxConfig,ITipShow tipShow)
+    public GameEnhancedViewModel(
+        [FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager,
+        XBoxService xboxService,
+        XBoxConfig xBoxConfig,
+        ITipShow tipShow
+    )
         : base(dialogManager)
     {
         TipShow = tipShow;
@@ -21,34 +26,30 @@ public sealed partial class GameEnhancedViewModel : DialogViewModelBase
         XboxConfig = xBoxConfig;
     }
 
+    [ObservableProperty]
+    public partial bool? XboxEnable { get; set; }
+
     /// <summary>
     /// 开启XBox 适配
     /// </summary>
     [RelayCommand]
-
-    async Task EnableConfig(RoutedEventArgs e)
+    async Task EnableConfig(string Tag)
     {
-        if (e.OriginalSource is CheckBox box)
+        if (Tag == "Fps")
         {
-            if (box.Tag.ToString() == "Fps")
+            XboxConfig.FpsEnable = XboxEnable ?? false;
+        }
+        if (Tag == "Xbox")
+        {
+            XboxConfig.IsEnable = XboxEnable ?? false;
+            if (XboxEnable == true)
             {
-                XboxConfig.FpsEnable = box.IsChecked ?? false;
+                await XBoxService.StartAsync();
             }
-            if (box.Tag.ToString() == "Xbox")
+            else
             {
-                XboxConfig.IsEnable = box.IsChecked ?? false;
-                if (box.IsChecked == true)
-                {
-                    await XBoxService.StartAsync();
-                }
-                else
-                {
-                    await XBoxService.StopAsync();
-                }
+                await XBoxService.StopAsync();
             }
         }
     }
-
-    
-
 }
