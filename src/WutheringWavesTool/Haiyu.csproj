@@ -82,6 +82,10 @@
 		<PackageReference Include="WinUIEx" Version="2.9.0" />
 		<PackageReference Include="ZLinq" Version="1.5.4" />
 		<PackageReference Include="ZXing.Net" Version="0.16.11" />
+		<PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.264">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Astronomical\Astronomical.csproj" />
@@ -198,6 +202,9 @@
 		<None Update="Assets\HpatchzResource\hpatchz.exe">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
+		<Page Update="Pages\XboxDisplayPage.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</Page>
 		<Page Update="Pages\Dialogs\GameEnhancedDialog.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</Page>
@@ -269,5 +276,6 @@
 	  <None Remove="Pages\Dialogs\GameEnhancedDialog.xaml" />
 	  <None Remove="Pages\Dialogs\LocalUserManagerDialog.xaml" />
 	  <None Remove="Pages\Dialogs\UpdateGameDialog.xaml" />
+	  <None Remove="Pages\XboxDisplayPage.xaml" />
 	</ItemGroup>
 </Project>
