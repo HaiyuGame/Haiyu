@@ -21,6 +21,8 @@ public interface IGameContext
     event GameContextProdOutputDelegate GameContextProdOutput;
     public string GamerConfigPath { get; internal set; }
     GameLocalConfig GameLocalConfig { get; }
+
+
     public GameAPIConfig Config { get; }
 
     public GameType GameType { get; }
