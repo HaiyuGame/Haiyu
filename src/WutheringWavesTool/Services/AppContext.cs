@@ -42,7 +42,7 @@ public class AppContext<T> : IAppContext<T>
         try
         {
             var xboxConfig = Instance.Host.Services.GetRequiredService<XBoxConfig>();
-            if (xboxConfig.IsEnable)
+            if (xboxConfig.IsEnable == true)
             {
                 await Instance.Host.Services.GetRequiredService<XBoxService>().StartAsync();
             }

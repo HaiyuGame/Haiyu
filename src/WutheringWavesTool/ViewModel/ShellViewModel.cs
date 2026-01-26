@@ -253,12 +253,6 @@ public sealed partial class ShellViewModel : ViewModelBase
     [RelayCommand]
     async Task Loaded()
     {
-        var network = await NetworkCheck.PingAsync(GameAPIConfig.BaseAddress[0]);
-        if (network == null || network.Status != System.Net.NetworkInformation.IPStatus.Success)
-        {
-            Logger.WriteError($"检查库洛CDN服务器失败！，地址为:{GameAPIConfig.BaseAddress[0]}");
-            Environment.Exit(0);
-        }
         if (AppSettings.AutoSignCommunity == false)
             await KuroClient.AccountService.SetAutoUser();
         var result = await WavesClient.IsLoginAsync(this.CTS.Token);

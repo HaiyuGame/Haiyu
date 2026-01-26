@@ -39,11 +39,6 @@ public class XBoxService
 
     public async Task StartAsync()
     {
-        if (!SystemHelper.IsAdministrator() && Config.IsEnable)
-        {
-            await TipShow.ShowMessageAsync("请在管理员模式下启用XBox手柄支持", Symbol.Clear);
-            return;
-        }
         _cts = new CancellationTokenSource();
         Controller = new XBoxController();
         _pollTask = Task.Run(() => PollLoopAsync(_cts.Token), _cts.Token);

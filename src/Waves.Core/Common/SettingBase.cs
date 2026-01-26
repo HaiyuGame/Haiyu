@@ -1,27 +1,31 @@
-﻿using System.Collections.Concurrent;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Linq;
 using Waves.Core.Models;
 
 namespace Waves.Core.Common;
 
 public class SettingBase
 {
+    private readonly string _configPath;
+    private readonly object _lockObj = new();
+    private Dictionary<string, string> _settingsCache;
+    private bool _isLoaded = false;
+
     public SettingBase(string configPath)
     {
-        this.configPath = configPath;
+        _configPath = configPath;
         _settingsCache = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        _lockObj = new object();
     }
-    private Dictionary<string, string> _settingsCache;
-    private readonly string configPath;
-    private bool _isLoaded = false;
-    private readonly object _lockObj;
 
     internal virtual string? Read([CallerMemberName] string key = null)
     {
         if (string.IsNullOrWhiteSpace(key)) return null;
+
         LoadSettingsOnce();
+
         try
         {
             lock (_lockObj)
@@ -42,6 +46,7 @@ public class SettingBase
         {
             throw new ArgumentException("配置键名不能为空", nameof(key));
         }
+
         LoadSettingsOnce();
 
         lock (_lockObj)
@@ -54,6 +59,7 @@ public class SettingBase
             {
                 _settingsCache[key] = value;
             }
+
             SaveSettings();
         }
     }
@@ -74,7 +80,14 @@ public class SettingBase
                     settingsList,
                     LocalSettingsJsonContext.Default.ListLocalSettings
                 );
-                File.WriteAllText(configPath, json);
+
+                var directory = Path.GetDirectoryName(_configPath);
+                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+
+                File.WriteAllText(_configPath, json);
             }
         }
         catch (Exception ex)
@@ -82,50 +95,54 @@ public class SettingBase
             throw new IOException("配置文件写入失败", ex);
         }
     }
-
     private void LoadSettingsOnce()
     {
-        if (!_isLoaded)
+        lock (_lockObj)
         {
-            lock (_lockObj)
+            if (!_isLoaded)
             {
-                if (!_isLoaded)
-                {
-                    DoLoadSettings();
-                    _isLoaded = true;
-                }
+                DoLoadSettings();
+                _isLoaded = true;
             }
         }
     }
 
     private void DoLoadSettings()
     {
-        if (File.Exists(configPath))
+        lock (_lockObj)
         {
-            var json = File.ReadAllText(configPath);
-            try
+            if (File.Exists(_configPath))
             {
-                var settingsList = JsonSerializer.Deserialize<List<LocalSettings>>(
-                    json,
-                    LocalSettingsJsonContext.Default.ListLocalSettings
-                );
-                if (settingsList != null && settingsList.Count > 0)
+                try
                 {
-                    _settingsCache = settingsList.ToDictionary(
-                        x => x.Key,
-                        x => x.Value,
-                        StringComparer.OrdinalIgnoreCase
+                    var json = File.ReadAllText(_configPath);
+                    var settingsList = JsonSerializer.Deserialize<List<LocalSettings>>(
+                        json,
+                        LocalSettingsJsonContext.Default.ListLocalSettings
                     );
+
+                    if (settingsList != null && settingsList.Count > 0)
+                    {
+                        _settingsCache = settingsList.ToDictionary(
+                            x => x.Key,
+                            x => x.Value,
+                            StringComparer.OrdinalIgnoreCase
+                        );
+                    }
+                    else
+                    {
+                        _settingsCache = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                    }
+                }
+                catch (Exception)
+                {
+                    _settingsCache = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 }
             }
-            catch (Exception)
+            else
             {
-                _settingsCache = new Dictionary<string, string>();
+                _settingsCache = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             }
-        }
-        else
-        {
-            _settingsCache = new Dictionary<string, string>();
         }
     }
 
@@ -134,7 +151,7 @@ public class SettingBase
         lock (_lockObj)
         {
             DoLoadSettings();
-            _isLoaded = true;
+            _isLoaded = true; 
         }
     }
 }
