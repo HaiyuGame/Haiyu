@@ -172,11 +172,11 @@ public sealed partial class ShellViewModel : ViewModelBase
             "Setting",
             new DrillInNavigationTransitionInfo()
         );
-        WindowAllowTransparentBase base1 = new WindowAllowTransparentBase();
-        base1.Manager.MaxHeight = 200;
-        base1.Manager.MaxWidth = 300;
-        base1.Content = new XboxDisplayPage();
-        base1.Show();
+        //WindowAllowTransparentBase base1 = new WindowAllowTransparentBase();
+        //base1.Manager.MaxHeight = 200;
+        //base1.Manager.MaxWidth = 300;
+        //base1.Content = new XboxDisplayPage();
+        //base1.Show();
     }
 
     [RelayCommand]
