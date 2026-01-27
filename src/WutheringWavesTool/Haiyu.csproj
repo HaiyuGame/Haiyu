@@ -255,6 +255,9 @@
 		<AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
 		<ApplicationIcon>Assets\appLogo.ico</ApplicationIcon>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+		<StartupObject>Haiyu.Program</StartupObject>
 	
 	</PropertyGroup>
 	<ItemGroup>
