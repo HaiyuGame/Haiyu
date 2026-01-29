@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.WinUI;
+using DevWinUI;
 using Haiyu.Services.DialogServices;
 using Microsoft.UI.Dispatching;
 using Waves.Core.GameContext.Contexts.PRG;
@@ -116,6 +117,7 @@ public class AppContext<T> : IAppContext<T>
             this.App.MainWindow.Activate();
             (win.AppWindow.Presenter as OverlappedPresenter)!.SetBorderAndTitleBar(true, false);
             this.App.MainWindow.AppWindow.Closing += AppWindow_Closing;
+
         }
         catch (Exception ex)
         {

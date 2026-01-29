@@ -1,4 +1,5 @@
 ﻿using Waves.Core.Models;
+using Waves.Core.Settings;
 
 namespace Waves.Core.Contracts;
 
@@ -7,6 +8,7 @@ namespace Waves.Core.Contracts;
 /// </summary>
 public interface IKuroAccountService
 {
+    public AppSettings AppSettings { get; }
 
     public LocalAccount? Current { get; }
 

@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Astronomical;
+using DevWinUI;
 using Haiyu.Models.Wrapper;
 using Haiyu.Services.DialogServices;
 using Waves.Core.Common;
@@ -36,14 +37,6 @@ public sealed partial class ShellViewModel : ViewModelBase
         WallpaperService = wallpaperService;
         KuroClient = kuroClient;
         RegisterMessanger();
-        SystemMenu = new NotifyIconMenu()
-        {
-            Items = new List<NotifyIconMenuItem>()
-            {
-                new() { Header = "显示主界面", Command = this.ShowWindowCommand },
-                new() { Header = "退出启动器", Command = this.ExitWindowCommand },
-            },
-        };
     }
 
     [ObservableProperty]
@@ -91,6 +84,7 @@ public sealed partial class ShellViewModel : ViewModelBase
 
     [ObservableProperty]
     public partial CollectionViewSource RoleViewSource { get; set; }
+    public SystemTrayIcon Icon { get; private set; }
 
     private void RegisterMessanger()
     {
@@ -251,6 +245,7 @@ public sealed partial class ShellViewModel : ViewModelBase
             }
             HeaderUserName = result.Data.Mine.UserName;
             HeaderCover = result.Data.Mine.HeadUrl;
+            GamerRoleListsVisibility = Visibility.Visible;
         }
         this.AppContext.MainTitle.UpDate();
     }
@@ -258,8 +253,13 @@ public sealed partial class ShellViewModel : ViewModelBase
     [RelayCommand]
     async Task Loaded()
     {
+        var id = WindowHelper.GetWindowIcon(AppContext.App.MainWindow);
+        uint iconId = 123;
+        Icon = new SystemTrayIcon(iconId, id, "Haiyu");
+        Icon.RightClick += TranRightClick;
+        Icon.LeftDoubleClick += Icon_LeftDoubleClick;
         if (AppSettings.AutoSignCommunity == false)
-            await KuroClient.AccountService.SetAutoUser();
+            await KuroClient.SetAutoUserAsync(this.CTS.Token);
         var result = await WavesClient.IsLoginAsync(this.CTS.Token);
         if (!result)
         {
@@ -282,17 +282,28 @@ public sealed partial class ShellViewModel : ViewModelBase
         OpenMain();
     }
 
+    private void Icon_LeftDoubleClick(SystemTrayIcon sender, SystemTrayIconEventArgs args)
+    {
+        this.ShowWindow();
+    }
+
+    private void TranRightClick(SystemTrayIcon sender, SystemTrayIconEventArgs args)
+    {
+        var flyout = new MenuFlyout();
+        flyout.Items.Add(
+            new MenuFlyoutItem() { Text = "显示主界面", Command = this.ShowWindowCommand }
+        );
+        flyout.Items.Add(
+            new MenuFlyoutItem() { Text = "退出启动器", Command = this.ExitWindowCommand }
+        );
+        args.Flyout = flyout;
+    }
+
     [RelayCommand]
     public void ShowDeviceInfo()
     {
         var window = ViewFactorys.ShowAdminDevice();
         window.Activate();
-    }
-
-    [RelayCommand]
-    async Task UnLogin()
-    {
-        await Task.CompletedTask;
     }
 
     [RelayCommand]

@@ -36,10 +36,6 @@
             <RowDefinition Height="auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
-        <ui:NotifyIconWinUI
-            x:Name="notify"
-            ContextMenu="{x:Bind ViewModel.SystemMenu, Mode=OneWay}"
-            LeftDoubleClick="notify_LeftDoubleClick" />
         <Border x:Name="titleback" Grid.RowSpan="1" />
         <ui:TitleBar
             x:Name="titlebar"
@@ -145,14 +141,6 @@
                                         </MenuFlyoutItem.Icon>
                                     </MenuFlyoutItem>
                                     <MenuFlyoutSeparator />
-                                    <MenuFlyoutItem
-                                        Command="{x:Bind ViewModel.UnLoginCommand}"
-                                        Foreground="{ThemeResource SystemFillColorCriticalBrush}"
-                                        Text="退出登录">
-                                        <MenuFlyoutItem.Icon>
-                                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xF3B1;" />
-                                        </MenuFlyoutItem.Icon>
-                                    </MenuFlyoutItem>
                                 </MenuFlyout>
                             </Button.Flyout>
                         </Button>

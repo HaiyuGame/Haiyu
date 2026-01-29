@@ -183,17 +183,21 @@ public class KuroAccountService : IKuroAccountService
         {
             if (_cache == null)
             {
-                // 无用户
                 return;
             }
             return;
         }
         else
         {
-            this.SetCurrentUser(
-               _cache
+            var result = _cache
                    .Where(x => x.Value.Item2.TokenId == AppSettings.LastSelectUser)
-                   .FirstOrDefault()
+                   .FirstOrDefault();
+            if(result.Key == null || result.Value == null)
+            {
+                return;
+            }
+            this.SetCurrentUser(
+               result
                    .Value.Item2
            );
         }
