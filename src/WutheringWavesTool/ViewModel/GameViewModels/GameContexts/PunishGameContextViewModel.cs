@@ -45,7 +45,7 @@ namespace Haiyu.ViewModel.GameViewModels.GameContexts
         }
 
         [ObservableProperty]
-        public partial ObservableCollection<Slideshow> SlideShows { get; set; }=[];
+        public partial ObservableCollection<Slideshow> SlideShows { get; set; }
 
         [ObservableProperty]
         public partial ObservableCollection<string> Tabs { get; set; } = new ObservableCollection<string>() { "活动", "公告", "新闻" };

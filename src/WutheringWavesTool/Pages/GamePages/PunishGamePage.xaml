@@ -21,6 +21,8 @@
     Background="Transparent"
     NavigationCacheMode="Disabled"
     mc:Ignorable="d">
+
+
     <Grid x:Name="backGrid" Margin="-1,0,0,0">
         <Grid.RowDefinitions>
             <RowDefinition />

@@ -3,7 +3,6 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:dev="using:DevWinUI"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:item="using:Waves.Api.Models.Communitys"
     xmlns:local="using:Haiyu.Pages.GameWikis"
@@ -670,11 +669,11 @@
                 </Grid>
             </Grid>
         </Border>
-        <dev:Shimmer
+        <ui:Shimmer
             Margin="0,10,0,0"
             Style="{ThemeResource DefaultShimmerStyle}"
             Visibility="{x:Bind ViewModel.Loading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
-        <dev:Shimmer
+        <ui:Shimmer
             Grid.Row="1"
             Margin="0,10,0,0"
             Style="{ThemeResource DefaultShimmerStyle}"
