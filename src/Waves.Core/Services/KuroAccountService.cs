@@ -190,11 +190,13 @@ public class KuroAccountService : IKuroAccountService
         }
         else
         {
-            this.SetCurrentUser(
-               _cache
+            var result = _cache
                    .Where(x => x.Value.Item2.TokenId == AppSettings.LastSelectUser)
-                   .FirstOrDefault()
-                   .Value.Item2
+                   .FirstOrDefault();
+            if (result.Key == null || result.Value == null)
+                return;
+            this.SetCurrentUser(
+                   result.Value.Item2
            );
         }
     }
