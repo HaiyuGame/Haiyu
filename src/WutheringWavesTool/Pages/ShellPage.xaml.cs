@@ -1,13 +1,9 @@
-﻿using DevWinUI;
-using Haiyu.Pages.GamePages;
-using Microsoft.UI.Xaml;
+﻿using Haiyu.Pages.GamePages;
 
 namespace Haiyu.Pages;
 
 public sealed partial class ShellPage : Page
 {
-
-
     public ShellPage()
     {
         this.InitializeComponent();
@@ -20,11 +16,15 @@ public sealed partial class ShellPage : Page
         this.ViewModel.TipShow.Owner = this.panel;
         //this.ViewModel.Image = this.image;
         this.ViewModel.AppContext.SetTitleControl(this.titlebar);
+
     }
 
     private void HomeNavigationService_Navigated(object sender, NavigationEventArgs e)
     {
-        if (e.SourcePageType == typeof(WavesGamePage) || e.SourcePageType == typeof(PunishGamePage))
+        if (
+            e.SourcePageType == typeof(WavesGamePage)
+            || e.SourcePageType == typeof(PunishGamePage)
+        )
         {
             To0.Start();
             this.titlebar.UpDate();
@@ -43,10 +43,12 @@ public sealed partial class ShellPage : Page
 
     private void ShellPage_Loaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
+        this.notify.RegisterWin(Instance.GetService<IAppContext<App>>().App.MainWindow);
+        this.notify.CreateTrayIcon(AppDomain.CurrentDomain.BaseDirectory + "\\Assets\\appLogo.ico", "Haiyu");
         this.ViewModel.DialogManager.RegisterRoot(this.XamlRoot);
+        //this.ViewModel.AppContext.WallpaperService.RegisterImageHost(this.image);
         this.ViewModel.AppContext.WallpaperService.RegisterMediaHost(mediaControl);
     }
-
 
     private void ComboBox_SizeChanged(object sender, SizeChangedEventArgs e)
     {

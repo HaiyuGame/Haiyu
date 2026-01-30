@@ -41,7 +41,7 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="DevWinUI" Version="9.6.0" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.7175" />
-	  <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.250907003" />
+	  <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.251106002" />
 	  <PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="3.0.0" />
     <PackageReference Include="NPOI" Version="2.7.5" />
     <PackageReference Include="Syncfusion.Grid.WinUI" Version="31.2.16" />

@@ -5,7 +5,6 @@ using Waves.Api.Models.Communitys.DataCenter.ResourceBrief;
 using Waves.Api.Models.GameWikiiClient;
 using Waves.Api.Models.QRLogin;
 using Waves.Core.Contracts;
-using Waves.Core.Models;
 using Waves.Core.Models.Enums;
 
 namespace WavesLauncher.Core.Contracts;
@@ -165,8 +164,6 @@ public interface IKuroClient
     );
 
     public Task InitAsync();
-
-    public Task SetAutoUserAsync(CancellationToken token = default);
 
     #region Wiki
     public Task<WikiHomeModel> GetMainWikiAsync(CancellationToken token = default);
