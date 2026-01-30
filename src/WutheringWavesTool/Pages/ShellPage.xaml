@@ -36,10 +36,7 @@
             <RowDefinition Height="auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
-        <ui:NotifyIconWinUI
-            x:Name="notify"
-            ContextMenu="{x:Bind ViewModel.SystemMenu, Mode=OneWay}"
-            LeftDoubleClick="notify_LeftDoubleClick" />
+
         <Border x:Name="titleback" Grid.RowSpan="1" />
         <ui:TitleBar
             x:Name="titlebar"
@@ -55,7 +52,7 @@
                     HorizontalAlignment="Left"
                     Orientation="Horizontal">
                     <Button
-                        Width="60"
+                        Width="70"
                         Margin="0,0,0,0"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
@@ -258,7 +255,7 @@
         <Grid x:Name="panel" Grid.Row="1">
             <NavigationView
                 x:Name="navigationView"
-                OpenPaneLength="60"
+                OpenPaneLength="70"
                 PaneDisplayMode="Left"
                 SelectedItem="{x:Bind ViewModel.SelectItem, Mode=OneWay}"
                 Style="{ThemeResource MainNavigationViewStyle}">

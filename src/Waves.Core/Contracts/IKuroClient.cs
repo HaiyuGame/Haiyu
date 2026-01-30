@@ -167,5 +167,6 @@ public interface IKuroClient
 
     #region Wiki
     public Task<WikiHomeModel> GetMainWikiAsync(CancellationToken token = default);
+    Task SetAutoUserAsync(CancellationToken token);
     #endregion
 }

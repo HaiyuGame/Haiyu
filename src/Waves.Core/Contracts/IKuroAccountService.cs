@@ -1,4 +1,5 @@
 ﻿using Waves.Core.Models;
+using Waves.Core.Settings;
 
 namespace Waves.Core.Contracts;
 
@@ -9,6 +10,7 @@ public interface IKuroAccountService
 {
 
     public LocalAccount? Current { get; }
+    public AppSettings AppSettings { get; }
 
     /// <summary>
     /// 获得库街区所有账号
