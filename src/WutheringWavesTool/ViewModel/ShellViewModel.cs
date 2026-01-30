@@ -84,6 +84,8 @@ public sealed partial class ShellViewModel : ViewModelBase
 
     [ObservableProperty]
     public partial CollectionViewSource RoleViewSource { get; set; }
+
+
     public SystemTrayIcon Icon { get; private set; }
 
     private void RegisterMessanger()
@@ -256,6 +258,7 @@ public sealed partial class ShellViewModel : ViewModelBase
         var id = WindowHelper.GetWindowIcon(AppContext.App.MainWindow);
         uint iconId = 123;
         Icon = new SystemTrayIcon(iconId, id, "Haiyu");
+        Icon.IsVisible = true;
         Icon.RightClick += TranRightClick;
         Icon.LeftDoubleClick += Icon_LeftDoubleClick;
         if (AppSettings.AutoSignCommunity == false)

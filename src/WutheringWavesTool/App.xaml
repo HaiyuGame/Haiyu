@@ -16,7 +16,6 @@
                 <ResourceDictionary Source="/Controls/Styles/SpiltButtonStyle.xaml" />
                 <ResourceDictionary Source="/Controls/Styles/ProgressBar.xaml" />
                 <ResourceDictionary Source="/Controls/Styles/Button.xaml" />
-                <ResourceDictionary Source="ms-appx:///DevWinUI.Controls/Themes/Generic.xaml" />
                 <ResourceDictionary Source="/Controls/Styles/ImageEx.xaml" />
                 <ResourceDictionary Source="/Controls/Styles/NavigationView.xaml" />
                 <ResourceDictionary Source="/Controls/Styles/LayeredProgressBar.xaml" />
