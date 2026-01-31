@@ -89,4 +89,11 @@ public class ViewFactorys : IViewFactorys
     {
         return this.ShowWindowBase<CommunityPage>(item);
     }
+
+    
+
+    public Window CreateAllowTransparent()
+    {
+        return new Window();
+    }
 }

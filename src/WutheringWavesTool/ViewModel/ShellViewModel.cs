@@ -1,7 +1,8 @@
-﻿using System.Linq;
-using Astronomical;
+﻿using Astronomical;
 using Haiyu.Models.Wrapper;
 using Haiyu.Services.DialogServices;
+using Microsoft.UI.Xaml;
+using System.Linq;
 using Waves.Core.Common;
 using Waves.Core.Models.Enums;
 using Windows.Devices.Geolocation;
@@ -21,7 +22,6 @@ public sealed partial class ShellViewModel : ViewModelBase
         IAppContext<App> appContext,
         [FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager,
         IViewFactorys viewFactorys,
-        IKuroClient wavesClient,
         IWallpaperService wallpaperService,
         IKuroClient kuroClient
     )
@@ -32,7 +32,6 @@ public sealed partial class ShellViewModel : ViewModelBase
         AppContext = appContext;
         DialogManager = dialogManager;
         ViewFactorys = viewFactorys;
-        WavesClient = wavesClient;
         WallpaperService = wallpaperService;
         KuroClient = kuroClient;
         RegisterMessanger();
@@ -55,7 +54,6 @@ public sealed partial class ShellViewModel : ViewModelBase
     public IAppContext<App> AppContext { get; }
     public IDialogManager DialogManager { get; }
     public IViewFactorys ViewFactorys { get; }
-    public IKuroClient WavesClient { get; }
     public IWallpaperService WallpaperService { get; }
     public IKuroClient KuroClient { get; }
 
@@ -172,6 +170,11 @@ public sealed partial class ShellViewModel : ViewModelBase
             "Setting",
             new DrillInNavigationTransitionInfo()
         );
+        //WindowAllowTransparentBase base1 = new WindowAllowTransparentBase();
+        //base1.Manager.MaxHeight = 200;
+        //base1.Manager.MaxWidth = 300;
+        //base1.Content = new XboxDisplayPage();
+        //base1.Show();
     }
 
     [RelayCommand]
@@ -254,8 +257,8 @@ public sealed partial class ShellViewModel : ViewModelBase
     async Task Loaded()
     {
         if (AppSettings.AutoSignCommunity == false)
-            await KuroClient.AccountService.SetAutoUser();
-        var result = await WavesClient.IsLoginAsync(this.CTS.Token);
+            await KuroClient.SetAutoUserAsync(this.CTS.Token);
+        var result = await KuroClient.IsLoginAsync(this.CTS.Token);
         if (!result)
         {
             this.LoginBthVisibility = Visibility.Visible;
@@ -276,6 +279,8 @@ public sealed partial class ShellViewModel : ViewModelBase
         );
         OpenMain();
     }
+
+
 
     [RelayCommand]
     public void ShowDeviceInfo()

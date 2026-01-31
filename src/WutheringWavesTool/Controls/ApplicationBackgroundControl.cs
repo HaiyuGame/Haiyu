@@ -85,6 +85,10 @@ public partial class ApplicationBackgroundControl : Control
             }
         }
         catch (Exception) { }
+        finally
+        {
+            GC.Collect();
+        }
     }
 
     private void Player_MediaOpened(MediaPlayer sender, object args)

@@ -85,6 +85,10 @@ public sealed partial class ImageGroupAnimation : UserControl
             );
         }
         catch (Exception) { }
+        finally
+        {
+            GC.Collect();
+        }
     }
 
     private void LoadGroupImages()

@@ -53,3 +53,5 @@ SHGetKnownFolderPath
 SwitchToThisWindow
 TOKEN_ELEVATION_TYPE
 WritePrivateProfileString
+WINDOW_EX_STYLE
+WM_ERASEBKGND

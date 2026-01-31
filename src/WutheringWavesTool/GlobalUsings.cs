@@ -3,7 +3,6 @@ global using CommunityToolkit.Mvvm.Input;
 global using CommunityToolkit.Mvvm.Messaging;
 global using Haiyu.Common;
 global using Haiyu.Common.Bases;
-global using Haiyu.Common.PInvoke;
 global using Haiyu.Controls;
 global using Haiyu.Controls.Propertys;
 global using Haiyu.Models;

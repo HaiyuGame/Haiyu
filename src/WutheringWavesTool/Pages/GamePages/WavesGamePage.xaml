@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <Page
     x:Class="Haiyu.Pages.GamePages.WavesGamePage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -313,12 +313,12 @@
                             Height="60"
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Stretch"
+                            Background="{ThemeResource SystemFillColorSuccess}"
                             BorderThickness="0"
                             Command="{x:Bind ViewModel.UpdateGameCommand}"
                             CornerRadius="4"
                             Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
-                            IsEnabled="{x:Bind ViewModel.EnableStartGameBth, Mode=OneWay}"
-                            Style="{ThemeResource AccentButtonStyle}">
+                            IsEnabled="{x:Bind ViewModel.EnableStartGameBth, Mode=OneWay}">
                             <Button.BorderBrush>
                                 <SolidColorBrush Color="{x:Bind ViewModel.StressShadowColor, Mode=OneWay}" />
                             </Button.BorderBrush>

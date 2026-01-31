@@ -1,13 +1,14 @@
-﻿using System.Net.Http.Headers;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using Microsoft.Extensions.DependencyInjection;
 using Waves.Api.Models;
 using Waves.Api.Models.Communitys;
 using Waves.Api.Models.QRLogin;
 using Waves.Core;
 using Waves.Core.Contracts;
 using Waves.Core.Helpers;
+using Waves.Core.Models;
 using Waves.Core.Services;
 using WavesLauncher.Core.Contracts;
 
@@ -495,6 +496,69 @@ public sealed partial class KuroClient : IKuroClient
         using (HttpClient client = new HttpClient())
         {
             this.Ip = await client.GetStringAsync("https://event.kurobbs.com/event/ip");
+        }
+    }
+
+    public async Task SetAutoUserAsync(CancellationToken token = default)
+    {
+        try
+        {
+            var users = await AccountService.GetUsersAsync();
+            var tokenId = AccountService.AppSettings.LastSelectUser;
+            var defaultSenect = users.FirstOrDefault(x => x.TokenId == tokenId);
+            if (tokenId != null && defaultSenect != null)
+            {
+                var mine = await GetWavesMineAsync(
+                    long.Parse(defaultSenect.TokenId),
+                    defaultSenect.TokenDid,
+                    defaultSenect.Token,
+                    token
+                );
+                if (mine == null || mine.Success == false || mine.Code != 200)
+                {
+                    await SetAutoUserAsync(users, token);
+                }
+                else
+                {
+                    //有信息则选定这个用户
+                    AccountService.SetCurrentUser(defaultSenect);
+                    AccountService.AppSettings.LastSelectUser = defaultSenect.TokenId;
+                }
+
+            }
+            else
+            {
+                await SetAutoUserAsync(users, token);
+            }
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    async Task SetAutoUserAsync(List<LocalAccount> accounts, CancellationToken token = default)
+    {
+        if (accounts.Count == 0)
+        {
+            return;
+        }
+        foreach (var item in accounts)
+        {
+            var mine = await GetWavesMineAsync(
+                    long.Parse(item.TokenId),
+                    item.TokenDid,
+                    item.Token,
+                    token
+                );
+            if (mine == null || mine.Success == false || mine.Code != 200)
+            {
+                await AccountService.DeleteUserAsync(item.TokenId);
+                continue;
+            }
+            //有信息则选定这个用户
+            AccountService.SetCurrentUser(item);
+            AccountService.AppSettings.LastSelectUser = item.TokenId;
         }
     }
 }
