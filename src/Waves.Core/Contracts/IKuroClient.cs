@@ -46,7 +46,7 @@ public interface IKuroClient
     );
     public Task<AccountMine?> GetWavesMineAsync(long id, CancellationToken token = default);
 
-    public Task<AccountMine?> GetWavesMineAsync(long id, string tokenDid,string tokenValue, CancellationToken token = default);
+    public Task<AccountMine?> GetWavesMineAsync(long id, string tokenDid, string tokenValue, CancellationToken token = default);
 
     public Task<ScanScreenModel?> PostQrValueAsync(
         string qrText,

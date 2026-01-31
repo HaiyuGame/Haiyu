@@ -1,5 +1,4 @@
 ﻿using Astronomical;
-using DevWinUI;
 using Haiyu.Models.Wrapper;
 using Haiyu.Services.DialogServices;
 using Microsoft.UI.Xaml;
@@ -15,7 +14,6 @@ public sealed partial class ShellViewModel : ViewModelBase
 {
     private bool computerShow;
 
-    DevWinUI.SystemTrayIcon NotifyIcon = null;
     public ShellViewModel(
         [FromKeyedServices(nameof(HomeNavigationService))] INavigationService homeNavigationService,
         [FromKeyedServices(nameof(HomeNavigationViewService))]
@@ -274,7 +272,6 @@ public sealed partial class ShellViewModel : ViewModelBase
             this.GamerRoleListsVisibility = Visibility.Visible;
             await this.RefreshHeaderUser();
         }
-        RegisterSystemTran();
         this.AppContext.MainTitle.UpDate();
         WallpaperService.SetMediaForUrl(
             WallpaperShowType.Image,
@@ -283,39 +280,7 @@ public sealed partial class ShellViewModel : ViewModelBase
         OpenMain();
     }
 
-    private void RegisterSystemTran()
-    {
-        var icon = WindowHelper.GetWindowIcon(AppContext.App.MainWindow);
-        uint iconId = 123;
-        this.NotifyIcon = new SystemTrayIcon(iconId, icon, "ToolTip");
-        NotifyIcon.IsVisible = true;
-        NotifyIcon.LeftClick += NotifyIcon_LeftClick;
-        NotifyIcon.RightClick += NotifyIcon_RightClick;
-    }
 
-    private void NotifyIcon_RightClick(SystemTrayIcon sender, SystemTrayIconEventArgs args)
-    {
-        MenuFlyout menuFlyout = new MenuFlyout();
-        menuFlyout.Items.Add(new MenuFlyoutItem()
-        {
-            Text = "显示主界面",
-            Command = this.ShowWindowCommand,
-        });
-        menuFlyout.Items.Add(new MenuFlyoutItem()
-        {
-            Text = "退出启动器",
-            Command = new RelayCommand(() =>
-            {
-                Process.GetCurrentProcess().Kill();
-            }),
-        });
-        args.Flyout = menuFlyout;
-    }
-
-    private void NotifyIcon_LeftClick(SystemTrayIcon sender, SystemTrayIconEventArgs args)
-    {
-        this.ShowWindow();
-    }
 
     [RelayCommand]
     public void ShowDeviceInfo()
