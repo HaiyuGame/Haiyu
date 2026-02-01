@@ -1,10 +1,11 @@
-﻿using System.Globalization;
-using Haiyu.Helpers;
+﻿using Haiyu.Helpers;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Windows.ApplicationModel.Resources;
 using Microsoft.Windows.AppLifecycle;
+using System.Globalization;
 using Waves.Core.Services;
 using Waves.Core.Settings;
+using Windows.ApplicationModel.Background;
 using Windows.Globalization;
 
 namespace Haiyu;
@@ -17,7 +18,7 @@ public partial class App : ClientApplication
     private const int PROCESS_PER_MONITOR_DPI_AWARE = 2;
     private AppInstance mainInstance;
 
-    public static string AppVersion => "1.2.18-preview2";
+    public static string AppVersion => "1.2.18";
 
     public AppSettings AppSettings { get; private set; }
 
@@ -28,6 +29,7 @@ public partial class App : ClientApplication
             "Haiyu_Main"
         );
         mainInstance.Activated += MainInstance_Activated;
+        
     }
 
     private void MainInstance_Activated(object sender, AppActivationArguments e)
