@@ -19,22 +19,22 @@ public class BackendRpcMethods
     public Dictionary<string, Func<string, List<RpcParams>, Task<string>>> CreateMethods() =>
         new()
         {
-            { "backend_ping", PingAsync },
-            { "backend_poll_events", PollEventsAsync },
-            { "backend_launch_process", LaunchProcessAsync },
-            { "gamecontext_list", ListGameContextsAsync },
-            { "gamecontext_get_status", GetGameContextStatusAsync },
-            { "gamecontext_get_default_launcher", GetDefaultLauncherAsync },
-            { "gamecontext_get_background", GetLauncherBackgroundAsync },
-            { "gamecontext_get_launcher_source", GetLauncherSourceAsync },
-            { "gamecontext_read_config", ReadContextConfigAsync },
-            { "gamecontext_start_download", StartDownloadAsync },
-            { "gamecontext_pause_download", PauseDownloadAsync },
-            { "gamecontext_resume_download", ResumeDownloadAsync },
-            { "gamecontext_stop_download", StopDownloadAsync },
-            { "gamecontext_set_speed_limit", SetSpeedLimitAsync },
-            { "gamecontext_start_game", StartGameAsync },
-            { "gamecontext_stop_game", StopGameAsync }
+            { RpcMethod.BackendPing.ToRpcName(), PingAsync },
+            { RpcMethod.BackendPollEvents.ToRpcName(), PollEventsAsync },
+            { RpcMethod.BackendLaunchProcess.ToRpcName(), LaunchProcessAsync },
+            { RpcMethod.GameContextList.ToRpcName(), ListGameContextsAsync },
+            { RpcMethod.GameContextGetStatus.ToRpcName(), GetGameContextStatusAsync },
+            { RpcMethod.GameContextGetDefaultLauncher.ToRpcName(), GetDefaultLauncherAsync },
+            { RpcMethod.GameContextGetBackground.ToRpcName(), GetLauncherBackgroundAsync },
+            { RpcMethod.GameContextGetLauncherSource.ToRpcName(), GetLauncherSourceAsync },
+            { RpcMethod.GameContextReadConfig.ToRpcName(), ReadContextConfigAsync },
+            { RpcMethod.GameContextStartDownload.ToRpcName(), StartDownloadAsync },
+            { RpcMethod.GameContextPauseDownload.ToRpcName(), PauseDownloadAsync },
+            { RpcMethod.GameContextResumeDownload.ToRpcName(), ResumeDownloadAsync },
+            { RpcMethod.GameContextStopDownload.ToRpcName(), StopDownloadAsync },
+            { RpcMethod.GameContextSetSpeedLimit.ToRpcName(), SetSpeedLimitAsync },
+            { RpcMethod.GameContextStartGame.ToRpcName(), StartGameAsync },
+            { RpcMethod.GameContextStopGame.ToRpcName(), StopGameAsync }
         };
 
     private Task<string> PingAsync(string method, List<RpcParams> rpcParams)
@@ -45,7 +45,7 @@ public class BackendRpcMethods
     private Task<string> PollEventsAsync(string method, List<RpcParams> rpcParams)
     {
         var events = _eventSink.DequeueAll();
-        var payload = JsonSerializer.Serialize(events);
+        var payload = JsonSerializer.Serialize(events, BackendJsonContext.Default.ListBackendEvent);
         return Task.FromResult(payload);
     }
 
@@ -74,21 +74,21 @@ public class BackendRpcMethods
     private Task<string> ListGameContextsAsync(string method, List<RpcParams> rpcParams)
     {
         var contexts = _gameContextService.GetContextKeys();
-        return Task.FromResult(JsonSerializer.Serialize(contexts));
+        return Task.FromResult(JsonSerializer.Serialize(contexts, BackendJsonContext.Default.ListString));
     }
 
     private async Task<string> GetGameContextStatusAsync(string method, List<RpcParams> rpcParams)
     {
         var contextKey = GetRequiredValue(rpcParams, "contextKey");
         var status = await _gameContextService.GetStatusAsync(contextKey).ConfigureAwait(false);
-        return JsonSerializer.Serialize(status);
+        return JsonSerializer.Serialize(status, BackendJsonContext.Default.GameContextStatus);
     }
 
     private async Task<string> GetDefaultLauncherAsync(string method, List<RpcParams> rpcParams)
     {
         var contextKey = GetRequiredValue(rpcParams, "contextKey");
         var result = await _gameContextService.GetDefaultLauncherAsync(contextKey).ConfigureAwait(false);
-        return JsonSerializer.Serialize(result);
+        return JsonSerializer.Serialize(result, BackendJsonContext.Default.LIndex);
     }
 
     private async Task<string> GetLauncherBackgroundAsync(string method, List<RpcParams> rpcParams)
@@ -96,21 +96,21 @@ public class BackendRpcMethods
         var contextKey = GetRequiredValue(rpcParams, "contextKey");
         var backgroundCode = GetRequiredValue(rpcParams, "backgroundCode");
         var result = await _gameContextService.GetLauncherBackgroundAsync(contextKey, backgroundCode).ConfigureAwait(false);
-        return JsonSerializer.Serialize(result);
+        return JsonSerializer.Serialize(result, BackendJsonContext.Default.LauncherBackgroundData);
     }
 
     private async Task<string> GetLauncherSourceAsync(string method, List<RpcParams> rpcParams)
     {
         var contextKey = GetRequiredValue(rpcParams, "contextKey");
         var result = await _gameContextService.GetLauncherSourceAsync(contextKey).ConfigureAwait(false);
-        return JsonSerializer.Serialize(result);
+        return JsonSerializer.Serialize(result, GameLauncherSourceContext.Default.GameLauncherSource);
     }
 
     private async Task<string> ReadContextConfigAsync(string method, List<RpcParams> rpcParams)
     {
         var contextKey = GetRequiredValue(rpcParams, "contextKey");
         var result = await _gameContextService.ReadConfigAsync(contextKey).ConfigureAwait(false);
-        return JsonSerializer.Serialize(result);
+        return JsonSerializer.Serialize(result, BackendJsonContext.Default.GameContextConfig);
     }
 
     private async Task<string> StartDownloadAsync(string method, List<RpcParams> rpcParams)
@@ -121,7 +121,9 @@ public class BackendRpcMethods
         var isDeleteValue = TryGetValue(rpcParams, "isDelete", out var isDeleteRaw) ? isDeleteRaw : null;
         var isDelete = bool.TryParse(isDeleteValue, out var deleteFlag) && deleteFlag;
 
-        var source = JsonSerializer.Deserialize<GameLauncherSource>(sourceJson);
+        var source = JsonSerializer.Deserialize<GameLauncherSource>(
+            sourceJson,
+            BackendJsonContext.Default.GameLauncherSource);
         await _gameContextService.StartDownloadAsync(contextKey, folder, source, isDelete).ConfigureAwait(false);
         return "ok";
     }
@@ -130,21 +132,21 @@ public class BackendRpcMethods
     {
         var contextKey = GetRequiredValue(rpcParams, "contextKey");
         var result = await _gameContextService.PauseDownloadAsync(contextKey).ConfigureAwait(false);
-        return JsonSerializer.Serialize(result);
+        return JsonSerializer.Serialize(result, BackendJsonContext.Default.Boolean);
     }
 
     private async Task<string> ResumeDownloadAsync(string method, List<RpcParams> rpcParams)
     {
         var contextKey = GetRequiredValue(rpcParams, "contextKey");
         var result = await _gameContextService.ResumeDownloadAsync(contextKey).ConfigureAwait(false);
-        return JsonSerializer.Serialize(result);
+        return JsonSerializer.Serialize(result, BackendJsonContext.Default.Boolean);
     }
 
     private async Task<string> StopDownloadAsync(string method, List<RpcParams> rpcParams)
     {
         var contextKey = GetRequiredValue(rpcParams, "contextKey");
         var result = await _gameContextService.StopDownloadAsync(contextKey).ConfigureAwait(false);
-        return JsonSerializer.Serialize(result);
+        return JsonSerializer.Serialize(result, BackendJsonContext.Default.Boolean);
     }
 
     private async Task<string> SetSpeedLimitAsync(string method, List<RpcParams> rpcParams)
@@ -164,7 +166,7 @@ public class BackendRpcMethods
     {
         var contextKey = GetRequiredValue(rpcParams, "contextKey");
         var result = await _gameContextService.StartGameAsync(contextKey).ConfigureAwait(false);
-        return JsonSerializer.Serialize(result);
+        return JsonSerializer.Serialize(result, BackendJsonContext.Default.Boolean);
     }
 
     private async Task<string> StopGameAsync(string method, List<RpcParams> rpcParams)

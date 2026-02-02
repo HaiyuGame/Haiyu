@@ -37,7 +37,7 @@ public class BackendGameContextService
         _eventSink = eventSink;
     }
 
-    public IReadOnlyList<string> GetContextKeys() => ContextKeys;
+    public List<string> GetContextKeys() => ContextKeys.ToList();
 
     public async Task<GameContextStatus> GetStatusAsync(string contextKey, CancellationToken token = default)
     {
@@ -156,11 +156,9 @@ public class BackendGameContextService
 
     private void EnqueueEvent(string eventType, string contextKey, GameContextOutputArgs args)
     {
-        var payload = JsonSerializer.Serialize(new
-        {
-            ContextKey = contextKey,
-            Args = args
-        });
+        var payload = JsonSerializer.Serialize(
+            new GameContextEventPayload(contextKey, args),
+            BackendJsonContext.Default.GameContextEventPayload);
 
         _eventSink.Enqueue(eventType, payload);
     }

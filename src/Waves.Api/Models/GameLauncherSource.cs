@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Waves.Api.Models;
 
+[JsonSourceGenerationOptions(UnknownTypeHandling = JsonUnknownTypeHandling.JsonElement)]
 [JsonSerializable(typeof(GameLauncherSource))]
 [JsonSerializable(typeof(AnimateBackground))]
 [JsonSerializable(typeof(AnimateBackground))]
@@ -29,6 +31,7 @@ namespace Waves.Api.Models;
 [JsonSerializable(typeof(WavesIndex))]
 [JsonSerializable(typeof(Text))]
 [JsonSerializable(typeof(ZhHans))]
+[JsonSerializable(typeof(JsonElement))]
 public partial class GameLauncherSourceContext : JsonSerializerContext { }
 
 public class GameLauncherSource

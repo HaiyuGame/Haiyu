@@ -6,9 +6,9 @@ using Waves.Core;
 
 var builder = Host.CreateDefaultBuilder(args)
     .UseWindowsService()
-    .ConfigureServices(services =>
+    .ConfigureServices(async services =>
     {
-        services.AddGameContext();
+        await services.AddGameContextAsync();
         services.AddSingleton<RpcService>();
         services.AddSingleton<BackendEventSink>();
         services.AddSingleton<BackendGameContextService>();

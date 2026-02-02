@@ -1,7 +1,9 @@
 ﻿using Haiyu.RpcClient;
 using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using Waves.Api.Models;
 using Waves.Api.Models.Rpc;
+using Waves.Core.GameContext.Contexts;
 
 const string defaultPort = "9084";
 const string defaultToken = "123456";
@@ -28,19 +30,25 @@ await client.StartAsync(cts.Token);
 
 _ = Task.Run(() => PollEventsAsync(client, cts.Token), cts.Token);
 
-var contexts = await CallAsync<List<string>>(client, "gamecontext_list", null, cts.Token);
-var contextKey = contexts?.FirstOrDefault();
+var contexts = await CallAsync(
+    client,
+    RpcMethod.GameContextList.ToRpcName(),
+    null,
+    cts.Token,
+    GameLauncherSourceContext.Default.ListString);
+var contextKey = nameof(PunishBiliBiliGameContext);
 if (string.IsNullOrWhiteSpace(contextKey))
 {
     Console.WriteLine("No game contexts available.");
     return;
 }
 
-var launcherSource = await CallAsync<GameLauncherSource>(
+var launcherSource = await CallAsync(
     client,
-    "gamecontext_get_launcher_source",
+    RpcMethod.GameContextGetLauncherSource.ToRpcName(),
     new List<RpcParams> { new() { Key = "contextKey", Value = contextKey } },
-    cts.Token);
+    cts.Token,
+    GameLauncherSourceContext.Default.GameLauncherSource);
 
 if (launcherSource == null)
 {
@@ -52,10 +60,10 @@ var startDownloadParams = new List<RpcParams>
 {
     new() { Key = "contextKey", Value = contextKey },
     new() { Key = "folder", Value = downloadFolder },
-    new() { Key = "sourceJson", Value = JsonSerializer.Serialize(launcherSource) }
+    new() { Key = "sourceJson", Value = JsonSerializer.Serialize(launcherSource, GameLauncherSourceContext.Default.GameLauncherSource) }
 };
 
-await CallAsync<string>(client, "gamecontext_start_download", startDownloadParams, cts.Token);
+await CallAsync<string>(client, RpcMethod.GameContextStartDownload.ToRpcName(), startDownloadParams, cts.Token);
 Console.WriteLine($"Download started for '{contextKey}' into '{downloadFolder}'.");
 
 Console.WriteLine("Press Ctrl+C to stop polling.");
@@ -68,7 +76,8 @@ static async Task<T?> CallAsync<T>(
     WebSocketRpcClient client,
     string method,
     List<RpcParams>? parameters,
-    CancellationToken token)
+    CancellationToken token,
+    JsonTypeInfo<T>? typeInfo = null)
 {
     var request = new RpcRequest
     {
@@ -88,6 +97,11 @@ static async Task<T?> CallAsync<T>(
         return (T)(object)response.Message;
     }
 
+    if (typeInfo != null)
+    {
+        return JsonSerializer.Deserialize(response.Message, typeInfo);
+    }
+
     return JsonSerializer.Deserialize<T>(response.Message);
 }
 
@@ -97,7 +111,7 @@ static async Task PollEventsAsync(WebSocketRpcClient client, CancellationToken t
     {
         var request = new RpcRequest
         {
-            Method = "backend_poll_events",
+            Method = RpcMethod.BackendPollEvents.ToRpcName(),
             Params = new List<RpcParams>(),
             RequestId = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
         };

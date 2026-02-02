@@ -1,8 +1,8 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
+﻿using System.Buffers;
+using CommunityToolkit.Mvvm.Messaging;
 using MemoryPack;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
-using System.Buffers;
 using Waves.Api.Models.Messanger;
 using Waves.Core.Contracts;
 using Waves.Core.Models;
@@ -12,7 +12,10 @@ namespace Waves.Core.Services;
 
 public class KuroAccountService : IKuroAccountService
 {
-    public KuroAccountService([FromKeyedServices("AppLog")] LoggerService loggerService,AppSettings appSettings)
+    public KuroAccountService(
+        [FromKeyedServices("AppLog")] LoggerService loggerService,
+        AppSettings appSettings
+    )
     {
         LoggerService = loggerService;
         AppSettings = appSettings;
@@ -163,16 +166,14 @@ public class KuroAccountService : IKuroAccountService
             AppSettings.LastSelectUser = value.Item2.TokenId;
             this.Current = value.Item2;
 
-            WeakReferenceMessenger.Default.Send(
-                new SelectUserMessanger(true)
-            );
+            WeakReferenceMessenger.Default.Send(new SelectUserMessanger(true));
         }
     }
 
     public void SetCurrentUser(LocalAccount localAccount, bool isWrite = true)
     {
         this.Current = localAccount;
-        if(isWrite)
+        if (isWrite)
             AppSettings.LastSelectUser = localAccount.TokenId;
     }
 
@@ -190,12 +191,12 @@ public class KuroAccountService : IKuroAccountService
         }
         else
         {
-            this.SetCurrentUser(
-               _cache
-                   .Where(x => x.Value.Item2.TokenId == AppSettings.LastSelectUser)
-                   .FirstOrDefault()
-                   .Value.Item2
-           );
+            var result = _cache
+                .Where(x => x.Value.Item2.TokenId == AppSettings.LastSelectUser)
+                .FirstOrDefault();
+            if (result.Key == null || result.Value == null)
+                return;
+            this.SetCurrentUser(result.Value.Item2);
         }
     }
 }

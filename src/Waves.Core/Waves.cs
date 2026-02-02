@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using System.Threading.Tasks;
 using Waves.Core.Contracts;
 using Waves.Core.GameContext;
 using Waves.Core.GameContext.Contexts;
@@ -85,4 +86,29 @@ public static class Waves
             .AddTransient<IHttpClientService, HttpClientService>();
         return services;
     }
+
+    public static async Task<IServiceCollection> AddGameContextAsync(this IServiceCollection services)
+    {
+        services.AddGameContext();
+
+        using var provider = services.BuildServiceProvider();
+        var contexts = new IGameContext[]
+        {
+            provider.GetRequiredKeyedService<IGameContext>(nameof(WavesMainGameContext)),
+            provider.GetRequiredKeyedService<IGameContext>(nameof(WavesGlobalGameContext)),
+            provider.GetRequiredKeyedService<IGameContext>(nameof(WavesBiliBiliGameContext)),
+            provider.GetRequiredKeyedService<IGameContext>(nameof(PunishMainGameContext)),
+            provider.GetRequiredKeyedService<IGameContext>(nameof(PunishBiliBiliGameContext)),
+            provider.GetRequiredKeyedService<IGameContext>(nameof(PunishGlobalGameContext)),
+            provider.GetRequiredKeyedService<IGameContext>(nameof(PunishTwGameContext))
+        };
+
+        foreach (var context in contexts)
+        {
+            await context.InitAsync().ConfigureAwait(false);
+        }
+
+        return services;
+    }
+
 }
