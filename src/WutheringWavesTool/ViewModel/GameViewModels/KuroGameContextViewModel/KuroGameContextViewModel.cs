@@ -37,9 +37,6 @@ public abstract partial class KuroGameContextViewModel
 
         var selectServer = Servers.Where(x=>x.Key == openService).FirstOrDefault();
         this.SelectServer = selectServer == null ? Servers[0] : selectServer;
-        this.AppContext.WallpaperService.WallpaperPletteChanged +=
-            WallpaperService_WallpaperPletteChanged;
-        this.StressShadowColor = AppContext.StressShadowColor;
     }
 
     public static List<string> GetWavesServers() =>
@@ -49,15 +46,7 @@ public abstract partial class KuroGameContextViewModel
             nameof(WavesMainGameContext),
         ];
 
-    private void WallpaperService_WallpaperPletteChanged(object sender, PletteArgs args)
-    {
-        if (args.Background == null || args.Forground == null || args.Shadow == null)
-            return;
-        this.StressShadowColor = args.Background.Value;
-    }
 
-    [ObservableProperty]
-    public partial Color StressShadowColor { get; set; }
 
     [ObservableProperty]
     public partial bool IsDx11Launcher { get; set; } = false;
@@ -507,8 +496,6 @@ public abstract partial class KuroGameContextViewModel
             if (disposing)
             {
                 GameContext.GameContextOutput -= GameContext_GameContextOutput;
-                this.AppContext.WallpaperService.WallpaperPletteChanged -=
-                    WallpaperService_WallpaperPletteChanged;
                 DisposeAfter();
             }
             disposedValue = true;

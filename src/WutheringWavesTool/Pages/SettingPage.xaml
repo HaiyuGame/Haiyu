@@ -229,9 +229,13 @@
                         </ComboBox>
                     </ui:SettingsCard.Content>
                 </ui:SettingsCard>
-                <ui:SettingsCard Margin="0 5 0 0" Header="游戏监控工具" Command="{x:Bind ViewModel.ShowGameEnhancedDialogCommand}" IsClickEnabled="True">
+                <ui:SettingsCard
+                    Margin="0,5,0,0"
+                    Command="{x:Bind ViewModel.ShowGameEnhancedDialogCommand}"
+                    Header="游戏监控工具"
+                    IsClickEnabled="True">
                     <ui:SettingsCard.HeaderIcon>
-                        <SymbolIcon Symbol="Find"/>
+                        <SymbolIcon Symbol="Find" />
                     </ui:SettingsCard.HeaderIcon>
                 </ui:SettingsCard>
                 <TextBlock
@@ -270,47 +274,6 @@
                         <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE631;" />
                     </ui:SettingsCard.HeaderIcon>
                 </ui:SettingsCard>
-                <ui:SettingsExpander
-                    Margin="0,5,0,0"
-                    HorizontalAlignment="Stretch"
-                    HorizontalContentAlignment="Stretch"
-                    ItemsSource="{x:Bind ViewModel.GamerData, Mode=OneWay}">
-                    <ui:SettingsExpander.HeaderIcon>
-                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xEC7A;" />
-                    </ui:SettingsExpander.HeaderIcon>
-                    <ui:SettingsExpander.Header>
-                        <TextBlock VerticalAlignment="Center" Text="账号管理" />
-                    </ui:SettingsExpander.Header>
-                    <ui:SettingsExpander.ItemTemplate>
-                        <DataTemplate x:DataType="gamer:GameRoilDataItem">
-                            <ui:SettingsCard>
-                                <ui:SettingsCard.Header>
-                                    <StackPanel Orientation="Horizontal">
-                                        <wui:ImageEx
-                                            Width="28"
-                                            Height="28"
-                                            CornerRadius="5"
-                                            Source="{x:Bind GameHeadUrl}" />
-                                        <TextBlock Margin="5,0,0,0" VerticalAlignment="Center">
-                                            <Run Text="{x:Bind RoleName}" />
-                                            <Run Text="--" />
-                                            <Run Text="{x:Bind ServerName}" />
-                                        </TextBlock>
-                                    </StackPanel>
-                                </ui:SettingsCard.Header>
-                                <Button
-                                    Command="{x:Bind CopyIdCommand}"
-                                    Style="{ThemeResource TransparentButtonStyle}"
-                                    ToolTipService.ToolTip="复制账号ID">
-                                    <FontIcon
-                                        FontFamily="Segoe Fluent Icons"
-                                        FontSize="15"
-                                        Glyph="&#xE8C8;" />
-                                </Button>
-                            </ui:SettingsCard>
-                        </DataTemplate>
-                    </ui:SettingsExpander.ItemTemplate>
-                </ui:SettingsExpander>
                 <ui:SettingsCard
                     Margin="0,5,0,0"
                     Description="程序启动时自动进行签到"

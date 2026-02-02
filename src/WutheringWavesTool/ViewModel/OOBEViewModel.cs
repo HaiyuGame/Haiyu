@@ -35,7 +35,7 @@ public sealed partial class OOBEViewModel:ViewModelBase
     [RelayCommand]
     public void Loaded()
     {
-        this.NavigationService.NavigationTo<LanguageSelectViewModel>(null, new EntranceNavigationTransitionInfo());
+        this.NavigationService.NavigationTo<LanguageSelectViewModel>(null, new DrillInNavigationTransitionInfo());
     }
 
     [RelayCommand]
@@ -45,7 +45,7 @@ public sealed partial class OOBEViewModel:ViewModelBase
         {
             return;
         }
-        this.NavigationService.NavigationTo(CurrentArgs.NextPage, null, new EntranceNavigationTransitionInfo());
+        this.NavigationService.NavigationTo(CurrentArgs.NextPage, null, new DrillInNavigationTransitionInfo());
     }
 
     [RelayCommand]
@@ -55,6 +55,6 @@ public sealed partial class OOBEViewModel:ViewModelBase
         {
             return;
         }
-        this.NavigationService.NavigationTo(CurrentArgs.ForwardPage, null, new EntranceNavigationTransitionInfo());
+        this.NavigationService.NavigationTo(CurrentArgs.ForwardPage, null, new DrillInNavigationTransitionInfo());
     }
 }

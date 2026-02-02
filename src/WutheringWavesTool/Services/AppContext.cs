@@ -24,7 +24,6 @@ public class AppContext<T> : IAppContext<T>
         DialogManager = dialogManager;
         LoggerService = loggerService;
         AppSettings = appSettings;
-        WallpaperService.WallpaperPletteChanged += WallpaperService_WallpaperPletteChanged;
     }
 
     private ContentDialog _dialog;
@@ -146,14 +145,6 @@ public class AppContext<T> : IAppContext<T>
             .ConfigureAwait(false);
     }
 
-    private void WallpaperService_WallpaperPletteChanged(object sender, PletteArgs color)
-    {
-        if (color.Background == null || color.Forground == null || color.Shadow == null)
-            return;
-        this.StressColor = new SolidColorBrush(color.Background.Value);
-        this.StressShadowColor = color.Shadow.Value;
-        this.StessForground = new SolidColorBrush(color.Forground.Value);
-    }
 
     async Task SafeInvokeAsync(
         DispatcherQueue dispatcher,

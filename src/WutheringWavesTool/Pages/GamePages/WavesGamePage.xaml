@@ -319,12 +319,6 @@
                             CornerRadius="4"
                             Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
                             IsEnabled="{x:Bind ViewModel.EnableStartGameBth, Mode=OneWay}">
-                            <Button.BorderBrush>
-                                <SolidColorBrush Color="{x:Bind ViewModel.StressShadowColor, Mode=OneWay}" />
-                            </Button.BorderBrush>
-
-
-
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition />

@@ -49,8 +49,6 @@ public sealed partial class SettingViewModel : ViewModelBase
     public IScreenCaptureService ScreenCaptureService { get; }
     public IPickersService PickersService { get; }
     public IThemeService ThemeService { get; }
-    [ObservableProperty]
-    public partial ObservableCollection<GameRoilDataItem> GamerData { get; set; }
 
     [ObservableProperty]
     public partial bool? AutoCommunitySign { get; set; }
@@ -67,13 +65,6 @@ public sealed partial class SettingViewModel : ViewModelBase
         ProgressAction = true;
         await AppContext.TryInvokeAsync(async () =>
         {
-            if (await WavesClient.IsLoginAsync())
-            {
-                var gamers = await WavesClient.GetGamerAsync(Waves.Core.Models.Enums.GameType.Waves, this.CTS.Token);
-                var punish = await WavesClient.GetGamerAsync(Waves.Core.Models.Enums.GameType.Punish, this.CTS.Token);
-                if (gamers != null && punish != null)
-                    this.GamerData = gamers.Data.Concat(punish.Data).ToObservableCollection();
-            }
             var closeWindow = AppSettings.CloseWindow;
             switch (closeWindow)
             {

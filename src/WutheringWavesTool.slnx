@@ -80,9 +80,6 @@
       <Deploy />
     </Project>
   </Folder>
-  <Project Path="Haiyu.Config/Haiyu.Config.csproj" Id="e012abb1-1039-41e6-bc54-64984ffbe1b4">
-    <BuildType Solution="All|*" Project="Debug" />
-  </Project>
   <Project Path="Haiyu.Run/Haiyu.Run.csproj" Id="7cb6f8b9-a589-4678-99f1-88f9fb7cf8bc">
     <BuildType Solution="All|*" Project="Debug" />
   </Project>
