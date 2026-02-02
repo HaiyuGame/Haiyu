@@ -80,6 +80,11 @@
       <Deploy />
     </Project>
   </Folder>
+  <Folder Name="/WinService/">
+    <Project Path="Haiyu.BackendService/Haiyu.BackendService.csproj">
+      <BuildType Solution="All|*" Project="Debug" />
+    </Project>
+  </Folder>
   <Project Path="Haiyu.Config/Haiyu.Config.csproj" Id="e012abb1-1039-41e6-bc54-64984ffbe1b4">
     <BuildType Solution="All|*" Project="Debug" />
   </Project>

@@ -14,6 +14,7 @@ public class WebSocketRpcClient : IRpcClient, IHostedService, IDisposable
     private string _webSocketUrl = string.Empty;
     private bool _disposed;
     private const int ReceiveBufferSize = 4096;
+    public bool EnableServerPush { get; set; } = true;
 
     public WebSocketRpcClient()
     {
@@ -68,7 +69,10 @@ public class WebSocketRpcClient : IRpcClient, IHostedService, IDisposable
             await _webSocket.ConnectAsync(new Uri(_webSocketUrl), cancellationToken);
             Console.WriteLine("WebSocket连接建立成功！");
 
-            _ = Task.Run(() => ListenServerMessageAsync(cancellationToken), cancellationToken);
+            if (EnableServerPush)
+            {
+                _ = Task.Run(() => ListenServerMessageAsync(cancellationToken), cancellationToken);
+            }
         }
         catch (Exception ex)
         {
