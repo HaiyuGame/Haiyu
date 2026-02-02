@@ -164,7 +164,10 @@
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         Orientation="Vertical">
-                        <TextBlock Text="未登录或登陆过期" />
+                        <TextBlock
+                            FontFamily="{ThemeResource DefaultFont}"
+                            FontSize="18"
+                            Text="未登录或登陆过期" />
                     </StackPanel>
                 </Border>
                 <Grid

@@ -4,28 +4,15 @@ using Waves.Core.Models.Enums;
 
 namespace Haiyu.Services;
 
-public delegate void WallpaperPletteChangedDelegate(object sender, PletteArgs color);
 
 public class WallpaperService : IWallpaperService
 {
-    private WallpaperPletteChangedDelegate? wallpaperPletteChangedDelegate;
 
     public WallpaperService(ITipShow tipShow)
     {
         TipShow = tipShow;
-        this.ColorPlette = new OctreeColorExtractor();
     }
 
-    public event WallpaperPletteChangedDelegate WallpaperPletteChanged
-    {
-        add => wallpaperPletteChangedDelegate += value;
-        remove => wallpaperPletteChangedDelegate -= value;
-    }
-
-    /// <summary>
-    /// 切换壁纸自动取色开关
-    /// </summary>
-    public bool PletteEnable { get; set; } = false;
 
     public string BaseFolder { get; private set; }
     public Controls.ImageEx ImageHost { get; private set; }
@@ -69,10 +56,7 @@ public class WallpaperService : IWallpaperService
             return false;
         }
     }
-    public OctreeColorExtractor ColorPlette { get; private set; }
     public ApplicationBackgroundControl Media { get; private set; }
-
-    //public ImageColorPaletteHelper ColorPlette { get; private set; }
 
 
 
@@ -134,6 +118,8 @@ public class WallpaperService : IWallpaperService
 
     public void SetMediaForUrl(WallpaperShowType type, string backgroundFile)
     {
+        if (Media == null)
+            return;
         Media.ShowType = type;
         if (type == WallpaperShowType.Video)
         {
