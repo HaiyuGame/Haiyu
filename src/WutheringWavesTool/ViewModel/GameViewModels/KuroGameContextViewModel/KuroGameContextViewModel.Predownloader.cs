@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Waves.Core.Models.Enums;
 
 namespace Haiyu.ViewModel.GameViewModels;
 
@@ -15,8 +16,6 @@ partial class KuroGameContextViewModel
     [ObservableProperty]
     public partial Visibility PredDownloadBthVisibility { get; set; } = Visibility.Collapsed;
 
-
-
     [ObservableProperty]
     public partial Visibility PredDownloadingVisibility { get; set; } = Visibility.Collapsed;
 
@@ -25,12 +24,14 @@ partial class KuroGameContextViewModel
 
     [ObservableProperty]
     public partial string PreDownloadIcon { get; set; }
-    
 
     [RelayCommand]
     async Task StartPreDownloadGame()
     {
-        var result = await DialogManager.ShowUpdateGameDialogAsync(this.GameContext.ContextName, Models.Enums.UpdateGameType.ProDownload);
+        var result = await DialogManager.ShowUpdateGameDialogAsync(
+            this.GameContext.ContextName,
+            Models.Enums.UpdateGameType.ProDownload
+        );
         if (result.IsOk)
         {
             await this.GameContext.StartDownloadProdGame(result.DiffSavePath);
@@ -57,28 +58,34 @@ partial class KuroGameContextViewModel
     async Task StopDownloadGame()
     {
         await this.GameContext.StopDownloadAsync();
-        var status = await this.GameContext.GetGameContextStatusAsync(this.CTS.Token);
-        if (status.IsPredownloaded)
-        {
-            PredCardVisibility = Visibility.Visible;
-            if (!status.PredownloadedDone)
-            {
-                PredDownloadBthVisibility = Visibility.Visible;
-                this.PredDownloadingVisibility = Visibility.Collapsed;
-            }
-        }
+        await this.GameContext_GameContextProdOutput(
+                this.GameContext,
+                new GameContextOutputArgs()
+                {
+                    Type = GameContextActionType.None,
+                    CurrentSize = 0,
+                    TotalSize = 0,
+                    DownloadSpeed = 0,
+                    VerifySpeed = 0,
+                    RemainingTime = TimeSpan.Zero,
+                }
+            )
+            .ConfigureAwait(false);
     }
 
     private async Task GameContext_GameContextProdOutput(object sender, GameContextOutputArgs args)
     {
         await AppContext.TryInvokeAsync(async () =>
         {
-            if (args.Type == Waves.Core.Models.Enums.GameContextActionType.Download || args.Type == Waves.Core.Models.Enums.GameContextActionType.Verify)
+            if (
+                args.Type == Waves.Core.Models.Enums.GameContextActionType.Download
+                || args.Type == Waves.Core.Models.Enums.GameContextActionType.Verify
+            )
             {
                 this.PredDownloadingVisibility = Visibility.Visible;
                 this.PredDownloadBthVisibility = Visibility.Collapsed;
                 this.PreDownloadProgress = args.ProgressPercentage;
-                if(args.IsAction == true && args.IsPause == true)
+                if (args.IsAction == true && args.IsPause == true)
                 {
                     PreDownloadIcon = "\uE768";
                 }
@@ -89,7 +96,16 @@ partial class KuroGameContextViewModel
             }
             else if (args.Type == Waves.Core.Models.Enums.GameContextActionType.None)
             {
-                await this.RefreshCoreAsync();
+                var status = await this.GameContext.GetGameContextStatusAsync(this.CTS.Token);
+                if (status.IsPredownloaded)
+                {
+                    PredCardVisibility = Visibility.Visible;
+                    if (!status.PredownloadedDone)
+                    {
+                        PredDownloadBthVisibility = Visibility.Visible;
+                        this.PredDownloadingVisibility = Visibility.Collapsed;
+                    }
+                }
             }
         });
     }
