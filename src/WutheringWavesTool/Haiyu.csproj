@@ -14,7 +14,7 @@
 		<InvariantGlobalization>true</InvariantGlobalization>
 		<WinUISDKReferences>false</WinUISDKReferences>
 		<EnableMsixTooling>true</EnableMsixTooling>
-		<PublishAot>true</PublishAot>
+		<PublishAot>false</PublishAot>
 		<PublishTrimmed>true</PublishTrimmed>
 		<WindowsPackageType>None</WindowsPackageType>
 		<!--

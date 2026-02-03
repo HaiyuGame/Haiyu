@@ -214,6 +214,9 @@ public class Predownload
 
     [JsonPropertyName("version")]
     public string Version { get; set; }
+
+    [JsonPropertyName("config")]
+    public Config Config { get; set; }
 }
 
 public class WavesIndex

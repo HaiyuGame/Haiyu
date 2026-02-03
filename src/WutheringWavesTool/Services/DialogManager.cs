@@ -1,4 +1,5 @@
 ﻿using Haiyu.Models.Dialogs;
+using Haiyu.Models.Enums;
 
 namespace Haiyu.Services;
 
@@ -87,8 +88,14 @@ public abstract class DialogManager : IDialogManager
     public async Task<SelectDownloadFolderResult> ShowSelectGameFolderAsync(Type type) =>
         await GetDialogResultAsync<SelectGameFolderDialog, SelectDownloadFolderResult>(type);
 
-    public async Task<UpdateGameResult> ShowUpateGameDialogAsync(string contextName)=>
-        await GetDialogResultAsync<UpdateGameDialog, UpdateGameResult>(contextName);
+    /// <summary>
+    /// 显示更新游戏对话框
+    /// </summary>
+    /// <param name="contextName">游戏核心</param>
+    /// <param name="isShowUpdate">是否是更新游戏，否则是预下载</param>
+    /// <returns></returns>
+    public async Task<UpdateGameResult> ShowUpdateGameDialogAsync(string contextName, UpdateGameType type)=>
+        await GetDialogResultAsync<UpdateGameDialog, UpdateGameResult>(new Tuple<string, UpdateGameType>(contextName, type));
 
     public async Task<SelectDownloadFolderResult> ShowSelectDownloadFolderAsync(Type type) =>
         await GetDialogResultAsync<SelectDownoadGameDialog, SelectDownloadFolderResult>(type);

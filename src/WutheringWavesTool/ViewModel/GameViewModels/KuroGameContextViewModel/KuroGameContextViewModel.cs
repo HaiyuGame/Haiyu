@@ -129,12 +129,14 @@ public abstract partial class KuroGameContextViewModel
             await this.CTS?.CancelAsync();
             this.CTS = null;
             GameContext.GameContextOutput -= GameContext_GameContextOutput;
+            GameContext.GameContextProdOutput -= GameContext_GameContextProdOutput;
         }
         GC.Collect();
         this.CTS = new CancellationTokenSource();
         this.GameContext = Instance.Host.Services.GetRequiredKeyedService<IGameContext>(name);
         CurrentProgressValue = 0;
         GameContext.GameContextOutput += GameContext_GameContextOutput;
+        GameContext.GameContextProdOutput+= GameContext_GameContextProdOutput;
         var dx11 = await GameContext.GameLocalConfig.GetConfigAsync(GameLocalSettingName.IsDx11);
         if (bool.TryParse(dx11, out var flag))
         {
@@ -204,6 +206,15 @@ public abstract partial class KuroGameContextViewModel
                 this.CTS.Token
             );
             var wallpaperType = AppSettings.WallpaperType;
+            if (status.IsPredownloaded)
+            {
+                PredCardVisibility = Visibility.Visible;
+                if (!status.PredownloadedDone)
+                {
+                    PredDownloadBthVisibility = Visibility.Visible;
+                    this.PredDownloadingVisibility = Visibility.Collapsed;
+                }
+            }
             if (wallpaperType == "Video")
             {
                 WallpaperService.SetMediaForUrl(
@@ -250,8 +261,6 @@ public abstract partial class KuroGameContextViewModel
             DisplayVersion = version;
             EnableStartGameBth = true;
             LauncherIcon = "\uE898";
-           
-            
         }
         else
         {
@@ -479,6 +488,8 @@ public abstract partial class KuroGameContextViewModel
         );
     }
 
+    
+
     public abstract Task LoadAfter();
 
     public abstract void DisposeAfter();
@@ -496,6 +507,7 @@ public abstract partial class KuroGameContextViewModel
             if (disposing)
             {
                 GameContext.GameContextOutput -= GameContext_GameContextOutput;
+                GameContext.GameContextProdOutput -= GameContext_GameContextProdOutput;
                 DisposeAfter();
             }
             disposedValue = true;

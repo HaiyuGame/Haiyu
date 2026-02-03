@@ -21,7 +21,7 @@ partial class KuroGameContextViewModel
             var localVersion = await GameContext.GameLocalConfig.GetConfigAsync(
                 GameLocalSettingName.LocalGameVersion
             );
-            var result = await DialogManager.ShowUpateGameDialogAsync(this.GameContext.ContextName);
+            var result = await DialogManager.ShowUpdateGameDialogAsync(this.GameContext.ContextName, Models.Enums.UpdateGameType.UpdateGame);
             
             if (result == null)
                 return; 

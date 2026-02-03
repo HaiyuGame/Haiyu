@@ -139,8 +139,25 @@ public abstract partial class KuroGameContextBase : IGameContext
                 {
                     status.IsUpdateing = updateResult;
                 }
+                //预下载是否完成，确保本地安装完成
+                if(indexSource.Predownload != null && status.IsGameExists == true &&status.IsGameInstalled == true)
+                {
+                    status.IsPredownloaded = true;
+                    var donwResult = await GameLocalConfig.GetConfigAsync(
+                        GameLocalSettingName.ProdDownloadFolderDone
+                    );
+                    if (bool.TryParse(donwResult,out var predDown))
+                    {
+                        status.PredownloadedDone = predDown;
+                    }
+                    else
+                    {
+                        status.PredownloadedDone = false;
+                    }
+                }
             }
         }
+        //下载游戏和预下载只存在一个状态，不需要分离状态
         if (_downloadState != null)
         {
             status.IsPause = this._downloadState.IsPaused;

@@ -64,6 +64,14 @@ public interface IGameContext
     Task StartDownloadTaskAsync(string folder, GameLauncherSource? source,bool isDelete = false);
 
     /// <summary>
+    /// 进行预下载
+    /// </summary>
+    /// <param name="launcher"></param>
+    /// <param name="downloadFolder"></param>
+    /// <returns></returns>
+    Task<bool> StartDownloadProdGame(string downloadFolder);
+
+    /// <summary>
     /// 恢复任务
     /// </summary>
     /// <returns></returns>

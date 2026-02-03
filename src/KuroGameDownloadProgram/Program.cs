@@ -12,24 +12,32 @@ using Waves.Core.Contracts;
 using Waves.Core.GameContext;
 using Waves.Core.GameContext.Contexts;
 using Waves.Core.Helpers;
+using Waves.Core.Models;
 using Waves.Core.Models.Downloader;
 using Waves.Core.Services;
 
-//IHost host = Host.CreateDefaultBuilder(args)
-//    .ConfigureServices(services =>
-//    {
-//        services.AddHostedService<WebSocketRpcClient>((s) =>
-//        {
-//            WebSocketRpcClient socket = new WebSocketRpcClient();
-//            socket.InitAsync("9084", "123456").Wait();
-//            return socket;
-//        });
-//    })
-//    .Build();
+IHost host = Host.CreateDefaultBuilder(args)
+    .ConfigureServices(services =>
+    {
+        services.AddGameContext();
+    })
+    .Build();
+GameContextFactory.GameBassPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Waves";
+var mainGame = host.Services.GetRequiredKeyedService<IGameContext>(nameof(WavesMainGameContext));
+mainGame.GameContextProdOutput += ProdDownload;
+mainGame.GameContextOutput+= GameContextOutput;
 
-//var socket = host.Services.GetService<WebSocketRpcClient>();
-//await host.StartAsync();
+async Task GameContextOutput(object sender, GameContextOutputArgs args)
+{
+    Console.WriteLine($"{args.Type},{args.ProgressPercentage}，VerifySpeed:{args.VerifySpeed},DownloadSpeed:{args.DownloadSpeed},剩余{args.RemainingTime}");
+}
 
-var id =  HardwareIdGenerator.GenerateUniqueId();
+async Task ProdDownload(object sender, GameContextOutputArgs args)
+{
+    Console.WriteLine($"{args.Type},{args.ProgressPercentage}，VerifySpeed:{args.VerifySpeed},DownloadSpeed:{args.DownloadSpeed},剩余{args.RemainingTime}");
+}
 
+await mainGame.InitAsync();
+var launcher = await mainGame.GetGameLauncherSourceAsync();
+await mainGame.StartDownloadProdGame(launcher,"D:\\Predown");
 Console.ReadLine();

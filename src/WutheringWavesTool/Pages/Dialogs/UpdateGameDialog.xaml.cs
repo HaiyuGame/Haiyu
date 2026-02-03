@@ -1,4 +1,5 @@
 using Haiyu.Models.Dialogs;
+using Haiyu.Models.Enums;
 
 namespace Haiyu.Pages.Dialogs;
 
@@ -21,9 +22,13 @@ public sealed partial class UpdateGameDialog : ContentDialog,
 
     public void SetData(object data)
     {
-        if(data is string str && Instance.Host.Services.GetRequiredKeyedService<IGameContext>(str) is IGameContext context)
+        if(data is Tuple<string, UpdateGameType> tuple)
         {
-            this.ViewModel.SetData(context);
+            if (Instance.Host.Services.GetRequiredKeyedService<IGameContext>(tuple.Item1) is IGameContext context)
+            {
+                this.ViewModel.SetData(context,tuple.Item2);
+            }
         }
+       
     }
 }

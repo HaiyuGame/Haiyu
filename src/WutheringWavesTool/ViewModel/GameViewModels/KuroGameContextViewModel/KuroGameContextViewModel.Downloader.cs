@@ -107,9 +107,9 @@ partial class KuroGameContextViewModel
                     this.AppContext.App.MainWindow.Show();
                 }
             }
-            if(args.Type == Waves.Core.Models.Enums.GameContextActionType.TipMessage)
+            if (args.Type == Waves.Core.Models.Enums.GameContextActionType.TipMessage)
             {
-                await DialogManager.ShowMessageDialog(args.TipMessage,"确认","关闭");
+                await DialogManager.ShowMessageDialog(args.TipMessage, "确认", "关闭");
             }
         });
     }
@@ -172,4 +172,5 @@ partial class KuroGameContextViewModel
         Logger.WriteInfo($"设置下载限速");
         await GameContext.SetSpeedLimitAsync(DownloadSpeedValue * 1024 * 1024);
     }
+
 }

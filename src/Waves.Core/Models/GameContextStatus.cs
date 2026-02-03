@@ -46,4 +46,15 @@ public class GameContextStatus
     /// 游戏中
     /// </summary>
     public bool Gameing { get; internal set; }
+
+    /// <summary>
+    /// 是否开始预下载
+    /// </summary>
+    public bool IsPredownloaded { get; internal set; }
+
+    /// <summary>
+    /// 预下载是否完成
+    /// </summary>
+    public bool PredownloadedDone { get; internal set; }
+
 }

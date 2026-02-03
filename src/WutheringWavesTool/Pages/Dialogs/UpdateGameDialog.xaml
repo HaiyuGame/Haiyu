@@ -61,7 +61,7 @@
                 <Run Text="GB" />
             </TextBlock>
             <TextBlock Margin="0,10,0,0" FontSize="15">
-                <Run Text="磁盘预留更新存储：" />
+                <Run Text="磁盘预留存储：" />
                 <Run Text="{x:Bind ViewModel.PatcherFileSize, Mode=OneWay}" />
                 <Run Text="GB" />
             </TextBlock>
@@ -109,14 +109,14 @@
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
                 Command="{x:Bind ViewModel.CloseCommand}"
-                Content="取消更新" />
+                Content="取消" />
             <Button
                 Grid.Column="1"
                 Margin="5,0,0,0"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
                 Command="{x:Bind ViewModel.InvokeCommand}"
-                Content="更新游戏"
+                Content="{x:Bind ViewModel.InvokeName, Mode=OneWay}"
                 IsEnabled="{x:Bind ViewModel.EnableContinue, Mode=OneWay}"
                 Style="{ThemeResource AccentButtonStyle}" />
         </Grid>
