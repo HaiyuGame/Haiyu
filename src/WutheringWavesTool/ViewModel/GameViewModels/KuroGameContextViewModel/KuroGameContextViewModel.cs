@@ -154,7 +154,7 @@ public abstract partial class KuroGameContextViewModel
     }
 
     /// <summary>
-    /// 按钮类型,1为安装游戏,2为下载游戏,3为开始游戏,4为准备更新,5为游戏中
+    /// 按钮类型,1为安装游戏,2为下载游戏,3为开始游戏,4为准备更新,5为游戏中,6为安装预下载
     /// </summary>
     private int _bthType = 0;
     private bool disposedValue;
@@ -265,15 +265,35 @@ public abstract partial class KuroGameContextViewModel
         GameLauncherBthVisibility = Visibility.Visible;
         if (isUpdate)
         {
-            _bthType = 4;
+            var launcher = await GameContext.GetGameLauncherSourceAsync(null, this.CTS.Token);
             this.CurrentProgressValue = 0;
             this.MaxProgressValue = 0;
-            Logger.WriteInfo("游戏版本有更新");
-            BottomBarContent = "游戏有更新";
-            LauncheContent = "更新游戏";
-            DisplayVersion = version;
-            EnableStartGameBth = true;
-            LauncherIcon = "\uE898";
+            var localPredVersion = await GameContext.GameLocalConfig.GetConfigAsync(GameLocalSettingName.ProdDownloadVersion);
+            var localVersion = await GameContext.GameLocalConfig.GetConfigAsync(GameLocalSettingName.LocalGameVersion);
+            var doneDownload = await GameContext.GameLocalConfig.GetConfigAsync(GameLocalSettingName.ProdDownloadFolderDone);
+            if (launcher == null)
+                return;
+            if(launcher.ResourceDefault.Version == localPredVersion && localVersion != launcher.ResourceDefault.Version)
+            {
+                if(bool.TryParse(doneDownload,out var done))
+                {
+                    _bthType = 6;
+                    BottomBarContent = "游戏有更新";
+                    LauncheContent = "安装更新";
+                    DisplayVersion = localPredVersion;
+                    EnableStartGameBth = true;
+                    LauncherIcon = "\uE896";
+                }
+            }
+            else
+            {
+                _bthType = 4;
+                BottomBarContent = "游戏有更新";
+                LauncheContent = "更新游戏";
+                DisplayVersion = version;
+                EnableStartGameBth = true;
+                LauncherIcon = "\uE898";
+            }
         }
         else
         {

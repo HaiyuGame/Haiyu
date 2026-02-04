@@ -10,10 +10,9 @@ partial class KuroGameContextViewModel
     {
         if (_bthType == 3)
         {
-            if( await GameContext.StartGameAsync())
+            if (await GameContext.StartGameAsync())
             {
                 this.AppContext.MinToTaskbar();
-                
             }
         }
         if (_bthType == 4)
@@ -21,15 +20,37 @@ partial class KuroGameContextViewModel
             var localVersion = await GameContext.GameLocalConfig.GetConfigAsync(
                 GameLocalSettingName.LocalGameVersion
             );
-            var result = await DialogManager.ShowUpdateGameDialogAsync(this.GameContext.ContextName, Models.Enums.UpdateGameType.UpdateGame);
-            
+            var result = await DialogManager.ShowUpdateGameDialogAsync(
+                this.GameContext.ContextName,
+                Models.Enums.UpdateGameType.UpdateGame
+            );
+
             if (result == null)
-                return; 
+                return;
             if (result.IsOk == false)
             {
                 return;
             }
             await GameContext.UpdataGameAsync(result.DiffSavePath);
+        }
+        if (_bthType == 6)
+        {
+            var diffDone = await GameContext.GameLocalConfig.GetConfigAsync(
+                GameLocalSettingName.ProdDownloadFolderDone
+            );
+            var diffPath = await GameContext.GameLocalConfig.GetConfigAsync(
+                GameLocalSettingName.ProdDownloadPath
+            );
+            if(bool.TryParse(diffDone,out var done) && done && !string.IsNullOrWhiteSpace(diffPath))
+            {
+                await GameContext.StartInstallPredGame(diffPath);
+            }
+            else
+            {
+                //跳转会更新游戏
+                _bthType = 4;
+                await UpdateGameAsync();
+            }
         }
     }
 }

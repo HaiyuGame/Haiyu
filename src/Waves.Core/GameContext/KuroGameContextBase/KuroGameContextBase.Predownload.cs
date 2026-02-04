@@ -1,7 +1,9 @@
 ﻿using System.Drawing;
 using Waves.Api.Models;
+using Waves.Api.Models.Communitys.DataCenter;
 using Waves.Api.Models.Launcher;
 using Waves.Core.Common;
+using Waves.Core.Helpers;
 using Waves.Core.Models;
 using Waves.Core.Models.Downloader;
 using Waves.Core.Models.Enums;
@@ -46,12 +48,12 @@ public partial  class KuroGameContextBase
             this._downloadState = new DownloadState();
             _downloadState.IsActive = true;
             await _downloadState.SetSpeedLimitAsync(this.SpeedValue);
+            await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdDownloadPath, downloadFolder);
+            await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdDownloadVersion, launcher.Predownload.Version);
             //启动预下载线程
             Task.Run(async () =>
                 StartDownProdAsync(downloadFolder,patch,previous.Version));
             //保存预下载信息
-            await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdDownloadPath, downloadFolder);
-            await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdDownloadVersion, previous.Version);
         }
         else
         {
@@ -89,4 +91,19 @@ public partial  class KuroGameContextBase
         _downloadState.IsActive = false;
         await this.SetNoneStatusAsync(true).ConfigureAwait(false);
     }
+
+    public async Task<bool> StartInstallPredGame(string diffFolder)
+    {
+        try
+        {
+            await UpdataGameAsync(diffFolder);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Logger.WriteError(ex.Message);
+            return false;
+        }
+    }
+
 }

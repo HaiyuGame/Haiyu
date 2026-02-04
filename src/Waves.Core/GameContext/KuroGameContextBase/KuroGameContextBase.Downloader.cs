@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using Waves.Api.Models;
 using Waves.Api.Models.Launcher;
 using Waves.Core.Common;
@@ -85,6 +86,7 @@ public partial class KuroGameContextBase
             return;
         await GameLocalConfig.SaveConfigAsync(GameLocalSettingName.LocalGameUpdateing, "True");
         await UpdataGameResourceAsync(folder, launcher, diffSavePath);
+
     }
 
     #region 核心下载逻辑
@@ -445,9 +447,12 @@ public partial class KuroGameContextBase
         var currentVersion = await GameLocalConfig.GetConfigAsync(
             GameLocalSettingName.LocalGameVersion
         );
+        #region 测试预下载
         var previous = launcher
             .ResourceDefault.Config.PatchConfig.Where(x => x.Version == currentVersion)
             .FirstOrDefault();
+        
+        #endregion
         PatchIndexGameResource? patch = null;
         _totalProgressTotal = 0;
         _totalVerifiedBytes = 0;
@@ -583,6 +588,7 @@ public partial class KuroGameContextBase
                 Logger.WriteInfo($"删除差异文件：{filePath}");
             }
             var resource = await GetGameResourceAsync(launcher.ResourceDefault);
+            //var resource2 = await GetGameResourceAsync(launcher.ResourceDefault,launcher.Predownload);
             if (resource == null)
             {
                 this._isDownload = false;
@@ -672,6 +678,21 @@ public partial class KuroGameContextBase
         await DownloadComplate(launcher);
         #endregion
         await SetNoneStatusAsync().ConfigureAwait(false);
+    }
+
+
+    private async Task<IndexGameResource> GetGameResourceAsync(ResourceDefault resourceDefault,Predownload predownload,CancellationToken token = default)
+    {
+        var resourceIndexUrl =
+            resourceDefault.CdnList.Where(x => x.P != 0).OrderBy(x => x.P).First().Url
+            + predownload.Config.IndexFile;
+        var result = await HttpClientService.HttpClient.GetAsync(resourceIndexUrl, token);
+        var jsonStr = await result.Content.ReadAsStringAsync();
+        var launcherIndex = JsonSerializer.Deserialize<IndexGameResource>(
+            jsonStr,
+            IndexGameResourceContext.Default.IndexGameResource
+        );
+        return launcherIndex;
     }
 
     private async Task<bool> CheckApplyFilesMd5(

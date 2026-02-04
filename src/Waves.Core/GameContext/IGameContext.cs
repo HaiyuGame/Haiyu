@@ -102,7 +102,12 @@ public interface IGameContext
     /// <param name="token"></param>
     /// <returns></returns>
     Task<List<KRSDKLauncherCache>?> GetLocalGameOAuthAsync(CancellationToken token);
-
+    /// <summary>
+    /// 安装预下载内容
+    /// </summary>
+    /// <param name="diffFolder"></param>
+    /// <returns></returns>
+    Task<bool> StartInstallPredGame(string diffFolder);
     Task<bool> StartGameAsync();
     Task UpdataGameAsync(string diffSavePath = null);
     Task StopGameAsync();
