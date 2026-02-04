@@ -1,4 +1,4 @@
-using System.Diagnostics.Contracts;
+﻿using System.Diagnostics.Contracts;
 using Haiyu.Models.Dialogs;
 using Haiyu.Services.DialogServices;
 using Haiyu.ViewModel.GameViewModels.Contracts;
@@ -211,9 +211,22 @@ public abstract partial class KuroGameContextViewModel
                 PredCardVisibility = Visibility.Visible;
                 if (!status.PredownloadedDone)
                 {
+                    PredCardVisibility = Visibility.Visible;
                     PredDownloadBthVisibility = Visibility.Visible;
+                    PredDownloadDoneVisibility = Visibility.Collapsed;
                     this.PredDownloadingVisibility = Visibility.Collapsed;
                 }
+                else
+                {
+                    PredCardVisibility = Visibility.Visible;
+                    PredDownloadBthVisibility = Visibility.Collapsed;
+                    PredDownloadDoneVisibility = Visibility.Visible;
+                    this.PredDownloadingVisibility = Visibility.Collapsed;
+                }
+            }
+            else
+            {
+                PredCardVisibility = Visibility.Collapsed;
             }
             if (wallpaperType == "Video")
             {

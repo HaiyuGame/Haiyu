@@ -57,4 +57,9 @@ public class GameContextStatus
     /// </summary>
     public bool PredownloadedDone { get; internal set; }
 
+    /// <summary>
+    /// 预下载Diff路径
+    /// </summary>
+    public string PredownloadPath { get; internal set; }
+
 }

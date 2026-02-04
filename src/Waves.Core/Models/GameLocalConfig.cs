@@ -41,6 +41,14 @@ public class GameLocalSettingName
     public const string ProdDownloadFolderPath = nameof(ProdDownloadFolderPath);
     public const string ProdDownloadFolderDone = nameof(ProdDownloadFolderDone);
 
+    /// <summary>
+    /// 预下载路径
+    /// </summary>
+    public const string ProdDownloadPath = nameof(ProdDownloadPath);
+
+    /// <summary>
+    /// 预下载版本
+    /// </summary>
     public const string ProdDownloadVersion = nameof(ProdDownloadVersion);
 
     public const string GameTime = nameof(GameTime);

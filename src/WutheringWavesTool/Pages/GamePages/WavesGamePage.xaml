@@ -616,6 +616,16 @@
                     FontSize="14"
                     Glyph="&#xE71A;" />
             </Button>
+            <StackPanel
+                VerticalAlignment="Center"
+                Orientation="Horizontal"
+                Visibility="{x:Bind ViewModel.PredDownloadDoneVisibility, Mode=OneWay}">
+                <TextBlock VerticalAlignment="Center" Text="预下载完成" />
+                <Button
+                    Margin="5,0,0,0"
+                    Command="{x:Bind ViewModel.RepreCheckCommand}"
+                    Content="校验" />
+            </StackPanel>
             <ProgressBar
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Bottom"

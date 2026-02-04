@@ -1,4 +1,5 @@
-﻿using Waves.Api.Models;
+﻿using System.Drawing;
+using Waves.Api.Models;
 using Waves.Api.Models.Launcher;
 using Waves.Core.Common;
 using Waves.Core.Models;
@@ -47,7 +48,10 @@ public partial  class KuroGameContextBase
             await _downloadState.SetSpeedLimitAsync(this.SpeedValue);
             //启动预下载线程
             Task.Run(async () =>
-                StartDownProdAsync(downloadFolder,patch));
+                StartDownProdAsync(downloadFolder,patch,previous.Version));
+            //保存预下载信息
+            await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdDownloadPath, downloadFolder);
+            await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdDownloadVersion, previous.Version);
         }
         else
         {
@@ -59,7 +63,7 @@ public partial  class KuroGameContextBase
         return true;
     }
 
-    private async Task StartDownProdAsync(string downloadFolder, PatchIndexGameResource patch)
+    private async Task StartDownProdAsync(string downloadFolder, PatchIndexGameResource patch, string version)
     {
         var downloadResult =  await this.DownloadGroupPatcheToResource(folder: downloadFolder, patch.Resource, ispred: true);
         if (!downloadResult)
@@ -77,6 +81,12 @@ public partial  class KuroGameContextBase
             return;
         }
         await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdDownloadFolderDone, "True");
+
+        _totalfileSize = 0;
+        _totalFileTotal = 0;
+        _totalProgressTotal = 0;
+        _totalProgressSize = 0;
         _downloadState.IsActive = false;
+        await this.SetNoneStatusAsync(true).ConfigureAwait(false);
     }
 }

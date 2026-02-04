@@ -20,6 +20,9 @@ partial class KuroGameContextViewModel
     public partial Visibility PredDownloadingVisibility { get; set; } = Visibility.Collapsed;
 
     [ObservableProperty]
+    public partial Visibility PredDownloadDoneVisibility { get; set; } = Visibility.Collapsed;
+
+    [ObservableProperty]
     public partial double PreDownloadProgress { get; set; } = 0;
 
     [ObservableProperty]
@@ -73,6 +76,27 @@ partial class KuroGameContextViewModel
             .ConfigureAwait(false);
     }
 
+    [RelayCommand]
+    async Task RepreCheck()
+    {
+        var done =  await this.GameContext.GameLocalConfig.GetConfigAsync(GameLocalSettingName.ProdDownloadFolderDone);
+        var version =  await this.GameContext.GameLocalConfig.GetConfigAsync(GameLocalSettingName.ProdDownloadVersion);
+        var path =  await this.GameContext.GameLocalConfig.GetConfigAsync(GameLocalSettingName.ProdDownloadPath);
+        var launcher = await this.GameContext.GetGameLauncherSourceAsync(null,this.CTS.Token);
+        if(string.IsNullOrWhiteSpace(version))
+        {
+            done = "false";
+        }
+        if (done!= null && done.ToLower() == "true" && Directory.Exists(path))
+        {
+            await this.GameContext.StartDownloadProdGame(path);
+        }
+        else
+        {
+            await StartPreDownloadGame();
+        }
+    }
+
     private async Task GameContext_GameContextProdOutput(object sender, GameContextOutputArgs args)
     {
         await AppContext.TryInvokeAsync(async () =>
@@ -82,8 +106,10 @@ partial class KuroGameContextViewModel
                 || args.Type == Waves.Core.Models.Enums.GameContextActionType.Verify
             )
             {
+                PredCardVisibility = Visibility.Visible;
+                PredDownloadBthVisibility = Visibility.Collapsed;
+                PredDownloadDoneVisibility = Visibility.Collapsed;
                 this.PredDownloadingVisibility = Visibility.Visible;
-                this.PredDownloadBthVisibility = Visibility.Collapsed;
                 this.PreDownloadProgress = args.ProgressPercentage;
                 if (args.IsAction == true && args.IsPause == true)
                 {
@@ -102,7 +128,16 @@ partial class KuroGameContextViewModel
                     PredCardVisibility = Visibility.Visible;
                     if (!status.PredownloadedDone)
                     {
-                        PredDownloadBthVisibility = Visibility.Visible;
+                        PredCardVisibility = Visibility.Visible;
+                        PredDownloadBthVisibility = Visibility.Collapsed;
+                        PredDownloadingVisibility = Visibility.Collapsed;
+                        PredDownloadDoneVisibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        PredCardVisibility = Visibility.Visible;
+                        PredDownloadBthVisibility = Visibility.Collapsed;
+                        PredDownloadDoneVisibility = Visibility.Visible;
                         this.PredDownloadingVisibility = Visibility.Collapsed;
                     }
                 }
