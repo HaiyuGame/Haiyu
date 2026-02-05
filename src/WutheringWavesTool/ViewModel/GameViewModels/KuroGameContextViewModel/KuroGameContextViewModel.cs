@@ -393,6 +393,7 @@ public abstract partial class KuroGameContextViewModel
             Logger.WriteInfo($"选择游戏安装文件：{result.InstallFolder}");
             if (File.Exists(result.InstallFolder + $"//{this.GameContext.Config.GameExeName}"))
             {
+                this.PauseIcon = "\uE769";
                 Task.Factory.StartNew(async () =>
                 {
                     await this.GameContext.StartDownloadTaskAsync(
@@ -410,6 +411,7 @@ public abstract partial class KuroGameContextViewModel
         {
             Logger.WriteInfo($"继续进行下载");
             var launcher = await GameContext.GetGameLauncherSourceAsync(null, this.CTS.Token);
+            this.PauseIcon = "\uE769";
             Task.Factory.StartNew(async () =>
             {
                 await this.GameContext.StartDownloadTaskAsync(

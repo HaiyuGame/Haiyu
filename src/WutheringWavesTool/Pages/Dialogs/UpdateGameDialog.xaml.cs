@@ -1,5 +1,5 @@
-using Haiyu.Models.Dialogs;
-using Haiyu.Models.Enums;
+﻿using Haiyu.Models.Dialogs;
+using Waves.Core.Models.Enums;
 
 namespace Haiyu.Pages.Dialogs;
 

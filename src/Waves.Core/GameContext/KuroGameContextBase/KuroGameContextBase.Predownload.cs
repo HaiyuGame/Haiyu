@@ -96,7 +96,7 @@ public partial  class KuroGameContextBase
     {
         try
         {
-            await UpdataGameAsync(diffFolder);
+            await UpdataGameAsync(diffFolder, UpdateGameType.ProDownload);
             return true;
         }
         catch (Exception ex)

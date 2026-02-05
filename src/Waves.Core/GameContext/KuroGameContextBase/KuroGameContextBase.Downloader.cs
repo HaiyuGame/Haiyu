@@ -75,7 +75,7 @@ public partial class KuroGameContextBase
     #endregion
 
 
-    public async Task UpdataGameAsync(string diffSavePath = null)
+    public async Task UpdataGameAsync(string diffSavePath = null,UpdateGameType type = UpdateGameType.UpdateGame)
     {
         _downloadCTS = new CancellationTokenSource();
         var folder = await GameLocalConfig.GetConfigAsync(
@@ -86,6 +86,20 @@ public partial class KuroGameContextBase
             return;
         await GameLocalConfig.SaveConfigAsync(GameLocalSettingName.LocalGameUpdateing, "True");
         await UpdataGameResourceAsync(folder, launcher, diffSavePath);
+        if(type == UpdateGameType.ProDownload)
+        {
+            //如果是预下载安装，则直接删除预下载配置
+            await this.GameLocalConfig.SaveConfigAsync(
+               GameLocalSettingName.ProdDownloadPath,
+               "");
+            await this.GameLocalConfig.SaveConfigAsync(
+                GameLocalSettingName.ProdDownloadFolderDone,
+                "False"
+            ); await this.GameLocalConfig.SaveConfigAsync(
+                GameLocalSettingName.ProdDownloadVersion,
+                ""
+            );
+        }
 
     }
 
@@ -147,7 +161,9 @@ public partial class KuroGameContextBase
         await this.GameLocalConfig.SaveConfigAsync(
             GameLocalSettingName.LocalGameUpdateing,
             "False"
-        );
+        ); 
+
+       
         await this.GameLocalConfig.SaveConfigAsync(
             GameLocalSettingName.GameLauncherBassProgram,
             $"{installFolder}\\{this.Config.GameExeName}"
@@ -454,6 +470,9 @@ public partial class KuroGameContextBase
         
         #endregion
         PatchIndexGameResource? patch = null;
+        this._downloadState = new DownloadState();
+        await _downloadState.SetSpeedLimitAsync(this.SpeedValue);
+        _downloadState.IsActive = true;
         _totalProgressTotal = 0;
         _totalVerifiedBytes = 0;
         _totalDownloadedBytes = 0;
@@ -490,9 +509,6 @@ public partial class KuroGameContextBase
             + previous.BaseUrl;
         _totalProgressTotal = 0;
         _totalProgressSize = 0;
-        this._downloadState = new DownloadState();
-        await _downloadState.SetSpeedLimitAsync(this.SpeedValue);
-        _downloadState.IsActive = true;
         if (
             patch.ApplyTypes != null
             && patch.ApplyTypes.Contains("patch")
@@ -505,8 +521,6 @@ public partial class KuroGameContextBase
             _totalfileSize = size;
             _totalFileTotal = count.Count() - 1;
             _totalProgressTotal = 0;
-            this._downloadState = new DownloadState();
-            await _downloadState.SetSpeedLimitAsync(this.SpeedValue);
             result = await Task.Run(() => DownloadPatcheToResource(diffSavePath, patch));
             if (result == false)
             {
@@ -537,6 +551,7 @@ public partial class KuroGameContextBase
             _totalFileTotal = count.Count() - 1;
             _totalProgressTotal = 0;
             this._downloadState = new DownloadState();
+            this._downloadState.IsActive = true;
             await _downloadState.SetSpeedLimitAsync(this.SpeedValue);
             result = await Task.Run(() =>
                 DownloadGroupPatcheToResource(diffSavePath, patch.Resource)

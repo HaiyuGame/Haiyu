@@ -109,7 +109,7 @@ public interface IGameContext
     /// <returns></returns>
     Task<bool> StartInstallPredGame(string diffFolder);
     Task<bool> StartGameAsync();
-    Task UpdataGameAsync(string diffSavePath = null);
+    Task UpdataGameAsync(string diffSavePath = null, UpdateGameType type = UpdateGameType.UpdateGame);
     Task StopGameAsync();
     Task DeleteResourceAsync();
     #endregion

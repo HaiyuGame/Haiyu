@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 using Haiyu.Models.Dialogs;
-using Haiyu.Models.Enums;
 using Haiyu.Services.DialogServices;
 using Waves.Core.Common;
 using Waves.Core.Helpers;
+using Waves.Core.Models.Enums;
 
 namespace Haiyu.ViewModel.DialogViewModels;
 

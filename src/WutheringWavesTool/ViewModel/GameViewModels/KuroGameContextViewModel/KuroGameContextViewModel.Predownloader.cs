@@ -33,7 +33,7 @@ partial class KuroGameContextViewModel
     {
         var result = await DialogManager.ShowUpdateGameDialogAsync(
             this.GameContext.ContextName,
-            Models.Enums.UpdateGameType.ProDownload
+            UpdateGameType.ProDownload
         );
         if (result.IsOk)
         {

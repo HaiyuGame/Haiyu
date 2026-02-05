@@ -1,6 +1,4 @@
-﻿
-
-namespace Haiyu.Models.Enums;
+﻿namespace Waves.Core.Models.Enums;
 
 public enum UpdateGameType:uint
 {
