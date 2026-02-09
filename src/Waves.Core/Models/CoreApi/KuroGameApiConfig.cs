@@ -1,6 +1,6 @@
-﻿namespace Waves.Core.Models
+﻿namespace Waves.Core.Models.CoreApi
 {
-    public class GameAPIConfig
+    public class KuroGameApiConfig
     {
         public static string[] BaseAddress =
         [
@@ -30,8 +30,8 @@
         public string Language { get; set; }
         #endregion
 
-        public static GameAPIConfig MainAPiConfig =>
-            new GameAPIConfig()
+        public static KuroGameApiConfig MainAPiConfig =>
+            new KuroGameApiConfig()
             {
                 AppId = "10003",
                 GameID = "G152",
@@ -46,8 +46,8 @@
                 PKGId = "A1381"
             };
 
-        public static GameAPIConfig GlobalConfig =>
-            new GameAPIConfig()
+        public static KuroGameApiConfig GlobalConfig =>
+            new KuroGameApiConfig()
             {
                 AppId = "50004",
                 GameID = "G153",
@@ -62,8 +62,8 @@
                 Language = "zh-Hant",
             };
 
-        public static GameAPIConfig BilibiliConfig =>
-            new GameAPIConfig()
+        public static KuroGameApiConfig BilibiliConfig =>
+            new KuroGameApiConfig()
             {
                 AppId = "10004",
                 GameID = "G152",
@@ -83,8 +83,8 @@
         /// <summary>
         /// 战双官服
         /// </summary>
-        public static GameAPIConfig MainBGRConfig =>
-            new GameAPIConfig()
+        public static KuroGameApiConfig MainBGRConfig =>
+            new KuroGameApiConfig()
             {
                 AppId = "10012",
                 GameID = "G148",
@@ -101,8 +101,8 @@
         /// <summary>
         /// 战双B服
         /// </summary>
-        public static GameAPIConfig BiliBiliBGRConfig =>
-            new GameAPIConfig()
+        public static KuroGameApiConfig BiliBiliBGRConfig =>
+            new KuroGameApiConfig()
             {
                 AppId = "10011",
                 GameID = "G148",
@@ -119,8 +119,8 @@
         /// <summary>
         /// 战双国际服
         /// </summary>
-        public static GameAPIConfig GlobalBGRConfig =>
-            new GameAPIConfig()
+        public static KuroGameApiConfig GlobalBGRConfig =>
+            new KuroGameApiConfig()
             {
                 AppId = "50015",
                 GameID = "G143",
@@ -138,8 +138,8 @@
         /// <summary>
         /// 战双台服
         /// </summary>
-        public static GameAPIConfig TWBGRConfig
-            => new GameAPIConfig()
+        public static KuroGameApiConfig TWBGRConfig
+            => new KuroGameApiConfig()
             {
                 AppId = "50016",
                 GameID = "G279",

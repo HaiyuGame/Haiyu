@@ -2,6 +2,7 @@
 using Waves.Api.Models.Launcher;
 using Waves.Core.Contracts;
 using Waves.Core.Models;
+using Waves.Core.Models.CoreApi;
 using Waves.Core.Models.Downloader;
 using Waves.Core.Models.Enums;
 
@@ -23,7 +24,7 @@ public interface IGameContext
     GameLocalConfig GameLocalConfig { get; }
 
 
-    public GameAPIConfig Config { get; }
+    public KuroGameApiConfig Config { get; }
 
     public GameType GameType { get; }
     Task<FileVersion> GetLocalDLSSAsync();
@@ -36,7 +37,7 @@ public interface IGameContext
     public Task RepirGameAsync();
 
     #region Launcher
-    Task<GameLauncherSource?> GetGameLauncherSourceAsync(GameAPIConfig apiConfig = null,CancellationToken token = default);
+    Task<GameLauncherSource?> GetGameLauncherSourceAsync(KuroGameApiConfig apiConfig = null,CancellationToken token = default);
 
     Task<GameLauncherStarter?> GetLauncherStarterAsync(CancellationToken token = default);
     #endregion
