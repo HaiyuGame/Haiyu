@@ -54,6 +54,9 @@
     </Project>
   </Folder>
   <Folder Name="/Setup/">
+    <Project Path="Project.WPFUninstaller/Project.WPFUninstaller.csproj" Id="46d6cea1-e534-4f16-a4f5-ba83fbccf067">
+      <BuildType Solution="All|*" Project="Debug" />
+    </Project>
     <Project Path="Setup/FluentWPF/FluentWPF.csproj">
       <BuildType Solution="All|*" Project="Debug" />
       <Platform Solution="*|x86" Project="x86" />

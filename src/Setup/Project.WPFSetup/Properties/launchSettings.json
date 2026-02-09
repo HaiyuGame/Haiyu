@@ -1,7 +1,8 @@
 {
   "profiles": {
     "Project.WPFSetup": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "uninstall run"
     }
   }
 }

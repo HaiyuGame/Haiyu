@@ -1,7 +1,11 @@
-﻿using Waves.Api.Models.CloudGame;
+﻿using System.Net.Http.Headers;
+using System.Text.Json;
+using Waves.Api.Models;
+using Waves.Api.Models.CloudGame;
+using Waves.Core.Contracts;
 using Waves.Core.Helpers;
 
-namespace Haiyu.Services;
+namespace Waves.Core.Services;
 
 public class CloudGameService : ICloudGameService
 {
@@ -261,5 +265,11 @@ public class CloudGameService : ICloudGameService
         {
             return (false, ex.Message);
         }
+    }
+
+    public async Task GetUserInfoAsync(LoginData data)
+    {
+        var url = $"https://cloud-game-sh.aki-game.com/UserRegion/GetUserInfo?loginType={data.LoginType}&userId={data.Id}&token={data.AutoToken}&userName={data.Username}";
+        var result = await HttpClientService.HttpClient.GetStringAsync(url);
     }
 }
