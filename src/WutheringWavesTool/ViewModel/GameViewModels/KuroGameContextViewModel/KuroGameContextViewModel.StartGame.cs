@@ -9,7 +9,6 @@ partial class KuroGameContextViewModel
     [RelayCommand]
     async Task UpdateGameAsync()
     {
-        //全部抛出线程执行，用户态使用事件进行通知取消
         if (_bthType == 3)
         {
             if (await GameContext.StartGameAsync())

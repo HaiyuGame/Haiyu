@@ -9,7 +9,7 @@ namespace Haiyu.ViewModel.GameViewModels.GameContexts;
 public partial class WavesGameContextViewModel : KuroGameContextViewModel
 {
     public WavesGameContextViewModel(IAppContext<App> appContext, ITipShow tipShow)
-        : base(appContext, tipShow) { }
+        : base(appContext, tipShow) {  }
 
     
 

@@ -67,9 +67,6 @@
                                 <ui:HeaderTileCard
                                     Width="350"
                                     Margin="3"
-                                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                    BorderBrush="{ThemeResource SystemColorGrayTextBrush}"
-                                    BorderThickness="1"
                                     Command="{x:Bind JumpWebCommand}"
                                     CornerRadius="5">
                                     <Grid Padding="5" BorderThickness="2">
@@ -151,7 +148,7 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
-                    <ColumnDefinition Width="300" />
+                    <ColumnDefinition Width="240" />
                 </Grid.ColumnDefinitions>
                 <Border
                     Margin="5"
@@ -175,7 +172,7 @@
                     CornerRadius="4"
                     Visibility="{x:Bind ViewModel.KuroLogin, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="250" />
+                        <ColumnDefinition Width="350" />
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
                     <Grid.ContextFlyout>
@@ -190,6 +187,8 @@
                     <Grid
                         Margin="0,0,1.5,0"
                         Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+                        BorderBrush="{ThemeResource ControlElevationBorderBrush}"
+                        BorderThickness="1"
                         CornerRadius="5">
                         <Grid.RowDefinitions>
                             <RowDefinition />
@@ -250,6 +249,8 @@
                         Margin="5,0,0,0"
                         Padding="5"
                         Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+                        BorderBrush="{ThemeResource ControlElevationBorderBrush}"
+                        BorderThickness="1"
                         CornerRadius="5">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="auto" />
@@ -608,6 +609,8 @@
                             Grid.Row="0"
                             VerticalAlignment="Top"
                             Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+                            BorderBrush="{ThemeResource ControlElevationBorderBrush}"
+                            BorderThickness="1"
                             ItemsSource="{x:Bind ViewModel.WeaponActive, Mode=OneWay}">
                             <FlipView.ItemTemplate>
                                 <DataTemplate x:DataType="wikiModel:EventContentSideWrapper">

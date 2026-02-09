@@ -167,7 +167,6 @@ public partial class WavesWikiViewModel : WikiViewModelBase
                 }
                 this.Gamers = roles.Result.Data.ToObservableCollection();
                 this.SelectGamer = Gamers[0];
-                //var stamina = ;
                 this.KuroLogin = true;
                 TipShow.ShowMessage("刷新完成", Symbol.Accept);
             }

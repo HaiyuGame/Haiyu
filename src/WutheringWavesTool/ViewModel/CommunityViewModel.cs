@@ -75,7 +75,7 @@ public partial class CommunityViewModel : ViewModelBase, IDisposable
                 break;
             case "DataAbyss":
                 NavigationService.NavigationTo<GamerTowerViewModel>(
-                    null,
+                    Item,
                     new Microsoft.UI.Xaml.Media.Animation.DrillInNavigationTransitionInfo()
                 );
                 break;

@@ -28,6 +28,8 @@
         <Grid
             Margin="0,0,2.5,0"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource ControlElevationBorderBrush}"
+            BorderThickness="1"
             CornerRadius="5">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto" />
@@ -35,6 +37,7 @@
             </Grid.RowDefinitions>
             <ui:ImageEx
                 VerticalAlignment="Top"
+                CornerRadius="5 5 0 0"
                 Opacity="0.8"
                 Source="{x:Bind ViewModel.Difficulty1Header.SlashHeaderBG, Mode=OneWay}" />
             <StackPanel Margin="25,0,0,0" Orientation="Horizontal">
@@ -62,7 +65,9 @@
                 Grid.Row="1"
                 Padding="10"
                 HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch">
+                VerticalAlignment="Stretch"
+                BorderBrush="{ThemeResource ControlElevationBorderBrush}"
+                BorderThickness="1">
                 <ScrollView
                     Padding="10"
                     HorizontalAlignment="Stretch"
@@ -189,6 +194,8 @@
             Grid.Row="1"
             Margin="0,5,2.5,0"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource ControlElevationBorderBrush}"
+            BorderThickness="1"
             CornerRadius="5">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto" />
@@ -196,6 +203,7 @@
             </Grid.RowDefinitions>
             <ui:ImageEx
                 VerticalAlignment="Top"
+                CornerRadius="5 5 0 0"
                 Opacity="0.8"
                 Source="{x:Bind ViewModel.Difficulty2Header.SlashHeaderBG, Mode=OneWay}" />
             <StackPanel Margin="25,0,0,0" Orientation="Horizontal">
@@ -350,6 +358,8 @@
             Grid.Column="1"
             Margin="2.5,0,0,0"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource ControlElevationBorderBrush}"
+            BorderThickness="1"
             CornerRadius="5">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto" />
@@ -357,6 +367,7 @@
             </Grid.RowDefinitions>
             <ui:ImageEx
                 VerticalAlignment="Top"
+                CornerRadius="5 5 0 0"
                 Opacity="0.8"
                 Source="{x:Bind ViewModel.Difficulty0Header.SlashHeaderBG, Mode=OneWay}" />
             <StackPanel Margin="25,0,0,0" Orientation="Horizontal">

@@ -1,4 +1,4 @@
-using Haiyu.ViewModel.GameViewModels;
+﻿using Haiyu.ViewModel.GameViewModels;
 using Haiyu.ViewModel.GameViewModels.Contracts;
 using Haiyu.ViewModel.GameViewModels.GameContexts;
 using Microsoft.UI.Xaml;
@@ -34,8 +34,8 @@ namespace Haiyu.Pages.GamePages
         {
             this.Bindings.StopTracking();
             this.ViewModel.Dispose();
-            base.OnNavigatedTo(e);
             GC.Collect();
+            base.OnNavigatedTo(e);
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)

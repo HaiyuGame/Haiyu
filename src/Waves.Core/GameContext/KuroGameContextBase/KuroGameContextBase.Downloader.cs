@@ -286,7 +286,7 @@ public partial class KuroGameContextBase
                     Logger.WriteInfo(
                         $"[{item.Dest}],当前进度大小[{Math.Round((double)_totalProgressSize, 2)}/{Math.Round((double)_totalfileSize, 2)}]"
                     );
-                    if (_downloadCTS?.IsCancellationRequested ?? true)
+                    if (IsDownloadCanceled())
                     {
                         this._downloadState.IsActive = false;
                         await SetNoneStatusAsync().ConfigureAwait(false);
@@ -450,6 +450,7 @@ public partial class KuroGameContextBase
         {
             this._isDownload = false;
             _downloadCTS?.Dispose();
+            _downloadCTS = null;
         }
     }
     #endregion
@@ -868,7 +869,7 @@ public partial class KuroGameContextBase
             for (int i = 0; i < resource.Count; i++)
             {
                 Logger.WriteInfo($"开始处理更新文件{resource[i].Dest}");
-                if (_downloadCTS?.IsCancellationRequested ?? true)
+                if (IsDownloadCanceled())
                 {
                     this._downloadState.IsActive = false;
                     await SetNoneStatusAsync().ConfigureAwait(false);
@@ -1015,8 +1016,12 @@ public partial class KuroGameContextBase
         }
         this._isDownload = false;
         _downloadState?.IsStop = true;
-        await _downloadCTS?.CancelAsync();
-        _downloadCTS.Dispose();
+        if (_downloadCTS != null)
+        {
+            await _downloadCTS.CancelAsync();
+            _downloadCTS.Dispose();
+            _downloadCTS = null;
+        }
         return;
     }
 
@@ -1052,6 +1057,11 @@ public partial class KuroGameContextBase
                 //    return true;
                 //}
                 var memoryPool = ArrayPool<byte>.Shared;
+                var downloadCts = _downloadCTS;
+                if (downloadCts == null || _downloadState?.IsStop == true)
+                {
+                    throw new OperationCanceledException();
+                }
                 long offset = file.Start;
                 long remaining = file.End - file.Start + 1;
                 bool isValid = true;
@@ -1065,7 +1075,7 @@ public partial class KuroGameContextBase
                         var buffer = memoryPool.Rent(MaxBufferSize);
                         try
                         {
-                            if (_downloadCTS.IsCancellationRequested)
+                            if (downloadCts.IsCancellationRequested || _downloadState?.IsStop == true)
                             {
                                 throw new OperationCanceledException();
                             }
@@ -1073,7 +1083,7 @@ public partial class KuroGameContextBase
                                     buffer,
                                     0,
                                     MaxBufferSize,
-                                    _downloadCTS.Token
+                                    downloadCts.Token
                                 )
                                 .ConfigureAwait(false);
                             if (bytesRead == 0)
@@ -1143,6 +1153,11 @@ public partial class KuroGameContextBase
         const int bufferSize = 262144; // 80KB缓冲区
         using var md5 = MD5.Create();
         var memoryPool = ArrayPool<byte>.Shared;
+        var downloadCts = _downloadCTS;
+        if (downloadCts == null || _downloadState?.IsStop == true)
+        {
+            throw new OperationCanceledException();
+        }
         const long UpdateThreshold = 1048576; // 1MB进度更新阈值
         FileStream? fs = null;
         try
@@ -1162,9 +1177,7 @@ public partial class KuroGameContextBase
                 long accumulatedBytes = 0L;
                 while (true)
                 {
-                    if (_downloadCTS == null)
-                        return false;
-                    if (_downloadCTS.IsCancellationRequested)
+                    if (downloadCts.IsCancellationRequested || _downloadState?.IsStop == true)
                     {
                         throw new OperationCanceledException();
                     }
@@ -1175,7 +1188,7 @@ public partial class KuroGameContextBase
                     {
                         int bytesRead = await fs.ReadAsync(
                                 buffer.AsMemory(0, bufferSize),
-                                _downloadCTS.Token
+                                downloadCts.Token
                             )
                             .ConfigureAwait(false);
                         if (bytesRead == 0)
@@ -1266,6 +1279,11 @@ public partial class KuroGameContextBase
         {
             try
             {
+                var downloadCts = _downloadCTS;
+                if (downloadCts == null || _downloadState?.IsStop == true)
+                {
+                    throw new OperationCanceledException();
+                }
                 long accumulatedBytes = 0;
                 if (start == 0 && end == -1)
                 {
@@ -1279,9 +1297,9 @@ public partial class KuroGameContextBase
                 using var response = await HttpClientService.GameDownloadClient.SendAsync(
                     request,
                     HttpCompletionOption.ResponseHeadersRead,
-                    _downloadCTS.Token
+                    downloadCts.Token
                 );
-                var stream = await response.Content.ReadAsStreamAsync(_downloadCTS.Token);
+                var stream = await response.Content.ReadAsStreamAsync(downloadCts.Token);
                 if (start < 0 || end < start)
                 {
                     Logger.WriteError($"分片范围无效: {start}-{end}");
@@ -1295,7 +1313,7 @@ public partial class KuroGameContextBase
                 bool isBreak = false;
                 while (totalWritten < chunkTotalSize)
                 {
-                    if (_downloadCTS.IsCancellationRequested)
+                    if (downloadCts.IsCancellationRequested || _downloadState?.IsStop == true)
                     {
                         throw new OperationCanceledException();
                     }
@@ -1305,7 +1323,7 @@ public partial class KuroGameContextBase
                     try
                     {
                         int bytesRead = await stream
-                            .ReadAsync(buffer.AsMemory(0, bytesToRead), _downloadCTS.Token)
+                            .ReadAsync(buffer.AsMemory(0, bytesToRead), downloadCts.Token)
                             .ConfigureAwait(false);
                         if (bytesRead == 0)
                         {
@@ -1316,7 +1334,7 @@ public partial class KuroGameContextBase
                             .SpeedLimiter.LimitAsync(bytesRead)
                             .ConfigureAwait(false);
                         await fileStream
-                            .WriteAsync(buffer.AsMemory(0, bytesRead), _downloadCTS.Token)
+                            .WriteAsync(buffer.AsMemory(0, bytesRead), downloadCts.Token)
                             .ConfigureAwait(false);
                         totalWritten += bytesRead;
                         accumulatedBytes += bytesRead;
@@ -1331,6 +1349,10 @@ public partial class KuroGameContextBase
                                 .ConfigureAwait(false);
                             accumulatedBytes = 0;
                         }
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
                     }
                     catch (Exception ex)
                     {
@@ -1355,9 +1377,13 @@ public partial class KuroGameContextBase
                 stream.Close();
                 await stream.DisposeAsync();
             }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
             catch (Exception)
             {
-                await fileStream.FlushAsync(_downloadCTS.Token);
+                await fileStream.FlushAsync(_downloadCTS?.Token ?? CancellationToken.None);
                 await fileStream.FlushAsync();
                 await fileStream.DisposeAsync();
             }
@@ -1369,7 +1395,10 @@ public partial class KuroGameContextBase
         if (this._downloadState != null)
         {
             this._downloadState.IsActive = false;
-            this._downloadState.IsStop = false;
+            if (!this._downloadState.IsStop)
+            {
+                this._downloadState.IsStop = false;
+            }
         }
         if (this.gameContextOutputDelegate != null && !isPred)
         {
@@ -1639,6 +1668,10 @@ public partial class KuroGameContextBase
 
     #region 辅助方法
 
+    private bool IsDownloadCanceled()
+    {
+        return _downloadCTS == null || _downloadCTS.IsCancellationRequested || _downloadState?.IsStop == true;
+    }
 
     private async Task UpdateFileProgress(
         GameContextActionType type,
