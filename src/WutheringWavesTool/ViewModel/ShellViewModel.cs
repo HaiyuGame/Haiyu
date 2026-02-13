@@ -277,6 +277,7 @@ public sealed partial class ShellViewModel : ViewModelBase
             WallpaperShowType.Image,
             AppDomain.CurrentDomain.BaseDirectory + "Assets\\background.png"
         );
+        await RefreshHeaderUser();
         OpenMain();
     }
 

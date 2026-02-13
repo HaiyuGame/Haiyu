@@ -10,6 +10,7 @@ using Waves.Api.Models.Launcher;
 using Waves.Core.Common;
 using Waves.Core.Contracts;
 using Waves.Core.Models;
+using Waves.Core.Models.CoreApi;
 using Waves.Core.Models.Enums;
 using Waves.Core.Services;
 
@@ -28,7 +29,7 @@ public abstract partial class KuroGameContextBase : IGameContext
     public IHttpClientService HttpClientService { get; set; }
 
     public LoggerService Logger { get; set; }
-    public GameAPIConfig Config { get; private set; }
+    public KuroGameApiConfig Config { get; private set; }
     public string ContextName { get; }
     public string GamerConfigPath { get; set; }
 
@@ -55,7 +56,7 @@ public abstract partial class KuroGameContextBase : IGameContext
     #endregion
 
 
-    internal KuroGameContextBase(GameAPIConfig config, string contextName)
+    internal KuroGameContextBase(KuroGameApiConfig config, string contextName)
     {
         Logger = new LoggerService();
         Config = config;
@@ -117,7 +118,7 @@ public abstract partial class KuroGameContextBase : IGameContext
             status.IsGameExists = false;
             status.IsGameInstalled = false;
         }
-        var ping = (await NetworkCheck.PingAsync(GameAPIConfig.BaseAddress[0]));
+        var ping = (await NetworkCheck.PingAsync(KuroGameApiConfig.BaseAddress[0]));
         if (ping != null && ping.Status == IPStatus.Success)
         {
             var indexSource = await this.GetGameLauncherSourceAsync();
@@ -139,8 +140,25 @@ public abstract partial class KuroGameContextBase : IGameContext
                 {
                     status.IsUpdateing = updateResult;
                 }
+                //预下载是否完成，确保本地安装完成
+                if(indexSource.Predownload != null && status.IsGameExists == true &&status.IsGameInstalled == true)
+                {
+                    status.IsPredownloaded = true;
+                    var donwResult = await GameLocalConfig.GetConfigAsync(
+                        GameLocalSettingName.ProdDownloadFolderDone
+                    );
+                    if (bool.TryParse(donwResult,out var predDown))
+                    {
+                        status.PredownloadedDone = predDown;
+                    }
+                    else
+                    {
+                        status.PredownloadedDone = false;
+                    }
+                }
             }
         }
+        //下载游戏和预下载只存在一个状态，不需要分离状态
         if (_downloadState != null)
         {
             status.IsPause = this._downloadState.IsPaused;

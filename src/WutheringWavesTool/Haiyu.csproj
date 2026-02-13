@@ -38,6 +38,7 @@
 		<Content Remove="Assets\Cursor\CursorResource.res" />
 		<Content Remove="assets\geet2.html" />
 		<Content Remove="Assets\HpatchzResource\hpatchz.exe" />
+		<Content Remove="assets\Readme.md" />
 		<Content Remove="Assets\RolePage\appLogo.png" />
 	</ItemGroup>
 
@@ -202,6 +203,9 @@
 		<None Update="Assets\HpatchzResource\hpatchz.exe">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
+		<Page Update="Pages\PluginPage.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</Page>
 		<Page Update="Controls\Styles\Shimmer.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</Page>
@@ -282,6 +286,7 @@
 	  <None Remove="Pages\Dialogs\GameEnhancedDialog.xaml" />
 	  <None Remove="Pages\Dialogs\LocalUserManagerDialog.xaml" />
 	  <None Remove="Pages\Dialogs\UpdateGameDialog.xaml" />
+	  <None Remove="Pages\PluginPage.xaml" />
 	  <None Remove="Pages\XboxDisplayPage.xaml" />
 	</ItemGroup>
 </Project>

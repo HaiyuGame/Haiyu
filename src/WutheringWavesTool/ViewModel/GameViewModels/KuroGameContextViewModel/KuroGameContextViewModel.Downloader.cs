@@ -28,6 +28,7 @@ partial class KuroGameContextViewModel
                 {
                     if (args.IsAction && args.IsPause)
                     {
+                        this.PauseIcon = "\uE768";
                         this.BottomBarContent = "下载已经暂停";
                     }
                     else
@@ -46,7 +47,6 @@ partial class KuroGameContextViewModel
                     }
                     else
                     {
-                        this.PauseIcon = "\uE769";
                         this.BottomBarContent =
                             $"下载速度:{Math.Round(args.DownloadSpeed / 1024 / 1024, 2)}MB，剩余：{Math.Round((double)(args.TotalSize - args.CurrentSize) / 1024 / 1024 / 1024, 2)}GB";
                     }
@@ -54,6 +54,7 @@ partial class KuroGameContextViewModel
                 }
                 else if (args.Type == Waves.Core.Models.Enums.GameContextActionType.Decompress)
                 {
+                    this.PauseIcon = "\uE769";
                     this.BottomBarContent =
                             $"[{args.CurrentDecompressCount}/{args.MaxDecompressValue}] 已解压:{Math.Round((double)args.CurrentSize / 1024 / 1024 / 1024, 2)}GB,剩余:{Math.Round((double)(args.TotalSize - args.CurrentSize) / 1024 / 1024 / 1024, 2)}GB";
                     PauseStartEnable = false;
@@ -107,9 +108,9 @@ partial class KuroGameContextViewModel
                     this.AppContext.App.MainWindow.Show();
                 }
             }
-            if(args.Type == Waves.Core.Models.Enums.GameContextActionType.TipMessage)
+            if (args.Type == Waves.Core.Models.Enums.GameContextActionType.TipMessage)
             {
-                await DialogManager.ShowMessageDialog(args.TipMessage,"确认","关闭");
+                await DialogManager.ShowMessageDialog(args.TipMessage, "确认", "关闭");
             }
         });
     }
@@ -172,4 +173,5 @@ partial class KuroGameContextViewModel
         Logger.WriteInfo($"设置下载限速");
         await GameContext.SetSpeedLimitAsync(DownloadSpeedValue * 1024 * 1024);
     }
+
 }

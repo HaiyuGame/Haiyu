@@ -2,6 +2,7 @@
 using Waves.Api.Models.Launcher;
 using Waves.Core.Contracts;
 using Waves.Core.Models;
+using Waves.Core.Models.CoreApi;
 using Waves.Core.Models.Downloader;
 using Waves.Core.Models.Enums;
 
@@ -23,7 +24,7 @@ public interface IGameContext
     GameLocalConfig GameLocalConfig { get; }
 
 
-    public GameAPIConfig Config { get; }
+    public KuroGameApiConfig Config { get; }
 
     public GameType GameType { get; }
     Task<FileVersion> GetLocalDLSSAsync();
@@ -36,7 +37,7 @@ public interface IGameContext
     public Task RepirGameAsync();
 
     #region Launcher
-    Task<GameLauncherSource?> GetGameLauncherSourceAsync(GameAPIConfig apiConfig = null,CancellationToken token = default);
+    Task<GameLauncherSource?> GetGameLauncherSourceAsync(KuroGameApiConfig apiConfig = null,CancellationToken token = default);
 
     Task<GameLauncherStarter?> GetLauncherStarterAsync(CancellationToken token = default);
     #endregion
@@ -62,6 +63,14 @@ public interface IGameContext
     /// <param name="source"></param>
     /// <returns></returns>
     Task StartDownloadTaskAsync(string folder, GameLauncherSource? source,bool isDelete = false);
+
+    /// <summary>
+    /// 进行预下载
+    /// </summary>
+    /// <param name="launcher"></param>
+    /// <param name="downloadFolder"></param>
+    /// <returns></returns>
+    Task<bool> StartDownloadProdGame(string downloadFolder);
 
     /// <summary>
     /// 恢复任务
@@ -94,9 +103,14 @@ public interface IGameContext
     /// <param name="token"></param>
     /// <returns></returns>
     Task<List<KRSDKLauncherCache>?> GetLocalGameOAuthAsync(CancellationToken token);
-
+    /// <summary>
+    /// 安装预下载内容
+    /// </summary>
+    /// <param name="diffFolder"></param>
+    /// <returns></returns>
+    Task<bool> StartInstallPredGame(string diffFolder);
     Task<bool> StartGameAsync();
-    Task UpdataGameAsync(string diffSavePath = null);
+    Task UpdataGameAsync(string diffSavePath = null, UpdateGameType type = UpdateGameType.UpdateGame);
     Task StopGameAsync();
     Task DeleteResourceAsync();
     #endregion

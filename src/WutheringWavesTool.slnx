@@ -11,9 +11,6 @@
     <Project Path="Astronomical/Astronomical.csproj" Id="1130a43f-a182-4633-b1ab-f68a92fdc860">
       <BuildType Solution="All|*" Project="Debug" />
     </Project>
-    <Project Path="Extensions/CursorResource/CursorResource.vcxproj" Id="8ce44d37-8b39-4eda-9774-a70c11f04518">
-      <BuildType Solution="All|*" Project="Debug" />
-    </Project>
     <Project Path="Extensions/GameFileDiffTool/GameFileDiffTool.csproj" Id="7e92e004-3edc-46fe-83e9-402bdb530d81">
       <BuildType Solution="All|*" Project="Debug" />
     </Project>
@@ -53,7 +50,15 @@
       <BuildType Solution="All|*" Project="Debug" />
     </Project>
   </Folder>
+  <Folder Name="/Server/">
+    <Project Path="Server/HaiyuServer/HaiyuServer.csproj" Id="99ed4541-5feb-4f82-a8b4-62f82e1be42b">
+      <BuildType Solution="All|*" Project="Debug" />
+    </Project>
+  </Folder>
   <Folder Name="/Setup/">
+    <Project Path="Project.WPFUninstaller/Project.WPFUninstaller.csproj" Id="46d6cea1-e534-4f16-a4f5-ba83fbccf067">
+      <BuildType Solution="All|*" Project="Debug" />
+    </Project>
     <Project Path="Setup/FluentWPF/FluentWPF.csproj">
       <BuildType Solution="All|*" Project="Debug" />
       <Platform Solution="*|x86" Project="x86" />

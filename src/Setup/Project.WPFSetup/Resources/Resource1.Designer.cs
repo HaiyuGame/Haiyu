@@ -89,7 +89,17 @@ namespace Project.WPFSetup.Resources {
         }
         
         /// <summary>
-        ///   查找类似 1.2.18.1 的本地化字符串。
+        ///   查找 System.Byte[] 类型的本地化资源。
+        /// </summary>
+        internal static byte[] Unstaller {
+            get {
+                object obj = ResourceManager.GetObject("Unstaller", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 1.2.19 的本地化字符串。
         /// </summary>
         internal static string Version {
             get {

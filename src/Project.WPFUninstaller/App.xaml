@@ -1,0 +1,18 @@
+﻿<Application
+    x:Class="Project.WPFUninstaller.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:Project.WPFUninstaller"
+    xmlns:theme="clr-namespace:FluentWPF;assembly=FluentWPF"
+    StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!--  颜色  -->
+                <theme:FluentXamlResource Type="Light" />
+                <!--  样式  -->
+                <ResourceDictionary Source="pack://application:,,,/FluentWPF;component/FluentXamlStyle.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

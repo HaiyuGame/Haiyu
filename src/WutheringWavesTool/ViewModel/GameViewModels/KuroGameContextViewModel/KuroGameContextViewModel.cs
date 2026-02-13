@@ -1,4 +1,4 @@
-using System.Diagnostics.Contracts;
+﻿using System.Diagnostics.Contracts;
 using Haiyu.Models.Dialogs;
 using Haiyu.Services.DialogServices;
 using Haiyu.ViewModel.GameViewModels.Contracts;
@@ -129,12 +129,14 @@ public abstract partial class KuroGameContextViewModel
             await this.CTS?.CancelAsync();
             this.CTS = null;
             GameContext.GameContextOutput -= GameContext_GameContextOutput;
+            GameContext.GameContextProdOutput -= GameContext_GameContextProdOutput;
         }
         GC.Collect();
         this.CTS = new CancellationTokenSource();
         this.GameContext = Instance.Host.Services.GetRequiredKeyedService<IGameContext>(name);
         CurrentProgressValue = 0;
         GameContext.GameContextOutput += GameContext_GameContextOutput;
+        GameContext.GameContextProdOutput+= GameContext_GameContextProdOutput;
         var dx11 = await GameContext.GameLocalConfig.GetConfigAsync(GameLocalSettingName.IsDx11);
         if (bool.TryParse(dx11, out var flag))
         {
@@ -152,7 +154,7 @@ public abstract partial class KuroGameContextViewModel
     }
 
     /// <summary>
-    /// 按钮类型,1为安装游戏,2为下载游戏,3为开始游戏,4为准备更新,5为游戏中
+    /// 按钮类型,1为安装游戏,2为下载游戏,3为开始游戏,4为准备更新,5为游戏中,6为安装预下载
     /// </summary>
     private int _bthType = 0;
     private bool disposedValue;
@@ -204,6 +206,28 @@ public abstract partial class KuroGameContextViewModel
                 this.CTS.Token
             );
             var wallpaperType = AppSettings.WallpaperType;
+            if (status.IsPredownloaded)
+            {
+                PredCardVisibility = Visibility.Visible;
+                if (!status.PredownloadedDone)
+                {
+                    PredCardVisibility = Visibility.Visible;
+                    PredDownloadBthVisibility = Visibility.Visible;
+                    PredDownloadDoneVisibility = Visibility.Collapsed;
+                    this.PredDownloadingVisibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    PredCardVisibility = Visibility.Visible;
+                    PredDownloadBthVisibility = Visibility.Collapsed;
+                    PredDownloadDoneVisibility = Visibility.Visible;
+                    this.PredDownloadingVisibility = Visibility.Collapsed;
+                }
+            }
+            else
+            {
+                PredCardVisibility = Visibility.Collapsed;
+            }
             if (wallpaperType == "Video")
             {
                 WallpaperService.SetMediaForUrl(
@@ -241,17 +265,35 @@ public abstract partial class KuroGameContextViewModel
         GameLauncherBthVisibility = Visibility.Visible;
         if (isUpdate)
         {
-            _bthType = 4;
+            var launcher = await GameContext.GetGameLauncherSourceAsync(null, this.CTS.Token);
             this.CurrentProgressValue = 0;
             this.MaxProgressValue = 0;
-            Logger.WriteInfo("游戏版本有更新");
-            BottomBarContent = "游戏有更新";
-            LauncheContent = "更新游戏";
-            DisplayVersion = version;
-            EnableStartGameBth = true;
-            LauncherIcon = "\uE898";
-           
-            
+            var localPredVersion = await GameContext.GameLocalConfig.GetConfigAsync(GameLocalSettingName.ProdDownloadVersion);
+            var localVersion = await GameContext.GameLocalConfig.GetConfigAsync(GameLocalSettingName.LocalGameVersion);
+            var doneDownload = await GameContext.GameLocalConfig.GetConfigAsync(GameLocalSettingName.ProdDownloadFolderDone);
+            if (launcher == null)
+                return;
+            if(launcher.ResourceDefault.Version == localPredVersion && localVersion != launcher.ResourceDefault.Version)
+            {
+                if(bool.TryParse(doneDownload,out var done))
+                {
+                    _bthType = 6;
+                    BottomBarContent = "游戏有更新";
+                    LauncheContent = "安装更新";
+                    DisplayVersion = localPredVersion;
+                    EnableStartGameBth = true;
+                    LauncherIcon = "\uE896";
+                }
+            }
+            else
+            {
+                _bthType = 4;
+                BottomBarContent = "游戏有更新";
+                LauncheContent = "更新游戏";
+                DisplayVersion = version;
+                EnableStartGameBth = true;
+                LauncherIcon = "\uE898";
+            }
         }
         else
         {
@@ -351,6 +393,7 @@ public abstract partial class KuroGameContextViewModel
             Logger.WriteInfo($"选择游戏安装文件：{result.InstallFolder}");
             if (File.Exists(result.InstallFolder + $"//{this.GameContext.Config.GameExeName}"))
             {
+                this.PauseIcon = "\uE769";
                 Task.Factory.StartNew(async () =>
                 {
                     await this.GameContext.StartDownloadTaskAsync(
@@ -368,6 +411,7 @@ public abstract partial class KuroGameContextViewModel
         {
             Logger.WriteInfo($"继续进行下载");
             var launcher = await GameContext.GetGameLauncherSourceAsync(null, this.CTS.Token);
+            this.PauseIcon = "\uE769";
             Task.Factory.StartNew(async () =>
             {
                 await this.GameContext.StartDownloadTaskAsync(
@@ -479,6 +523,8 @@ public abstract partial class KuroGameContextViewModel
         );
     }
 
+    
+
     public abstract Task LoadAfter();
 
     public abstract void DisposeAfter();
@@ -496,6 +542,7 @@ public abstract partial class KuroGameContextViewModel
             if (disposing)
             {
                 GameContext.GameContextOutput -= GameContext_GameContextOutput;
+                GameContext.GameContextProdOutput -= GameContext_GameContextProdOutput;
                 DisposeAfter();
             }
             disposedValue = true;

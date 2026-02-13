@@ -5,6 +5,7 @@ using Haiyu.Models.Dialogs;
 using Haiyu.Services.DialogServices;
 using Waves.Core.Common;
 using Waves.Core.Helpers;
+using Waves.Core.Models.Enums;
 
 namespace Haiyu.ViewModel.DialogViewModels;
 
@@ -20,11 +21,7 @@ public sealed partial class UpdateGameViewModel : DialogViewModelBase
     }
 
     public IGameContext GameContext { get; private set; }
-
-    public void SetData(IGameContext context)
-    {
-        this.GameContext = context;
-    }
+    public UpdateGameType InvokeType { get; private set; }
 
     [ObservableProperty]
     public partial string NewVersion { get; set; }
@@ -52,6 +49,9 @@ public sealed partial class UpdateGameViewModel : DialogViewModelBase
 
     private string? _localPath;
 
+    [ObservableProperty]
+    public partial string InvokeName { get; set; }
+
     /// <summary>
     /// 磁盘更新示意图
     /// </summary>
@@ -62,7 +62,7 @@ public sealed partial class UpdateGameViewModel : DialogViewModelBase
 
     public UpdateGameResult? GameResult()
     {
-        return new UpdateGameResult() { DiffSavePath = DiffSavePath,IsOk = this.IsOk };
+        return new UpdateGameResult() { DiffSavePath = DiffSavePath, IsOk = this.IsOk };
     }
 
     [RelayCommand]
@@ -79,30 +79,19 @@ public sealed partial class UpdateGameViewModel : DialogViewModelBase
             .FirstOrDefault(d => d.Name.Equals(rootDir, StringComparison.OrdinalIgnoreCase));
         if (driveInfo == null || !driveInfo.IsReady)
         {
-            
             EnableContinue = false;
         }
-        if(rootDir == result.Path)
+        if (rootDir == result.Path)
         {
-            WindowExtension.MessageBox(
-                0,
-                "不能选择磁盘根目录作为补丁下载目录！",
-                "警告",
-                0
-            );
+            WindowExtension.MessageBox(0, "不能选择磁盘根目录作为补丁下载目录！", "警告", 0);
             EnableContinue = false;
             return;
         }
         double totalSizeGB = ByteConversion.BytesToGigabytes(driveInfo.TotalSize, 2);
         double freeSpaceGB = ByteConversion.BytesToGigabytes(driveInfo.TotalFreeSpace, 2);
-        if(freeSpaceGB< PatcherFileSize)
+        if (freeSpaceGB < PatcherFileSize)
         {
-            WindowExtension.MessageBox(
-                0,
-                "选择磁盘容量不足！",
-                "警告",
-                0
-            );
+            WindowExtension.MessageBox(0, "选择磁盘容量不足！", "警告", 0);
             EnableContinue = false;
             return;
         }
@@ -112,28 +101,66 @@ public sealed partial class UpdateGameViewModel : DialogViewModelBase
     [RelayCommand]
     async Task Loaded()
     {
+        string? localVersion = "";
         var launcher = await this.GameContext.GetGameLauncherSourceAsync(null, this.CTS.Token);
+        #region 前置判断
+        if(this.InvokeType == UpdateGameType.UpdateGame)
+        {
+            if (launcher == null || launcher.ResourceDefault == null)
+            {
+                WindowExtension.MessageBox(0, "游戏资源拉取失败！", "错误", 0);
+                this.Close();
+                return;
+            }
+        }
+        else
+        {
+            if(launcher == null || launcher.Predownload == null)
+            {
+                WindowExtension.MessageBox(0, "预下载资源拉取失败！", "错误", 0);
+                this.Close();
+                return;
+            }
+        }
+        #endregion
         _localPath = await this.GameContext.GameLocalConfig.GetConfigAsync(
-            GameLocalSettingName.GameLauncherBassFolder,
-            this.CTS.Token
-        );
-        var localVersion = await this.GameContext.GameLocalConfig.GetConfigAsync(
-            GameLocalSettingName.LocalGameVersion,
-            this.CTS.Token
-        );
-        var defaultConfig = launcher.ResourceDefault;
+               GameLocalSettingName.GameLauncherBassFolder,
+               this.CTS.Token
+           );
+        localVersion = await this.GameContext.GameLocalConfig.GetConfigAsync(
+                GameLocalSettingName.LocalGameVersion,
+                this.CTS.Token
+            );
+        if(localVersion == null)
+        {
+            WindowExtension.MessageBox(0, "本地游戏版本获取失败，请重启启动器后重新尝试", "错误", 0);
+            return;
+        }
         LocalVersion = localVersion;
-        NewVersion = defaultConfig.Version;
-        NewFileSize = ByteConversion.BytesToGigabytes(defaultConfig.Config.UnCompressSize, 2);
+        NewVersion =
+            this.InvokeType == UpdateGameType.UpdateGame
+                ? launcher.ResourceDefault.Version
+                : launcher.Predownload.Version;
+        NewFileSize = ByteConversion.BytesToGigabytes(
+            this.InvokeType == UpdateGameType.UpdateGame
+                ? launcher.ResourceDefault.Config.UnCompressSize
+                : launcher.Predownload.Config.UnCompressSize,
+            2
+        );
         var localSize = await FolderSizeCalculator.CalculateFolderSizeAsync(
             _localPath!,
             this.CTS.Token
         );
         LocalFileSize = ByteConversion.BytesToGigabytes(localSize, 2);
-        var patche = defaultConfig
-            .Config.PatchConfig.Where(x => x.Version == localVersion)
-            .FirstOrDefault();
-        PatcherFileSize = ByteConversion.BytesToGigabytes(patche.UnCompressSize + patche.Size, 2);
+        var patche =
+            this.InvokeType == UpdateGameType.UpdateGame
+                ? launcher
+                    .ResourceDefault.Config.PatchConfig.Where(x => x.Version == localVersion)
+                    .FirstOrDefault()
+                : launcher
+                    .Predownload.Config.PatchConfig.Where(x => x.Version == localVersion)
+                    .FirstOrDefault();
+        PatcherFileSize = ByteConversion.BytesToGigabytes(patche.Size, 2);
         string? driveLetter = Path.GetPathRoot(_localPath);
         DriveInfo? driveInfo = DriveInfo
             .GetDrives()
@@ -186,4 +213,17 @@ public sealed partial class UpdateGameViewModel : DialogViewModelBase
         this.Close();
     }
 
+    internal void SetData(IGameContext context, UpdateGameType item2)
+    {
+        this.GameContext = context;
+        this.InvokeType = item2;
+        if(this.InvokeType == UpdateGameType.UpdateGame)
+        {
+            this.InvokeName = "更新游戏";
+        }
+        else
+        {
+            this.InvokeName = "预下载游戏";
+        }
+    }
 }

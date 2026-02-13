@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using Waves.Api.Models;
 using Waves.Api.Models.Launcher;
 using Waves.Core.Common;
@@ -74,7 +75,7 @@ public partial class KuroGameContextBase
     #endregion
 
 
-    public async Task UpdataGameAsync(string diffSavePath = null)
+    public async Task UpdataGameAsync(string diffSavePath = null,UpdateGameType type = UpdateGameType.UpdateGame)
     {
         _downloadCTS = new CancellationTokenSource();
         var folder = await GameLocalConfig.GetConfigAsync(
@@ -85,6 +86,21 @@ public partial class KuroGameContextBase
             return;
         await GameLocalConfig.SaveConfigAsync(GameLocalSettingName.LocalGameUpdateing, "True");
         await UpdataGameResourceAsync(folder, launcher, diffSavePath);
+        if(type == UpdateGameType.ProDownload)
+        {
+            //如果是预下载安装，则直接删除预下载配置
+            await this.GameLocalConfig.SaveConfigAsync(
+               GameLocalSettingName.ProdDownloadPath,
+               "");
+            await this.GameLocalConfig.SaveConfigAsync(
+                GameLocalSettingName.ProdDownloadFolderDone,
+                "False"
+            ); await this.GameLocalConfig.SaveConfigAsync(
+                GameLocalSettingName.ProdDownloadVersion,
+                ""
+            );
+        }
+
     }
 
     #region 核心下载逻辑
@@ -145,7 +161,9 @@ public partial class KuroGameContextBase
         await this.GameLocalConfig.SaveConfigAsync(
             GameLocalSettingName.LocalGameUpdateing,
             "False"
-        );
+        ); 
+
+       
         await this.GameLocalConfig.SaveConfigAsync(
             GameLocalSettingName.GameLauncherBassProgram,
             $"{installFolder}\\{this.Config.GameExeName}"
@@ -254,7 +272,8 @@ public partial class KuroGameContextBase
     public async Task<bool> ParallelDownloadAsync(
         List<IndexResource> resource,
         ParallelOptions options,
-        string folder
+        string folder,
+        bool ispred = false
     )
     {
         try
@@ -267,7 +286,7 @@ public partial class KuroGameContextBase
                     Logger.WriteInfo(
                         $"[{item.Dest}],当前进度大小[{Math.Round((double)_totalProgressSize, 2)}/{Math.Round((double)_totalfileSize, 2)}]"
                     );
-                    if (_downloadCTS?.IsCancellationRequested ?? true)
+                    if (IsDownloadCanceled())
                     {
                         this._downloadState.IsActive = false;
                         await SetNoneStatusAsync().ConfigureAwait(false);
@@ -278,7 +297,7 @@ public partial class KuroGameContextBase
                     {
                         if (item.ChunkInfos == null)
                         {
-                            var checkResult = await VaildateFullFile(item.Md5, filePath);
+                            var checkResult = await VaildateFullFile(item.Md5, filePath, ispred);
                             if (checkResult)
                             {
                                 Logger.WriteInfo("需要全量下载……");
@@ -291,7 +310,8 @@ public partial class KuroGameContextBase
                                         Start = 0,
                                         End = item.Size - 1,
                                         Md5 = item.Md5,
-                                    }
+                                    },
+                                    ispred
                                 );
                             }
                             else
@@ -299,7 +319,8 @@ public partial class KuroGameContextBase
                                 await UpdateFileProgress(
                                         GameContextActionType.Verify,
                                         item.Size,
-                                        true
+                                        true,
+                                        ispred
                                     )
                                     .ConfigureAwait(false);
                             }
@@ -311,7 +332,8 @@ public partial class KuroGameContextBase
                             {
                                 var needDownload = await ValidateFileChunks(
                                     item.ChunkInfos[i],
-                                    filePath
+                                    filePath,
+                                    ispred
                                 );
                                 if (needDownload)
                                 {
@@ -324,7 +346,8 @@ public partial class KuroGameContextBase
                                             item.ChunkInfos[i].Start,
                                             item.ChunkInfos[i].End,
                                             true,
-                                            item.Size
+                                            item.Size,
+                                            ispred
                                         );
                                     }
                                     else
@@ -334,7 +357,8 @@ public partial class KuroGameContextBase
                                             filePath,
                                             item.ChunkInfos[i].Start,
                                             item.ChunkInfos[i].End,
-                                            false
+                                            false,
+                                            isPred: ispred
                                         );
                                     }
                                 }
@@ -343,7 +367,8 @@ public partial class KuroGameContextBase
                                     await UpdateFileProgress(
                                             GameContextActionType.Verify,
                                             item.ChunkInfos[i].End - item.ChunkInfos[i].Start,
-                                            true
+                                            true,
+                                            ispred
                                         )
                                         .ConfigureAwait(false);
                                 }
@@ -362,7 +387,8 @@ public partial class KuroGameContextBase
                                 Start = 0,
                                 End = item.Size - 1,
                                 Md5 = item.Md5,
-                            }
+                            },
+                            ispred
                         );
                         //await FinalValidation(file, filePath);
                     }
@@ -424,6 +450,7 @@ public partial class KuroGameContextBase
         {
             this._isDownload = false;
             _downloadCTS?.Dispose();
+            _downloadCTS = null;
         }
     }
     #endregion
@@ -437,10 +464,16 @@ public partial class KuroGameContextBase
         var currentVersion = await GameLocalConfig.GetConfigAsync(
             GameLocalSettingName.LocalGameVersion
         );
+        #region 测试预下载
         var previous = launcher
             .ResourceDefault.Config.PatchConfig.Where(x => x.Version == currentVersion)
             .FirstOrDefault();
+        
+        #endregion
         PatchIndexGameResource? patch = null;
+        this._downloadState = new DownloadState();
+        await _downloadState.SetSpeedLimitAsync(this.SpeedValue);
+        _downloadState.IsActive = true;
         _totalProgressTotal = 0;
         _totalVerifiedBytes = 0;
         _totalDownloadedBytes = 0;
@@ -477,9 +510,6 @@ public partial class KuroGameContextBase
             + previous.BaseUrl;
         _totalProgressTotal = 0;
         _totalProgressSize = 0;
-        this._downloadState = new DownloadState();
-        await _downloadState.SetSpeedLimitAsync(this.SpeedValue);
-        _downloadState.IsActive = true;
         if (
             patch.ApplyTypes != null
             && patch.ApplyTypes.Contains("patch")
@@ -492,8 +522,6 @@ public partial class KuroGameContextBase
             _totalfileSize = size;
             _totalFileTotal = count.Count() - 1;
             _totalProgressTotal = 0;
-            this._downloadState = new DownloadState();
-            await _downloadState.SetSpeedLimitAsync(this.SpeedValue);
             result = await Task.Run(() => DownloadPatcheToResource(diffSavePath, patch));
             if (result == false)
             {
@@ -502,6 +530,7 @@ public partial class KuroGameContextBase
                 await UpdateFileProgress(
                         GameContextActionType.TipMessage,
                         0,
+                        false,
                         false,
                         "下载差异组文件失败，请尝试修复游戏！"
                     )
@@ -523,8 +552,11 @@ public partial class KuroGameContextBase
             _totalFileTotal = count.Count() - 1;
             _totalProgressTotal = 0;
             this._downloadState = new DownloadState();
+            this._downloadState.IsActive = true;
             await _downloadState.SetSpeedLimitAsync(this.SpeedValue);
-            result = await Task.Run(() => DownloadGroupPatcheToResource(diffSavePath, patch));
+            result = await Task.Run(() =>
+                DownloadGroupPatcheToResource(diffSavePath, patch.Resource)
+            );
             if (result == false)
             {
                 Logger.WriteInfo($"下载差异组文件失败，请检查网络之后，重启启动器再次更新");
@@ -532,6 +564,7 @@ public partial class KuroGameContextBase
                 await UpdateFileProgress(
                         GameContextActionType.TipMessage,
                         0,
+                        false,
                         false,
                         "下载差异组文件失败，请尝试修复游戏！"
                     )
@@ -571,6 +604,7 @@ public partial class KuroGameContextBase
                 Logger.WriteInfo($"删除差异文件：{filePath}");
             }
             var resource = await GetGameResourceAsync(launcher.ResourceDefault);
+            //var resource2 = await GetGameResourceAsync(launcher.ResourceDefault,launcher.Predownload);
             if (resource == null)
             {
                 this._isDownload = false;
@@ -578,6 +612,7 @@ public partial class KuroGameContextBase
                 await UpdateFileProgress(
                         GameContextActionType.TipMessage,
                         0,
+                        false,
                         false,
                         "下载差异组文件失败，请重启应用进行重新更新"
                     )
@@ -592,6 +627,7 @@ public partial class KuroGameContextBase
                 await UpdateFileProgress(
                         GameContextActionType.TipMessage,
                         0,
+                        false,
                         false,
                         "更新失败，请直接进行修复文件"
                     )
@@ -620,6 +656,7 @@ public partial class KuroGameContextBase
             await UpdateFileProgress(
                 GameContextActionType.TipMessage,
                 0,
+                false,
                 false,
                 "下载差异文件失败，请直接进行修复游戏"
             );
@@ -657,6 +694,21 @@ public partial class KuroGameContextBase
         await DownloadComplate(launcher);
         #endregion
         await SetNoneStatusAsync().ConfigureAwait(false);
+    }
+
+
+    private async Task<IndexGameResource> GetGameResourceAsync(ResourceDefault resourceDefault,Predownload predownload,CancellationToken token = default)
+    {
+        var resourceIndexUrl =
+            resourceDefault.CdnList.Where(x => x.P != 0).OrderBy(x => x.P).First().Url
+            + predownload.Config.IndexFile;
+        var result = await HttpClientService.HttpClient.GetAsync(resourceIndexUrl, token);
+        var jsonStr = await result.Content.ReadAsStringAsync();
+        var launcherIndex = JsonSerializer.Deserialize<IndexGameResource>(
+            jsonStr,
+            IndexGameResourceContext.Default.IndexGameResource
+        );
+        return launcherIndex;
     }
 
     private async Task<bool> CheckApplyFilesMd5(
@@ -697,6 +749,7 @@ public partial class KuroGameContextBase
                         GameContextActionType.TipMessage,
                         0,
                         false,
+                        false,
                         "更新校验出错，请直接尝试修复游戏，下载缓存需手动删除"
                     )
                     .ConfigureAwait(false);
@@ -708,12 +761,7 @@ public partial class KuroGameContextBase
         catch (Exception ex)
         {
             await SetNoneStatusAsync().ConfigureAwait(false);
-            await UpdateFileProgress(
-                GameContextActionType.TipMessage,
-                0,
-                false,
-                ex.Message
-            );
+            await UpdateFileProgress(GameContextActionType.TipMessage, 0, false, false, ex.Message);
             this._isDownload = false;
             Logger.WriteError(ex.Message);
             return false;
@@ -722,38 +770,22 @@ public partial class KuroGameContextBase
 
     private async Task<bool> DownloadGroupPatcheToResource(
         string folder,
-        PatchIndexGameResource patch
+        List<IndexResource> patch,
+        bool ispred = false
     )
     {
-        var patchInfos = patch.Resource.Where(x=>x.Dest.EndsWith("krpdiff")).ToList();
+        var patchInfos = patch.Where(x => x.Dest.EndsWith("krpdiff")).ToList();
         ParallelOptions options = new ParallelOptions()
         {
             MaxDegreeOfParallelism = MAX_Concurrency_Count,
             CancellationToken = _downloadCTS.Token,
         };
-        if (!(await ParallelDownloadAsync(patchInfos, options, folder)))
+        if (!(await ParallelDownloadAsync(patchInfos, options, folder, ispred)))
         {
             Logger.WriteError("下载差异文件取消或出现异常");
             return false;
         }
-
         return true;
-        //for (int i = 0; i < patchInfos.Count(); i++)
-        //{
-        //    var downloadUrl = _downloadBaseUrl + patchInfos[i].Dest;
-        //    var filePath = BuildFileHelper.BuildFilePath(folder, patchInfos[i]);
-        //    string? krdiffPath = "";
-        //    if (File.Exists(filePath))
-        //    {
-        //        continue;
-        //        //File.Delete(filePath);
-        //    }
-
-        //    krdiffPath = await DownloadFileByKrDiff(patchInfos[i].Dest, filePath);
-        //    if (krdiffPath == null)
-        //    {
-        //    }
-        //}
     }
 
     private async Task<bool> DownloadPatcheToResource(string folder, PatchIndexGameResource patch)
@@ -837,7 +869,7 @@ public partial class KuroGameContextBase
             for (int i = 0; i < resource.Count; i++)
             {
                 Logger.WriteInfo($"开始处理更新文件{resource[i].Dest}");
-                if (_downloadCTS?.IsCancellationRequested ?? true)
+                if (IsDownloadCanceled())
                 {
                     this._downloadState.IsActive = false;
                     await SetNoneStatusAsync().ConfigureAwait(false);
@@ -984,8 +1016,12 @@ public partial class KuroGameContextBase
         }
         this._isDownload = false;
         _downloadState?.IsStop = true;
-        await _downloadCTS?.CancelAsync();
-        _downloadCTS.Dispose();
+        if (_downloadCTS != null)
+        {
+            await _downloadCTS.CancelAsync();
+            _downloadCTS.Dispose();
+            _downloadCTS = null;
+        }
         return;
     }
 
@@ -996,7 +1032,11 @@ public partial class KuroGameContextBase
     /// <param name="file"></param>
     /// <param name="filePath"></param>
     /// <returns></returns>
-    private async Task<bool> ValidateFileChunks(IndexChunkInfo file, string filePath)
+    private async Task<bool> ValidateFileChunks(
+        IndexChunkInfo file,
+        string filePath,
+        bool isPred = false
+    )
     {
         using (
             var fs = new FileStream(
@@ -1017,6 +1057,11 @@ public partial class KuroGameContextBase
                 //    return true;
                 //}
                 var memoryPool = ArrayPool<byte>.Shared;
+                var downloadCts = _downloadCTS;
+                if (downloadCts == null || _downloadState?.IsStop == true)
+                {
+                    throw new OperationCanceledException();
+                }
                 long offset = file.Start;
                 long remaining = file.End - file.Start + 1;
                 bool isValid = true;
@@ -1030,7 +1075,7 @@ public partial class KuroGameContextBase
                         var buffer = memoryPool.Rent(MaxBufferSize);
                         try
                         {
-                            if (_downloadCTS.IsCancellationRequested)
+                            if (downloadCts.IsCancellationRequested || _downloadState?.IsStop == true)
                             {
                                 throw new OperationCanceledException();
                             }
@@ -1038,7 +1083,7 @@ public partial class KuroGameContextBase
                                     buffer,
                                     0,
                                     MaxBufferSize,
-                                    _downloadCTS.Token
+                                    downloadCts.Token
                                 )
                                 .ConfigureAwait(false);
                             if (bytesRead == 0)
@@ -1053,7 +1098,8 @@ public partial class KuroGameContextBase
                                 await UpdateFileProgress(
                                         GameContextActionType.Verify,
                                         accumulatedBytes,
-                                        false
+                                        false,
+                                        isPred
                                     )
                                     .ConfigureAwait(false);
                                 accumulatedBytes = 0;
@@ -1073,7 +1119,8 @@ public partial class KuroGameContextBase
                         await UpdateFileProgress(
                                 GameContextActionType.Verify,
                                 accumulatedBytes,
-                                false
+                                false,
+                                isPred
                             )
                             .ConfigureAwait(false);
                     }
@@ -1101,11 +1148,16 @@ public partial class KuroGameContextBase
         }
     }
 
-    private async Task<bool> VaildateFullFile(string md5Value, string filePath)
+    private async Task<bool> VaildateFullFile(string md5Value, string filePath, bool isPred = false)
     {
         const int bufferSize = 262144; // 80KB缓冲区
         using var md5 = MD5.Create();
         var memoryPool = ArrayPool<byte>.Shared;
+        var downloadCts = _downloadCTS;
+        if (downloadCts == null || _downloadState?.IsStop == true)
+        {
+            throw new OperationCanceledException();
+        }
         const long UpdateThreshold = 1048576; // 1MB进度更新阈值
         FileStream? fs = null;
         try
@@ -1125,9 +1177,7 @@ public partial class KuroGameContextBase
                 long accumulatedBytes = 0L;
                 while (true)
                 {
-                    if (_downloadCTS == null)
-                        return false;
-                    if (_downloadCTS.IsCancellationRequested)
+                    if (downloadCts.IsCancellationRequested || _downloadState?.IsStop == true)
                     {
                         throw new OperationCanceledException();
                     }
@@ -1138,7 +1188,7 @@ public partial class KuroGameContextBase
                     {
                         int bytesRead = await fs.ReadAsync(
                                 buffer.AsMemory(0, bufferSize),
-                                _downloadCTS.Token
+                                downloadCts.Token
                             )
                             .ConfigureAwait(false);
                         if (bytesRead == 0)
@@ -1153,7 +1203,8 @@ public partial class KuroGameContextBase
                             await UpdateFileProgress(
                                     GameContextActionType.Verify,
                                     accumulatedBytes,
-                                    false
+                                    false,
+                                    isPred
                                 )
                                 .ConfigureAwait(false);
                             accumulatedBytes = 0;
@@ -1166,7 +1217,12 @@ public partial class KuroGameContextBase
                 }
                 if (accumulatedBytes < UpdateThreshold)
                 {
-                    await UpdateFileProgress(GameContextActionType.Verify, accumulatedBytes, false)
+                    await UpdateFileProgress(
+                            GameContextActionType.Verify,
+                            accumulatedBytes,
+                            false,
+                            isPred: isPred
+                        )
                         .ConfigureAwait(false);
                 }
             }
@@ -1206,7 +1262,8 @@ public partial class KuroGameContextBase
         long start,
         long end,
         bool isLast = false,
-        long allSize = 0L
+        long allSize = 0L,
+        bool isPred = false
     )
     {
         using (
@@ -1222,6 +1279,11 @@ public partial class KuroGameContextBase
         {
             try
             {
+                var downloadCts = _downloadCTS;
+                if (downloadCts == null || _downloadState?.IsStop == true)
+                {
+                    throw new OperationCanceledException();
+                }
                 long accumulatedBytes = 0;
                 if (start == 0 && end == -1)
                 {
@@ -1235,9 +1297,9 @@ public partial class KuroGameContextBase
                 using var response = await HttpClientService.GameDownloadClient.SendAsync(
                     request,
                     HttpCompletionOption.ResponseHeadersRead,
-                    _downloadCTS.Token
+                    downloadCts.Token
                 );
-                var stream = await response.Content.ReadAsStreamAsync(_downloadCTS.Token);
+                var stream = await response.Content.ReadAsStreamAsync(downloadCts.Token);
                 if (start < 0 || end < start)
                 {
                     Logger.WriteError($"分片范围无效: {start}-{end}");
@@ -1251,7 +1313,7 @@ public partial class KuroGameContextBase
                 bool isBreak = false;
                 while (totalWritten < chunkTotalSize)
                 {
-                    if (_downloadCTS.IsCancellationRequested)
+                    if (downloadCts.IsCancellationRequested || _downloadState?.IsStop == true)
                     {
                         throw new OperationCanceledException();
                     }
@@ -1261,7 +1323,7 @@ public partial class KuroGameContextBase
                     try
                     {
                         int bytesRead = await stream
-                            .ReadAsync(buffer.AsMemory(0, bytesToRead), _downloadCTS.Token)
+                            .ReadAsync(buffer.AsMemory(0, bytesToRead), downloadCts.Token)
                             .ConfigureAwait(false);
                         if (bytesRead == 0)
                         {
@@ -1272,7 +1334,7 @@ public partial class KuroGameContextBase
                             .SpeedLimiter.LimitAsync(bytesRead)
                             .ConfigureAwait(false);
                         await fileStream
-                            .WriteAsync(buffer.AsMemory(0, bytesRead), _downloadCTS.Token)
+                            .WriteAsync(buffer.AsMemory(0, bytesRead), downloadCts.Token)
                             .ConfigureAwait(false);
                         totalWritten += bytesRead;
                         accumulatedBytes += bytesRead;
@@ -1280,11 +1342,17 @@ public partial class KuroGameContextBase
                         {
                             await UpdateFileProgress(
                                     GameContextActionType.Download,
-                                    accumulatedBytes
+                                    accumulatedBytes,
+                                    true,
+                                    isPred
                                 )
                                 .ConfigureAwait(false);
                             accumulatedBytes = 0;
                         }
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
                     }
                     catch (Exception ex)
                     {
@@ -1297,7 +1365,11 @@ public partial class KuroGameContextBase
                 }
                 if (accumulatedBytes > 0 && !isBreak)
                 {
-                    await UpdateFileProgress(GameContextActionType.Download, accumulatedBytes)
+                    await UpdateFileProgress(
+                            GameContextActionType.Download,
+                            accumulatedBytes,
+                            isPred: isPred
+                        )
                         .ConfigureAwait(false);
                 }
                 if (isLast)
@@ -1305,36 +1377,59 @@ public partial class KuroGameContextBase
                 stream.Close();
                 await stream.DisposeAsync();
             }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
             catch (Exception)
             {
-                await fileStream.FlushAsync(_downloadCTS.Token);
+                await fileStream.FlushAsync(_downloadCTS?.Token ?? CancellationToken.None);
                 await fileStream.FlushAsync();
                 await fileStream.DisposeAsync();
             }
         }
     }
 
-    public async Task SetNoneStatusAsync()
+    public async Task SetNoneStatusAsync(bool isPred = false)
     {
         if (this._downloadState != null)
         {
             this._downloadState.IsActive = false;
-            this._downloadState.IsStop = false;
-        }
-        if (this.gameContextOutputDelegate == null)
-            return;
-        await this.gameContextOutputDelegate.Invoke(
-            this,
-            new GameContextOutputArgs()
+            if (!this._downloadState.IsStop)
             {
-                Type = GameContextActionType.None,
-                CurrentSize = _totalProgressSize,
-                TotalSize = _totalfileSize,
-                DownloadSpeed = _downloadSpeed,
-                VerifySpeed = VerifySpeed,
-                RemainingTime = this.RemainingTime,
+                this._downloadState.IsStop = false;
             }
-        );
+        }
+        if (this.gameContextOutputDelegate != null && !isPred)
+        {
+            await this.gameContextOutputDelegate.Invoke(
+                this,
+                new GameContextOutputArgs()
+                {
+                    Type = GameContextActionType.None,
+                    CurrentSize = _totalProgressSize,
+                    TotalSize = _totalfileSize,
+                    DownloadSpeed = _downloadSpeed,
+                    VerifySpeed = VerifySpeed,
+                    RemainingTime = this.RemainingTime,
+                }
+            );
+        }
+        else
+        {
+            await this.gameContextProdOutputDelegate.Invoke(
+                this,
+                new GameContextOutputArgs()
+                {
+                    Type = GameContextActionType.None,
+                    CurrentSize = _totalProgressSize,
+                    TotalSize = _totalfileSize,
+                    DownloadSpeed = _downloadSpeed,
+                    VerifySpeed = VerifySpeed,
+                    RemainingTime = this.RemainingTime,
+                }
+            );
+        }
     }
 
     public async Task SetSpeedLimitAsync(long bytesPerSecond)
@@ -1350,7 +1445,8 @@ public partial class KuroGameContextBase
         string dest,
         long size,
         string filePath,
-        IndexChunkInfo chunk
+        IndexChunkInfo chunk,
+        bool ispred = false
     )
     {
         long accumulatedBytes = 0;
@@ -1430,7 +1526,8 @@ public partial class KuroGameContextBase
                         await UpdateFileProgress(
                                 GameContextActionType.Download,
                                 accumulatedBytes,
-                                true
+                                true,
+                                ispred
                             )
                             .ConfigureAwait(false);
                         accumulatedBytes = 0; // 重置累积计数器
@@ -1438,7 +1535,12 @@ public partial class KuroGameContextBase
                 }
                 if (accumulatedBytes > 0 && !isBreak)
                 {
-                    await UpdateFileProgress(GameContextActionType.Download, accumulatedBytes, true)
+                    await UpdateFileProgress(
+                            GameContextActionType.Download,
+                            accumulatedBytes,
+                            true,
+                            ispred
+                        )
                         .ConfigureAwait(false);
                 }
                 if (totalWritten != chunkTotalSize)
@@ -1525,6 +1627,7 @@ public partial class KuroGameContextBase
                                 GameContextActionType.Download,
                                 accumulatedBytes,
                                 true,
+                                false,
                                 "下载差异文件"
                             )
                             .ConfigureAwait(false);
@@ -1537,6 +1640,7 @@ public partial class KuroGameContextBase
                             GameContextActionType.Download,
                             accumulatedBytes,
                             true,
+                            false,
                             "下载差异文件"
                         )
                         .ConfigureAwait(false);
@@ -1564,12 +1668,17 @@ public partial class KuroGameContextBase
 
     #region 辅助方法
 
+    private bool IsDownloadCanceled()
+    {
+        return _downloadCTS == null || _downloadCTS.IsCancellationRequested || _downloadState?.IsStop == true;
+    }
 
     private async Task UpdateFileProgress(
         GameContextActionType type,
         long fileSize,
         bool isAdd = true,
-        string v = null
+        bool isPred = false,
+        string tip = ""
     )
     {
         if (type == GameContextActionType.Download)
@@ -1598,27 +1707,46 @@ public partial class KuroGameContextBase
             _lastSpeedUpdateTime = DateTime.Now;
         }
 
-        if (gameContextOutputDelegate == null)
-            return;
-        await gameContextOutputDelegate
-            .Invoke(
-                this,
-                new GameContextOutputArgs
-                {
-                    Type = type,
-                    CurrentSize = _totalProgressSize,
-                    TotalSize = _totalfileSize,
-                    //CurrentSize = _totalProgressTotal,
-                    //TotalSize = _totalFileTotal,
-                    DownloadSpeed = _downloadSpeed,
-                    VerifySpeed = _verifySpeed,
-                    RemainingTime = RemainingTime,
-                    IsAction = _downloadState?.IsActive ?? false,
-                    IsPause = _downloadState?.IsPaused ?? false,
-                    TipMessage = v,
-                }
-            )
-            .ConfigureAwait(false);
+        if (isPred && gameContextProdOutputDelegate != null)
+        {
+            await gameContextProdOutputDelegate
+                .Invoke(
+                    this,
+                    new GameContextOutputArgs
+                    {
+                        Type = type,
+                        CurrentSize = _totalProgressSize,
+                        TotalSize = _totalfileSize,
+                        DownloadSpeed = _downloadSpeed,
+                        VerifySpeed = _verifySpeed,
+                        RemainingTime = RemainingTime,
+                        IsAction = _downloadState?.IsActive ?? false,
+                        IsPause = _downloadState?.IsPaused ?? false,
+                        TipMessage = tip,
+                    }
+                )
+                .ConfigureAwait(false);
+        }
+        else if (isPred == false && gameContextOutputDelegate != null)
+        {
+            await gameContextOutputDelegate
+                .Invoke(
+                    this,
+                    new GameContextOutputArgs
+                    {
+                        Type = type,
+                        CurrentSize = _totalProgressSize,
+                        TotalSize = _totalfileSize,
+                        DownloadSpeed = _downloadSpeed,
+                        VerifySpeed = _verifySpeed,
+                        RemainingTime = RemainingTime,
+                        IsAction = _downloadState?.IsActive ?? false,
+                        IsPause = _downloadState?.IsPaused ?? false,
+                        TipMessage = tip,
+                    }
+                )
+                .ConfigureAwait(false);
+        }
     }
 
     public TimeSpan RemainingTime
@@ -1651,7 +1779,7 @@ public partial class KuroGameContextBase
         _totalFileTotal = resource.Count - 1;
         _totalProgressSize = 0L;
         _totalProgressTotal = 0L;
-         _totalVerifiedBytes = 0;
+        _totalVerifiedBytes = 0;
         _totalDownloadedBytes = 0;
         this._downloadState = new DownloadState();
         await _downloadState.SetSpeedLimitAsync(this.SpeedValue);

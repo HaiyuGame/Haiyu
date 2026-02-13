@@ -23,10 +23,13 @@ public class OutputLocalExeSetup : ISetup
         {
             try
             {
-                string sourcePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                var uninstallByte = Resources.Resource1.Unstaller;
                 string destinationPath = property.GetUninstallPath();
-                File.Copy(sourcePath, destinationPath, true);
-                property.UninstallString = $"{destinationPath}";
+                if (File.Exists(destinationPath))
+                {
+                    File.Delete(destinationPath);
+                }
+                File.WriteAllBytes(destinationPath, uninstallByte);
                 progress.Report((100, "成功"));
                 return ("", true);
             }

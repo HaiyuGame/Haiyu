@@ -1,4 +1,5 @@
 ﻿using Haiyu.Models.Dialogs;
+using Waves.Core.Models.Enums;
 
 namespace Haiyu.Services.Contracts;
 
@@ -17,7 +18,7 @@ public interface IDialogManager
     public Task<SelectDownloadFolderResult> ShowSelectDownloadFolderAsync(Type type);
     public Task<CloseWindowResult> ShowCloseWindowResult();
     public Task<QRScanResult> GetQRLoginResultAsync();
-    public Task<UpdateGameResult> ShowUpateGameDialogAsync(string contextName);
+    public Task<UpdateGameResult> ShowUpdateGameDialogAsync(string contextName, UpdateGameType type);
 
     public void CloseDialog();
 

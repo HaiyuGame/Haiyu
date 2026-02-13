@@ -22,8 +22,6 @@
     Background="Transparent"
     NavigationCacheMode="Disabled"
     mc:Ignorable="d">
-
-
     <Grid x:Name="backGrid" Margin="-1,0,0,0">
         <Grid.RowDefinitions>
             <RowDefinition />
@@ -540,5 +538,99 @@
             Canvas.ZIndex="-1"
             Source="{x:Bind ViewModel.VersionLogo, Mode=OneWay}"
             Stretch="UniformToFill" />
+        <StackPanel
+            Grid.Column="1"
+            Height="50"
+            Margin="0,0,10,0"
+            Padding="10,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            Background="{ThemeResource AcrylicInAppFillColorDefaultBrush}"
+            CornerRadius="5"
+            Orientation="Horizontal"
+            Visibility="{x:Bind ViewModel.PredCardVisibility, Mode=OneWay}">
+            <StackPanel.ChildrenTransitions>
+                <TransitionCollection>
+                    <RepositionThemeTransition />
+                </TransitionCollection>
+            </StackPanel.ChildrenTransitions>
+            <Grid VerticalAlignment="Center" Visibility="{x:Bind ViewModel.PredDownloadingVisibility, Mode=OneWay}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <FontIcon
+                    VerticalAlignment="Center"
+                    FontFamily="Segoe Fluent Icons"
+                    FontSize="16"
+                    Glyph="&#xEBD3;" />
+                <TextBlock
+                    Grid.Column="1"
+                    Margin="10,0,0,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    FontSize="16"
+                    Text="{x:Bind ViewModel.PreDownloadProgress, Mode=OneWay}" />
+                <TextBlock
+                    Grid.Column="2"
+                    FontSize="16"
+                    Text="%" />
+            </Grid>
+            <Button
+                VerticalAlignment="Center"
+                Command="{x:Bind ViewModel.StartPreDownloadGameCommand}"
+                Style="{ThemeResource TransparentButtonStyle}"
+                ToolTipService.ToolTip="预下载已开启，点击此处开始下载"
+                Visibility="{x:Bind ViewModel.PredDownloadBthVisibility, Mode=OneWay}">
+                <StackPanel Orientation="Horizontal">
+                    <FontIcon
+                        FontFamily="Segoe Fluent Icons"
+                        FontSize="14"
+                        Glyph="&#xEBD3;" />
+                    <TextBlock
+                        Margin="10,0,0,0"
+                        FontSize="14"
+                        Text="预下载" />
+                </StackPanel>
+            </Button>
+            <Button
+                Margin="5,0,0,0"
+                VerticalAlignment="Center"
+                Command="{x:Bind ViewModel.PausePreDownloadGameCommand}"
+                Style="{ThemeResource TransparentButtonStyle}"
+                Visibility="{x:Bind ViewModel.PredDownloadingVisibility, Mode=OneWay}">
+                <FontIcon
+                    FontFamily="Segoe Fluent Icons"
+                    FontSize="14"
+                    Glyph="{x:Bind ViewModel.PreDownloadIcon, Mode=OneWay}" />
+            </Button>
+            <Button
+                Margin="5,0,0,0"
+                VerticalAlignment="Center"
+                Command="{x:Bind ViewModel.StopDownloadGameCommand}"
+                Style="{ThemeResource TransparentButtonStyle}"
+                Visibility="{x:Bind ViewModel.PredDownloadingVisibility, Mode=OneWay}">
+                <FontIcon
+                    FontFamily="Segoe Fluent Icons"
+                    FontSize="14"
+                    Glyph="&#xE71A;" />
+            </Button>
+            <StackPanel
+                VerticalAlignment="Center"
+                Orientation="Horizontal"
+                Visibility="{x:Bind ViewModel.PredDownloadDoneVisibility, Mode=OneWay}">
+                <TextBlock VerticalAlignment="Center" Text="预下载完成" />
+                <Button
+                    Margin="5,0,0,0"
+                    Command="{x:Bind ViewModel.RepreCheckCommand}"
+                    Content="校验" />
+            </StackPanel>
+            <ProgressBar
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Bottom"
+                Maximum="100"
+                Value="75" />
+        </StackPanel>
     </Grid>
 </Page>

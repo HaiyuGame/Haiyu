@@ -11,23 +11,15 @@ internal class DeviceNumGenerator
     private const string CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     private static Random random = new Random();
 
-    /// <summary>
-    /// 解析环境变量并获取包含deviceNum的请求基础参数
-    /// </summary>
-    /// <param name="env">环境变量字典</param>
-    /// <returns>请求基础参数</returns>
     public static Dictionary<string, string> ParserEnv(Dictionary<string, string> env)
     {
         var result = new Dictionary<string, string>();
 
-        // 处理以VITE_APP_BASEHTTPREQ开头的环境变量
         foreach (var key in env.Keys.Where(k => k.StartsWith("VITE_APP_BASEHTTPREQ")))
         {
             var newKey = key.Replace("VITE_APP_BASEHTTPREQ_", "");
             result[newKey] = env[key];
         }
-
-        // 添加deviceNum及其他必要参数
         result["deviceNum"] = Uuid(32);
         result["version"] = Assembly.GetExecutingAssembly().GetName().Version.ToString();
         result["sdkVersion"] = Assembly.GetExecutingAssembly().GetName().Version.ToString();
@@ -44,27 +36,17 @@ internal class DeviceNumGenerator
     /// <returns>UUID字符串</returns>
     public static string Uuid(int length, int charSetLength = -1)
     {
-        // 尝试从存储中获取已有的UUID
         if (localStorage.ContainsKey(UUID_KEY_NAME))
         {
             return localStorage[UUID_KEY_NAME];
         }
 
-        // 创建新的UUID
         string newUuid = CreateUuid(length, charSetLength);
 
-        // 保存到存储
         localStorage[UUID_KEY_NAME] = newUuid;
 
         return newUuid;
     }
-
-    /// <summary>
-    /// 创建指定长度的随机UUID
-    /// </summary>
-    /// <param name="length">UUID长度</param>
-    /// <param name="charSetLength">字符集长度</param>
-    /// <returns>生成的UUID字符串</returns>
     public static string CreateUuid(int length, int charSetLength)
     {
         charSetLength = charSetLength > 0 ? charSetLength : CHARS.Length;
@@ -81,11 +63,6 @@ internal class DeviceNumGenerator
         return new string(result);
     }
 
-    /// <summary>
-    /// 获取HTTP请求的基础参数
-    /// </summary>
-    /// <param name="env">环境变量</param>
-    /// <returns>包含基础参数的字典</returns>
     public static Dictionary<string, string> GetHttpBaseReq(Dictionary<string, string> env)
     {
         var baseParams = new Dictionary<string, string>
@@ -115,35 +92,23 @@ internal class DeviceNumGenerator
     /// </summary>
     public static string GenerateId()
     {
-        // 1. 机器码/随机前缀 (14 hex)
         string part1 = GetRandomHex(14);
 
-        // 2. 时间戳 + 随机 (15 hex)
         long ticks = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         string part2 = (ticks ^ _random.Next()).ToString("x");
-
-        // 3. 时间戳低位 (8 hex)
         int timestamp = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         string part3 = timestamp.ToString("x8");
-
-        // 4. 自增序列 (7 digits)
         long seq;
         lock (_lock)
         {
-            _sequence = (_sequence + 1) % 10_000_000; // 保证在 7 位以内
+            _sequence = (_sequence + 1) % 10_000_000;
             seq = _sequence;
         }
         string part4 = seq.ToString("D7");
-
-        // 5. 随机后缀 (15 hex)
         string part5 = GetRandomHex(15);
 
         return $"{part1}-{part2}-{part3}-{part4}-{part5}";
     }
-
-    /// <summary>
-    /// 获取指定位数的十六进制字符串
-    /// </summary>
     private static string GetRandomHex(int length)
     {
         byte[] buffer = new byte[length];
