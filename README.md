@@ -22,11 +22,13 @@
 
 进入到<a href="https://github.com/BlameTwo/WutheringWavesTool/releases">Release</a>页面下载最新版本进行安装。
 
+其他文件：[网盘地址](https://pan.quark.cn/s/ff6e179a2462)
+
 <br>
 
 [<img src="https://get.microsoft.com/images/zh-cn%20dark.svg" width="200"/>](https://apps.microsoft.com/detail/9p70bt6bvwfh?hl=zh-CN&gl=CN)
 
- 
+
 
 ### 功能
 
@@ -42,7 +44,7 @@
 
 支持库街区登陆（手机号、Token），支持使用账号进行游戏扫码登陆
 
- 
+
 
 #### 其他引用
 

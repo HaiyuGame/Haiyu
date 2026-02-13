@@ -1,5 +1,4 @@
-﻿
-using Waves.Core.Models;
+﻿using Waves.Core.Models.CoreApi;
 using Waves.Core.Models.Enums;
 
 namespace Waves.Core.GameContext.Contexts;
@@ -7,7 +6,7 @@ namespace Waves.Core.GameContext.Contexts;
 public sealed class PunishBiliBiliGameContext: KuroGameContextBase
 {
     public override string GameContextNameKey => nameof(PunishBiliBiliGameContext);
-    public PunishBiliBiliGameContext(GameAPIConfig config)
+    public PunishBiliBiliGameContext(KuroGameApiConfig config)
     : base(config, nameof(PunishBiliBiliGameContext)) { }
 
     public override Type ContextType => typeof(PunishBiliBiliGameContext);

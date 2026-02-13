@@ -15,29 +15,24 @@ using Waves.Core.Helpers;
 using Waves.Core.Models;
 using Waves.Core.Models.Downloader;
 using Waves.Core.Services;
+using Waves.Core.Settings;
 
 IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
     {
         services.AddGameContext();
+        services.AddSingleton<CloudGameService>();
+        services.AddSingleton<CloudConfigManager>((s) =>
+        {
+            return new CloudConfigManager(AppSettings.CloudFolderPath);
+        });
+        services.AddSingleton<IHttpClientService,HttpClientService>();
+        services.AddSingleton<AppSettings>();
     })
     .Build();
 GameContextFactory.GameBassPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Waves";
-var mainGame = host.Services.GetRequiredKeyedService<IGameContext>(nameof(WavesMainGameContext));
-mainGame.GameContextProdOutput += ProdDownload;
-mainGame.GameContextOutput+= GameContextOutput;
-
-async Task GameContextOutput(object sender, GameContextOutputArgs args)
-{
-    Console.WriteLine($"{args.Type},{args.ProgressPercentage}，VerifySpeed:{args.VerifySpeed},DownloadSpeed:{args.DownloadSpeed},剩余{args.RemainingTime}");
-}
-
-async Task ProdDownload(object sender, GameContextOutputArgs args)
-{
-    Console.WriteLine($"{args.Type},{args.ProgressPercentage}，VerifySpeed:{args.VerifySpeed},DownloadSpeed:{args.DownloadSpeed},剩余{args.RemainingTime}");
-}
-
-await mainGame.InitAsync();
-var launcher = await mainGame.GetGameLauncherSourceAsync();
-await mainGame.StartDownloadProdGame(launcher,"D:\\Predown");
+var mainGame = host.Services.GetRequiredService<CloudGameService>();
+var result =  await mainGame.ConfigManager.GetUsersAsync();
+await mainGame.OpenUserAsync(result[0]);
+await mainGame.GetUserInfoAsync(result[0]);
 Console.ReadLine();

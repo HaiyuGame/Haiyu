@@ -95,10 +95,16 @@ public sealed partial class InstallViewModel : ObservableRecipient
                 return;
             }
         }
+        var files = Directory.GetFiles(this.SetupProperty.InstallPath,"*",searchOption: SearchOption.AllDirectories);
+        if (files.Length>0)
+        {
+            MessageBox.Show("必须选择一个空文件夹作为安装目录！", "警告", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+            return;
+        }
         this.SelectInstallVisibility = Visibility.Collapsed;
         InstalledVisibility = Visibility.Collapsed;
         InstallingVisibility = Visibility.Visible;
-
+        SetupProperty.UninstallString = SetupProperty.GetUninstallPath();
         if (CreateStartMenuCheck)
         {
             SetupProperty.Setups.Add(new StartMenuLinkSetup());
