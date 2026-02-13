@@ -89,7 +89,7 @@ namespace Project.WPFSetup.Resources {
         }
         
         /// <summary>
-        ///   查找类似 1.2.18.1 的本地化字符串。
+        ///   查找类似 1.2.19 的本地化字符串。
         /// </summary>
         internal static string Version {
             get {

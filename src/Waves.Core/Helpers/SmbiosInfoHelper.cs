@@ -48,23 +48,23 @@ public class HardwareIdGenerator
         public byte[] AdditionalParameters;
     }
 
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     private struct STORAGE_DEVICE_DESCRIPTOR
     {
         public uint Version;
         public uint Size;
-        public ushort PhysicalBytesPerSector;
-        public ushort BytesPerPhysicalSector;
-        public ushort BytesPerLogicalSector;
-        public ushort BytesPerPhysicalSectorForDevice;
-        public uint DeviceType;
-        public uint DeviceTypeModifier;
+        public byte DeviceType;
+        public byte DeviceTypeModifier;
         public bool RemovableMedia;
         public bool CommandQueueing;
         public uint VendorIdOffset;
         public uint ProductIdOffset;
         public uint ProductRevisionOffset;
         public uint SerialNumberOffset;
+        public uint BusType;
+        public uint RawPropertiesLength;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1)]
+        public byte[] RawDeviceProperties;
     }
 
     /// <summary>

@@ -148,7 +148,8 @@
                                     <MenuFlyoutItem
                                         Command="{x:Bind ViewModel.UnLoginCommand}"
                                         Foreground="{ThemeResource SystemFillColorCriticalBrush}"
-                                        Text="退出登录">
+                                        Text="退出登录"
+                                        Visibility="Collapsed">
                                         <MenuFlyoutItem.Icon>
                                             <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xF3B1;" />
                                         </MenuFlyoutItem.Icon>
