@@ -10,28 +10,31 @@ namespace Haiyu.Helpers;
 
 public static class WikiExtensions
 {
-    public static ObservableCollection<HotContentSideWrapper>? Format( this IEnumerable<HotContentSide> result)
+    extension(IEnumerable<HotContentSide> source)
     {
-        ObservableCollection<HotContentSideWrapper> wrappers = new();
-        if (result == null)
-            return wrappers;
-        foreach (var item in result)
+        public ObservableCollection<HotContentSideWrapper>? Format()
         {
-            var value = new HotContentSideWrapper()
+            ObservableCollection<HotContentSideWrapper> wrappers = new();
+            if (source == null)
+                return wrappers;
+            foreach (var item in source)
             {
-                Title = item.Title,
-                ImageUrl = item.ContentUrl,
-                StartTime = item.CountDown == null ? DateTime.Now.ToString() : item.CountDown.DateRange[0],
-                EndTime = item.CountDown == null ? DateTime.Now.AddYears(1).ToString() : item.CountDown.DateRange[1],
-                JumpUrl = item.LinkConfig.LinkUrl
-            };
-            if(item.CountDown != null)
-            {
-                var spanResult = (DateTime.Parse(item.CountDown.DateRange[1]) - DateTime.Now);
+                var value = new HotContentSideWrapper()
+                {
+                    Title = item.Title,
+                    ImageUrl = item.ContentUrl,
+                    StartTime = item.CountDown == null ? DateTime.Now.ToString() : item.CountDown.DateRange[0],
+                    EndTime = item.CountDown == null ? DateTime.Now.AddYears(1).ToString() : item.CountDown.DateRange[1],
+                    JumpUrl = item.LinkConfig.LinkUrl
+                };
+                if (item.CountDown != null)
+                {
+                    var spanResult = (DateTime.Parse(item.CountDown.DateRange[1]) - DateTime.Now);
+                }
+                value.Cali();
+                wrappers.Add(value);
             }
-            value.Cali();
-            wrappers.Add(value);
+            return wrappers;
         }
-        return wrappers;
     }
 }

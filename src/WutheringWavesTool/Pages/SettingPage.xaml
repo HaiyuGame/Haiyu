@@ -245,37 +245,6 @@
                     Text="库街区" />
                 <ui:SettingsCard
                     Margin="0,5,0,0"
-                    Command="{x:Bind ViewModel.CopyTokenCommand}"
-                    Header="复制授权码"
-                    IsClickEnabled="True">
-                    <ui:SettingsCard.ActionIcon>
-                        <FontIcon
-                            FontFamily="Segoe Fluent Icons"
-                            FontSize="15"
-                            Glyph="&#xE8C8;" />
-                    </ui:SettingsCard.ActionIcon>
-                    <ui:SettingsCard.HeaderIcon>
-                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE631;" />
-                    </ui:SettingsCard.HeaderIcon>
-                </ui:SettingsCard>
-
-                <ui:SettingsCard
-                    Margin="0,5,0,0"
-                    Command="{x:Bind ViewModel.CopyDidCommand}"
-                    Header="复制Did"
-                    IsClickEnabled="True">
-                    <ui:SettingsCard.ActionIcon>
-                        <FontIcon
-                            FontFamily="Segoe Fluent Icons"
-                            FontSize="15"
-                            Glyph="&#xE8C8;" />
-                    </ui:SettingsCard.ActionIcon>
-                    <ui:SettingsCard.HeaderIcon>
-                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE631;" />
-                    </ui:SettingsCard.HeaderIcon>
-                </ui:SettingsCard>
-                <ui:SettingsCard
-                    Margin="0,5,0,0"
                     Description="程序启动时自动进行签到"
                     Header="自动签到">
                     <ui:SettingsCard.HeaderIcon>

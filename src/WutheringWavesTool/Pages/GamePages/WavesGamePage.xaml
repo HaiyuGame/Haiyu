@@ -67,7 +67,6 @@
             <Grid.Transitions>
                 <TransitionCollection>
                     <EntranceThemeTransition FromHorizontalOffset="-20" FromVerticalOffset="-20" />
-                    <RepositionThemeTransition />
                 </TransitionCollection>
             </Grid.Transitions>
             <ProgressBar
@@ -87,6 +86,11 @@
                 HorizontalAlignment="Right"
                 VerticalAlignment="Center"
                 CornerRadius="5">
+                <Grid.Transitions>
+                    <TransitionCollection>
+                        <EntranceThemeTransition FromVerticalOffset="-50" IsStaggeringEnabled="True" />
+                    </TransitionCollection>
+                </Grid.Transitions>
                 <Grid.RowDefinitions>
                     <RowDefinition />
                     <RowDefinition />
@@ -103,6 +107,12 @@
                     BorderBrush="{ThemeResource LayerOnMicaBaseAltFillColorSecondaryBrush}"
                     BorderThickness="1,1,1,0"
                     CornerRadius="5 5 0 0">
+                    <Border.Transitions>
+                        <TransitionCollection>
+                            <EntranceThemeTransition FromVerticalOffset="80" IsStaggeringEnabled="True" />
+                            <RepositionThemeTransition />
+                        </TransitionCollection>
+                    </Border.Transitions>
                     <TextBlock
                         Margin="5,0,0,0"
                         FontFamily="{ThemeResource DefaultFont}"

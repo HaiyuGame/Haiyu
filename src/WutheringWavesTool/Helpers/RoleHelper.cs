@@ -1,8 +1,12 @@
-﻿namespace Haiyu.Helpers
+﻿using System.Security.Cryptography.X509Certificates;
+
+namespace Haiyu.Helpers;
+
+public static class RoleHelper
 {
-    internal class RoleHelper
+    extension(int RoleData)
     {
-        public static string SwitchType(int RoleData)
+        public string SwitchType()
         {
             var TypeImage = "";
             switch (RoleData)
@@ -29,4 +33,5 @@
             return TypeImage;
         }
     }
+
 }
