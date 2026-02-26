@@ -45,6 +45,20 @@ public partial class LocalAccount:ObservableObject
     {
         WeakReferenceMessenger.Default.Send(new SetCurrentAccount(TokenId));
     });
+
+    [MemoryPackIgnore]
+    public IAsyncRelayCommand CopyTokenCommand => new AsyncRelayCommand(async () =>
+    {
+        WeakReferenceMessenger.Default.Send(new CopyTokenAccount(this.Token));
+
+    }); 
+    
+    [MemoryPackIgnore]
+    public IAsyncRelayCommand CopyDeviceDidCommand => new AsyncRelayCommand(async () =>
+    {
+        WeakReferenceMessenger.Default.Send(new CopyDeviceDidAccount(this.TokenDid));
+
+    });
 }
 
 /// <summary>
@@ -58,3 +72,15 @@ public record DeleteLocalAccount(string userId);
 /// </summary>
 /// <param name="userId"></param>
 public record SetCurrentAccount(string userId);
+
+/// <summary>
+/// 复制Token
+/// </summary>
+/// <param name="accountToken"></param>
+public record CopyTokenAccount(string accountToken);
+
+/// <summary>
+/// 复制设备Did
+/// </summary>
+/// <param name="deviceDid"></param>
+public record CopyDeviceDidAccount(string deviceDid);

@@ -1,12 +1,14 @@
-﻿using Astronomical;
+﻿using System.Linq;
+using Astronomical;
 using Haiyu.Models.Wrapper;
 using Haiyu.Services.DialogServices;
 using Microsoft.UI.Xaml;
-using System.Linq;
 using Waves.Core.Common;
 using Waves.Core.Models.Enums;
+using Windows.ApplicationModel.DataTransfer;
 using Windows.Devices.Geolocation;
 using Windows.Graphics.DirectX.Direct3D11;
+using Windows.Security.Credentials.UI;
 
 namespace Haiyu.ViewModel;
 
@@ -93,6 +95,40 @@ public sealed partial class ShellViewModel : ViewModelBase
     private void RegisterMessanger()
     {
         this.Messenger.Register<SelectUserMessanger>(this, LoginMessangerMethod);
+        this.Messenger.Register<CopyTokenAccount>(this, CopyTokenMethod);
+        this.Messenger.Register<CopyDeviceDidAccount>(this, CopyDeviceDidMethod);
+    }
+
+    private async void CopyTokenMethod(object recipient, CopyTokenAccount message)
+    {
+        var result = await UserConsentVerifier.RequestVerificationAsync(
+            "复制授权码需要系统用户密码"
+        );
+        if (result != UserConsentVerificationResult.Verified)
+        {
+            TipShow.ShowMessage("系统用户验证失败！", Symbol.Clear);
+            return;
+        }
+
+        DataPackage package = new();
+        package.SetText(message.accountToken);
+        Clipboard.SetContent(package);
+    }
+
+    private async void CopyDeviceDidMethod(object recipient, CopyDeviceDidAccount message)
+    {
+        var result = await UserConsentVerifier.RequestVerificationAsync(
+            "复制账号Did需要系统用户密码"
+        );
+        if (result != UserConsentVerificationResult.Verified)
+        {
+            TipShow.ShowMessage("系统用户验证失败！", Symbol.Clear);
+            return;
+        }
+
+        DataPackage package = new();
+        package.SetText(message.deviceDid);
+        Clipboard.SetContent(package);
     }
 
     [RelayCommand]
@@ -280,8 +316,6 @@ public sealed partial class ShellViewModel : ViewModelBase
         await RefreshHeaderUser();
         OpenMain();
     }
-
-
 
     [RelayCommand]
     public void ShowDeviceInfo()

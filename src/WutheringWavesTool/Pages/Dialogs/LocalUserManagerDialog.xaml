@@ -39,9 +39,9 @@
                     <DataTemplate x:DataType="w:LocalAccount">
                         <Border
                             Margin="4"
-                            BorderThickness="{x:Bind IsSelect, Mode=OneWay, Converter={StaticResource LocalUserBorderThicknessConverter}}"
                             Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
                             BorderBrush="{ThemeResource AccentAAFillColorDefaultBrush}"
+                            BorderThickness="{x:Bind IsSelect, Mode=OneWay, Converter={StaticResource LocalUserBorderThicknessConverter}}"
                             CornerRadius="5">
                             <Border.ContextFlyout>
                                 <MenuFlyout>
@@ -49,6 +49,8 @@
                                         Command="{x:Bind SetCurrentAccountCommand}"
                                         Text="选择"
                                         Visibility="{x:Bind IsSelect, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}" />
+                                    <MenuFlyoutItem Command="{x:Bind CopyTokenCommand}" Text="复制Token" />
+                                    <MenuFlyoutItem Command="{x:Bind CopyDeviceDidCommand}" Text="复制Did" />
                                 </MenuFlyout>
                             </Border.ContextFlyout>
                             <Grid Padding="20">
