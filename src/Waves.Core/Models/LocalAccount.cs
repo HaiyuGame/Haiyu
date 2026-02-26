@@ -59,6 +59,12 @@ public partial class LocalAccount:ObservableObject
         WeakReferenceMessenger.Default.Send(new CopyDeviceDidAccount(this.TokenDid));
 
     });
+    
+    [MemoryPackIgnore]
+    public IAsyncRelayCommand CopyUserIdCommand => new AsyncRelayCommand(async () =>
+    {
+        WeakReferenceMessenger.Default.Send(new CopyUserIdAccount(this.TokenId));
+    });
 }
 
 /// <summary>
@@ -84,3 +90,9 @@ public record CopyTokenAccount(string accountToken);
 /// </summary>
 /// <param name="deviceDid"></param>
 public record CopyDeviceDidAccount(string deviceDid);
+
+/// <summary>
+/// 复制UserId
+/// </summary>
+/// <param name="userId"></param>
+public record CopyUserIdAccount(string userId);

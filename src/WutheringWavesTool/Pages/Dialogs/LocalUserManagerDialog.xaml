@@ -51,6 +51,7 @@
                                         Visibility="{x:Bind IsSelect, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}" />
                                     <MenuFlyoutItem Command="{x:Bind CopyTokenCommand}" Text="复制Token" />
                                     <MenuFlyoutItem Command="{x:Bind CopyDeviceDidCommand}" Text="复制Did" />
+                                    <MenuFlyoutItem Command="{x:Bind CopyUserIdCommand}" Text="复制账号Id" />
                                 </MenuFlyout>
                             </Border.ContextFlyout>
                             <Grid Padding="20">

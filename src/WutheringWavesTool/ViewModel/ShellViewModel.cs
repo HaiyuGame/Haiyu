@@ -97,6 +97,7 @@ public sealed partial class ShellViewModel : ViewModelBase
         this.Messenger.Register<SelectUserMessanger>(this, LoginMessangerMethod);
         this.Messenger.Register<CopyTokenAccount>(this, CopyTokenMethod);
         this.Messenger.Register<CopyDeviceDidAccount>(this, CopyDeviceDidMethod);
+        this.Messenger.Register<CopyUserIdAccount>(this, CopyUserIdMethod);
     }
 
     private async void CopyTokenMethod(object recipient, CopyTokenAccount message)
@@ -117,17 +118,15 @@ public sealed partial class ShellViewModel : ViewModelBase
 
     private async void CopyDeviceDidMethod(object recipient, CopyDeviceDidAccount message)
     {
-        var result = await UserConsentVerifier.RequestVerificationAsync(
-            "复制账号Did需要系统用户密码"
-        );
-        if (result != UserConsentVerificationResult.Verified)
-        {
-            TipShow.ShowMessage("系统用户验证失败！", Symbol.Clear);
-            return;
-        }
-
         DataPackage package = new();
         package.SetText(message.deviceDid);
+        Clipboard.SetContent(package);
+    }
+
+    private async void CopyUserIdMethod(object recipient, CopyUserIdAccount message)
+    {
+        DataPackage package = new();
+        package.SetText(message.userId);
         Clipboard.SetContent(package);
     }
 
