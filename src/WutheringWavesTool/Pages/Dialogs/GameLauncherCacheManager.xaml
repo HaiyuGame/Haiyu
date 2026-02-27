@@ -37,6 +37,7 @@
                 <ItemsRepeater.ItemTemplate>
                     <DataTemplate x:DataType="um:KRSDKLauncherCache">
                         <Grid
+                            Margin="0,5"
                             Padding="8"
                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             CornerRadius="5">

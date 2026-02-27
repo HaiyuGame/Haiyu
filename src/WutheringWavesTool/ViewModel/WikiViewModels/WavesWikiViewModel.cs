@@ -155,6 +155,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase
     {
         try
         {
+            this.SelectGamer = null;
             if (await WavesClient.IsLoginAsync(CTS.Token))
             {
                 var roles = await TryInvokeAsync(async () =>
