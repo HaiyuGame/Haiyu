@@ -16,8 +16,8 @@
 		<EnableMsixTooling>true</EnableMsixTooling>
 		<PublishAot>true</PublishAot>
 		<PublishTrimmed>true</PublishTrimmed>
-		<WindowsPackageType>None</WindowsPackageType>
 		<!--
+		<WindowsPackageType>None</WindowsPackageType>
 		-->
 	</PropertyGroup>
 	<ItemGroup>
@@ -252,7 +252,7 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<GenerateAppInstallerFile>False</GenerateAppInstallerFile>
 		<AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
-		<PackageCertificateThumbprint>9A058084F8990CF8FEAA9817CB4E3FC0A7C56294</PackageCertificateThumbprint>
+		<PackageCertificateThumbprint>5E3FC358956D46C6784EC5D4D2ECCCF64EDC6A7D</PackageCertificateThumbprint>
 		<AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
 		<AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
 		<GenerateTestArtifacts>False</GenerateTestArtifacts>
