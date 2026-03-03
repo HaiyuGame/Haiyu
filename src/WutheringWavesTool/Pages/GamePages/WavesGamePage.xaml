@@ -392,14 +392,6 @@
                                             <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xEF19;" />
                                         </MenuFlyoutItem.Icon>
                                     </MenuFlyoutItem>
-                                    <MenuFlyoutItem
-                                        Command="{x:Bind ViewModel.ShowGameLauncherCacheCommand}"
-                                        Text="游戏登陆管理"
-                                        ToolTipService.ToolTip="只包含已经登陆游戏的所有账号信息">
-                                        <MenuFlyoutItem.Icon>
-                                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE912;" />
-                                        </MenuFlyoutItem.Icon>
-                                    </MenuFlyoutItem>
                                     <MenuFlyoutSeparator />
                                     <MenuFlyoutItem
                                         Command="{x:Bind ViewModel.DeleteGameResourceCommand}"
@@ -541,16 +533,35 @@
                     </Grid>
                 </control:CardSwitcher.Card1>
                 <control:CardSwitcher.Card2>
-                    <Border
+                    <Grid
+                        Padding="5"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
                         Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         CornerRadius="5"
-                        Opacity="1" />
+                        Opacity="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto" />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                            <Button Command="{x:Bind ViewModel.ShowGameLauncherCacheCommand}" Style="{ThemeResource TransparentButtonStyle}">
+                                <FontIcon
+                                    FontFamily="Segoe Fluent Icons"
+                                    FontSize="14"
+                                    Glyph="&#xE72C;" />
+                            </Button>
+                            <Button Command="{x:Bind ViewModel.ShowGameLauncherCacheCommand}" Style="{ThemeResource TransparentButtonStyle}">
+                                <FontIcon
+                                    FontFamily="Segoe Fluent Icons"
+                                    FontSize="14"
+                                    Glyph="&#xE8AB;" />
+                            </Button>
+                        </StackPanel>
+                    </Grid>
                 </control:CardSwitcher.Card2>
             </control:CardSwitcher>
-
             <Button
                 Grid.Column="1"
                 Height="40"
@@ -572,7 +583,7 @@
             Grid.ColumnSpan="2"
             HorizontalAlignment="Right"
             VerticalAlignment="Bottom"
-            Canvas.ZIndex="-1"
+            Canvas.ZIndex="-2"
             Source="{x:Bind ViewModel.VersionLogo, Mode=OneWay}"
             Stretch="UniformToFill" />
         <StackPanel

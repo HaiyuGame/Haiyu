@@ -17,6 +17,11 @@ public class GameLocalSettingName
     public const string GameLauncherBassProgram = nameof(GameLauncherBassProgram);
 
     /// <summary>
+    /// 本地游戏最后选择的用户名称
+    /// </summary>
+    public const string LasterSelectLocalUser = nameof(LasterSelectLocalUser);
+
+    /// <summary>
     /// 本地游戏版本
     /// </summary>
     public const string LocalGameVersion = nameof(LocalGameVersion);

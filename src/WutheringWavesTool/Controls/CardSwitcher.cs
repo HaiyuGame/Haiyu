@@ -109,7 +109,16 @@ namespace Haiyu.Controls
             sb.Begin();
 
             isFront = !isFront;
-
+            if(isFront)
+            {
+                Canvas.SetZIndex(CardFront, 1);
+                Canvas.SetZIndex(CardBack, -1);
+            }
+            else
+            {
+                Canvas.SetZIndex(CardFront, -1);
+                Canvas.SetZIndex(CardBack, 1);
+            }
         }
 
         private void InitRenderTransform(UIElement border, double scale)

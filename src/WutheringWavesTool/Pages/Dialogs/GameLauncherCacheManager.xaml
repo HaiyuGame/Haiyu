@@ -4,9 +4,10 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:local="using:Haiyu.Pages.Dialogs"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:um="using:Waves.Api.Models.Launcher"
+    xmlns:um="using:Haiyu.Models.Wrapper"
     Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
     CornerRadius="5"
     mc:Ignorable="d">
@@ -20,7 +21,7 @@
             Margin="5,5,0,0"
             FontFamily="{ThemeResource DefaultFont}"
             FontSize="18"
-            Text="登陆信息" />
+            Text="本地游戏记录" />
         <Button
             Margin="0,0,0,0"
             HorizontalAlignment="Right"
@@ -32,14 +33,22 @@
                 FontSize="12"
                 Glyph="&#xE653;" />
         </Button>
-        <ScrollView Grid.Row="1" Margin="0,10,0,0">
-            <ItemsRepeater ItemsSource="{x:Bind ViewModel.Items, Mode=OneWay}">
-                <ItemsRepeater.ItemTemplate>
-                    <DataTemplate x:DataType="um:KRSDKLauncherCache">
+        <ItemsView
+            Grid.Row="1"
+            Margin="0,10,0,0"
+            IsItemInvokedEnabled="True"
+            ItemsSource="{x:Bind ViewModel.Items, Mode=OneWay}">
+            <i:Interaction.Behaviors>
+                <i:EventTriggerBehavior EventName="ItemInvoked">
+                    <i:InvokeCommandAction Command="{x:Bind ViewModel.SetSelectCommand}" />
+                </i:EventTriggerBehavior>
+            </i:Interaction.Behaviors>
+            <ItemsView.ItemTemplate>
+                <DataTemplate x:DataType="um:KRSDKLauncherCacheWrapper">
+                    <ItemContainer IsSelected="{x:Bind IsSelect, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ToolTipService.ToolTip="双击设置">
                         <Grid
                             Margin="0,5"
                             Padding="8"
-                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             CornerRadius="5">
                             <Grid.RowDefinitions>
                                 <RowDefinition />
@@ -49,19 +58,19 @@
                                 <ColumnDefinition />
                                 <ColumnDefinition Width="auto" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="{x:Bind Username}" />
+                            <TextBlock Text="{x:Bind Cache.Username}" />
                             <TextBlock
                                 Grid.Row="1"
                                 Margin="0,5,0,0"
                                 FontSize="10"
                                 Foreground="{ThemeResource SystemChromeGrayColor}"
-                                Text="{x:Bind Cuid}" />
+                                Text="{x:Bind Cache.Cuid}" />
                             <Button
                                 Grid.RowSpan="2"
                                 Grid.Column="1"
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
-                                Command="{x:Bind CopyOAuthCodeCommand}"
+                                Command="{x:Bind Cache.CopyOAuthCodeCommand}"
                                 Style="{ThemeResource TransparentButtonStyle}"
                                 ToolTipService.ToolTip="复制游戏登陆码">
                                 <FontIcon
@@ -70,9 +79,12 @@
                                     Glyph="&#xE8C8;" />
                             </Button>
                         </Grid>
-                    </DataTemplate>
-                </ItemsRepeater.ItemTemplate>
-            </ItemsRepeater>
-        </ScrollView>
+                    </ItemContainer>
+                </DataTemplate>
+            </ItemsView.ItemTemplate>
+            <ItemsView.Layout>
+                <StackLayout Orientation="Vertical" Spacing="10" />
+            </ItemsView.Layout>
+        </ItemsView>
     </Grid>
 </ContentDialog>

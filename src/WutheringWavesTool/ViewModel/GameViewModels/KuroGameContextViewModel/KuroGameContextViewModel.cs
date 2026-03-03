@@ -513,7 +513,6 @@ public abstract partial class KuroGameContextViewModel
             TipShow.ShowMessage("不存在任何登陆信息，请登陆游戏后再次查看", Symbol.Clear);
             return;
         }
-
         await DialogManager.ShowGameLauncherChacheDialogAsync(
             new GameLauncherCacheArgs()
             {
