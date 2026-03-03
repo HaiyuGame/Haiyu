@@ -41,5 +41,10 @@ namespace Haiyu.Pages.GamePages
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            switcher.Switch();
+        }
     }
 }

@@ -16,8 +16,8 @@
 		<EnableMsixTooling>true</EnableMsixTooling>
 		<PublishAot>true</PublishAot>
 		<PublishTrimmed>true</PublishTrimmed>
-		<!--
 		<WindowsPackageType>None</WindowsPackageType>
+		<!--
 		-->
     <UserSecretsId>e239e9df-797b-4568-b3e5-8397f5b3faa6</UserSecretsId>
   </PropertyGroup>
@@ -201,6 +201,9 @@
     <None Update="Assets\HpatchzResource\hpatchz.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <Page Update="Controls\Styles\CardSwitcher.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Pages\PluginPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -277,6 +280,7 @@
 	  <None Remove="Assets\appLogo.ico" />
 	  <None Remove="Assets\appLogo.png" />
 	  <None Remove="Assets\background.png" />
+	  <None Remove="Controls\Styles\CardSwitcher.xaml" />
 	  <None Remove="Controls\Styles\Colors.xaml" />
 	  <None Remove="Controls\Styles\HeaderTileCard.xaml" />
 	  <None Remove="Controls\Styles\LoadingCard.xaml" />
