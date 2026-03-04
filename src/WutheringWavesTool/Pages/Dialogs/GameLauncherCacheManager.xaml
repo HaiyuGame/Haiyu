@@ -16,6 +16,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
             <RowDefinition />
+            <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
         <TextBlock
             Margin="5,5,0,0"
@@ -37,9 +38,10 @@
             Grid.Row="1"
             Margin="0,10,0,0"
             IsItemInvokedEnabled="True"
-            ItemsSource="{x:Bind ViewModel.Items, Mode=OneWay}">
+            ItemsSource="{x:Bind ViewModel.Items, Mode=OneWay}"
+            SelectionMode="Single">
             <i:Interaction.Behaviors>
-                <i:EventTriggerBehavior EventName="ItemInvoked">
+                <i:EventTriggerBehavior EventName="SelectionChanged">
                     <i:InvokeCommandAction Command="{x:Bind ViewModel.SetSelectCommand}" />
                 </i:EventTriggerBehavior>
             </i:Interaction.Behaviors>
@@ -86,5 +88,11 @@
                 <StackLayout Orientation="Vertical" Spacing="10" />
             </ItemsView.Layout>
         </ItemsView>
+        <Button
+            Grid.Row="2"
+            HorizontalAlignment="Center"
+            Command="{x:Bind ViewModel.SetSelectCommand}"
+            Content="确定"
+            Style="{ThemeResource AccentButtonStyle}" />
     </Grid>
 </ContentDialog>

@@ -24,20 +24,6 @@ public partial class LauncherConfig:JsonSerializerContext
 
 }
 
-public class CdnList
-{
-    [JsonPropertyName("P")]
-    public int P { get; set; }
-
-    [JsonPropertyName("K1")]
-    public int K1 { get; set; }
-
-    [JsonPropertyName("K2")]
-    public int K2 { get; set; }
-
-    [JsonPropertyName("url")]
-    public string Url { get; set; }
-}
 
 public class Changelog
 {

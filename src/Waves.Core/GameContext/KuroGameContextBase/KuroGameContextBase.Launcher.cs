@@ -28,7 +28,7 @@ partial class KuroGameContextBase
                 url =
                     $"{KuroGameApiConfig.BaseAddress[0]}/launcher/game/{cacheConfig.GameID}/{cacheConfig.AppId}_{cacheConfig.AppKey}/index.json?_t={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
             }
-            var result = await HttpClientService.GameDownloadClient.GetAsync(url);
+            var result = await HttpClientService.HttpClient.GetAsync(url);
             var jsonStr = await result.Content.ReadAsStringAsync();
             var launcherIndex = JsonSerializer.Deserialize<GameLauncherSource>(
                 jsonStr,

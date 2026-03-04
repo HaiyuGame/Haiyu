@@ -429,6 +429,37 @@
                 <control:CardSwitcher.Card1>
                     <Grid
                         Padding="5"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        CornerRadius="5"
+                        Opacity="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto" />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                            <Button Command="{x:Bind ViewModel.ShowGameLauncherCacheCommand}" Style="{ThemeResource TransparentButtonStyle}">
+                                <FontIcon
+                                    FontFamily="Segoe Fluent Icons"
+                                    FontSize="14"
+                                    Glyph="&#xE72C;" />
+                            </Button>
+                            <Button Command="{x:Bind ViewModel.ShowGameLauncherCacheCommand}" Style="{ThemeResource TransparentButtonStyle}">
+                                <FontIcon
+                                    FontFamily="Segoe Fluent Icons"
+                                    FontSize="14"
+                                    Glyph="&#xE8AB;" />
+                            </Button>
+                        </StackPanel>
+                        <ProgressRing Grid.RowSpan="2" />
+                    </Grid>
+                </control:CardSwitcher.Card1>
+                <control:CardSwitcher.Card2>
+                    <Grid
+                        Padding="5"
                         Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="2"
@@ -530,35 +561,6 @@
                                 </ItemsRepeater>
                             </ScrollView>
                         </Grid>
-                    </Grid>
-                </control:CardSwitcher.Card1>
-                <control:CardSwitcher.Card2>
-                    <Grid
-                        Padding="5"
-                        HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch"
-                        Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
-                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        CornerRadius="5"
-                        Opacity="1">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="auto" />
-                            <RowDefinition />
-                        </Grid.RowDefinitions>
-                        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
-                            <Button Command="{x:Bind ViewModel.ShowGameLauncherCacheCommand}" Style="{ThemeResource TransparentButtonStyle}">
-                                <FontIcon
-                                    FontFamily="Segoe Fluent Icons"
-                                    FontSize="14"
-                                    Glyph="&#xE72C;" />
-                            </Button>
-                            <Button Command="{x:Bind ViewModel.ShowGameLauncherCacheCommand}" Style="{ThemeResource TransparentButtonStyle}">
-                                <FontIcon
-                                    FontFamily="Segoe Fluent Icons"
-                                    FontSize="14"
-                                    Glyph="&#xE8AB;" />
-                            </Button>
-                        </StackPanel>
                     </Grid>
                 </control:CardSwitcher.Card2>
             </control:CardSwitcher>

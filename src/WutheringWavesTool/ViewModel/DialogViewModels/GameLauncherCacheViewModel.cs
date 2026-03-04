@@ -74,10 +74,20 @@ public sealed partial class GameLauncherCacheViewModel : DialogViewModelBase
     [RelayCommand]
     public async Task SetSelect()
     {
-        foreach (var item in Items)
+        var item = Items.Where(x => x.IsSelect).FirstOrDefault();
+        if(item == null)
         {
-            await GameContext.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.LasterSelectLocalUser, item.Cache.Username);
+            return;
         }
+        await GameContext.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.LasterSelectLocalUser,item.Cache.Username);
+        this.Close();
+    }
+
+    public override void AfterClose()
+    {
+        this.Items.Clear();
+        this.Items = null;
+        base.AfterClose();
     }
 
     

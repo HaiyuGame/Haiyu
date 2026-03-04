@@ -5,6 +5,7 @@ using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using Haiyu.Common;
 using Waves.Api.Models;
 using Waves.Api.Models.Launcher;
 using Waves.Core.Common;
@@ -35,6 +36,7 @@ public partial class KuroGameContextBase
     private long _totalProgressSize = 0L;
     private long _totalFileTotal = 0L;
     private long _totalProgressTotal = 0L;
+    string baseUrl = "";
     #endregion
 
     #region DownloadStatus
@@ -75,7 +77,10 @@ public partial class KuroGameContextBase
     #endregion
 
 
-    public async Task UpdataGameAsync(string diffSavePath = null,UpdateGameType type = UpdateGameType.UpdateGame)
+    public async Task UpdataGameAsync(
+        string diffSavePath = null,
+        UpdateGameType type = UpdateGameType.UpdateGame
+    )
     {
         _downloadCTS = new CancellationTokenSource();
         var folder = await GameLocalConfig.GetConfigAsync(
@@ -86,21 +91,19 @@ public partial class KuroGameContextBase
             return;
         await GameLocalConfig.SaveConfigAsync(GameLocalSettingName.LocalGameUpdateing, "True");
         await UpdataGameResourceAsync(folder, launcher, diffSavePath);
-        if(type == UpdateGameType.ProDownload)
+        if (type == UpdateGameType.ProDownload)
         {
             //如果是预下载安装，则直接删除预下载配置
-            await this.GameLocalConfig.SaveConfigAsync(
-               GameLocalSettingName.ProdDownloadPath,
-               "");
+            await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdDownloadPath, "");
             await this.GameLocalConfig.SaveConfigAsync(
                 GameLocalSettingName.ProdDownloadFolderDone,
                 "False"
-            ); await this.GameLocalConfig.SaveConfigAsync(
+            );
+            await this.GameLocalConfig.SaveConfigAsync(
                 GameLocalSettingName.ProdDownloadVersion,
                 ""
             );
         }
-
     }
 
     #region 核心下载逻辑
@@ -119,9 +122,10 @@ public partial class KuroGameContextBase
             _downloadBaseUrl =
                 source.ResourceDefault.CdnList.Where(x => x.P != 0).OrderBy(x => x.P).First().Url
                 + source.ResourceDefault.Config.BaseUrl;
+            baseUrl = source.ResourceDefault.Config.BaseUrl;
             HttpClientService.BuildClient();
             await InitializeProgress(resource.Resource);
-            await Task.Run(() => StartDownloadAsync(folder, resource, isDelete));
+            await Task.Run(() => StartDownloadAsync(folder, source, resource, isDelete));
             if (!_isDownload)
             {
                 await DownloadComplate(source);
@@ -161,9 +165,8 @@ public partial class KuroGameContextBase
         await this.GameLocalConfig.SaveConfigAsync(
             GameLocalSettingName.LocalGameUpdateing,
             "False"
-        ); 
+        );
 
-       
         await this.GameLocalConfig.SaveConfigAsync(
             GameLocalSettingName.GameLauncherBassProgram,
             $"{installFolder}\\{this.Config.GameExeName}"
@@ -180,8 +183,14 @@ public partial class KuroGameContextBase
             .ConfigureAwait(false);
     }
 
-    private async Task StartDownloadAsync(string folder, IndexGameResource resource, bool isDelete)
+    private async Task StartDownloadAsync(
+        string folder,
+        GameLauncherSource source,
+        IndexGameResource resource,
+        bool isDelete
+    )
     {
+        CDNSpeedTester = new CDNSpeedTester();
         _downloadState.IsActive = true;
         if (isDelete)
         {
@@ -217,7 +226,17 @@ public partial class KuroGameContextBase
                 MaxDegreeOfParallelism = MAX_Concurrency_Count,
                 CancellationToken = _downloadCTS.Token,
             };
-            if (!(await ParallelDownloadAsync(resource.Resource, options, folder)))
+
+            if (
+                !(
+                    await ParallelDownloadAsync(
+                        resource.Resource,
+                        source.ResourceDefault.CdnList,
+                        options,
+                        folder
+                    )
+                )
+            )
             {
                 throw new IOException("下载文件出错！");
             }
@@ -271,6 +290,7 @@ public partial class KuroGameContextBase
 
     public async Task<bool> ParallelDownloadAsync(
         List<IndexResource> resource,
+        List<CdnList> cdns,
         ParallelOptions options,
         string folder,
         bool ispred = false
@@ -278,6 +298,23 @@ public partial class KuroGameContextBase
     {
         try
         {
+            const long targetTestSize = 50L * 1024 * 1024; // ~50MB
+            var item = resource
+                .OrderBy(x => Math.Abs((long)x.Size - targetTestSize))
+                .FirstOrDefault();
+            item ??= resource.OrderBy(x => x.Size).FirstOrDefault();
+            var result = await CDNSpeedTester.TestAllAsync(
+                cdns,
+                baseUrl,
+                item!,
+                TimeSpan.FromSeconds(20)
+            );
+            var best = result
+                .Where(r => r.Success && r.DownloadBytes > 0)
+                .OrderByDescending(r => r.Score) 
+                .ThenByDescending(r => r.BytesPerSecond)
+                .FirstOrDefault();
+            this._downloadBaseUrl = best.Url + baseUrl;
             await Parallel.ForEachAsync(
                 resource,
                 options,
@@ -468,7 +505,7 @@ public partial class KuroGameContextBase
         var previous = launcher
             .ResourceDefault.Config.PatchConfig.Where(x => x.Version == currentVersion)
             .FirstOrDefault();
-        
+
         #endregion
         PatchIndexGameResource? patch = null;
         this._downloadState = new DownloadState();
@@ -483,7 +520,8 @@ public partial class KuroGameContextBase
                 launcher
                     .ResourceDefault.CdnList.Where(x => x.P != 0)
                     .OrderBy(x => x.P)
-                    .FirstOrDefault() ?? null;
+                    .FirstOrDefault()
+                ?? null;
             if (cdnUrl == null)
             {
                 await CancelDownloadAsync();
@@ -508,6 +546,7 @@ public partial class KuroGameContextBase
         _downloadBaseUrl =
             launcher.ResourceDefault.CdnList.Where(x => x.P != 0).OrderBy(x => x.P).First().Url
             + previous.BaseUrl;
+        baseUrl = previous.BaseUrl;
         _totalProgressTotal = 0;
         _totalProgressSize = 0;
         if (
@@ -555,7 +594,7 @@ public partial class KuroGameContextBase
             this._downloadState.IsActive = true;
             await _downloadState.SetSpeedLimitAsync(this.SpeedValue);
             result = await Task.Run(() =>
-                DownloadGroupPatcheToResource(diffSavePath, patch.Resource)
+                DownloadGroupPatcheToResource(launcher, diffSavePath, patch.Resource)
             );
             if (result == false)
             {
@@ -642,6 +681,7 @@ public partial class KuroGameContextBase
             _downloadBaseUrl =
                 launcher.ResourceDefault.CdnList.Where(x => x.P != 0).OrderBy(x => x.P).First().Url
                 + launcher.ResourceDefault.ResourcesBasePath;
+            baseUrl = launcher.ResourceDefault.ResourcesBasePath;
             _totalfileSize = resourceinfo.Sum(x => x.Size);
             _totalFileTotal = resourceinfo.Count() - 1;
             _totalProgressTotal = resourceinfo.Sum(x => x.Size);
@@ -696,8 +736,11 @@ public partial class KuroGameContextBase
         await SetNoneStatusAsync().ConfigureAwait(false);
     }
 
-
-    private async Task<IndexGameResource> GetGameResourceAsync(ResourceDefault resourceDefault,Predownload predownload,CancellationToken token = default)
+    private async Task<IndexGameResource> GetGameResourceAsync(
+        ResourceDefault resourceDefault,
+        Predownload predownload,
+        CancellationToken token = default
+    )
     {
         var resourceIndexUrl =
             resourceDefault.CdnList.Where(x => x.P != 0).OrderBy(x => x.P).First().Url
@@ -769,6 +812,7 @@ public partial class KuroGameContextBase
     }
 
     private async Task<bool> DownloadGroupPatcheToResource(
+        GameLauncherSource resource,
         string folder,
         List<IndexResource> patch,
         bool ispred = false
@@ -780,7 +824,17 @@ public partial class KuroGameContextBase
             MaxDegreeOfParallelism = MAX_Concurrency_Count,
             CancellationToken = _downloadCTS.Token,
         };
-        if (!(await ParallelDownloadAsync(patchInfos, options, folder, ispred)))
+        if (
+            !(
+                await ParallelDownloadAsync(
+                    patchInfos,
+                    resource.ResourceDefault.CdnList,
+                    options,
+                    folder,
+                    ispred
+                )
+            )
+        )
         {
             Logger.WriteError("下载差异文件取消或出现异常");
             return false;
@@ -1075,7 +1129,10 @@ public partial class KuroGameContextBase
                         var buffer = memoryPool.Rent(MaxBufferSize);
                         try
                         {
-                            if (downloadCts.IsCancellationRequested || _downloadState?.IsStop == true)
+                            if (
+                                downloadCts.IsCancellationRequested
+                                || _downloadState?.IsStop == true
+                            )
                             {
                                 throw new OperationCanceledException();
                             }
@@ -1415,7 +1472,7 @@ public partial class KuroGameContextBase
                 }
             );
         }
-        else
+        else if(this.gameContextProdOutputDelegate != null)
         {
             await this.gameContextProdOutputDelegate.Invoke(
                 this,
@@ -1670,7 +1727,9 @@ public partial class KuroGameContextBase
 
     private bool IsDownloadCanceled()
     {
-        return _downloadCTS == null || _downloadCTS.IsCancellationRequested || _downloadState?.IsStop == true;
+        return _downloadCTS == null
+            || _downloadCTS.IsCancellationRequested
+            || _downloadState?.IsStop == true;
     }
 
     private async Task UpdateFileProgress(
@@ -1767,6 +1826,8 @@ public partial class KuroGameContextBase
             }
         }
     }
+
+    public CDNSpeedTester CDNSpeedTester { get; private set; }
 
     #endregion
 
