@@ -98,6 +98,11 @@ public interface IGameContext
     Task SetSpeedLimitAsync(long bytesPerSecond);
 
     /// <summary>
+    /// 重新推送上一次的输出（用于页面重建后恢复显示）
+    /// </summary>
+    Task ReEmitLastOutputAsync(bool isPred = false);
+
+    /// <summary>
     /// 获得游戏登陆的OAuth的代码
     /// </summary>
     /// <param name="token"></param>

@@ -88,6 +88,7 @@ public abstract partial class KuroGameContextBase : IGameContext
     )
     {
         GameContextStatus status = new GameContextStatus();
+        status.LasterArgs = this._lastOutputArgs;
         var localVersion = await GameLocalConfig.GetConfigAsync(
             GameLocalSettingName.LocalGameVersion
         );

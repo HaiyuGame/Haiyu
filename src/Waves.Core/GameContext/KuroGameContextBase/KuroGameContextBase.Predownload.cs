@@ -15,6 +15,14 @@ public partial  class KuroGameContextBase
 
     public async Task<bool> StartDownloadProdGame(string downloadFolder)
     {
+        await UpdateFileProgress(
+                    GameContextActionType.CdnSelect,
+                    0,
+                    false,
+                    true,
+                    "正在准备"
+                )
+                .ConfigureAwait(false);
         await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdDownloadFolderDone, "False");
         var currentVersion = await GameLocalConfig.GetConfigAsync(
             GameLocalSettingName.LocalGameVersion

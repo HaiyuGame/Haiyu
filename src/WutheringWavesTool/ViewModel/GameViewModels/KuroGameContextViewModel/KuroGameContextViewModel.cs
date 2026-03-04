@@ -137,6 +137,7 @@ public abstract partial class KuroGameContextViewModel
         CurrentProgressValue = 0;
         GameContext.GameContextOutput += GameContext_GameContextOutput;
         GameContext.GameContextProdOutput+= GameContext_GameContextProdOutput;
+        await this.GameContext.ReEmitLastOutputAsync();
         var dx11 = await GameContext.GameLocalConfig.GetConfigAsync(GameLocalSettingName.IsDx11);
         if (bool.TryParse(dx11, out var flag))
         {
@@ -168,12 +169,12 @@ public abstract partial class KuroGameContextViewModel
             if (!status.IsGameExists && !status.IsGameInstalled)
             {
                 Logger.WriteInfo("未找到游戏文件，显示下载按钮");
-                ShowSelectInstallBth();
+                ShowSelectInstallBth(status);
             }
             if (status.IsGameExists && !status.IsGameInstalled && !status.IsLauncher)
             {
                 Logger.WriteInfo("游戏文件存在，但不能启动，显示继续按钮");
-                ShowGameDownloadBth();
+                ShowGameDownloadBth(status);
             }
             else if (!status.IsAction && status.IsGameExists && status.IsGameInstalled)
             {
@@ -190,7 +191,7 @@ public abstract partial class KuroGameContextViewModel
                 {
                     this.PauseIcon = "\uE769";
                 }
-                ShowGameDownloadingBth();
+                ShowGameDownloadingBth(status);
             }
             if (status.IsGameExists && status.IsGameInstalled && !status.IsPause && status.IsAction)
             {
@@ -427,17 +428,18 @@ public abstract partial class KuroGameContextViewModel
     /// <summary>
     /// 显示
     /// </summary>
-    private void ShowSelectInstallBth()
+    private void ShowSelectInstallBth(GameContextStatus status)
     {
         _bthType = 1;
         GameInputFolderBthVisibility = Visibility.Visible;
         GameInstallBthVisibility = Visibility.Visible;
         GameDownloadingBthVisibility = Visibility.Collapsed;
         GameLauncherBthVisibility = Visibility.Collapsed;
-        BottomBarContent = "游戏文件不存在";
+        if(status.LasterArgs==null)
+            BottomBarContent = "游戏文件不存在";
     }
 
-    private void ShowGameDownloadingBth()
+    private void ShowGameDownloadingBth(GameContextStatus status)
     {
         Logger.WriteInfo($"游戏正在下载中");
         _bthType = 2;
@@ -452,14 +454,15 @@ public abstract partial class KuroGameContextViewModel
     /// <summary>
     /// 显示继续下载
     /// </summary>
-    private void ShowGameDownloadBth()
+    private void ShowGameDownloadBth(GameContextStatus status)
     {
         _bthType = 2;
         GameInputFolderBthVisibility = Visibility.Collapsed;
         GameInstallBthVisibility = Visibility.Visible;
         GameDownloadingBthVisibility = Visibility.Collapsed;
         GameLauncherBthVisibility = Visibility.Collapsed;
-        BottomBarContent = "请点击右下角继续更新游戏";
+        if (status.LasterArgs == null)
+            BottomBarContent = "请点击右下角继续更新游戏";
     }
 
     [RelayCommand]

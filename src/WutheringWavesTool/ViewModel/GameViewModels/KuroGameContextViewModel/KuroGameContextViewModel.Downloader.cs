@@ -16,6 +16,7 @@ partial class KuroGameContextViewModel
     {
         await AppContext.TryInvokeAsync(async () =>
         {
+            var status = await this.GameContext.GetGameContextStatusAsync(this.CTS.Token);
             if (
                 args.Type == Waves.Core.Models.Enums.GameContextActionType.Download
                 || args.Type == Waves.Core.Models.Enums.GameContextActionType.Verify
@@ -59,11 +60,11 @@ partial class KuroGameContextViewModel
                             $"[{args.CurrentDecompressCount}/{args.MaxDecompressValue}] 已解压:{Math.Round((double)args.CurrentSize / 1024 / 1024 / 1024, 2)}GB,剩余:{Math.Round((double)(args.TotalSize - args.CurrentSize) / 1024 / 1024 / 1024, 2)}GB";
                     PauseStartEnable = false;
                 }
-                ShowGameDownloadingBth();
+                ShowGameDownloadingBth(status);
             }
             if (args.Type == Waves.Core.Models.Enums.GameContextActionType.DeleteFile)
             {
-                ShowGameDownloadingBth();
+                ShowGameDownloadingBth(status);
                 this.MaxProgressValue = args.FileTotal;
                 this.CurrentProgressValue = args.CurrentFile;
                 this.BottomBarContent = args.DeleteString;
@@ -74,14 +75,13 @@ partial class KuroGameContextViewModel
                 PauseStartEnable = true;
                 this.CurrentProgressValue = 0;
                 this.MaxProgressValue = 100;
-                var status = await this.GameContext.GetGameContextStatusAsync(this.CTS.Token);
                 if (!status.IsGameExists && !status.IsGameInstalled)
                 {
-                    ShowSelectInstallBth();
+                    ShowSelectInstallBth(status);
                 }
                 if (status.IsGameExists && !status.IsGameInstalled)
                 {
-                    ShowGameDownloadBth();
+                    ShowGameDownloadBth(status);
                 }
                 if (status.IsLauncher)
                 {
@@ -93,7 +93,7 @@ partial class KuroGameContextViewModel
                     && (status.IsPause || status.IsAction)
                 )
                 {
-                    ShowGameDownloadingBth();
+                    ShowGameDownloadingBth(status);
                     if (status.IsPause)
                     {
                         this.PauseIcon = "\uE768";
@@ -111,6 +111,12 @@ partial class KuroGameContextViewModel
             if (args.Type == Waves.Core.Models.Enums.GameContextActionType.TipMessage)
             {
                 await DialogManager.ShowMessageDialog(args.TipMessage, "确认", "关闭");
+            }
+            if(args.Type == Waves.Core.Models.Enums.GameContextActionType.CdnSelect)
+            {
+                ShowGameDownloadingBth(status);
+                PauseStartEnable = false;
+                BottomBarContent = args.TipMessage;
             }
         });
     }
