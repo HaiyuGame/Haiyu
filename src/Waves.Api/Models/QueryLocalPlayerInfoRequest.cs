@@ -1,0 +1,337 @@
+﻿using System.Text.Json.Serialization;
+
+namespace Waves.Api.Models;
+
+public class QueryLocalPlayerInfoRequest
+{
+    [JsonPropertyName("oauthCode")]
+    public string OAutoCode { get; set; }
+}
+
+public class QueryLocalRoleInfoRequest
+{
+    [JsonPropertyName("oauthCode")]
+    public string OAutoCode { get; set; }
+
+    [JsonPropertyName("playerId")]
+    public long PlayerId { get; set;  }
+
+    [JsonPropertyName("region")]
+    public string Region { get; set; }
+}
+
+
+public class QueryPlayerInfo
+{
+    [JsonPropertyName("code")]
+    public int Code { get; set; }
+
+    [JsonPropertyName("message")]
+    public string Message { get; set; }
+
+    [JsonPropertyName("timestamp")]
+    public long Timestamp { get; set; }
+
+    [JsonPropertyName("data")]
+    public Dictionary<string, string> Data { get; set; }
+
+    [JsonIgnore]
+    public List<QueryPlayerItem> Items { get; set; }
+}
+
+public class QueryPlayerItem
+{
+    [JsonPropertyName("roleId")]
+    public string Id { get; set; }
+
+    [JsonPropertyName("roleName")]
+    public string RoleName { get; set; }
+
+    [JsonPropertyName("level")]
+    public int Level { get; set; }
+    [JsonPropertyName("sex")]
+    public int Sex { get; set; }
+
+    [JsonPropertyName("headPhoto")]
+    public int HeadPhoto { get; set; }
+
+    [JsonIgnore]
+    public string ServerName { get; set; }
+}
+
+
+public class QueryRoleInfo
+{
+    [JsonPropertyName("code")]
+    public int Code { get; set; }
+
+    [JsonPropertyName("message")]
+    public string Message { get; set; }
+
+    [JsonPropertyName("data")]
+    public Dictionary<string,string> Data { get; set; }
+
+    [JsonPropertyName("timestamp")]
+    public long Timestamp { get; set; }
+
+    [JsonIgnore]
+    public List<LocalGameRoleItem> Items { get; set; }
+}
+
+
+
+public class Album
+{
+    [JsonPropertyName("Id")]
+    public int Id { get; set; }
+
+    [JsonPropertyName("Count")]
+    public int Count { get; set; }
+
+    [JsonPropertyName("TotalCount")]
+    public int TotalCount { get; set; }
+}
+
+public class Base
+{
+    [JsonPropertyName("Name")]
+    public string Name { get; set; }
+
+    [JsonPropertyName("Id")]
+    public int Id { get; set; }
+
+    [JsonPropertyName("CreatTime")]
+    public long CreatTime { get; set; }
+
+    [JsonPropertyName("ActiveDays")]
+    public int ActiveDays { get; set; }
+
+    [JsonPropertyName("Level")]
+    public int Level { get; set; }
+
+    [JsonPropertyName("WorldLevel")]
+    public int WorldLevel { get; set; }
+
+    [JsonPropertyName("RoleNum")]
+    public int RoleNum { get; set; }
+
+    [JsonPropertyName("SoundBox")]
+    public int SoundBox { get; set; }
+
+    [JsonPropertyName("Energy")]
+    public int Energy { get; set; }
+
+    [JsonPropertyName("MaxEnergy")]
+    public int MaxEnergy { get; set; }
+
+    [JsonPropertyName("StoreEnergy")]
+    public int StoreEnergy { get; set; }
+
+    [JsonPropertyName("StoreEnergyRecoverTime")]
+    public int StoreEnergyRecoverTime { get; set; }
+
+    [JsonPropertyName("MaxStoreEnergy")]
+    public int MaxStoreEnergy { get; set; }
+
+    [JsonPropertyName("EnergyRecoverTime")]
+    public int EnergyRecoverTime { get; set; }
+
+    [JsonPropertyName("Liveness")]
+    public int Liveness { get; set; }
+
+    [JsonPropertyName("LivenessMaxCount")]
+    public int LivenessMaxCount { get; set; }
+
+    [JsonPropertyName("LivenessUnlock")]
+    public bool LivenessUnlock { get; set; }
+
+    [JsonPropertyName("ChapterId")]
+    public int ChapterId { get; set; }
+
+    [JsonPropertyName("WeeklyInstCount")]
+    public int WeeklyInstCount { get; set; }
+
+    [JsonPropertyName("Boxes")]
+    public Boxes Boxes { get; set; }
+
+    [JsonPropertyName("BasicBoxes")]
+    public BasicBoxes BasicBoxes { get; set; }
+
+    [JsonPropertyName("PhantomBoxes")]
+    public PhantomBoxes PhantomBoxes { get; set; }
+
+    [JsonPropertyName("BirthMon")]
+    public int BirthMon { get; set; }
+
+    [JsonPropertyName("BirthDay")]
+    public int BirthDay { get; set; }
+}
+
+public class BasicBoxes
+{
+    [JsonPropertyName("2")]
+    public int _2 { get; set; }
+
+    [JsonPropertyName("1")]
+    public int _1 { get; set; }
+
+    [JsonPropertyName("3")]
+    public int _3 { get; set; }
+
+    [JsonPropertyName("4")]
+    public int _4 { get; set; }
+}
+
+public class BattlePass
+{
+    [JsonPropertyName("Level")]
+    public int Level { get; set; }
+
+    [JsonPropertyName("WeekExp")]
+    public int WeekExp { get; set; }
+
+    [JsonPropertyName("WeekMaxExp")]
+    public int WeekMaxExp { get; set; }
+
+    [JsonPropertyName("IsUnlock")]
+    public bool IsUnlock { get; set; }
+
+    [JsonPropertyName("IsOpen")]
+    public bool IsOpen { get; set; }
+
+    [JsonPropertyName("Exp")]
+    public int Exp { get; set; }
+
+    [JsonPropertyName("ExpLimit")]
+    public int ExpLimit { get; set; }
+}
+
+public class Boxes
+{
+    [JsonPropertyName("2")]
+    public int _2 { get; set; }
+
+    [JsonPropertyName("1")]
+    public int _1 { get; set; }
+
+    [JsonPropertyName("3")]
+    public int _3 { get; set; }
+
+    [JsonPropertyName("4")]
+    public int _4 { get; set; }
+}
+
+public class Decoration
+{
+    [JsonPropertyName("Id")]
+    public int Id { get; set; }
+
+    [JsonPropertyName("Quality")]
+    public int Quality { get; set; }
+
+    [JsonPropertyName("PartId")]
+    public int PartId { get; set; }
+}
+
+public class EquipSkin
+{
+    [JsonPropertyName("SkinId")]
+    public int SkinId { get; set; }
+
+    [JsonPropertyName("Quality")]
+    public int Quality { get; set; }
+}
+
+public class Frame
+{
+    [JsonPropertyName("Id")]
+    public int Id { get; set; }
+
+    [JsonPropertyName("Quality")]
+    public int Quality { get; set; }
+}
+
+public class MotorData
+{
+    [JsonPropertyName("Level")]
+    public int Level { get; set; }
+
+    [JsonPropertyName("Exp")]
+    public int Exp { get; set; }
+
+    [JsonPropertyName("NextExp")]
+    public int NextExp { get; set; }
+
+    [JsonPropertyName("Skins")]
+    public List<Skin> Skins { get; set; }
+
+    [JsonPropertyName("Stickers")]
+    public List<Sticker> Stickers { get; set; }
+
+    [JsonPropertyName("Decorations")]
+    public List<Decoration> Decorations { get; set; }
+
+    [JsonPropertyName("Frames")]
+    public List<Frame> Frames { get; set; }
+
+    [JsonPropertyName("EquipSkin")]
+    public EquipSkin EquipSkin { get; set; }
+}
+
+public class MusicData
+{
+    [JsonPropertyName("Albums")]
+    public List<Album> Albums { get; set; }
+}
+
+public class PhantomBoxes
+{
+    [JsonPropertyName("1")]
+    public int _1 { get; set; }
+
+    [JsonPropertyName("2")]
+    public int _2 { get; set; }
+
+    [JsonPropertyName("3")]
+    public int _3 { get; set; }
+}
+
+public class LocalGameRoleItem
+{
+    [JsonPropertyName("MotorData")]
+    public MotorData MotorData { get; set; }
+
+    [JsonPropertyName("MusicData")]
+    public MusicData MusicData { get; set; }
+
+    [JsonPropertyName("Base")]
+    public Base Base { get; set; }
+
+    [JsonPropertyName("BattlePass")]
+    public BattlePass BattlePass { get; set; }
+
+    [JsonIgnore]
+    public string ServerName { get; set; }
+}
+
+public class Skin
+{
+    [JsonPropertyName("SkinId")]
+    public int SkinId { get; set; }
+
+    [JsonPropertyName("Quality")]
+    public int Quality { get; set; }
+}
+
+public class Sticker
+{
+    [JsonPropertyName("Id")]
+    public int Id { get; set; }
+
+    [JsonPropertyName("Quality")]
+    public int Quality { get; set; }
+
+    [JsonPropertyName("PartId")]
+    public int PartId { get; set; }
+}
+

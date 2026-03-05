@@ -40,11 +40,7 @@
             IsItemInvokedEnabled="True"
             ItemsSource="{x:Bind ViewModel.Items, Mode=OneWay}"
             SelectionMode="Single">
-            <i:Interaction.Behaviors>
-                <i:EventTriggerBehavior EventName="SelectionChanged">
-                    <i:InvokeCommandAction Command="{x:Bind ViewModel.SetSelectCommand}" />
-                </i:EventTriggerBehavior>
-            </i:Interaction.Behaviors>
+
             <ItemsView.ItemTemplate>
                 <DataTemplate x:DataType="um:KRSDKLauncherCacheWrapper">
                     <ItemContainer IsSelected="{x:Bind IsSelect, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ToolTipService.ToolTip="双击设置">
