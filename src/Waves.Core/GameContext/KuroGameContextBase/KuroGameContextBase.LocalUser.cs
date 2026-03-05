@@ -67,9 +67,18 @@ partial class KuroGameContextBase
                     break;
                 }
                 HttpRequestMessage msg = new HttpRequestMessage();
-                msg.RequestUri = new Uri(
-                    $"https://pc-launcher-sdk-api.kurogame.com/game/queryPlayerInfo?_t={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}"
-                );
+                if (this.ContextName == nameof(WavesGlobalGameContext))
+                {
+                    msg.RequestUri = new Uri(
+                        $"https://pc-launcher-sdk-api.kurogame.net/game/queryPlayerInfo?_t={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}"
+                    );
+                }
+                else
+                {
+                    msg.RequestUri = new Uri(
+                        $"https://pc-launcher-sdk-api.kurogame.com/game/queryPlayerInfo?_t={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}"
+                    );
+                }
                 msg.Method = HttpMethod.Post;
                 QueryLocalPlayerInfoRequest request = new QueryLocalPlayerInfoRequest();
                 request.OAutoCode = oAutoCode;

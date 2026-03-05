@@ -32,13 +32,11 @@ IHost host = Host.CreateDefaultBuilder(args)
     })
     .Build();
 GameContextFactory.GameBassPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Waves";
-var mainGame = host.Services.GetRequiredKeyedService<IGameContext>(nameof(WavesMainGameContext));
+var mainGame = host.Services.GetRequiredKeyedService<IGameContext>(nameof(WavesGlobalGameContext));
 var locals = await mainGame.GetLocalGameOAuthAsync();
 var key =  KrKeyHelper.Xor(locals[0].OauthCode, 5);
 string json = await File.ReadAllTextAsync("D:\\Test.txt");
-//var model = JsonSerializer.Deserialize<QueryPlayerInfo> (json, LocalGameUserContext.Default.QueryPlayerInfo);
-
-////ValueKind = String : "{"roleId":"905859732","roleName":"怪","level":1,"sex":1,"headPhoto":82001501}"
 var result = await mainGame.QueryPlayerInfoAsync(key);
 var result2 = await mainGame.QueryRoleInfoAsync(key, result.Items[0].Id, result.Items[0].ServerName);
+Console.WriteLine(result2.Items[0].Base.Name);
 Console.ReadLine();
