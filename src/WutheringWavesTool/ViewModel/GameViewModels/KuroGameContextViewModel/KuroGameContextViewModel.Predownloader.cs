@@ -142,6 +142,11 @@ partial class KuroGameContextViewModel
                     }
                 }
             }
+            if (args.Type == Waves.Core.Models.Enums.GameContextActionType.CdnSelect)
+            {
+                PredDownloadBthVisibility = Visibility.Collapsed;
+                await TipShow.ShowMessageAsync(args.TipMessage, Symbol.Message);
+            }
         });
     }
 }

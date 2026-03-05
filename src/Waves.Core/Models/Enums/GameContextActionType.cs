@@ -25,5 +25,6 @@ public enum GameContextActionType:uint
 
     Decompress,
     GameExit,
-    TipMessage
+    TipMessage,
+    CdnSelect
 }

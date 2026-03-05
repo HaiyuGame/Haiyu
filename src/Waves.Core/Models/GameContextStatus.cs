@@ -61,5 +61,5 @@ public class GameContextStatus
     /// 预下载Diff路径
     /// </summary>
     public string PredownloadPath { get; internal set; }
-
+    public GameContextOutputArgs? LasterArgs { get; internal set; }
 }
