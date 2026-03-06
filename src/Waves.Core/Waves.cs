@@ -17,7 +17,6 @@ public static class Waves
     public static IServiceCollection AddGameContext(this IServiceCollection services)
     {
         services
-            .AddTransient<IHttpClientService, HttpClientService>()
             .AddKeyedSingleton<IGameContext, WavesMainGameContext>(
                 nameof(WavesMainGameContext),
                 (provider, c) =>
