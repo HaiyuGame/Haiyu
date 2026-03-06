@@ -107,7 +107,7 @@ public interface IGameContext
     /// </summary>
     /// <param name="token"></param>
     /// <returns></returns>
-    Task<List<KRSDKLauncherCache>?> GetLocalGameOAuthAsync(CancellationToken token);
+    Task<List<KRSDKLauncherCache>?> GetLocalGameOAuthAsync(CancellationToken token = default);
     /// <summary>
     /// 安装预下载内容
     /// </summary>
@@ -123,4 +123,10 @@ public interface IGameContext
     Task<LIndex?> GetDefaultLauncherValue(CancellationToken token = default);
 
     Task<LauncherBackgroundData?> GetLauncherBackgroundDataAsync(string backgroundCode, CancellationToken token = default);
+
+    #region 本地游戏体力查询接口
+    Task<QueryPlayerInfo?> QueryPlayerInfoAsync(string oAutoCode,CancellationToken token = default);
+
+    Task<QueryRoleInfo?> QueryRoleInfoAsync(string oautoCode, string playerId, string region, CancellationToken token = default);
+    #endregion
 }

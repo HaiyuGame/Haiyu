@@ -8,6 +8,7 @@ using System.Text.Json;
 using Waves.Api.Models;
 using Waves.Api.Models.GameWikiiClient;
 using Waves.Core;
+using Waves.Core.Common;
 using Waves.Core.Contracts;
 using Waves.Core.GameContext;
 using Waves.Core.GameContext.Contexts;
@@ -31,8 +32,11 @@ IHost host = Host.CreateDefaultBuilder(args)
     })
     .Build();
 GameContextFactory.GameBassPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Waves";
-var mainGame = host.Services.GetRequiredService<CloudGameService>();
-var result =  await mainGame.ConfigManager.GetUsersAsync();
-await mainGame.OpenUserAsync(result[0]);
-await mainGame.GetUserInfoAsync(result[0]);
+var mainGame = host.Services.GetRequiredKeyedService<IGameContext>(nameof(WavesGlobalGameContext));
+var locals = await mainGame.GetLocalGameOAuthAsync();
+var key =  KrKeyHelper.Xor(locals[0].OauthCode, 5);
+string json = await File.ReadAllTextAsync("D:\\Test.txt");
+var result = await mainGame.QueryPlayerInfoAsync(key);
+var result2 = await mainGame.QueryRoleInfoAsync(key, result.Items[0].Id, result.Items[0].ServerName);
+Console.WriteLine(result2.Items[0].Base.Name);
 Console.ReadLine();
