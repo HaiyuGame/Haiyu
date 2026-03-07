@@ -7,6 +7,7 @@ using System.Text.Json;
 using Waves.Api.Models;
 using Waves.Api.Models.Launcher;
 using Waves.Core.GameContext.Contexts;
+using Waves.Core.Models;
 
 namespace Waves.Core.GameContext;
 
@@ -84,7 +85,7 @@ partial class KuroGameContextBase
                 request.OAutoCode = oAutoCode;
                 var json = JsonSerializer.Serialize(
                     request,
-                    LocalGameUserContext.Default.QueryLocalPlayerInfoRequest
+                     LocalGameUserContext.Default.QueryLocalPlayerInfoRequest
                 );
                 msg.Content = new StringContent(json, Encoding.UTF8, "application/json");
                 var reponse = await client.SendAsync(msg, token);

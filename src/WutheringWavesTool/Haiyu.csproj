@@ -100,16 +100,16 @@
     <Content Update="Assets\Font.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Update="Assets\GameAssets\activity-points-359b6680.png">
+    <Content Update="Assets\GameAssets\Waves\activity.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Update="Assets\GameAssets\podcast-a7e86051.png">
+    <Content Update="Assets\GameAssets\Waves\podcast.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Update="Assets\GameAssets\waveplates-cc69cd83.png">
+    <Content Update="Assets\GameAssets\Waves\waveplates.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Update="Assets\GameAssets\wavesubstance-d775eab9.png">
+    <Content Update="Assets\GameAssets\Waves\wavesubstance.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -245,6 +245,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Assets\GameAssets\Punish\" />
     <Folder Include="Assets\Languages\" />
     <Folder Include="Common\Plugins\" />
     <Folder Include="Pages\ColorGame\" />

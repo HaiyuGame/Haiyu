@@ -34,13 +34,19 @@
                 FontSize="12"
                 Glyph="&#xE653;" />
         </Button>
+        <ProgressRing
+            Grid.Row="1"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            IsActive="True"
+            Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
         <ItemsView
             Grid.Row="1"
             Margin="0,10,0,0"
             IsItemInvokedEnabled="True"
             ItemsSource="{x:Bind ViewModel.Items, Mode=OneWay}"
-            SelectionMode="Single">
-
+            SelectionMode="Single"
+            Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}">
             <ItemsView.ItemTemplate>
                 <DataTemplate x:DataType="um:KRSDKLauncherCacheWrapper">
                     <ItemContainer IsSelected="{x:Bind IsSelect, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ToolTipService.ToolTip="双击设置">
@@ -56,7 +62,13 @@
                                 <ColumnDefinition />
                                 <ColumnDefinition Width="auto" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="{x:Bind Cache.Username}" />
+                            <TextBlock>
+                                <Run Text="{x:Bind PlayerItem.ServerName}" />
+                                <Run Text="-" />
+                                <Run Text="{x:Bind Cache.Username}" />
+                                <Run Text="-" />
+                                <Run Text="{x:Bind PlayerItem.RoleName}" />
+                            </TextBlock>
                             <TextBlock
                                 Grid.Row="1"
                                 Margin="0,5,0,0"

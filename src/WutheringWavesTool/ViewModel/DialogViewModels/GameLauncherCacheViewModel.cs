@@ -16,6 +16,14 @@ public sealed partial class GameLauncherCacheViewModel : DialogViewModelBase
     [ObservableProperty]
     public partial ObservableCollection<KRSDKLauncherCacheWrapper> Items { get; private set; }
 
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SetSelectCommand))]
+
+    public partial bool IsLoading { get; set; }
+
+    
+    public bool IsOk() => !IsLoading;
+
     public GameLauncherCacheViewModel(
         [FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager
     )
@@ -59,19 +67,36 @@ public sealed partial class GameLauncherCacheViewModel : DialogViewModelBase
 
     public async void SetData(GameLauncherCacheArgs args)
     {
+        IsLoading = true;
         this._args = args;
+        Items = [];
         this.GameContext = Instance.Host.Services.GetKeyedService<IGameContext>(
             args.GameContextName
         );
         var localSelect = await GameContext.GameLocalConfig.GetConfigAsync(
             GameLocalSettingName.LasterSelectLocalUser
         );
-        this.Items = (await GameContext.GetLocalGameOAuthAsync(this.CTS.Token))
-            .Select(x => new KRSDKLauncherCacheWrapper(x,localSelect))
-            .ToObservableCollection();
+        var result = await GameContext.GetLocalGameOAuthAsync(this.CTS.Token);
+        if (result == null)
+            return;
+        foreach (var item in result)
+        {
+            var code = KrKeyHelper.Xor(item.OauthCode, 5);
+            var userPlayers = await GameContext.QueryPlayerInfoAsync(code);
+            foreach (var player in userPlayers.Items)
+            {
+                KRSDKLauncherCacheWrapper info = new KRSDKLauncherCacheWrapper(item,player);
+                if(info.GetKey == localSelect)
+                {
+                    info.IsSelect = true;
+                }
+                Items.Add(info);
+            }
+        }
+        IsLoading = false;
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(IsOk))]
     public async Task SetSelect()
     {
         var item = Items.Where(x => x.IsSelect).FirstOrDefault();
@@ -79,7 +104,8 @@ public sealed partial class GameLauncherCacheViewModel : DialogViewModelBase
         {
             return;
         }
-        await GameContext.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.LasterSelectLocalUser,item.Cache.Username);
+        await GameContext.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.LasterSelectLocalUser,item.GetKey);
+        WeakReferenceMessenger.Default.Send<LocalGameRefreshBindUser>(new LocalGameRefreshBindUser(item));
         this.Close();
     }
 

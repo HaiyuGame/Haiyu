@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace Waves.Api.Models
+namespace Waves.Core.Models
 {
     [JsonSerializable(typeof(QueryLocalPlayerInfoRequest))]
     [JsonSerializable(typeof(QueryPlayerInfo))]

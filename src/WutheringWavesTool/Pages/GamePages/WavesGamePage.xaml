@@ -439,7 +439,7 @@
                             <RowDefinition Height="auto" />
                             <RowDefinition />
                         </Grid.RowDefinitions>
-
+                        <TextBlock Text="" />
                         <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
                             <Button Command="{x:Bind ViewModel.ShowGameLauncherCacheCommand}" Style="{ThemeResource TransparentButtonStyle}">
                                 <FontIcon
@@ -454,7 +454,12 @@
                                     Glyph="&#xE8AB;" />
                             </Button>
                         </StackPanel>
-                        <ProgressRing Grid.RowSpan="2" />
+                        <Grid Grid.Row="1">
+                            <ProgressRing Visibility="{x:Bind ViewModel.IsLocalUserRefresh, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            <Grid Visibility="{x:Bind ViewModel.IsLocalUserRefresh, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}">
+                                <TextBlock Text="选择" />
+                            </Grid>
+                        </Grid>
                     </Grid>
                 </control:CardSwitcher.Card1>
                 <control:CardSwitcher.Card2>

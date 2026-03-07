@@ -1,6 +1,8 @@
 ﻿using System.Text.Json.Serialization;
+using Waves.Core.Contracts;
+using Waves.Core.Models.Enums;
 
-namespace Waves.Api.Models;
+namespace Waves.Core.Models;
 
 public class QueryLocalPlayerInfoRequest
 {
@@ -296,7 +298,7 @@ public class PhantomBoxes
     public int _3 { get; set; }
 }
 
-public class LocalGameRoleItem
+public class LocalGameRoleItem: ILocalGameRole
 {
     [JsonPropertyName("MotorData")]
     public MotorData MotorData { get; set; }
@@ -312,6 +314,7 @@ public class LocalGameRoleItem
 
     [JsonIgnore]
     public string ServerName { get; set; }
+    public GameType Type { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 }
 
 public class Skin
