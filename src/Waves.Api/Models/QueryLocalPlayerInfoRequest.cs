@@ -242,7 +242,7 @@ public class EquipSkin
     public int Quality { get; set; }
 }
 
-public class Frame
+public class FrameModel
 {
     [JsonPropertyName("Id")]
     public int Id { get; set; }
@@ -272,7 +272,7 @@ public class MotorData
     public List<Decoration> Decorations { get; set; }
 
     [JsonPropertyName("Frames")]
-    public List<Frame> Frames { get; set; }
+    public List<FrameModel> Frames { get; set; }
 
     [JsonPropertyName("EquipSkin")]
     public EquipSkin EquipSkin { get; set; }

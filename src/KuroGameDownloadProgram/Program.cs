@@ -32,7 +32,7 @@ IHost host = Host.CreateDefaultBuilder(args)
     })
     .Build();
 GameContextFactory.GameBassPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Waves";
-var mainGame = host.Services.GetRequiredKeyedService<IGameContext>(nameof(WavesGlobalGameContext));
+var mainGame = host.Services.GetRequiredKeyedService<IGameContext>(nameof(WavesBiliBiliGameContext));
 var locals = await mainGame.GetLocalGameOAuthAsync();
 var key =  KrKeyHelper.Xor(locals[0].OauthCode, 5);
 string json = await File.ReadAllTextAsync("D:\\Test.txt");

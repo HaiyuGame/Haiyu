@@ -2,9 +2,9 @@
 
 public interface INavigationService
 {
-    public void RegisterView(Frame frame);
+    public void RegisterView(Microsoft.UI.Xaml.Controls.Frame frame);
 
-    public Frame Frame { get; }
+    public Microsoft.UI.Xaml.Controls.Frame Frame { get; }
 
     public void UnRegisterView();
 
