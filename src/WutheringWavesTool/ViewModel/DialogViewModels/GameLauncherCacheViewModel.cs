@@ -83,6 +83,11 @@ public sealed partial class GameLauncherCacheViewModel : DialogViewModelBase
         {
             var code = KrKeyHelper.Xor(item.OauthCode, 5);
             var userPlayers = await GameContext.QueryPlayerInfoAsync(code);
+
+            if(userPlayers.Code != 0)
+            {
+                continue;
+            }
             foreach (var player in userPlayers.Items)
             {
                 KRSDKLauncherCacheWrapper info = new KRSDKLauncherCacheWrapper(item, (WavesQueryPlayerItem)player);

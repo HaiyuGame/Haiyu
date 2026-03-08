@@ -428,7 +428,7 @@
             <control:CardSwitcher x:Name="switcher" Style="{ThemeResource DefaultCardsSwitcher}">
                 <control:CardSwitcher.Card1>
                     <Grid
-                        Padding="5"
+                        Padding="8"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
                         Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
@@ -437,11 +437,17 @@
                         Opacity="1">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
                             <RowDefinition />
                         </Grid.RowDefinitions>
-                        <TextBlock Text="" />
+                        <TextBlock
+                            Margin="8,0,0,0"
+                            VerticalAlignment="Center"
+                            FontFamily="{ThemeResource DefaultFont}"
+                            FontSize="16"
+                            Text="{x:Bind ViewModel.LocalUserTitle, Mode=OneWay}" />
                         <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
-                            <Button Command="{x:Bind ViewModel.ShowGameLauncherCacheCommand}" Style="{ThemeResource TransparentButtonStyle}">
+                            <Button Command="{x:Bind ViewModel.RefreshLocalGameUserCommand}" Style="{ThemeResource TransparentButtonStyle}">
                                 <FontIcon
                                     FontFamily="Segoe Fluent Icons"
                                     FontSize="14"
@@ -454,10 +460,94 @@
                                     Glyph="&#xE8AB;" />
                             </Button>
                         </StackPanel>
-                        <Grid Grid.Row="1">
+                        <NavigationViewItemSeparator Grid.Row="1" />
+                        <Grid Grid.Row="2" Padding="8">
                             <ProgressRing Visibility="{x:Bind ViewModel.IsLocalUserRefresh, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
                             <Grid Visibility="{x:Bind ViewModel.IsLocalUserRefresh, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}">
-                                <TextBlock Text="选择" />
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto" />
+                                    <RowDefinition Height="auto" />
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                <TextBlock FontFamily="{ThemeResource DefaultFont}" FontSize="15">
+                                    <Run Text="联觉等级" />
+                                    <Run Text="80" />
+                                </TextBlock>
+                                <StackPanel
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Orientation="Horizontal">
+                                    <TextBlock
+                                        FontFamily="{StaticResource DefaultFont}"
+                                        FontSize="12"
+                                        Foreground="{ThemeResource SystemChromeGrayColor}"
+                                        Text="特征码：" />
+                                    <TextBlock
+                                        FontFamily="{StaticResource DefaultFont}"
+                                        FontSize="12"
+                                        Foreground="{ThemeResource SystemChromeGrayColor}"
+                                        Text="1423656345" />
+                                </StackPanel>
+
+                                <NavigationViewItemSeparator Grid.Row="1" Margin="-8,5,-8,0" />
+                                <Grid
+                                    Grid.Row="3"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition />
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
+                                    <Border
+                                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="8">
+                                        <control:ImageEx
+                                            Width="25"
+                                            Height="25"
+                                            Source="Assets/GameAssets/Waves/waveplates.png" />
+                                    </Border>
+                                    <Border
+                                        Grid.Column="1"
+                                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="8">
+                                        <control:ImageEx
+                                            Width="25"
+                                            Height="25"
+                                            Source="Assets/GameAssets/Waves/activity.png" />
+                                    </Border>
+                                    <Border
+                                        Grid.Row="1"
+                                        Grid.Column="0"
+                                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="8">
+                                        <control:ImageEx
+                                            Width="25"
+                                            Height="25"
+                                            Source="Assets/GameAssets/Waves/wavesubstance.png" />
+                                    </Border>
+                                    <Border
+                                        Grid.Row="1"
+                                        Grid.Column="2"
+                                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="8">
+                                        <control:ImageEx
+                                            Width="25"
+                                            Height="25"
+                                            Source="Assets/GameAssets/Waves/podcast.png" />
+                                    </Border>
+                                </Grid>
                             </Grid>
                         </Grid>
                     </Grid>

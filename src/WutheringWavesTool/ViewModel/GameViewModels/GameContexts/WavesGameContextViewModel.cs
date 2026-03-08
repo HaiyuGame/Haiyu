@@ -145,6 +145,7 @@ public partial class WavesGameContextViewModel : KuroGameContextViewModel
         }
     }
 
+    [RelayCommand]
     private async Task RefreshLocalGameUser(KRSDKLauncherCacheWrapper wrapper = null)
     {
         IsLocalUserRefresh = true;
@@ -174,9 +175,11 @@ public partial class WavesGameContextViewModel : KuroGameContextViewModel
             {
                 var code = KrKeyHelper.Xor(item.OauthCode, 5);
                 var userPlayers = await GameContext.QueryPlayerInfoAsync(code);
-                if (userPlayers == null)
+                if (userPlayers == null || userPlayers.Code != 0)
                 {
-                    LocalUserTitle = "当前账号本地没有角色信息";
+                    LocalUserTitle = "获取账号信息失败";
+                    await TipShow.ShowMessageAsync("请重新进入游戏获取信息", Symbol.Clear);
+                    IsLocalUserRefresh = false;
                     return;
                 }
                 foreach (var player in userPlayers.Items)
@@ -194,6 +197,7 @@ public partial class WavesGameContextViewModel : KuroGameContextViewModel
                 LocalUserTitle = "未获取到上次选择的本地游戏账号信息";
                 return;
             }
+            LocalUserTitle = selectItem.PlayerItem.RoleName;
             var result = await this.GameContext.QueryRoleInfoAsync(
                 KrKeyHelper.Xor(selectItem.Cache.OauthCode, 5),
                 selectItem.PlayerItem.Id,

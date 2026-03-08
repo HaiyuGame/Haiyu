@@ -23,7 +23,7 @@ public partial class KuroGameContextBase
     /// <summary>
     /// 下载校验最大并发数
     /// </summary>
-    const int MAX_Concurrency_Count = 4;
+    const int MAX_Concurrency_Count = 6;
 
     #region 常量
     const int MaxBufferSize = 65536; // 64KB缓冲区

@@ -63,10 +63,7 @@ partial class KuroGameContextBase
             QueryPlayerInfo? info = null;
             while (true)
             {
-                if (count > 5)
-                {
-                    break;
-                }
+                
                 HttpRequestMessage msg = new HttpRequestMessage();
                 var url = PlayerInfoUser();
                 if (url == null)
@@ -86,6 +83,11 @@ partial class KuroGameContextBase
                     resultJson,
                     LocalGameUserContext.Default.QueryPlayerInfo
                 );
+                if (count > 5)
+                {
+                    info = models;
+                    break;
+                }
                 if (models == null || models.Code != 0)
                 {
                     count++;
@@ -97,6 +99,10 @@ partial class KuroGameContextBase
             if (info == null)
                 return null;
             info.Items = new();
+            if(info.Code != 0)
+            {
+                return info;
+            }
             foreach (var item in info.Data)
             {
                 if(this.GameType == Models.Enums.GameType.Waves)

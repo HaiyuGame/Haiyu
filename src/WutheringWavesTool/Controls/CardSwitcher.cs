@@ -30,6 +30,7 @@ namespace Haiyu.Controls
             this.CardFront = GetTemplateChild("CardFront") as ContentControl;
             InitRenderTransform(CardBack, 1.0);
             InitRenderTransform(CardFront, 0.75);
+            UpdateZIndex();
             base.OnApplyTemplate();
         }
 
@@ -109,7 +110,12 @@ namespace Haiyu.Controls
             sb.Begin();
 
             isFront = !isFront;
-            if(isFront)
+            UpdateZIndex();
+        }
+
+        void UpdateZIndex()
+        {
+            if (isFront)
             {
                 Canvas.SetZIndex(CardFront, 1);
                 Canvas.SetZIndex(CardBack, -1);
