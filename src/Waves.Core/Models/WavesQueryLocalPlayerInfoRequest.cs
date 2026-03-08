@@ -4,7 +4,7 @@ using Waves.Core.Models.Enums;
 
 namespace Waves.Core.Models;
 
-public class QueryLocalPlayerInfoRequest
+public class WavesQueryLocalPlayerInfoRequest
 {
     [JsonPropertyName("oauthCode")]
     public string OAutoCode { get; set; }
@@ -38,10 +38,10 @@ public class QueryPlayerInfo
     public Dictionary<string, string> Data { get; set; }
 
     [JsonIgnore]
-    public List<QueryPlayerItem> Items { get; set; }
+    public List<ILocalGamerPlayer> Items { get; set; }
 }
 
-public class QueryPlayerItem
+public class WavesQueryPlayerItem: ILocalGamerPlayer
 {
     [JsonPropertyName("roleId")]
     public string Id { get; set; }
@@ -59,6 +59,7 @@ public class QueryPlayerItem
 
     [JsonIgnore]
     public string ServerName { get; set; }
+    public GameType Type { get; set; } = GameType.Waves;
 }
 
 
@@ -77,7 +78,7 @@ public class QueryRoleInfo
     public long Timestamp { get; set; }
 
     [JsonIgnore]
-    public List<LocalGameRoleItem> Items { get; set; }
+    public List<ILocalGameRole> Items { get; set; }
 }
 
 
@@ -298,7 +299,7 @@ public class PhantomBoxes
     public int _3 { get; set; }
 }
 
-public class LocalGameRoleItem: ILocalGameRole
+public class WavesLocalGameRoleItem: ILocalGameRole
 {
     [JsonPropertyName("MotorData")]
     public MotorData MotorData { get; set; }
@@ -316,6 +317,8 @@ public class LocalGameRoleItem: ILocalGameRole
     public string ServerName { get; set; }
     public GameType Type { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 }
+
+
 
 public class Skin
 {

@@ -68,24 +68,16 @@ partial class KuroGameContextBase
                     break;
                 }
                 HttpRequestMessage msg = new HttpRequestMessage();
-                if (this.ContextName == nameof(WavesGlobalGameContext))
-                {
-                    msg.RequestUri = new Uri(
-                        $"https://pc-launcher-sdk-api.kurogame.net/game/queryPlayerInfo?_t={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}"
-                    );
-                }
-                else
-                {
-                    msg.RequestUri = new Uri(
-                        $"https://pc-launcher-sdk-api.kurogame.com/game/queryPlayerInfo?_t={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}"
-                    );
-                }
+                var url = PlayerInfoUser();
+                if (url == null)
+                    return null;
+                msg.RequestUri = new Uri(url);
                 msg.Method = HttpMethod.Post;
-                QueryLocalPlayerInfoRequest request = new QueryLocalPlayerInfoRequest();
+                WavesQueryLocalPlayerInfoRequest request = new WavesQueryLocalPlayerInfoRequest();
                 request.OAutoCode = oAutoCode;
                 var json = JsonSerializer.Serialize(
                     request,
-                     LocalGameUserContext.Default.QueryLocalPlayerInfoRequest
+                    LocalGameUserContext.Default.WavesQueryLocalPlayerInfoRequest
                 );
                 msg.Content = new StringContent(json, Encoding.UTF8, "application/json");
                 var reponse = await client.SendAsync(msg, token);
@@ -107,14 +99,28 @@ partial class KuroGameContextBase
             info.Items = new();
             foreach (var item in info.Data)
             {
-                QueryPlayerItem? model = JsonSerializer.Deserialize<QueryPlayerItem>(
+                if(this.GameType == Models.Enums.GameType.Waves)
+                {
+                    WavesQueryPlayerItem? model = JsonSerializer.Deserialize<WavesQueryPlayerItem>(
                     item.Value,
-                    LocalGameUserContext.Default.QueryPlayerItem
+                    LocalGameUserContext.Default.WavesQueryPlayerItem
                 );
-                if (model == null)
-                    continue;
-                model.ServerName = item.Key;
-                info.Items.Add(model);
+                    if (model == null)
+                        continue;
+                    model.ServerName = item.Key;
+                    info.Items.Add(model);
+                }else if( this.GameType == Models.Enums.GameType.Punish)
+                {
+                    PunishQueryPlayerItem? model = JsonSerializer.Deserialize<PunishQueryPlayerItem>(
+                    item.Value,
+                    LocalGameUserContext.Default.PunishQueryPlayerItem
+                );
+                    if (model == null)
+                        continue;
+                    model.ServerName = item.Key;
+                    info.Items.Add(model);
+                }
+                
             }
             return info;
         }
@@ -136,38 +142,12 @@ partial class KuroGameContextBase
                 if (count > 5)
                     break;
                 HttpRequestMessage msg = new HttpRequestMessage();
-                msg.Headers.Add("sec-ch-ua-platform", "Windows");
-                msg.Headers.Add(
-                    "User-Agent",
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.0.0"
-                );
-                msg.Headers.Add("Accept", "application/json, text/plain, */*");
-                msg.Headers.Add(
-                    "sec-ch-ua",
-                    "\"Chromium\";v=\"133\", \"Microsoft Edge WebView2\";v=\"133\", \"Not(A:Brand\";v=\"99\", \"Microsoft Edge\";v=\"133\""
-                );
-                msg.Headers.Add("sec-ch-ua-mobile", "?0");
-                msg.Headers.Add("Origin", "null");
-                msg.Headers.Add("Sec-Fetch-Site", "cross-site");
-                msg.Headers.Add("Sec-Fetch-Mode", "cors");
-                msg.Headers.Add("Sec-Fetch-Dest", "empty");
-                msg.Headers.Add("Accept-Encoding", "gzip, deflate, br, zstd");
-                msg.Headers.Add(
-                    "Accept-Language",
-                    "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"
-                );
-                if (this.ContextName == nameof(WavesGlobalGameContext))
-                {
-                    msg.RequestUri = new Uri(
-                        $"https://pc-launcher-sdk-api.kurogame.net/game/queryRole?_t={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}"
-                    );
-                }
-                else
-                {
-                    msg.RequestUri = new Uri(
-                        $"https://pc-launcher-sdk-api.kurogame.com/game/queryRole?_t={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}"
-                    );
-                }
+
+                var url = RoleInfoUser();
+                if (url == null)
+                    return null;
+                msg.RequestUri = new Uri(url);
+
                 msg.Method = HttpMethod.Post;
                 QueryLocalRoleInfoRequest request = new QueryLocalRoleInfoRequest();
                 request.OAutoCode = oautoCode;
@@ -199,17 +179,93 @@ partial class KuroGameContextBase
             info.Items = [];
             foreach (var item in info.Data)
             {
-                LocalGameRoleItem? roleItem = JsonSerializer.Deserialize<LocalGameRoleItem>(
-                    item.Value,
-                    LocalGameUserContext.Default.LocalGameRoleItem
-                );
-                if (roleItem == null)
-                    continue;
-                roleItem.ServerName = item.Key;
-                info.Items.Add(roleItem);
+                if (this.GameType == Models.Enums.GameType.Waves)
+                {
+                    WavesLocalGameRoleItem? roleItem =
+                        JsonSerializer.Deserialize<WavesLocalGameRoleItem>(
+                            item.Value,
+                            LocalGameUserContext.Default.WavesLocalGameRoleItem
+                        );
+                    if (roleItem == null)
+                        continue;
+                    roleItem.ServerName = item.Key;
+                    info.Items.Add(roleItem);
+                }
+                else if (this.GameType == Models.Enums.GameType.Punish)
+                {
+                    PunishLocalGameRoleItem? roleItem =
+                        JsonSerializer.Deserialize<PunishLocalGameRoleItem>(
+                            item.Value,
+                            LocalGameUserContext.Default.PunishLocalGameRoleItem
+                        );
+                    if (roleItem == null)
+                        continue;
+                    roleItem.ServerName = item.Key;
+                    info.Items.Add(roleItem);
+                }
             }
-           
         }
         return info;
+    }
+
+    public string? PlayerInfoUser()
+    {
+        if (this.GameType == Models.Enums.GameType.Waves)
+        {
+            if (this.ContextName == nameof(WavesGlobalGameContext))
+            {
+                return $"https://pc-launcher-sdk-api.kurogame.net/game/queryPlayerInfo?_t={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
+            }
+            else
+            {
+                return $"https://pc-launcher-sdk-api.kurogame.com/game/queryPlayerInfo?_t={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
+            }
+        }
+
+        if (this.GameType == Models.Enums.GameType.Punish)
+        {
+            //https://pc-launcher-sdk-haru-api.kurogames.com/game/queryPlayerInfo?_t=1772959214
+            //https://pc-launcher-sdk-haru-api.kurogames.com/game/queryRole?_t=1772959216
+
+            if (this.ContextName == nameof(PunishGlobalGameContext))
+            {
+                return $"https://pc-launcher-sdk-haru-api.kurogames.net/game/queryPlayerInfo?_t={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
+            }
+            else
+            {
+                return $"https://pc-launcher-sdk-haru-api.kurogames.com/game/queryPlayerInfo?_t={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
+            }
+        }
+
+        return null;
+    }
+
+    public string? RoleInfoUser()
+    {
+        if (this.GameType == Models.Enums.GameType.Waves)
+        {
+            if (this.ContextName == nameof(WavesGlobalGameContext))
+            {
+                return $"https://pc-launcher-sdk-api.kurogame.net/game/queryRole?_t={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
+            }
+            else
+            {
+                return $"https://pc-launcher-sdk-api.kurogame.com/game/queryRole?_t={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
+            }
+        }
+
+        if (this.GameType == Models.Enums.GameType.Punish)
+        {
+            if (this.ContextName == nameof(PunishGlobalGameContext))
+            {
+                return $"https://pc-launcher-sdk-haru-api.kurogames.net/game/queryRole?_t={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
+            }
+            else
+            {
+                return $"https://pc-launcher-sdk-haru-api.kurogames.com/game/queryRole?_t={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
+            }
+        }
+
+        return null;
     }
 }

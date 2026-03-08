@@ -85,7 +85,7 @@ public sealed partial class GameLauncherCacheViewModel : DialogViewModelBase
             var userPlayers = await GameContext.QueryPlayerInfoAsync(code);
             foreach (var player in userPlayers.Items)
             {
-                KRSDKLauncherCacheWrapper info = new KRSDKLauncherCacheWrapper(item,player);
+                KRSDKLauncherCacheWrapper info = new KRSDKLauncherCacheWrapper(item, (WavesQueryPlayerItem)player);
                 if(info.GetKey == localSelect)
                 {
                     info.IsSelect = true;

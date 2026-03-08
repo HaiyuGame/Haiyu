@@ -94,6 +94,7 @@ namespace Waves.Core.Models.CoreApi
                 AppKey = "RnIUKs3r59Csliu3N0rl5uRWWBOFDaJL",
                 GameIdentity = "Haru",
                 GameExeName = "PGR.exe",
+                PKGId= "A1393",
                 ConfigUrl =
                     "https://prod-cn-alicdn-gamestarter.kurogame.com/launcher/game/G148/10012_RnIUKs3r59Csliu3N0rl5uRWWBOFDaJL/index.json",
                 LauncherConfigUrl =
@@ -112,6 +113,7 @@ namespace Waves.Core.Models.CoreApi
                 AppKey = "qYQv6TyyyhCKD3ox3gssyolNPwMoCPZt",
                 GameIdentity = "Haru",
                 GameExeName = "PGR.exe",
+                PKGId= "A1508",
                 ConfigUrl =
                     "https://prod-cn-alicdn-gamestarter.kurogame.com/launcher/game/G148/10011_qYQv6TyyyhCKD3ox3gssyolNPwMoCPZt/index.json",
                 LauncherConfigUrl =
@@ -130,7 +132,7 @@ namespace Waves.Core.Models.CoreApi
                 AppKey = "LWdk9D2Ep9mpJmqBZZkcPBU2YNraEWBQ",
                 GameIdentity = "Haru",
                 GameExeName = "PGR.exe",
-                PKGId=null,
+                PKGId= "A1728",
                 ConfigUrl =
                     "https://prod-alicdn-gamestarter.kurogame.com/launcher/game/G143/50015_LWdk9D2Ep9mpJmqBZZkcPBU2YNraEWBQ/index.json",
                 LauncherConfigUrl =
@@ -149,6 +151,7 @@ namespace Waves.Core.Models.CoreApi
                 AppKey = "i2n5NLmdCAmOGP3J1tJOlWKNSMQuyWL7",
                 GameIdentity = "Haru",
                 GameExeName = "PGR.exe",
+                PKGId= "A1760",
                 ConfigUrl =
                     "https://prod-alicdn-gamestarter.kurogame.com/launcher/game/G279/50016_i2n5NLmdCAmOGP3J1tJOlWKNSMQuyWL7/index.json",
                 LauncherConfigUrl =
