@@ -468,10 +468,11 @@
                                     <RowDefinition Height="auto" />
                                     <RowDefinition Height="auto" />
                                     <RowDefinition />
+                                    <RowDefinition Height="50" />
                                 </Grid.RowDefinitions>
                                 <TextBlock FontFamily="{ThemeResource DefaultFont}" FontSize="15">
                                     <Run Text="联觉等级" />
-                                    <Run Text="80" />
+                                    <Run Text="{x:Bind ViewModel.Base.Level, Mode=OneWay}" />
                                 </TextBlock>
                                 <StackPanel
                                     HorizontalAlignment="Right"
@@ -486,12 +487,11 @@
                                         FontFamily="{StaticResource DefaultFont}"
                                         FontSize="12"
                                         Foreground="{ThemeResource SystemChromeGrayColor}"
-                                        Text="1423656345" />
+                                        Text="{x:Bind ViewModel.Base.Id, Mode=OneWay}" />
                                 </StackPanel>
-
                                 <NavigationViewItemSeparator Grid.Row="1" Margin="-8,5,-8,0" />
                                 <Grid
-                                    Grid.Row="3"
+                                    Grid.Row="2"
                                     HorizontalAlignment="Stretch"
                                     VerticalAlignment="Stretch">
                                     <Grid.ColumnDefinitions>
@@ -502,51 +502,166 @@
                                         <RowDefinition />
                                         <RowDefinition />
                                     </Grid.RowDefinitions>
-                                    <Border
+                                    <Grid
+                                        Padding="8"
                                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                         BorderThickness="1"
                                         CornerRadius="8">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition />
+                                            <RowDefinition />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="auto" />
+                                            <ColumnDefinition />
+                                        </Grid.ColumnDefinitions>
                                         <control:ImageEx
-                                            Width="25"
-                                            Height="25"
+                                            Grid.RowSpan="2"
+                                            Width="30"
+                                            Height="30"
+                                            Margin="8,0,0,0"
                                             Source="Assets/GameAssets/Waves/waveplates.png" />
-                                    </Border>
-                                    <Border
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            Margin="4,0,0,0"
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Center"
+                                            FontFamily="{ThemeResource DefaultFont}">
+                                            <Run
+                                                FontSize="17"
+                                                Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"
+                                                Text="{x:Bind ViewModel.Base.Energy, Mode=OneWay}" />
+                                            <Run Text="/" />
+                                            <Run FontSize="14" Text="{x:Bind ViewModel.Base.MaxEnergy, Mode=OneWay}" />
+                                        </TextBlock>
+                                        <TextBlock
+                                            Grid.Row="1"
+                                            Grid.Column="1"
+                                            Margin="4,0,0,0"
+                                            HorizontalAlignment="Left"
+                                            FontFamily="{ThemeResource DefaultFont}"
+                                            Text="已充满" />
+                                    </Grid>
+                                    <Grid
                                         Grid.Column="1"
                                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                         BorderThickness="1"
                                         CornerRadius="8">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="auto" />
+                                            <ColumnDefinition />
+                                        </Grid.ColumnDefinitions>
                                         <control:ImageEx
-                                            Width="25"
-                                            Height="25"
+                                            Grid.RowSpan="2"
+                                            Width="30"
+                                            Height="30"
+                                            Margin="15,0,0,0"
                                             Source="Assets/GameAssets/Waves/activity.png" />
-                                    </Border>
-                                    <Border
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            Margin="4,0,0,0"
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Center"
+                                            FontFamily="{ThemeResource DefaultFont}"
+                                            FontSize="16">
+                                            <Run Foreground="{ThemeResource AccentAAFillColorDefaultBrush}" Text="{x:Bind ViewModel.Base.Liveness, Mode=OneWay}" />
+                                            <Run Text="/" />
+                                            <Run Text="{x:Bind ViewModel.Base.LivenessMaxCount, Mode=OneWay}" />
+                                        </TextBlock>
+                                    </Grid>
+                                    <Grid
                                         Grid.Row="1"
                                         Grid.Column="0"
                                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                         BorderThickness="1"
                                         CornerRadius="8">
+
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition />
+                                            <RowDefinition />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="auto" />
+                                            <ColumnDefinition />
+                                        </Grid.ColumnDefinitions>
                                         <control:ImageEx
-                                            Width="25"
-                                            Height="25"
+                                            Grid.RowSpan="2"
+                                            Width="30"
+                                            Height="30"
+                                            Margin="15,0,0,0"
                                             Source="Assets/GameAssets/Waves/wavesubstance.png" />
-                                    </Border>
-                                    <Border
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            Margin="4,0,0,0"
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Center"
+                                            FontFamily="{ThemeResource DefaultFont}">
+                                            <Run
+                                                FontSize="17"
+                                                Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"
+                                                Text="{x:Bind ViewModel.Base.StoreEnergy, Mode=OneWay}" />
+                                            <Run Text="/" />
+                                            <Run FontSize="14" Text="{x:Bind ViewModel.Base.MaxStoreEnergy, Mode=OneWay}" />
+                                        </TextBlock>
+                                        <TextBlock
+                                            Grid.Row="1"
+                                            Grid.Column="1"
+                                            Margin="4,0,0,0"
+                                            HorizontalAlignment="Left"
+                                            FontFamily="{ThemeResource DefaultFont}"
+                                            Text="已充满" />
+                                    </Grid>
+                                    <Grid
                                         Grid.Row="1"
                                         Grid.Column="2"
                                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                         BorderThickness="1"
                                         CornerRadius="8">
+
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition />
+                                            <RowDefinition />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="auto" />
+                                            <ColumnDefinition />
+                                        </Grid.ColumnDefinitions>
                                         <control:ImageEx
-                                            Width="25"
-                                            Height="25"
+                                            Grid.RowSpan="2"
+                                            Width="30"
+                                            Height="30"
+                                            Margin="15,0,0,0"
                                             Source="Assets/GameAssets/Waves/podcast.png" />
-                                    </Border>
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            Margin="4,0,0,0"
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Center"
+                                            FontFamily="{ThemeResource DefaultFont}">
+                                            <Run
+                                                FontSize="15"
+                                                Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"
+                                                Text="{x:Bind ViewModel.BattlePass.Exp, Mode=OneWay}" />
+                                            <Run Text="/" />
+                                            <Run FontSize="12" Text="{x:Bind ViewModel.BattlePass.ExpLimit, Mode=OneWay}" />
+                                        </TextBlock>
+                                        <TextBlock
+                                            Grid.Row="1"
+                                            Grid.Column="1"
+                                            Margin="4,0,0,0"
+                                            HorizontalAlignment="Left"
+                                            FontFamily="{ThemeResource DefaultFont}">
+                                            <Run Text="Lv:" />
+                                            <Run Text="{x:Bind ViewModel.BattlePass.Level, Mode=OneWay}" />
+                                        </TextBlock>
+                                    </Grid>
                                 </Grid>
                             </Grid>
                         </Grid>

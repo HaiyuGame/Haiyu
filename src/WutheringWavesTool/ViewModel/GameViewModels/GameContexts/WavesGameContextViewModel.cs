@@ -120,6 +120,17 @@ public partial class WavesGameContextViewModel : KuroGameContextViewModel
     [ObservableProperty]
     public partial string LocalUserTitle { get; set; }
 
+    [ObservableProperty]
+    public partial Base Base { get; private set; }
+    [ObservableProperty]
+    public partial MusicData MusicData { get; private set; }
+
+    [ObservableProperty]
+    public partial BattlePass BattlePass { get; private set; }
+
+    [ObservableProperty]
+    public partial MotorData MotorData { get; private set; }
+
     #endregion
 
     public async override Task ShowCardAsync(bool showCard)
@@ -140,6 +151,11 @@ public partial class WavesGameContextViewModel : KuroGameContextViewModel
         }
         else
         {
+
+            this.Base = null;
+            this.MusicData = null;
+            this.BattlePass = null;
+            this.MotorData = null;
             this.SelectTab = null;
             PlayerCardVisibility = Visibility.Collapsed;
         }
@@ -169,6 +185,10 @@ public partial class WavesGameContextViewModel : KuroGameContextViewModel
             if (localUsers == null || localUsers.Count == 0)
             {
                 LocalUserTitle = "未获取到本地游戏账号信息";
+                this.Base = null;
+                this.MusicData = null;
+                this.BattlePass = null;
+                this.MotorData = null;
                 return;
             }
             foreach (var item in localUsers)
@@ -178,6 +198,11 @@ public partial class WavesGameContextViewModel : KuroGameContextViewModel
                 if (userPlayers == null || userPlayers.Code != 0)
                 {
                     LocalUserTitle = "获取账号信息失败";
+
+                    this.Base = null;
+                    this.MusicData = null;
+                    this.BattlePass = null;
+                    this.MotorData = null;
                     await TipShow.ShowMessageAsync("请重新进入游戏获取信息", Symbol.Clear);
                     IsLocalUserRefresh = false;
                     return;
@@ -192,18 +217,40 @@ public partial class WavesGameContextViewModel : KuroGameContextViewModel
                     }
                 }
             }
-            if (selectItem == null)
-            {
-                LocalUserTitle = "未获取到上次选择的本地游戏账号信息";
-                return;
-            }
-            LocalUserTitle = selectItem.PlayerItem.RoleName;
-            var result = await this.GameContext.QueryRoleInfoAsync(
-                KrKeyHelper.Xor(selectItem.Cache.OauthCode, 5),
-                selectItem.PlayerItem.Id,
-                selectItem.PlayerItem.ServerName
-            );
+            
         }
+        if (selectItem == null)
+        {
+            LocalUserTitle = "未获取到上次选择的本地游戏账号信息";
+            this.Base = null;
+            this.MusicData = null;
+            this.BattlePass = null;
+            this.MotorData = null;
+            IsLocalUserRefresh = false;
+            return;
+        }
+        LocalUserTitle = selectItem.PlayerItem.RoleName;
+        var result = await this.GameContext.QueryRoleInfoAsync(
+            KrKeyHelper.Xor(selectItem.Cache.OauthCode, 5),
+            selectItem.PlayerItem.Id,
+            selectItem.PlayerItem.ServerName
+        );
+        if (result.Items == null || result.Items.Count == 0)
+        {
+            LocalUserTitle = "获取账号信息失败";
+            await TipShow.ShowMessageAsync("请重新进入游戏获取信息", Symbol.Clear);
+            IsLocalUserRefresh = false;
+            this.Base = null;
+            this.MusicData = null;
+            this.BattlePass = null;
+            this.MotorData = null;
+            return;
+        }
+        var wavesData = (result.Items[0] as WavesLocalGameRoleItem)!;
+        this.Base = wavesData.Base;
+        this.MusicData = wavesData.MusicData;
+        this.BattlePass = wavesData.BattlePass;
+        this.MotorData = wavesData.MotorData;
         IsLocalUserRefresh = false;
     }
 }
