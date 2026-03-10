@@ -16,12 +16,11 @@ public class QueryLocalRoleInfoRequest
     public string OAutoCode { get; set; }
 
     [JsonPropertyName("playerId")]
-    public long PlayerId { get; set;  }
+    public long PlayerId { get; set; }
 
     [JsonPropertyName("region")]
     public string Region { get; set; }
 }
-
 
 public class QueryPlayerInfo
 {
@@ -41,7 +40,7 @@ public class QueryPlayerInfo
     public List<ILocalGamerPlayer> Items { get; set; }
 }
 
-public class WavesQueryPlayerItem: ILocalGamerPlayer
+public class WavesQueryPlayerItem : ILocalGamerPlayer
 {
     [JsonPropertyName("roleId")]
     public string Id { get; set; }
@@ -51,6 +50,7 @@ public class WavesQueryPlayerItem: ILocalGamerPlayer
 
     [JsonPropertyName("level")]
     public int Level { get; set; }
+
     [JsonPropertyName("sex")]
     public int Sex { get; set; }
 
@@ -62,7 +62,6 @@ public class WavesQueryPlayerItem: ILocalGamerPlayer
     public GameType Type { get; set; } = GameType.Waves;
 }
 
-
 public class QueryRoleInfo
 {
     [JsonPropertyName("code")]
@@ -72,7 +71,7 @@ public class QueryRoleInfo
     public string Message { get; set; }
 
     [JsonPropertyName("data")]
-    public Dictionary<string,string> Data { get; set; }
+    public Dictionary<string, string> Data { get; set; }
 
     [JsonPropertyName("timestamp")]
     public long Timestamp { get; set; }
@@ -80,8 +79,6 @@ public class QueryRoleInfo
     [JsonIgnore]
     public List<ILocalGameRole> Items { get; set; }
 }
-
-
 
 public class Album
 {
@@ -131,13 +128,59 @@ public class Base
     public int StoreEnergy { get; set; }
 
     [JsonPropertyName("StoreEnergyRecoverTime")]
-    public int StoreEnergyRecoverTime { get; set; }
+    public int StoreEnergyRecoverTime
+    {
+        get => field;
+        set
+        {
+            if (value == 0)
+            {
+                this.StoreEnergyRecoverEndTime = "已充满";
+                field = value;
+                return;
+            }
+            var time = DateTimeOffset.FromUnixTimeMilliseconds(value).ToLocalTime().DateTime;
+            if (time > DateTime.Now)
+            {
+                this.StoreEnergyRecoverEndTime = "已充满";
+                field = value;
+                return;
+            }
+            var dateTimeOffset = time - DateTime.Now;
+            this.StoreEnergyRecoverEndTime =
+                $"{dateTimeOffset.Hours}:{dateTimeOffset.Minutes}:{dateTimeOffset.Seconds}S";
+            field = value;
+        }
+    }
 
     [JsonPropertyName("MaxStoreEnergy")]
     public int MaxStoreEnergy { get; set; }
 
     [JsonPropertyName("EnergyRecoverTime")]
-    public int EnergyRecoverTime { get; set; }
+    public long EnergyRecoverTime
+    {
+        get => field;
+        set
+        {
+            if (value == 0)
+            {
+                this.EnergyRecoverEndTime = "已充满";
+                field = value;
+                return;
+            }
+            var time = DateTimeOffset.FromUnixTimeMilliseconds(value).ToLocalTime().DateTime;
+            if (time > DateTime.Now)
+            {
+                this.EnergyRecoverEndTime = "已充满";
+                field = value;
+                return;
+            }
+            var dateTimeOffset = time - DateTime.Now;
+            this.EnergyRecoverEndTime =
+                $"{dateTimeOffset.Hours}:{dateTimeOffset.Minutes}:{dateTimeOffset.Seconds}S";
+            field = value;
+        }
+    }
 
     [JsonPropertyName("Liveness")]
     public int Liveness { get; set; }
@@ -168,6 +211,12 @@ public class Base
 
     [JsonPropertyName("BirthDay")]
     public int BirthDay { get; set; }
+
+    [JsonIgnore]
+    public string EnergyRecoverEndTime { get; set; }
+
+    [JsonIgnore]
+    public string StoreEnergyRecoverEndTime { get; set; }
 }
 
 public class BasicBoxes
@@ -299,7 +348,7 @@ public class PhantomBoxes
     public int _3 { get; set; }
 }
 
-public class WavesLocalGameRoleItem: ILocalGameRole
+public class WavesLocalGameRoleItem : ILocalGameRole
 {
     [JsonPropertyName("MotorData")]
     public MotorData MotorData { get; set; }
@@ -315,10 +364,12 @@ public class WavesLocalGameRoleItem: ILocalGameRole
 
     [JsonIgnore]
     public string ServerName { get; set; }
-    public GameType Type { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    public GameType Type
+    {
+        get => throw new NotImplementedException();
+        set => throw new NotImplementedException();
+    }
 }
-
-
 
 public class Skin
 {
@@ -340,4 +391,3 @@ public class Sticker
     [JsonPropertyName("PartId")]
     public int PartId { get; set; }
 }
-

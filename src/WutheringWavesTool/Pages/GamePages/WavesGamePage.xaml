@@ -439,6 +439,7 @@
                             <RowDefinition Height="auto" />
                             <RowDefinition Height="auto" />
                             <RowDefinition />
+                            <RowDefinition Height="auto" />
                         </Grid.RowDefinitions>
                         <TextBlock
                             Margin="8,0,0,0"
@@ -462,13 +463,19 @@
                         </StackPanel>
                         <NavigationViewItemSeparator Grid.Row="1" />
                         <Grid Grid.Row="2" Padding="8">
+                            <Grid.ChildrenTransitions>
+                                <TransitionCollection>
+                                    <ContentThemeTransition />
+                                </TransitionCollection>
+                            </Grid.ChildrenTransitions>
                             <ProgressRing Visibility="{x:Bind ViewModel.IsLocalUserRefresh, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
                             <Grid Visibility="{x:Bind ViewModel.IsLocalUserRefresh, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="auto" />
                                     <RowDefinition Height="auto" />
                                     <RowDefinition />
-                                    <RowDefinition Height="50" />
+                                    <RowDefinition Height="auto" />
+                                    <RowDefinition Height="80" />
                                 </Grid.RowDefinitions>
                                 <TextBlock FontFamily="{ThemeResource DefaultFont}" FontSize="15">
                                     <Run Text="联觉等级" />
@@ -490,8 +497,10 @@
                                         Text="{x:Bind ViewModel.Base.Id, Mode=OneWay}" />
                                 </StackPanel>
                                 <NavigationViewItemSeparator Grid.Row="1" Margin="-8,5,-8,0" />
+
                                 <Grid
                                     Grid.Row="2"
+                                    Margin="0,5,0,0"
                                     HorizontalAlignment="Stretch"
                                     VerticalAlignment="Stretch">
                                     <Grid.ColumnDefinitions>
@@ -503,13 +512,10 @@
                                         <RowDefinition />
                                     </Grid.RowDefinitions>
                                     <Grid
-                                        Padding="8"
-                                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                        BorderThickness="1"
+                                        BorderThickness="0"
                                         CornerRadius="8">
                                         <Grid.RowDefinitions>
-                                            <RowDefinition />
                                             <RowDefinition />
                                         </Grid.RowDefinitions>
                                         <Grid.ColumnDefinitions>
@@ -520,34 +526,38 @@
                                             Grid.RowSpan="2"
                                             Width="30"
                                             Height="30"
-                                            Margin="8,0,0,0"
+                                            Margin="15,0,0,0"
                                             Source="Assets/GameAssets/Waves/waveplates.png" />
-                                        <TextBlock
+                                        <StackPanel
                                             Grid.Column="1"
-                                            Margin="4,0,0,0"
-                                            HorizontalAlignment="Left"
                                             VerticalAlignment="Center"
-                                            FontFamily="{ThemeResource DefaultFont}">
-                                            <Run
-                                                FontSize="17"
-                                                Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"
-                                                Text="{x:Bind ViewModel.Base.Energy, Mode=OneWay}" />
-                                            <Run Text="/" />
-                                            <Run FontSize="14" Text="{x:Bind ViewModel.Base.MaxEnergy, Mode=OneWay}" />
-                                        </TextBlock>
-                                        <TextBlock
-                                            Grid.Row="1"
-                                            Grid.Column="1"
-                                            Margin="4,0,0,0"
-                                            HorizontalAlignment="Left"
-                                            FontFamily="{ThemeResource DefaultFont}"
-                                            Text="已充满" />
+                                            Orientation="Vertical">
+                                            <TextBlock
+                                                Grid.Column="1"
+                                                Margin="4,0,0,0"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Center"
+                                                FontFamily="{ThemeResource DefaultFont}">
+                                                <Run
+                                                    FontSize="17"
+                                                    Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"
+                                                    Text="{x:Bind ViewModel.Base.Energy, Mode=OneWay}" />
+                                                <Run Text="/" />
+                                                <Run FontSize="14" Text="{x:Bind ViewModel.Base.MaxEnergy, Mode=OneWay}" />
+                                            </TextBlock>
+                                            <TextBlock
+                                                Grid.Row="1"
+                                                Grid.Column="1"
+                                                Margin="4,0,0,0"
+                                                HorizontalAlignment="Left"
+                                                FontFamily="{ThemeResource DefaultFont}"
+                                                FontSize="12"
+                                                Text="{x:Bind ViewModel.Base.EnergyRecoverEndTime, Mode=OneWay}" />
+                                        </StackPanel>
                                     </Grid>
                                     <Grid
                                         Grid.Column="1"
-                                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                        BorderThickness="1"
                                         CornerRadius="8">
                                         <Grid.RowDefinitions>
                                             <RowDefinition />
@@ -577,13 +587,10 @@
                                     <Grid
                                         Grid.Row="1"
                                         Grid.Column="0"
-                                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                        BorderThickness="1"
                                         CornerRadius="8">
 
                                         <Grid.RowDefinitions>
-                                            <RowDefinition />
                                             <RowDefinition />
                                         </Grid.RowDefinitions>
                                         <Grid.ColumnDefinitions>
@@ -596,33 +603,37 @@
                                             Height="30"
                                             Margin="15,0,0,0"
                                             Source="Assets/GameAssets/Waves/wavesubstance.png" />
-                                        <TextBlock
+                                        <StackPanel
                                             Grid.Column="1"
-                                            Margin="4,0,0,0"
-                                            HorizontalAlignment="Left"
                                             VerticalAlignment="Center"
-                                            FontFamily="{ThemeResource DefaultFont}">
-                                            <Run
-                                                FontSize="17"
-                                                Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"
-                                                Text="{x:Bind ViewModel.Base.StoreEnergy, Mode=OneWay}" />
-                                            <Run Text="/" />
-                                            <Run FontSize="14" Text="{x:Bind ViewModel.Base.MaxStoreEnergy, Mode=OneWay}" />
-                                        </TextBlock>
-                                        <TextBlock
-                                            Grid.Row="1"
-                                            Grid.Column="1"
-                                            Margin="4,0,0,0"
-                                            HorizontalAlignment="Left"
-                                            FontFamily="{ThemeResource DefaultFont}"
-                                            Text="已充满" />
+                                            Orientation="Vertical">
+                                            <TextBlock
+                                                Grid.Column="1"
+                                                Margin="4,0,0,0"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Center"
+                                                FontFamily="{ThemeResource DefaultFont}">
+                                                <Run
+                                                    FontSize="17"
+                                                    Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"
+                                                    Text="{x:Bind ViewModel.Base.StoreEnergy, Mode=OneWay}" />
+                                                <Run Text="/" />
+                                                <Run FontSize="14" Text="{x:Bind ViewModel.Base.MaxStoreEnergy, Mode=OneWay}" />
+                                            </TextBlock>
+                                            <TextBlock
+                                                Grid.Row="1"
+                                                Grid.Column="1"
+                                                Margin="4,0,0,0"
+                                                HorizontalAlignment="Left"
+                                                FontFamily="{ThemeResource DefaultFont}"
+                                                FontSize="12"
+                                                Text="{x:Bind ViewModel.Base.StoreEnergyRecoverEndTime, Mode=OneWay}" />
+                                        </StackPanel>
                                     </Grid>
                                     <Grid
                                         Grid.Row="1"
                                         Grid.Column="2"
-                                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                        BorderThickness="1"
                                         CornerRadius="8">
 
                                         <Grid.RowDefinitions>
@@ -662,6 +673,60 @@
                                             <Run Text="{x:Bind ViewModel.BattlePass.Level, Mode=OneWay}" />
                                         </TextBlock>
                                     </Grid>
+                                </Grid>
+
+                                <NavigationViewItemSeparator Grid.Row="3" Margin="-8,5,-8,0" />
+                                <Grid Grid.Row="4" VerticalAlignment="Center">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition />
+                                        <RowDefinition />
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock
+                                        FontFamily="{ThemeResource DefaultFont}"
+                                        FontSize="14"
+                                        Text="世界等级：" />
+                                    <TextBlock
+                                        Grid.Row="1"
+                                        Margin="0,5,0,0"
+                                        VerticalAlignment="Center"
+                                        FontFamily="{ThemeResource DefaultFont}"
+                                        FontSize="14"
+                                        Text="周本次数：" />
+                                    <TextBlock
+                                        Grid.Row="2"
+                                        Margin="0,5,0,0"
+                                        VerticalAlignment="Center"
+                                        FontFamily="{ThemeResource DefaultFont}"
+                                        FontSize="14"
+                                        Text="角色数量：" />
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        FontFamily="{ThemeResource DefaultFont}"
+                                        FontSize="14"
+                                        Text="{x:Bind ViewModel.Base.WorldLevel, Mode=OneWay}" />
+                                    <TextBlock
+                                        Grid.Row="1"
+                                        Grid.Column="1"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        FontFamily="{ThemeResource DefaultFont}"
+                                        FontSize="14"
+                                        Text="{x:Bind ViewModel.Base.WeeklyInstCount, Mode=OneWay}" />
+                                    <TextBlock
+                                        Grid.Row="2"
+                                        Grid.Column="1"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        FontFamily="{ThemeResource DefaultFont}"
+                                        FontSize="14"
+                                        Text="{x:Bind ViewModel.Base.RoleNum, Mode=OneWay}" />
                                 </Grid>
                             </Grid>
                         </Grid>

@@ -122,6 +122,9 @@ public partial class WavesGameContextViewModel : KuroGameContextViewModel
 
     [ObservableProperty]
     public partial Base Base { get; private set; }
+
+    
+
     [ObservableProperty]
     public partial MusicData MusicData { get; private set; }
 
