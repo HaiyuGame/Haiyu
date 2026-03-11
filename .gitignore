@@ -363,3 +363,4 @@ FodyWeavers.xsd
 *.7z
 /src/Setup/Project.WPFSetup/Resources/program.zip
 /src/Setup/Msix.WPFSetup/Resources/Installer
+/src/Setup/Project.WPFSetup/Resources/unstaller.exe
