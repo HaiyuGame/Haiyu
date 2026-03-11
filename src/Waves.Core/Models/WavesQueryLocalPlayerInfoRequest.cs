@@ -142,13 +142,14 @@ public class Base
             var time = DateTimeOffset.FromUnixTimeMilliseconds(value).ToLocalTime().DateTime;
             if (time > DateTime.Now)
             {
-                this.StoreEnergyRecoverEndTime = "已充满";
+                var dateTimeOffset = time - DateTime.Now;
+                this.StoreEnergyRecoverEndTime =
+                    $"{dateTimeOffset.Hours}:{dateTimeOffset.Minutes}:{dateTimeOffset.Seconds}S";
                 field = value;
                 return;
+
             }
-            var dateTimeOffset = time - DateTime.Now;
-            this.StoreEnergyRecoverEndTime =
-                $"{dateTimeOffset.Hours}:{dateTimeOffset.Minutes}:{dateTimeOffset.Seconds}S";
+            this.StoreEnergyRecoverEndTime = "已充满";
             field = value;
         }
     }
@@ -171,13 +172,13 @@ public class Base
             var time = DateTimeOffset.FromUnixTimeMilliseconds(value).ToLocalTime().DateTime;
             if (time > DateTime.Now)
             {
-                this.EnergyRecoverEndTime = "已充满";
+                var dateTimeOffset = time - DateTime.Now;
+                this.EnergyRecoverEndTime =
+                    $"{dateTimeOffset.Hours}:{dateTimeOffset.Minutes}:{dateTimeOffset.Seconds}";
                 field = value;
                 return;
             }
-            var dateTimeOffset = time - DateTime.Now;
-            this.EnergyRecoverEndTime =
-                $"{dateTimeOffset.Hours}:{dateTimeOffset.Minutes}:{dateTimeOffset.Seconds}S";
+            this.EnergyRecoverEndTime = "已充满";
             field = value;
         }
     }

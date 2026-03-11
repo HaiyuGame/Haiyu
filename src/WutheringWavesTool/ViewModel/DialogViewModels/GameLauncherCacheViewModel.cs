@@ -70,7 +70,7 @@ public sealed partial class GameLauncherCacheViewModel : DialogViewModelBase
         IsLoading = true;
         this._args = args;
         Items = [];
-        this.GameContext = Instance.Host.Services.GetKeyedService<IGameContext>(
+        this.GameContext = Instance.Host.Services.GetRequiredKeyedService<IGameContext>(
             args.GameContextName
         );
         var localSelect = await GameContext.GameLocalConfig.GetConfigAsync(
@@ -90,11 +90,26 @@ public sealed partial class GameLauncherCacheViewModel : DialogViewModelBase
             }
             foreach (var player in userPlayers.Items)
             {
-                KRSDKLauncherCacheWrapper info = new KRSDKLauncherCacheWrapper(item, (WavesQueryPlayerItem)player);
-                if(info.GetKey == localSelect)
+                KRSDKLauncherCacheWrapper? info = null;
+                if (this.GameContext.GameType == Waves.Core.Models.Enums.GameType.Waves)
                 {
-                    info.IsSelect = true;
+                    info = new KRSDKLauncherCacheWrapper(item, (WavesQueryPlayerItem)player);
+                    if (info.GetKey == localSelect)
+                    {
+                        info.IsSelect = true;
+                    }
                 }
+
+                if(this.GameContext.GameType == Waves.Core.Models.Enums.GameType.Punish)
+                {
+                    info = new KRSDKLauncherCacheWrapper(item, (PunishQueryPlayerItem)player);
+                    if (info.GetKey == localSelect)
+                    {
+                        info.IsSelect = true;
+                    }
+                }
+                if (info == null)
+                    continue;
                 Items.Add(info);
             }
         }

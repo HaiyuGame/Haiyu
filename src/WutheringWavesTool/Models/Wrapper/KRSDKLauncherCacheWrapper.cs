@@ -4,7 +4,7 @@ namespace Haiyu.Models.Wrapper;
 
 public sealed partial class KRSDKLauncherCacheWrapper:ObservableObject
 {
-    public KRSDKLauncherCacheWrapper(KRSDKLauncherCache cache,WavesQueryPlayerItem playerItem)
+    public KRSDKLauncherCacheWrapper(KRSDKLauncherCache cache, ILocalGamerPlayer playerItem)
     {
         Cache = cache;
         this.PlayerItem = playerItem;
@@ -12,7 +12,7 @@ public sealed partial class KRSDKLauncherCacheWrapper:ObservableObject
 
     public KRSDKLauncherCache Cache { get; }
 
-    public WavesQueryPlayerItem PlayerItem { get; }
+    public ILocalGamerPlayer PlayerItem { get; }
 
     [ObservableProperty]
     public partial bool IsSelect { get; set; }

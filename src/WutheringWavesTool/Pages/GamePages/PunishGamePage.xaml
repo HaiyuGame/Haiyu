@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <Page
     x:Class="Haiyu.Pages.GamePages.PunishGamePage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -418,110 +418,162 @@
                 <ColumnDefinition />
                 <ColumnDefinition Width="auto" />
             </Grid.ColumnDefinitions>
-            <Grid
-                Padding="5"
-                Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
-                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                BorderThickness="2"
-                CornerRadius="5">
-                <Grid.Transitions>
-                    <TransitionCollection>
-                        <EntranceThemeTransition FromVerticalOffset="-50" />
-                    </TransitionCollection>
-                </Grid.Transitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="6*" />
-                    <RowDefinition Height="4*" />
-                </Grid.RowDefinitions>
-                <FlipView
-                    x:Name="fileView"
-                    Grid.Row="0"
-                    Background="Transparent"
-                    ItemsSource="{x:Bind ViewModel.SlideShows, Mode=OneWay}"
-                    Style="{ThemeResource DefaultFlipViewStyle}">
-                    <i:Interaction.Behaviors>
-                        <bs:FilpViewAutoPlayBehavior IsPlay="True" Duration="0:0:8" />
-                    </i:Interaction.Behaviors>
-                    <FlipView.ItemTemplate>
-                        <DataTemplate x:DataType="launcheModel:Slideshow">
-                            <Grid>
-                                <control:ImageEx Source="{x:Bind Url}" Stretch="UniformToFill" />
-                                <Border
-                                    MaxWidth="120"
-                                    Padding="5"
-                                    HorizontalAlignment="Left"
-                                    VerticalAlignment="Bottom"
-                                    Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
-                                    CornerRadius="0 5 0 0">
-                                    <HyperlinkButton
-                                        Content="前往"
-                                        FontSize="10"
-                                        NavigateUri="{x:Bind JumpUrl}" />
-                                </Border>
-                            </Grid>
-                        </DataTemplate>
-                    </FlipView.ItemTemplate>
-                </FlipView>
-
-                <Border
-                    Padding="10,0"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Bottom"
-                    Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
-                    CornerRadius="5 0 0 0">
-                    <PipsPager
-                        x:Name="FlipViewPipsPager"
-                        FontFamily="Segoe Fluent Icons"
-                        NumberOfPages="{x:Bind ViewModel.SlideShows.Count, Mode=OneWay}"
-                        SelectedPageIndex="{x:Bind Path=fileView.SelectedIndex, Mode=TwoWay}">
-                        <PipsPager.SelectedPipStyle>
-                            <Style BasedOn="{StaticResource PipsPagerButtonBaseStyle}" TargetType="Button">
-                                <Setter Property="Content" Value="&#xE735;" />
-                                <Setter Property="FontSize" Value="9" />
-                                <Setter Property="Margin" Value="0,0" />
-                            </Style>
-                        </PipsPager.SelectedPipStyle>
-                        <PipsPager.NormalPipStyle>
-                            <Style BasedOn="{StaticResource PipsPagerButtonBaseStyle}" TargetType="Button">
-
-                                <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
-
-                                <Setter Property="Content" Value="&#xE734;" />
-                                <Setter Property="FontSize" Value="9" />
-                                <Setter Property="Margin" Value="0,0" />
-                            </Style>
-                        </PipsPager.NormalPipStyle>
-                    </PipsPager>
-                </Border>
-                <Grid Grid.Row="1" Margin="0,10,0,0">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="auto" />
-                        <RowDefinition Height="auto" />
-                        <RowDefinition />
-                    </Grid.RowDefinitions>
-                    <wui:Segmented
-                        x:Name="tabNews"
-                        ItemsSource="{x:Bind ViewModel.Tabs, Mode=OneWay}"
-                        SelectedItem="{x:Bind ViewModel.SelectTab, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        Style="{ThemeResource PivotSegmentedStyle}" />
-                    <NavigationViewItemSeparator Grid.Row="1" HorizontalAlignment="Stretch" />
-                    <ScrollView Grid.Row="2">
-                        <ItemsRepeater ItemsSource="{x:Bind ViewModel.Contents, Mode=OneWay}">
-                            <ItemsRepeater.ItemTemplate>
-                                <DataTemplate x:DataType="launcheModel:Content">
-                                    <HyperlinkButton
-                                        HorizontalAlignment="Stretch"
-                                        HorizontalContentAlignment="Left"
-                                        FontSize="12"
-                                        NavigateUri="{x:Bind JumpUrl}">
-                                        <TextBlock Text="{x:Bind TContent}" TextTrimming="CharacterEllipsis" />
-                                    </HyperlinkButton>
+            <control:CardSwitcher x:Name="switcher" Style="{ThemeResource DefaultCardsSwitcher}">
+                <control:CardSwitcher.Card1>
+                    <Grid
+                        Padding="8"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        CornerRadius="5"
+                        Opacity="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto" />
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <TextBlock
+                            Margin="8,0,0,0"
+                            VerticalAlignment="Center"
+                            FontFamily="{ThemeResource DefaultFont}"
+                            FontSize="16" />
+                        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                            <Button Style="{ThemeResource TransparentButtonStyle}">
+                                <FontIcon
+                                    FontFamily="Segoe Fluent Icons"
+                                    FontSize="14"
+                                    Glyph="&#xE72C;" />
+                            </Button>
+                            <Button Command="{x:Bind ViewModel.ShowGameLauncherCacheCommand}" Style="{ThemeResource TransparentButtonStyle}">
+                                <FontIcon
+                                    FontFamily="Segoe Fluent Icons"
+                                    FontSize="14"
+                                    Glyph="&#xE8AB;" />
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </control:CardSwitcher.Card1>
+                <control:CardSwitcher.Card2>
+                    <Grid
+                        Padding="5"
+                        Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="2"
+                        CornerRadius="5">
+                        <Grid.Transitions>
+                            <TransitionCollection>
+                                <EntranceThemeTransition FromVerticalOffset="-50" />
+                            </TransitionCollection>
+                        </Grid.Transitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="6*" />
+                            <RowDefinition Height="4*" />
+                        </Grid.RowDefinitions>
+                        <FlipView
+                            x:Name="fileView"
+                            Grid.Row="0"
+                            Background="Transparent"
+                            ItemsSource="{x:Bind ViewModel.SlideShows, Mode=OneWay}"
+                            Style="{ThemeResource DefaultFlipViewStyle}">
+                            <i:Interaction.Behaviors>
+                                <bs:FilpViewAutoPlayBehavior IsPlay="True" Duration="0:0:8" />
+                            </i:Interaction.Behaviors>
+                            <FlipView.ItemTemplate>
+                                <DataTemplate x:DataType="launcheModel:Slideshow">
+                                    <Grid>
+                                        <control:ImageEx Source="{x:Bind Url}" Stretch="UniformToFill" />
+                                        <Border
+                                            MaxWidth="120"
+                                            Padding="5"
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Bottom"
+                                            Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+                                            CornerRadius="0 5 0 0">
+                                            <HyperlinkButton
+                                                Content="前往"
+                                                FontSize="10"
+                                                NavigateUri="{x:Bind JumpUrl}" />
+                                        </Border>
+                                    </Grid>
                                 </DataTemplate>
-                            </ItemsRepeater.ItemTemplate>
-                        </ItemsRepeater>
-                    </ScrollView>
-                </Grid>
-            </Grid>
+                            </FlipView.ItemTemplate>
+                        </FlipView>
+
+                        <Border
+                            Padding="10,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"
+                            Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+                            CornerRadius="5 0 0 0">
+                            <PipsPager
+                                x:Name="FlipViewPipsPager"
+                                FontFamily="Segoe Fluent Icons"
+                                NumberOfPages="{x:Bind ViewModel.SlideShows.Count, Mode=OneWay}"
+                                SelectedPageIndex="{x:Bind Path=fileView.SelectedIndex, Mode=TwoWay}">
+                                <PipsPager.SelectedPipStyle>
+                                    <Style BasedOn="{StaticResource PipsPagerButtonBaseStyle}" TargetType="Button">
+                                        <Setter Property="Content" Value="&#xE735;" />
+                                        <Setter Property="FontSize" Value="9" />
+                                        <Setter Property="Margin" Value="0,0" />
+                                    </Style>
+                                </PipsPager.SelectedPipStyle>
+                                <PipsPager.NormalPipStyle>
+                                    <Style BasedOn="{StaticResource PipsPagerButtonBaseStyle}" TargetType="Button">
+
+                                        <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+
+                                        <Setter Property="Content" Value="&#xE734;" />
+                                        <Setter Property="FontSize" Value="9" />
+                                        <Setter Property="Margin" Value="0,0" />
+                                    </Style>
+                                </PipsPager.NormalPipStyle>
+                            </PipsPager>
+                        </Border>
+                        <Grid Grid.Row="1" Margin="0,10,0,0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="auto" />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <wui:Segmented
+                                x:Name="tabNews"
+                                ItemsSource="{x:Bind ViewModel.Tabs, Mode=OneWay}"
+                                SelectedItem="{x:Bind ViewModel.SelectTab, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                Style="{ThemeResource PivotSegmentedStyle}" />
+                            <NavigationViewItemSeparator Grid.Row="1" HorizontalAlignment="Stretch" />
+                            <ScrollView Grid.Row="2">
+                                <ItemsRepeater ItemsSource="{x:Bind ViewModel.Contents, Mode=OneWay}">
+                                    <ItemsRepeater.ItemTemplate>
+                                        <DataTemplate x:DataType="launcheModel:Content">
+                                            <HyperlinkButton
+                                                HorizontalAlignment="Stretch"
+                                                HorizontalContentAlignment="Left"
+                                                FontSize="12"
+                                                NavigateUri="{x:Bind JumpUrl}">
+                                                <TextBlock Text="{x:Bind TContent}" TextTrimming="CharacterEllipsis" />
+                                            </HyperlinkButton>
+                                        </DataTemplate>
+                                    </ItemsRepeater.ItemTemplate>
+                                </ItemsRepeater>
+                            </ScrollView>
+                        </Grid>
+                    </Grid>
+                </control:CardSwitcher.Card2>
+            </control:CardSwitcher>
+            <Button
+                Grid.Column="1"
+                Height="40"
+                Margin="-4,0,0,0"
+                VerticalAlignment="Center"
+                Click="Button_Click"
+                CornerRadius="0 5 5 0"
+                Style="{ThemeResource DefaultAcrylicButtonStyle}">
+                <FontIcon
+                    FontFamily="Segoe Fluent Icons"
+                    FontSize="14"
+                    Glyph="&#xE8AB;" />
+            </Button>
         </Grid>
         <control:ImageEx
             Grid.Row="0"

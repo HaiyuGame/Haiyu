@@ -232,13 +232,14 @@ public partial class WavesGameContextViewModel : KuroGameContextViewModel
             IsLocalUserRefresh = false;
             return;
         }
-        LocalUserTitle = selectItem.PlayerItem.RoleName;
+        var playerItem = (WavesQueryPlayerItem)selectItem.PlayerItem;
+        LocalUserTitle = playerItem.RoleName;
         var result = await this.GameContext.QueryRoleInfoAsync(
             KrKeyHelper.Xor(selectItem.Cache.OauthCode, 5),
-            selectItem.PlayerItem.Id,
-            selectItem.PlayerItem.ServerName
+            playerItem.Id,
+            playerItem.ServerName
         );
-        if (result.Items == null || result.Items.Count == 0)
+        if (result == null || result.Items == null || result.Items.Count == 0)
         {
             LocalUserTitle = "获取账号信息失败";
             await TipShow.ShowMessageAsync("请重新进入游戏获取信息", Symbol.Clear);

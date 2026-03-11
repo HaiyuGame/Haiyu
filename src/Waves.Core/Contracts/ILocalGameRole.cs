@@ -19,4 +19,5 @@ public interface ILocalGamerPlayer
     public string ServerName { get; set; }
 
     public GameType Type { get; set; }
+    public string RoleName { get; set; }
 }

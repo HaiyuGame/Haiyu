@@ -21,7 +21,7 @@ public class PunishQueryPlayerItem : ILocalGamerPlayer
     }
 
     [JsonPropertyName("playerName")]
-    public string PlayerName { get; set; }
+    public string RoleName { get; set; }
 
     [JsonPropertyName("playerLevel")]
     public int PlayerLevel { get; set; }
