@@ -439,7 +439,7 @@
                             FontFamily="{ThemeResource DefaultFont}"
                             FontSize="16" />
                         <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
-                            <Button Style="{ThemeResource TransparentButtonStyle}">
+                            <Button Command="{x:Bind ViewModel.RefreshLocalGameUserCommand}" Style="{ThemeResource TransparentButtonStyle}">
                                 <FontIcon
                                     FontFamily="Segoe Fluent Icons"
                                     FontSize="14"

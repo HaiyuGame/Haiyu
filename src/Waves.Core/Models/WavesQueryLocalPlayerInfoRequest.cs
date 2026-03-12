@@ -16,7 +16,7 @@ public class QueryLocalRoleInfoRequest
     public string OAutoCode { get; set; }
 
     [JsonPropertyName("playerId")]
-    public long PlayerId { get; set; }
+    public string PlayerId { get; set; }
 
     [JsonPropertyName("region")]
     public string Region { get; set; }

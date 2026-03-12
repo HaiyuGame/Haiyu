@@ -37,6 +37,7 @@ namespace Haiyu.ViewModel.GameViewModels.GameContexts
             await this.RefreshLocalGameUser(message.data);
         }
 
+        [RelayCommand]
         private async Task RefreshLocalGameUser(KRSDKLauncherCacheWrapper wrapper)
         {
             var lastSelect = await this.GameContext.GameLocalConfig.GetConfigAsync(
@@ -75,7 +76,7 @@ namespace Haiyu.ViewModel.GameViewModels.GameContexts
                     }
                     foreach (var player in userPlayers.Items)
                     {
-                        KRSDKLauncherCacheWrapper info = new KRSDKLauncherCacheWrapper(item, (WavesQueryPlayerItem)player);
+                        KRSDKLauncherCacheWrapper info = new KRSDKLauncherCacheWrapper(item, (PunishQueryPlayerItem)player);
                         if (info.GetKey == lastSelect)
                         {
                             selectItem = info;
@@ -159,14 +160,20 @@ namespace Haiyu.ViewModel.GameViewModels.GameContexts
             }
             if (value == Tabs[0])
             {
+                if (Contents == null)
+                    return;
                 Contents = Activity.Contents.ToObservableCollection();
             }
             else if (value == Tabs[1])
             {
+                if (Notice == null)
+                    return;
                 Contents = Notice.Contents.ToObservableCollection();
             }
             else if (value == Tabs[2])
             {
+                if (Contents == null)
+                    return;
                 Contents = News.Contents.ToObservableCollection();
             }
         }
