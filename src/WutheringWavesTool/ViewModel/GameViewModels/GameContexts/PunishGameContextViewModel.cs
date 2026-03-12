@@ -57,7 +57,7 @@ namespace Haiyu.ViewModel.GameViewModels.GameContexts
                 var localUsers = await this.GameContext.GetLocalGameOAuthAsync(this.CTS.Token);
                 if (localUsers == null || localUsers.Count == 0)
                 {
-                    LocalUserTitle = "未获取到本地游戏账号信息";
+                    LocalUserTitle = "请选择账号";
                     
                     return;
                 }
@@ -87,7 +87,7 @@ namespace Haiyu.ViewModel.GameViewModels.GameContexts
             }
             if (selectItem == null)
             {
-                LocalUserTitle = "未获取到上次选择的本地游戏账号信息";
+                LocalUserTitle = "请选择账号";
                 IsLocalUserRefresh = false;
                 return;
             }
