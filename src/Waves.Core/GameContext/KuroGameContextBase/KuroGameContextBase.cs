@@ -165,7 +165,7 @@ public abstract partial class KuroGameContextBase : IGameContext
                     {
                         status.PredownloadedDone = false;
                     }
-                    status.PredownloaAcion = _isDownload;
+                    status.PredownloaAcion = _prodDownloadState != null?_prodDownloadState.IsActive:false;
                 }
             }
         }

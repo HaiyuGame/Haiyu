@@ -16,6 +16,11 @@ partial class KuroGameContextBase
         return IsDownloadCanceled(false);
     }
 
+    /// <summary>
+    /// 是否取消下载
+    /// </summary>
+    /// <param name="isPred"></param>
+    /// <returns></returns>
     private bool IsDownloadCanceled(bool isPred)
     {
         var cts = isPred ? _prodDownloadCTS : _downloadCTS;
@@ -23,11 +28,21 @@ partial class KuroGameContextBase
         return cts == null || cts.IsCancellationRequested || state?.IsStop == true;
     }
 
+    /// <summary>
+    /// 获得下载信号量
+    /// </summary>
+    /// <param name="isPred"></param>
+    /// <returns></returns>
     private CancellationTokenSource GetCTS(bool isPred)
     {
         return isPred ? (_prodDownloadCTS ?? _downloadCTS) : _downloadCTS;
     }
 
+    /// <summary>
+    /// 获得下载状态机
+    /// </summary>
+    /// <param name="isPred"></param>
+    /// <returns></returns>
     private DownloadState GetState(bool isPred)
     {
         return isPred ? (_prodDownloadState ?? _downloadState) : _downloadState;

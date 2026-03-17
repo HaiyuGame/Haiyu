@@ -17,10 +17,6 @@ partial class KuroGameContextViewModel
         await AppContext.TryInvokeAsync(async () =>
         {
             var status = await this.GameContext.GetGameContextStatusAsync(this.CTS.Token);
-            if (status.PredownloaAcion)
-            {
-                return;
-            }
             if (
                 args.Type == Waves.Core.Models.Enums.GameContextActionType.Download
                 || args.Type == Waves.Core.Models.Enums.GameContextActionType.Verify
@@ -38,6 +34,7 @@ partial class KuroGameContextViewModel
                     }
                     else
                     {
+                        this.PauseIcon = "\uE769";
                         this.BottomBarContent =
                             $"校验速度:{Math.Round(args.VerifySpeed / 1024 / 1024, 2)}MB,剩余：{Math.Round((double)(args.TotalSize - args.CurrentSize) / 1024 / 1024 / 1024, 2)}GB";
                     }
@@ -52,6 +49,7 @@ partial class KuroGameContextViewModel
                     }
                     else
                     {
+                        this.PauseIcon = "\uE769";
                         this.BottomBarContent =
                             $"下载速度:{Math.Round(args.DownloadSpeed / 1024 / 1024, 2)}MB，剩余：{Math.Round((double)(args.TotalSize - args.CurrentSize) / 1024 / 1024 / 1024, 2)}GB";
                     }
@@ -64,8 +62,7 @@ partial class KuroGameContextViewModel
                             $"[{args.CurrentDecompressCount}/{args.MaxDecompressValue}] 已解压:{Math.Round((double)args.CurrentSize / 1024 / 1024 / 1024, 2)}GB,剩余:{Math.Round((double)(args.TotalSize - args.CurrentSize) / 1024 / 1024 / 1024, 2)}GB";
                     PauseStartEnable = false;
                 }
-                if(!status.IsPredownloaded)
-                    ShowGameDownloadingBth(status);
+                ShowGameDownloadingBth(status);
             }
             if (args.Type == Waves.Core.Models.Enums.GameContextActionType.DeleteFile)
             {
