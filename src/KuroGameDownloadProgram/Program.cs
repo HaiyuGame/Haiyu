@@ -32,9 +32,10 @@ IHost host = Host.CreateDefaultBuilder(args)
     })
     .Build();
 GameContextFactory.GameBassPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Waves";
-var mainGame = host.Services.GetRequiredKeyedService<IGameContext>(nameof(WavesGlobalGameContext));
-var locals = await mainGame.GetLocalGameOAuthAsync();
-var key =  KrKeyHelper.Xor(locals[0].OauthCode, 5);
-var result = await mainGame.QueryPlayerInfoAsync(key);
-var result2 = await mainGame.QueryRoleInfoAsync(key, result.Items[0].Id, result.Items[0].ServerName);
+var mainGame = host.Services.GetRequiredKeyedService<IGameContext>(nameof(PunishMainGameContext));
+await mainGame.InitAsync();
+var launcher = await mainGame.GetGameLauncherSourceAsync(null);
+var previous = launcher
+            .ResourceDefault.Config.PatchConfig.Last();
+
 Console.ReadLine();

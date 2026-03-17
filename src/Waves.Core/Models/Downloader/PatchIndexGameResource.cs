@@ -57,6 +57,15 @@ public class GroupFileInfo
     public List<IndexResource> DstFiles { get; set; }
 }
 
+public class ZipFileInfo
+{
+    [JsonPropertyName("dest")]
+    public string Dest { get; set; } = string.Empty;
+
+    [JsonPropertyName("entries")]
+    public List<IndexResource> Entries { get; set; }
+}
+
 
 public class PatchIndexGameResource : IndexGameResource
 {
@@ -71,6 +80,9 @@ public class PatchIndexGameResource : IndexGameResource
 
     [JsonPropertyName("groupInfos")]
     public List<GroupFileInfo> GroupInfos { get; set; }
+
+    [JsonPropertyName("zipInfos")]
+    public List<ZipFileInfo> ZipFileInfos { get; set; }
 }
 
 [JsonSerializable(typeof(PatchInfo))]
