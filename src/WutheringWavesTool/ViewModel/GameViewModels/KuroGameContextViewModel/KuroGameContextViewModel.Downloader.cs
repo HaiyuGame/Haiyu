@@ -16,6 +16,8 @@ partial class KuroGameContextViewModel
     {
         await AppContext.TryInvokeAsync(async () =>
         {
+            if (this.GameContext == null)
+                return;
             var status = await this.GameContext.GetGameContextStatusAsync(this.CTS.Token);
             if (
                 args.Type == Waves.Core.Models.Enums.GameContextActionType.Download

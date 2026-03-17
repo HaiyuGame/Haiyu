@@ -101,23 +101,17 @@ public abstract partial class KuroGameContextBase : IGameContext
         var updateing = await GameLocalConfig.GetConfigAsync(
             GameLocalSettingName.LocalGameUpdateing
         );
-        if (string.IsNullOrWhiteSpace(gameBaseFolder))
-        {
-            status.IsGameExists = false;
-        }
-        else if (Directory.Exists(gameBaseFolder) && File.Exists(gameProgramFile))
+        if (Directory.Exists(gameBaseFolder) )
         {
             status.IsGameExists = true;
-            status.IsGameInstalled = true;
-            if (!string.IsNullOrWhiteSpace(localVersion))
-            {
-                status.IsLauncher = true;
-            }
         }
-        else if (Directory.Exists(gameBaseFolder))
+        if (File.Exists(gameProgramFile))
         {
-            status.IsGameExists = false;
-            status.IsGameInstalled = false;
+            status.IsGameInstalled = true;
+        }
+        if (!string.IsNullOrWhiteSpace(localVersion))
+        {
+            status.IsLauncher = true;
         }
         var ping = (await NetworkCheck.PingAsync(KuroGameApiConfig.BaseAddress[0]));
         if (ping != null && ping.Status == IPStatus.Success)

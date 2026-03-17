@@ -132,14 +132,13 @@ public abstract partial class KuroGameContextViewModel
             GameContext.GameContextProdOutput -= GameContext_GameContextProdOutput;
         }
         GC.Collect();
+        await Task.Delay(500);
         this.CTS = new CancellationTokenSource();
         this.GameContext = Instance.Host.Services.GetRequiredKeyedService<IGameContext>(name);
         CurrentProgressValue = 0;
         GameContext.GameContextOutput += GameContext_GameContextOutput;
         GameContext.GameContextProdOutput += GameContext_GameContextProdOutput;
-        // Re-emit predownload output first so it won't be overridden by regular output
         await this.GameContext.ReEmitLastOutputAsync(true);
-        // Only re-emit regular output if there is no active predownload action
         var status = await this.GameContext.GetGameContextStatusAsync(this.CTS.Token);
         if (!status.PredownloaAcion)
         {
@@ -184,12 +183,12 @@ public abstract partial class KuroGameContextViewModel
         {
             ProcessAction = true;
             var status = await this.GameContext.GetGameContextStatusAsync(this.CTS.Token);
-            if (!status.IsGameExists && !status.IsGameInstalled)
+            if (!status.IsGameExists)
             {
                 Logger.WriteInfo("未找到游戏文件，显示下载按钮");
                 ShowSelectInstallBth(status);
             }
-            if (status.IsGameExists && !status.IsGameInstalled && !status.IsLauncher)
+            if (status.IsGameExists && !status.IsLauncher)
             {
                 Logger.WriteInfo("游戏文件存在，但不能启动，显示继续按钮");
                 ShowGameDownloadBth(status);
@@ -211,11 +210,11 @@ public abstract partial class KuroGameContextViewModel
                 }
                 ShowGameDownloadingBth(status);
             }
-            if (status.IsGameExists && status.IsGameInstalled && !status.IsPause && status.IsAction)
+            if (status.IsGameExists && !status.IsPause && status.IsAction)
             {
                 this.PauseIcon = "\uE769";
             }
-            if (status.IsGameExists && status.IsGameInstalled && status.IsPause && status.IsAction)
+            if (status.IsGameExists && status.IsPause && status.IsAction)
             {
                 this.PauseIcon = "\uE768";
             }
