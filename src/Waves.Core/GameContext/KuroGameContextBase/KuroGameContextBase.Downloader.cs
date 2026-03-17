@@ -47,6 +47,7 @@ public partial class KuroGameContextBase
     private double _verifySpeed;
 
     private GameContextOutputArgs? _lastOutputArgs;
+    private GameContextOutputArgs? _lastProdOutputArgs;
 
     private DateTime _lastSpeedTime = DateTime.Now;
     private long _lastSpeedBytes; // 速度计算基准值
@@ -58,6 +59,8 @@ public partial class KuroGameContextBase
     #endregion
     #region DownloadStatus
     private DownloadState _downloadState;
+    private DownloadState _prodDownloadState;
+    private CancellationTokenSource _prodDownloadCTS;
     #endregion
     #region 公开方法
     public async Task StartDownloadTaskAsync(
@@ -341,6 +344,7 @@ public partial class KuroGameContextBase
                     "已选定最优CDN，开始下载"
                 )
                 .ConfigureAwait(false);
+            var parallelCts = GetCTS(ispred) ?? _downloadCTS;
             await Parallel.ForEachAsync(
                 resource,
                 options,
@@ -349,9 +353,11 @@ public partial class KuroGameContextBase
                     Logger.WriteInfo(
                         $"[{item.Dest}],当前进度大小[{Math.Round((double)_totalProgressSize, 2)}/{Math.Round((double)_totalfileSize, 2)}]"
                     );
-                    if (IsDownloadCanceled())
+                    if (IsDownloadCanceled(ispred))
                     {
-                        this._downloadState.IsActive = false;
+                        var s = GetState(ispred);
+                        if (s != null)
+                            s.IsActive = false;
                         await SetNoneStatusAsync().ConfigureAwait(false);
                         return;
                     }
@@ -468,10 +474,12 @@ public partial class KuroGameContextBase
 
     public async Task<bool> PauseDownloadAsync()
     {
-        if (this._downloadState.IsActive)
+        // Pause the active download state (prefer prod if active)
+        var state = _prodDownloadState != null && _prodDownloadState.IsActive ? _prodDownloadState : _downloadState;
+        if (state != null && state.IsActive)
         {
             Logger.WriteInfo($"暂停下载");
-            return await this._downloadState.PauseAsync();
+            return await state.PauseAsync();
         }
 
         return false;
@@ -479,11 +487,12 @@ public partial class KuroGameContextBase
 
     public async Task<bool> ResumeDownloadAsync()
     {
-        if (_downloadState.IsPaused)
+        var state = _prodDownloadState != null && _prodDownloadState.IsActive ? _prodDownloadState : _downloadState;
+        if (state != null && state.IsPaused)
         {
             Logger.WriteInfo($"恢复下载");
             _lastSpeedTime = DateTime.Now;
-            return await _downloadState.ResumeAsync();
+            return await state.ResumeAsync();
         }
         return false;
     }
@@ -492,10 +501,20 @@ public partial class KuroGameContextBase
     {
         try
         {
-            if (_downloadCTS != null && !_downloadCTS.IsCancellationRequested)
+            if ((_downloadCTS != null && !_downloadCTS.IsCancellationRequested) || (_prodDownloadCTS != null && !_prodDownloadCTS.IsCancellationRequested))
             {
-                this._downloadState.IsStop = true;
-                await _downloadCTS.CancelAsync().ConfigureAwait(false);
+                if(_downloadCTS != null && !_downloadCTS.IsCancellationRequested)
+                {
+                    if(this._downloadState != null)
+                        this._downloadState.IsStop = true;
+                    await _downloadCTS.CancelAsync().ConfigureAwait(false);
+                }
+                if(_prodDownloadCTS != null && !_prodDownloadCTS.IsCancellationRequested)
+                {
+                    if (this._prodDownloadState != null)
+                        this._prodDownloadState.IsStop = true;
+                    await _prodDownloadCTS.CancelAsync().ConfigureAwait(false);
+                }
             }
             Interlocked.Exchange(ref _totalProgressSize, 0L);
             Interlocked.Exchange(ref _totalfileSize, 0L);
@@ -1138,8 +1157,9 @@ public partial class KuroGameContextBase
                 //    return true;
                 //}
                 var memoryPool = ArrayPool<byte>.Shared;
-                var downloadCts = _downloadCTS;
-                if (downloadCts == null || _downloadState?.IsStop == true)
+                    var downloadCts = GetCTS(isPred);
+                    var state = GetState(isPred);
+                    if (downloadCts == null || state?.IsStop == true)
                 {
                     throw new OperationCanceledException();
                 }
@@ -1152,13 +1172,14 @@ public partial class KuroGameContextBase
                     long accumulatedBytes = 0L;
                     while (remaining > 0 && isValid)
                     {
-                        await this._downloadState.PauseToken.WaitIfPausedAsync();
+                        if (state != null)
+                            await state.PauseToken.WaitIfPausedAsync();
                         var buffer = memoryPool.Rent(MaxBufferSize);
                         try
                         {
                             if (
                                 downloadCts.IsCancellationRequested
-                                || _downloadState?.IsStop == true
+                                || state?.IsStop == true
                             )
                             {
                                 throw new OperationCanceledException();
@@ -1237,8 +1258,9 @@ public partial class KuroGameContextBase
         const int bufferSize = 262144; // 80KB缓冲区
         using var md5 = MD5.Create();
         var memoryPool = ArrayPool<byte>.Shared;
-        var downloadCts = _downloadCTS;
-        if (downloadCts == null || _downloadState?.IsStop == true)
+        var downloadCts = GetCTS(isPred);
+        var state = GetState(isPred);
+                if (downloadCts == null || state?.IsStop == true)
         {
             throw new OperationCanceledException();
         }
@@ -1261,12 +1283,13 @@ public partial class KuroGameContextBase
                 long accumulatedBytes = 0L;
                 while (true)
                 {
-                    if (downloadCts.IsCancellationRequested || _downloadState?.IsStop == true)
+                    if (downloadCts.IsCancellationRequested || state?.IsStop == true)
                     {
                         throw new OperationCanceledException();
                     }
                     //暂停锁
-                    await this._downloadState.PauseToken.WaitIfPausedAsync();
+                    if (state != null)
+                        await state.PauseToken.WaitIfPausedAsync().ConfigureAwait(false);
                     byte[] buffer = memoryPool.Rent(bufferSize);
                     try
                     {
@@ -1363,8 +1386,9 @@ public partial class KuroGameContextBase
         {
             try
             {
-                var downloadCts = _downloadCTS;
-                if (downloadCts == null || _downloadState?.IsStop == true)
+                var downloadCts = GetCTS(isPred);
+                var state = GetState(isPred);
+                if (downloadCts == null || state?.IsStop == true)
                 {
                     throw new OperationCanceledException();
                 }
@@ -1397,11 +1421,12 @@ public partial class KuroGameContextBase
                 bool isBreak = false;
                 while (totalWritten < chunkTotalSize)
                 {
-                    if (downloadCts.IsCancellationRequested || _downloadState?.IsStop == true)
+                    if (downloadCts.IsCancellationRequested || state?.IsStop == true)
                     {
                         throw new OperationCanceledException();
                     }
-                    await _downloadState.PauseToken.WaitIfPausedAsync().ConfigureAwait(false); // 暂停检查也异步化
+                    if (state != null)
+                        await state.PauseToken.WaitIfPausedAsync().ConfigureAwait(false); // 暂停检查也异步化
                     int bytesToRead = (int)Math.Min(MaxBufferSize, chunkTotalSize - totalWritten);
                     byte[] buffer = ArrayPool<byte>.Shared.Rent(bytesToRead);
                     try
@@ -1414,7 +1439,8 @@ public partial class KuroGameContextBase
                             isBreak = true;
                             break;
                         }
-                        await _downloadState
+                    if (state != null)
+                        await state
                             .SpeedLimiter.LimitAsync(bytesRead)
                             .ConfigureAwait(false);
                         await fileStream
@@ -1528,7 +1554,7 @@ public partial class KuroGameContextBase
         long size,
         string filePath,
         IndexChunkInfo chunk,
-        bool ispred = false
+        bool isPred = false
     )
     {
         long accumulatedBytes = 0;
@@ -1557,17 +1583,19 @@ public partial class KuroGameContextBase
                     _downloadBaseUrl.TrimEnd('/') + "/" + dest.TrimStart('/')
                 );
                 request.Headers.Range = new RangeHeaderValue(chunk.Start, chunk.End);
+                var downloadCts = GetCTS(isPred);
+                var state = GetState(isPred);
                 using var response = await HttpClientService
                     .GameDownloadClient.SendAsync(
                         request,
                         HttpCompletionOption.ResponseHeadersRead,
-                        _downloadCTS.Token
+                        downloadCts.Token
                     )
                     .ConfigureAwait(false); // 非UI上下文切换
 
                 response.EnsureSuccessStatusCode();
                 var stream = await response
-                    .Content.ReadAsStreamAsync(_downloadCTS.Token)
+                    .Content.ReadAsStreamAsync(downloadCts.Token)
                     .ConfigureAwait(false);
                 if (chunk.Start < 0 || chunk.End < chunk.Start)
                 {
@@ -1583,23 +1611,25 @@ public partial class KuroGameContextBase
                 bool isBreak = false;
                 while (totalWritten < chunkTotalSize)
                 {
-                    if (_downloadCTS.IsCancellationRequested)
+                    if (downloadCts.IsCancellationRequested || state?.IsStop == true)
                     {
                         throw new OperationCanceledException();
                     }
-                    await _downloadState.PauseToken.WaitIfPausedAsync().ConfigureAwait(false); // 暂停检查也异步化
+                    if (state != null)
+                        await state.PauseToken.WaitIfPausedAsync().ConfigureAwait(false); // 暂停检查也异步化
                     int bytesToRead = (int)Math.Min(MaxBufferSize, chunkTotalSize - totalWritten);
                     byte[] buffer = memoryPool.Rent(bytesToRead);
                     int bytesRead = await stream
-                        .ReadAsync(buffer.AsMemory(0, bytesToRead), _downloadCTS.Token)
+                        .ReadAsync(buffer.AsMemory(0, bytesToRead), downloadCts.Token)
                         .ConfigureAwait(false);
                     if (bytesRead == 0)
                     {
                         isBreak = true;
                     }
-                    await _downloadState.SpeedLimiter.LimitAsync(bytesRead).ConfigureAwait(false);
+                    if (state != null)
+                        await state.SpeedLimiter.LimitAsync(bytesRead).ConfigureAwait(false);
                     await fileStream
-                        .WriteAsync(buffer.AsMemory(0, bytesRead), _downloadCTS.Token)
+                        .WriteAsync(buffer.AsMemory(0, bytesRead), downloadCts.Token)
                         .ConfigureAwait(false);
                     totalWritten += bytesRead;
                     accumulatedBytes += bytesRead;
@@ -1609,7 +1639,7 @@ public partial class KuroGameContextBase
                                 GameContextActionType.Download,
                                 accumulatedBytes,
                                 true,
-                                ispred
+                                isPred
                             )
                             .ConfigureAwait(false);
                         accumulatedBytes = 0; // 重置累积计数器
@@ -1621,7 +1651,7 @@ public partial class KuroGameContextBase
                             GameContextActionType.Download,
                             accumulatedBytes,
                             true,
-                            ispred
+                            isPred
                         )
                         .ConfigureAwait(false);
                 }
@@ -1643,7 +1673,7 @@ public partial class KuroGameContextBase
         }
     }
 
-    private async Task<string?> DownloadFileByKrDiff(string dest, string filePath)
+    private async Task<string?> DownloadFileByKrDiff(string dest, string filePath, bool isPred = false)
     {
         long accumulatedBytes = 0;
         using (
@@ -1663,16 +1693,18 @@ public partial class KuroGameContextBase
                     HttpMethod.Get,
                     _downloadBaseUrl.TrimEnd('/') + "/" + dest.TrimStart('/')
                 );
+                var downloadCts = GetCTS(isPred);
+                var state = GetState(isPred);
                 using var response = await HttpClientService
                     .GameDownloadClient.SendAsync(
                         request,
                         HttpCompletionOption.ResponseHeadersRead,
-                        _downloadCTS.Token
+                        downloadCts.Token
                     )
                     .ConfigureAwait(false);
                 response.EnsureSuccessStatusCode();
                 var stream = await response
-                    .Content.ReadAsStreamAsync(_downloadCTS.Token)
+                    .Content.ReadAsStreamAsync(downloadCts.Token)
                     .ConfigureAwait(false);
                 long totalWritten = 0;
                 long chunkTotalSize = long.Parse(
@@ -1683,23 +1715,25 @@ public partial class KuroGameContextBase
                 bool isBreak = false;
                 while (totalWritten < chunkTotalSize)
                 {
-                    if (_downloadCTS.IsCancellationRequested)
+                    if (downloadCts.IsCancellationRequested || state?.IsStop == true)
                     {
                         return null;
                     }
-                    await _downloadState.PauseToken.WaitIfPausedAsync().ConfigureAwait(false); // 暂停检查也异步化
+                    if (state != null)
+                        await state.PauseToken.WaitIfPausedAsync().ConfigureAwait(false); // 暂停检查也异步化
                     int bytesToRead = (int)Math.Min(MaxBufferSize, chunkTotalSize - totalWritten);
                     byte[] buffer = memoryPool.Rent(bytesToRead);
                     int bytesRead = await stream
-                        .ReadAsync(buffer.AsMemory(0, bytesToRead), _downloadCTS.Token)
+                        .ReadAsync(buffer.AsMemory(0, bytesToRead), downloadCts.Token)
                         .ConfigureAwait(false);
                     if (bytesRead == 0)
                     {
                         isBreak = true;
                     }
-                    await _downloadState.SpeedLimiter.LimitAsync(bytesRead).ConfigureAwait(false);
+                    if (state != null)
+                        await state.SpeedLimiter.LimitAsync(bytesRead).ConfigureAwait(false);
                     await fileStream
-                        .WriteAsync(buffer.AsMemory(0, bytesRead), _downloadCTS.Token)
+                        .WriteAsync(buffer.AsMemory(0, bytesRead), downloadCts.Token)
                         .ConfigureAwait(false);
                     totalWritten += bytesRead;
                     accumulatedBytes += bytesRead;
@@ -1752,9 +1786,24 @@ public partial class KuroGameContextBase
 
     private bool IsDownloadCanceled()
     {
-        return _downloadCTS == null
-            || _downloadCTS.IsCancellationRequested
-            || _downloadState?.IsStop == true;
+        return IsDownloadCanceled(false);
+    }
+
+    private bool IsDownloadCanceled(bool isPred)
+    {
+        var cts = isPred ? _prodDownloadCTS : _downloadCTS;
+        var state = isPred ? _prodDownloadState : _downloadState;
+        return cts == null || cts.IsCancellationRequested || state?.IsStop == true;
+    }
+
+    private CancellationTokenSource GetCTS(bool isPred)
+    {
+        return isPred ? (_prodDownloadCTS ?? _downloadCTS) : _downloadCTS;
+    }
+
+    private DownloadState GetState(bool isPred)
+    {
+        return isPred ? (_prodDownloadState ?? _downloadState) : _downloadState;
     }
 
     private async Task UpdateFileProgress(
@@ -1803,7 +1852,11 @@ public partial class KuroGameContextBase
             IsPause = _downloadState?.IsPaused ?? false,
             TipMessage = tip,
         };
-        _lastOutputArgs = args;
+        // keep separate last output args for predownload and normal download
+        if (isPred)
+            _lastProdOutputArgs = args;
+        else
+            _lastOutputArgs = args;
 
         if (isPred && gameContextProdOutputDelegate != null)
         {
@@ -1841,16 +1894,23 @@ public partial class KuroGameContextBase
     /// </summary>
     public async Task ReEmitLastOutputAsync(bool isPred = false)
     {
-        if (_lastOutputArgs == null)
-            return;
-
-        if (isPred && gameContextProdOutputDelegate != null)
+        if (isPred)
         {
-            await gameContextProdOutputDelegate.Invoke(this, _lastOutputArgs).ConfigureAwait(false);
+            if (_lastProdOutputArgs == null)
+                return;
+            if (gameContextProdOutputDelegate != null)
+            {
+                await gameContextProdOutputDelegate.Invoke(this, _lastProdOutputArgs).ConfigureAwait(false);
+            }
         }
-        else if (!isPred && gameContextOutputDelegate != null)
+        else
         {
-            await gameContextOutputDelegate.Invoke(this, _lastOutputArgs).ConfigureAwait(false);
+            if (_lastOutputArgs == null)
+                return;
+            if (gameContextOutputDelegate != null)
+            {
+                await gameContextOutputDelegate.Invoke(this, _lastOutputArgs).ConfigureAwait(false);
+            }
         }
     }
 

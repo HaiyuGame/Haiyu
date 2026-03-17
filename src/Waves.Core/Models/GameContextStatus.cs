@@ -52,6 +52,8 @@ public class GameContextStatus
     /// </summary>
     public bool IsPredownloaded { get; internal set; }
 
+    public bool IsProdownPause { get; internal set; }
+
     /// <summary>
     /// 预下载是否完成
     /// </summary>

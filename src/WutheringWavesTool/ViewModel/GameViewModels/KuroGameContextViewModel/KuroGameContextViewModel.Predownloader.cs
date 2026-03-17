@@ -45,7 +45,7 @@ partial class KuroGameContextViewModel
     async Task PausePreDownloadGame()
     {
         var status = await this.GameContext.GetGameContextStatusAsync(this.CTS.Token);
-        if (!status.IsPause)
+        if (!status.IsProdownPause)
         {
             await this.GameContext.PauseDownloadAsync();
             this.PreDownloadIcon = "\uE768";

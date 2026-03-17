@@ -942,6 +942,7 @@
                     Glyph="&#xE71A;" />
             </Button>
             <StackPanel
+                HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Orientation="Horizontal"
                 Visibility="{x:Bind ViewModel.PredDownloadDoneVisibility, Mode=OneWay}">

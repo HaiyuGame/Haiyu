@@ -148,6 +148,8 @@ public abstract partial class KuroGameContextBase : IGameContext
                     && status.IsGameInstalled == true
                 )
                 {
+                    status.IsProdownPause =
+                        _prodDownloadState == null ? false : _prodDownloadState.IsPaused;
                     status.IsPredownloaded = true;
                     var donwResult = await GameLocalConfig.GetConfigAsync(
                         GameLocalSettingName.ProdDownloadFolderDone

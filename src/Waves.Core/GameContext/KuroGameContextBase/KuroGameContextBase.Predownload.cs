@@ -47,15 +47,16 @@ public partial  class KuroGameContextBase
 
             _downloadBaseUrl = cdnUrl.Url+ previous.BaseUrl;
             patch = await GetPatchGameResourceAsync(cdnUrl.Url + previous.IndexFile);
-            _downloadCTS = new CancellationTokenSource();
+            _prodDownloadCTS = new CancellationTokenSource();
             var count = patch.Resource.Where(x => x.Dest.EndsWith(".krpdiff"));
             var size = count.Sum(x => x.Size);
             _totalfileSize = size;
             _totalFileTotal = count.Count() - 1;
             _totalProgressTotal = 0;
-            this._downloadState = new DownloadState();
-            _downloadState.IsActive = true;
-            await _downloadState.SetSpeedLimitAsync(this.SpeedValue);
+            this._prodDownloadState = new DownloadState();
+            _prodDownloadState.IsActive = true;
+            _prodDownloadState.CancelToken = _prodDownloadCTS.Token;
+            await _prodDownloadState.SetSpeedLimitAsync(this.SpeedValue);
             await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdDownloadPath, downloadFolder);
             await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdDownloadVersion, launcher.Predownload.Version);
             //启动预下载线程
@@ -79,6 +80,7 @@ public partial  class KuroGameContextBase
     {
 
         this._isDownload = true;
+        _downloadCTS = new CancellationTokenSource();
         var downloadResult = await this.DownloadGroupPatcheToResource(launcher,downloadFolder, patch.Resource, ispred: true);
         this._isDownload = false;
         if (!downloadResult)
@@ -101,7 +103,13 @@ public partial  class KuroGameContextBase
         _totalFileTotal = 0;
         _totalProgressTotal = 0;
         _totalProgressSize = 0;
-        _downloadState.IsActive = false;
+        if(_prodDownloadState != null)
+            _prodDownloadState.IsActive = false;
+        if(_prodDownloadCTS != null)
+        {
+            _prodDownloadCTS.Dispose();
+            _prodDownloadCTS = null;
+        }
         await this.SetNoneStatusAsync(true).ConfigureAwait(false);
     }
 

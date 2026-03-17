@@ -136,8 +136,15 @@ public abstract partial class KuroGameContextViewModel
         this.GameContext = Instance.Host.Services.GetRequiredKeyedService<IGameContext>(name);
         CurrentProgressValue = 0;
         GameContext.GameContextOutput += GameContext_GameContextOutput;
-        GameContext.GameContextProdOutput+= GameContext_GameContextProdOutput;
-        await this.GameContext.ReEmitLastOutputAsync();
+        GameContext.GameContextProdOutput += GameContext_GameContextProdOutput;
+        // Re-emit predownload output first so it won't be overridden by regular output
+        await this.GameContext.ReEmitLastOutputAsync(true);
+        // Only re-emit regular output if there is no active predownload action
+        var status = await this.GameContext.GetGameContextStatusAsync(this.CTS.Token);
+        if (!status.PredownloaAcion)
+        {
+            await this.GameContext.ReEmitLastOutputAsync(false);
+        }
         var dx11 = await GameContext.GameLocalConfig.GetConfigAsync(GameLocalSettingName.IsDx11);
         if (bool.TryParse(dx11, out var flag))
         {
