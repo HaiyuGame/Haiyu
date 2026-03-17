@@ -176,11 +176,11 @@ public abstract partial class KuroGameContextViewModel
                 Logger.WriteInfo("游戏文件存在，但不能启动，显示继续按钮");
                 ShowGameDownloadBth(status);
             }
-            else if (!status.IsAction && status.IsGameExists && status.IsGameInstalled)
+            else if (!status.IsAction && status.IsGameExists)
             {
                 await ShowGameLauncherBth(status.IsUpdate, status.DisplayVersion, status.Gameing);
             }
-            if ((status.IsPause || status.IsAction))
+            if ((status.IsPause || status.IsAction) && !status.PredownloaAcion)
             {
                 if (status.IsAction && status.IsPause)
                 {
@@ -210,12 +210,26 @@ public abstract partial class KuroGameContextViewModel
             if (status.IsPredownloaded)
             {
                 PredCardVisibility = Visibility.Visible;
-                if (!status.PredownloadedDone)
+                if (status.PredownloaAcion && !status.PredownloadedDone && status.IsPause) // 正在预下载但已经暂停
+                {
+                    PredCardVisibility = Visibility.Visible;
+                    PredDownloadBthVisibility = Visibility.Collapsed;
+                    PredDownloadingVisibility = Visibility.Visible;
+                    PredDownloadDoneVisibility = Visibility.Collapsed;
+                }
+                else if(status.PredownloaAcion && !status.PredownloadedDone && !status.IsPause)
+                {
+                    PredCardVisibility = Visibility.Visible;
+                    PredDownloadBthVisibility = Visibility.Collapsed;
+                    PredDownloadingVisibility = Visibility.Visible;
+                    PredDownloadDoneVisibility = Visibility.Collapsed;
+                }
+                else if (!status.PredownloadedDone)
                 {
                     PredCardVisibility = Visibility.Visible;
                     PredDownloadBthVisibility = Visibility.Visible;
+                    PredDownloadingVisibility = Visibility.Collapsed;
                     PredDownloadDoneVisibility = Visibility.Collapsed;
-                    this.PredDownloadingVisibility = Visibility.Collapsed;
                 }
                 else
                 {
@@ -224,6 +238,7 @@ public abstract partial class KuroGameContextViewModel
                     PredDownloadDoneVisibility = Visibility.Visible;
                     this.PredDownloadingVisibility = Visibility.Collapsed;
                 }
+                
             }
             else
             {

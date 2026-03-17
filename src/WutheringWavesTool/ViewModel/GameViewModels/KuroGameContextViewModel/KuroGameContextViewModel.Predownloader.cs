@@ -129,9 +129,9 @@ partial class KuroGameContextViewModel
                     if (!status.PredownloadedDone)
                     {
                         PredCardVisibility = Visibility.Visible;
-                        PredDownloadBthVisibility = Visibility.Collapsed;
+                        PredDownloadBthVisibility = Visibility.Visible;
                         PredDownloadingVisibility = Visibility.Collapsed;
-                        PredDownloadDoneVisibility = Visibility.Visible;
+                        PredDownloadDoneVisibility = Visibility.Collapsed;
                     }
                     else
                     {

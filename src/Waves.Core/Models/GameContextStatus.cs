@@ -58,6 +58,11 @@ public class GameContextStatus
     public bool PredownloadedDone { get; internal set; }
 
     /// <summary>
+    /// 是否正在预下载
+    /// </summary>
+    public bool PredownloaAcion { get; internal set; }
+
+    /// <summary>
     /// 预下载Diff路径
     /// </summary>
     public string PredownloadPath { get; internal set; }

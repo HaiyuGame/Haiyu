@@ -83,8 +83,6 @@ public abstract partial class KuroGameContextBase : IGameContext
         }
     }
 
-
-
     public async Task<GameContextStatus> GetGameContextStatusAsync(
         CancellationToken token = default
     )
@@ -154,6 +152,9 @@ public abstract partial class KuroGameContextBase : IGameContext
                     var donwResult = await GameLocalConfig.GetConfigAsync(
                         GameLocalSettingName.ProdDownloadFolderDone
                     );
+                    var prodDownVersion = await GameLocalConfig.GetConfigAsync(
+                        GameLocalSettingName.ProdDownloadVersion
+                    );
                     if (bool.TryParse(donwResult, out var predDown))
                     {
                         status.PredownloadedDone = predDown;
@@ -162,6 +163,7 @@ public abstract partial class KuroGameContextBase : IGameContext
                     {
                         status.PredownloadedDone = false;
                     }
+                    status.PredownloaAcion = _isDownload;
                 }
             }
         }
@@ -197,5 +199,4 @@ public abstract partial class KuroGameContextBase : IGameContext
     {
         this.Logger.Option = coreLogOption;
     }
-
 }

@@ -316,7 +316,7 @@ public partial class KuroGameContextBase
                     "正在选择最优CDN，请稍候…"
                 )
                 .ConfigureAwait(false);
-            const long targetTestSize = 50L * 1024 * 1024; // ~50MB
+            const long targetTestSize = 50L * 1024 * 1024;
             var item = resource
                 .OrderBy(x => Math.Abs((long)x.Size - targetTestSize))
                 .FirstOrDefault();
@@ -844,6 +844,7 @@ public partial class KuroGameContextBase
         bool ispred = false
     )
     {
+        this.CDNSpeedTester = new CDNSpeedTester();
         var patchInfos = patch.Where(x => x.Dest.EndsWith("krpdiff")).ToList();
         ParallelOptions options = new ParallelOptions()
         {

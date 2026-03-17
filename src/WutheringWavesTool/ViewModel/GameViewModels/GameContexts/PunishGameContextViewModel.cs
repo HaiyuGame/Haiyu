@@ -69,7 +69,6 @@ namespace Haiyu.ViewModel.GameViewModels.GameContexts
                     if (userPlayers == null || userPlayers.Code != 0)
                     {
                         LocalUserTitle = "获取账号信息失败";
-                        
                         await TipShow.ShowMessageAsync("请重新进入游戏获取信息", Symbol.Clear);
                         IsLocalUserRefresh = false;
                         return;

@@ -59,6 +59,8 @@ public partial  class KuroGameContextBase
             await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdDownloadPath, downloadFolder);
             await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdDownloadVersion, launcher.Predownload.Version);
             //启动预下载线程
+
+            baseUrl = previous.BaseUrl;
             Task.Run(async () =>
                 StartDownProdAsync(launcher,downloadFolder,patch,previous.Version));
             //保存预下载信息
@@ -75,7 +77,10 @@ public partial  class KuroGameContextBase
 
     private async Task StartDownProdAsync(GameLauncherSource launcher, string downloadFolder, PatchIndexGameResource patch, string version)
     {
+
+        this._isDownload = true;
         var downloadResult = await this.DownloadGroupPatcheToResource(launcher,downloadFolder, patch.Resource, ispred: true);
+        this._isDownload = false;
         if (!downloadResult)
         {
             Logger.WriteInfo($"预下载：下载差异组文件失败，请重新尝试");

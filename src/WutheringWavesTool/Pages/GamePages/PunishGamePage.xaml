@@ -452,6 +452,13 @@
                                     Glyph="&#xE8AB;" />
                             </Button>
                         </StackPanel>
+                        <TextBlock
+                            Margin="8,0,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            FontFamily="{ThemeResource DefaultFont}"
+                            FontSize="16"
+                            Text="{x:Bind ViewModel.LocalUserTitle, Mode=OneWay}" />
                     </Grid>
                 </control:CardSwitcher.Card1>
                 <control:CardSwitcher.Card2>

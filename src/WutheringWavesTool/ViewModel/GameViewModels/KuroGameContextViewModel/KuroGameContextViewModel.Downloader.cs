@@ -17,6 +17,10 @@ partial class KuroGameContextViewModel
         await AppContext.TryInvokeAsync(async () =>
         {
             var status = await this.GameContext.GetGameContextStatusAsync(this.CTS.Token);
+            if (status.PredownloaAcion)
+            {
+                return;
+            }
             if (
                 args.Type == Waves.Core.Models.Enums.GameContextActionType.Download
                 || args.Type == Waves.Core.Models.Enums.GameContextActionType.Verify
@@ -24,7 +28,7 @@ partial class KuroGameContextViewModel
             )
             {
                 this.MaxProgressValue = args.TotalSize;
-                this.CurrentProgressValue = args.CurrentSize;
+                this.CurrentProgressValue = args.CurrentSize; 
                 if (args.Type == Waves.Core.Models.Enums.GameContextActionType.Verify)
                 {
                     if (args.IsAction && args.IsPause)
@@ -60,7 +64,8 @@ partial class KuroGameContextViewModel
                             $"[{args.CurrentDecompressCount}/{args.MaxDecompressValue}] 已解压:{Math.Round((double)args.CurrentSize / 1024 / 1024 / 1024, 2)}GB,剩余:{Math.Round((double)(args.TotalSize - args.CurrentSize) / 1024 / 1024 / 1024, 2)}GB";
                     PauseStartEnable = false;
                 }
-                ShowGameDownloadingBth(status);
+                if(!status.IsPredownloaded)
+                    ShowGameDownloadingBth(status);
             }
             if (args.Type == Waves.Core.Models.Enums.GameContextActionType.DeleteFile)
             {
@@ -70,7 +75,7 @@ partial class KuroGameContextViewModel
                 this.BottomBarContent = args.DeleteString;
                 PauseStartEnable = false;
             }
-            if (args.Type == Waves.Core.Models.Enums.GameContextActionType.None || args.Type == Waves.Core.Models.Enums.GameContextActionType.GameExit)
+            if (args.Type == Waves.Core.Models.Enums.GameContextActionType.None || args.Type == Waves.Core.Models.Enums.GameContextActionType.GameExit && !status.IsPredownloaded)
             {
                 PauseStartEnable = true;
                 this.CurrentProgressValue = 0;
@@ -108,11 +113,11 @@ partial class KuroGameContextViewModel
                     this.AppContext.App.MainWindow.Show();
                 }
             }
-            if (args.Type == Waves.Core.Models.Enums.GameContextActionType.TipMessage)
+            if (args.Type == Waves.Core.Models.Enums.GameContextActionType.TipMessage && !status.IsPredownloaded)
             {
                 await DialogManager.ShowMessageDialog(args.TipMessage, "确认", "关闭");
             }
-            if(args.Type == Waves.Core.Models.Enums.GameContextActionType.CdnSelect)
+            if(args.Type == Waves.Core.Models.Enums.GameContextActionType.CdnSelect && !status.IsPredownloaded)
             {
                 ShowGameDownloadingBth(status);
                 PauseStartEnable = false;
