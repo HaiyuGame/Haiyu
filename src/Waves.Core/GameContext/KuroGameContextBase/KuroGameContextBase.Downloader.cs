@@ -536,10 +536,7 @@ public partial class KuroGameContextBase
         baseUrl = previous.BaseUrl;
         _totalProgressTotal = 0;
         _totalProgressSize = 0;
-        if (
-            patch.ApplyTypes != null
-            && patch.ApplyTypes.Contains("patch")
-            && patch.PatchInfos != null
+        if (patch.PatchInfos != null
             && patch.PatchInfos.Count > 0
         )
         {
@@ -564,14 +561,10 @@ public partial class KuroGameContextBase
                 return;
             }
         }
-        else if (
-            patch.ApplyTypes != null
-            && patch.ApplyTypes.Contains("group")
-            && patch.GroupInfos != null
+        else if (patch.GroupInfos != null
             && patch.GroupInfos.Count > 0
         )
         {
-            //2.8.0_3.0.0_group_27_1766046101203.krpdiff
             var count = patch.Resource.Where(x => x.Dest.EndsWith(".krpdiff"));
             var size = count.Sum(x => x.Size);
             _totalfileSize = size;
@@ -630,7 +623,6 @@ public partial class KuroGameContextBase
                 Logger.WriteInfo($"删除差异文件：{filePath}");
             }
             var resource = await GetGameResourceAsync(launcher.ResourceDefault);
-            //var resource2 = await GetGameResourceAsync(launcher.ResourceDefault,launcher.Predownload);
             if (resource == null)
             {
                 this._isDownload = false;
@@ -661,6 +653,19 @@ public partial class KuroGameContextBase
                 await SetNoneStatusAsync().ConfigureAwait(false);
                 return;
             }
+        }
+        else if(patch.ZipFileInfos!=null && patch.ZipFileInfos.Count > 0)
+        {
+            //解压包执行程序
+            var zips = patch.Resource.Where(x => x.Dest.EndsWith("krzip"));
+            long size = 0;
+            foreach (var item in zips)
+            {
+                size+=item.Size;
+            }
+            _totalfileSize = size;
+            _totalFileTotal = zips.Count() - 1;
+            _totalProgressTotal = 0;
         }
         else
         {
@@ -722,6 +727,7 @@ public partial class KuroGameContextBase
         #endregion
         await SetNoneStatusAsync().ConfigureAwait(false);
     }
+
 
     private async Task<IndexGameResource> GetGameResourceAsync(
         ResourceDefault resourceDefault,

@@ -98,7 +98,6 @@ public partial  class KuroGameContextBase
             return;
         }
         await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdDownloadFolderDone, "True");
-
         _totalfileSize = 0;
         _totalFileTotal = 0;
         _totalProgressTotal = 0;
