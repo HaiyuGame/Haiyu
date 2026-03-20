@@ -57,7 +57,6 @@ public partial class KuroGameContextBase
         await UpdataGameResourceAsync(folder, launcher, diffSavePath);
         if (type == UpdateGameType.ProDownload)
         {
-            //如果是预下载安装，则直接删除预下载配置
             await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdDownloadPath, "");
             await this.GameLocalConfig.SaveConfigAsync(
                 GameLocalSettingName.ProdDownloadFolderDone,
