@@ -47,19 +47,24 @@ IHost host = Host.CreateDefaultBuilder(args)
     })
     .Build();
 
-//var mainGame = host.Services.GetRequiredKeyedService<IGameContext>(nameof(PunishMainGameContext));
-//await mainGame.InitAsync();
-//var launcher = await mainGame.GetGameLauncherSourceAsync(null);
-//var previous = launcher
-//            .ResourceDefault.Config.PatchConfig.Last();
 
 var v2 = host.Services.GetService<V2TestGameContext>();
 await v2.InitAsync();
 await v2.StartDownloadTaskAsync("D:\\Punish");
+var subMessage = await v2.GameEventPublisher.SubscribeAsync(Message);
 await Task.Delay(5000);
 Console.WriteLine("正在下载，按回车键取消下载，输入Q停止");
-if(Console.ReadLine() == "Q")
+
+async ValueTask Message(GameContextOutputArgs v)
+{
+    Console.WriteLine($"{v.Type}：{v.TipMessage}");
+}
+
+if (Console.ReadLine() == "Q")
+{
     await v2.StopCannelTaskAsync();
+    subMessage.Dispose();
+}
 Console.ReadLine();
 
 public class TestContext : KuroGameContextBaseV2

@@ -8,7 +8,9 @@ using Waves.Api.Models;
 using Waves.Core.Common;
 using Waves.Core.Common.Downloads;
 using Waves.Core.Contracts;
+using Waves.Core.Contracts.Events;
 using Waves.Core.Helpers;
+using Waves.Core.Models;
 using Waves.Core.Models.Downloader;
 using Waves.Core.Models.Enums;
 using Waves.Core.Services;
@@ -18,7 +20,7 @@ namespace Waves.Core.GameContext.KruoGameContextBaseV2.Common;
 /// <summary>
 /// 进行修复或下载使用的工具类，其中使用IProgress进行回调，再由核心回调事件结束
 /// </summary>
-public sealed class DownloadAndVerifyResource
+public sealed class DownloadAndVerifyResource : IAsyncDisposable
 {
     #region Param
     private List<IndexResource> _resource;
@@ -31,6 +33,13 @@ public sealed class DownloadAndVerifyResource
     private string _downloadBaseUrl;
     #endregion
 
+    public DownloadState DownloadState { get; set; }
+
+    public CDNSpeedTester CDNSpeedTester { get; }
+    public Dictionary<string, object> Param { get; private set; }
+    public IGameEventPublisher GameEventPublisher { get; private set; }
+    public LoggerService Logger { get; }
+
     /// <summary>
     /// 构造传参
     /// </summary>
@@ -41,19 +50,14 @@ public sealed class DownloadAndVerifyResource
         CDNSpeedTester = new();
     }
 
-    public void SetParam(Dictionary<string, object> param)
+    public void SetParam(Dictionary<string, object> param, IGameEventPublisher gameEventPublisher)
     {
         Param = param;
+        this.GameEventPublisher = gameEventPublisher;
     }
 
-    public DownloadState DownloadState { get; set; }
-
-    public CDNSpeedTester CDNSpeedTester { get; }
-    public Dictionary<string, object> Param { get; private set; }
-    public LoggerService Logger { get; }
-
     /// <summary>
-    /// 开始执行，并开始回调
+    /// 开始执行
     /// </summary>
     /// <param name="isSync">是否同步执行</param>
     /// <returns></returns>
@@ -143,12 +147,13 @@ public sealed class DownloadAndVerifyResource
                 CancellationToken = cts.Token,
             };
             await ParallelDownloadAsync(
-                DownloadState,
-                _resource,
-                _launcher!.ResourceDefault.CdnList,
-                options,
-                _folder
-            ).ConfigureAwait(false);
+                    DownloadState,
+                    _resource,
+                    _launcher!.ResourceDefault.CdnList,
+                    options,
+                    _folder
+                )
+                .ConfigureAwait(false);
             return true;
         }
         catch (Exception)
@@ -167,34 +172,23 @@ public sealed class DownloadAndVerifyResource
     {
         try
         {
-            //await UpdateFileProgress(
-            //        GameContextActionType.CdnSelect,
-            //        0,
-            //        false,
-            //        ispred,
-            //        "正在选择最优CDN，请稍候…"
-            //    )
-            //    .ConfigureAwait(false);
+            await GameEventPublisher.PublisAsync(
+                GameContextActionType.CdnSelect,
+                "正在选择最优CDN"
+            );
             const long targetTestSize = 50L * 1024 * 1024;
             var item = resource
                 .OrderBy(x => Math.Abs((long)x.Size - targetTestSize))
                 .FirstOrDefault();
             item ??= resource.OrderBy(x => x.Size).FirstOrDefault();
-            var testUrl = this._launcher.ResourceDefault.Config.BaseUrl+item.Dest;
+            var testUrl = this._launcher.ResourceDefault.Config.BaseUrl + item.Dest;
             var best = await CDNSpeedTester.TestAllAsync(
                 _launcher.ResourceDefault.CdnList,
                 testUrl,
                 TimeSpan.FromSeconds(40)
             );
             this._downloadBaseUrl = best.Url + this._launcher.ResourceDefault.Config.BaseUrl;
-            //await UpdateFileProgress(
-            //        GameContextActionType.CdnSelect,
-            //        0,
-            //        false,
-            //        ispred,
-            //        "已选定最优CDN，开始下载"
-            //    )
-            //    .ConfigureAwait(false);
+            await GameEventPublisher.PublisAsync(GameContextActionType.CdnSelect, "CDN选择完毕");
             await Parallel.ForEachAsync(
                 resource,
                 options,
@@ -203,8 +197,10 @@ public sealed class DownloadAndVerifyResource
                     if (cts.IsCancellationRequested)
                     {
                         if (downloadState != null)
-                            downloadState.IsActive = false;
-                        //await SetNoneStatusAsync().ConfigureAwait(false);
+                            await GameEventPublisher.PublisAsync(
+                                GameContextActionType.None,
+                                "取消下载"
+                            );
                         return;
                     }
                     var filePath = BuildFileHelper.BuildFilePath(folder, item);
@@ -217,7 +213,8 @@ public sealed class DownloadAndVerifyResource
                                 item.Md5,
                                 filePath,
                                 downloadState,
-                                cts
+                                cts,
+                                eventPublisher: GameEventPublisher
                             );
                             if (checkResult)
                             {
@@ -234,7 +231,7 @@ public sealed class DownloadAndVerifyResource
                                         Md5 = item.Md5,
                                     },
                                     downloadState,
-                                    cts
+                                    cts,eventPublisher:this.GameEventPublisher
                                 );
                             }
                             else
@@ -273,7 +270,7 @@ public sealed class DownloadAndVerifyResource
                                             true,
                                             item.Size,
                                             downloadState,
-                                            cts
+                                            cts,eventPublisher:this.GameEventPublisher
                                         );
                                     }
                                     else
@@ -318,7 +315,7 @@ public sealed class DownloadAndVerifyResource
                                 Md5 = item.Md5,
                             },
                             downloadState,
-                            cts
+                            cts,eventPublisher:this.GameEventPublisher
                         );
                         //await FinalValidation(file, filePath);
                     }
@@ -344,5 +341,12 @@ public sealed class DownloadAndVerifyResource
         {
             return false;
         }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await CancelAsync();
+        this._resource.Clear();
+        this._launcher = null;
     }
 }

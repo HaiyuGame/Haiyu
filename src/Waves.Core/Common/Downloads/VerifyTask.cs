@@ -1,6 +1,7 @@
-﻿using System.Buffers;
+﻿using Serilog.Core;
+using System.Buffers;
 using System.Security.Cryptography;
-using Serilog.Core;
+using Waves.Core.Contracts.Events;
 using Waves.Core.Models;
 using Waves.Core.Models.Downloader;
 using Waves.Core.Models.Enums;

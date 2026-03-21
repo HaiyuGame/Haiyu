@@ -7,6 +7,7 @@ using Waves.Api.Models;
 using Waves.Api.Models.Launcher;
 using Waves.Core.Common;
 using Waves.Core.Contracts;
+using Waves.Core.Contracts.Events;
 using Waves.Core.GameContext.KruoGameContextBaseV2.Common;
 using Waves.Core.Helpers;
 using Waves.Core.Models;
@@ -23,6 +24,8 @@ namespace Waves.Core.GameContext;
 public abstract partial class KuroGameContextBaseV2
 {
     private bool isLimtSpeed;
+
+    public IGameEventPublisher GameEventPublisher { get; internal set; }
 
     /// <summary>
     /// Http 请求服务，包含下载Client与配置Client
@@ -139,6 +142,7 @@ public abstract partial class KuroGameContextBaseV2
     #endregion
 
 
+
     /// <summary>
     /// 启动下载进程
     /// </summary>
@@ -182,7 +186,7 @@ public abstract partial class KuroGameContextBaseV2
                 {"isDelete", false },
                 {"folder", folder },
                 {"httpClient", HttpClientService }
-            });
+            },this.GameEventPublisher);
             await downloadMethod.RunAsync();
             return true;
         }

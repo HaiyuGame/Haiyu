@@ -81,10 +81,13 @@ public static class Waves
                 }
             )
         #region 新核心测试
+            //事件订阅发布器
+            .AddKeyedSingleton<GameEventPublisher>(nameof(V2TestGameContext))
             .AddSingleton<V2TestGameContext>((provider) =>
             {
                 var context = GameContextFactory.GetV2TestGameContext();
                 context.HttpClientService = provider.GetRequiredService<IHttpClientService>();
+                context.GameEventPublisher = provider.GetRequiredKeyedService<GameEventPublisher>(nameof(V2TestGameContext));
                 return context;
             })
         #endregion

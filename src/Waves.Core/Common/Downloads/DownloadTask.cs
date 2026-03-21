@@ -2,6 +2,7 @@
 using System.Buffers;
 using System.Net.Http.Headers;
 using Waves.Core.Contracts;
+using Waves.Core.Contracts.Events;
 using Waves.Core.Models.Downloader;
 using Waves.Core.Models.Enums;
 using Waves.Core.Services;
