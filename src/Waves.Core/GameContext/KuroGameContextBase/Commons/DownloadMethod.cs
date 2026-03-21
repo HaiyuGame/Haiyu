@@ -247,6 +247,74 @@ partial class KuroGameContextBase
         }
     }
 
+   
+
+    /// <summary>
+    /// 检查指定列表的Md5校验值
+    /// </summary>
+    /// <param name="list"></param>
+    /// <param name="folder"></param>
+    /// <param name="tempFolder"></param>
+    /// <param name="newFiles"></param>
+    /// <returns></returns>
+    private async Task<bool> CheckApplyFilesMd5(
+        List<IndexResource> list,
+        string folder,
+        string tempFolder,
+        Dictionary<string, string> newFiles
+    )
+    {
+        try
+        {
+            var keys = newFiles.Keys.ToList();
+            for (int i = 0; i < keys.Count; i++)
+            {
+                string key = keys[i];
+                string value = newFiles[key];
+                if (File.Exists(value))
+                    File.Delete(value);
+                File.Move(key, value);
+                this.gameContextOutputDelegate?.Invoke(
+                        this,
+                        new GameContextOutputArgs()
+                        {
+                            Type = GameContextActionType.DeleteFile,
+                            FileTotal = keys.Count,
+                            CurrentFile = i,
+                            DeleteString = $"正在移动校验文件{System.IO.Path.GetFileName(value)}",
+                        }
+                    )
+                    .ConfigureAwait(false);
+            }
+            await InitializeProgress(list);
+            var resource = await this.GetGameLauncherSourceAsync();
+            var resourceOne = await this.GetGameResourceAsync(resource.ResourceDefault);
+            if (!await GetGameResourceAsync(folder, resource, false))
+            {
+                await UpdateFileProgress(
+                        GameContextActionType.TipMessage,
+                        0,
+                        false,
+                        false,
+                        "更新校验出错，请直接尝试修复游戏，下载缓存需手动删除"
+                    )
+                    .ConfigureAwait(false);
+                await SetNoneStatusAsync();
+                return false;
+            }
+            return true;
+        }
+        catch (Exception ex)
+        {
+            await SetNoneStatusAsync().ConfigureAwait(false);
+            await UpdateFileProgress(GameContextActionType.TipMessage, 0, false, false, ex.Message);
+            this._isDownload = false;
+            Logger.WriteError(ex.Message);
+            return false;
+        }
+    }
+
+
     /// <summary>
     /// 开始下载分片
     /// </summary>
@@ -384,72 +452,6 @@ partial class KuroGameContextBase
                 await fileStream.FlushAsync();
                 await fileStream.DisposeAsync();
             }
-        }
-    }
-
-
-    /// <summary>
-    /// 检查指定列表的Md5校验值
-    /// </summary>
-    /// <param name="list"></param>
-    /// <param name="folder"></param>
-    /// <param name="tempFolder"></param>
-    /// <param name="newFiles"></param>
-    /// <returns></returns>
-    private async Task<bool> CheckApplyFilesMd5(
-        List<IndexResource> list,
-        string folder,
-        string tempFolder,
-        Dictionary<string, string> newFiles
-    )
-    {
-        try
-        {
-            var keys = newFiles.Keys.ToList();
-            for (int i = 0; i < keys.Count; i++)
-            {
-                string key = keys[i];
-                string value = newFiles[key];
-                if (File.Exists(value))
-                    File.Delete(value);
-                File.Move(key, value);
-                this.gameContextOutputDelegate?.Invoke(
-                        this,
-                        new GameContextOutputArgs()
-                        {
-                            Type = GameContextActionType.DeleteFile,
-                            FileTotal = keys.Count,
-                            CurrentFile = i,
-                            DeleteString = $"正在移动校验文件{System.IO.Path.GetFileName(value)}",
-                        }
-                    )
-                    .ConfigureAwait(false);
-            }
-            await InitializeProgress(list);
-            var resource = await this.GetGameLauncherSourceAsync();
-            var resourceOne = await this.GetGameResourceAsync(resource.ResourceDefault);
-            if (!await GetGameResourceAsync(folder, resource, false))
-            {
-                await UpdateFileProgress(
-                        GameContextActionType.TipMessage,
-                        0,
-                        false,
-                        false,
-                        "更新校验出错，请直接尝试修复游戏，下载缓存需手动删除"
-                    )
-                    .ConfigureAwait(false);
-                await SetNoneStatusAsync();
-                return false;
-            }
-            return true;
-        }
-        catch (Exception ex)
-        {
-            await SetNoneStatusAsync().ConfigureAwait(false);
-            await UpdateFileProgress(GameContextActionType.TipMessage, 0, false, false, ex.Message);
-            this._isDownload = false;
-            Logger.WriteError(ex.Message);
-            return false;
         }
     }
 

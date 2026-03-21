@@ -80,7 +80,14 @@ public static class Waves
                     return context;
                 }
             )
-            
+        #region 新核心测试
+            .AddSingleton<V2TestGameContext>((provider) =>
+            {
+                var context = GameContextFactory.GetV2TestGameContext();
+                context.HttpClientService = provider.GetRequiredService<IHttpClientService>();
+                return context;
+            })
+        #endregion
             .AddTransient<IHttpClientService, HttpClientService>();
         return services;
     }
