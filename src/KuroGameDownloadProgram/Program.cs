@@ -47,17 +47,17 @@ IHost host = Host.CreateDefaultBuilder(args)
     })
     .Build();
 
-
 var v2 = host.Services.GetService<V2TestGameContext>();
 await v2.InitAsync();
 await v2.StartDownloadTaskAsync("D:\\Punish");
 var subMessage = await v2.GameEventPublisher.SubscribeAsync(Message);
-await Task.Delay(5000);
 Console.WriteLine("正在下载，按回车键取消下载，输入Q停止");
 
-async ValueTask Message(GameContextOutputArgs v)
+async ValueTask Message(GameContextOutputArgs args)
 {
-    Console.WriteLine($"{v.Type}：{v.TipMessage}");
+    Console.WriteLine(
+        $"类型：{args.Type}:下载速度:{Math.Round(args.DownloadSpeed / 1024 / 1024, 2)}MB,校验速度：{Math.Round(args.VerifySpeed)}，剩余：{Math.Round((double)(args.TotalSize - args.CurrentSize) / 1024 / 1024 / 1024, 2)}GB"
+    );
 }
 
 if (Console.ReadLine() == "Q")

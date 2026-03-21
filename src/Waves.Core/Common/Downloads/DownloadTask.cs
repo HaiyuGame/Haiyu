@@ -25,7 +25,8 @@ public static class DownloadTask
         bool isLast = false,
         long allSize = 0L,
         DownloadState state = null,
-        CancellationTokenSource? downloadCts = default
+        CancellationTokenSource? downloadCts = default,
+        IProgress<(GameContextActionType,bool,long)> progress = null
     )
     {
         using (
@@ -109,6 +110,7 @@ public static class DownloadTask
                             //        isPred
                             //    )
                             //    .ConfigureAwait(false);
+                            progress?.Report((GameContextActionType.Download,true,accumulatedBytes));
                             accumulatedBytes = 0;
                         }
                     }
@@ -133,6 +135,7 @@ public static class DownloadTask
                     //        isPred: isPred
                     //    )
                     //    .ConfigureAwait(false);
+                    progress?.Report((GameContextActionType.Download,true, accumulatedBytes));
                 }
                 if (isLast)
                     fileStream.SetLength(allSize);
@@ -163,7 +166,8 @@ public static class DownloadTask
         string filePath,
         IndexChunkInfo chunk,
         DownloadState state = null,
-        CancellationTokenSource? downloadCts = default
+        CancellationTokenSource? downloadCts = default,
+        IProgress<(GameContextActionType, bool, long)> progress = null
     )
     {
         long accumulatedBytes = 0;
@@ -242,25 +246,13 @@ public static class DownloadTask
                     accumulatedBytes += bytesRead;
                     if (accumulatedBytes >= UpdateThreshold)
                     {
-                        //await UpdateFileProgress(
-                        //        GameContextActionType.Download,
-                        //        accumulatedBytes,
-                        //        true,
-                        //        isPred
-                        //    )
-                        //    .ConfigureAwait(false);
-                        accumulatedBytes = 0; // 重置累积计数器
+                        progress?.Report((GameContextActionType.Download,true,accumulatedBytes));
+                        accumulatedBytes = 0;
                     }
                 }
                 if (accumulatedBytes > 0 && !isBreak)
                 {
-                    //await UpdateFileProgress(
-                    //        GameContextActionType.Download,
-                    //        accumulatedBytes,
-                    //        true,
-                    //        isPred
-                    //    )
-                    //    .ConfigureAwait(false);
+                    progress?.Report((GameContextActionType.Download, true, accumulatedBytes));
                 }
                 if (totalWritten != chunkTotalSize)
                 {

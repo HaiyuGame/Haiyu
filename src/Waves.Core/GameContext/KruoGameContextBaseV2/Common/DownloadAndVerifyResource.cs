@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Haiyu.Common;
+using Serilog.Core;
+using System;
 using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Text;
-using Haiyu.Common;
-using Serilog.Core;
 using Waves.Api.Models;
+using Waves.Api.Models.Launcher;
 using Waves.Core.Common;
 using Waves.Core.Common.Downloads;
 using Waves.Core.Contracts;
@@ -31,6 +32,16 @@ public sealed class DownloadAndVerifyResource : IAsyncDisposable
     private IHttpClientService _httpClientService;
     private GameLauncherSource? _launcher;
     private string _downloadBaseUrl;
+    private long _totalDownloadedBytes;
+    private long _totalProgressSize;
+    private long _totalProgressTotal;
+    private long _totalVerifiedBytes;
+    private long _lastSpeedBytes;
+    private DateTime _lastSpeedUpdateTime;
+    private double _downloadSpeed;
+    private double _verifySpeed;
+    private long _totalfileSize;
+    private int _totalFileTotal;
     #endregion
 
     public DownloadState DownloadState { get; set; }
@@ -78,6 +89,16 @@ public sealed class DownloadAndVerifyResource : IAsyncDisposable
         }
     }
 
+    public void InitProgress()
+    {
+        _totalfileSize = this._resource.Sum(x => x.Size);
+        _totalFileTotal = _resource.Count - 1;
+        _totalProgressSize = 0L;
+        _totalProgressTotal = 0L;
+        _totalVerifiedBytes = 0;
+        _totalDownloadedBytes = 0;
+    }
+
     public async Task<bool> CheckAsync()
     {
         if (!Param.CheckParam<List<IndexResource>>("resource", out var resources))
@@ -106,6 +127,7 @@ public sealed class DownloadAndVerifyResource : IAsyncDisposable
         this._folder = folder!;
         this._httpClientService = httpService!;
         this._launcher = launcher;
+        InitProgress();
         return true;
     }
 
@@ -170,6 +192,15 @@ public sealed class DownloadAndVerifyResource : IAsyncDisposable
         string folder
     )
     {
+        IProgress<(GameContextActionType, bool, long)> progress = new Progress<(
+            GameContextActionType,
+            bool,
+            long
+        )>(value =>
+        {
+            var args = UpdateFileProgress(value.Item1, value.Item3, value.Item2);
+            this.GameEventPublisher.Publish(args);
+        });
         try
         {
             await GameEventPublisher.PublisAsync(
@@ -214,7 +245,7 @@ public sealed class DownloadAndVerifyResource : IAsyncDisposable
                                 filePath,
                                 downloadState,
                                 cts,
-                                eventPublisher: GameEventPublisher
+                                progress: progress
                             );
                             if (checkResult)
                             {
@@ -231,18 +262,13 @@ public sealed class DownloadAndVerifyResource : IAsyncDisposable
                                         Md5 = item.Md5,
                                     },
                                     downloadState,
-                                    cts,eventPublisher:this.GameEventPublisher
+                                    cts,
+                                    progress: progress
                                 );
                             }
                             else
                             {
-                                //await UpdateFileProgress(
-                                //        GameContextActionType.Verify,
-                                //        item.Size,
-                                //        true,
-                                //        ispred
-                                //    )
-                                //    .ConfigureAwait(false);
+                                UpdateFileProgress(GameContextActionType.Verify, item.Size, true);
                             }
                         }
                         else
@@ -254,7 +280,8 @@ public sealed class DownloadAndVerifyResource : IAsyncDisposable
                                     item.ChunkInfos[i],
                                     filePath,
                                     downloadState,
-                                    cts
+                                    cts,
+                                    progress: progress
                                 );
                                 if (needDownload)
                                 {
@@ -270,7 +297,8 @@ public sealed class DownloadAndVerifyResource : IAsyncDisposable
                                             true,
                                             item.Size,
                                             downloadState,
-                                            cts,eventPublisher:this.GameEventPublisher
+                                            cts,
+                                            progress: progress
                                         );
                                     }
                                     else
@@ -283,19 +311,18 @@ public sealed class DownloadAndVerifyResource : IAsyncDisposable
                                             item.ChunkInfos[i].End,
                                             false,
                                             downloadCts: cts,
-                                            state: downloadState
+                                            state: downloadState,
+                                            progress: progress
                                         );
                                     }
                                 }
                                 else
                                 {
-                                    //await UpdateFileProgress(
-                                    //        GameContextActionType.Verify,
-                                    //        item.ChunkInfos[i].End - item.ChunkInfos[i].Start,
-                                    //        true,
-                                    //        ispred
-                                    //    )
-                                    //    .ConfigureAwait(false);
+                                    UpdateFileProgress(
+                                        GameContextActionType.Verify,
+                                        item.ChunkInfos[i].End - item.ChunkInfos[i].Start,
+                                        true
+                                    );
                                 }
                             }
                         }
@@ -315,7 +342,8 @@ public sealed class DownloadAndVerifyResource : IAsyncDisposable
                                 Md5 = item.Md5,
                             },
                             downloadState,
-                            cts,eventPublisher:this.GameEventPublisher
+                            cts,
+                            progress: progress
                         );
                         //await FinalValidation(file, filePath);
                     }
@@ -328,6 +356,52 @@ public sealed class DownloadAndVerifyResource : IAsyncDisposable
             Logger.WriteError("校验失败！");
             return false;
         }
+    }
+
+    private GameContextOutputArgs UpdateFileProgress(
+        GameContextActionType type,
+        long fileSize,
+        bool isAdd = true,
+        string tip = ""
+    )
+    {
+        if (type == GameContextActionType.Download)
+        {
+            Interlocked.Add(ref _totalDownloadedBytes, fileSize);
+            if (isAdd)
+                Interlocked.Add(ref _totalProgressSize, fileSize);
+        }
+        else if (type == GameContextActionType.Verify)
+        {
+            if (!isAdd)
+                Interlocked.Add(ref _totalVerifiedBytes, fileSize);
+            if (isAdd)
+                Interlocked.Add(ref _totalProgressSize, fileSize);
+        }
+        var elapsed = (DateTime.Now - _lastSpeedUpdateTime).TotalSeconds;
+        if (elapsed >= 1)
+        {
+            _downloadSpeed = _totalDownloadedBytes / elapsed;
+            _verifySpeed = _totalVerifiedBytes / elapsed;
+            Interlocked.Exchange(ref _totalDownloadedBytes, 0);
+            Interlocked.Exchange(ref _totalVerifiedBytes, 0);
+            var currentBytes = Interlocked.Read(ref _totalDownloadedBytes);
+            _lastSpeedBytes = currentBytes;
+            _lastSpeedUpdateTime = DateTime.Now;
+        }
+        var args = new GameContextOutputArgs
+        {
+            Type = type,
+            CurrentSize = _totalProgressSize,
+            TotalSize = _totalfileSize,
+            FileTotal = _totalFileTotal,
+            DownloadSpeed = _downloadSpeed,
+            VerifySpeed = _verifySpeed,
+            IsAction = this.DownloadState?.IsActive ?? false,
+            IsPause = DownloadState?.IsPaused ?? false,
+            TipMessage = tip,
+        };
+        return args;
     }
 
     public async Task<bool> CancelAsync()

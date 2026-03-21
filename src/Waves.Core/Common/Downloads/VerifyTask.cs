@@ -21,7 +21,8 @@ public static class VerifyTask
         IndexChunkInfo file,
         string filePath,
         DownloadState state = null,
-        CancellationTokenSource? downloadCts = default
+        CancellationTokenSource? downloadCts = default,
+        IProgress<(GameContextActionType,bool,long)> progress=null
     )
     {
         using (
@@ -83,6 +84,7 @@ public static class VerifyTask
                                 //        isPred
                                 //    )
                                 //    .ConfigureAwait(false);
+                                progress?.Report((GameContextActionType.Verify,false,accumulatedBytes));
                                 accumulatedBytes = 0;
                             }
                         }
@@ -101,6 +103,8 @@ public static class VerifyTask
                         //        isPred
                         //    )
                         //    .ConfigureAwait(false);
+
+                        progress?.Report((GameContextActionType.Verify, false, accumulatedBytes));
                     }
                     md5.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
                     string hash = BitConverter.ToString(md5.Hash!).Replace("-", "").ToLower();
@@ -132,7 +136,8 @@ public static class VerifyTask
         string md5Value,
         string filePath,
         DownloadState state = null,
-        CancellationTokenSource? downloadCts = default
+        CancellationTokenSource? downloadCts = default,
+        IProgress<(GameContextActionType, bool, long)> progress = null
     )
     {
         const int bufferSize = 262144;
@@ -184,13 +189,7 @@ public static class VerifyTask
                         accumulatedBytes += bytesRead; // 添加此行以累加字节数
                         if (accumulatedBytes >= UpdateThreshold)
                         {
-                            //await UpdateFileProgress(
-                            //        GameContextActionType.Verify,
-                            //        accumulatedBytes,
-                            //        false,
-                            //        isPred
-                            //    )
-                            //    .ConfigureAwait(false);
+                            progress?.Report((GameContextActionType.Verify, false, accumulatedBytes));
                             accumulatedBytes = 0;
                         }
                     }
@@ -201,13 +200,7 @@ public static class VerifyTask
                 }
                 if (accumulatedBytes < UpdateThreshold)
                 {
-                    //await UpdateFileProgress(
-                    //        GameContextActionType.Verify,
-                    //        accumulatedBytes,
-                    //        false,
-                    //        isPred: isPred
-                    //    )
-                    //    .ConfigureAwait(false);
+                    progress?.Report((GameContextActionType.Verify, false, accumulatedBytes));
                 }
             }
 
@@ -234,7 +227,8 @@ public static class VerifyTask
         IndexChunkInfo file,
         string filePath,
         DownloadState state = null,
-        CancellationTokenSource? downloadCts = default
+        CancellationTokenSource? downloadCts = default,
+        IProgress<(GameContextActionType, bool, long)> progress = null
     )
     {
         using (
@@ -289,13 +283,7 @@ public static class VerifyTask
                             accumulatedBytes += bytesRead;
                             if (accumulatedBytes >= UpdateThreshold)
                             {
-                                //await UpdateFileProgress(
-                                //        GameContextActionType.Verify,
-                                //        accumulatedBytes,
-                                //        false,
-                                //        isPred
-                                //    )
-                                //    .ConfigureAwait(false);
+                                progress?.Report((GameContextActionType.Verify, false, accumulatedBytes));
                                 accumulatedBytes = 0;
                             }
                         }
@@ -310,13 +298,7 @@ public static class VerifyTask
                     }
                     if (accumulatedBytes > 0 && accumulatedBytes < UpdateThreshold)
                     {
-                        //await UpdateFileProgress(
-                        //        GameContextActionType.Verify,
-                        //        accumulatedBytes,
-                        //        false,
-                        //        isPred
-                        //    )
-                        //    .ConfigureAwait(false);
+                        progress?.Report((GameContextActionType.Verify, false, accumulatedBytes));
                     }
                     md5.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
                     string hash = BitConverter.ToString(md5.Hash!).Replace("-", "").ToLower();

@@ -27,6 +27,7 @@ public class GameContextOutputArgs
 
     public double VerifySpeed { get; set; }
 
+    [Obsolete("Use RemainingTime instead.")]
     public TimeSpan RemainingTime { get; set; }
     #endregion
 
