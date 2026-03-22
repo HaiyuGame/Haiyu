@@ -1,4 +1,6 @@
-﻿namespace Waves.Core.Models;
+﻿using Waves.Core.Contracts.Events;
+
+namespace Waves.Core.Models;
 
 /// <summary>
 /// 处理步骤
@@ -15,5 +17,5 @@ public interface IProgressSetup
     /// </summary>
     public double ProgressValue { get; set; }
 
-
+    public void SetParam(Dictionary<string, object> param, IGameEventPublisher gameEventPublisher);
 }

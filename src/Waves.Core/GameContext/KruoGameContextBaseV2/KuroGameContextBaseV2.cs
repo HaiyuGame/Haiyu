@@ -213,6 +213,7 @@ public abstract partial class KuroGameContextBaseV2
             HttpClientService?.BuildClient();
             _downloadState = new DownloadState();
             downloadMethod = new(this.Logger);
+            downloadMethod.ProgressName = "下载与校验数据";
             downloadMethod.SetParam(
                 new Dictionary<string, object>()
                 {
@@ -239,6 +240,11 @@ public abstract partial class KuroGameContextBaseV2
             this.CurrentSetups = 1;
             await this.GameEventPublisher.PublishStepAsync("写入配置信息", CurrentSetups, Setups);
             await writeConfig.WriteDownloadComplateAsync(this.GameEventPublisher,true);
+            //通知UI刷新
+            GameEventPublisher.Publish(new GameContextOutputArgs()
+            {
+                Type = GameContextActionType.None
+            });
             return true;
         }
         finally

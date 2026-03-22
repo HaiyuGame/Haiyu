@@ -118,7 +118,10 @@ public sealed class GameProgressTracker : IAsyncDisposable
 
     private ValueTask HandleEventAsync(GameContextOutputArgs args)
     {
-        CurrentAction = args.Type;
+        if (args.Type != GameContextActionType.None)
+        {
+            CurrentAction = args.Type;
+        }
 
         if (args.IsStepUpdate)
         {
@@ -130,19 +133,26 @@ public sealed class GameProgressTracker : IAsyncDisposable
             if (args.AllSteps != null && args.AllSteps.Count > 0)
                 AllSteps = args.AllSteps;
         }
-        CurrentBytes = args.CurrentSize;
-        TotalBytes = args.TotalSize;
-        CurrentFileIndex = args.CurrentFile;
-        TotalFiles = args.FileTotal;
-        DownloadSpeed = args.DownloadSpeed;
-        VerifySpeed = args.VerifySpeed;
+
+        if (args.TotalSize > 0 || args.Type == GameContextActionType.Download || args.Type == GameContextActionType.Verify)
+        {
+            CurrentBytes = args.CurrentSize;
+            TotalBytes = args.TotalSize;
+            CurrentFileIndex = args.CurrentFile;
+            TotalFiles = args.FileTotal;
+            DownloadSpeed = args.DownloadSpeed;
+            VerifySpeed = args.VerifySpeed;
+        }
+
         IsActive = args.IsAction;
         IsPaused = args.IsPause;
-        FilePath = args.FilePath;
-        FileCurrentSize = args.FileCurrentSize;
-        FileTotalSize = args.FileTotalSize;
+
         if (!string.IsNullOrWhiteSpace(args.FilePath))
         {
+            FilePath = args.FilePath;
+            FileCurrentSize = args.FileCurrentSize;
+            FileTotalSize = args.FileTotalSize;
+
             var fileName = System.IO.Path.GetFileName(args.FilePath);
             if (args.FileCurrentSize >= args.FileTotalSize && args.FileTotalSize > 0)
             {
@@ -158,6 +168,7 @@ public sealed class GameProgressTracker : IAsyncDisposable
         {
             CurrentStepTip = args.TipMessage;
         }
+
         _isDirty = true;
 
         return ValueTask.CompletedTask;

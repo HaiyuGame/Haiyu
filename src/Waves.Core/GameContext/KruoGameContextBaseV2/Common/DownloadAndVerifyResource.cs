@@ -44,7 +44,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
     private int _totalFileTotal;
     #endregion
 
-    public DownloadState DownloadState { get; set; }
+    private DownloadState _downloadState;
 
     public CDNSpeedTester CDNSpeedTester { get; }
     public Dictionary<string, object> Param { get; private set; }
@@ -133,7 +133,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
         this._folder = folder!;
         this._httpClientService = httpService!;
         this._launcher = launcher;
-        this.DownloadState = downloadState!;
+        this._downloadState = downloadState!;
         InitProgress();
         return true;
     }
@@ -175,9 +175,9 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
                 MaxDegreeOfParallelism = 4,
                 CancellationToken = cts.Token,
             };
-            DownloadState.IsActive = true;
+            _downloadState.IsActive = true;
             await ParallelDownloadAsync(
-                    DownloadState,
+                    _downloadState,
                     _resource,
                     _launcher!.ResourceDefault.CdnList,
                     options,
@@ -245,6 +245,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
                                     currentFileSize: value.Item5,
                                     fileMaxSize: value.Item6
                                 );
+                                this.ProgressValue = (double)args.CurrentSize / (double)args.TotalSize;
                                 this.GameEventPublisher.Publish(args);
                             }
                         );
@@ -423,8 +424,8 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
             FileCurrentSize = currentFileSize,
             FileTotalSize = fileMaxSize,
             VerifySpeed = _verifySpeed,
-            IsAction = this.DownloadState?.IsActive ?? false,
-            IsPause = DownloadState?.IsPaused ?? false,
+            IsAction = this._downloadState?.IsActive ?? false,
+            IsPause = _downloadState?.IsPaused ?? false,
             TipMessage = tip,
         };
         return args;
