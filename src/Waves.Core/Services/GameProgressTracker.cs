@@ -1,0 +1,207 @@
+﻿using System;
+using System.Collections.Concurrent;
+using System.Threading;
+using System.Threading.Tasks;
+using Waves.Core.Contracts.Events;
+using Waves.Core.Models;
+using Waves.Core.Models.Enums;
+
+namespace Waves.Core.Services;
+
+/// <summary>
+/// 游戏下载/校验进度跟踪器
+/// 负责订阅并在内部维护更新当前所处状态。
+/// </summary>
+public sealed class GameProgressTracker : IAsyncDisposable
+{
+    private IGameEventSubscription? _subscription;
+
+    public GameContextActionType CurrentAction { get; private set; }
+
+    /// <summary>
+    ///
+    /// </summary>
+    public string CurrentStepTip { get; private set; } = string.Empty;
+
+    // 大步骤状态
+    public int CurrentStepIndex { get; private set; }
+
+    public int TotalSteps { get; private set; }
+
+    public string StepName { get; private set; } = string.Empty;
+
+    public System.Collections.Generic.List<string> AllSteps { get; private set; } = new();
+
+    public long CurrentBytes { get; private set; }
+
+    public long TotalBytes { get; private set; }
+
+    public int CurrentFileIndex { get; private set; }
+
+    public int TotalFiles { get; private set; }
+
+    public double DownloadSpeed { get; private set; }
+    public double VerifySpeed { get; private set; }
+
+    public bool IsPaused { get; private set; }
+    public bool IsActive { get; private set; }
+
+
+    public string FilePath { get; private set; }
+
+    public long FileCurrentSize { get; private set; }
+
+    public long FileTotalSize { get; private set; }
+
+    /// <summary>
+    /// 正在进行操作的活跃文件列表（如并发下载/校验的文件）
+    /// Key: 文件名, Value: (当前进度, 总大小)
+    /// </summary>
+    public ConcurrentDictionary<string, (long Current, long Total)> ActiveFiles { get; } = new(StringComparer.OrdinalIgnoreCase);
+
+    public event Action<GameProgressTracker>? OnProgressChanged;
+
+    public double Percentage => TotalBytes > 0 ? Math.Round((CurrentBytes * 100.0) / TotalBytes, 2) : 0;
+
+    private SynchronizationContext? _syncContext;
+    private PeriodicTimer? _timer;
+    private Task? _timerTask;
+    private volatile bool _isDirty;
+
+    /// <summary>
+    /// UI线程启动收集数据
+    /// </summary>
+    /// <param name="publisher"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    public async Task StartTrackingAsync(IGameEventPublisher publisher)
+    {
+        if (publisher == null)
+            throw new ArgumentNullException(nameof(publisher));
+
+        _syncContext = SynchronizationContext.Current;
+
+        _subscription = await publisher.SubscribeAsync(HandleEventAsync).ConfigureAwait(false);
+        _timer = new PeriodicTimer(TimeSpan.FromMilliseconds(50));
+        _timerTask = NotifyLoopAsync();
+    }
+
+    /// <summary>
+    /// 轮询推送数据
+    /// </summary>
+    /// <returns></returns>
+    private async Task NotifyLoopAsync()
+    {
+        try
+        {
+            while (await _timer!.WaitForNextTickAsync())
+            {
+                if (_isDirty)
+                {
+                    _isDirty = false;
+
+                    if (_syncContext != null)
+                    {
+                        _syncContext.Post(_ => OnProgressChanged?.Invoke(this), null);
+                    }
+                    else
+                    {
+                        OnProgressChanged?.Invoke(this);
+                    }
+                }
+            }
+        }
+        catch (Exception)
+        {
+        }
+    }
+
+    private ValueTask HandleEventAsync(GameContextOutputArgs args)
+    {
+        CurrentAction = args.Type;
+
+        if (args.IsStepUpdate)
+        {
+            CurrentStepIndex = args.CurrentStepIndex;
+            TotalSteps = args.TotalSteps;
+            if (!string.IsNullOrEmpty(args.StepName))
+                StepName = args.StepName;
+
+            if (args.AllSteps != null && args.AllSteps.Count > 0)
+                AllSteps = args.AllSteps;
+        }
+        CurrentBytes = args.CurrentSize;
+        TotalBytes = args.TotalSize;
+        CurrentFileIndex = args.CurrentFile;
+        TotalFiles = args.FileTotal;
+        DownloadSpeed = args.DownloadSpeed;
+        VerifySpeed = args.VerifySpeed;
+        IsActive = args.IsAction;
+        IsPaused = args.IsPause;
+        FilePath = args.FilePath;
+        FileCurrentSize = args.FileCurrentSize;
+        FileTotalSize = args.FileTotalSize;
+        if (!string.IsNullOrWhiteSpace(args.FilePath))
+        {
+            var fileName = System.IO.Path.GetFileName(args.FilePath);
+            if (args.FileCurrentSize >= args.FileTotalSize && args.FileTotalSize > 0)
+            {
+                ActiveFiles.TryRemove(fileName, out _);
+            }
+            else
+            {
+                ActiveFiles[fileName] = (args.FileCurrentSize, args.FileTotalSize);
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(args.TipMessage))
+        {
+            CurrentStepTip = args.TipMessage;
+        }
+        _isDirty = true;
+
+        return ValueTask.CompletedTask;
+    }
+
+    public string GetSpeedText()
+    {
+        return CurrentAction switch
+        {
+            GameContextActionType.Download => $"{FormatBytes(DownloadSpeed)}/s",
+            GameContextActionType.Verify => $"{FormatBytes(VerifySpeed)}/s",
+            _ => ""
+        };
+    }
+
+    public static string FormatBytes(double bytes)
+    {
+        string[] suffix = { "B", "KB", "MB", "GB", "TB" };
+        int i = 0;
+        double dblSByte = bytes;
+        while (dblSByte >= 1024 && i < suffix.Length - 1)
+        {
+            dblSByte /= 1024;
+            i++;
+        }
+        return $"{dblSByte:0.##} {suffix[i]}";
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            _timer?.Dispose();
+            _subscription?.Dispose();
+            _subscription = null;
+            OnProgressChanged = null;
+
+            if (_timerTask != null)
+            {
+                await _timerTask;
+            }
+        }
+        catch 
+        {
+        }
+    }
+}

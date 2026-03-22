@@ -34,12 +34,14 @@ public sealed class DownloadState
     public Task<bool> PauseAsync()
     {
         Volatile.Write(ref _isPaused, true);
+        IsActive = false;
         return Task.FromResult(true);
     }
 
     public Task<bool> ResumeAsync()
     {
         Volatile.Write(ref _isPaused, false);
+        IsActive = true;
         return Task.FromResult(true);
     }
 }

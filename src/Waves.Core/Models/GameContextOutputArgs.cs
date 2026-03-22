@@ -1,4 +1,5 @@
-﻿using Waves.Core.Models.Enums;
+﻿using System.Collections.Generic;
+using Waves.Core.Models.Enums;
 
 namespace Waves.Core.Models;
 
@@ -7,6 +8,20 @@ public class GameContextOutputArgs
     public GameContextActionType Type { get; set; }
 
     public string ErrorString { get; set; }
+
+    #region 整体大步骤进度
+    /// <summary>
+    /// 是否为步骤更新消息
+    /// </summary>
+    public bool IsStepUpdate { get; set; }
+    public string StepName { get; set; }
+    public int TotalSteps { get; set; }
+    /// <summary>
+    /// 当更新大步骤时，提供整个步骤的名称列表，以便UI初始化生成侧边栏/步骤条
+    /// </summary>
+    public List<string> AllSteps { get; set; } = new();
+    #endregion
+
     #region 文件进度
     public int FileTotal { get; set; }
 
@@ -35,10 +50,17 @@ public class GameContextOutputArgs
 
     public bool IsPause { get; set; }
 
-    // 进度百分比
+    #region 单文件进度
+    public string FilePath { get; set; }
 
+    public long FileCurrentSize { get; set; }
+
+    public long FileTotalSize { get; set; }
+    #endregion
     public string TipMessage { get; set; }
 
     public double ProgressPercentage =>
         TotalSize > 0 ? Math.Round((CurrentSize * 100.0) / TotalSize, 2) : 0;
+
+    public int CurrentStepIndex { get; internal set; }
 }

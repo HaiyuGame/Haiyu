@@ -1,9 +1,9 @@
-﻿using Haiyu.Common;
-using Serilog.Core;
-using System;
+﻿using System;
 using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Text;
+using Haiyu.Common;
+using Serilog.Core;
 using Waves.Api.Models;
 using Waves.Api.Models.Launcher;
 using Waves.Core.Common;
@@ -21,7 +21,7 @@ namespace Waves.Core.GameContext.KruoGameContextBaseV2.Common;
 /// <summary>
 /// 进行修复或下载使用的工具类，其中使用IProgress进行回调，再由核心回调事件结束
 /// </summary>
-public sealed class DownloadAndVerifyResource : IAsyncDisposable
+public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
 {
     #region Param
     private List<IndexResource> _resource;
@@ -50,6 +50,8 @@ public sealed class DownloadAndVerifyResource : IAsyncDisposable
     public Dictionary<string, object> Param { get; private set; }
     public IGameEventPublisher GameEventPublisher { get; private set; }
     public LoggerService Logger { get; }
+    public string ProgressName { get; set; }
+    public double ProgressValue { get; set; }
 
     /// <summary>
     /// 构造传参
@@ -121,12 +123,17 @@ public sealed class DownloadAndVerifyResource : IAsyncDisposable
         {
             return false;
         }
+        if (!Param.CheckParam<DownloadState>("downloadState", out var downloadState))
+        {
+            return false;
+        }
         this._resource = resources!;
         this.isDelete = isDelete!;
         this.cts = new CancellationTokenSource();
         this._folder = folder!;
         this._httpClientService = httpService!;
         this._launcher = launcher;
+        this.DownloadState = downloadState!;
         InitProgress();
         return true;
     }
@@ -168,6 +175,7 @@ public sealed class DownloadAndVerifyResource : IAsyncDisposable
                 MaxDegreeOfParallelism = 4,
                 CancellationToken = cts.Token,
             };
+            DownloadState.IsActive = true;
             await ParallelDownloadAsync(
                     DownloadState,
                     _resource,
@@ -192,15 +200,6 @@ public sealed class DownloadAndVerifyResource : IAsyncDisposable
         string folder
     )
     {
-        IProgress<(GameContextActionType, bool, long)> progress = new Progress<(
-            GameContextActionType,
-            bool,
-            long
-        )>(value =>
-        {
-            var args = UpdateFileProgress(value.Item1, value.Item3, value.Item2);
-            this.GameEventPublisher.Publish(args);
-        });
         try
         {
             await GameEventPublisher.PublisAsync(
@@ -219,7 +218,7 @@ public sealed class DownloadAndVerifyResource : IAsyncDisposable
                 TimeSpan.FromSeconds(40)
             );
             this._downloadBaseUrl = best.Url + this._launcher.ResourceDefault.Config.BaseUrl;
-            await GameEventPublisher.PublisAsync(GameContextActionType.CdnSelect, "CDN选择完毕");
+            await GameEventPublisher.PublisAsync(GameContextActionType.CdnSelect, "正在下载数据");
             await Parallel.ForEachAsync(
                 resource,
                 options,
@@ -234,6 +233,21 @@ public sealed class DownloadAndVerifyResource : IAsyncDisposable
                             );
                         return;
                     }
+                    IProgress<(GameContextActionType, bool, long, string, long, long)> progress =
+                        new Progress<(GameContextActionType, bool, long, string, long, long)>(
+                            value =>
+                            {
+                                var args = UpdateFileProgress(
+                                    value.Item1,
+                                    value.Item3,
+                                    value.Item2,
+                                    filePath: value.Item4,
+                                    currentFileSize: value.Item5,
+                                    fileMaxSize: value.Item6
+                                );
+                                this.GameEventPublisher.Publish(args);
+                            }
+                        );
                     var filePath = BuildFileHelper.BuildFilePath(folder, item);
                     var downloadUrl = this._downloadBaseUrl + item.Dest;
                     if (File.Exists(filePath))
@@ -268,7 +282,12 @@ public sealed class DownloadAndVerifyResource : IAsyncDisposable
                             }
                             else
                             {
-                                UpdateFileProgress(GameContextActionType.Verify, item.Size, true);
+                                var args = UpdateFileProgress(
+                                    GameContextActionType.Verify,
+                                    item.Size,
+                                    true
+                                );
+                                GameEventPublisher.Publish(args);
                             }
                         }
                         else
@@ -318,11 +337,12 @@ public sealed class DownloadAndVerifyResource : IAsyncDisposable
                                 }
                                 else
                                 {
-                                    UpdateFileProgress(
+                                    var args = UpdateFileProgress(
                                         GameContextActionType.Verify,
                                         item.ChunkInfos[i].End - item.ChunkInfos[i].Start,
                                         true
                                     );
+                                    GameEventPublisher.Publish(args);
                                 }
                             }
                         }
@@ -362,7 +382,10 @@ public sealed class DownloadAndVerifyResource : IAsyncDisposable
         GameContextActionType type,
         long fileSize,
         bool isAdd = true,
-        string tip = ""
+        string tip = "",
+        string filePath = null,
+        long currentFileSize = 0,
+        long fileMaxSize = 0
     )
     {
         if (type == GameContextActionType.Download)
@@ -396,6 +419,9 @@ public sealed class DownloadAndVerifyResource : IAsyncDisposable
             TotalSize = _totalfileSize,
             FileTotal = _totalFileTotal,
             DownloadSpeed = _downloadSpeed,
+            FilePath = filePath,
+            FileCurrentSize = currentFileSize,
+            FileTotalSize = fileMaxSize,
             VerifySpeed = _verifySpeed,
             IsAction = this.DownloadState?.IsActive ?? false,
             IsPause = DownloadState?.IsPaused ?? false,

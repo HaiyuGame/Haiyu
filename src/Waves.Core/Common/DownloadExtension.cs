@@ -40,6 +40,28 @@ public static class DownloadExtension
             );
         }
 
-        
+        public async ValueTask PublishStepAsync(string stepName, int totalSteps, string tipMessage = "")
+        {
+            publisher.Publish(new Models.GameContextOutputArgs()
+            {
+                IsStepUpdate = true,
+                StepName = stepName,
+                TotalSteps = totalSteps,
+                TipMessage = tipMessage
+            });
+        }
+
+        public async ValueTask PublishStepAsync(string stepName, int currentStepIndex, List<string> allSteps, string tipMessage = "")
+        {
+            publisher.Publish(new Models.GameContextOutputArgs()
+            {
+                IsStepUpdate = true,
+                StepName = stepName,
+                CurrentStepIndex = currentStepIndex,
+                TotalSteps = allSteps?.Count ?? 0,
+                AllSteps = allSteps ?? new List<string>(),
+                TipMessage = tipMessage
+            });
+        }
     }
 }

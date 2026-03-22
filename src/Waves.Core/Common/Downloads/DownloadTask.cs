@@ -26,7 +26,7 @@ public static class DownloadTask
         long allSize = 0L,
         DownloadState state = null,
         CancellationTokenSource? downloadCts = default,
-        IProgress<(GameContextActionType,bool,long)> progress = null
+        IProgress<(GameContextActionType,bool,long,string,long,long)> progress = null
     )
     {
         using (
@@ -47,6 +47,7 @@ public static class DownloadTask
                     throw new OperationCanceledException();
                 }
                 long accumulatedBytes = 0;
+                long currentBytes = 0;
                 if (start == 0 && end == -1)
                 {
                     //Logger.WriteError($"文件{filePath}，分片数据错误，start={start},end={end}");
@@ -101,16 +102,10 @@ public static class DownloadTask
                             .ConfigureAwait(false);
                         totalWritten += bytesRead;
                         accumulatedBytes += bytesRead;
+                        currentBytes+= bytesRead;
                         if (accumulatedBytes >= UpdateThreshold)
                         {
-                            //await UpdateFileProgress(
-                            //        GameContextActionType.Download,
-                            //        accumulatedBytes,
-                            //        true,
-                            //        isPred
-                            //    )
-                            //    .ConfigureAwait(false);
-                            progress?.Report((GameContextActionType.Download,true,accumulatedBytes));
+                            progress?.Report((GameContextActionType.Download,true,accumulatedBytes,filePath,currentBytes, chunkTotalSize));
                             accumulatedBytes = 0;
                         }
                     }
@@ -129,13 +124,7 @@ public static class DownloadTask
                 }
                 if (accumulatedBytes > 0 && !isBreak)
                 {
-                    //await UpdateFileProgress(
-                    //        GameContextActionType.Download,
-                    //        accumulatedBytes,
-                    //        isPred: isPred
-                    //    )
-                    //    .ConfigureAwait(false);
-                    progress?.Report((GameContextActionType.Download,true, accumulatedBytes));
+                    progress?.Report((GameContextActionType.Download, true, accumulatedBytes, filePath, currentBytes, chunkTotalSize));
                 }
                 if (isLast)
                     fileStream.SetLength(allSize);
@@ -167,10 +156,11 @@ public static class DownloadTask
         IndexChunkInfo chunk,
         DownloadState state = null,
         CancellationTokenSource? downloadCts = default,
-        IProgress<(GameContextActionType, bool, long)> progress = null
+        IProgress<(GameContextActionType, bool, long,string,long,long)> progress = null
     )
     {
         long accumulatedBytes = 0;
+        long currentByte = 0;
         using (
             var fileStream = new FileStream(
                 filePath,
@@ -244,15 +234,16 @@ public static class DownloadTask
                         .ConfigureAwait(false);
                     totalWritten += bytesRead;
                     accumulatedBytes += bytesRead;
+                    currentByte += bytesRead;
                     if (accumulatedBytes >= UpdateThreshold)
                     {
-                        progress?.Report((GameContextActionType.Download,true,accumulatedBytes));
+                        progress?.Report((GameContextActionType.Download,true,accumulatedBytes,filePath,currentByte, chunkTotalSize));
                         accumulatedBytes = 0;
                     }
                 }
                 if (accumulatedBytes > 0 && !isBreak)
                 {
-                    progress?.Report((GameContextActionType.Download, true, accumulatedBytes));
+                    progress?.Report((GameContextActionType.Download, true, accumulatedBytes, filePath, currentByte, chunkTotalSize));
                 }
                 if (totalWritten != chunkTotalSize)
                 {
