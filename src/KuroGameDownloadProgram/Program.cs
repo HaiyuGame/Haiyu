@@ -64,15 +64,12 @@ v2.ProgressState.OnProgressChanged += (t) =>
         progressBar += new string('=', filledTabs);
         progressBar += new string(' ', 50 - filledTabs);
         progressBar += $"] {percentage, 6:F2}%";
-
         Console.Write(progressBar.PadRight(Console.WindowWidth - 1));
         Console.SetCursorPosition(0, 1);
-
         string stepInfo =
             $"Step {t.CurrentStepIndex + 1}/{t.TotalSteps}: {t.StepName} | Action: {t.CurrentAction} | {t.CurrentStepTip}";
         Console.Write(stepInfo.PadRight(Console.WindowWidth - 1));
         Console.SetCursorPosition(0, 2);
-
         string currentFile =
             $"Current File: {System.IO.Path.GetFileName(t.FilePath)} | {GameProgressTracker.FormatBytes(t.FileCurrentSize)} / {GameProgressTracker.FormatBytes(t.FileTotalSize)}";
         Console.Write(currentFile.PadRight(Console.WindowWidth - 1));
@@ -83,7 +80,6 @@ v2.ProgressState.OnProgressChanged += (t) =>
         int line = 4;
         Console.SetCursorPosition(0, line++);
         Console.Write("Active Files:".PadRight(Console.WindowWidth - 1));
-
         var activeSnap = t.ActiveFiles.ToArray();
         foreach (var file in activeSnap)
         {

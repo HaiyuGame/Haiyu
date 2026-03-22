@@ -190,6 +190,17 @@ public abstract partial class KuroGameContextBaseV2
         Task.Run(async() => await StartDownloadAsync(folder, launcher, token));
     }
 
+    public async Task<bool> RepairGameAsync(CancellationToken token = default)
+    {
+        var folder =  await GameLocalConfig.GetConfigAsync(GameLocalSettingName.GameLauncherBassFolder);
+        if(folder == null)
+        {
+            return false;
+        }
+        await StartDownloadTaskAsync(folder,true,token);
+        return true;
+    }
+
     private async Task<bool> StartDownloadAsync(
         string folder,
         GameLauncherSource launcher,
@@ -260,6 +271,10 @@ public abstract partial class KuroGameContextBaseV2
         {
             if (_currentRunningAction != null)
                 await _currentRunningAction.DisposeAsync();
+            this.GameEventPublisher.Publish(new GameContextOutputArgs()
+            {
+                Type = GameContextActionType.None
+            });
             return true;
         }
         catch (Exception ex)

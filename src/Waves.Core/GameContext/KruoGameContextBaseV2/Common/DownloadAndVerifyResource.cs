@@ -366,7 +366,6 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
                             cts,
                             progress: progress
                         );
-                        //await FinalValidation(file, filePath);
                     }
                 }
             );

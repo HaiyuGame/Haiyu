@@ -122,7 +122,6 @@ public sealed class GameProgressTracker : IAsyncDisposable
         {
             CurrentAction = args.Type;
         }
-
         if (args.IsStepUpdate)
         {
             CurrentStepIndex = args.CurrentStepIndex;
@@ -133,7 +132,6 @@ public sealed class GameProgressTracker : IAsyncDisposable
             if (args.AllSteps != null && args.AllSteps.Count > 0)
                 AllSteps = args.AllSteps;
         }
-
         if (args.TotalSize > 0 || args.Type == GameContextActionType.Download || args.Type == GameContextActionType.Verify)
         {
             CurrentBytes = args.CurrentSize;
@@ -143,10 +141,8 @@ public sealed class GameProgressTracker : IAsyncDisposable
             DownloadSpeed = args.DownloadSpeed;
             VerifySpeed = args.VerifySpeed;
         }
-
         IsActive = args.IsAction;
         IsPaused = args.IsPause;
-
         if (!string.IsNullOrWhiteSpace(args.FilePath))
         {
             FilePath = args.FilePath;
@@ -163,14 +159,12 @@ public sealed class GameProgressTracker : IAsyncDisposable
                 ActiveFiles[fileName] = (args.FileCurrentSize, args.FileTotalSize);
             }
         }
-
         if (!string.IsNullOrWhiteSpace(args.TipMessage))
         {
             CurrentStepTip = args.TipMessage;
         }
 
         _isDirty = true;
-
         return ValueTask.CompletedTask;
     }
 
@@ -215,4 +209,5 @@ public sealed class GameProgressTracker : IAsyncDisposable
         {
         }
     }
+
 }
