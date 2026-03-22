@@ -70,6 +70,10 @@ public sealed class DownloadUpdateResource : IProgressSetup,IAsyncDisposable
         return true;
     }
 
+    public async Task RunAsync(bool isSync = false)
+    {
+
+    }
 
 
     /// <summary>
