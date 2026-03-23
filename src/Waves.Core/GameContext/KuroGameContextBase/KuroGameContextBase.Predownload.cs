@@ -15,6 +15,14 @@ public partial  class KuroGameContextBase
 
     public async Task<bool> StartDownloadProdGame(string downloadFolder)
     {
+        await UpdateFileProgress(
+                    GameContextActionType.CdnSelect,
+                    0,
+                    false,
+                    true,
+                    "正在准备"
+                )
+                .ConfigureAwait(false);
         await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdDownloadFolderDone, "False");
         var currentVersion = await GameLocalConfig.GetConfigAsync(
             GameLocalSettingName.LocalGameVersion
@@ -39,20 +47,23 @@ public partial  class KuroGameContextBase
 
             _downloadBaseUrl = cdnUrl.Url+ previous.BaseUrl;
             patch = await GetPatchGameResourceAsync(cdnUrl.Url + previous.IndexFile);
-            _downloadCTS = new CancellationTokenSource();
+            _prodDownloadCTS = new CancellationTokenSource();
             var count = patch.Resource.Where(x => x.Dest.EndsWith(".krpdiff"));
             var size = count.Sum(x => x.Size);
             _totalfileSize = size;
             _totalFileTotal = count.Count() - 1;
             _totalProgressTotal = 0;
-            this._downloadState = new DownloadState();
-            _downloadState.IsActive = true;
-            await _downloadState.SetSpeedLimitAsync(this.SpeedValue);
+            this._prodDownloadState = new DownloadState();
+            _prodDownloadState.IsActive = true;
+            _prodDownloadState.CancelToken = _prodDownloadCTS.Token;
+            await _prodDownloadState.SetSpeedLimitAsync(this.SpeedValue);
             await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdDownloadPath, downloadFolder);
             await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdDownloadVersion, launcher.Predownload.Version);
             //启动预下载线程
+
+            baseUrl = previous.BaseUrl;
             Task.Run(async () =>
-                StartDownProdAsync(downloadFolder,patch,previous.Version));
+                StartDownProdAsync(launcher,downloadFolder,patch,previous.Version));
             //保存预下载信息
         }
         else
@@ -65,9 +76,13 @@ public partial  class KuroGameContextBase
         return true;
     }
 
-    private async Task StartDownProdAsync(string downloadFolder, PatchIndexGameResource patch, string version)
+    private async Task StartDownProdAsync(GameLauncherSource launcher, string downloadFolder, PatchIndexGameResource patch, string version)
     {
-        var downloadResult =  await this.DownloadGroupPatcheToResource(folder: downloadFolder, patch.Resource, ispred: true);
+
+        this._isDownload = true;
+        _downloadCTS = new CancellationTokenSource();
+        var downloadResult = await this.DownloadGroupPatcheToResource(launcher,downloadFolder, patch.Resource, ispred: true);
+        this._isDownload = false;
         if (!downloadResult)
         {
             Logger.WriteInfo($"预下载：下载差异组文件失败，请重新尝试");
@@ -83,12 +98,17 @@ public partial  class KuroGameContextBase
             return;
         }
         await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdDownloadFolderDone, "True");
-
         _totalfileSize = 0;
         _totalFileTotal = 0;
         _totalProgressTotal = 0;
         _totalProgressSize = 0;
-        _downloadState.IsActive = false;
+        if(_prodDownloadState != null)
+            _prodDownloadState.IsActive = false;
+        if(_prodDownloadCTS != null)
+        {
+            _prodDownloadCTS.Dispose();
+            _prodDownloadCTS = null;
+        }
         await this.SetNoneStatusAsync(true).ConfigureAwait(false);
     }
 

@@ -8,6 +8,7 @@ using System.Text.Json;
 using Waves.Api.Models;
 using Waves.Api.Models.GameWikiiClient;
 using Waves.Core;
+using Waves.Core.Common;
 using Waves.Core.Contracts;
 using Waves.Core.GameContext;
 using Waves.Core.GameContext.Contexts;
@@ -31,8 +32,10 @@ IHost host = Host.CreateDefaultBuilder(args)
     })
     .Build();
 GameContextFactory.GameBassPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Waves";
-var mainGame = host.Services.GetRequiredService<CloudGameService>();
-var result =  await mainGame.ConfigManager.GetUsersAsync();
-await mainGame.OpenUserAsync(result[0]);
-await mainGame.GetUserInfoAsync(result[0]);
+var mainGame = host.Services.GetRequiredKeyedService<IGameContext>(nameof(PunishMainGameContext));
+await mainGame.InitAsync();
+var launcher = await mainGame.GetGameLauncherSourceAsync(null);
+var previous = launcher
+            .ResourceDefault.Config.PatchConfig.Last();
+
 Console.ReadLine();

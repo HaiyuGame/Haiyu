@@ -5,6 +5,7 @@ using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using Haiyu.Common;
 using Waves.Api.Models;
 using Waves.Api.Models.Launcher;
 using Waves.Core.Common;
@@ -19,42 +20,7 @@ namespace Waves.Core.GameContext;
 
 public partial class KuroGameContextBase
 {
-    /// <summary>
-    /// 下载校验最大并发数
-    /// </summary>
-    const int MAX_Concurrency_Count = 4;
-
-    #region 常量
-    const int MaxBufferSize = 65536; // 64KB缓冲区
-    const long UpdateThreshold = 1048576; // 1MB进度更新阈值
-    #endregion
-
-    #region 字段和属性
-    private string _downloadBaseUrl;
-    private long _totalfileSize = 0L;
-    private long _totalProgressSize = 0L;
-    private long _totalFileTotal = 0L;
-    private long _totalProgressTotal = 0L;
-    #endregion
-
-    #region DownloadStatus
-    private long _totalVerifiedBytes;
-    private long _totalDownloadedBytes;
-    private DateTime _lastSpeedUpdateTime;
-    private double _downloadSpeed;
-    private double _verifySpeed;
-
-    private DateTime _lastSpeedTime = DateTime.Now;
-    private long _lastSpeedBytes; // 速度计算基准值
-    #endregion
-
-    #region 速度属性
-    public double DownloadSpeed => _downloadSpeed;
-    public double VerifySpeed => _verifySpeed;
-    #endregion
-    #region DownloadStatus
-    private DownloadState _downloadState;
-    #endregion
+    
     #region 公开方法
     public async Task StartDownloadTaskAsync(
         string folder,
@@ -75,7 +41,10 @@ public partial class KuroGameContextBase
     #endregion
 
 
-    public async Task UpdataGameAsync(string diffSavePath = null,UpdateGameType type = UpdateGameType.UpdateGame)
+    public async Task UpdataGameAsync(
+        string diffSavePath = null,
+        UpdateGameType type = UpdateGameType.UpdateGame
+    )
     {
         _downloadCTS = new CancellationTokenSource();
         var folder = await GameLocalConfig.GetConfigAsync(
@@ -86,21 +55,18 @@ public partial class KuroGameContextBase
             return;
         await GameLocalConfig.SaveConfigAsync(GameLocalSettingName.LocalGameUpdateing, "True");
         await UpdataGameResourceAsync(folder, launcher, diffSavePath);
-        if(type == UpdateGameType.ProDownload)
+        if (type == UpdateGameType.ProDownload)
         {
-            //如果是预下载安装，则直接删除预下载配置
-            await this.GameLocalConfig.SaveConfigAsync(
-               GameLocalSettingName.ProdDownloadPath,
-               "");
+            await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdDownloadPath, "");
             await this.GameLocalConfig.SaveConfigAsync(
                 GameLocalSettingName.ProdDownloadFolderDone,
                 "False"
-            ); await this.GameLocalConfig.SaveConfigAsync(
+            );
+            await this.GameLocalConfig.SaveConfigAsync(
                 GameLocalSettingName.ProdDownloadVersion,
                 ""
             );
         }
-
     }
 
     #region 核心下载逻辑
@@ -112,6 +78,14 @@ public partial class KuroGameContextBase
     {
         try
         {
+            await UpdateFileProgress(
+                    GameContextActionType.CdnSelect,
+                    0,
+                    false,
+                    false,
+                    "正在准备"
+                )
+                .ConfigureAwait(false);
             var resource = await GetGameResourceAsync(source.ResourceDefault);
             if (resource == null)
                 return false;
@@ -119,9 +93,10 @@ public partial class KuroGameContextBase
             _downloadBaseUrl =
                 source.ResourceDefault.CdnList.Where(x => x.P != 0).OrderBy(x => x.P).First().Url
                 + source.ResourceDefault.Config.BaseUrl;
+            baseUrl = source.ResourceDefault.Config.BaseUrl;
             HttpClientService.BuildClient();
             await InitializeProgress(resource.Resource);
-            await Task.Run(() => StartDownloadAsync(folder, resource, isDelete));
+            await Task.Run(() => StartDownloadAsync(folder, source, resource, isDelete));
             if (!_isDownload)
             {
                 await DownloadComplate(source);
@@ -161,9 +136,8 @@ public partial class KuroGameContextBase
         await this.GameLocalConfig.SaveConfigAsync(
             GameLocalSettingName.LocalGameUpdateing,
             "False"
-        ); 
+        );
 
-       
         await this.GameLocalConfig.SaveConfigAsync(
             GameLocalSettingName.GameLauncherBassProgram,
             $"{installFolder}\\{this.Config.GameExeName}"
@@ -180,8 +154,14 @@ public partial class KuroGameContextBase
             .ConfigureAwait(false);
     }
 
-    private async Task StartDownloadAsync(string folder, IndexGameResource resource, bool isDelete)
+    private async Task StartDownloadAsync(
+        string folder,
+        GameLauncherSource source,
+        IndexGameResource resource,
+        bool isDelete
+    )
     {
+        CDNSpeedTester = new CDNSpeedTester();
         _downloadState.IsActive = true;
         if (isDelete)
         {
@@ -217,7 +197,17 @@ public partial class KuroGameContextBase
                 MaxDegreeOfParallelism = MAX_Concurrency_Count,
                 CancellationToken = _downloadCTS.Token,
             };
-            if (!(await ParallelDownloadAsync(resource.Resource, options, folder)))
+
+            if (
+                !(
+                    await ParallelDownloadAsync(
+                        resource.Resource,
+                        source.ResourceDefault.CdnList,
+                        options,
+                        folder
+                    )
+                )
+            )
             {
                 throw new IOException("下载文件出错！");
             }
@@ -253,24 +243,10 @@ public partial class KuroGameContextBase
         _downloadState.IsActive = false;
     }
 
-    public int GetVerifyLimit()
-    {
-        if (
-            this.ContextName == nameof(PunishMainGameContext)
-            || this.ContextName == nameof(PunishGlobalGameContext)
-            || this.ContextName == nameof(PunishTwGameContext)
-        )
-        {
-            return 200;
-        }
-        else
-        {
-            return 2000;
-        }
-    }
 
     public async Task<bool> ParallelDownloadAsync(
         List<IndexResource> resource,
+        List<CdnList> cdns,
         ParallelOptions options,
         string folder,
         bool ispred = false
@@ -278,6 +254,40 @@ public partial class KuroGameContextBase
     {
         try
         {
+            await UpdateFileProgress(
+                    GameContextActionType.CdnSelect,
+                    0,
+                    false,
+                    ispred,
+                    "正在选择最优CDN，请稍候…"
+                )
+                .ConfigureAwait(false);
+            const long targetTestSize = 50L * 1024 * 1024;
+            var item = resource
+                .OrderBy(x => Math.Abs((long)x.Size - targetTestSize))
+                .FirstOrDefault();
+            item ??= resource.OrderBy(x => x.Size).FirstOrDefault();
+            var result = await CDNSpeedTester.TestAllAsync(
+                cdns,
+                baseUrl,
+                item!,
+                TimeSpan.FromSeconds(20)
+            );
+            var best = result
+                .Where(r => r.Success && r.DownloadBytes > 0)
+                .OrderByDescending(r => r.Score) 
+                .ThenByDescending(r => r.BytesPerSecond)
+                .FirstOrDefault();
+            this._downloadBaseUrl = best.Url + baseUrl;
+            await UpdateFileProgress(
+                    GameContextActionType.CdnSelect,
+                    0,
+                    false,
+                    ispred,
+                    "已选定最优CDN，开始下载"
+                )
+                .ConfigureAwait(false);
+            var parallelCts = GetCTS(ispred) ?? _downloadCTS;
             await Parallel.ForEachAsync(
                 resource,
                 options,
@@ -286,9 +296,11 @@ public partial class KuroGameContextBase
                     Logger.WriteInfo(
                         $"[{item.Dest}],当前进度大小[{Math.Round((double)_totalProgressSize, 2)}/{Math.Round((double)_totalfileSize, 2)}]"
                     );
-                    if (IsDownloadCanceled())
+                    if (IsDownloadCanceled(ispred))
                     {
-                        this._downloadState.IsActive = false;
+                        var s = GetState(ispred);
+                        if (s != null)
+                            s.IsActive = false;
                         await SetNoneStatusAsync().ConfigureAwait(false);
                         return;
                     }
@@ -405,10 +417,12 @@ public partial class KuroGameContextBase
 
     public async Task<bool> PauseDownloadAsync()
     {
-        if (this._downloadState.IsActive)
+        // Pause the active download state (prefer prod if active)
+        var state = _prodDownloadState != null && _prodDownloadState.IsActive ? _prodDownloadState : _downloadState;
+        if (state != null && state.IsActive)
         {
             Logger.WriteInfo($"暂停下载");
-            return await this._downloadState.PauseAsync();
+            return await state.PauseAsync();
         }
 
         return false;
@@ -416,11 +430,12 @@ public partial class KuroGameContextBase
 
     public async Task<bool> ResumeDownloadAsync()
     {
-        if (_downloadState.IsPaused)
+        var state = _prodDownloadState != null && _prodDownloadState.IsActive ? _prodDownloadState : _downloadState;
+        if (state != null && state.IsPaused)
         {
             Logger.WriteInfo($"恢复下载");
             _lastSpeedTime = DateTime.Now;
-            return await _downloadState.ResumeAsync();
+            return await state.ResumeAsync();
         }
         return false;
     }
@@ -429,10 +444,20 @@ public partial class KuroGameContextBase
     {
         try
         {
-            if (_downloadCTS != null && !_downloadCTS.IsCancellationRequested)
+            if ((_downloadCTS != null && !_downloadCTS.IsCancellationRequested) || (_prodDownloadCTS != null && !_prodDownloadCTS.IsCancellationRequested))
             {
-                this._downloadState.IsStop = true;
-                await _downloadCTS.CancelAsync().ConfigureAwait(false);
+                if(_downloadCTS != null && !_downloadCTS.IsCancellationRequested)
+                {
+                    if(this._downloadState != null)
+                        this._downloadState.IsStop = true;
+                    await _downloadCTS.CancelAsync().ConfigureAwait(false);
+                }
+                if(_prodDownloadCTS != null && !_prodDownloadCTS.IsCancellationRequested)
+                {
+                    if (this._prodDownloadState != null)
+                        this._prodDownloadState.IsStop = true;
+                    await _prodDownloadCTS.CancelAsync().ConfigureAwait(false);
+                }
             }
             Interlocked.Exchange(ref _totalProgressSize, 0L);
             Interlocked.Exchange(ref _totalfileSize, 0L);
@@ -464,12 +489,10 @@ public partial class KuroGameContextBase
         var currentVersion = await GameLocalConfig.GetConfigAsync(
             GameLocalSettingName.LocalGameVersion
         );
-        #region 测试预下载
+
         var previous = launcher
             .ResourceDefault.Config.PatchConfig.Where(x => x.Version == currentVersion)
             .FirstOrDefault();
-        
-        #endregion
         PatchIndexGameResource? patch = null;
         this._downloadState = new DownloadState();
         await _downloadState.SetSpeedLimitAsync(this.SpeedValue);
@@ -483,7 +506,8 @@ public partial class KuroGameContextBase
                 launcher
                     .ResourceDefault.CdnList.Where(x => x.P != 0)
                     .OrderBy(x => x.P)
-                    .FirstOrDefault() ?? null;
+                    .FirstOrDefault()
+                ?? null;
             if (cdnUrl == null)
             {
                 await CancelDownloadAsync();
@@ -508,12 +532,10 @@ public partial class KuroGameContextBase
         _downloadBaseUrl =
             launcher.ResourceDefault.CdnList.Where(x => x.P != 0).OrderBy(x => x.P).First().Url
             + previous.BaseUrl;
+        baseUrl = previous.BaseUrl;
         _totalProgressTotal = 0;
         _totalProgressSize = 0;
-        if (
-            patch.ApplyTypes != null
-            && patch.ApplyTypes.Contains("patch")
-            && patch.PatchInfos != null
+        if (patch.PatchInfos != null
             && patch.PatchInfos.Count > 0
         )
         {
@@ -538,14 +560,10 @@ public partial class KuroGameContextBase
                 return;
             }
         }
-        else if (
-            patch.ApplyTypes != null
-            && patch.ApplyTypes.Contains("group")
-            && patch.GroupInfos != null
+        else if (patch.GroupInfos != null
             && patch.GroupInfos.Count > 0
         )
         {
-            //2.8.0_3.0.0_group_27_1766046101203.krpdiff
             var count = patch.Resource.Where(x => x.Dest.EndsWith(".krpdiff"));
             var size = count.Sum(x => x.Size);
             _totalfileSize = size;
@@ -555,7 +573,7 @@ public partial class KuroGameContextBase
             this._downloadState.IsActive = true;
             await _downloadState.SetSpeedLimitAsync(this.SpeedValue);
             result = await Task.Run(() =>
-                DownloadGroupPatcheToResource(diffSavePath, patch.Resource)
+                DownloadGroupPatcheToResource(launcher, diffSavePath, patch.Resource)
             );
             if (result == false)
             {
@@ -604,7 +622,6 @@ public partial class KuroGameContextBase
                 Logger.WriteInfo($"删除差异文件：{filePath}");
             }
             var resource = await GetGameResourceAsync(launcher.ResourceDefault);
-            //var resource2 = await GetGameResourceAsync(launcher.ResourceDefault,launcher.Predownload);
             if (resource == null)
             {
                 this._isDownload = false;
@@ -636,12 +653,26 @@ public partial class KuroGameContextBase
                 return;
             }
         }
+        else if(patch.ZipFileInfos!=null && patch.ZipFileInfos.Count > 0)
+        {
+            //解压包执行程序
+            var zips = patch.Resource.Where(x => x.Dest.EndsWith("krzip"));
+            long size = 0;
+            foreach (var item in zips)
+            {
+                size+=item.Size;
+            }
+            _totalfileSize = size;
+            _totalFileTotal = zips.Count() - 1;
+            _totalProgressTotal = 0;
+        }
         else
         {
             var resourceinfo = patch.Resource;
             _downloadBaseUrl =
                 launcher.ResourceDefault.CdnList.Where(x => x.P != 0).OrderBy(x => x.P).First().Url
                 + launcher.ResourceDefault.ResourcesBasePath;
+            baseUrl = launcher.ResourceDefault.ResourcesBasePath;
             _totalfileSize = resourceinfo.Sum(x => x.Size);
             _totalFileTotal = resourceinfo.Count() - 1;
             _totalProgressTotal = resourceinfo.Sum(x => x.Size);
@@ -697,7 +728,11 @@ public partial class KuroGameContextBase
     }
 
 
-    private async Task<IndexGameResource> GetGameResourceAsync(ResourceDefault resourceDefault,Predownload predownload,CancellationToken token = default)
+    private async Task<IndexGameResource> GetGameResourceAsync(
+        ResourceDefault resourceDefault,
+        Predownload predownload,
+        CancellationToken token = default
+    )
     {
         var resourceIndexUrl =
             resourceDefault.CdnList.Where(x => x.P != 0).OrderBy(x => x.P).First().Url
@@ -711,76 +746,32 @@ public partial class KuroGameContextBase
         return launcherIndex;
     }
 
-    private async Task<bool> CheckApplyFilesMd5(
-        List<IndexResource> list,
-        string folder,
-        string tempFolder,
-        Dictionary<string, string> newFiles
-    )
-    {
-        try
-        {
-            var keys = newFiles.Keys.ToList();
-            for (int i = 0; i < keys.Count; i++)
-            {
-                string key = keys[i];
-                string value = newFiles[key];
-                if (File.Exists(value))
-                    File.Delete(value);
-                File.Move(key, value);
-                this.gameContextOutputDelegate?.Invoke(
-                        this,
-                        new GameContextOutputArgs()
-                        {
-                            Type = GameContextActionType.DeleteFile,
-                            FileTotal = keys.Count,
-                            CurrentFile = i,
-                            DeleteString = $"正在移动校验文件{System.IO.Path.GetFileName(value)}",
-                        }
-                    )
-                    .ConfigureAwait(false);
-            }
-            await InitializeProgress(list);
-            var resource = await this.GetGameLauncherSourceAsync();
-            var resourceOne = await this.GetGameResourceAsync(resource.ResourceDefault);
-            if (!await GetGameResourceAsync(folder, resource, false))
-            {
-                await UpdateFileProgress(
-                        GameContextActionType.TipMessage,
-                        0,
-                        false,
-                        false,
-                        "更新校验出错，请直接尝试修复游戏，下载缓存需手动删除"
-                    )
-                    .ConfigureAwait(false);
-                await SetNoneStatusAsync();
-                return false;
-            }
-            return true;
-        }
-        catch (Exception ex)
-        {
-            await SetNoneStatusAsync().ConfigureAwait(false);
-            await UpdateFileProgress(GameContextActionType.TipMessage, 0, false, false, ex.Message);
-            this._isDownload = false;
-            Logger.WriteError(ex.Message);
-            return false;
-        }
-    }
 
     private async Task<bool> DownloadGroupPatcheToResource(
+        GameLauncherSource resource,
         string folder,
         List<IndexResource> patch,
         bool ispred = false
     )
     {
+        this.CDNSpeedTester = new CDNSpeedTester();
         var patchInfos = patch.Where(x => x.Dest.EndsWith("krpdiff")).ToList();
         ParallelOptions options = new ParallelOptions()
         {
             MaxDegreeOfParallelism = MAX_Concurrency_Count,
             CancellationToken = _downloadCTS.Token,
         };
-        if (!(await ParallelDownloadAsync(patchInfos, options, folder, ispred)))
+        if (
+            !(
+                await ParallelDownloadAsync(
+                    patchInfos,
+                    resource.ResourceDefault.CdnList,
+                    options,
+                    folder,
+                    ispred
+                )
+            )
+        )
         {
             Logger.WriteError("下载差异文件取消或出现异常");
             return false;
@@ -812,50 +803,6 @@ public partial class KuroGameContextBase
         return true;
     }
 
-    private async Task<int> DecompressKrdiffFile(
-        string folder,
-        string? krdiffPath,
-        int curent,
-        int total,
-        string? tempFolder = null
-    )
-    {
-        if (krdiffPath == null)
-            return -1000;
-        DiffDecompressManager manager = new DiffDecompressManager(
-            folder,
-            tempFolder ?? folder,
-            krdiffPath
-        );
-        IProgress<(double, double)> progress = new Progress<(double, double)>();
-        ((Progress<(double, double)>)progress).ProgressChanged += async (s, e) =>
-        {
-            if (gameContextOutputDelegate == null)
-                return;
-            await gameContextOutputDelegate
-                .Invoke(
-                    this,
-                    new GameContextOutputArgs
-                    {
-                        Type = GameContextActionType.Decompress,
-                        CurrentSize = (long)e.Item1,
-                        TotalSize = (long)e.Item2,
-                        DownloadSpeed = 0,
-                        VerifySpeed = 0,
-                        RemainingTime = TimeSpan.FromMicroseconds(0),
-                        IsAction = _downloadState?.IsActive ?? false,
-                        IsPause = _downloadState?.IsPaused ?? false,
-                        TipMessage = "正在解压合并资源",
-                        CurrentDecompressCount = curent,
-                        MaxDecompressValue = total,
-                    }
-                )
-                .ConfigureAwait(false);
-        };
-        var result = await manager.StartAsync(progress);
-        Logger.WriteInfo($"解压程序结果{result}");
-        return result;
-    }
 
     private async Task<bool> UpdateGameToResources(string folder, List<IndexResource> resource)
     {
@@ -1022,373 +969,15 @@ public partial class KuroGameContextBase
             _downloadCTS.Dispose();
             _downloadCTS = null;
         }
-        return;
-    }
-
-    #region 校验逻辑
-    /// <summary>
-    /// 校验
-    /// </summary>
-    /// <param name="file"></param>
-    /// <param name="filePath"></param>
-    /// <returns></returns>
-    private async Task<bool> ValidateFileChunks(
-        IndexChunkInfo file,
-        string filePath,
-        bool isPred = false
-    )
-    {
-        using (
-            var fs = new FileStream(
-                filePath,
-                FileMode.Open,
-                FileAccess.Read,
-                FileShare.Read,
-                262144,
-                true
-            )
-        )
+        if (_prodDownloadCTS != null)
         {
-            try
-            {
-                //if (fs.Length < file.End + 1) // 检查文件长度是否足够
-                //{
-                //    Debug.WriteLine($"文件长度不足: {fs.Length} < {file.End + 1}");
-                //    return true;
-                //}
-                var memoryPool = ArrayPool<byte>.Shared;
-                var downloadCts = _downloadCTS;
-                if (downloadCts == null || _downloadState?.IsStop == true)
-                {
-                    throw new OperationCanceledException();
-                }
-                long offset = file.Start;
-                long remaining = file.End - file.Start + 1;
-                bool isValid = true;
-                fs.Seek(offset, SeekOrigin.Begin);
-                using (var md5 = MD5.Create())
-                {
-                    long accumulatedBytes = 0L;
-                    while (remaining > 0 && isValid)
-                    {
-                        await this._downloadState.PauseToken.WaitIfPausedAsync();
-                        var buffer = memoryPool.Rent(MaxBufferSize);
-                        try
-                        {
-                            if (downloadCts.IsCancellationRequested || _downloadState?.IsStop == true)
-                            {
-                                throw new OperationCanceledException();
-                            }
-                            int bytesRead = await fs.ReadAsync(
-                                    buffer,
-                                    0,
-                                    MaxBufferSize,
-                                    downloadCts.Token
-                                )
-                                .ConfigureAwait(false);
-                            if (bytesRead == 0)
-                            {
-                                break;
-                            }
-                            md5.TransformBlock(buffer, 0, bytesRead, null, 0);
-                            remaining -= bytesRead;
-                            accumulatedBytes += bytesRead;
-                            if (accumulatedBytes >= UpdateThreshold)
-                            {
-                                await UpdateFileProgress(
-                                        GameContextActionType.Verify,
-                                        accumulatedBytes,
-                                        false,
-                                        isPred
-                                    )
-                                    .ConfigureAwait(false);
-                                accumulatedBytes = 0;
-                            }
-                        }
-                        catch (IOException ex)
-                        {
-                            Logger.WriteError(ex.Message);
-                        }
-                        finally
-                        {
-                            memoryPool.Return(buffer);
-                        }
-                    }
-                    if (accumulatedBytes > 0 && accumulatedBytes < UpdateThreshold)
-                    {
-                        await UpdateFileProgress(
-                                GameContextActionType.Verify,
-                                accumulatedBytes,
-                                false,
-                                isPred
-                            )
-                            .ConfigureAwait(false);
-                    }
-                    md5.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
-                    string hash = BitConverter.ToString(md5.Hash!).Replace("-", "").ToLower();
-                    isValid = hash == file.Md5.ToLower();
-                    Logger.WriteInfo($"分片校验结果{hash}|{file.Md5}");
-                    return !isValid;
-                }
-            }
-            catch (IOException ex)
-            {
-                Logger.WriteError(ex.Message);
-                return false;
-            }
-            catch (OperationCanceledException)
-            {
-                throw new OperationCanceledException();
-            }
-            finally
-            {
-                fs.Close();
-                fs.Dispose();
-            }
+            await _prodDownloadCTS.CancelAsync();
+            _prodDownloadCTS.Dispose();
+            _prodDownloadCTS = null;
         }
     }
-
-    private async Task<bool> VaildateFullFile(string md5Value, string filePath, bool isPred = false)
-    {
-        const int bufferSize = 262144; // 80KB缓冲区
-        using var md5 = MD5.Create();
-        var memoryPool = ArrayPool<byte>.Shared;
-        var downloadCts = _downloadCTS;
-        if (downloadCts == null || _downloadState?.IsStop == true)
-        {
-            throw new OperationCanceledException();
-        }
-        const long UpdateThreshold = 1048576; // 1MB进度更新阈值
-        FileStream? fs = null;
-        try
-        {
-            using (
-                fs = new FileStream(
-                    filePath,
-                    FileMode.Open,
-                    FileAccess.Read,
-                    FileShare.Read,
-                    bufferSize: bufferSize,
-                    true
-                )
-            )
-            {
-                bool isBreak = false;
-                long accumulatedBytes = 0L;
-                while (true)
-                {
-                    if (downloadCts.IsCancellationRequested || _downloadState?.IsStop == true)
-                    {
-                        throw new OperationCanceledException();
-                    }
-                    //暂停锁
-                    await this._downloadState.PauseToken.WaitIfPausedAsync();
-                    byte[] buffer = memoryPool.Rent(bufferSize);
-                    try
-                    {
-                        int bytesRead = await fs.ReadAsync(
-                                buffer.AsMemory(0, bufferSize),
-                                downloadCts.Token
-                            )
-                            .ConfigureAwait(false);
-                        if (bytesRead == 0)
-                        {
-                            isBreak = true;
-                            break;
-                        }
-                        md5.TransformBlock(buffer, 0, bytesRead, null, 0);
-                        accumulatedBytes += bytesRead; // 添加此行以累加字节数
-                        if (accumulatedBytes >= UpdateThreshold)
-                        {
-                            await UpdateFileProgress(
-                                    GameContextActionType.Verify,
-                                    accumulatedBytes,
-                                    false,
-                                    isPred
-                                )
-                                .ConfigureAwait(false);
-                            accumulatedBytes = 0;
-                        }
-                    }
-                    finally
-                    {
-                        memoryPool.Return(buffer);
-                    }
-                }
-                if (accumulatedBytes < UpdateThreshold)
-                {
-                    await UpdateFileProgress(
-                            GameContextActionType.Verify,
-                            accumulatedBytes,
-                            false,
-                            isPred: isPred
-                        )
-                        .ConfigureAwait(false);
-                }
-            }
-
-            md5.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
-            string hash = BitConverter.ToString(md5.Hash!).Replace("-", "").ToLower();
-
-            return !(hash == md5Value);
-        }
-        catch (OperationCanceledException)
-        {
-            throw new OperationCanceledException();
-        }
-        catch (IOException ex)
-        {
-            Logger.WriteError(ex.Message);
-            return false;
-        }
-        catch (Exception ex)
-        {
-            Logger.WriteError(ex.Message);
-            return false;
-        }
-        finally
-        {
-            fs?.Close();
-            fs?.Dispose();
-        }
-    }
-
-    #endregion
 
     #region 下载逻辑
-    private async Task DownloadFileByChunks(
-        string dest,
-        string filePath,
-        long start,
-        long end,
-        bool isLast = false,
-        long allSize = 0L,
-        bool isPred = false
-    )
-    {
-        using (
-            var fileStream = new FileStream(
-                filePath,
-                FileMode.OpenOrCreate,
-                FileAccess.ReadWrite,
-                FileShare.Read,
-                262144,
-                true
-            )
-        )
-        {
-            try
-            {
-                var downloadCts = _downloadCTS;
-                if (downloadCts == null || _downloadState?.IsStop == true)
-                {
-                    throw new OperationCanceledException();
-                }
-                long accumulatedBytes = 0;
-                if (start == 0 && end == -1)
-                {
-                    Logger.WriteError($"文件{filePath}，分片数据错误，start={start},end={end}");
-                }
-                using var request = new HttpRequestMessage(
-                    HttpMethod.Get,
-                    _downloadBaseUrl.TrimEnd('/') + "/" + dest.TrimStart('/')
-                );
-                request.Headers.Range = new RangeHeaderValue(start, end);
-                using var response = await HttpClientService.GameDownloadClient.SendAsync(
-                    request,
-                    HttpCompletionOption.ResponseHeadersRead,
-                    downloadCts.Token
-                );
-                var stream = await response.Content.ReadAsStreamAsync(downloadCts.Token);
-                if (start < 0 || end < start)
-                {
-                    Logger.WriteError($"分片范围无效: {start}-{end}");
-                    throw new ArgumentException($"分片范围无效: {start}-{end}");
-                }
-
-                long totalWritten = 0;
-                long chunkTotalSize = end - start + 1;
-                var memoryPool = ArrayPool<byte>.Shared;
-                fileStream.Seek(start, SeekOrigin.Begin);
-                bool isBreak = false;
-                while (totalWritten < chunkTotalSize)
-                {
-                    if (downloadCts.IsCancellationRequested || _downloadState?.IsStop == true)
-                    {
-                        throw new OperationCanceledException();
-                    }
-                    await _downloadState.PauseToken.WaitIfPausedAsync().ConfigureAwait(false); // 暂停检查也异步化
-                    int bytesToRead = (int)Math.Min(MaxBufferSize, chunkTotalSize - totalWritten);
-                    byte[] buffer = ArrayPool<byte>.Shared.Rent(bytesToRead);
-                    try
-                    {
-                        int bytesRead = await stream
-                            .ReadAsync(buffer.AsMemory(0, bytesToRead), downloadCts.Token)
-                            .ConfigureAwait(false);
-                        if (bytesRead == 0)
-                        {
-                            isBreak = true;
-                            break;
-                        }
-                        await _downloadState
-                            .SpeedLimiter.LimitAsync(bytesRead)
-                            .ConfigureAwait(false);
-                        await fileStream
-                            .WriteAsync(buffer.AsMemory(0, bytesRead), downloadCts.Token)
-                            .ConfigureAwait(false);
-                        totalWritten += bytesRead;
-                        accumulatedBytes += bytesRead;
-                        if (accumulatedBytes >= UpdateThreshold)
-                        {
-                            await UpdateFileProgress(
-                                    GameContextActionType.Download,
-                                    accumulatedBytes,
-                                    true,
-                                    isPred
-                                )
-                                .ConfigureAwait(false);
-                            accumulatedBytes = 0;
-                        }
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        throw;
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.WriteError(ex.Message);
-                    }
-                    finally
-                    {
-                        ArrayPool<byte>.Shared.Return(buffer);
-                    }
-                }
-                if (accumulatedBytes > 0 && !isBreak)
-                {
-                    await UpdateFileProgress(
-                            GameContextActionType.Download,
-                            accumulatedBytes,
-                            isPred: isPred
-                        )
-                        .ConfigureAwait(false);
-                }
-                if (isLast)
-                    fileStream.SetLength(allSize);
-                stream.Close();
-                await stream.DisposeAsync();
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (Exception)
-            {
-                await fileStream.FlushAsync(_downloadCTS?.Token ?? CancellationToken.None);
-                await fileStream.FlushAsync();
-                await fileStream.DisposeAsync();
-            }
-        }
-    }
 
     public async Task SetNoneStatusAsync(bool isPred = false)
     {
@@ -1402,33 +991,31 @@ public partial class KuroGameContextBase
         }
         if (this.gameContextOutputDelegate != null && !isPred)
         {
-            await this.gameContextOutputDelegate.Invoke(
-                this,
-                new GameContextOutputArgs()
-                {
-                    Type = GameContextActionType.None,
-                    CurrentSize = _totalProgressSize,
-                    TotalSize = _totalfileSize,
-                    DownloadSpeed = _downloadSpeed,
-                    VerifySpeed = VerifySpeed,
-                    RemainingTime = this.RemainingTime,
-                }
-            );
+            var args = new GameContextOutputArgs()
+            {
+                Type = GameContextActionType.None,
+                CurrentSize = _totalProgressSize,
+                TotalSize = _totalfileSize,
+                DownloadSpeed = _downloadSpeed,
+                VerifySpeed = VerifySpeed,
+                RemainingTime = this.RemainingTime,
+            };
+            _lastOutputArgs = args;
+            await this.gameContextOutputDelegate.Invoke(this, args);
         }
-        else
+        else if(this.gameContextProdOutputDelegate != null)
         {
-            await this.gameContextProdOutputDelegate.Invoke(
-                this,
-                new GameContextOutputArgs()
-                {
-                    Type = GameContextActionType.None,
-                    CurrentSize = _totalProgressSize,
-                    TotalSize = _totalfileSize,
-                    DownloadSpeed = _downloadSpeed,
-                    VerifySpeed = VerifySpeed,
-                    RemainingTime = this.RemainingTime,
-                }
-            );
+            var args = new GameContextOutputArgs()
+            {
+                Type = GameContextActionType.None,
+                CurrentSize = _totalProgressSize,
+                TotalSize = _totalfileSize,
+                DownloadSpeed = _downloadSpeed,
+                VerifySpeed = VerifySpeed,
+                RemainingTime = this.RemainingTime,
+            };
+            _lastOutputArgs = args;
+            await this.gameContextProdOutputDelegate.Invoke(this, args);
         }
     }
 
@@ -1441,336 +1028,7 @@ public partial class KuroGameContextBase
         );
     }
 
-    private async Task DownloadFileByFull(
-        string dest,
-        long size,
-        string filePath,
-        IndexChunkInfo chunk,
-        bool ispred = false
-    )
-    {
-        long accumulatedBytes = 0;
-        using (
-            var fileStream = new FileStream(
-                filePath,
-                FileMode.OpenOrCreate,
-                FileAccess.ReadWrite,
-                FileShare.None,
-                262144,
-                true
-            )
-        )
-        {
-            try
-            {
-                if (chunk.Start == 0 && chunk.End == -1)
-                {
-                    Logger.WriteError(
-                        $"文件{filePath}，分片数据错误，start={chunk.Start},end={chunk.End}"
-                    );
-                    return;
-                }
-                using var request = new HttpRequestMessage(
-                    HttpMethod.Get,
-                    _downloadBaseUrl.TrimEnd('/') + "/" + dest.TrimStart('/')
-                );
-                request.Headers.Range = new RangeHeaderValue(chunk.Start, chunk.End);
-                using var response = await HttpClientService
-                    .GameDownloadClient.SendAsync(
-                        request,
-                        HttpCompletionOption.ResponseHeadersRead,
-                        _downloadCTS.Token
-                    )
-                    .ConfigureAwait(false); // 非UI上下文切换
-
-                response.EnsureSuccessStatusCode();
-                var stream = await response
-                    .Content.ReadAsStreamAsync(_downloadCTS.Token)
-                    .ConfigureAwait(false);
-                if (chunk.Start < 0 || chunk.End < chunk.Start)
-                {
-                    Logger.WriteError($"分片范围无效，start={chunk.Start},end={chunk.End}");
-                    throw new ArgumentException($"分片范围无效: {chunk.Start}-{chunk.End}");
-                }
-
-                long totalWritten = 0;
-                long chunkTotalSize = chunk.End - chunk.Start + 1;
-                var memoryPool = ArrayPool<byte>.Shared;
-
-                fileStream.Seek(chunk.Start, SeekOrigin.Begin);
-                bool isBreak = false;
-                while (totalWritten < chunkTotalSize)
-                {
-                    if (_downloadCTS.IsCancellationRequested)
-                    {
-                        throw new OperationCanceledException();
-                    }
-                    await _downloadState.PauseToken.WaitIfPausedAsync().ConfigureAwait(false); // 暂停检查也异步化
-                    int bytesToRead = (int)Math.Min(MaxBufferSize, chunkTotalSize - totalWritten);
-                    byte[] buffer = memoryPool.Rent(bytesToRead);
-                    int bytesRead = await stream
-                        .ReadAsync(buffer.AsMemory(0, bytesToRead), _downloadCTS.Token)
-                        .ConfigureAwait(false);
-                    if (bytesRead == 0)
-                    {
-                        isBreak = true;
-                    }
-                    await _downloadState.SpeedLimiter.LimitAsync(bytesRead).ConfigureAwait(false);
-                    await fileStream
-                        .WriteAsync(buffer.AsMemory(0, bytesRead), _downloadCTS.Token)
-                        .ConfigureAwait(false);
-                    totalWritten += bytesRead;
-                    accumulatedBytes += bytesRead;
-                    if (accumulatedBytes >= UpdateThreshold)
-                    {
-                        await UpdateFileProgress(
-                                GameContextActionType.Download,
-                                accumulatedBytes,
-                                true,
-                                ispred
-                            )
-                            .ConfigureAwait(false);
-                        accumulatedBytes = 0; // 重置累积计数器
-                    }
-                }
-                if (accumulatedBytes > 0 && !isBreak)
-                {
-                    await UpdateFileProgress(
-                            GameContextActionType.Download,
-                            accumulatedBytes,
-                            true,
-                            ispred
-                        )
-                        .ConfigureAwait(false);
-                }
-                if (totalWritten != chunkTotalSize)
-                {
-                    throw new IOException($"分片写入不完整: {totalWritten}/{chunkTotalSize}");
-                }
-                fileStream.SetLength(size);
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError($"下载文件{filePath}出现异常" + ex.Message);
-            }
-            finally
-            {
-                await fileStream.FlushAsync().ConfigureAwait(false);
-                await fileStream.DisposeAsync().ConfigureAwait(false);
-            }
-        }
-    }
-
-    private async Task<string?> DownloadFileByKrDiff(string dest, string filePath)
-    {
-        long accumulatedBytes = 0;
-        using (
-            var fileStream = new FileStream(
-                filePath,
-                FileMode.OpenOrCreate,
-                FileAccess.ReadWrite,
-                FileShare.None,
-                262144,
-                true
-            )
-        )
-        {
-            try
-            {
-                using var request = new HttpRequestMessage(
-                    HttpMethod.Get,
-                    _downloadBaseUrl.TrimEnd('/') + "/" + dest.TrimStart('/')
-                );
-                using var response = await HttpClientService
-                    .GameDownloadClient.SendAsync(
-                        request,
-                        HttpCompletionOption.ResponseHeadersRead,
-                        _downloadCTS.Token
-                    )
-                    .ConfigureAwait(false);
-                response.EnsureSuccessStatusCode();
-                var stream = await response
-                    .Content.ReadAsStreamAsync(_downloadCTS.Token)
-                    .ConfigureAwait(false);
-                long totalWritten = 0;
-                long chunkTotalSize = long.Parse(
-                    response.Content.Headers.GetValues("Content-Length").First()
-                );
-                var memoryPool = ArrayPool<byte>.Shared;
-                fileStream.Seek(0, SeekOrigin.Begin);
-                bool isBreak = false;
-                while (totalWritten < chunkTotalSize)
-                {
-                    if (_downloadCTS.IsCancellationRequested)
-                    {
-                        return null;
-                    }
-                    await _downloadState.PauseToken.WaitIfPausedAsync().ConfigureAwait(false); // 暂停检查也异步化
-                    int bytesToRead = (int)Math.Min(MaxBufferSize, chunkTotalSize - totalWritten);
-                    byte[] buffer = memoryPool.Rent(bytesToRead);
-                    int bytesRead = await stream
-                        .ReadAsync(buffer.AsMemory(0, bytesToRead), _downloadCTS.Token)
-                        .ConfigureAwait(false);
-                    if (bytesRead == 0)
-                    {
-                        isBreak = true;
-                    }
-                    await _downloadState.SpeedLimiter.LimitAsync(bytesRead).ConfigureAwait(false);
-                    await fileStream
-                        .WriteAsync(buffer.AsMemory(0, bytesRead), _downloadCTS.Token)
-                        .ConfigureAwait(false);
-                    totalWritten += bytesRead;
-                    accumulatedBytes += bytesRead;
-                    if (accumulatedBytes >= UpdateThreshold)
-                    {
-                        await UpdateFileProgress(
-                                GameContextActionType.Download,
-                                accumulatedBytes,
-                                true,
-                                false,
-                                "下载差异文件"
-                            )
-                            .ConfigureAwait(false);
-                        accumulatedBytes = 0;
-                    }
-                }
-                if (accumulatedBytes > 0 && !isBreak)
-                {
-                    await UpdateFileProgress(
-                            GameContextActionType.Download,
-                            accumulatedBytes,
-                            true,
-                            false,
-                            "下载差异文件"
-                        )
-                        .ConfigureAwait(false);
-                }
-                if (totalWritten != chunkTotalSize)
-                {
-                    throw new IOException($"分片写入不完整: {totalWritten}/{chunkTotalSize}");
-                }
-                await fileStream.FlushAsync();
-                return filePath;
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError(ex.Message);
-                return null;
-            }
-            finally
-            {
-                await fileStream.FlushAsync();
-                await fileStream.DisposeAsync();
-            }
-        }
-    }
     #endregion
-
-    #region 辅助方法
-
-    private bool IsDownloadCanceled()
-    {
-        return _downloadCTS == null || _downloadCTS.IsCancellationRequested || _downloadState?.IsStop == true;
-    }
-
-    private async Task UpdateFileProgress(
-        GameContextActionType type,
-        long fileSize,
-        bool isAdd = true,
-        bool isPred = false,
-        string tip = ""
-    )
-    {
-        if (type == GameContextActionType.Download)
-        {
-            Interlocked.Add(ref _totalDownloadedBytes, fileSize);
-            if (isAdd)
-                Interlocked.Add(ref _totalProgressSize, fileSize);
-        }
-        else if (type == GameContextActionType.Verify)
-        {
-            if (!isAdd)
-                Interlocked.Add(ref _totalVerifiedBytes, fileSize);
-            if (isAdd)
-                Interlocked.Add(ref _totalProgressSize, fileSize);
-        }
-        var elapsed = (DateTime.Now - _lastSpeedUpdateTime).TotalSeconds;
-        if (elapsed >= 1)
-        {
-            _downloadSpeed = _totalDownloadedBytes / elapsed;
-            _verifySpeed = _totalVerifiedBytes / elapsed;
-            // 重置计数器和时间
-            Interlocked.Exchange(ref _totalDownloadedBytes, 0);
-            Interlocked.Exchange(ref _totalVerifiedBytes, 0);
-            var currentBytes = Interlocked.Read(ref _totalDownloadedBytes);
-            _lastSpeedBytes = currentBytes;
-            _lastSpeedUpdateTime = DateTime.Now;
-        }
-
-        if (isPred && gameContextProdOutputDelegate != null)
-        {
-            await gameContextProdOutputDelegate
-                .Invoke(
-                    this,
-                    new GameContextOutputArgs
-                    {
-                        Type = type,
-                        CurrentSize = _totalProgressSize,
-                        TotalSize = _totalfileSize,
-                        DownloadSpeed = _downloadSpeed,
-                        VerifySpeed = _verifySpeed,
-                        RemainingTime = RemainingTime,
-                        IsAction = _downloadState?.IsActive ?? false,
-                        IsPause = _downloadState?.IsPaused ?? false,
-                        TipMessage = tip,
-                    }
-                )
-                .ConfigureAwait(false);
-        }
-        else if (isPred == false && gameContextOutputDelegate != null)
-        {
-            await gameContextOutputDelegate
-                .Invoke(
-                    this,
-                    new GameContextOutputArgs
-                    {
-                        Type = type,
-                        CurrentSize = _totalProgressSize,
-                        TotalSize = _totalfileSize,
-                        DownloadSpeed = _downloadSpeed,
-                        VerifySpeed = _verifySpeed,
-                        RemainingTime = RemainingTime,
-                        IsAction = _downloadState?.IsActive ?? false,
-                        IsPause = _downloadState?.IsPaused ?? false,
-                        TipMessage = tip,
-                    }
-                )
-                .ConfigureAwait(false);
-        }
-    }
-
-    public TimeSpan RemainingTime
-    {
-        get
-        {
-            try
-            {
-                if (DownloadSpeed <= 0 || _totalDownloadedBytes >= _totalfileSize)
-                    return TimeSpan.Zero;
-
-                var remainingBytes = _totalfileSize - _totalProgressSize;
-                return TimeSpan.FromSeconds(remainingBytes / DownloadSpeed);
-            }
-            catch (Exception)
-            {
-                return TimeSpan.Zero;
-            }
-        }
-    }
-
-    #endregion
-
-    #region 公共辅助方法
 
 
     private async Task InitializeProgress(List<IndexResource> resource)
@@ -1795,6 +1053,17 @@ public partial class KuroGameContextBase
             }
         );
     }
+
+    #region 辅助方法
+
+
+
+
+    #endregion
+
+    #region 公共辅助方法
+
+
     #endregion
 
     public async Task RepirGameAsync()

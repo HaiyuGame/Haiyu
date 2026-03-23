@@ -45,7 +45,7 @@ partial class KuroGameContextViewModel
     async Task PausePreDownloadGame()
     {
         var status = await this.GameContext.GetGameContextStatusAsync(this.CTS.Token);
-        if (!status.IsPause)
+        if (!status.IsProdownPause)
         {
             await this.GameContext.PauseDownloadAsync();
             this.PreDownloadIcon = "\uE768";
@@ -129,9 +129,9 @@ partial class KuroGameContextViewModel
                     if (!status.PredownloadedDone)
                     {
                         PredCardVisibility = Visibility.Visible;
-                        PredDownloadBthVisibility = Visibility.Collapsed;
+                        PredDownloadBthVisibility = Visibility.Visible;
                         PredDownloadingVisibility = Visibility.Collapsed;
-                        PredDownloadDoneVisibility = Visibility.Visible;
+                        PredDownloadDoneVisibility = Visibility.Collapsed;
                     }
                     else
                     {
@@ -141,6 +141,11 @@ partial class KuroGameContextViewModel
                         this.PredDownloadingVisibility = Visibility.Collapsed;
                     }
                 }
+            }
+            if (args.Type == Waves.Core.Models.Enums.GameContextActionType.CdnSelect)
+            {
+                PredDownloadBthVisibility = Visibility.Collapsed;
+                await TipShow.ShowMessageAsync(args.TipMessage, Symbol.Message);
             }
         });
     }

@@ -117,7 +117,7 @@ public partial class CommunityViewModel : ViewModelBase, IDisposable
     }
 
     [RelayCommand]
-    async Task LoadedAsync(Frame frame = null)
+    async Task LoadedAsync(Microsoft.UI.Xaml.Controls.Frame frame = null)
     {
         if (frame != null)
             this.NavigationService.RegisterView(frame);

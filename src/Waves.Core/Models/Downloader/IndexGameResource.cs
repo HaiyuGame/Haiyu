@@ -33,6 +33,9 @@ public class IndexResource
 
     [JsonPropertyName("end")]
     public long? End { get; set; }
+
+    [JsonPropertyName("fromFolder")]
+    public string? FromFolder { get; set; }
 }
 
 [JsonSerializable(typeof(IndexGameResource))]

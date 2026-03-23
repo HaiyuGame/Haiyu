@@ -9,14 +9,14 @@ partial class KuroGameContextViewModel
     [RelayCommand]
     async Task UpdateGameAsync()
     {
-        if (_bthType == 3)
+        if (_buttonAction == ButtonActionType.StartGame)
         {
             if (await GameContext.StartGameAsync())
             {
                 this.AppContext.MinToTaskbar();
             }
         }
-        if (_bthType == 4)
+        if (_buttonAction == ButtonActionType.PrepareUpdate)
         {
             var localVersion = await GameContext.GameLocalConfig.GetConfigAsync(
                 GameLocalSettingName.LocalGameVersion
@@ -35,7 +35,7 @@ partial class KuroGameContextViewModel
             this.PauseIcon = "\uE769";
             Task.Run(async () => await GameContext.UpdataGameAsync(result.DiffSavePath));
         }
-        if (_bthType == 6)
+        if (_buttonAction == ButtonActionType.InstallPreDownload)
         {
             var diffDone = await GameContext.GameLocalConfig.GetConfigAsync(
                 GameLocalSettingName.ProdDownloadFolderDone
@@ -51,7 +51,7 @@ partial class KuroGameContextViewModel
             else
             {
                 //跳转会更新游戏
-                _bthType = 4;
+                _buttonAction = ButtonActionType.PrepareUpdate;
                 Task.Run(async()=> await UpdateGameAsync());
             }
         }

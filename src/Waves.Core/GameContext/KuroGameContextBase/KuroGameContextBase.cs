@@ -1,10 +1,10 @@
-﻿using CommunityToolkit.Mvvm.Input;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using CommunityToolkit.Mvvm.Input;
 using Waves.Api.Models;
 using Waves.Api.Models.Launcher;
 using Waves.Core.Common;
@@ -21,7 +21,7 @@ public abstract partial class KuroGameContextBase : IGameContext
     #region _filed
 
     private bool isLimtSpeed;
-    private CancellationTokenSource _downloadCTS; 
+    private CancellationTokenSource _downloadCTS;
     private bool _isDownload;
     #endregion
 
@@ -88,6 +88,7 @@ public abstract partial class KuroGameContextBase : IGameContext
     )
     {
         GameContextStatus status = new GameContextStatus();
+        status.LasterArgs = this._lastOutputArgs;
         var localVersion = await GameLocalConfig.GetConfigAsync(
             GameLocalSettingName.LocalGameVersion
         );
@@ -100,23 +101,17 @@ public abstract partial class KuroGameContextBase : IGameContext
         var updateing = await GameLocalConfig.GetConfigAsync(
             GameLocalSettingName.LocalGameUpdateing
         );
-        if (string.IsNullOrWhiteSpace(gameBaseFolder))
-        {
-            status.IsGameExists = false;
-        }
-        else if (Directory.Exists(gameBaseFolder) && File.Exists(gameProgramFile))
+        if (Directory.Exists(gameBaseFolder) )
         {
             status.IsGameExists = true;
-            status.IsGameInstalled = true;
-            if (!string.IsNullOrWhiteSpace(localVersion))
-            {
-                status.IsLauncher = true;
-            }
         }
-        else if(Directory.Exists(gameBaseFolder))
+        if (File.Exists(gameProgramFile))
         {
-            status.IsGameExists = false;
-            status.IsGameInstalled = false;
+            status.IsGameInstalled = true;
+        }
+        if (!string.IsNullOrWhiteSpace(localVersion))
+        {
+            status.IsLauncher = true;
         }
         var ping = (await NetworkCheck.PingAsync(KuroGameApiConfig.BaseAddress[0]));
         if (ping != null && ping.Status == IPStatus.Success)
@@ -141,13 +136,22 @@ public abstract partial class KuroGameContextBase : IGameContext
                     status.IsUpdateing = updateResult;
                 }
                 //预下载是否完成，确保本地安装完成
-                if(indexSource.Predownload != null && status.IsGameExists == true &&status.IsGameInstalled == true)
+                if (
+                    indexSource.Predownload != null
+                    && status.IsGameExists == true
+                    && status.IsGameInstalled == true
+                )
                 {
+                    status.IsProdownPause =
+                        _prodDownloadState == null ? false : _prodDownloadState.IsPaused;
                     status.IsPredownloaded = true;
                     var donwResult = await GameLocalConfig.GetConfigAsync(
                         GameLocalSettingName.ProdDownloadFolderDone
                     );
-                    if (bool.TryParse(donwResult,out var predDown))
+                    var prodDownVersion = await GameLocalConfig.GetConfigAsync(
+                        GameLocalSettingName.ProdDownloadVersion
+                    );
+                    if (bool.TryParse(donwResult, out var predDown))
                     {
                         status.PredownloadedDone = predDown;
                     }
@@ -155,6 +159,7 @@ public abstract partial class KuroGameContextBase : IGameContext
                     {
                         status.PredownloadedDone = false;
                     }
+                    status.PredownloaAcion = _prodDownloadState != null?_prodDownloadState.IsActive:false;
                 }
             }
         }
@@ -173,10 +178,10 @@ public abstract partial class KuroGameContextBase : IGameContext
         var folder = await GameLocalConfig.GetConfigAsync(
             GameLocalSettingName.GameLauncherBassFolder
         );
-        //await Task.Run(() =>
-        //{
-        //    Directory.Delete(folder, true);
-        //});
+        await Task.Run(() =>
+        {
+            Directory.Delete(folder, true);
+        });
         await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.GameLauncherBassFolder, "");
         await this.GameLocalConfig.SaveConfigAsync(
             GameLocalSettingName.GameLauncherBassProgram,
@@ -190,30 +195,4 @@ public abstract partial class KuroGameContextBase : IGameContext
     {
         this.Logger.Option = coreLogOption;
     }
-
-    public virtual async Task<List<KRSDKLauncherCache>?> GetLocalGameOAuthAsync(CancellationToken token)
-    {
-        try
-        {
-            if (this.Config.PKGId == null)
-            {
-                return null;
-            }
-            var roming = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            var gameLocal = Path.Combine(roming, $"KR_{this.Config.GameID}");
-            var gameLaunche = Path.Combine(gameLocal, $"{this.Config.PKGId}\\KRSDKUserLauncherCache.json");
-            if (Directory.Exists(gameLocal) && File.Exists(gameLaunche))
-            {
-                var fileStr = await File.ReadAllTextAsync(gameLaunche,token);
-                var model = JsonSerializer.Deserialize(fileStr, LauncherConfig.Default.ListKRSDKLauncherCache);
-                return model;
-            }
-            return null;
-        }
-        catch (Exception ex)
-        {
-            return null;
-        }
-    }
-
 }

@@ -98,11 +98,16 @@ public interface IGameContext
     Task SetSpeedLimitAsync(long bytesPerSecond);
 
     /// <summary>
+    /// 重新推送上一次的输出（用于页面重建后恢复显示）
+    /// </summary>
+    Task ReEmitLastOutputAsync(bool isPred = false);
+
+    /// <summary>
     /// 获得游戏登陆的OAuth的代码
     /// </summary>
     /// <param name="token"></param>
     /// <returns></returns>
-    Task<List<KRSDKLauncherCache>?> GetLocalGameOAuthAsync(CancellationToken token);
+    Task<List<KRSDKLauncherCache>?> GetLocalGameOAuthAsync(CancellationToken token = default);
     /// <summary>
     /// 安装预下载内容
     /// </summary>
@@ -118,4 +123,10 @@ public interface IGameContext
     Task<LIndex?> GetDefaultLauncherValue(CancellationToken token = default);
 
     Task<LauncherBackgroundData?> GetLauncherBackgroundDataAsync(string backgroundCode, CancellationToken token = default);
+
+    #region 本地游戏体力查询接口
+    Task<QueryPlayerInfo?> QueryPlayerInfoAsync(string oAutoCode,CancellationToken token = default);
+
+    Task<QueryRoleInfo?> QueryRoleInfoAsync(string oautoCode, string playerId, string region, CancellationToken token = default);
+    #endregion
 }

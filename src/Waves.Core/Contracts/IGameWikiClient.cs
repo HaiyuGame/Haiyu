@@ -13,7 +13,7 @@ public interface IGameWikiClient
         CancellationToken token = default
     );
 
-    List<HotContentSide?> GetEventData(WikiHomeModel model);
+    List<HotContentSide>? GetEventData(WikiHomeModel model);
 
     public Task<EventContentSide?> GetEventTabDataAsync(
         WikiType type,

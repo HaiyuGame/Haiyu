@@ -11,13 +11,13 @@ public class NavigationServiceBase : INavigationService
 
     public IPageService PageService { get; }
 
-    public Frame RootFrame { get; private set; }
+    public Microsoft.UI.Xaml.Controls.Frame RootFrame { get; private set; }
 
     public bool CanGoBack => RootFrame != null ? RootFrame.CanGoBack : false;
 
     public bool CanGoForward => RootFrame != null ? RootFrame.CanGoForward : false;
 
-    public Frame Frame => RootFrame;
+    public Microsoft.UI.Xaml.Controls.Frame Frame => RootFrame;
 
     public event NavigatedEventHandler Navigated;
     public event NavigationFailedEventHandler NavigationFailed;
@@ -71,7 +71,7 @@ public class NavigationServiceBase : INavigationService
         return false;
     }
 
-    public void RegisterView(Frame frame)
+    public void RegisterView(Microsoft.UI.Xaml.Controls.Frame frame)
     {
         RootFrame = frame;
         RootFrame.Navigated += Navigated;

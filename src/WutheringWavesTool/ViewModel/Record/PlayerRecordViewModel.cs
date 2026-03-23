@@ -410,7 +410,7 @@ public sealed partial class PlayerRecordViewModel : ViewModelBase, IDisposable
         );
     }
 
-    public async Task Loaded(Frame frame = null)
+    public async Task Loaded(Microsoft.UI.Xaml.Controls.Frame frame = null)
     {
         await this.ShowInputRecordAsync();
     }

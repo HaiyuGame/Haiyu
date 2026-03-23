@@ -141,6 +141,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase
 
     private async Task RefreshBaseData(GameRoilDataItem value)
     {
+        await WavesClient.UpdateRefreshToken(value);
         var result = await WavesClient.GetGamerBassDataAsync(value);
         if(result == null)
         {
@@ -155,6 +156,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase
     {
         try
         {
+            this.SelectGamer = null;
             if (await WavesClient.IsLoginAsync(CTS.Token))
             {
                 var roles = await TryInvokeAsync(async () =>

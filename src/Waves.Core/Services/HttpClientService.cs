@@ -16,6 +16,9 @@ public class HttpClientService : IHttpClientService
     public void BuildClient()
     {
         this.HttpClient = new HttpClient(new WavesGameHandler());
-        this.GameDownloadClient = new HttpClient(new WavesGameHandler());
+        this.GameDownloadClient = new HttpClient();
+        GameDownloadClient.DefaultRequestHeaders.ConnectionClose = false;
+        GameDownloadClient.DefaultRequestHeaders.TryAddWithoutValidation("Accept-Encoding", "identity");
+        GameDownloadClient.Timeout = TimeSpan.FromSeconds(20);
     }
 }

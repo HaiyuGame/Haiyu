@@ -30,6 +30,7 @@
                 <ResourceDictionary Source="/Controls/Styles/Colors.xaml" />
                 <ResourceDictionary Source="/Controls/Styles/ApplicationBackgroundControl.xaml" />
                 <ResourceDictionary Source="/Controls/Styles/AnimatedTextBlock.xaml" />
+                <ResourceDictionary Source="/Controls/Styles/CardSwitcher.xaml" />
                 <ResourceDictionary Source="/Controls/Styles/LoadingCard.xaml" />
                 <ResourceDictionary Source="ms-appx:///CommunityToolkit.WinUI.Controls.Segmented/Segmented/Segmented.xaml" />
             </ResourceDictionary.MergedDictionaries>

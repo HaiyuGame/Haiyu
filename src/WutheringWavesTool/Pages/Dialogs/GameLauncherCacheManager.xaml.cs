@@ -20,5 +20,6 @@ namespace Haiyu.Pages.Dialogs
                 ViewModel.SetData(args);
             }
         }
+
     }
 }

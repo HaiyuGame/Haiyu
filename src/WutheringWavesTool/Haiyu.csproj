@@ -1,24 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
-    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
-    <RootNamespace>Haiyu</RootNamespace>
-    <Platforms>x64</Platforms>
-    <Nullable>enable</Nullable>
-    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
-    <PublishProfile>win-x64.pubxml</PublishProfile>
-    <UseWinUI>true</UseWinUI>
-    <LangVersion>preview</LangVersion>
-    <SatelliteResourceLanguages>
-    </SatelliteResourceLanguages>
-    <InvariantGlobalization>true</InvariantGlobalization>
-    <WinUISDKReferences>false</WinUISDKReferences>
-    <EnableMsixTooling>true</EnableMsixTooling>
-    <PublishAot>true</PublishAot>
-    <PublishTrimmed>true</PublishTrimmed>
-    <WindowsPackageType>None</WindowsPackageType>
-    <!--
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+		<RootNamespace>Haiyu</RootNamespace>
+		<Platforms>x64</Platforms>
+		<Nullable>enable</Nullable>
+		<RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+		<PublishProfile>win-x64.pubxml</PublishProfile>
+		<UseWinUI>true</UseWinUI>
+		<LangVersion>preview</LangVersion>
+		<SatelliteResourceLanguages></SatelliteResourceLanguages>
+		<InvariantGlobalization>true</InvariantGlobalization>
+		<WinUISDKReferences>false</WinUISDKReferences>
+		<EnableMsixTooling>true</EnableMsixTooling>
+		<PublishAot>true</PublishAot>
+		<PublishTrimmed>true</PublishTrimmed>
+		<WindowsPackageType>None</WindowsPackageType>
+		<!--
 		-->
     <UserSecretsId>e239e9df-797b-4568-b3e5-8397f5b3faa6</UserSecretsId>
   </PropertyGroup>
@@ -99,6 +98,18 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Update="Assets\Font.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Assets\GameAssets\Waves\activity.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Assets\GameAssets\Waves\podcast.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Assets\GameAssets\Waves\waveplates.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Assets\GameAssets\Waves\wavesubstance.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -202,6 +213,9 @@
     <None Update="Assets\HpatchzResource\hpatchz.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <Page Update="Controls\Styles\CardSwitcher.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Pages\PluginPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -231,6 +245,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Assets\GameAssets\Punish\" />
     <Folder Include="Assets\Languages\" />
     <Folder Include="Common\Plugins\" />
     <Folder Include="Pages\ColorGame\" />
@@ -241,49 +256,51 @@
     Explorer "Package and Publish" context menu entry to be enabled for this project even if
     the Windows App SDK Nuget package has not yet been restored.
   -->
-  <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
-    <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
-  </PropertyGroup>
-  <PropertyGroup>
-    <PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
-    <PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
-    <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
-    <PackageCertificateThumbprint>9A058084F8990CF8FEAA9817CB4E3FC0A7C56294</PackageCertificateThumbprint>
-    <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
-    <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
-    <GenerateTestArtifacts>False</GenerateTestArtifacts>
-    <AppxBundle>Auto</AppxBundle>
-    <AppxBundlePlatforms>x64</AppxBundlePlatforms>
-    <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
-    <AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
-    <ApplicationIcon>Assets\appLogo.ico</ApplicationIcon>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-    <StartupObject>Haiyu.Program</StartupObject>
-  </PropertyGroup>
-  <ItemGroup>
-    <PRIResource Remove="AppPackages\**" />
-  </ItemGroup>
-  <ItemGroup>
-    <PRIResource Remove="BundleArtifacts\**" />
-  </ItemGroup>
-  <ItemGroup>
-    <PRIResource Remove="Strings\**" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Remove="Assets\appLogo.ico" />
-    <None Remove="Assets\appLogo.png" />
-    <None Remove="Assets\background.png" />
-    <None Remove="Controls\Styles\Colors.xaml" />
-    <None Remove="Controls\Styles\HeaderTileCard.xaml" />
-    <None Remove="Controls\Styles\LoadingCard.xaml" />
-    <None Remove="Pages\Dialogs\GameEnhancedDialog.xaml" />
-    <None Remove="Pages\Dialogs\LocalUserManagerDialog.xaml" />
-    <None Remove="Pages\Dialogs\UpdateGameDialog.xaml" />
-    <None Remove="Pages\PluginPage.xaml" />
-    <None Remove="Pages\XboxDisplayPage.xaml" />
-  </ItemGroup>
+	<PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+		<HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
+	</PropertyGroup>
+	<PropertyGroup>
+		<PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
+		<PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<GenerateAppInstallerFile>False</GenerateAppInstallerFile>
+		<AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
+		<PackageCertificateThumbprint>9A058084F8990CF8FEAA9817CB4E3FC0A7C56294</PackageCertificateThumbprint>
+		<AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
+		<AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
+		<GenerateTestArtifacts>False</GenerateTestArtifacts>
+		<AppxBundle>Auto</AppxBundle>		
+		<AppxBundlePlatforms>x64</AppxBundlePlatforms>
+		<HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
+		<AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
+		<ApplicationIcon>Assets\appLogo.ico</ApplicationIcon>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+		<StartupObject>Haiyu.Program</StartupObject>
+	
+	</PropertyGroup>
+	<ItemGroup>
+	  <PRIResource Remove="AppPackages\**" />
+	</ItemGroup>
+	<ItemGroup>
+	  <PRIResource Remove="BundleArtifacts\**" />
+	</ItemGroup>
+	<ItemGroup>
+	  <PRIResource Remove="Strings\**" />
+	</ItemGroup>
+	<ItemGroup>
+	  <None Remove="Assets\appLogo.ico" />
+	  <None Remove="Assets\appLogo.png" />
+	  <None Remove="Assets\background.png" />
+	  <None Remove="Controls\Styles\CardSwitcher.xaml" />
+	  <None Remove="Controls\Styles\Colors.xaml" />
+	  <None Remove="Controls\Styles\HeaderTileCard.xaml" />
+	  <None Remove="Controls\Styles\LoadingCard.xaml" />
+	  <None Remove="Pages\Dialogs\GameEnhancedDialog.xaml" />
+	  <None Remove="Pages\Dialogs\LocalUserManagerDialog.xaml" />
+	  <None Remove="Pages\Dialogs\UpdateGameDialog.xaml" />
+	  <None Remove="Pages\PluginPage.xaml" />
+	  <None Remove="Pages\XboxDisplayPage.xaml" />
+	</ItemGroup>
 </Project>
