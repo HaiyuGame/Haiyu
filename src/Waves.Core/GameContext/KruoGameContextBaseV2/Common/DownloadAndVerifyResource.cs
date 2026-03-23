@@ -29,6 +29,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
     private CancellationTokenSource cts;
     private string _folder;
     private string _baseUrl;
+    private bool _isProd;
     private IHttpClientService _httpClientService;
     private GameLauncherSource? _launcher;
     private long _totalDownloadedBytes;
@@ -127,6 +128,10 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
         {
             return false;
         }
+        if(!Param.CheckParam<bool>("isProd",out var isProd))
+        {
+            return false;
+        }
         this._resource = resources!;
         this.isDelete = isDelete!;
         this.cts = new CancellationTokenSource();
@@ -135,6 +140,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
         this._launcher = launcher;
         this._downloadState = downloadState!;
         this._baseUrl = baseUrl!;
+        this._isProd = isProd;
         InitProgress();
         return true;
     }
@@ -231,6 +237,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
                                     currentFileSize: value.Item5,
                                     fileMaxSize: value.Item6
                                 );
+                                args.Prod = this._isProd;
                                 this.ProgressValue = (double)args.CurrentSize / (double)args.TotalSize;
                                 this.GameEventPublisher.Publish(args);
                             }
@@ -408,6 +415,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
             FilePath = filePath,
             FileCurrentSize = currentFileSize,
             FileTotalSize = fileMaxSize,
+            Prod = _isProd,
             VerifySpeed = _verifySpeed,
             IsAction = this._downloadState?.IsActive ?? false,
             IsPause = _downloadState?.IsPaused ?? false,

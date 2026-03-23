@@ -5,6 +5,7 @@ namespace Waves.Core.Models;
 
 public class GameContextOutputArgs
 {
+
     public GameContextActionType Type { get; set; }
 
     public string ErrorString { get; set; }
@@ -63,4 +64,5 @@ public class GameContextOutputArgs
         TotalSize > 0 ? Math.Round((CurrentSize * 100.0) / TotalSize, 2) : 0;
 
     public int CurrentStepIndex { get; internal set; }
+    public bool Prod { get; internal set; }
 }

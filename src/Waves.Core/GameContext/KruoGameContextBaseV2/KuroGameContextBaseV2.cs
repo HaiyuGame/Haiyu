@@ -226,8 +226,12 @@ public abstract partial class KuroGameContextBaseV2
                 GameContextActionType.CdnSelect,
                 "正在选择最优CDN"
             );
-            var cdnResult = await TestCdnAsync(launcher.ResourceDefault.CdnList, launcher.ResourceDefault.Config.BaseUrl, resource.Resource);
-            if(cdnResult == null)
+            var cdnResult = await TestCdnAsync(
+                launcher.ResourceDefault.CdnList,
+                launcher.ResourceDefault.Config.BaseUrl,
+                resource.Resource
+            );
+            if (cdnResult == null)
             {
                 this.GameEventPublisher.Publish(
                     new GameContextOutputArgs()
@@ -299,7 +303,8 @@ public abstract partial class KuroGameContextBaseV2
         List<IndexResource> resource
     )
     {
-        if (resource == null || !resource.Any()) return null;
+        if (resource == null || !resource.Any())
+            return null;
 
         const long targetTestSize = 50L * 1024 * 1024;
 
@@ -312,11 +317,7 @@ public abstract partial class KuroGameContextBaseV2
 
         // 修复找不到文件错误：安全地拼接 URL
         var testUrl = baseUrl.TrimEnd('/') + "/" + item.Dest.TrimStart('/');
-        var best = await CDNSpeedTester.TestAllAsync(
-            cdnList,
-            testUrl,
-            TimeSpan.FromSeconds(40)
-        );
+        var best = await CDNSpeedTester.TestAllAsync(cdnList, testUrl, TimeSpan.FromSeconds(40));
         return best;
     }
 
@@ -332,6 +333,28 @@ public abstract partial class KuroGameContextBaseV2
         return true;
     }
 
+    /// <summary>
+    /// 预下载
+    /// </summary>
+    /// <returns></returns>
+    public async Task<bool> StartProdDownloadGameResourceAsync()
+    {
+        var _launcher = await this.GetGameLauncherSourceAsync();
+        var currentVersion = await GameLocalConfig.GetConfigAsync(
+            GameLocalSettingName.LocalGameVersion
+        );
+        Task.Run(async () => await StartDownloadUpdateGameResourceAsync(_launcher, currentVersion,true));
+        return true;
+    }
+
+
+    /// <summary>
+    /// 更新游戏
+    /// </summary>
+    /// <param name="_launcher"></param>
+    /// <param name="currentVersion"></param>
+    /// <param name="isProd"></param>
+    /// <returns></returns>
     private async Task<bool> StartDownloadUpdateGameResourceAsync(
         GameLauncherSource _launcher,
         string currentVersion,
@@ -341,6 +364,7 @@ public abstract partial class KuroGameContextBaseV2
         await _actionLock.WaitAsync();
         try
         {
+            
             #region 获取配置
             if (_launcher == null || string.IsNullOrWhiteSpace(currentVersion))
             {
@@ -374,7 +398,8 @@ public abstract partial class KuroGameContextBaseV2
                 _launcher
                     .ResourceDefault.CdnList.Where(x => x.P != 0)
                     .OrderBy(x => x.P)
-                    .FirstOrDefault() ?? null;
+                    .FirstOrDefault()
+                ?? null;
             if (cdnUrl == null)
             {
                 GameEventPublisher.Publish(
@@ -399,7 +424,7 @@ public abstract partial class KuroGameContextBaseV2
                 return false;
             }
             #endregion
-
+           
             this._downloadState = new DownloadState();
 
             var downloadResource = new List<IndexResource>();
@@ -409,21 +434,47 @@ public abstract partial class KuroGameContextBaseV2
 
             foreach (var x in _patch.Resource)
             {
-                if (x.Dest.Contains("krdiff")) patchResource.Add(x);
-                else if (x.Dest.Contains("krpdiff")) groupResource.Add(x);
-                else if (x.Dest.Contains("krzip")) zipResource.Add(x);
-                else downloadResource.Add(x);
+                if (x.Dest.Contains("krdiff"))
+                    patchResource.Add(x);
+                else if (x.Dest.Contains("krpdiff"))
+                    groupResource.Add(x);
+                else if (x.Dest.Contains("krzip"))
+                    zipResource.Add(x);
+                else
+                    downloadResource.Add(x);
             }
-
-            var downloadBaseFolder = Path.Combine(baseFolder, "downloads");
+            string downloadBaseFolder = "";
+            if (isProd)
+            {
+                downloadBaseFolder = Path.Combine(baseFolder, "prodDownloads");
+            }
+            else
+            {
+                downloadBaseFolder = Path.Combine(baseFolder, "downloads");
+            }
+            if (isProd)
+            {
+                await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdDownloadPath, downloadBaseFolder);
+                await this.GameLocalConfig.SaveConfigAsync(
+                    GameLocalSettingName.ProdDownloadFolderDone,
+                    "False"
+                );
+                await this.GameLocalConfig.SaveConfigAsync(
+                    GameLocalSettingName.ProdDownloadVersion,
+                    previous.Version
+                );
+            }
             DownloadUpdateFolderConfig folderConfig = new();
             await GameEventPublisher.PublisAsync(
                 GameContextActionType.CdnSelect,
                 "正在选择最优CDN"
             );
-            // 避免 patchResource 为空导致无文件测速报错，这里改用全资源测速
-            var cdnResult = await TestCdnAsync(_launcher.ResourceDefault.CdnList, previous.BaseUrl, _patch.Resource);
-            if(cdnResult == null)
+            var cdnResult = await TestCdnAsync(
+                _launcher.ResourceDefault.CdnList,
+                previous.BaseUrl,
+                _patch.Resource
+            );
+            if (cdnResult == null)
             {
                 this.GameEventPublisher.Publish(
                     new GameContextOutputArgs()
@@ -436,7 +487,8 @@ public abstract partial class KuroGameContextBaseV2
             }
             var baseUrl = cdnResult.Value.Url + previous.BaseUrl;
             #region 初始化步骤显示
-            var downloadTasks = new List<(IEnumerable<IndexResource> Items, string Name, string Folder)>();
+            var downloadTasks =
+                new List<(IEnumerable<IndexResource> Items, string Name, string Folder)>();
             if (patchResource.Any())
             {
                 this.Setups.Add("下载补丁文件");
@@ -462,11 +514,12 @@ public abstract partial class KuroGameContextBaseV2
                 downloadTasks.Add((downloadResource, "下载更新文件", folderConfig.DownloadFolder));
             }
             #endregion
+            #region  下载资源
             for (int i = 0; i < downloadTasks.Count; i++)
             {
                 var downloadMethod = new DownloadAndVerifyResource(this.Logger)
                 {
-                    ProgressName = downloadTasks[i].Name
+                    ProgressName = downloadTasks[i].Name,
                 };
 
                 downloadMethod.SetParam(
@@ -485,9 +538,31 @@ public abstract partial class KuroGameContextBaseV2
                 );
                 this._currentRunningAction = downloadMethod;
                 CurrentSetups = i;
-                await this.GameEventPublisher.PublishStepAsync(downloadTasks[i].Name, CurrentSetups, Setups);
+                await this.GameEventPublisher.PublishStepAsync(
+                    downloadTasks[i].Name,
+                    CurrentSetups,
+                    Setups
+                );
                 await downloadMethod.RunAsync(true);
             }
+            #endregion
+            #region 安装资源
+            if (isProd) //如果是预下载则跳出
+            {
+                await this.GameLocalConfig.SaveConfigAsync(
+                    GameLocalSettingName.ProdDownloadFolderDone,
+                    "True"
+                );
+                this.GameEventPublisher.Publish(
+                    new GameContextOutputArgs() { Type = GameContextActionType.None }
+                );
+                return true;
+            }
+            else
+            {
+
+            }
+            #endregion
             return true;
         }
         catch (TaskCanceledException)
