@@ -509,8 +509,9 @@ public abstract partial class KuroGameContextBaseV2
             }
             if (downloadResource.Any())
             {
+                //下载更新文件放最后，直接更新到本体路径上，后续需要测试解压增量是否会影响到downloadResource
                 this.Setups.Add("下载更新文件");
-                folderConfig.DownloadFolder = Path.Combine(downloadBaseFolder, "downloads");
+                folderConfig.DownloadFolder = baseFolder;
                 downloadTasks.Add((downloadResource, "下载更新文件", folderConfig.DownloadFolder));
             }
             #endregion
