@@ -28,7 +28,7 @@ public sealed class GameProgressTracker : IAsyncDisposable
 
     public int TotalSteps { get; private set; }
 
-    public string StepName { get; private set; } = string.Empty;
+    public int SetupIndex { get;internal set; } =-1;
 
     public System.Collections.Generic.List<string> AllSteps { get; private set; } = new();
 
@@ -62,6 +62,8 @@ public sealed class GameProgressTracker : IAsyncDisposable
     public event Action<GameProgressTracker>? OnProgressChanged;
 
     public double Percentage => TotalBytes > 0 ? Math.Round((CurrentBytes * 100.0) / TotalBytes, 2) : 0;
+
+    public string StepName { get; private set; }
 
     private SynchronizationContext? _syncContext;
     private PeriodicTimer? _timer;

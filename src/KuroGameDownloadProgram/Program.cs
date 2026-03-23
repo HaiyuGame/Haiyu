@@ -49,7 +49,7 @@ IHost host = Host.CreateDefaultBuilder(args)
 
 var v2 = host.Services.GetService<V2TestGameContext>();
 await v2.InitAsync();
-await v2.StartDownloadTaskAsync("D:\\Punish");
+await v2.UpdateGameResourceAsync();
 v2.ProgressState.OnProgressChanged += (t) =>
 {
     int oldLeft = Console.CursorLeft;

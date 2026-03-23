@@ -31,7 +31,6 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
     private string _baseUrl;
     private IHttpClientService _httpClientService;
     private GameLauncherSource? _launcher;
-    private string _downloadBaseUrl;
     private long _totalDownloadedBytes;
     private long _totalProgressSize;
     private long _totalProgressTotal;
@@ -46,13 +45,11 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
 
     private DownloadState _downloadState;
 
-    public CDNSpeedTester CDNSpeedTester { get; }
     public Dictionary<string, object> Param { get; private set; }
     public IGameEventPublisher GameEventPublisher { get; private set; }
     public LoggerService Logger { get; }
     public string ProgressName { get; set; }
     public double ProgressValue { get; set; }
-
     /// <summary>
     /// 构造传参
     /// </summary>
@@ -60,7 +57,6 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
     public DownloadAndVerifyResource(LoggerService loggerService)
     {
         Logger = loggerService;
-        CDNSpeedTester = new();
     }
 
     public void SetParam(Dictionary<string, object> param, IGameEventPublisher gameEventPublisher)
@@ -127,6 +123,10 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
         {
             return false;
         }
+        if (!Param.CheckParam<string>("baseUrl", out var baseUrl))
+        {
+            return false;
+        }
         this._resource = resources!;
         this.isDelete = isDelete!;
         this.cts = new CancellationTokenSource();
@@ -134,6 +134,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
         this._httpClientService = httpService!;
         this._launcher = launcher;
         this._downloadState = downloadState!;
+        this._baseUrl = baseUrl!;
         InitProgress();
         return true;
     }
@@ -202,23 +203,8 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
     {
         try
         {
-            await GameEventPublisher.PublisAsync(
-                GameContextActionType.CdnSelect,
-                "正在选择最优CDN"
-            );
-            const long targetTestSize = 50L * 1024 * 1024;
-            var item = resource
-                .OrderBy(x => Math.Abs((long)x.Size - targetTestSize))
-                .FirstOrDefault();
-            item ??= resource.OrderBy(x => x.Size).FirstOrDefault();
-            var testUrl = this._launcher.ResourceDefault.Config.BaseUrl + item.Dest;
-            var best = await CDNSpeedTester.TestAllAsync(
-                _launcher.ResourceDefault.CdnList,
-                testUrl,
-                TimeSpan.FromSeconds(40)
-            );
-            this._downloadBaseUrl = best.Url + this._launcher.ResourceDefault.Config.BaseUrl;
-            await GameEventPublisher.PublisAsync(GameContextActionType.CdnSelect, "正在下载数据");
+            
+            await GameEventPublisher.PublisAsync(GameContextActionType.CdnSelect, this.ProgressName);
             await Parallel.ForEachAsync(
                 resource,
                 options,
@@ -250,7 +236,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
                             }
                         );
                     var filePath = BuildFileHelper.BuildFilePath(folder, item);
-                    var downloadUrl = this._downloadBaseUrl + item.Dest;
+                    var downloadUrl = this._baseUrl + item.Dest;
                     if (File.Exists(filePath))
                     {
                         if (item.ChunkInfos == null)
@@ -426,6 +412,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
             IsAction = this._downloadState?.IsActive ?? false,
             IsPause = _downloadState?.IsPaused ?? false,
             TipMessage = tip,
+            
         };
         return args;
     }
