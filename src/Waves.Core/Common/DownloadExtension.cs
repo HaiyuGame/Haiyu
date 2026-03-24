@@ -56,7 +56,7 @@ public static class DownloadExtension
             publisher.Publish(new Models.GameContextOutputArgs()
             {
                 IsStepUpdate = true,
-                StepName = stepName,
+                StepName = stepName ?? allSteps[currentStepIndex],
                 CurrentStepIndex = currentStepIndex,
                 TotalSteps = allSteps?.Count ?? 0,
                 AllSteps = allSteps ?? new List<string>(),

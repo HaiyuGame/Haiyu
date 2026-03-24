@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Haiyu.Common;
+using System;
 using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Text;
-using Haiyu.Common;
+using System.Text.RegularExpressions;
 using Waves.Api.Models;
 using Waves.Api.Models.Launcher;
 using Waves.Core.Common;
@@ -424,7 +425,8 @@ public abstract partial class KuroGameContextBaseV2
                 return false;
             }
             #endregion
-           
+
+            #region 初始化资源
             this._downloadState = new DownloadState();
 
             var downloadResource = new List<IndexResource>();
@@ -486,6 +488,8 @@ public abstract partial class KuroGameContextBaseV2
                 return false;
             }
             var baseUrl = cdnResult.Value.Url + previous.BaseUrl;
+            #endregion
+
             #region 初始化步骤显示
             var downloadTasks =
                 new List<(IEnumerable<IndexResource> Items, string Name, string Folder)>();
@@ -515,6 +519,7 @@ public abstract partial class KuroGameContextBaseV2
                 downloadTasks.Add((downloadResource, "下载更新文件", folderConfig.DownloadFolder));
             }
             #endregion
+
             #region  下载资源
             for (int i = 0; i < downloadTasks.Count; i++)
             {
@@ -547,6 +552,7 @@ public abstract partial class KuroGameContextBaseV2
                 await downloadMethod.RunAsync(true);
             }
             #endregion
+
             #region 安装资源
             if (isProd) //如果是预下载则跳出
             {
@@ -561,7 +567,7 @@ public abstract partial class KuroGameContextBaseV2
             }
             else
             {
-
+                await this.StartInstallGameResource(_launcher,previous,_patch);
             }
             #endregion
             return true;
@@ -579,8 +585,147 @@ public abstract partial class KuroGameContextBaseV2
             _actionLock.Release();
         }
     }
+
+    public async Task StartInstallGameResource(GameLauncherSource launcher, PatchConfig previous, PatchIndexGameResource patch,bool isProd = false)
+    {
+        #region 获取资源
+        var baseFolder = await this.GameLocalConfig.GetConfigAsync(
+                GameLocalSettingName.GameLauncherBassFolder
+            );
+        if (baseFolder == null)
+        {
+            GameEventPublisher.Publish(
+                new GameContextOutputArgs()
+                {
+                    Type = Models.Enums.GameContextActionType.TipMessage,
+                    TipMessage = "未找到游戏安装路径，无法进行安装",
+                }
+            );
+            GameEventPublisher.Publish(
+                new GameContextOutputArgs()
+                {
+                    Type = Models.Enums.GameContextActionType.None
+                }
+            );
+
+            return;
+        }
+        #endregion
+
+        DownloadUpdateFolderConfig folderConfig = new();
+        #region 初始化资源
+        this._downloadState = new DownloadState();
+
+        var downloadResource = new List<IndexResource>();
+        var patchResource = new List<IndexResource>();
+        var groupResource = new List<IndexResource>();
+        var zipResource = new List<IndexResource>();
+        foreach (var x in patch.Resource)
+        {
+            if (x.Dest.Contains("krdiff"))
+                patchResource.Add(x);
+            else if (x.Dest.Contains("krpdiff"))
+                groupResource.Add(x);
+            else if (x.Dest.Contains("krzip"))
+                zipResource.Add(x);
+            else
+                downloadResource.Add(x);
+        }
+        string downloadBaseFolder = "";
+        if (isProd)
+        {
+            downloadBaseFolder = Path.Combine(baseFolder, "prodDownloads");
+        }
+        else
+        {
+            downloadBaseFolder = Path.Combine(baseFolder, "downloads");
+        }
+        if (isProd)
+        {
+            await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdDownloadPath, downloadBaseFolder);
+            await this.GameLocalConfig.SaveConfigAsync(
+                GameLocalSettingName.ProdDownloadFolderDone,
+                "False"
+            );
+            await this.GameLocalConfig.SaveConfigAsync(
+                GameLocalSettingName.ProdDownloadVersion,
+                previous.Version
+            );
+        }
+        await GameEventPublisher.PublisAsync(
+            GameContextActionType.CdnSelect,
+            "正在选择最优CDN"
+        );
+        #endregion
+        Setups.Clear();
+        #region 初始化步骤显示
+        var installTasks =
+            new List<(IEnumerable<IndexResource> Items, string Name, string Folder, InstallGameResourceType)>();
+        if (patchResource.Any())
+        {
+            this.Setups.Add("安装补丁文件");
+            folderConfig.PatchFolder = Path.Combine(downloadBaseFolder, "patchs");
+            installTasks.Add((patchResource, "安装补丁文件", folderConfig.PatchFolder, InstallGameResourceType.Krdiff));
+        }
+        if (groupResource.Any())
+        {
+            this.Setups.Add("安装补丁组文件");
+            folderConfig.PatchGroupFolder = Path.Combine(downloadBaseFolder, "patchGroup");
+            installTasks.Add((groupResource, "安装补丁组文件", folderConfig.PatchGroupFolder, InstallGameResourceType.KrdiffGroup));
+        }
+        if (zipResource.Any())
+        {
+            this.Setups.Add("安装压缩包");
+            folderConfig.ZipFolder = Path.Combine(downloadBaseFolder, "zips");
+            installTasks.Add((zipResource, "安装压缩包", folderConfig.ZipFolder, InstallGameResourceType.KrZip));
+        }
+        for (int i = 0; i < installTasks.Count; i++)
+        {
+            CurrentSetups = i;
+            await this.GameEventPublisher.PublishStepAsync(
+                    installTasks[i].Name,
+                    CurrentSetups,
+                    Setups
+                );
+            await this.GameEventPublisher.PublishStepAsync(
+                    installTasks[i].Name,
+                    CurrentSetups,
+                    Setups
+                );
+            if (installTasks[i].Item4 == InstallGameResourceType.Krdiff)
+            {
+                InstallKrdiffResource installMethod = new InstallKrdiffResource(this.Logger);
+                installMethod.SetParam(new()
+                {
+                    {"krdiffs",patchResource },
+                    { "diffFolderPath", installTasks[i].Folder },
+                    {"gameBaseFolder",baseFolder }
+                },
+                this.GameEventPublisher);
+                this._currentRunningAction = installMethod;
+                await installMethod.RunAsync();
+            }
+            if(installTasks[i].Item4 == InstallGameResourceType.KrdiffGroup)
+            {
+                InstallKrdiffGroupResource installgroupMethod = new InstallKrdiffGroupResource(this.Logger);
+                installgroupMethod.SetParam(new()
+                {
+                    {"krpdiffs",groupResource },
+                    { "diffFolderPath", installTasks[i].Folder },
+                    {"baseFolderPath",baseFolder },
+                    {"groupFileInfos",patch.GroupInfos }
+                },
+                this.GameEventPublisher);
+                this._currentRunningAction = installgroupMethod;
+                await installgroupMethod.RunAsync();
+            }
+
+        }
+        #endregion
+    }
     #endregion
 
+    
 
     public async Task<bool> StopCannelTaskAsync()
     {
