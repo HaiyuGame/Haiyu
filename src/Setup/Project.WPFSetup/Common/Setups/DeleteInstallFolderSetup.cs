@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.IO.Compression;
+using System.Text.Json;
 
 namespace Project.WPFSetup.Common.Setups;
 
@@ -23,58 +24,43 @@ public class DeleteInstallFolderSetup : ISetup
 
     public async Task<bool> Remove(SetupProperty setupProperty, string directoryPath)
     {
-        return await Task.Run(() =>
+        try
         {
-            try
+            return await Task.Run(async () =>
             {
-                if (!Directory.Exists(directoryPath))
+                var installFolder = setupProperty.InstallPath;
+                var uninstallDat = Path.Combine(installFolder, "unstall.dat");
+                var unstallexe = Path.Combine(installFolder, "uninstall.exe");
+                if (File.Exists(uninstallDat))
                 {
-                    Console.WriteLine("指定的目录不存在。");
-                    return true;
+                    var reader = File.OpenText(uninstallDat);
+                    var list = JsonSerializer.Deserialize<List<string>>(await reader.ReadToEndAsync());
+                    if (list == null)
+                        return true;
+                    try
+                    {
+                        foreach (var file in list)
+                        {
+                            if (File.Exists(file))
+                            {
+                                File.Delete(file);
+                            }
+                        }
+                    }
+                    catch
+                    {
+                    }
+                    reader.Dispose();
                 }
-                Directory.Delete(directoryPath, true);
-                //var bytes = Resources.Resource1.InstallFile;
-                //using MemoryStream memoryStream = new MemoryStream(bytes);
-                //using (ZipArchive zipArchive = new ZipArchive(memoryStream))
-                //{
-                //    var files = zipArchive.Entries.Select(x => x.FullName).ToArray();
-                //    foreach (
-                //        var file in Directory.GetFiles(
-                //            directoryPath,
-                //            "*.*",
-                //            SearchOption.TopDirectoryOnly
-                //        )
-                //    )
-                //    {
-                //        try
-                //        {
-                //            File.Delete(file);
-                //            Console.WriteLine($"已删除文件: {file}");
-                //        }
-                //        catch (Exception ex)
-                //        {
-                //            Console.WriteLine($"无法删除文件 {file}: {ex.Message}");
-                //        }
-                //    }
-                //    foreach (
-                //        var dir in Directory.GetDirectories(
-                //            directoryPath,
-                //            "*",
-                //            SearchOption.TopDirectoryOnly
-                //        )
-                //    )
-                //    {
-                //        try
-                //        {
-                //            Directory.Delete(dir, true);
-                //        }
-                //        catch (Exception) { }
-                //    }
-                //}
-                
-            }
-            catch (Exception ex) { }
-            return true;
-        });
+                File.Delete(uninstallDat);
+                File.Delete(unstallexe);
+                return true;
+            });
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+        
     }
 }

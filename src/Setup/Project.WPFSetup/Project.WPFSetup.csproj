@@ -53,6 +53,7 @@
 		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
 		<PackageReference Include="SharpCompress" Version="0.39.0" />
 		<PackageReference Include="System.IO.Compression" Version="4.3.0" />
+		<PackageReference Include="System.Text.Json" Version="10.0.5" />
 		<PackageReference Include="WindowsAPICodePack-Core" Version="1.1.2" />
 		<PackageReference Include="WindowsAPICodePack-Shell" Version="1.1.1" />
 	</ItemGroup>

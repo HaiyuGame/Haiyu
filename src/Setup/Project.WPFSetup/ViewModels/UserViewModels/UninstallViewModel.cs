@@ -71,7 +71,28 @@ public sealed partial class UninstallViewModel : ObservableRecipient
             this.UninsatllVisibility = Visibility.Collapsed;
             this.UninstallingVisibility = Visibility.Collapsed;
             this.UninstadVisibility = Visibility.Visible;
+            MessageBox.Show("卸载完成，可能会出现多余的文件夹内容需要手动删除");
             return;
+        }
+    }
+
+    [RelayCommand]
+    async Task Loaded()
+    {
+        var progress = Process.GetProcesses();
+        var current = progress.Where(x=>x.ProcessName.Contains("Haiyu")).FirstOrDefault();
+        if(current != null)
+        {
+            var result = MessageBox.Show("Haiyu正在运行，是否关闭？","警告",MessageBoxButton.OKCancel, MessageBoxImage.Warning,MessageBoxResult.OK);
+            if(result == MessageBoxResult.OK) 
+            {
+                current.Kill();
+            }
+            else
+            {
+                MessageBox.Show("Haiyu正在运行，无法卸载");
+                Environment.Exit(0);
+            }
         }
     }
 

@@ -66,10 +66,9 @@ public sealed partial class InstallViewModel : ObservableRecipient
         dialog.IsFolderPicker = true;
         if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
         {
-            var isVild =  Path.GetPathRoot(dialog.FileName) == dialog.FileName;
-            if (isVild)
+            if (!dialog.FileName.ToLower().EndsWith("haiyu"))
             {
-                InstallFolder = dialog.FileName+"\\Haiyu";
+                InstallFolder = Path.Combine(dialog.FileName, "Haiyu");
             }
             else
             {
@@ -95,6 +94,7 @@ public sealed partial class InstallViewModel : ObservableRecipient
                 return;
             }
         }
+        Directory.CreateDirectory(this.SetupProperty.InstallPath);
         var files = Directory.GetFiles(this.SetupProperty.InstallPath,"*",searchOption: SearchOption.AllDirectories);
         if (files.Length>0)
         {
