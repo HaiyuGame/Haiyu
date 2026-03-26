@@ -8,5 +8,6 @@ public enum InstallGameResourceType:uint
 {
     Krdiff,
     KrdiffGroup,
-    KrZip
+    KrZip,
+    CheckAllFiles
 }

@@ -51,6 +51,11 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
     public LoggerService Logger { get; }
     public string ProgressName { get; set; }
     public double ProgressValue { get; set; }
+
+    public bool CanPause => true;
+
+    public bool CanStop => true;
+
     /// <summary>
     /// 构造传参
     /// </summary>
@@ -71,11 +76,11 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
     /// </summary>
     /// <param name="isSync">是否同步执行</param>
     /// <returns></returns>
-    public async Task<bool> RunAsync(bool isSync = false)
+    public async Task<object?> ExecuteAsync(bool isSync = false)
     {
         if (!(await CheckAsync()))
         {
-            return false;
+            return null;
         }
         if (isSync)
         {
@@ -100,7 +105,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
 
     public async Task<bool> CheckAsync()
     {
-        if (!Param.CheckParam<List<IndexResource>>("resource", out var resources))
+        if (!Param.CheckParam<IEnumerable<IndexResource>>("resource", out var resources))
         {
             return false;
         }
@@ -132,7 +137,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
         {
             return false;
         }
-        this._resource = resources!;
+        this._resource = resources?.ToList()!;
         this.isDelete = isDelete!;
         this.cts = new CancellationTokenSource();
         this._folder = folder!;
@@ -145,7 +150,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
         return true;
     }
 
-    public async Task<bool> ExecuteAsync()
+    public async Task<object?> ExecuteAsync()
     {
         try
         {

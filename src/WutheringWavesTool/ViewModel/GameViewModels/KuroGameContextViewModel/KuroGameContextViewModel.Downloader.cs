@@ -66,7 +66,7 @@ partial class KuroGameContextViewModel
                 }
                 ShowGameDownloadingBth(status);
             }
-            if (args.Type == Waves.Core.Models.Enums.GameContextActionType.DeleteFile)
+            if (args.Type == Waves.Core.Models.Enums.GameContextActionType.BottomText)
             {
                 ShowGameDownloadingBth(status);
                 this.MaxProgressValue = args.FileTotal;

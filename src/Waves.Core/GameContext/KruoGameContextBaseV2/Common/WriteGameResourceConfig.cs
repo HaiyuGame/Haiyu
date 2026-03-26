@@ -1,5 +1,6 @@
 ﻿using Waves.Api.Models;
 using Waves.Api.Models.Launcher;
+using Waves.Core.Common;
 using Waves.Core.Contracts.Events;
 using Waves.Core.Models;
 using Waves.Core.Models.CoreApi;
@@ -63,5 +64,35 @@ public class WriteGameResourceConfig : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         await Task.CompletedTask;
+    }
+
+    public async Task WriteDownloadAndUpDateResultAsync(GameLauncherSource source)
+    {
+        var currentVersion = await GameLocalConfig.GetConfigAsync(
+            GameLocalSettingName.LocalGameVersion
+        );
+        var installFolder = await GameLocalConfig.GetConfigAsync(
+            GameLocalSettingName.GameLauncherBassFolder
+        );
+        if (string.IsNullOrWhiteSpace(currentVersion))
+        {
+            await this.GameLocalConfig.SaveConfigAsync(
+                GameLocalSettingName.LocalGameVersion,
+                source.ResourceDefault.Version
+            );
+        }
+        await this.GameLocalConfig.SaveConfigAsync(
+            GameLocalSettingName.LocalGameVersion,
+            source.ResourceDefault.Version
+        );
+        await this.GameLocalConfig.SaveConfigAsync(
+            GameLocalSettingName.LocalGameUpdateing,
+            "False"
+        );
+
+        await this.GameLocalConfig.SaveConfigAsync(
+            GameLocalSettingName.GameLauncherBassProgram,
+            $"{installFolder}\\{kuroGameApiConfig.GameExeName}"
+        );
     }
 }

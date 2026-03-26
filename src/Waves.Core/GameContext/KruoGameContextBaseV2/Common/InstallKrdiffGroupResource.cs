@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 using Waves.Core.Common;
 using Waves.Core.Common.Downloads;
 using Waves.Core.Contracts.Events;
@@ -32,6 +33,10 @@ namespace Waves.Core.GameContext.KruoGameContextBaseV2.Common
         public IGameEventPublisher GameEventPublisher { get; private set; }
         public string ProgressName { get; set; }
         public double ProgressValue { get; set; }
+
+        public bool CanPause => false;
+
+        public bool CanStop => false;
 
         public void SetParam(Dictionary<string, object> param,GameEventPublisher gameEventPublisher)
         {
@@ -68,7 +73,12 @@ namespace Waves.Core.GameContext.KruoGameContextBaseV2.Common
             return true;
         }
 
-        public async Task RunAsync()
+        /// <summary>
+        /// 执行，获得已经解压成功得文件列表
+        /// </summary>
+        /// <param name="isSync"></param>
+        /// <returns></returns>
+        public async Task<object?> ExecuteAsync(bool isSync = false)
         {
             if (!await CheckAsync())
             {
@@ -79,8 +89,9 @@ namespace Waves.Core.GameContext.KruoGameContextBaseV2.Common
                         TipMessage = "初始化失败"
                     }
                 );
-                return;
+                return null;
             }
+            Dictionary<string, string> newFiles = new();
             var tempFolder = Path.Combine(baseFolderPath, "decompressFolder");
             Directory.CreateDirectory(tempFolder);
             for (int i = 0; i < krdiffs.Count; i++)
@@ -120,8 +131,28 @@ namespace Waves.Core.GameContext.KruoGameContextBaseV2.Common
                     tempFolder,
                     progress: progress
                 );
-                //删除源文件信息
+                //ToDo 删除源文件信息
+                var groupItem = this.groupFileInfos.Where(x => x.Dest == krdiffs[i].Dest).FirstOrDefault();
+                if (groupItem == null)
+                    return null;
+                for (int j = 0; j < groupItem.SrcFiles.Count; j++)
+                {
+                    var deleteFilePath = BuildFileHelper.BuildFilePath(
+                        baseFolderPath,
+                        groupItem.SrcFiles[j]
+                    );
+                    //返回新文件
+                    newFiles.Add(
+                       BuildFileHelper.BuildFilePath(tempFolder, groupItem),
+                       BuildFileHelper.BuildFilePath(baseFolderPath, groupItem)
+                    );
+                    Logger.WriteError($"删除源文件{deleteFilePath}");
+                    File.Delete(deleteFilePath);
+                }
+                Logger.WriteInfo("删除差异文件");
+                File.Delete(krdiffPath);
             }
+            return newFiles;
         }
 
         public void SetParam(

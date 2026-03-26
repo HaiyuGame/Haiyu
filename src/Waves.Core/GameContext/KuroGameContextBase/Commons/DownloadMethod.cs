@@ -278,7 +278,7 @@ partial class KuroGameContextBase
                         this,
                         new GameContextOutputArgs()
                         {
-                            Type = GameContextActionType.DeleteFile,
+                            Type = GameContextActionType.BottomText,
                             FileTotal = keys.Count,
                             CurrentFile = i,
                             DeleteString = $"正在移动校验文件{System.IO.Path.GetFileName(value)}",

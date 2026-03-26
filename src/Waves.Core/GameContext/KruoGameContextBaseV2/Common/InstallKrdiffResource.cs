@@ -35,6 +35,10 @@ public class InstallKrdiffResource:IProgressSetup,IAsyncDisposable
     public string ProgressName { get; set; }
     public double ProgressValue { get; set; }
 
+    public bool CanPause => false;
+
+    public bool CanStop => false;
+
     public void SetParam(Dictionary<string, object> param)
     {
         this.Param = param;
@@ -59,7 +63,7 @@ public class InstallKrdiffResource:IProgressSetup,IAsyncDisposable
         return true;
     }
 
-    public async Task RunAsync()
+    public async Task<bool> RunAsync()
     {
         for (int i = 0; i < krdiffs.Count; i++)
         {
@@ -95,6 +99,7 @@ public class InstallKrdiffResource:IProgressSetup,IAsyncDisposable
                 progress: progress
             );
         }
+        return true;
     }
 
     public void SetParam(Dictionary<string, object> param, IGameEventPublisher gameEventPublisher)
@@ -110,5 +115,18 @@ public class InstallKrdiffResource:IProgressSetup,IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         await Task.CompletedTask;
+    }
+
+    public async Task<object?> ExecuteAsync(bool isSync = false)
+    {
+        if (isSync)
+        {
+            return await RunAsync();
+        }
+        else
+        {
+            Task.Run(async() => await RunAsync());
+            return null;
+        }
     }
 }
