@@ -38,7 +38,10 @@ namespace Waves.Core.GameContext.KruoGameContextBaseV2.Common
 
         public bool CanStop => false;
 
-        public void SetParam(Dictionary<string, object> param,GameEventPublisher gameEventPublisher)
+        public void SetParam(
+            Dictionary<string, object> param,
+            GameEventPublisher gameEventPublisher
+        )
         {
             this.Param = param;
             this.GameEventPublisher = GameEventPublisher;
@@ -86,7 +89,7 @@ namespace Waves.Core.GameContext.KruoGameContextBaseV2.Common
                     new GameContextOutputArgs
                     {
                         Type = GameContextActionType.Error,
-                        TipMessage = "初始化失败"
+                        TipMessage = "初始化失败",
                     }
                 );
                 return null;
@@ -117,7 +120,6 @@ namespace Waves.Core.GameContext.KruoGameContextBaseV2.Common
                                     FilePath = s.Item2,
                                     FileCurrentSize = (long)s.Item3.PatchedCurrentBytes,
                                     FileTotalSize = (long)s.Item3.PatchTotalBytes,
-                                    
                                 }
                             );
                             ProgressValue = s.Item3.TotalBytesProgress;
@@ -132,7 +134,9 @@ namespace Waves.Core.GameContext.KruoGameContextBaseV2.Common
                     progress: progress
                 );
                 //ToDo 删除源文件信息
-                var groupItem = this.groupFileInfos.Where(x => x.Dest == krdiffs[i].Dest).FirstOrDefault();
+                var groupItem = this
+                    .groupFileInfos.Where(x => x.Dest == krdiffs[i].Dest)
+                    .FirstOrDefault();
                 if (groupItem == null)
                     return null;
                 for (int j = 0; j < groupItem.SrcFiles.Count; j++)
@@ -143,8 +147,8 @@ namespace Waves.Core.GameContext.KruoGameContextBaseV2.Common
                     );
                     //返回新文件
                     newFiles.Add(
-                       BuildFileHelper.BuildFilePath(tempFolder, groupItem),
-                       BuildFileHelper.BuildFilePath(baseFolderPath, groupItem)
+                        BuildFileHelper.BuildFilePath(tempFolder, groupItem),
+                        BuildFileHelper.BuildFilePath(baseFolderPath, groupItem)
                     );
                     Logger.WriteError($"删除源文件{deleteFilePath}");
                     File.Delete(deleteFilePath);
@@ -152,6 +156,32 @@ namespace Waves.Core.GameContext.KruoGameContextBaseV2.Common
                 Logger.WriteInfo("删除差异文件");
                 File.Delete(krdiffPath);
             }
+            this.GameEventPublisher.Publish(
+                new GameContextOutputArgs()
+                {
+                    Type = GameContextActionType.BottomText,
+                    TipMessage = "正在移动解压文件……",
+                }
+            );
+            var keys = newFiles.Keys.ToList();
+            for (int i = 0; i < keys.Count; i++)
+            {
+                string key = keys[i];
+                string value = newFiles[key];
+                if (File.Exists(value))
+                    File.Delete(value);
+                File.Move(key, value);
+                this.GameEventPublisher.Publish(
+                    new GameContextOutputArgs()
+                    {
+                        Type = GameContextActionType.BottomText,
+                        FileTotal = keys.Count,
+                        CurrentFile = i,
+                        DeleteString = $"正在移动校验文件{System.IO.Path.GetFileName(value)}",
+                    }
+                );
+            }
+
             return newFiles;
         }
 

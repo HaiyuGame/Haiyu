@@ -463,37 +463,7 @@ partial class KuroGameContextBaseV2
                 this._currentRunningAction = installgroupMethod;
                 //运行解压补丁组后，获取解压结果
                 var newFiles = await installgroupMethod.ExecuteAsync();
-                this.GameEventPublisher.Publish(
-                    new GameContextOutputArgs()
-                    {
-                        Type = GameContextActionType.BottomText,
-                        TipMessage = "正在移动解压文件……",
-                    }
-                );
-                if (newFiles is Dictionary<string, string> newFilesDict)
-                {
-                    var keys = newFilesDict.Keys.ToList();
-                    for (int f = 0; f < keys.Count; f++)
-                    {
-                        string key = keys[i];
-                        string value = newFilesDict[key];
-                        if (File.Exists(value))
-                            File.Delete(value);
-                        File.Move(key, value);
-                    }
-                }
-                else
-                {
-                    await this.StopCannelTaskAsync();
-                    this.GameEventPublisher.Publish(
-                        new GameContextOutputArgs()
-                        {
-                            Type = GameContextActionType.TipMessage,
-                            TipMessage = "补丁组安装失败，无法进行后续安装，请尝试直接修复文件",
-                        }
-                    );
-                    return;
-                }
+                
             }
             if (installTasks[i].Item4 == InstallGameResourceType.KrZip) { }
             if (installTasks[i].Item4 == InstallGameResourceType.CheckAllFiles)
