@@ -385,7 +385,8 @@ partial class KuroGameContextBaseV2
                 IEnumerable<IndexResource> Items,
                 string Name,
                 string Folder,
-                InstallGameResourceType
+                InstallGameResourceType,
+                string baseUrl
             )>();
         if (patchResource.Any())
         {
@@ -396,7 +397,8 @@ partial class KuroGameContextBaseV2
                     patchResource,
                     "安装补丁文件",
                     folderConfig.PatchFolder,
-                    InstallGameResourceType.Krdiff
+                    InstallGameResourceType.Krdiff,
+                    previous.BaseUrl
                 )
             );
         }
@@ -409,7 +411,8 @@ partial class KuroGameContextBaseV2
                     groupResource,
                     "安装补丁组文件",
                     folderConfig.PatchGroupFolder,
-                    InstallGameResourceType.KrdiffGroup
+                    InstallGameResourceType.KrdiffGroup,
+                    previous.BaseUrl
                 )
             );
         }
@@ -418,7 +421,7 @@ partial class KuroGameContextBaseV2
             this.Setups.Add("安装压缩包");
             folderConfig.ZipFolder = Path.Combine(downloadBaseFolder, "zips");
             installTasks.Add(
-                (zipResource, "安装压缩包", folderConfig.ZipFolder, InstallGameResourceType.KrZip)
+                (zipResource, "安装压缩包", folderConfig.ZipFolder, InstallGameResourceType.KrZip,previous.BaseUrl)
             );
         }
         this.Setups.Add("重新校验文件");
@@ -431,7 +434,8 @@ partial class KuroGameContextBaseV2
                     resource!.Resource,
                     "安装压缩包",
                     baseFolder,
-                    InstallGameResourceType.CheckAllFiles
+                    InstallGameResourceType.CheckAllFiles,
+                    launcher.ResourceDefault.ResourcesBasePath
                 )
             );
         }
@@ -439,7 +443,6 @@ partial class KuroGameContextBaseV2
         {
             Logger.WriteError("获取资源信息失败，最终校验启动失败，跳过此校验");
         }
-
         for (int i = 0; i < installTasks.Count; i++)
         {
             CurrentSetups = i;
@@ -521,7 +524,7 @@ partial class KuroGameContextBaseV2
                 );
                 var cdnResult = await TestCdnAsync(
                     launcher.ResourceDefault.CdnList,
-                    previous.BaseUrl,
+                    launcher.ResourceDefault.ResourcesBasePath,
                     patch.Resource
                 );
                 if (cdnResult == null)
@@ -532,7 +535,7 @@ partial class KuroGameContextBaseV2
                     );
                     return;
                 }
-                var baseUrl = cdnResult.Value.Url + previous.BaseUrl;
+                var baseUrl = cdnResult.Value.Url + launcher.ResourceDefault.ResourcesBasePath;
                 downloadMethod.SetParam(
                     new Dictionary<string, object>()
                     {

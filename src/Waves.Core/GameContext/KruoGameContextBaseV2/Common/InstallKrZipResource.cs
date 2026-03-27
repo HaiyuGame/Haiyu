@@ -133,6 +133,7 @@ public class InstallKrZipResource : IProgressSetup,IAsyncDisposable
                 progress,
                 Logger
             );
+            File.Delete(item.Key);
         }
         return true;
     }

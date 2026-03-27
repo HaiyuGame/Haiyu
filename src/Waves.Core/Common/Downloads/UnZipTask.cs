@@ -72,6 +72,8 @@ public static class UnZipTask
                     4096,
                     true
                 );
+                // 预先分配文件大小以避免磁盘碎片并提升写入性能
+                fileStream.SetLength(entry.Length);
                 long totalWritten = 0;
                 long chunkTotalSize = entry.Length;
                 long accumulatedBytes = 0;
@@ -138,7 +140,6 @@ public static class UnZipTask
                         chunkTotalSize
                     ));
                 }
-                fs.SetLength(entry.Length);
             }
             return true;
         }
