@@ -1,4 +1,5 @@
-﻿using Waves.Api.Models;
+﻿using System.Buffers.Text;
+using Waves.Api.Models;
 using Waves.Core.Common;
 using Waves.Core.GameContext.KruoGameContextBaseV2.Common;
 using Waves.Core.Models;
@@ -155,58 +156,60 @@ partial class KuroGameContextBaseV2
                 );
             }
             DownloadUpdateFolderConfig folderConfig = new();
-            await GameEventPublisher.PublisAsync(
-                GameContextActionType.CdnSelect,
-                "正在选择最优CDN"
-            );
-            var cdnResult = await TestCdnAsync(
-                _launcher.ResourceDefault.CdnList,
-                previous.BaseUrl,
-                _patch.Resource
-            );
-            if (cdnResult == null)
-            {
-                this.GameEventPublisher.Publish(
-                    new GameContextOutputArgs()
-                    {
-                        Type = GameContextActionType.TipMessage,
-                        TipMessage = "未找到可用的CDN地址，无法进行下载",
-                    }
-                );
-                return false;
-            }
-            var baseUrl = cdnResult.Value.Url + previous.BaseUrl;
             #endregion
 
             #region 初始化步骤显示
             var downloadTasks =
-                new List<(IEnumerable<IndexResource> Items, string Name, string Folder)>();
+                new List<(
+                    IEnumerable<IndexResource> Items,
+                    string Name,
+                    string Folder,
+                    string baseUrl
+                )>();
             if (patchResource.Any())
             {
                 this.Setups.Add("下载补丁文件");
                 folderConfig.PatchFolder = Path.Combine(downloadBaseFolder, "patchs");
-                downloadTasks.Add((patchResource, "下载补丁文件", folderConfig.PatchFolder));
+                downloadTasks.Add(
+                    (patchResource, "下载补丁文件", folderConfig.PatchFolder, previous.BaseUrl)
+                );
             }
             if (groupResource.Any())
             {
                 this.Setups.Add("下载补丁组文件");
                 folderConfig.PatchGroupFolder = Path.Combine(downloadBaseFolder, "patchGroup");
-                downloadTasks.Add((groupResource, "下载补丁组文件", folderConfig.PatchGroupFolder));
+                downloadTasks.Add(
+                    (
+                        groupResource,
+                        "下载补丁组文件",
+                        folderConfig.PatchGroupFolder,
+                        previous.BaseUrl
+                    )
+                );
             }
             if (zipResource.Any())
             {
                 this.Setups.Add("下载压缩包更新文件");
                 folderConfig.ZipFolder = Path.Combine(downloadBaseFolder, "zips");
-                downloadTasks.Add((zipResource, "下载压缩包更新文件", folderConfig.ZipFolder));
+                downloadTasks.Add(
+                    (zipResource, "下载压缩包更新文件", folderConfig.ZipFolder, previous.BaseUrl)
+                );
             }
             if (downloadResource.Any())
             {
-                //下载更新文件放最后，直接更新到本体路径上，后续需要测试解压增量是否会影响到downloadResource
                 this.Setups.Add("下载更新文件");
                 folderConfig.DownloadFolder = baseFolder;
-                downloadTasks.Add((downloadResource, "下载更新文件", folderConfig.DownloadFolder));
+                downloadTasks.Add(
+                    (
+                        downloadResource,
+                        "下载更新文件",
+                        folderConfig.DownloadFolder,
+                        _launcher.ResourceDefault.ResourcesBasePath
+                    )
+                );
             }
             #endregion
+
 
             #region  下载资源
             for (int i = 0; i < downloadTasks.Count; i++)
@@ -215,7 +218,27 @@ partial class KuroGameContextBaseV2
                 {
                     ProgressName = downloadTasks[i].Name,
                 };
-
+                await GameEventPublisher.PublisAsync(
+                    GameContextActionType.CdnSelect,
+                    "正在选择最优CDN"
+                );
+                var cdnResult = await TestCdnAsync(
+                    _launcher.ResourceDefault.CdnList,
+                    _launcher.ResourceDefault.ResourcesBasePath,
+                    _patch.Resource
+                );
+                if (cdnResult == null || !cdnResult.Value.Success)
+                {
+                    this.GameEventPublisher.Publish(
+                        new GameContextOutputArgs()
+                        {
+                            Type = GameContextActionType.TipMessage,
+                            TipMessage = "未找到可用的CDN地址，无法进行下载",
+                        }
+                    );
+                    return false;
+                }
+                var baseUrl = cdnResult.Value.Url + downloadTasks[i].baseUrl;
                 downloadMethod.SetParam(
                     new Dictionary<string, object>()
                     {
@@ -443,7 +466,7 @@ partial class KuroGameContextBaseV2
                     this.GameEventPublisher
                 );
                 this._currentRunningAction = installMethod;
-                await installMethod.RunAsync();
+                await installMethod.ExecuteAsync(true);
             }
             if (installTasks[i].Item4 == InstallGameResourceType.KrdiffGroup)
             {
@@ -461,11 +484,31 @@ partial class KuroGameContextBaseV2
                     this.GameEventPublisher
                 );
                 this._currentRunningAction = installgroupMethod;
-                //运行解压补丁组后，获取解压结果
-                var newFiles = await installgroupMethod.ExecuteAsync();
-                
+                var newFiles = await installgroupMethod.ExecuteAsync(true);
             }
-            if (installTasks[i].Item4 == InstallGameResourceType.KrZip) { }
+            if (installTasks[i].Item4 == InstallGameResourceType.KrZip)
+            {
+                InstallKrZipResource installZipMethod = new InstallKrZipResource(Logger)
+                {
+                    ProgressName = "安装压缩包",
+                };
+                await GameEventPublisher.PublisAsync(
+                    GameContextActionType.BottomText,
+                    "准备开始解压压缩包"
+                );
+                installZipMethod.SetParam(
+                    new Dictionary<string, object>()
+                    {
+                        { "zipInfos", installTasks[i].Items.ToList() },
+                        { "zipDownFolder", installTasks[i].Folder },
+                        { "baseGamePath", baseFolder },
+                        { "downloadState", _downloadState! },
+                    },
+                    this.GameEventPublisher
+                );
+                this._currentRunningAction = installZipMethod;
+                await installZipMethod.ExecuteAsync(true);
+            }
             if (installTasks[i].Item4 == InstallGameResourceType.CheckAllFiles)
             {
                 var downloadMethod = new DownloadAndVerifyResource(this.Logger)
@@ -485,10 +528,7 @@ partial class KuroGameContextBaseV2
                 {
                     Logger.WriteError("获取资源信息失败，最终校验启动失败，跳过此校验");
                     this.GameEventPublisher.Publish(
-                        new GameContextOutputArgs()
-                        {
-                            Type = GameContextActionType.None,
-                        }
+                        new GameContextOutputArgs() { Type = GameContextActionType.None }
                     );
                     return;
                 }
@@ -508,15 +548,15 @@ partial class KuroGameContextBaseV2
                     this.GameEventPublisher
                 );
                 this._currentRunningAction = downloadMethod;
-                CurrentSetups = i;
+                await downloadMethod.ExecuteAsync(true);
             }
         }
         var writeConfig = new WriteGameResourceConfig(
-               this.GameLocalConfig,
-               launcher,
-               this.Config,
-               Logger
-           );
+            this.GameLocalConfig,
+            launcher,
+            this.Config,
+            Logger
+        );
         await writeConfig.WriteDownloadAndUpDateResultAsync(launcher);
         #endregion
     }

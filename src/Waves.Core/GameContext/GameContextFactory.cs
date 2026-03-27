@@ -75,7 +75,7 @@ public static class GameContextFactory
         };
 
     internal static V2TestGameContext GetV2TestGameContext() =>
-        new V2TestGameContext(KuroGameApiConfig.MainAPiConfig, nameof(V2TestGameContext))
+        new V2TestGameContext(KuroGameApiConfig.MainBGRConfig, nameof(V2TestGameContext))
         {
             GamerConfigPath = GameContextFactory.GameBassPath + "\\V2TestConfig",
             IsLimitSpeed = false,

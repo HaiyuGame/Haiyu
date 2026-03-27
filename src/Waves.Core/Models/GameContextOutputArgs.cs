@@ -35,9 +35,9 @@ public class GameContextOutputArgs
     public long CurrentSize { get; set; }
     public long TotalSize { get; set; }
 
-    public int CurrentDecompressCount { get; set; }
+    public long CurrentDecompressCount { get; set; }
 
-    public int MaxDecompressValue { get; set; }
+    public long MaxDecompressValue { get; set; }
 
     public double DownloadSpeed { get; set; }
 
@@ -65,4 +65,5 @@ public class GameContextOutputArgs
 
     public int CurrentStepIndex { get; internal set; }
     public bool Prod { get; internal set; }
+    public double ZipSpeed { get; internal set; }
 }

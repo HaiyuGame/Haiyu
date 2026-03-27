@@ -47,6 +47,9 @@ IHost host = Host.CreateDefaultBuilder(args)
     })
     .Build();
 
+//var punish = host.Services.GetKeyedService<IGameContext>(nameof(PunishMainGameContext));
+//var launche = await punish.GetGameLauncherSourceAsync();
+//Console.ReadKey();
 var v2 = host.Services.GetService<V2TestGameContext>();
 await v2.InitAsync();
 await v2.UpdateGameResourceAsync();
@@ -54,7 +57,6 @@ v2.ProgressState.OnProgressChanged += (t) =>
 {
     int oldLeft = Console.CursorLeft;
     int oldTop = Console.CursorTop;
-
     try
     {
         Console.SetCursorPosition(0, 0);
@@ -63,7 +65,7 @@ v2.ProgressState.OnProgressChanged += (t) =>
         int filledTabs = (int)(percentage / 2);
         progressBar += new string('=', filledTabs);
         progressBar += new string(' ', 50 - filledTabs);
-        progressBar += $"] {percentage, 6:F2}%";
+        progressBar += $"] {percentage,6:F2}%";
         Console.Write(progressBar.PadRight(Console.WindowWidth - 1));
         Console.SetCursorPosition(0, 1);
         string stepInfo =
@@ -106,14 +108,12 @@ Console.SetCursorPosition(0, 15);
 while (true)
 {
     Console.WriteLine("Q停止，P暂停，R恢复，输入数字设定下载速度（MB）,回车确认");
-
     var input = Console.ReadLine();
-
     switch (input)
     {
         case "Q":
             await v2.StopCannelTaskAsync();
-            return; 
+            return;
         case "P":
             await v2.PauseDownloadAsync();
             break;

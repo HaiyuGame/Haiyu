@@ -248,7 +248,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
                             }
                         );
                     var filePath = BuildFileHelper.BuildFilePath(folder, item);
-                    var downloadUrl = this._baseUrl + item.Dest;
+                    var downloadUrl = Path.Combine(this._baseUrl, item.Dest).Replace("\\","/");
                     if (File.Exists(filePath))
                     {
                         if (item.ChunkInfos == null)
