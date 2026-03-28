@@ -99,6 +99,7 @@ public static class InstanceBuilderExtensions
                     #region GameContext
                     .AddTransient<WavesGameContextViewModel>()
                     .AddTransient<PunishGameContextViewModel>()
+                    .AddTransient<PunishV2GameContextViewModel>()
                     #endregion
                     #region Wiki
                     .AddTransient<WavesWikiViewModel>()

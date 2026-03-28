@@ -40,7 +40,7 @@ partial class KuroGameContextBaseV2
             );
             return false;
         }
-        Task.Run(async () => await StartDownloadAsync(folder, launcher, token));
+        Task.Run(async () => await StartDownloadAsync(folder, launcher));
         return true;
     }
 
@@ -53,8 +53,7 @@ partial class KuroGameContextBaseV2
     /// <returns></returns>
     private async Task<bool> StartDownloadAsync(
         string folder,
-        GameLauncherSource launcher,
-        CancellationToken token
+        GameLauncherSource launcher
     )
     {
         await _actionLock.WaitAsync();
@@ -68,7 +67,7 @@ partial class KuroGameContextBaseV2
             Setups.Add("下载与校验数据");
             Setups.Add("保存数据信息");
             var downloadMethod = new DownloadAndVerifyResource(this.Logger);
-            var resource = await GetGameResourceAsync(launcher.ResourceDefault, token);
+            var resource = await GetGameResourceAsync(launcher.ResourceDefault);
             if (resource == null)
                 return false;
             HttpClientService?.BuildClient();
@@ -142,7 +141,7 @@ partial class KuroGameContextBaseV2
     /// </summary>
     /// <param name="token"></param>
     /// <returns></returns>
-    public async Task<bool> RepairGameAsync(CancellationToken token = default)
+    public async Task<bool> RepairGameAsync()
     {
         var folder = await GameLocalConfig.GetConfigAsync(
             GameLocalSettingName.GameLauncherBassFolder
@@ -151,7 +150,8 @@ partial class KuroGameContextBaseV2
         {
             return false;
         }
-        await StartDownloadTaskAsync(folder, true, token);
+        
+        await StartDownloadTaskAsync(folder, true);
         return true;
     }
 

@@ -63,11 +63,14 @@ public sealed class GameProgressTracker : IAsyncDisposable
 
     public double Percentage => TotalBytes > 0 ? Math.Round((CurrentBytes * 100.0) / TotalBytes, 2) : 0;
 
+    public GameContextOutputArgs LastArgs=> _lastArgs;
+
     public string StepName { get; private set; }
 
     private SynchronizationContext? _syncContext;
     private PeriodicTimer? _timer;
     private Task? _timerTask;
+    private GameContextOutputArgs _lastArgs;
     private volatile bool _isDirty;
 
     /// <summary>
@@ -165,7 +168,7 @@ public sealed class GameProgressTracker : IAsyncDisposable
         {
             CurrentStepTip = args.TipMessage;
         }
-
+        this._lastArgs = args;
         _isDirty = true;
         return ValueTask.CompletedTask;
     }

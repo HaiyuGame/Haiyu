@@ -12,10 +12,12 @@ using Waves.Core.Common;
 using Waves.Core.Contracts;
 using Waves.Core.GameContext;
 using Waves.Core.GameContext.Contexts;
+using Waves.Core.GameContext.ContextsV2;
 using Waves.Core.Helpers;
 using Waves.Core.Models;
 using Waves.Core.Models.CoreApi;
 using Waves.Core.Models.Downloader;
+using Waves.Core.Models.Enums;
 using Waves.Core.Services;
 using Waves.Core.Settings;
 
@@ -50,7 +52,7 @@ IHost host = Host.CreateDefaultBuilder(args)
 //var punish = host.Services.GetKeyedService<IGameContext>(nameof(PunishMainGameContext));
 //var launche = await punish.GetGameLauncherSourceAsync();
 //Console.ReadKey();
-var v2 = host.Services.GetService<V2TestGameContext>();
+var v2 = host.Services.GetService<Waves.Core.GameContext.ContextsV2.PunishMainGameContextV2>();
 await v2.InitAsync();
 await v2.UpdateGameResourceAsync();
 v2.ProgressState.OnProgressChanged += (t) =>
@@ -131,4 +133,10 @@ public class TestContext : KuroGameContextBaseV2
 {
     public TestContext(KuroGameApiConfig config, string contextName)
         : base(config, contextName) { }
+
+    public override string GameContextNameKey => throw new NotImplementedException();
+
+    public override GameType GameType => throw new NotImplementedException();
+
+    public override Type ContextType => throw new NotImplementedException();
 }

@@ -86,7 +86,8 @@ partial class KuroGameContextBaseV2
                 _launcher
                     .ResourceDefault.CdnList.Where(x => x.P != 0)
                     .OrderBy(x => x.P)
-                    .FirstOrDefault() ?? null;
+                    .FirstOrDefault()
+                ?? null;
             if (cdnUrl == null)
             {
                 GameEventPublisher.Publish(
@@ -421,7 +422,13 @@ partial class KuroGameContextBaseV2
             this.Setups.Add("安装压缩包");
             folderConfig.ZipFolder = Path.Combine(downloadBaseFolder, "zips");
             installTasks.Add(
-                (zipResource, "安装压缩包", folderConfig.ZipFolder, InstallGameResourceType.KrZip,previous.BaseUrl)
+                (
+                    zipResource,
+                    "安装压缩包",
+                    folderConfig.ZipFolder,
+                    InstallGameResourceType.KrZip,
+                    previous.BaseUrl
+                )
             );
         }
         this.Setups.Add("重新校验文件");
@@ -562,6 +569,46 @@ partial class KuroGameContextBaseV2
         );
         await writeConfig.WriteDownloadAndUpDateResultAsync(launcher);
         #endregion
+    }
+
+    public async Task StartInstallGameResource()
+    {
+        var currentVersion = await this.GameLocalConfig.GetConfigAsync(
+            GameLocalSettingName.LocalGameVersion
+        );
+        var launcher = await this.GetGameLauncherSourceAsync();
+        var previous = launcher
+            .ResourceDefault.Config.PatchConfig.Where(x => x.Version == currentVersion)
+            .FirstOrDefault();
+        if (previous == null)
+        {
+            GameEventPublisher.Publish(
+                new GameContextOutputArgs()
+                {
+                    Type = Models.Enums.GameContextActionType.TipMessage,
+                    TipMessage = "未找到更新配置文件，无法进行下载",
+                }
+            );
+            return;
+        }
+        var cdnUrl =
+               launcher
+                   .ResourceDefault.CdnList.Where(x => x.P != 0)
+                   .OrderBy(x => x.P)
+                   .FirstOrDefault()
+               ?? null;
+        var _patch = await GetPatchGameResourceAsync(cdnUrl.Url + previous.IndexFile);
+        if (_patch == null)
+        {
+            GameEventPublisher.Publish(
+                new GameContextOutputArgs()
+                {
+                    Type = Models.Enums.GameContextActionType.TipMessage,
+                    TipMessage = "未找到更新配置文件，无法进行下载",
+                }
+            );
+            return;
+        }
     }
     #endregion
 }

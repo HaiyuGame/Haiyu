@@ -1,6 +1,7 @@
 ﻿using Waves.Core.Contracts;
 using Waves.Core.GameContext.Contexts;
 using Waves.Core.GameContext.Contexts.PRG;
+using Waves.Core.GameContext.ContextsV2;
 using Waves.Core.Models.CoreApi;
 using Waves.Core.Services;
 
@@ -74,8 +75,8 @@ public static class GameContextFactory
             IsLimitSpeed = false,
         };
 
-    internal static V2TestGameContext GetV2TestGameContext() =>
-        new V2TestGameContext(KuroGameApiConfig.MainBGRConfig, nameof(V2TestGameContext))
+    internal static ContextsV2.PunishMainGameContextV2 GetMainPunishGameContextV2() =>
+        new ContextsV2.PunishMainGameContextV2(KuroGameApiConfig.MainBGRConfig, nameof(ContextsV2.PunishMainGameContextV2))
         {
             GamerConfigPath = GameContextFactory.GameBassPath + "\\V2TestConfig",
             IsLimitSpeed = false,

@@ -48,21 +48,7 @@ partial class KuroGameContextBase
         return isPred ? (_prodDownloadState ?? _downloadState) : _downloadState;
     }
 
-    public int GetVerifyLimit()
-    {
-        if (
-            this.ContextName == nameof(PunishMainGameContext)
-            || this.ContextName == nameof(PunishGlobalGameContext)
-            || this.ContextName == nameof(PunishTwGameContext)
-        )
-        {
-            return 200;
-        }
-        else
-        {
-            return 2000;
-        }
-    }
+   
 
     /// <summary>
     /// 重新推送最后一次的下载/提示信息（用于页面切换后恢复显示）

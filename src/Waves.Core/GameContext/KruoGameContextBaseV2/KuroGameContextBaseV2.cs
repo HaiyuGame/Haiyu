@@ -1,9 +1,11 @@
-﻿using System;
+﻿using Haiyu.Common;
+using System;
 using System.Buffers.Text;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Text.RegularExpressions;
-using Haiyu.Common;
 using Waves.Api.Models;
 using Waves.Api.Models.Launcher;
 using Waves.Core.Common;
@@ -22,7 +24,7 @@ namespace Waves.Core.GameContext;
 /// <summary>
 /// 库洛游戏核心上下文基类V2，重构版本，增强结构性
 /// </summary>
-public abstract partial class KuroGameContextBaseV2
+public abstract partial class KuroGameContextBaseV2:IGameContextV2
 {
     private bool isLimtSpeed;
 
@@ -77,6 +79,14 @@ public abstract partial class KuroGameContextBaseV2
     /// 核心进度状态跟踪器，聚合内部事件，供UI初始读取和长效绑定的最新状态
     /// </summary>
     public GameProgressTracker ProgressState { get; } = new();
+
+    public abstract string GameContextNameKey { get; }
+
+
+    public abstract GameType GameType { get; }
+
+    public abstract Type ContextType { get; }
+    IHttpClientService IGameContextV2.HttpClientService { get => HttpClientService; set => HttpClientService = value; }
 
     public KuroGameContextBaseV2(KuroGameApiConfig config, string contextName)
     {
@@ -159,8 +169,9 @@ public abstract partial class KuroGameContextBaseV2
     #endregion
 
     private IAsyncDisposable? _currentRunningAction;
-
+    private bool _isStarting;
     private readonly SemaphoreSlim _actionLock = new(1, 1);
+
 
     public async Task<bool> StopCannelTaskAsync()
     {
@@ -198,10 +209,10 @@ public abstract partial class KuroGameContextBaseV2
         }
     }
 
-    public async Task PauseDownloadAsync()
+    public async Task<bool> PauseDownloadAsync()
     {
         if (_downloadState == null)
-            return;
+            return true;
         if (_downloadState.IsActive && _currentRunningAction != null)
         {
             if (_currentRunningAction is IProgressSetup cancelTask)
@@ -227,16 +238,18 @@ public abstract partial class KuroGameContextBaseV2
             //处于其他任务，直接暂停
             await _downloadState.PauseAsync();
         }
+        return true;
     }
 
-    public async Task ResumeDownloadAsync()
+    public async Task<bool> ResumeDownloadAsync()
     {
         if (_downloadState == null)
-            return;
+            return true;
         if (_downloadState.IsPaused)
         {
             await _downloadState.ResumeAsync();
         }
+        return true;
     }
 
     public async Task SetDownloadSpeedAsync(long mbValue)
@@ -244,5 +257,161 @@ public abstract partial class KuroGameContextBaseV2
         if (_downloadState == null)
             return;
         await _downloadState.SetSpeedLimitAsync(mbValue * 1024 * 1024);
+    }
+
+    public async Task<FileVersion> GetLocalFileVersionAsync(string fileName, string displayName)
+    {
+        var gameFolder = await GameLocalConfig.GetConfigAsync(GameLocalSettingName.GameLauncherBassFolder);
+        var file = Directory
+            .GetFiles(gameFolder, fileName, SearchOption.AllDirectories)
+            .FirstOrDefault();
+        if (file == null)
+        {
+            return new FileVersion() { DisplayName = displayName, Version = "未找到文件" };
+        }
+        FileVersionInfo fileinfo = FileVersionInfo.GetVersionInfo(file);
+        return new FileVersion()
+        {
+            DisplayName = displayName,
+            Subtitle = fileinfo.InternalName,
+            FilePath = file,
+            Version =
+                $"{fileinfo.FileMajorPart}.{fileinfo.FileMinorPart}.{fileinfo.FileBuildPart}.{fileinfo.FilePrivatePart}",
+        };
+    }
+
+    public async Task<FileVersion> GetLocalDLSSAsync()
+    {
+        return await GetLocalFileVersionAsync("nvngx_dlss.dll", "Xess");
+    }
+    public async Task<FileVersion> GetLocalDLSSGenerateAsync()
+    {
+        return await GetLocalFileVersionAsync("nvngx_dlssg.dll", "Dlss 帧生成");
+    }
+
+    public async Task<FileVersion> GetLocalXeSSGenerateAsync()
+    {
+        return await GetLocalFileVersionAsync("libxess.dll", "Xess");
+    }
+
+    public TimeSpan GetGameTime()
+    {
+        return TimeSpan.FromDays(2);
+    }
+
+    public async Task<GameContextStatus> GetGameContextStatusAsync(CancellationToken token = default)
+    {
+        GameContextStatus status = new GameContextStatus();
+        var localVersion = await GameLocalConfig.GetConfigAsync(
+            GameLocalSettingName.LocalGameVersion
+        );
+        var gameBaseFolder = await GameLocalConfig.GetConfigAsync(
+            GameLocalSettingName.GameLauncherBassFolder
+        );
+        var gameProgramFile = await GameLocalConfig.GetConfigAsync(
+            GameLocalSettingName.GameLauncherBassProgram
+        );
+        var updateing = await GameLocalConfig.GetConfigAsync(
+            GameLocalSettingName.LocalGameUpdateing
+        );
+        if (Directory.Exists(gameBaseFolder))
+        {
+            status.IsGameExists = true;
+        }
+        if (File.Exists(gameProgramFile))
+        {
+            status.IsGameInstalled = true;
+        }
+        if (!string.IsNullOrWhiteSpace(localVersion))
+        {
+            status.IsLauncher = true;
+        }
+        var ping = (await NetworkCheck.PingAsync(KuroGameApiConfig.BaseAddress[0]));
+        if (ping != null && ping.Status == IPStatus.Success)
+        {
+            var indexSource = await this.GetGameLauncherSourceAsync();
+            if (indexSource != null)
+            {
+                if (localVersion != indexSource.ResourceDefault.Version)
+                {
+                    status.IsUpdate = true;
+                    status.DisplayVersion = indexSource.ResourceDefault.Version;
+                }
+                else
+                {
+                    status.DisplayVersion = localVersion;
+                }
+                if (
+                    !string.IsNullOrWhiteSpace(updateing)
+                    && bool.TryParse(updateing, out var updateResult)
+                )
+                {
+                    status.IsUpdateing = updateResult;
+                }
+                if (
+                    indexSource.Predownload != null
+                    && status.IsGameExists == true
+                    && status.IsGameInstalled == true
+                )
+                {
+                    status.IsProdownPause =
+                        status == null ? false : status.IsPause;
+                    status.IsPredownloaded = true;
+                    var donwResult = await GameLocalConfig.GetConfigAsync(
+                        GameLocalSettingName.ProdDownloadFolderDone
+                    );
+                    var prodDownVersion = await GameLocalConfig.GetConfigAsync(
+                        GameLocalSettingName.ProdDownloadVersion
+                    );
+                    if (bool.TryParse(donwResult, out var predDown))
+                    {
+                        status.PredownloadedDone = predDown;
+                    }
+                    else
+                    {
+                        status.PredownloadedDone = false;
+                    }
+                    status.PredownloaAcion = status != null ? status.IsAction : false;
+                }
+            }
+        }
+        if (_downloadState != null)
+        {
+            status.IsPause = this._downloadState.IsPaused;
+            status.IsAction = this._downloadState.IsActive;
+        }
+        status.Gameing = this._isStarting;
+        return status;
+    }
+
+
+    public async Task ReEmitLastOutputAsync(bool isPred = false)
+    {
+        this.GameEventPublisher.Publish(this.ProgressState.LastArgs);
+    }
+
+    public Task<List<KRSDKLauncherCache>?> GetLocalGameOAuthAsync(CancellationToken token = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<bool> StartGameAsync()
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task DeleteResourceAsync()
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<QueryPlayerInfo?> QueryPlayerInfoAsync(string oAutoCode, CancellationToken token = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<QueryRoleInfo?> QueryRoleInfoAsync(string oautoCode, string playerId, string region, CancellationToken token = default)
+    {
+        throw new NotImplementedException();
     }
 }

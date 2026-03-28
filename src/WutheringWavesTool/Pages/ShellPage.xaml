@@ -263,6 +263,7 @@
                 PaneDisplayMode="Left"
                 SelectedItem="{x:Bind ViewModel.SelectItem, Mode=OneWay}"
                 Style="{ThemeResource MainNavigationViewStyle}">
+                <!--    -->
                 <NavigationView.MenuItems>
                     <NavigationViewItem
                         property:NavigationItemClickHelper.NavigationKey="Haiyu.ViewModel.HomeViewModel"
@@ -283,6 +284,14 @@
                         </NavigationViewItem.Icon>
                     </NavigationViewItem>
 
+                    <NavigationViewItem Content="战双">
+                        <NavigationViewItem.InfoBadge>
+                            <InfoBadge Value="2" />
+                        </NavigationViewItem.InfoBadge>
+                        <NavigationViewItem.Icon>
+                            <ImageIcon Source="ms-appx:///Assets/GameIcons/pgr.ico" />
+                        </NavigationViewItem.Icon>
+                    </NavigationViewItem>
                     <NavigationViewItem property:NavigationItemClickHelper.NavigationKey="Haiyu.ViewModel.CloudGameViewModel" Content="云工具">
                         <NavigationViewItem.Icon>
                             <FontIcon FontFamily="Segoe UI Emoji" Glyph="&#x2601;" />
