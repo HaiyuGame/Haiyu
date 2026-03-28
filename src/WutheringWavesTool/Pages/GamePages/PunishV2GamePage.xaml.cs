@@ -17,7 +17,7 @@ using Windows.Foundation.Collections;
 
 namespace Haiyu.Pages.GamePages;
 
-public sealed partial class PunishV2GamePage : Page
+public sealed partial class PunishV2GamePage : Page,IPage
 {
     public Type PageType => typeof(PunishV2GamePage);
 

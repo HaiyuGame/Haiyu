@@ -571,7 +571,7 @@ partial class KuroGameContextBaseV2
         #endregion
     }
 
-    public async Task StartInstallGameResource()
+    public async Task StartInstallGameResource(bool isProd = false)
     {
         var currentVersion = await this.GameLocalConfig.GetConfigAsync(
             GameLocalSettingName.LocalGameVersion
@@ -609,6 +609,7 @@ partial class KuroGameContextBaseV2
             );
             return;
         }
+        await StartInstallGameResource(launcher, previous, _patch, isProd);
     }
     #endregion
 }

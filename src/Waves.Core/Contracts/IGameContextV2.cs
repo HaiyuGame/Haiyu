@@ -133,7 +133,7 @@ public interface IGameContextV2
     Task DeleteResourceAsync();
     #endregion
 
-    Task StartInstallGameResource();
+    Task StartInstallGameResource(bool isProd = false);
 
     Task<LIndex?> GetDefaultLauncherValue(CancellationToken token = default);
 

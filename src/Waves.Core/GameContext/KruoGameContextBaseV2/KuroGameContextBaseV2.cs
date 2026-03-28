@@ -400,9 +400,21 @@ public abstract partial class KuroGameContextBaseV2:IGameContextV2
         throw new NotImplementedException();
     }
 
-    public Task DeleteResourceAsync()
+    public async Task DeleteResourceAsync()
     {
-        throw new NotImplementedException();
+        var folder = await GameLocalConfig.GetConfigAsync(
+            GameLocalSettingName.GameLauncherBassFolder
+        );
+        await Task.Run(() =>
+        {
+            Directory.Delete(folder, true);
+        });
+        await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.GameLauncherBassFolder, "");
+        await this.GameLocalConfig.SaveConfigAsync(
+            GameLocalSettingName.GameLauncherBassProgram,
+            ""
+        );
+        await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.LocalGameVersion, "");
     }
 
     public Task<QueryPlayerInfo?> QueryPlayerInfoAsync(string oAutoCode, CancellationToken token = default)

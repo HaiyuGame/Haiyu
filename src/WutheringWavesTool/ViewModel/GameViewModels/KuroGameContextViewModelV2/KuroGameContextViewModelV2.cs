@@ -33,7 +33,7 @@ public abstract partial class KuroGameContextViewModelV2
         this.Servers =
             this.GameType == GameType.Waves
                 ? ServerDisplay.GetWavesGames
-                : ServerDisplay.GetPunishGames;
+                : ServerDisplay.GetPunishV2Games;
         var openService = this.GameType == GameType.Waves ? AppSettings.WavesAutoOpenContext : AppSettings.PunishAutoOpenContext;
 
         var selectServer = Servers.Where(x => x.Key == openService).FirstOrDefault();
@@ -548,15 +548,16 @@ public abstract partial class KuroGameContextViewModelV2
     {
         if (_buttonAction == ButtonActionType.SelectInstall)
         {
-            var result = await DialogManager.ShowSelectDownloadFolderAsync(
-                this.GameContext.ContextType
-            );
-            if (result.Result == ContentDialogResult.None)
-            {
-                return;
-            }
-            Logger.WriteInfo($"选择游戏安装路径：{result.InstallFolder},即将进入通知核心进行下载");
-            StartBackground(() => this.GameContext.StartDownloadTaskAsync(result.InstallFolder));
+            //var result = await DialogManager.ShowSelectDownloadFolderAsync(
+            //    this.GameContext.ContextType
+            //);
+            //if (result.Result == ContentDialogResult.None)
+            //{
+            //    return;
+            //}
+            //Logger.WriteInfo($"选择游戏安装路径：{result.InstallFolder},即将进入通知核心进行下载");
+            //StartBackground(() => this.GameContext.StartDownloadTaskAsync(result.InstallFolder));
+            StartBackground(() => this.GameContext.StartDownloadTaskAsync("D:\\Punish"));
         }
         else
         {
@@ -685,6 +686,10 @@ public abstract partial class KuroGameContextViewModelV2
         }
         Logger.WriteInfo($"删除游戏文件");
         await GameContext.DeleteResourceAsync();
+        this.GameContext.GameEventPublisher.Publish(new GameContextOutputArgs()
+        {
+            Type = GameContextActionType.None
+        });
         //await this.GameContext_GameContextOutput(
         //    this,
         //    new GameContextOutputArgs()

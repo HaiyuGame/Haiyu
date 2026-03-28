@@ -18,21 +18,21 @@ partial class KuroGameContextViewModelV2
         }
         if (_buttonAction == ButtonActionType.PrepareUpdate)
         {
-            var localVersion = await GameContext.GameLocalConfig.GetConfigAsync(
-                GameLocalSettingName.LocalGameVersion
-            );
-            var result = await DialogManager.ShowUpdateGameDialogAsync(
-                this.GameContext.ContextName,
-                UpdateGameType.UpdateGame
-            );
+            //var localVersion = await GameContext.GameLocalConfig.GetConfigAsync(
+            //    GameLocalSettingName.LocalGameVersion
+            //);
+            //var result = await DialogManager.ShowUpdateGameDialogAsync(
+            //    this.GameContext.ContextName,
+            //    UpdateGameType.UpdateGame
+            //);
 
-            if (result == null)
-                return;
-            if (result.IsOk == false)
-            {
-                return;
-            }
-            this.PauseIcon = "\uE769";
+            //if (result == null)
+            //    return;
+            //if (result.IsOk == false)
+            //{
+            //    return;
+            //}
+            //this.PauseIcon = "\uE769";
             Task.Run(async () => await GameContext.UpdateGameResourceAsync());
         }
         if (_buttonAction == ButtonActionType.InstallPreDownload)
@@ -46,7 +46,7 @@ partial class KuroGameContextViewModelV2
             if(bool.TryParse(diffDone,out var done) && done)
             {
                 this.PauseIcon = "\uE769";
-                Task.Run(async () => await GameContext.StartInstallGameResource());
+                Task.Run(async () => await GameContext.StartInstallGameResource(true));
             }
             else
             {

@@ -263,7 +263,6 @@
                 PaneDisplayMode="Left"
                 SelectedItem="{x:Bind ViewModel.SelectItem, Mode=OneWay}"
                 Style="{ThemeResource MainNavigationViewStyle}">
-                <!--    -->
                 <NavigationView.MenuItems>
                     <NavigationViewItem
                         property:NavigationItemClickHelper.NavigationKey="Haiyu.ViewModel.HomeViewModel"
@@ -284,7 +283,7 @@
                         </NavigationViewItem.Icon>
                     </NavigationViewItem>
 
-                    <NavigationViewItem Content="战双">
+                    <NavigationViewItem property:NavigationItemClickHelper.NavigationKey="Haiyu.ViewModel.GameViewModels.GameContexts.PunishV2GameContextViewModel" Content="战双V2">
                         <NavigationViewItem.InfoBadge>
                             <InfoBadge Value="2" />
                         </NavigationViewItem.InfoBadge>

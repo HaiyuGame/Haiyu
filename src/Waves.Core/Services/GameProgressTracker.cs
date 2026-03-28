@@ -121,8 +121,10 @@ public sealed class GameProgressTracker : IAsyncDisposable
         }
     }
 
-    private ValueTask HandleEventAsync(GameContextOutputArgs args)
+    private async ValueTask HandleEventAsync(GameContextOutputArgs args)
     {
+        if (args == null)
+            return;
         if (args.Type != GameContextActionType.None)
         {
             CurrentAction = args.Type;
@@ -170,7 +172,7 @@ public sealed class GameProgressTracker : IAsyncDisposable
         }
         this._lastArgs = args;
         _isDirty = true;
-        return ValueTask.CompletedTask;
+        await ValueTask.CompletedTask;
     }
 
     public string GetSpeedText()

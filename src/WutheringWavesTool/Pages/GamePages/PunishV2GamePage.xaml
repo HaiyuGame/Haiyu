@@ -107,7 +107,8 @@
                         FontFamily="{ThemeResource DefaultFont}"
                         FontSize="14"
                         Text="{x:Bind ViewModel.BottomBarContent, Mode=OneWay}"
-                        TextAlignment="Center" />
+                        TextAlignment="Center"
+                        TextWrapping="Wrap" />
                 </Border>
                 <Grid
                     Grid.Row="1"
