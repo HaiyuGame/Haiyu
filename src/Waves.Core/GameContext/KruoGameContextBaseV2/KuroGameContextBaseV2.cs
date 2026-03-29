@@ -170,7 +170,6 @@ public abstract partial class KuroGameContextBaseV2:IGameContextV2
 
     private IAsyncDisposable? _currentRunningAction;
     private bool _isStarting;
-    private readonly SemaphoreSlim _actionLock = new(1, 1);
 
 
     public async Task<bool> StopCannelTaskAsync()

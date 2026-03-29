@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Waves.Core.Contracts.Events;
 using Waves.Core.Models;
 using Waves.Core.Models.Enums;
@@ -28,9 +30,33 @@ public sealed class GameProgressTracker : IAsyncDisposable
 
     public int TotalSteps { get; private set; }
 
-    public int SetupIndex { get;internal set; } =-1;
+    public int SetupIndex { get; internal set; } = -1;
 
     public System.Collections.Generic.List<string> AllSteps { get; private set; } = new();
+
+    public List<DownloadSetupItem> GetCurrentSteps()
+    {
+        var setups = AllSteps
+            .Select(
+                (name, index) =>
+                    new DownloadSetupItem()
+                    {
+                        Name = name,
+                        IsActive = index == CurrentStepIndex,
+                        IsOK = index < CurrentStepIndex,
+                    }
+            )
+            .ToList();
+        if (CurrentStepIndex >= setups.Count && setups.Count > 0)
+        {
+            for (int i = 0; i < setups.Count; i++)
+            {
+                setups[i].IsActive = false;
+                setups[i].IsOK = true;
+            }
+        }
+        return setups;
+    }
 
     public long CurrentBytes { get; private set; }
 
@@ -43,9 +69,11 @@ public sealed class GameProgressTracker : IAsyncDisposable
     public double DownloadSpeed { get; private set; }
     public double VerifySpeed { get; private set; }
 
-    public bool IsPaused { get; private set; }
-    public bool IsActive { get; private set; }
+    public double ZipSpeed { get; private set; }
 
+    public bool IsPaused { get; private set; }
+    public bool Prod { get; private set; }
+    public bool IsActive { get; private set; }
 
     public string FilePath { get; private set; }
 
@@ -57,13 +85,25 @@ public sealed class GameProgressTracker : IAsyncDisposable
     /// 正在进行操作的活跃文件列表（如并发下载/校验的文件）
     /// Key: 文件名, Value: (当前进度, 总大小)
     /// </summary>
-    public ConcurrentDictionary<string, (long Current, long Total)> ActiveFiles { get; } = new(StringComparer.OrdinalIgnoreCase);
+    public ConcurrentDictionary<string, (long Current, long Total)> ActiveFiles { get; } =
+        new(StringComparer.OrdinalIgnoreCase);
+
+    public ObservableCollection<DownloadActiveFileItem> ActiveFilesItem =>
+        new(
+            ActiveFiles.Select(x => new DownloadActiveFileItem()
+            {
+                CurrentSize = x.Value.Current,
+                TotalSize = x.Value.Total,
+                FileName = x.Key,
+            })
+        );
 
     public event Action<GameProgressTracker>? OnProgressChanged;
 
-    public double Percentage => TotalBytes > 0 ? Math.Round((CurrentBytes * 100.0) / TotalBytes, 2) : 0;
+    public double Percentage =>
+        TotalBytes > 0 ? Math.Round((CurrentBytes * 100.0) / TotalBytes, 2) : 0;
 
-    public GameContextOutputArgs LastArgs=> _lastArgs;
+    public GameContextOutputArgs LastArgs => _lastArgs;
 
     public string StepName { get; private set; }
 
@@ -116,9 +156,7 @@ public sealed class GameProgressTracker : IAsyncDisposable
                 }
             }
         }
-        catch (Exception)
-        {
-        }
+        catch (Exception) { }
     }
 
     private async ValueTask HandleEventAsync(GameContextOutputArgs args)
@@ -139,7 +177,11 @@ public sealed class GameProgressTracker : IAsyncDisposable
             if (args.AllSteps != null && args.AllSteps.Count > 0)
                 AllSteps = args.AllSteps;
         }
-        if (args.TotalSize > 0 || args.Type == GameContextActionType.Download || args.Type == GameContextActionType.Verify)
+        if (
+            args.TotalSize > 0
+            || args.Type == GameContextActionType.Download
+            || args.Type == GameContextActionType.Verify
+        )
         {
             CurrentBytes = args.CurrentSize;
             TotalBytes = args.TotalSize;
@@ -147,9 +189,11 @@ public sealed class GameProgressTracker : IAsyncDisposable
             TotalFiles = args.FileTotal;
             DownloadSpeed = args.DownloadSpeed;
             VerifySpeed = args.VerifySpeed;
+            ZipSpeed = args.ZipSpeed;
         }
         IsActive = args.IsAction;
         IsPaused = args.IsPause;
+        this.Prod = args.Prod;
         if (!string.IsNullOrWhiteSpace(args.FilePath))
         {
             FilePath = args.FilePath;
@@ -181,7 +225,8 @@ public sealed class GameProgressTracker : IAsyncDisposable
         {
             GameContextActionType.Download => $"{FormatBytes(DownloadSpeed)}/s",
             GameContextActionType.Verify => $"{FormatBytes(VerifySpeed)}/s",
-            _ => ""
+            GameContextActionType.Decompress => $"{FormatBytes(ZipSpeed)}/s",
+            _ => "",
         };
     }
 
@@ -212,9 +257,6 @@ public sealed class GameProgressTracker : IAsyncDisposable
                 await _timerTask;
             }
         }
-        catch 
-        {
-        }
+        catch { }
     }
-
 }

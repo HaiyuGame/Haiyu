@@ -2,6 +2,27 @@
 
 partial class KuroGameContextViewModelV2
 {
+    
+    #region 进度显示
+
+    [ObservableProperty]
+    public partial ObservableCollection<DownloadActiveFileItem> ActiveFilesItems { get; set; } = new();
+
+    [ObservableProperty]
+    public partial string CurrentStepText { get; set; }
+
+    [ObservableProperty]
+    public partial int MaxStep { get; set; }
+
+    [ObservableProperty]
+    public partial int CurrentStep { get; set; }
+
+    [ObservableProperty]
+    public partial string SpeedText { get; set; }
+
+    [ObservableProperty]
+    public partial string ActiveFile { get; set; }
+
     [ObservableProperty]
     public partial double MaxProgressValue { get; set; }
 
@@ -11,6 +32,14 @@ partial class KuroGameContextViewModelV2
     [ObservableProperty]
     public partial int DownloadSpeedValue { get; set; }
 
+    [ObservableProperty]
+    public partial double ProgressValue { get; set; }
+
+    [ObservableProperty]
+    public partial string CurrentByteText { get; set; }
+    [ObservableProperty]
+    public partial string MaxByteText { get; set; }
+    #endregion
 
     #region 通知
 
@@ -67,7 +96,7 @@ partial class KuroGameContextViewModelV2
     async Task SetDownloadSpeedAsync()
     {
         Logger.WriteInfo($"设置下载限速");
-        await GameContext.SetDownloadSpeedAsync(DownloadSpeedValue * 1024 * 1024);
+        await GameContext.SetDownloadSpeedAsync(DownloadSpeedValue);
     }
 
 }

@@ -1,4 +1,5 @@
-﻿using Waves.Core.Models;
+﻿using System.Collections.ObjectModel;
+using Waves.Core.Models;
 
 namespace Waves.Core.GameContext;
 
@@ -11,4 +12,6 @@ partial class KuroGameContextBaseV2
     public List<string> Setups { get; set; } = new();
 
     public int CurrentSetups { get; set; }
+
+   
 }

@@ -56,7 +56,6 @@ partial class KuroGameContextBaseV2
         GameLauncherSource launcher
     )
     {
-        await _actionLock.WaitAsync();
         try
         {
             if (_currentRunningAction != null)
@@ -64,16 +63,17 @@ partial class KuroGameContextBaseV2
                 await _currentRunningAction.DisposeAsync();
             }
             this.Setups = new List<string>();
-            Setups.Add("下载与校验数据");
-            Setups.Add("保存数据信息");
+            Setups.Add("下载校验");
+            Setups.Add("保存数据");
             var downloadMethod = new DownloadAndVerifyResource(this.Logger);
             var resource = await GetGameResourceAsync(launcher.ResourceDefault);
             if (resource == null)
                 return false;
             HttpClientService?.BuildClient();
             _downloadState = new DownloadState();
+            _downloadState.IsActive = true;
             downloadMethod = new(this.Logger);
-            downloadMethod.ProgressName = "下载与校验数据";
+            downloadMethod.ProgressName = "下载校验";
             await GameEventPublisher.PublisAsync(
                 GameContextActionType.CdnSelect,
                 "正在选择最优CDN"
@@ -112,7 +112,7 @@ partial class KuroGameContextBaseV2
             _currentRunningAction = downloadMethod;
             await GameEventPublisher.PublisAsync(GameContextActionType.CdnSelect, "CDN选择完毕");
             this.CurrentSetups = 0;
-            await this.GameEventPublisher.PublishStepAsync("下载与校验数据", CurrentSetups, Setups);
+            await this.GameEventPublisher.PublishStepAsync("下载校验", CurrentSetups, Setups);
             await downloadMethod.ExecuteAsync(true);
             var writeConfig = new WriteGameResourceConfig(
                 this.GameLocalConfig,
@@ -122,9 +122,10 @@ partial class KuroGameContextBaseV2
             );
             _currentRunningAction = writeConfig;
             this.CurrentSetups = 1;
-            await this.GameEventPublisher.PublishStepAsync("写入配置信息", CurrentSetups, Setups);
+            await this.GameEventPublisher.PublishStepAsync("写入配置", CurrentSetups, Setups);
             await writeConfig.WriteDownloadComplateAsync(this.GameEventPublisher, true);
             //通知UI刷新
+            _downloadState.IsActive = false;
             GameEventPublisher.Publish(
                 new GameContextOutputArgs() { Type = GameContextActionType.None }
             );
@@ -132,7 +133,7 @@ partial class KuroGameContextBaseV2
         }
         finally
         {
-            _actionLock.Release();
+            _downloadState.IsActive = false;
         }
     }
 

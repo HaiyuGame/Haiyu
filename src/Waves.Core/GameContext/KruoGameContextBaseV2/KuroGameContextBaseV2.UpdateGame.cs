@@ -50,10 +50,11 @@ partial class KuroGameContextBaseV2
         bool isProd = false
     )
     {
-        await _actionLock.WaitAsync();
         try
         {
             #region 获取配置
+            _downloadState = new DownloadState();
+            _downloadState.IsActive = true;
             if (_launcher == null || string.IsNullOrWhiteSpace(currentVersion))
             {
                 GameEventPublisher.Publish(
@@ -281,20 +282,19 @@ partial class KuroGameContextBaseV2
             {
                 await this.StartInstallGameResource(_launcher, previous, _patch);
             }
+            _downloadState.IsActive = false;
             #endregion
             return true;
         }
         catch (TaskCanceledException)
         {
+            _downloadState!.IsActive = false;
             return false;
         }
         catch (Exception)
         {
+            _downloadState!.IsActive = false;
             return false;
-        }
-        finally
-        {
-            _actionLock.Release();
         }
     }
 

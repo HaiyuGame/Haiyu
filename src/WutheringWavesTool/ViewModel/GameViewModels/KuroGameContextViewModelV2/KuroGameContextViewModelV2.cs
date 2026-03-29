@@ -116,7 +116,11 @@ public abstract partial class KuroGameContextViewModelV2
 
     [ObservableProperty]
     public partial bool ProcessAction { get; set; } = false;
+
+   
     public abstract GameType GameType { get; }
+
+
 
     async partial void OnSelectServerChanged(ServerDisplay value)
     {
@@ -165,94 +169,112 @@ public abstract partial class KuroGameContextViewModelV2
         {
             if (this.GameContext == null)
                 return;
-
-            var status = await this.GameContext.GetGameContextStatusAsync(this.CTS.Token);
-            var actionType = args.Type;
-
-            if (
-                actionType == Waves.Core.Models.Enums.GameContextActionType.Download
-                || actionType == Waves.Core.Models.Enums.GameContextActionType.Verify
-                || actionType == Waves.Core.Models.Enums.GameContextActionType.Decompress
-            )
+            if (!tracker.Prod)
             {
-                UpdateTransferProgressDisplay(tracker, args);
-                ShowGameDownloadingBth(status);
-            }
-
-            if (actionType == Waves.Core.Models.Enums.GameContextActionType.BottomText)
-            {
-                ShowGameDownloadingBth(status);
-                this.MaxProgressValue = args.FileTotal;
-                this.CurrentProgressValue = args.CurrentFile;
-                this.BottomBarContent = args.DeleteString;
-                PauseStartEnable = false;
-            }
-
-            if (
-                actionType == Waves.Core.Models.Enums.GameContextActionType.None
-                || actionType == Waves.Core.Models.Enums.GameContextActionType.GameExit
-                    && !status.IsPredownloaded
-            )
-            {
-                PauseStartEnable = true;
-                this.CurrentProgressValue = 0;
-                this.MaxProgressValue = 100;
-                if (!status.IsGameExists && !status.IsGameInstalled)
+                var activeFiles = tracker.ActiveFilesItem;
+                if (ShouldReplaceActiveFilesItem(ActiveFilesItems, activeFiles))
                 {
-                    ShowSelectInstallBth(status);
+                    ActiveFilesItems = activeFiles;
                 }
-                if (status.IsGameExists && !status.IsGameInstalled)
-                {
-                    ShowGameDownloadBth(status);
-                }
-                if (status.IsLauncher)
-                {
-                    await ShowGameLauncherBth(status.IsUpdate, status.DisplayVersion, status.Gameing);
-                }
+                this.MaxStep = tracker.AllSteps.Count;
+                this.CurrentStep = tracker.CurrentStepIndex + 1;
+                this.CurrentStepText = tracker.AllSteps[tracker.CurrentStepIndex];
+                this.SpeedText = tracker.GetSpeedText();
+                this.ActiveFile = System.IO.Path.GetFileName(tracker.FilePath);
+                var status = await this.GameContext.GetGameContextStatusAsync(this.CTS.Token);
+                var actionType = args.Type;
                 if (
-                    status.IsGameExists
-                    && !status.IsGameInstalled
-                    && (status.IsPause || status.IsAction)
+                    actionType == Waves.Core.Models.Enums.GameContextActionType.Download
+                    || actionType == Waves.Core.Models.Enums.GameContextActionType.Verify
+                    || actionType == Waves.Core.Models.Enums.GameContextActionType.Decompress
                 )
                 {
+                    UpdateTransferProgressDisplay(tracker, args, status);
                     ShowGameDownloadingBth(status);
-                    if (status.IsPause)
-                    {
-                        this.PauseIcon = "\uE768";
-                    }
-                    else
-                    {
-                        this.PauseIcon = "\uE769";
-                    }
                 }
-                if (actionType == Waves.Core.Models.Enums.GameContextActionType.GameExit)
+                if (actionType == Waves.Core.Models.Enums.GameContextActionType.BottomText)
                 {
-                    this.AppContext.App.MainWindow.Show();
+                    ShowGameDownloadingBth(status);
+                    this.MaxProgressValue = args.FileTotal;
+                    this.CurrentProgressValue = args.CurrentFile;
+                    this.BottomBarContent = args.DeleteString;
+                    PauseStartEnable = false;
+                }
+
+                if (
+                    actionType == Waves.Core.Models.Enums.GameContextActionType.None
+                    || actionType == Waves.Core.Models.Enums.GameContextActionType.GameExit
+                        && !status.IsPredownloaded
+                )
+                {
+                    PauseStartEnable = true;
+                    this.CurrentProgressValue = 0;
+                    this.MaxProgressValue = 100;
+                    if (!status.IsGameExists && !status.IsGameInstalled)
+                    {
+                        ShowSelectInstallBth(status);
+                    }
+                    if (status.IsGameExists && !status.IsGameInstalled)
+                    {
+                        ShowGameDownloadBth(status);
+                    }
+                    if (status.IsLauncher)
+                    {
+                        await ShowGameLauncherBth(status.IsUpdate, status.DisplayVersion, status.Gameing);
+                    }
+                    if (
+                        status.IsGameExists
+                        && !status.IsGameInstalled
+                        && (status.IsPause || status.IsAction)
+                    )
+                    {
+                        ShowGameDownloadingBth(status);
+                        if (status.IsPause)
+                        {
+                            this.PauseIcon = "\uE768";
+                        }
+                        else
+                        {
+                            this.PauseIcon = "\uE769";
+                        }
+                    }
+                    if (actionType == Waves.Core.Models.Enums.GameContextActionType.GameExit)
+                    {
+                        this.AppContext.App.MainWindow.Show();
+                    }
+                }
+                if (actionType == Waves.Core.Models.Enums.GameContextActionType.TipMessage && !status.IsPredownloaded)
+                {
+                    await DialogManager.ShowMessageDialog(args.TipMessage, "确认", "关闭");
+                }
+                if (actionType == Waves.Core.Models.Enums.GameContextActionType.CdnSelect && !status.IsPredownloaded)
+                {
+                    ShowGameDownloadingBth(status);
+                    PauseStartEnable = false;
+                    BottomBarContent = args.TipMessage;
                 }
             }
-
-            if (actionType == Waves.Core.Models.Enums.GameContextActionType.TipMessage && !status.IsPredownloaded)
-            {
-                await DialogManager.ShowMessageDialog(args.TipMessage, "确认", "关闭");
-            }
-
-            if (actionType == Waves.Core.Models.Enums.GameContextActionType.CdnSelect && !status.IsPredownloaded)
-            {
-                ShowGameDownloadingBth(status);
-                PauseStartEnable = false;
-                BottomBarContent = args.TipMessage;
-            }
+            
         });
     }
 
-    private void UpdateTransferProgressDisplay(GameProgressTracker tracker, Waves.Core.Models.GameContextOutputArgs args)
+    private void UpdateTransferProgressDisplay(
+        GameProgressTracker tracker,
+        Waves.Core.Models.GameContextOutputArgs args,
+        GameContextStatus status
+    )
     {
         this.MaxProgressValue = tracker.TotalBytes;
         this.CurrentProgressValue = tracker.CurrentBytes;
+        this.ProgressValue = tracker.Percentage;
+        this.CurrentByteText = GameProgressTracker.FormatBytes(tracker.CurrentBytes);
+        this.MaxByteText = GameProgressTracker.FormatBytes(tracker.TotalBytes);
+
+        var isPaused = status.IsPause || tracker.IsPaused || (args.IsAction && args.IsPause);
 
         if (args.Type == Waves.Core.Models.Enums.GameContextActionType.Verify)
         {
-            if (args.IsAction && args.IsPause)
+            if (isPaused)
             {
                 this.PauseIcon = "\uE768";
                 this.BottomBarContent = "下载已经暂停";
@@ -268,7 +290,7 @@ public abstract partial class KuroGameContextViewModelV2
 
         if (args.Type == Waves.Core.Models.Enums.GameContextActionType.Download)
         {
-            if (args.IsAction && args.IsPause)
+            if (isPaused)
             {
                 this.PauseIcon = "\uE768";
                 this.BottomBarContent = "下载已经暂停";
@@ -296,21 +318,12 @@ public abstract partial class KuroGameContextViewModelV2
         var segments = new List<string>(6)
         {
             $"{tracker.Percentage:F2}%",
-            $"Step {tracker.CurrentStepIndex + 1}/{Math.Max(1, tracker.TotalSteps)}: {tracker.StepName}",
-            $"Action: {tracker.CurrentAction}"
+            $"Step {tracker.CurrentStepIndex + 1}/{Math.Max(1, tracker.TotalSteps)}: {tracker.StepName}"
         };
 
         if (!string.IsNullOrWhiteSpace(tracker.CurrentStepTip))
         {
             segments.Add(tracker.CurrentStepTip);
-        }
-
-        if (!string.IsNullOrWhiteSpace(tracker.FilePath))
-        {
-            var fileName = System.IO.Path.GetFileName(tracker.FilePath);
-            segments.Add(
-                $"File: {fileName} ({GameProgressTracker.FormatBytes(tracker.FileCurrentSize)} / {GameProgressTracker.FormatBytes(tracker.FileTotalSize)})"
-            );
         }
 
         var speedText = tracker.GetSpeedText();
@@ -325,6 +338,8 @@ public abstract partial class KuroGameContextViewModelV2
 
         return string.Join(" | ", segments);
     }
+
+    
 
     /// <summary>
     /// 按钮类型，用枚举替代魔法数字，便于扩展和可读性
@@ -348,6 +363,7 @@ public abstract partial class KuroGameContextViewModelV2
         try
         {
             ProcessAction = true;
+
             var status = await this.GameContext.GetGameContextStatusAsync(this.CTS.Token);
             if (!status.IsGameExists)
             {

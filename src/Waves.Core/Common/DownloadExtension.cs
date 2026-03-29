@@ -55,6 +55,7 @@ public static class DownloadExtension
         {
             publisher.Publish(new Models.GameContextOutputArgs()
             {
+                Type = Models.Enums.GameContextActionType.PublishStep,
                 IsStepUpdate = true,
                 StepName = stepName ?? allSteps[currentStepIndex],
                 CurrentStepIndex = currentStepIndex,

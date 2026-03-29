@@ -35,6 +35,7 @@ public class GameContextOutputArgs
     public long CurrentSize { get; set; }
     public long TotalSize { get; set; }
 
+
     public long CurrentDecompressCount { get; set; }
 
     public long MaxDecompressValue { get; set; }
@@ -64,6 +65,9 @@ public class GameContextOutputArgs
         TotalSize > 0 ? Math.Round((CurrentSize * 100.0) / TotalSize, 2) : 0;
 
     public int CurrentStepIndex { get; internal set; }
+    /// <summary>
+    /// 是否为预下载
+    /// </summary>
     public bool Prod { get; internal set; }
     public double ZipSpeed { get; internal set; }
 }
