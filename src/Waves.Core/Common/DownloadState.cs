@@ -10,7 +10,7 @@ public sealed class DownloadState
 
     public SpeedLimiter SpeedLimiter { get; private set; }
     public bool IsActive { get; set; }
-    public CancellationToken CancelToken { get; set; }
+    public CancellationTokenSource CancelToken { get; set; }
     public PauseToken PauseToken => new PauseToken(this);
 
     public DownloadState()
@@ -59,7 +59,7 @@ public readonly struct PauseToken
     {
         while (Volatile.Read(ref _state._isPaused))
         {
-            await Task.Delay(100, _state.CancelToken); // 低延迟轮询
+            await Task.Delay(100, _state.CancelToken.Token); // 低延迟轮询
         }
     }
 }

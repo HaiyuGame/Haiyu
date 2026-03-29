@@ -70,4 +70,5 @@ public class GameContextOutputArgs
     /// </summary>
     public bool Prod { get; internal set; }
     public double ZipSpeed { get; internal set; }
+    public bool IsCancel { get; internal set; }
 }

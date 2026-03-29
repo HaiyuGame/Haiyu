@@ -116,7 +116,16 @@ partial class KuroGameContextBaseV2
 
             #region 初始化资源
             this._downloadState = new DownloadState();
-
+            if (isProd)
+            {
+                _prodDownloadCts = new CancellationTokenSource();
+                _downloadState.CancelToken = _prodDownloadCts;
+            }
+            else
+            {
+                _downloadCts = new CancellationTokenSource();
+                _downloadState.CancelToken = _downloadCts;
+            }
             var downloadResource = new List<IndexResource>();
             var patchResource = new List<IndexResource>();
             var groupResource = new List<IndexResource>();
@@ -216,6 +225,13 @@ partial class KuroGameContextBaseV2
             #region  下载资源
             for (int i = 0; i < downloadTasks.Count; i++)
             {
+                if (_downloadState.CancelToken.IsCancellationRequested)
+                {
+                    this.GameEventPublisher.Publish(new() { Type = GameContextActionType.None });
+                    _downloadState.IsActive = false;
+                    _downloadState.IsStop = true;
+                    return false;
+                }
                 var downloadMethod = new DownloadAndVerifyResource(this.Logger)
                 {
                     ProgressName = downloadTasks[i].Name,
@@ -288,7 +304,7 @@ partial class KuroGameContextBaseV2
         }
         catch (TaskCanceledException)
         {
-            _downloadState!.IsActive = false;
+            _downloadState.IsStop = true;
             return false;
         }
         catch (Exception)
@@ -452,6 +468,12 @@ partial class KuroGameContextBaseV2
         }
         for (int i = 0; i < installTasks.Count; i++)
         {
+            if (_downloadState.CancelToken.IsCancellationRequested)
+            {
+                this.GameEventPublisher.Publish(new() { Type = GameContextActionType.None });
+                _downloadState.IsActive = false;
+                _downloadState.IsStop = true;
+            }
             CurrentSetups = i;
             await this.GameEventPublisher.PublishStepAsync(
                 installTasks[i].Name,

@@ -10,6 +10,9 @@ namespace Waves.Core.GameContext;
 
 partial class KuroGameContextBaseV2
 {
+    private CancellationTokenSource _downloadCts = null;
+    private CancellationTokenSource _prodDownloadCts = null;
+
     #region 下载方法
 
     /// <summary>
@@ -53,7 +56,8 @@ partial class KuroGameContextBaseV2
     /// <returns></returns>
     private async Task<bool> StartDownloadAsync(
         string folder,
-        GameLauncherSource launcher
+        GameLauncherSource launcher,
+        bool isRepir = false
     )
     {
         try
@@ -70,7 +74,9 @@ partial class KuroGameContextBaseV2
             if (resource == null)
                 return false;
             HttpClientService?.BuildClient();
+            _downloadCts = new CancellationTokenSource();
             _downloadState = new DownloadState();
+            _downloadState.CancelToken = _downloadCts;
             _downloadState.IsActive = true;
             downloadMethod = new(this.Logger);
             downloadMethod.ProgressName = "下载校验";
@@ -98,14 +104,14 @@ partial class KuroGameContextBaseV2
             downloadMethod.SetParam(
                 new Dictionary<string, object>()
                 {
-                { "resource", resource.Resource },
-                { "launcher", launcher },
-                { "isDelete", false },
-                { "folder", folder },
-                { "httpClient", HttpClientService! },
-                { "downloadState", _downloadState! },
-                { "baseUrl", baseUrl },
-                { "isProd", false },
+                    { "resource", resource.Resource },
+                    { "launcher", launcher },
+                    { "isDelete", false },
+                    { "folder", folder },
+                    { "httpClient", HttpClientService! },
+                    { "downloadState", _downloadState! },
+                    { "baseUrl", baseUrl },
+                    { "isProd", false },
                 },
                 this.GameEventPublisher
             );
@@ -122,6 +128,32 @@ partial class KuroGameContextBaseV2
             );
             _currentRunningAction = writeConfig;
             this.CurrentSetups = 1;
+            if (_downloadState.CancelToken.IsCancellationRequested)
+            {
+                await this.GameLocalConfig.SaveConfigAsync(
+                    GameLocalSettingName.GameLauncherBassFolder,
+                    ""
+                );
+                await this.GameLocalConfig.SaveConfigAsync(
+                    GameLocalSettingName.LocalGameVersion,
+                    ""
+                );
+                await this.GameLocalConfig.SaveConfigAsync(
+                    GameLocalSettingName.LocalGameUpdateing,
+                    "False"
+                );
+
+                await this.GameLocalConfig.SaveConfigAsync(
+                    GameLocalSettingName.GameLauncherBassProgram,
+                    ""
+                );
+
+                GameEventPublisher.Publish(
+                    new GameContextOutputArgs() { Type = GameContextActionType.None }
+                );
+
+                return true;
+            }
             await this.GameEventPublisher.PublishStepAsync("写入配置", CurrentSetups, Setups);
             await writeConfig.WriteDownloadComplateAsync(this.GameEventPublisher, true);
             //通知UI刷新
@@ -130,6 +162,11 @@ partial class KuroGameContextBaseV2
                 new GameContextOutputArgs() { Type = GameContextActionType.None }
             );
             return true;
+        }
+        catch (OperationCanceledException)
+        {
+            _downloadState.IsStop = true;
+            return false;
         }
         finally
         {
@@ -147,12 +184,24 @@ partial class KuroGameContextBaseV2
         var folder = await GameLocalConfig.GetConfigAsync(
             GameLocalSettingName.GameLauncherBassFolder
         );
-        if (folder == null)
+
+        if (string.IsNullOrWhiteSpace(folder))
+            return false;
+        await GameLocalConfig.SaveConfigAsync(GameLocalSettingName.GameLauncherBassFolder, folder);
+        await GameLocalConfig.SaveConfigAsync(GameLocalSettingName.LocalGameUpdateing, "True");
+        var launcher = await this.GetGameLauncherSourceAsync(null);
+        if (launcher == null)
         {
+            this.GameEventPublisher.Publish(
+                new GameContextOutputArgs()
+                {
+                    TipMessage = "未请求到游戏文件信息",
+                    Type = GameContextActionType.TipMessage,
+                }
+            );
             return false;
         }
-        
-        await StartDownloadTaskAsync(folder, true);
+        Task.Run(async () => await StartDownloadAsync(folder, launcher, true));
         return true;
     }
 

@@ -106,6 +106,7 @@ public sealed class GameProgressTracker : IAsyncDisposable
     public GameContextOutputArgs LastArgs => _lastArgs;
 
     public string StepName { get; private set; }
+    public bool IsCancel { get; private set; }
 
     private SynchronizationContext? _syncContext;
     private PeriodicTimer? _timer;
@@ -190,6 +191,7 @@ public sealed class GameProgressTracker : IAsyncDisposable
             DownloadSpeed = args.DownloadSpeed;
             VerifySpeed = args.VerifySpeed;
             ZipSpeed = args.ZipSpeed;
+            this.IsCancel = args.IsCancel;
         }
         IsActive = args.IsAction;
         IsPaused = args.IsPause;

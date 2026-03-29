@@ -26,7 +26,6 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
     #region Param
     private List<IndexResource> _resource;
     private bool isDelete;
-    private CancellationTokenSource cts;
     private string _folder;
     private string _baseUrl;
     private bool _isProd;
@@ -139,7 +138,6 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
         }
         this._resource = resources?.ToList()!;
         this.isDelete = isDelete!;
-        this.cts = new CancellationTokenSource();
         this._folder = folder!;
         this._httpClientService = httpService!;
         this._launcher = launcher;
@@ -185,7 +183,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
             ParallelOptions options = new ParallelOptions()
             {
                 MaxDegreeOfParallelism = 4,
-                CancellationToken = cts.Token,
+                CancellationToken = _downloadState.CancelToken.Token,
             };
             _downloadState.IsActive = true;
             await ParallelDownloadAsync(
@@ -221,13 +219,14 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
                 options,
                 async (item, token) =>
                 {
-                    if (cts.IsCancellationRequested)
+                    if (_downloadState.CancelToken.Token.IsCancellationRequested)
                     {
                         if (downloadState != null)
                             await GameEventPublisher.PublisAsync(
                                 GameContextActionType.None,
                                 "取消下载"
                             );
+
                         return;
                     }
                     IProgress<(GameContextActionType, bool, long, string, long, long)> progress =
@@ -257,7 +256,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
                                 item.Md5,
                                 filePath,
                                 downloadState,
-                                cts,
+                                _downloadState.CancelToken,
                                 progress: progress
                             );
                             if (checkResult)
@@ -275,7 +274,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
                                         Md5 = item.Md5,
                                     },
                                     downloadState,
-                                    cts,
+                                    _downloadState.CancelToken,
                                     progress: progress
                                 );
                             }
@@ -298,7 +297,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
                                     item.ChunkInfos[i],
                                     filePath,
                                     downloadState,
-                                    cts,
+                                    _downloadState.CancelToken,
                                     progress: progress
                                 );
                                 if (needDownload)
@@ -315,7 +314,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
                                             true,
                                             item.Size,
                                             downloadState,
-                                            cts,
+                                            _downloadState.CancelToken,
                                             progress: progress
                                         );
                                     }
@@ -328,7 +327,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
                                             item.ChunkInfos[i].Start,
                                             item.ChunkInfos[i].End,
                                             false,
-                                            downloadCts: cts,
+                                            downloadCts: _downloadState.CancelToken,
                                             state: downloadState,
                                             progress: progress
                                         );
@@ -361,7 +360,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
                                 Md5 = item.Md5,
                             },
                             downloadState,
-                            cts,
+                            _downloadState.CancelToken,
                             progress: progress
                         );
                     }
@@ -421,6 +420,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
             FileCurrentSize = currentFileSize,
             FileTotalSize = fileMaxSize,
             Prod = _isProd,
+            IsCancel = this._downloadState.CancelToken.IsCancellationRequested,
             VerifySpeed = _verifySpeed,
             IsAction = this._downloadState?.IsActive ?? false,
             IsPause = _downloadState?.IsPaused ?? false,
@@ -434,7 +434,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
     {
         try
         {
-            await this.cts.CancelAsync();
+            await this._downloadState.CancelToken.CancelAsync();
             return true;
         }
         catch (Exception)

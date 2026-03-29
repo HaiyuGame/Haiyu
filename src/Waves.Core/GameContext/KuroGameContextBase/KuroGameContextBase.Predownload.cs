@@ -55,7 +55,7 @@ public partial  class KuroGameContextBase
             _totalProgressTotal = 0;
             this._prodDownloadState = new DownloadState();
             _prodDownloadState.IsActive = true;
-            _prodDownloadState.CancelToken = _prodDownloadCTS.Token;
+            _prodDownloadState.CancelToken = _prodDownloadCTS;
             await _prodDownloadState.SetSpeedLimitAsync(this.SpeedValue);
             await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdDownloadPath, downloadFolder);
             await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdDownloadVersion, launcher.Predownload.Version);

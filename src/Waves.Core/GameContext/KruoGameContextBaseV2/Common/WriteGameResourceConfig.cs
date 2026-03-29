@@ -60,7 +60,35 @@ public class WriteGameResourceConfig : IAsyncDisposable
         );
     }
 
+    public async Task WriteDownloadCancelAsync(IGameEventPublisher gameEventPublisher, bool isSync = false)
+    {
+        var currentVersion = await GameLocalConfig.GetConfigAsync(
+            GameLocalSettingName.LocalGameVersion
+        );
+        var installFolder = await GameLocalConfig.GetConfigAsync(
+            GameLocalSettingName.GameLauncherBassFolder
+        );
+        if (string.IsNullOrWhiteSpace(currentVersion))
+        {
+            await this.GameLocalConfig.SaveConfigAsync(
+                GameLocalSettingName.LocalGameVersion,
+            ""
+            );
+        }
+        await this.GameLocalConfig.SaveConfigAsync(
+            GameLocalSettingName.LocalGameVersion,
+            ""
+        );
+        await this.GameLocalConfig.SaveConfigAsync(
+            GameLocalSettingName.LocalGameUpdateing,
+            "False"
+        );
 
+        await this.GameLocalConfig.SaveConfigAsync(
+            GameLocalSettingName.GameLauncherBassProgram,
+            ""
+        );
+    }
     public async ValueTask DisposeAsync()
     {
         await Task.CompletedTask;
