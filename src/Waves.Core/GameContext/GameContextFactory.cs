@@ -75,10 +75,20 @@ public static class GameContextFactory
             IsLimitSpeed = false,
         };
 
+    #region 新核心
+
     internal static ContextsV2.PunishMainGameContextV2 GetMainPunishGameContextV2() =>
         new ContextsV2.PunishMainGameContextV2(KuroGameApiConfig.MainBGRConfig, nameof(ContextsV2.PunishMainGameContextV2))
         {
-            GamerConfigPath = GameContextFactory.GameBassPath + "\\V2TestConfig",
+            GamerConfigPath = GameContextFactory.GameBassPath + "\\MainPGRV2Config",
             IsLimitSpeed = false,
         };
+
+    internal static ContextsV2.WavesMainGameContextV2 GetMainWavesGameContextV2() =>
+       new ContextsV2.WavesMainGameContextV2(KuroGameApiConfig.MainAPiConfig, nameof(ContextsV2.WavesMainGameContextV2))
+       {
+           GamerConfigPath = GameContextFactory.GameBassPath + "\\MainWavesV2Config",
+           IsLimitSpeed = false,
+       };
+    #endregion
 }

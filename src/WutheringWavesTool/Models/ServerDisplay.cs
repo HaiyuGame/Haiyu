@@ -83,4 +83,16 @@ public class ServerDisplay
                 ShowCard = true,
             },
         ];
+
+
+    public static ObservableCollection<ServerDisplay> GetWavesV2Games =>
+        [
+            new ServerDisplay()
+            {
+                Display = "官服",
+                Key = $"{nameof(WavesMainGameContextV2)}",
+                Tag = "Main",
+                ShowCard = true,
+            }
+        ];
 }

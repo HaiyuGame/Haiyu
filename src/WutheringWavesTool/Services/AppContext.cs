@@ -64,6 +64,8 @@ public class AppContext<T> : IAppContext<T>
             #region 新核心测试
 
             await Instance.Host.Services!.GetRequiredKeyedService<IGameContextV2>(nameof(PunishMainGameContextV2))
+                .InitAsync(); 
+            await Instance.Host.Services!.GetRequiredKeyedService<IGameContextV2>(nameof(WavesMainGameContextV2))
                 .InitAsync();
             #endregion
             this.App = app;

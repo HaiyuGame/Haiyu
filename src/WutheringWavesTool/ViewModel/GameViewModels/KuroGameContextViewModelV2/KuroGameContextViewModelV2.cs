@@ -31,7 +31,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         WallpaperService = Instance.GetService<IWallpaperService>();
         this.Servers =
             this.GameType == GameType.Waves
-                ? ServerDisplay.GetWavesGames
+                ? ServerDisplay.GetWavesV2Games
                 : ServerDisplay.GetPunishV2Games;
         var openService =
             this.GameType == GameType.Waves

@@ -84,6 +84,7 @@ public static class Waves
             #region 新核心测试
             //事件订阅发布器
             .AddKeyedSingleton<GameEventPublisher>(nameof(PunishMainGameContextV2))
+            .AddKeyedSingleton<GameEventPublisher>(nameof(WavesMainGameContextV2))
             .AddKeyedSingleton<IGameContextV2, PunishMainGameContextV2>(
                 nameof(PunishMainGameContextV2),
                 (provider,c) =>
@@ -96,8 +97,20 @@ public static class Waves
                         );
                     return context;
                 }
+            ).AddKeyedSingleton<IGameContextV2, WavesMainGameContextV2>(
+                nameof(WavesMainGameContextV2),
+                (provider, c) =>
+                {
+                    var context = GameContextFactory.GetMainWavesGameContextV2();
+                    context.HttpClientService = provider.GetRequiredService<IHttpClientService>();
+                    context.GameEventPublisher =
+                        provider.GetRequiredKeyedService<GameEventPublisher>(
+                            nameof(WavesMainGameContextV2)
+                        );
+                    return context;
+                }
             )
-            #endregion
+        #endregion
             .AddTransient<IHttpClientService, HttpClientService>();
         return services;
     }
