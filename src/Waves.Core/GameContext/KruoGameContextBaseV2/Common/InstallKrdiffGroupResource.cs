@@ -157,8 +157,8 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
                         groupFileInfos[i].SrcFiles[j]
                     );
                     newFiles.Add(
-                        BuildFileHelper.BuildFilePath(tempFolder, groupFileInfos[i]),
-                        BuildFileHelper.BuildFilePath(baseFolderPath, groupFileInfos[i])
+                        BuildFileHelper.BuildFilePath(tempFolder, groupFileInfos[i].DstFiles[j]),
+                        BuildFileHelper.BuildFilePath(baseFolderPath, groupFileInfos[i].DstFiles[j])
                     );
                     Logger.WriteError($"删除源文件{deleteFilePath}");
                     if(File.Exists(deleteFilePath))
