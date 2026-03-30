@@ -215,7 +215,7 @@ partial class KuroGameContextBaseV2
                         downloadResource,
                         "下载更新文件",
                         folderConfig.DownloadFolder,
-                        _launcher.ResourceDefault.ResourcesBasePath
+                        previous.BaseUrl
                     )
                 );
             }
@@ -242,7 +242,7 @@ partial class KuroGameContextBaseV2
                 );
                 var cdnResult = await TestCdnAsync(
                     _launcher.ResourceDefault.CdnList,
-                    _launcher.ResourceDefault.ResourcesBasePath,
+                    downloadTasks[i].baseUrl,
                     _patch.Resource
                 );
                 if (cdnResult == null || !cdnResult.Value.Success)

@@ -173,9 +173,19 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                 {
                     ActiveFilesItems = activeFiles;
                 }
-                this.MaxStep = tracker.AllSteps.Count;
-                this.CurrentStep = tracker.CurrentStepIndex + 1;
-                this.CurrentStepText = tracker.AllSteps[tracker.CurrentStepIndex];
+                var allSteps = tracker.AllSteps;
+                this.MaxStep = allSteps.Count;
+                if (allSteps.Count > 0)
+                {
+                    var safeStepIndex = Math.Clamp(tracker.CurrentStepIndex, 0, allSteps.Count - 1);
+                    this.CurrentStep = safeStepIndex + 1;
+                    this.CurrentStepText = allSteps[safeStepIndex];
+                }
+                else
+                {
+                    this.CurrentStep = 0;
+                    this.CurrentStepText = string.Empty;
+                }
                 this.SpeedText = tracker.GetSpeedText();
                 this.ActiveFile = System.IO.Path.GetFileName(tracker.FilePath);
                 var status = await this.GameContext.GetGameContextStatusAsync(this.CTS.Token);
@@ -585,7 +595,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
             //}
             //Logger.WriteInfo($"选择游戏安装路径：{result.InstallFolder},即将进入通知核心进行下载");
             //StartBackground(() => this.GameContext.StartDownloadTaskAsync(result.InstallFolder));
-            StartBackground(() => this.GameContext.StartDownloadTaskAsync("D:\\Punish"));
+            StartBackground(() => this.GameContext.StartDownloadTaskAsync("E:\\Test"));
         }
         else
         {
