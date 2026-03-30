@@ -12,6 +12,7 @@ partial class KuroGameContextBaseV2
 {
     private CancellationTokenSource _downloadCts = null;
     private CancellationTokenSource _prodDownloadCts = null;
+    private CancellationTokenSource _installGameResourceCts = null;
 
     #region 下载方法
 

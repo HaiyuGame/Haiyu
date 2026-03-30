@@ -353,7 +353,8 @@ partial class KuroGameContextBaseV2
         DownloadUpdateFolderConfig folderConfig = new();
         #region 初始化资源
         this._downloadState = new DownloadState();
-
+        this._installGameResourceCts = new CancellationTokenSource();
+        this._downloadState.CancelToken = _installGameResourceCts;
         var downloadResource = new List<IndexResource>();
         var patchResource = new List<IndexResource>();
         var groupResource = new List<IndexResource>();
@@ -590,6 +591,11 @@ partial class KuroGameContextBaseV2
             Logger
         );
         await writeConfig.WriteDownloadAndUpDateResultAsync(launcher);
+        _downloadState.IsActive = false;
+        this.GameEventPublisher.Publish(new GameContextOutputArgs()
+        {
+            Type = GameContextActionType.None,
+        });
         #endregion
     }
 
