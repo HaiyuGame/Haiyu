@@ -370,7 +370,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            Logger.WriteError("校验失败！");
+            Logger.WriteError($"校验失败！{ex}");
             return false;
         }
     }

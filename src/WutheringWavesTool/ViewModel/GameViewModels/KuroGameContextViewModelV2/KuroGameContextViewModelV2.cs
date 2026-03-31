@@ -285,7 +285,8 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         this.ProgressValue = tracker.Percentage;
         this.CurrentByteText = GameProgressTracker.FormatBytes(tracker.CurrentBytes);
         this.MaxByteText = GameProgressTracker.FormatBytes(tracker.TotalBytes);
-
+        this.CurrentFile = tracker.CurrentFileIndex.ToString();
+        this.FileTotal = tracker.TotalFiles.ToString();
         var isPaused = status.IsPause || tracker.IsPaused || (args.IsAction && args.IsPause);
 
         if (args.Type == Waves.Core.Models.Enums.GameContextActionType.Verify)

@@ -39,6 +39,11 @@ partial class KuroGameContextViewModelV2
     public partial string CurrentByteText { get; set; }
     [ObservableProperty]
     public partial string MaxByteText { get; set; }
+
+    [ObservableProperty]
+    public partial string CurrentFile { get; set; }
+    [ObservableProperty]
+    public partial string FileTotal { get; set; }
     #endregion
 
     #region 通知

@@ -130,6 +130,7 @@
                             <RowDefinition />
                             <RowDefinition />
                             <RowDefinition />
+                            <RowDefinition />
                         </Grid.RowDefinitions>
                         <TextBlock FontFamily="{ThemeResource DefaultFont}">
                             <Run Text="任务步骤(" />
@@ -238,6 +239,19 @@
                             <Run Text="{x:Bind ViewModel.CurrentByteText, Mode=OneWay}" />
                             <Run Text="/" />
                             <Run Text="{x:Bind ViewModel.MaxByteText, Mode=OneWay}" />
+                        </TextBlock>
+                        <TextBlock
+                            Grid.Row="5"
+                            FontFamily="{ThemeResource DefaultFont}"
+                            Text="当前文件" />
+                        <TextBlock
+                            Grid.Row="5"
+                            Grid.Column="1"
+                            HorizontalAlignment="Right"
+                            FontFamily="{ThemeResource DefaultFont}">
+                            <Run Text="{x:Bind ViewModel.CurrentFile, Mode=OneWay}" />
+                            <Run Text="/" />
+                            <Run Text="{x:Bind ViewModel.FileTotal, Mode=OneWay}" />
                         </TextBlock>
                     </Grid>
                     <NavigationViewItemSeparator Grid.Row="1" />

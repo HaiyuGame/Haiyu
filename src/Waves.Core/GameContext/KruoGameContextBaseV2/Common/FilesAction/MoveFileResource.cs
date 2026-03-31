@@ -2,13 +2,14 @@
 using Waves.Core.Contracts.Events;
 using Waves.Core.Models;
 using Waves.Core.Models.Enums;
+using Waves.Core.Services;
 
 namespace Waves.Core.GameContext.Common.FilesAction;
 
 /// <summary>
 /// 移动文件， 一次性多文件操作，不能停止
 /// </summary>
-public class MoveFileResource : IProgressSetup
+public class MoveFileResource : IProgressSetup, IAsyncDisposable
 {
     public string ProgressName { get; set; }
     public Dictionary<string, object> Param { get; private set; }
@@ -22,11 +23,16 @@ public class MoveFileResource : IProgressSetup
     public Dictionary<string, string> Files { get; private set; }
 
     private IGameEventPublisher gameEventPublisher;
+    private LoggerService logger;
 
+    public MoveFileResource(LoggerService logger)
+    {
+        this.logger = logger;
+    }
 
     private async Task<bool> CheckAsync()
     {
-        if (!Param.CheckParam<Dictionary<string,string>>("files",out var files))
+        if (!Param.CheckParam<Dictionary<string, string>>("files", out var files))
         {
             return false;
         }
@@ -53,30 +59,47 @@ public class MoveFileResource : IProgressSetup
         {
             return null;
         }
-        var keys = Files.Keys.ToList();
-        for (int i = 0; i < keys.Count; i++)
+        await Task.Run(() =>
         {
-            string key = keys[i];
-            string value = Files[key];
-            if (File.Exists(value))
-                File.Delete(value);
-            File.Move(key, value);
-            this.gameEventPublisher.Publish(new GameContextOutputArgs()
+            var keys = Files.Keys.ToList();
+            for (int i = 0; i < keys.Count; i++)
             {
-                Type = GameContextActionType.BottomText,
-                FileTotal = keys.Count,
-                CurrentFile = i,
-                DeleteString = $"正在移动校验文件{System.IO.Path.GetFileName(value)}",
-            });
-            await Task.Delay(100);
-        }
+                string key = keys[i];
+                string value = Files[key].Replace("/", "\\");
+                var dirName = System.IO.Path.GetDirectoryName(value)!;
+                Directory.CreateDirectory(dirName);
+                try
+                {
+                    if (File.Exists(value))
+                        File.Delete(value);
+                    File.Move(key.Replace("/","\\"), value, true);
+                    this.gameEventPublisher.Publish(
+                        new GameContextOutputArgs()
+                        {
+                            Type = GameContextActionType.BottomText,
+                            FileTotal = keys.Count,
+                            CurrentFile = i + 1,
+                            DeleteString = $"正在移动校验文件{System.IO.Path.GetFileName(value)}",
+                        }
+                    );
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+            }
+        });
         return true;
     }
-
 
     public void SetParam(Dictionary<string, object> param, IGameEventPublisher gameEventPublisher)
     {
         this.Param = param;
         this.gameEventPublisher = gameEventPublisher;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await Task.CompletedTask;
     }
 }

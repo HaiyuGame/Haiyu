@@ -81,6 +81,9 @@ public sealed class GameProgressTracker : IAsyncDisposable
 
     public long FileTotalSize { get; private set; }
 
+
+    
+
     /// <summary>
     /// 正在进行操作的活跃文件列表（如并发下载/校验的文件）
     /// Key: 文件名, Value: (当前进度, 总大小)

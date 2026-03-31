@@ -116,7 +116,7 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
                         );
                     return null;
                 }
-                var krdiffPath = BuildFileHelper.BuildFilePath(diffFolderPath, krdiffs[i]);
+                var krdiffPath = BuildFileHelper.BuildFilePath(diffFolderPath, groupFileInfos[i]);
                 IProgress<(GameContextActionType, string, KrDiffDecompressResult)> progress =
                     new Progress<(GameContextActionType, string, KrDiffDecompressResult)>(
                         (s) =>
@@ -133,7 +133,7 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
                                     IsPause = false,
                                     TipMessage = "正在解压合并资源",
                                     CurrentDecompressCount = i,
-                                    MaxDecompressValue = krdiffs.Count,
+                                    MaxDecompressValue = groupFileInfos.Count,
                                     FilePath = s.Item2,
                                     FileCurrentSize = (long)s.Item3.PatchedCurrentBytes,
                                     FileTotalSize = (long)s.Item3.PatchTotalBytes,
@@ -146,7 +146,7 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
                     baseFolderPath,
                     krdiffPath,
                     i,
-                    krdiffs.Count,
+                    groupFileInfos.Count,
                     tempFolder,
                     progress: progress
                 );
@@ -161,37 +161,30 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
                         BuildFileHelper.BuildFilePath(baseFolderPath, groupFileInfos[i].DstFiles[j])
                     );
                     Logger.WriteError($"删除源文件{deleteFilePath}");
-                    if(File.Exists(deleteFilePath))
-                        File.Delete(deleteFilePath);
+                    //if(File.Exists(deleteFilePath))
+                        //File.Delete(deleteFilePath);
                 }
                 Logger.WriteInfo("删除差异文件");
-                if(File.Exists(krdiffPath))
-                    File.Delete(krdiffPath);
+                //if(File.Exists(krdiffPath))
+                    //File.Delete(krdiffPath);
             }
-            this.GameEventPublisher.Publish(
-                new GameContextOutputArgs()
-                {
-                    Type = GameContextActionType.BottomText,
-                    TipMessage = "正在移动解压文件……",
-                }
-            );
             var keys = newFiles.Keys.ToList();
             for (int i = 0; i < keys.Count; i++)
             {
                 string key = keys[i];
-                string value = newFiles[key];
-                if (File.Exists(value))
-                    File.Delete(value);
-                File.Move(key, value);
-                this.GameEventPublisher.Publish(
-                    new GameContextOutputArgs()
-                    {
-                        Type = GameContextActionType.BottomText,
-                        FileTotal = keys.Count,
-                        CurrentFile = i,
-                        DeleteString = $"正在移动校验文件{System.IO.Path.GetFileName(value)}",
-                    }
-                );
+                string value = newFiles[key].Replace("/", "\\");
+                var dirName = System.IO.Path.GetDirectoryName(value)!;
+                Directory.CreateDirectory(dirName);
+                try
+                {
+                    if (File.Exists(value))
+                        File.Delete(value);
+                    File.Move(key.Replace("/", "\\"), value, true);
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
             }
 
             return newFiles;
