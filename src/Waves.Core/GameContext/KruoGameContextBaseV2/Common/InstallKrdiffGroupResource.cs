@@ -161,12 +161,12 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
                         BuildFileHelper.BuildFilePath(baseFolderPath, groupFileInfos[i].DstFiles[j])
                     );
                     Logger.WriteError($"删除源文件{deleteFilePath}");
-                    //if(File.Exists(deleteFilePath))
-                        //File.Delete(deleteFilePath);
+                    if(File.Exists(deleteFilePath))
+                        File.Delete(deleteFilePath);
                 }
                 Logger.WriteInfo("删除差异文件");
-                //if(File.Exists(krdiffPath))
-                    //File.Delete(krdiffPath);
+                if(File.Exists(krdiffPath))
+                    File.Delete(krdiffPath);
             }
             var keys = newFiles.Keys.ToList();
             for (int i = 0; i < keys.Count; i++)
