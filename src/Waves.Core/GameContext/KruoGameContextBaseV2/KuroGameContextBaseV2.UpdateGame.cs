@@ -681,6 +681,8 @@ partial class KuroGameContextBaseV2
         );
         await writeConfig.WriteDownloadAndUpDateResultAsync(launcher);
         _downloadState.IsActive = false;
+        if(!string.IsNullOrWhiteSpace(downloadBaseFolder))
+            Directory.Delete(downloadBaseFolder,true);
         this.GameEventPublisher.Publish(
             new GameContextOutputArgs() { Type = GameContextActionType.None }
         );
