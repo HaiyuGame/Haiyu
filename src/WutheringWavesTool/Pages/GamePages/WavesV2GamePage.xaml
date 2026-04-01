@@ -243,15 +243,13 @@
                         <TextBlock
                             Grid.Row="5"
                             FontFamily="{ThemeResource DefaultFont}"
-                            Text="当前文件" />
+                            Text="任务类型" />
                         <TextBlock
                             Grid.Row="5"
                             Grid.Column="1"
                             HorizontalAlignment="Right"
                             FontFamily="{ThemeResource DefaultFont}">
-                            <Run Text="{x:Bind ViewModel.CurrentFile, Mode=OneWay}" />
-                            <Run Text="/" />
-                            <Run Text="{x:Bind ViewModel.FileTotal, Mode=OneWay}" />
+                            <Run Text="{x:Bind ViewModel.CurrentActiveType, Mode=OneWay}" />
                         </TextBlock>
                     </Grid>
                     <NavigationViewItemSeparator Grid.Row="1" />

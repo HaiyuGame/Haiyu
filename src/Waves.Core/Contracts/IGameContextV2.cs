@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Waves.Api.Models;
 using Waves.Api.Models.Launcher;
+using Waves.Core.Common;
 using Waves.Core.Contracts.Events;
 using Waves.Core.Models;
 using Waves.Core.Models.CoreApi;
@@ -32,6 +33,7 @@ public interface IGameContextV2
     Task<FileVersion> GetLocalXeSSGenerateAsync();
     public Type ContextType { get; }
 
+    public DownloadState? DownloadState { get;}
     public TimeSpan GetGameTime();
 
     public Task<bool> RepairGameAsync();

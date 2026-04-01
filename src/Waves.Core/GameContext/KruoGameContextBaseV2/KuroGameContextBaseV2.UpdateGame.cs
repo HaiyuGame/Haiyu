@@ -20,7 +20,75 @@ partial class KuroGameContextBaseV2
         var currentVersion = await GameLocalConfig.GetConfigAsync(
             GameLocalSettingName.LocalGameVersion
         );
-        Task.Run(async () => await StartDownloadUpdateGameResourceAsync(_launcher, currentVersion));
+
+        #region 获取配置
+        DownloadState = new DownloadState();
+        DownloadState.IsActive = true;
+        if (_launcher == null || string.IsNullOrWhiteSpace(currentVersion))
+        {
+            GameEventPublisher.Publish(
+                new GameContextOutputArgs()
+                {
+                    Type = Models.Enums.GameContextActionType.TipMessage,
+                    TipMessage = "未找到更新配置文件，无法进行下载",
+                }
+            );
+            return false;
+        }
+
+        var previous = _launcher
+            .ResourceDefault.Config.PatchConfig.Where(x => x.Version == currentVersion)
+            .FirstOrDefault();
+        if (previous == null)
+        {
+            GameEventPublisher.Publish(
+                new GameContextOutputArgs()
+                {
+                    Type = Models.Enums.GameContextActionType.TipMessage,
+                    TipMessage = "未找到更新配置文件，无法进行下载",
+                }
+            );
+            return false;
+        }
+        var cdnUrl =
+            _launcher
+                .ResourceDefault.CdnList.Where(x => x.P != 0)
+                .OrderBy(x => x.P)
+                .FirstOrDefault()
+            ?? null;
+        if (cdnUrl == null)
+        {
+            GameEventPublisher.Publish(
+                new GameContextOutputArgs()
+                {
+                    Type = Models.Enums.GameContextActionType.TipMessage,
+                    TipMessage = "未找到更新配置文件，无法进行下载",
+                }
+            );
+            return false;
+        }
+        var _patch = await GetPatchGameResourceAsync(cdnUrl.Url + previous.IndexFile);
+        if (_patch == null)
+        {
+            GameEventPublisher.Publish(
+                new GameContextOutputArgs()
+                {
+                    Type = Models.Enums.GameContextActionType.TipMessage,
+                    TipMessage = "未找到更新配置文件，无法进行下载",
+                }
+            );
+            return false;
+        }
+        #endregion
+        Task.Run(async () =>
+            await StartDownloadUpdateGameResourceAsync(
+                _launcher,
+                currentVersion,
+                previous,
+                _patch,
+                false
+            )
+        );
         return true;
     }
 
@@ -34,8 +102,74 @@ partial class KuroGameContextBaseV2
         var currentVersion = await GameLocalConfig.GetConfigAsync(
             GameLocalSettingName.LocalGameVersion
         );
+
         Task.Run(async () =>
-            await StartDownloadUpdateGameResourceAsync(_launcher, currentVersion, true)
+        {
+            await StartProdDownloadGameResourceAsync(_launcher, currentVersion);
+        });
+        return true;
+    }
+
+    private async Task<bool> StartProdDownloadGameResourceAsync(
+        GameLauncherSource _launcher,
+        string currentVersion
+    )
+    {
+        var previous = _launcher
+            .Predownload.Config.PatchConfig.Where(x => x.Version == currentVersion)
+            .FirstOrDefault();
+        if (previous == null)
+        {
+            return false;
+        }
+        if (previous == null)
+        {
+            GameEventPublisher.Publish(
+                new GameContextOutputArgs()
+                {
+                    Type = Models.Enums.GameContextActionType.TipMessage,
+                    TipMessage = "未找到更新配置文件，无法进行下载",
+                }
+            );
+            return false;
+        }
+        var cdnUrl =
+            _launcher
+                .ResourceDefault.CdnList.Where(x => x.P != 0)
+                .OrderBy(x => x.P)
+                .FirstOrDefault()
+            ?? null;
+        if (cdnUrl == null)
+        {
+            GameEventPublisher.Publish(
+                new GameContextOutputArgs()
+                {
+                    Type = Models.Enums.GameContextActionType.TipMessage,
+                    TipMessage = "未找到更新配置文件，无法进行下载",
+                }
+            );
+            return false;
+        }
+        var _patch = await GetPatchGameResourceAsync(cdnUrl.Url + previous.IndexFile);
+        if (_patch == null)
+        {
+            GameEventPublisher.Publish(
+                new GameContextOutputArgs()
+                {
+                    Type = Models.Enums.GameContextActionType.TipMessage,
+                    TipMessage = "未找到更新配置文件，无法进行下载",
+                }
+            );
+            return false;
+        }
+        Task.Run(async () =>
+            await StartDownloadUpdateGameResourceAsync(
+                _launcher,
+                currentVersion,
+                previous,
+                _patch,
+                false
+            )
         );
         return true;
     }
@@ -50,83 +184,27 @@ partial class KuroGameContextBaseV2
     private async Task<bool> StartDownloadUpdateGameResourceAsync(
         GameLauncherSource _launcher,
         string currentVersion,
+        PatchConfig previous,
+        PatchIndexGameResource _patch,
         bool isProd = false
     )
     {
         try
         {
-            #region 获取配置
-            _downloadState = new DownloadState();
-            _downloadState.IsActive = true;
-            if (_launcher == null || string.IsNullOrWhiteSpace(currentVersion))
-            {
-                GameEventPublisher.Publish(
-                    new GameContextOutputArgs()
-                    {
-                        Type = Models.Enums.GameContextActionType.TipMessage,
-                        TipMessage = "未找到更新配置文件，无法进行下载",
-                    }
-                );
-                return false;
-            }
+            #region 初始化资源
             var baseFolder = await this.GameLocalConfig.GetConfigAsync(
                 GameLocalSettingName.GameLauncherBassFolder
             );
-            var previous = _launcher
-                .ResourceDefault.Config.PatchConfig.Where(x => x.Version == currentVersion)
-                .FirstOrDefault();
-            if (previous == null)
-            {
-                GameEventPublisher.Publish(
-                    new GameContextOutputArgs()
-                    {
-                        Type = Models.Enums.GameContextActionType.TipMessage,
-                        TipMessage = "未找到更新配置文件，无法进行下载",
-                    }
-                );
-                return false;
-            }
-            var cdnUrl =
-                _launcher
-                    .ResourceDefault.CdnList.Where(x => x.P != 0)
-                    .OrderBy(x => x.P)
-                    .FirstOrDefault() ?? null;
-            if (cdnUrl == null)
-            {
-                GameEventPublisher.Publish(
-                    new GameContextOutputArgs()
-                    {
-                        Type = Models.Enums.GameContextActionType.TipMessage,
-                        TipMessage = "未找到更新配置文件，无法进行下载",
-                    }
-                );
-                return false;
-            }
-            var _patch = await GetPatchGameResourceAsync(cdnUrl.Url + previous.IndexFile);
-            if (_patch == null)
-            {
-                GameEventPublisher.Publish(
-                    new GameContextOutputArgs()
-                    {
-                        Type = Models.Enums.GameContextActionType.TipMessage,
-                        TipMessage = "未找到更新配置文件，无法进行下载",
-                    }
-                );
-                return false;
-            }
-            #endregion
-
-            #region 初始化资源
-            this._downloadState = new DownloadState();
+            this.DownloadState = new DownloadState();
             if (isProd)
             {
                 _prodDownloadCts = new CancellationTokenSource();
-                _downloadState.CancelToken = _prodDownloadCts;
+                DownloadState.CancelToken = _prodDownloadCts;
             }
             else
             {
                 _downloadCts = new CancellationTokenSource();
-                _downloadState.CancelToken = _downloadCts;
+                DownloadState.CancelToken = _downloadCts;
             }
             var downloadResource = new List<IndexResource>();
             var patchResource = new List<IndexResource>();
@@ -242,11 +320,11 @@ partial class KuroGameContextBaseV2
             #region  下载资源
             for (int i = 0; i < downloadTasks.Count; i++)
             {
-                if (_downloadState.CancelToken.IsCancellationRequested)
+                if (DownloadState.CancelToken.IsCancellationRequested)
                 {
                     this.GameEventPublisher.Publish(new() { Type = GameContextActionType.None });
-                    _downloadState.IsActive = false;
-                    _downloadState.IsStop = true;
+                    DownloadState.IsActive = false;
+                    DownloadState.IsStop = true;
                     return false;
                 }
                 var downloadMethod = new DownloadAndVerifyResource(this.Logger)
@@ -283,7 +361,7 @@ partial class KuroGameContextBaseV2
                         { "isDelete", false },
                         { "folder", downloadTasks[i].Folder },
                         { "httpClient", HttpClientService! },
-                        { "downloadState", _downloadState! },
+                        { "downloadState", DownloadState! },
                         { "baseUrl", cdn },
                         { "isProd", isProd },
                     },
@@ -316,18 +394,18 @@ partial class KuroGameContextBaseV2
             {
                 await this.StartInstallGameResource(_launcher, previous, _patch);
             }
-            _downloadState.IsActive = false;
+            DownloadState.IsActive = false;
             #endregion
             return true;
         }
         catch (TaskCanceledException)
         {
-            _downloadState.IsStop = true;
+            DownloadState.IsStop = true;
             return false;
         }
         catch (Exception)
         {
-            _downloadState!.IsActive = false;
+            DownloadState!.IsActive = false;
             return false;
         }
     }
@@ -408,9 +486,9 @@ partial class KuroGameContextBaseV2
 
         DownloadUpdateFolderConfig folderConfig = new();
         #region 初始化资源
-        this._downloadState = new DownloadState();
+        this.DownloadState = new DownloadState();
         this._installGameResourceCts = new CancellationTokenSource();
-        this._downloadState.CancelToken = _installGameResourceCts;
+        this.DownloadState.CancelToken = _installGameResourceCts;
         var downloadResource = new List<IndexResource>();
         var patchResource = new List<IndexResource>();
         var groupResource = new List<IndexResource>();
@@ -539,11 +617,11 @@ partial class KuroGameContextBaseV2
         }
         for (int i = 0; i < installTasks.Count; i++)
         {
-            if (_downloadState.CancelToken.IsCancellationRequested)
+            if (DownloadState.CancelToken.IsCancellationRequested)
             {
                 this.GameEventPublisher.Publish(new() { Type = GameContextActionType.None });
-                _downloadState.IsActive = false;
-                _downloadState.IsStop = true;
+                DownloadState.IsActive = false;
+                DownloadState.IsStop = true;
             }
             CurrentSetups = i;
             await this.GameEventPublisher.PublishStepAsync(
@@ -576,6 +654,7 @@ partial class KuroGameContextBaseV2
                 InstallKrdiffGroupResource installgroupMethod = new InstallKrdiffGroupResource(
                     this.Logger
                 );
+                var decompressTempFolder = Path.Combine(baseFolder, "decompressFolder");
                 installgroupMethod.SetParam(
                     new()
                     {
@@ -583,11 +662,14 @@ partial class KuroGameContextBaseV2
                         { "diffFolderPath", installTasks[i].Folder },
                         { "baseFolderPath", baseFolder },
                         { "groupFileInfos", patch.GroupInfos },
+                        { "decompressTempFolder", decompressTempFolder },
                     },
                     this.GameEventPublisher
                 );
                 this._currentRunningAction = installgroupMethod;
-                var newFiles = await installgroupMethod.ExecuteAsync(true);
+                var runValue = await installgroupMethod.ExecuteAsync(true);
+                //无论执行结果，直接删除临时解压目录
+                Directory.Delete(decompressTempFolder, true);
             }
             if (installTasks[i].Item4 == InstallGameResourceType.KrZip)
             {
@@ -605,7 +687,7 @@ partial class KuroGameContextBaseV2
                         { "zipInfos", installTasks[i].Items.ToList() },
                         { "zipDownFolder", installTasks[i].Folder },
                         { "baseGamePath", baseFolder },
-                        { "downloadState", _downloadState! },
+                        { "downloadState", DownloadState! },
                     },
                     this.GameEventPublisher
                 );
@@ -663,7 +745,7 @@ partial class KuroGameContextBaseV2
                         { "isDelete", false },
                         { "folder", installTasks[i].Folder },
                         { "httpClient", HttpClientService! },
-                        { "downloadState", _downloadState! },
+                        { "downloadState", DownloadState! },
                         { "baseUrl", baseUrl },
                         { "isProd", isProd },
                     },
@@ -680,9 +762,10 @@ partial class KuroGameContextBaseV2
             Logger
         );
         await writeConfig.WriteDownloadAndUpDateResultAsync(launcher);
-        _downloadState.IsActive = false;
-        if(!string.IsNullOrWhiteSpace(downloadBaseFolder))
-            Directory.Delete(downloadBaseFolder,true);
+        DownloadState.IsActive = false;
+        //删除下载文件夹
+        if (!string.IsNullOrWhiteSpace(downloadBaseFolder))
+            Directory.Delete(downloadBaseFolder, true);
         this.GameEventPublisher.Publish(
             new GameContextOutputArgs() { Type = GameContextActionType.None }
         );

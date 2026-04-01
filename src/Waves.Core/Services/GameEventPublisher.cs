@@ -140,8 +140,6 @@ public sealed class GameEventPublisher : IGameEventPublisher, IAsyncDisposable
             _subscribers.Clear();
         }
     }
-
-
     private sealed class SubscriptionToken : IGameEventSubscription
     {
         private readonly GameEventPublisher _publisher;

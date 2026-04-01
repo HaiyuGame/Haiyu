@@ -18,6 +18,7 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
     private string diffFolderPath;
     private List<GroupFileInfo> groupFileInfos;
     private string baseFolderPath;
+    private string decompressTempFolder;
 
     public InstallKrdiffGroupResource(LoggerService loggerService)
     {
@@ -65,10 +66,15 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
         {
             return false;
         }
+        if(!Param.CheckParam<string>("decompressTempFolder",out var decompressTempFolder))
+        {
+            return false;
+        }
         this.krdiffs = krdiffs!;
         this.diffFolderPath = diffFolderPath!;
         this.groupFileInfos = groupFileInfos!;
         this.baseFolderPath = baseFolderPath!;
+        this.decompressTempFolder = decompressTempFolder!;
         return true;
     }
 
@@ -90,10 +96,10 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
                         TipMessage = "初始化失败",
                     }
                 );
-                return null;
+                return false;
             }
             Dictionary<string, string> newFiles = new();
-            var tempFolder = Path.Combine(baseFolderPath, "decompressFolder");
+            var tempFolder = decompressTempFolder;
             Directory.CreateDirectory(tempFolder);
             for (int i = 0;i < groupFileInfos.Count; i++)
             {
@@ -114,7 +120,7 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
                                 Type = GameContextActionType.None,
                             }
                         );
-                    return null;
+                    return false;
                 }
                 var krdiffPath = BuildFileHelper.BuildFilePath(diffFolderPath, groupFileInfos[i]);
                 IProgress<(GameContextActionType, string, KrDiffDecompressResult)> progress =
@@ -124,7 +130,7 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
                             GameEventPublisher.Publish(
                                 new GameContextOutputArgs
                                 {
-                                    Type = s.Item1,
+                                    Type =  GameContextActionType.Decompress,
                                     CurrentSize = (long)s.Item3.PatchedCurrentBytes,
                                     TotalSize = (long)s.Item3.PatchTotalBytes,
                                     DownloadSpeed = 0,
@@ -187,7 +193,7 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
                 }
             }
 
-            return newFiles;
+            return true;
         }
         catch (Exception ex)
         {

@@ -160,7 +160,7 @@ public abstract partial class KuroGameContextBaseV2:IGameContextV2
     /// <summary>
     /// 阻塞用户启动的下载状态管理
     /// </summary>
-    private DownloadState? _downloadState = null;
+    public DownloadState? DownloadState { get; private set; }
 
     /// <summary>
     /// CDN测速工具
@@ -193,8 +193,14 @@ public abstract partial class KuroGameContextBaseV2:IGameContextV2
                                 TipMessage = "当前任务不支持取消",
                             }
                         );
+                        return true;
                     }
                 }
+            }
+            if(DownloadState != null)
+            {
+                DownloadState.IsStop = true;
+                DownloadState.IsActive = false;
             }
             this.GameEventPublisher.Publish(
                 new GameContextOutputArgs() { Type = GameContextActionType.None }
@@ -210,15 +216,15 @@ public abstract partial class KuroGameContextBaseV2:IGameContextV2
 
     public async Task<bool> PauseDownloadAsync()
     {
-        if (_downloadState == null)
+        if (DownloadState == null)
             return true;
-        if (_downloadState.IsActive && _currentRunningAction != null)
+        if (DownloadState.IsActive && _currentRunningAction != null)
         {
             if (_currentRunningAction is IProgressSetup cancelTask)
             {
                 if (cancelTask.CanPause)
                 {
-                    await _downloadState.PauseAsync();
+                    await DownloadState.PauseAsync();
                 }
                 else
                 {
@@ -235,27 +241,27 @@ public abstract partial class KuroGameContextBaseV2:IGameContextV2
         else
         {
             //处于其他任务，直接暂停
-            await _downloadState.PauseAsync();
+            await DownloadState.PauseAsync();
         }
         return true;
     }
 
     public async Task<bool> ResumeDownloadAsync()
     {
-        if (_downloadState == null)
+        if (DownloadState == null)
             return true;
-        if (_downloadState.IsPaused)
+        if (DownloadState.IsPaused)
         {
-            await _downloadState.ResumeAsync();
+            await DownloadState.ResumeAsync();
         }
         return true;
     }
 
     public async Task SetDownloadSpeedAsync(long mbValue)
     {
-        if (_downloadState == null)
+        if (DownloadState == null)
             return;
-        await _downloadState.SetSpeedLimitAsync(mbValue * 1024 * 1024);
+        await DownloadState.SetSpeedLimitAsync(mbValue * 1024 * 1024);
     }
 
     public async Task<FileVersion> GetLocalFileVersionAsync(string fileName, string displayName)
@@ -374,10 +380,10 @@ public abstract partial class KuroGameContextBaseV2:IGameContextV2
                 }
             }
         }
-        if (_downloadState != null)
+        if (DownloadState != null)
         {
-            status.IsPause = this._downloadState.IsPaused;
-            status.IsAction = this._downloadState.IsActive;
+            status.IsPause = this.DownloadState.IsPaused;
+            status.IsAction = this.DownloadState.IsActive;
         }
         status.Gameing = this._isStarting;
         return status;

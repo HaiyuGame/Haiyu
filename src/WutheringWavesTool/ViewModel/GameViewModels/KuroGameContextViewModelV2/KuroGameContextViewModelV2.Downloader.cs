@@ -1,4 +1,6 @@
-﻿namespace Haiyu.ViewModel.GameViewModels;
+﻿using Waves.Core.Models.Enums;
+
+namespace Haiyu.ViewModel.GameViewModels;
 
 partial class KuroGameContextViewModelV2
 {
@@ -41,9 +43,7 @@ partial class KuroGameContextViewModelV2
     public partial string MaxByteText { get; set; }
 
     [ObservableProperty]
-    public partial string CurrentFile { get; set; }
-    [ObservableProperty]
-    public partial string FileTotal { get; set; }
+    public partial GameContextActionType CurrentActiveType { get; set; }
     #endregion
 
     #region 通知
