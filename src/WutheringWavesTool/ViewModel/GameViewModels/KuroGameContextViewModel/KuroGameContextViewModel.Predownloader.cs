@@ -111,7 +111,8 @@ partial class KuroGameContextViewModel
                 PredDownloadDoneVisibility = Visibility.Collapsed;
                 this.PredDownloadingVisibility = Visibility.Visible;
                 this.PreDownloadProgress = args.ProgressPercentage;
-                if (args.IsAction == true && args.IsPause == true)
+                var prodStatus = await this.GameContext.GetGameContextStatusAsync(this.CTS.Token);
+                if (args.IsAction == true && prodStatus.IsProdownPause)
                 {
                     PreDownloadIcon = "\uE768";
                 }

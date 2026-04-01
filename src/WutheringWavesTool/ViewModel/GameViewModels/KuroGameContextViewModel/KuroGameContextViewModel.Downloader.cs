@@ -29,7 +29,7 @@ partial class KuroGameContextViewModel
                 this.CurrentProgressValue = args.CurrentSize; 
                 if (args.Type == Waves.Core.Models.Enums.GameContextActionType.Verify)
                 {
-                    if (args.IsAction && args.IsPause)
+                    if (args.IsAction && status.IsPause)
                     {
                         this.PauseIcon = "\uE768";
                         this.BottomBarContent = "下载已经暂停";
@@ -44,7 +44,7 @@ partial class KuroGameContextViewModel
                 }
                 else if (args.Type == Waves.Core.Models.Enums.GameContextActionType.Download)
                 {
-                    if (args.IsAction && args.IsPause)
+                    if (args.IsAction && status.IsPause)
                     {
                         this.PauseIcon = "\uE768";
                         this.BottomBarContent = "下载已经暂停";
