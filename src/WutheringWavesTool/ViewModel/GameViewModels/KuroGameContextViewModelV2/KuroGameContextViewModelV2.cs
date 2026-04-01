@@ -779,6 +779,8 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
     {
         if (!disposedValue)
         {
+            //取消数据接收接口
+            this.GameContext.ProgressState.OnProgressChanged -= ProgressState_OnProgressChanged;
             if (disposing)
             {
                 DisposeAfter();
