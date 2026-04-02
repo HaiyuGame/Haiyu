@@ -49,12 +49,8 @@ IHost host = Host.CreateDefaultBuilder(args)
     })
     .Build();
 
-//var punish = host.Services.GetKeyedService<IGameContext>(nameof(PunishMainGameContext));
-//var launche = await punish.GetGameLauncherSourceAsync();
-//Console.ReadKey();
-var v2 = host.Services.GetService<Waves.Core.GameContext.ContextsV2.PunishMainGameContextV2>();
+var v2 = host.Services.GetRequiredKeyedService<IGameContextV2>(nameof(WavesMainGameContextV2));
 await v2.InitAsync();
-await v2.UpdateGameResourceAsync();
 v2.ProgressState.OnProgressChanged += (t) =>
 {
     int oldLeft = Console.CursorLeft;
@@ -71,7 +67,7 @@ v2.ProgressState.OnProgressChanged += (t) =>
         Console.Write(progressBar.PadRight(Console.WindowWidth - 1));
         Console.SetCursorPosition(0, 1);
         string stepInfo =
-            $"Step {t.CurrentStepIndex + 1}/{t.TotalSteps}: {t.StepName} | Action: {t.CurrentAction} | {t.CurrentStepTip}";
+            $"IsProd:{t.Prod} Step {t.CurrentStepIndex + 1}/{t.TotalSteps}: {t.StepName} | Action: {t.CurrentAction} | {t.CurrentStepTip}";
         Console.Write(stepInfo.PadRight(Console.WindowWidth - 1));
         Console.SetCursorPosition(0, 2);
         string currentFile =
@@ -107,6 +103,7 @@ v2.ProgressState.OnProgressChanged += (t) =>
 
 Console.Clear();
 Console.SetCursorPosition(0, 15);
+await v2.StartInstallGameResource(true);
 while (true)
 {
     Console.WriteLine("Q停止，P暂停，R恢复，输入数字设定下载速度（MB）,回车确认");

@@ -168,7 +168,7 @@ partial class KuroGameContextBaseV2
                 currentVersion,
                 previous,
                 _patch,
-                false
+                true
             )
         );
         return true;
@@ -385,6 +385,7 @@ partial class KuroGameContextBaseV2
                     GameLocalSettingName.ProdDownloadFolderDone,
                     "True"
                 );
+                await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdDownloadVersion, _launcher.Predownload.Version);
                 this.GameEventPublisher.Publish(
                     new GameContextOutputArgs() { Type = GameContextActionType.None }
                 );
@@ -513,21 +514,7 @@ partial class KuroGameContextBaseV2
         {
             downloadBaseFolder = Path.Combine(baseFolder, "downloads");
         }
-        if (isProd)
-        {
-            await this.GameLocalConfig.SaveConfigAsync(
-                GameLocalSettingName.ProdDownloadPath,
-                downloadBaseFolder
-            );
-            await this.GameLocalConfig.SaveConfigAsync(
-                GameLocalSettingName.ProdDownloadFolderDone,
-                "False"
-            );
-            await this.GameLocalConfig.SaveConfigAsync(
-                GameLocalSettingName.ProdDownloadVersion,
-                previous.Version
-            );
-        }
+        
         await GameEventPublisher.PublisAsync(GameContextActionType.CdnSelect, "正在选择最优CDN");
         #endregion
         Setups.Clear();
@@ -762,6 +749,21 @@ partial class KuroGameContextBaseV2
             Logger
         );
         await writeConfig.WriteDownloadAndUpDateResultAsync(launcher);
+        if (isProd)
+        {
+            await this.GameLocalConfig.SaveConfigAsync(
+                GameLocalSettingName.ProdDownloadPath,
+                ""
+            );
+            await this.GameLocalConfig.SaveConfigAsync(
+                GameLocalSettingName.ProdDownloadFolderDone,
+                "False"
+            );
+            await this.GameLocalConfig.SaveConfigAsync(
+                GameLocalSettingName.ProdDownloadVersion,
+                ""
+            );
+        }
         DownloadState.IsActive = false;
         //删除下载文件夹
         if (!string.IsNullOrWhiteSpace(downloadBaseFolder))
@@ -771,6 +773,8 @@ partial class KuroGameContextBaseV2
         );
         #endregion
     }
+
+
 
     public async Task StartInstallGameResource(bool isProd = false)
     {
