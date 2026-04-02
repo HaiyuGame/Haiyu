@@ -738,13 +738,6 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         this.GameContext.GameEventPublisher.Publish(
             new GameContextOutputArgs() { Type = GameContextActionType.None }
         );
-        //await this.GameContext_GameContextOutput(
-        //    this,
-        //    new GameContextOutputArgs()
-        //    {
-        //        Type = Waves.Core.Models.Enums.GameContextActionType.None,
-        //    }
-        //);
     }
 
     [RelayCommand]
