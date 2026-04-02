@@ -36,7 +36,7 @@ public abstract partial class KuroGameContextBaseV2:IGameContextV2
     /// <summary>
     /// Http 请求服务，包含下载Client与配置Client
     /// </summary>
-    public IHttpClientService HttpClientService { get; internal set; }
+    public IHttpClientService HttpClientService { get;  set; }
 
     /// <summary>
     /// CDN测试工具
@@ -86,7 +86,22 @@ public abstract partial class KuroGameContextBaseV2:IGameContextV2
     public abstract GameType GameType { get; }
 
     public abstract Type ContextType { get; }
-    IHttpClientService IGameContextV2.HttpClientService { get => HttpClientService; set => HttpClientService = value; }
+
+    #region 下载字段
+    /// <summary>
+    /// 阻塞用户启动的下载状态管理
+    /// </summary>
+    public DownloadState? DownloadState { get; private set; }
+
+    /// <summary>
+    /// CDN测速工具
+    /// </summary>
+    private CDNSpeedTester _cdnSpeedTester = new();
+    #endregion
+
+    private IAsyncDisposable? _currentRunningAction;
+    private bool _isStarting;
+
 
     public KuroGameContextBaseV2(KuroGameApiConfig config, string contextName)
     {
@@ -156,20 +171,6 @@ public abstract partial class KuroGameContextBaseV2:IGameContextV2
         return config;
     }
 
-    #region 下载字段
-    /// <summary>
-    /// 阻塞用户启动的下载状态管理
-    /// </summary>
-    public DownloadState? DownloadState { get; private set; }
-
-    /// <summary>
-    /// CDN测速工具
-    /// </summary>
-    private CDNSpeedTester _cdnSpeedTester = new();
-    #endregion
-
-    private IAsyncDisposable? _currentRunningAction;
-    private bool _isStarting;
 
 
     public async Task<bool> StopCannelTaskAsync()
@@ -183,6 +184,8 @@ public abstract partial class KuroGameContextBaseV2:IGameContextV2
                     if (cancelTask.CanStop)
                     {
                         await _currentRunningAction.DisposeAsync();
+                        if(this.DownloadState != null)
+                            await this.DownloadState.CancelToken.CancelAsync();
                     }
                     else
                     {

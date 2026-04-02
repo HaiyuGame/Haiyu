@@ -18,21 +18,6 @@ partial class KuroGameContextViewModelV2
         }
         if (_buttonAction == ButtonActionType.PrepareUpdate)
         {
-            //var localVersion = await GameContext.GameLocalConfig.GetConfigAsync(
-            //    GameLocalSettingName.LocalGameVersion
-            //);
-            //var result = await DialogManager.ShowUpdateGameDialogAsync(
-            //    this.GameContext.ContextName,
-            //    UpdateGameType.UpdateGame
-            //);
-
-            //if (result == null)
-            //    return;
-            //if (result.IsOk == false)
-            //{
-            //    return;
-            //}
-            //this.PauseIcon = "\uE769";
             Task.Run(async () => await GameContext.UpdateGameResourceAsync());
         }
         if (_buttonAction == ButtonActionType.InstallPreDownload)
@@ -50,10 +35,15 @@ partial class KuroGameContextViewModelV2
             }
             else
             {
-                //跳转会更新游戏
                 _buttonAction = ButtonActionType.PrepareUpdate;
                 Task.Run(async()=> await UpdateGameAsync());
             }
         }
+    }
+
+    [RelayCommand]
+    async Task StartDownloadProdGameResource()
+    {
+        await this.GameContext.StartProdDownloadGameResourceAsync();
     }
 }

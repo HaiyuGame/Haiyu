@@ -72,6 +72,9 @@ public sealed class GameProgressTracker : IAsyncDisposable
     public double ZipSpeed { get; private set; }
 
     public bool IsPaused { get; private set; }
+    /// <summary>
+    /// 是否预下载
+    /// </summary>
     public bool Prod { get; private set; }
     public bool IsActive { get; private set; }
 

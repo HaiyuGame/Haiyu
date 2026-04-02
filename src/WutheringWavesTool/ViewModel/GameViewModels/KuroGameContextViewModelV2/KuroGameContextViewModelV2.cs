@@ -271,6 +271,10 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                     BottomBarContent = args.TipMessage;
                 }
             }
+            else
+            {
+
+            }
         });
     }
 
