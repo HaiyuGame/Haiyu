@@ -13,6 +13,7 @@ partial class KuroGameContextViewModelV2
     [ObservableProperty]
     public partial Visibility PredCardVisibility { get; set; } = Visibility.Collapsed;
 
+
     [ObservableProperty]
     public partial Visibility PredDownloadBthVisibility { get; set; } = Visibility.Collapsed;
 
@@ -27,6 +28,29 @@ partial class KuroGameContextViewModelV2
 
     [ObservableProperty]
     public partial string PreDownloadIcon { get; set; }
+
+
+
+    /// <summary>
+    /// 预下载进度
+    /// </summary>
+    [ObservableProperty]
+    public partial double PreProgress { get; set; }
+
+    /// <summary>
+    /// 预下载执行步骤
+    /// </summary>
+    [ObservableProperty]
+    public partial string PreSetupText { get; set; }
+
+    [ObservableProperty]
+    public partial string PreSetupHeaderText { get; set; }
+
+    [ObservableProperty]
+    public partial string PreSpeedText { get; set; }
+
+
+
 
     [RelayCommand]
     async Task StartPreDownloadGame()
@@ -61,19 +85,6 @@ partial class KuroGameContextViewModelV2
     async Task StopDownloadGame()
     {
         await this.GameContext.StopCannelTaskAsync();
-        //await this.GameContext_GameContextProdOutput(
-        //        this.GameContext,
-        //        new GameContextOutputArgs()
-        //        {
-        //            Type = GameContextActionType.None,
-        //            CurrentSize = 0,
-        //            TotalSize = 0,
-        //            DownloadSpeed = 0,
-        //            VerifySpeed = 0,
-        //            RemainingTime = TimeSpan.Zero,
-        //        }
-        //    )
-        //    .ConfigureAwait(false);
     }
 
     [RelayCommand]

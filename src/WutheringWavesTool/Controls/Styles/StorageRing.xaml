@@ -20,8 +20,8 @@
             <StaticResource x:Key="StorageRingBackgroundBrush" ResourceKey="ControlFillColorTransparentBrush" />
 
             <StaticResource x:Key="StorageRingValueBrush" ResourceKey="AccentFillColorDefaultBrush" />
-            <StaticResource x:Key="StorageRingValueCautionBrush" ResourceKey="SystemFillColorCautionBrush" />
-            <StaticResource x:Key="StorageRingValueCriticalBrush" ResourceKey="SystemFillColorCriticalBrush" />
+            <StaticResource x:Key="StorageRingValueCautionBrush" ResourceKey="AccentFillColorDefaultBrush" />
+            <StaticResource x:Key="StorageRingValueCriticalBrush" ResourceKey="AccentFillColorDefaultBrush" />
             <StaticResource x:Key="StorageRingValueDisabledBrush" ResourceKey="AccentFillColorDisabledBrush" />
 
             <StaticResource x:Key="StorageRingTrackBrush" ResourceKey="ControlStrongStrokeColorDefaultBrush" />

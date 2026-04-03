@@ -134,6 +134,10 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         GC.Collect();
         await Task.Delay(500);
         this.CTS = new CancellationTokenSource();
+        if(GameContext!= null)
+        {
+            GameContext.ProgressState.OnProgressChanged -= ProgressState_OnProgressChanged;
+        }
         this.GameContext = Instance.Host.Services.GetRequiredKeyedService<IGameContextV2>(name);
         GameContext.ProgressState.OnProgressChanged += ProgressState_OnProgressChanged;
         CurrentProgressValue = 0;
@@ -256,14 +260,13 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                 }
                 if (
                     actionType == Waves.Core.Models.Enums.GameContextActionType.TipMessage
-                    && !status.IsPredownloaded
+                    
                 )
                 {
                     await DialogManager.ShowMessageDialog(args.TipMessage, "确认", "关闭");
                 }
                 if (
                     actionType == Waves.Core.Models.Enums.GameContextActionType.CdnSelect
-                    && !status.IsPredownloaded
                 )
                 {
                     ShowGameDownloadingBth(status);
@@ -273,7 +276,29 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
             }
             else
             {
-
+                this.PreProgress = tracker.Percentage;
+                this.SpeedText = tracker.GetSpeedText();
+                var allSteps = tracker.AllSteps;
+                this.MaxStep = allSteps.Count;
+                if (allSteps.Count > 0)
+                {
+                    var safeStepIndex = Math.Clamp(tracker.CurrentStepIndex, 0, allSteps.Count - 1);
+                    PreSetupText = $"{allSteps[safeStepIndex]}";
+                    PreSetupHeaderText = $"[{safeStepIndex + 1}/{allSteps.Count}]";
+                }
+                else
+                {
+                    this.CurrentStep = 0;
+                    this.CurrentStepText = string.Empty;
+                }
+                if (GameContext.DownloadState!.IsPaused || args.IsPause)
+                {
+                    this.PreDownloadIcon = "\uE768";
+                }
+                else
+                {
+                    this.PreDownloadIcon = "\uE769";
+                }
             }
         });
     }
