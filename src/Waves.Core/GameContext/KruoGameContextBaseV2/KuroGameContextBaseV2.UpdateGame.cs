@@ -331,16 +331,21 @@ partial class KuroGameContextBaseV2
                 {
                     ProgressName = downloadTasks[i].Name,
                 };
-                await GameEventPublisher.PublisAsync(
-                    GameContextActionType.CdnSelect,
-                    "正在选择最优CDN"
+                GameEventPublisher.Publish(
+                    new GameContextOutputArgs()
+                    {
+                        Type = GameContextActionType.CdnSelect,
+                        TipMessage = "正在选择最优CDN",
+                        Prod = isProd,
+                    }
                 );
                 var cdn = await GetBaseUrl(
                     _launcher,
                     _launcher.ResourceDefault.ResourcesBasePath,
                     previous.BaseUrl,
                     downloadTasks[i].Items.ToList(),
-                    downloadTasks[i].isResource
+                    downloadTasks[i].isResource,
+                    isProd
                 );
                 if (string.IsNullOrWhiteSpace(cdn))
                 {
@@ -372,8 +377,10 @@ partial class KuroGameContextBaseV2
                 await this.GameEventPublisher.PublishStepAsync(
                     downloadTasks[i].Name,
                     CurrentSetups,
-                    Setups
+                    Setups,
+                    isProd: isProd
                 );
+                await Task.Delay(100);
                 await downloadMethod.ExecuteAsync(true);
             }
             #endregion
@@ -385,7 +392,10 @@ partial class KuroGameContextBaseV2
                     GameLocalSettingName.ProdDownloadFolderDone,
                     "True"
                 );
-                await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdDownloadVersion, _launcher.Predownload.Version);
+                await this.GameLocalConfig.SaveConfigAsync(
+                    GameLocalSettingName.ProdDownloadVersion,
+                    _launcher.Predownload.Version
+                );
                 this.GameEventPublisher.Publish(
                     new GameContextOutputArgs() { Type = GameContextActionType.None }
                 );
@@ -416,14 +426,19 @@ partial class KuroGameContextBaseV2
         string resourceUrl,
         string preiveResource,
         List<IndexResource> resources,
-        bool isResource = false
+        bool isResource = false,
+        bool isProd = false
     )
     {
         try
         {
-            await GameEventPublisher.PublisAsync(
-                GameContextActionType.CdnSelect,
-                "正在选择最优CDN"
+            GameEventPublisher.Publish(
+                new GameContextOutputArgs()
+                {
+                    Type = GameContextActionType.CdnSelect,
+                    TipMessage = "正在选择最优CDN",
+                    Prod = isProd,
+                }
             );
             var cdnResult = await TestCdnAsync(
                 _launcher.ResourceDefault.CdnList,
@@ -437,6 +452,7 @@ partial class KuroGameContextBaseV2
                     {
                         Type = GameContextActionType.TipMessage,
                         TipMessage = "未找到可用的CDN地址，无法进行下载",
+                        Prod = isProd,
                     }
                 );
             }
@@ -514,8 +530,14 @@ partial class KuroGameContextBaseV2
         {
             downloadBaseFolder = Path.Combine(baseFolder, "downloads");
         }
-        
-        await GameEventPublisher.PublisAsync(GameContextActionType.CdnSelect, "正在选择最优CDN");
+        GameEventPublisher.Publish(
+            new GameContextOutputArgs()
+            {
+                Type = GameContextActionType.CdnSelect,
+                TipMessage = "正在选择最优CDN",
+                Prod = isProd,
+            }
+        );
         #endregion
         Setups.Clear();
         #region 初始化步骤显示
@@ -614,12 +636,14 @@ partial class KuroGameContextBaseV2
             await this.GameEventPublisher.PublishStepAsync(
                 installTasks[i].Name,
                 CurrentSetups,
-                Setups
+                Setups,
+                isProd: isProd
             );
             await this.GameEventPublisher.PublishStepAsync(
                 installTasks[i].Name,
                 CurrentSetups,
-                Setups
+                Setups,
+                isProd: isProd
             );
             if (installTasks[i].Item4 == InstallGameResourceType.Krdiff)
             {
@@ -666,7 +690,8 @@ partial class KuroGameContextBaseV2
                 };
                 await GameEventPublisher.PublisAsync(
                     GameContextActionType.BottomText,
-                    "准备开始解压压缩包"
+                    "准备开始解压压缩包",
+                    isProd
                 );
                 installZipMethod.SetParam(
                     new Dictionary<string, object>()
@@ -706,9 +731,13 @@ partial class KuroGameContextBaseV2
                 {
                     ProgressName = "重新校验文件",
                 };
-                await GameEventPublisher.PublisAsync(
-                    GameContextActionType.CdnSelect,
-                    "正在选择最优CDN"
+                GameEventPublisher.Publish(
+                    new GameContextOutputArgs()
+                    {
+                        Type = GameContextActionType.CdnSelect,
+                        TipMessage = "正在选择最优CDN",
+                        Prod = isProd,
+                    }
                 );
                 var cdnResult = await TestCdnAsync(
                     launcher.ResourceDefault.CdnList,
@@ -751,10 +780,7 @@ partial class KuroGameContextBaseV2
         await writeConfig.WriteDownloadAndUpDateResultAsync(launcher);
         if (isProd)
         {
-            await this.GameLocalConfig.SaveConfigAsync(
-                GameLocalSettingName.ProdDownloadPath,
-                ""
-            );
+            await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdDownloadPath, "");
             await this.GameLocalConfig.SaveConfigAsync(
                 GameLocalSettingName.ProdDownloadFolderDone,
                 "False"
@@ -773,8 +799,6 @@ partial class KuroGameContextBaseV2
         );
         #endregion
     }
-
-
 
     public async Task StartInstallGameResource(bool isProd = false)
     {

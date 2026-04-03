@@ -27,7 +27,7 @@ partial class KuroGameContextViewModelV2
     public partial double PreDownloadProgress { get; set; } = 0;
 
     [ObservableProperty]
-    public partial string PreDownloadIcon { get; set; }
+    public partial string PreDownloadIcon { get; set; } = "\uEBD3";
 
 
 
@@ -65,21 +65,6 @@ partial class KuroGameContextViewModelV2
         }
     }
 
-    [RelayCommand]
-    async Task PausePreDownloadGame()
-    {
-        var status = await this.GameContext.GetGameContextStatusAsync(this.CTS.Token);
-        if (!status.IsProdownPause)
-        {
-            await this.GameContext.PauseDownloadAsync();
-            this.PreDownloadIcon = "\uE768";
-        }
-        else
-        {
-            await this.GameContext.ResumeDownloadAsync();
-            this.PreDownloadIcon = "\uE769";
-        }
-    }
 
     [RelayCommand]
     async Task StopDownloadGame()

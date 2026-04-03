@@ -81,9 +81,13 @@ partial class KuroGameContextBaseV2
             DownloadState.IsActive = true;
             downloadMethod = new(this.Logger);
             downloadMethod.ProgressName = "下载校验";
-            await GameEventPublisher.PublisAsync(
-                GameContextActionType.CdnSelect,
-                "正在选择最优CDN"
+            GameEventPublisher.Publish(
+                new GameContextOutputArgs()
+                {
+                    Type = GameContextActionType.CdnSelect,
+                    TipMessage = "正在选择最优CDN",
+                    Prod = false,
+                }
             );
             var cdnResult = await TestCdnAsync(
                 launcher.ResourceDefault.CdnList,

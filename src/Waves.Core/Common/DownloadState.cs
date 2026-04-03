@@ -5,7 +5,7 @@ namespace Waves.Core.Common;
 
 public sealed class DownloadState
 {
-    public volatile bool _isPaused;
+    internal volatile bool _isPaused;
     private long _currentBytes;
 
     public SpeedLimiter SpeedLimiter { get; private set; }

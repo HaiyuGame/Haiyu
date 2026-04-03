@@ -47,12 +47,6 @@ public class GameContextStatus
     /// </summary>
     public bool Gameing { get; internal set; }
 
-    /// <summary>
-    /// 是否开始预下载
-    /// </summary>
-    public bool IsPredownloaded { get; internal set; }
-
-    public bool IsProdownPause { get; internal set; }
 
     /// <summary>
     /// 预下载是否完成
@@ -69,4 +63,6 @@ public class GameContextStatus
     /// </summary>
     public string PredownloadPath { get; internal set; }
     public GameContextOutputArgs? LasterArgs { get; internal set; }
+    public bool IsProdownPause { get; internal set; }
+    public bool IsPredownloaded { get; internal set; }
 }

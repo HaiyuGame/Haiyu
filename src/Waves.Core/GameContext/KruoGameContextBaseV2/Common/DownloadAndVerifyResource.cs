@@ -212,7 +212,11 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
     {
         try
         {
-            await GameEventPublisher.PublisAsync(GameContextActionType.CdnSelect, this.ProgressName);
+            await GameEventPublisher.PublisAsync(
+                GameContextActionType.CdnSelect,
+                this.ProgressName,
+                _isProd
+            );
             await Parallel.ForEachAsync(
                 resource,
                 options,

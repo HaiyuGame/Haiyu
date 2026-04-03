@@ -44,6 +44,24 @@ partial class KuroGameContextViewModelV2
     [RelayCommand]
     async Task StartDownloadProdGameResource()
     {
-        await this.GameContext.StartProdDownloadGameResourceAsync();
+        var status = await this.GameContext.GetGameContextStatusAsync(this.CTS.Token);
+        if (status == null)
+            return;
+        if(GameContext.DownloadState== null)
+        {
+            this.PreDownloadIcon = "\uEBD3";
+            await this.GameContext.StartProdDownloadGameResourceAsync();
+            return;
+        }
+        if (status.IsPause || GameContext.DownloadState.IsPaused)
+        {
+            await this.GameContext.ResumeDownloadAsync();
+            this.PreDownloadIcon = "\uE768";
+        }
+        else
+        {
+            await this.GameContext.PauseDownloadAsync();
+            this.PreDownloadIcon = "\uE768";
+        }
     }
 }

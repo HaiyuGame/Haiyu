@@ -32,11 +32,17 @@ public static class DownloadExtension
     {
         public async ValueTask PublisAsync(
             Models.Enums.GameContextActionType cdnSelect,
-            string message
+            string message,
+            bool isProd = false
         )
         {
             publisher.Publish(
-                new Models.GameContextOutputArgs() {  Type = cdnSelect, TipMessage = message }
+                new Models.GameContextOutputArgs()
+                {
+                    Type = cdnSelect,
+                    TipMessage = message,
+                    Prod = isProd,
+                }
             );
         }
 
@@ -51,7 +57,7 @@ public static class DownloadExtension
             });
         }
 
-        public async ValueTask PublishStepAsync(string stepName, int currentStepIndex, List<string> allSteps, string tipMessage = "")
+        public async ValueTask PublishStepAsync(string stepName, int currentStepIndex, List<string> allSteps, string tipMessage = "",bool isProd = false)
         {
             publisher.Publish(new Models.GameContextOutputArgs()
             {
@@ -61,7 +67,8 @@ public static class DownloadExtension
                 CurrentStepIndex = currentStepIndex,
                 TotalSteps = allSteps?.Count ?? 0,
                 AllSteps = allSteps ?? new List<string>(),
-                TipMessage = tipMessage
+                TipMessage = tipMessage,
+                Prod = isProd
             });
         }
     }
