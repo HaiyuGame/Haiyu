@@ -115,8 +115,11 @@ partial class KuroGameContextBaseV2
         string currentVersion
     )
     {
+        //var previous = _launcher
+        //    .Predownload.Config.PatchConfig.Where(x => x.Version == currentVersion)
+        //    .FirstOrDefault();
         var previous = _launcher
-            .Predownload.Config.PatchConfig.Where(x => x.Version == currentVersion)
+            .ResourceDefault.Config.PatchConfig.Where(x => x.Version == currentVersion)
             .FirstOrDefault();
         if (previous == null)
         {
@@ -392,12 +395,16 @@ partial class KuroGameContextBaseV2
                     GameLocalSettingName.ProdDownloadFolderDone,
                     "True"
                 );
+                //await this.GameLocalConfig.SaveConfigAsync(
+                //    GameLocalSettingName.ProdDownloadVersion,
+                //    _launcher.Predownload.Version
+                //);
                 await this.GameLocalConfig.SaveConfigAsync(
                     GameLocalSettingName.ProdDownloadVersion,
                     _launcher.Predownload.Version
                 );
                 this.GameEventPublisher.Publish(
-                    new GameContextOutputArgs() { Type = GameContextActionType.None }
+                    new GameContextOutputArgs() { Type = GameContextActionType.None, Prod = isProd }
                 );
                 return true;
             }

@@ -49,7 +49,8 @@ partial class KuroGameContextViewModelV2
     [ObservableProperty]
     public partial string PreSpeedText { get; set; }
 
-
+    [ObservableProperty]
+    public partial string PreDownloadSizeText { get; set; }
 
 
     [RelayCommand]

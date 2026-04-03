@@ -134,7 +134,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         GC.Collect();
         await Task.Delay(500);
         this.CTS = new CancellationTokenSource();
-        if(GameContext!= null)
+        if (GameContext != null)
         {
             GameContext.ProgressState.OnProgressChanged -= ProgressState_OnProgressChanged;
         }
@@ -170,6 +170,8 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         {
             if (this.GameContext == null)
                 return;
+            var actionType = args.Type;
+            var status = await this.GameContext.GetGameContextStatusAsync(this.CTS.Token);
             if (!tracker.Prod)
             {
                 var activeFiles = tracker.ActiveFilesItem;
@@ -192,8 +194,6 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                 }
                 this.SpeedText = tracker.GetSpeedText();
                 this.ActiveFile = System.IO.Path.GetFileName(tracker.FilePath);
-                var status = await this.GameContext.GetGameContextStatusAsync(this.CTS.Token);
-                var actionType = args.Type;
                 if (
                     actionType == Waves.Core.Models.Enums.GameContextActionType.Download
                     || actionType == Waves.Core.Models.Enums.GameContextActionType.Verify
@@ -212,11 +212,52 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                     PauseStartEnable = false;
                 }
 
-                if (
-                    actionType == Waves.Core.Models.Enums.GameContextActionType.None
-                    || actionType == Waves.Core.Models.Enums.GameContextActionType.GameExit
-                    || tracker.IsCancel
-                )
+                if (actionType == Waves.Core.Models.Enums.GameContextActionType.CdnSelect)
+                {
+                    ShowGameDownloadingBth(status);
+                    PauseStartEnable = false;
+                    BottomBarContent = args.TipMessage;
+                }
+            }
+            else
+            {
+                this.PreProgress = tracker.Percentage;
+                this.PreSpeedText = tracker.GetSpeedText();
+                this.PreDownloadSizeText = $"{GameProgressTracker.FormatBytes(tracker.CurrentBytes)}/{GameProgressTracker.FormatBytes(tracker.TotalBytes)}";
+                var allSteps = tracker.AllSteps;
+                this.MaxStep = allSteps.Count;
+                if (allSteps.Count > 0)
+                {
+                    var safeStepIndex = Math.Clamp(tracker.CurrentStepIndex, 0, allSteps.Count - 1);
+                    PreSetupText = $"{allSteps[safeStepIndex]}";
+                    PreSetupHeaderText = $"[{safeStepIndex + 1}/{allSteps.Count}]";
+                }
+                else
+                {
+                    this.CurrentStep = 0;
+                    this.CurrentStepText = string.Empty;
+                }
+                if (GameContext.DownloadState!.IsPaused || args.IsPause)
+                {
+                    this.PreDownloadIcon = "\uE768";
+                }
+                else
+                {
+                    this.PreDownloadIcon = "\uE769";
+                }
+            }
+            //显示消息
+            if (args.Type == Waves.Core.Models.Enums.GameContextActionType.TipMessage)
+            {
+                await DialogManager.ShowMessageDialog(args.TipMessage, "确认", "关闭");
+            }
+            if (
+                actionType == Waves.Core.Models.Enums.GameContextActionType.None
+                || actionType == Waves.Core.Models.Enums.GameContextActionType.GameExit
+                || tracker.IsCancel
+            )
+            {
+                if (args.Prod)
                 {
                     PauseStartEnable = true;
                     this.CurrentProgressValue = 0;
@@ -253,51 +294,19 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                             this.PauseIcon = "\uE769";
                         }
                     }
-                    if (actionType == Waves.Core.Models.Enums.GameContextActionType.GameExit)
-                    {
-                        this.AppContext.App.MainWindow.Show();
-                    }
-                }
-                if (
-                    actionType == Waves.Core.Models.Enums.GameContextActionType.TipMessage
-                    
-                )
-                {
-                    await DialogManager.ShowMessageDialog(args.TipMessage, "确认", "关闭");
-                }
-                if (
-                    actionType == Waves.Core.Models.Enums.GameContextActionType.CdnSelect
-                )
-                {
-                    ShowGameDownloadingBth(status);
-                    PauseStartEnable = false;
-                    BottomBarContent = args.TipMessage;
-                }
-            }
-            else
-            {
-                this.PreProgress = tracker.Percentage;
-                this.SpeedText = tracker.GetSpeedText();
-                var allSteps = tracker.AllSteps;
-                this.MaxStep = allSteps.Count;
-                if (allSteps.Count > 0)
-                {
-                    var safeStepIndex = Math.Clamp(tracker.CurrentStepIndex, 0, allSteps.Count - 1);
-                    PreSetupText = $"{allSteps[safeStepIndex]}";
-                    PreSetupHeaderText = $"[{safeStepIndex + 1}/{allSteps.Count}]";
                 }
                 else
                 {
-                    this.CurrentStep = 0;
-                    this.CurrentStepText = string.Empty;
+                    var donwResult = await GameContext.GameLocalConfig.GetConfigAsync(
+                       GameLocalSettingName.ProdDownloadFolderDone
+                   );
+                    var prodDownVersion = await GameContext.GameLocalConfig.GetConfigAsync(
+                        GameLocalSettingName.ProdDownloadVersion
+                    );
                 }
-                if (GameContext.DownloadState!.IsPaused || args.IsPause)
+                if (actionType == Waves.Core.Models.Enums.GameContextActionType.GameExit)
                 {
-                    this.PreDownloadIcon = "\uE768";
-                }
-                else
-                {
-                    this.PreDownloadIcon = "\uE769";
+                    this.AppContext.App.MainWindow.Show();
                 }
             }
         });
@@ -437,7 +446,8 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                 {
                     this.PauseIcon = "\uE769";
                 }
-                ShowGameDownloadingBth(status);
+                if (!GameContext.ProgressState.Prod)
+                    ShowGameDownloadingBth(status);
             }
             if (status.IsGameExists && !status.IsPause && status.IsAction)
             {

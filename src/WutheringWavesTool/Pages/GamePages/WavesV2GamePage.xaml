@@ -409,7 +409,8 @@
                     <Grid
                         Margin="5"
                         HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch">
+                        VerticalAlignment="Stretch"
+                        Visibility="{x:Bind ViewModel.PredCardVisibility, Mode=OneWay}">
                         <Viewbox
                             Width="70"
                             Height="70"
@@ -432,6 +433,8 @@
                                             <Grid.RowDefinitions>
                                                 <RowDefinition Height="auto" />
                                                 <RowDefinition Height="auto" />
+                                                <RowDefinition Height="auto" />
+                                                <RowDefinition Height="auto" />
                                             </Grid.RowDefinitions>
                                             <TextBlock FontFamily="{ThemeResource DefaultFont}" Text="下载进度" />
                                             <TextBlock
@@ -442,11 +445,34 @@
                                             <TextBlock
                                                 Grid.Row="1"
                                                 FontFamily="{ThemeResource DefaultFont}"
-                                                Text="任务进度" />
+                                                Text="任务步骤" />
                                             <TextBlock
                                                 Grid.Row="1"
                                                 Grid.Column="1"
-                                                FontFamily="{ThemeResource DefaultFont}" />
+                                                FontFamily="{ThemeResource DefaultFont}">
+                                                <Run Text="{x:Bind ViewModel.PreSetupHeaderText}" />
+                                                <Run Text="{x:Bind ViewModel.PreSetupText}" />
+                                            </TextBlock>
+                                            <TextBlock
+                                                Grid.Row="1"
+                                                FontFamily="{ThemeResource DefaultFont}"
+                                                Text="数据容量" />
+                                            <TextBlock
+                                                Grid.Row="1"
+                                                Grid.Column="1"
+                                                FontFamily="{ThemeResource DefaultFont}">
+                                                <Run Text="{x:Bind ViewModel.PreDownloadSizeText, Mode=OneWay}" />
+                                            </TextBlock>
+                                            <TextBlock
+                                                Grid.Row="1"
+                                                FontFamily="{ThemeResource DefaultFont}"
+                                                Text="下载速度" />
+                                            <TextBlock
+                                                Grid.Row="1"
+                                                Grid.Column="1"
+                                                FontFamily="{ThemeResource DefaultFont}">
+                                                <Run Text="{x:Bind ViewModel.PreSpeedText, Mode=OneWay}" />
+                                            </TextBlock>
                                         </Grid>
                                     </Flyout>
                                 </Button.ContextFlyout>
@@ -466,8 +492,6 @@
                                         FontSize="45"
                                         Glyph="{x:Bind ViewModel.PreDownloadIcon, Mode=OneWay}" />
                                 </Grid>
-
-
                             </Button>
                         </Viewbox>
                     </Grid>
