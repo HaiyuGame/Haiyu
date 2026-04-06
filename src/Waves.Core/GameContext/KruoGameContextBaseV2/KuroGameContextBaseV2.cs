@@ -1,11 +1,11 @@
-﻿using Haiyu.Common;
-using System;
+﻿using System;
 using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Text;
 using System.Text.RegularExpressions;
+using Haiyu.Common;
 using Waves.Api.Models;
 using Waves.Api.Models.Launcher;
 using Waves.Core.Common;
@@ -24,7 +24,7 @@ namespace Waves.Core.GameContext;
 /// <summary>
 /// 库洛游戏核心上下文基类V2，重构版本，增强结构性
 /// </summary>
-public abstract partial class KuroGameContextBaseV2:IGameContextV2
+public abstract partial class KuroGameContextBaseV2 : IGameContextV2
 {
     private bool isLimtSpeed;
 
@@ -36,7 +36,7 @@ public abstract partial class KuroGameContextBaseV2:IGameContextV2
     /// <summary>
     /// Http 请求服务，包含下载Client与配置Client
     /// </summary>
-    public IHttpClientService HttpClientService { get;  set; }
+    public IHttpClientService HttpClientService { get; set; }
 
     /// <summary>
     /// CDN测试工具
@@ -82,7 +82,6 @@ public abstract partial class KuroGameContextBaseV2:IGameContextV2
 
     public abstract string GameContextNameKey { get; }
 
-
     public abstract GameType GameType { get; }
 
     public abstract Type ContextType { get; }
@@ -93,6 +92,8 @@ public abstract partial class KuroGameContextBaseV2:IGameContextV2
     /// </summary>
     public DownloadState? DownloadState { get; private set; }
 
+    public DownloadState? ProdDownloadState { get; private set; }
+
     /// <summary>
     /// CDN测速工具
     /// </summary>
@@ -101,7 +102,6 @@ public abstract partial class KuroGameContextBaseV2:IGameContextV2
 
     private IAsyncDisposable? _currentRunningAction;
     private bool _isStarting;
-
 
     public KuroGameContextBaseV2(KuroGameApiConfig config, string contextName)
     {
@@ -171,8 +171,6 @@ public abstract partial class KuroGameContextBaseV2:IGameContextV2
         return config;
     }
 
-
-
     public async Task<bool> StopCannelTaskAsync()
     {
         try
@@ -184,7 +182,7 @@ public abstract partial class KuroGameContextBaseV2:IGameContextV2
                     if (cancelTask.CanStop)
                     {
                         await _currentRunningAction.DisposeAsync();
-                        if(this.DownloadState != null)
+                        if (this.DownloadState != null)
                             await this.DownloadState.CancelToken.CancelAsync();
                     }
                     else
@@ -200,7 +198,7 @@ public abstract partial class KuroGameContextBaseV2:IGameContextV2
                     }
                 }
             }
-            if(DownloadState != null)
+            if (DownloadState != null)
             {
                 DownloadState.IsStop = true;
                 DownloadState.IsActive = false;
@@ -219,44 +217,56 @@ public abstract partial class KuroGameContextBaseV2:IGameContextV2
 
     public async Task<bool> PauseDownloadAsync()
     {
-        if (DownloadState == null)
-            return true;
-        if (DownloadState.IsActive && _currentRunningAction != null)
+        var state = DownloadState != null
+            ? DownloadState : this.ProdDownloadState;
+        if (state != null)
         {
-            if (_currentRunningAction is IProgressSetup cancelTask)
+            if (state.IsActive && _currentRunningAction != null)
             {
-                if (cancelTask.CanPause)
+                if (_currentRunningAction is IProgressSetup cancelTask)
                 {
-                    await DownloadState.PauseAsync();
-                }
-                else
-                {
-                    this.GameEventPublisher.Publish(
-                        new GameContextOutputArgs()
-                        {
-                            Type = GameContextActionType.TipMessage,
-                            TipMessage = "当前任务不支持",
-                        }
-                    );
+                    if (cancelTask.CanPause)
+                    {
+                        await state.PauseAsync();
+                    }
+                    else
+                    {
+                        this.GameEventPublisher.Publish(
+                            new GameContextOutputArgs()
+                            {
+                                Type = GameContextActionType.TipMessage,
+                                TipMessage = "当前任务不支持",
+                            }
+                        );
+                    }
                 }
             }
-        }
-        else
-        {
-            //处于其他任务，直接暂停
-            await DownloadState.PauseAsync();
+            else
+            {
+                //处于其他任务，直接暂停
+                await state.PauseAsync();
+            }
         }
         return true;
     }
 
     public async Task<bool> ResumeDownloadAsync()
     {
-        if (DownloadState == null)
-            return true;
-        if (DownloadState.IsPaused)
+        if (DownloadState != null)
         {
-            await DownloadState.ResumeAsync();
+            if (DownloadState.IsPaused)
+            {
+                await DownloadState.ResumeAsync();
+            }
         }
+        else if (ProdDownloadState != null)
+        {
+            if (ProdDownloadState.IsPaused)
+            {
+                await ProdDownloadState.ResumeAsync();
+            }
+        }
+
         return true;
     }
 
@@ -269,7 +279,9 @@ public abstract partial class KuroGameContextBaseV2:IGameContextV2
 
     public async Task<FileVersion> GetLocalFileVersionAsync(string fileName, string displayName)
     {
-        var gameFolder = await GameLocalConfig.GetConfigAsync(GameLocalSettingName.GameLauncherBassFolder);
+        var gameFolder = await GameLocalConfig.GetConfigAsync(
+            GameLocalSettingName.GameLauncherBassFolder
+        );
         var file = Directory
             .GetFiles(gameFolder, fileName, SearchOption.AllDirectories)
             .FirstOrDefault();
@@ -292,6 +304,7 @@ public abstract partial class KuroGameContextBaseV2:IGameContextV2
     {
         return await GetLocalFileVersionAsync("nvngx_dlss.dll", "Xess");
     }
+
     public async Task<FileVersion> GetLocalDLSSGenerateAsync()
     {
         return await GetLocalFileVersionAsync("nvngx_dlssg.dll", "Dlss 帧生成");
@@ -307,7 +320,9 @@ public abstract partial class KuroGameContextBaseV2:IGameContextV2
         return TimeSpan.FromDays(2);
     }
 
-    public async Task<GameContextStatus> GetGameContextStatusAsync(CancellationToken token = default)
+    public async Task<GameContextStatus> GetGameContextStatusAsync(
+        CancellationToken token = default
+    )
     {
         GameContextStatus status = new GameContextStatus();
         var localVersion = await GameLocalConfig.GetConfigAsync(
@@ -363,8 +378,9 @@ public abstract partial class KuroGameContextBaseV2:IGameContextV2
                 )
                 {
                     status.IsProdownPause =
-                        status == null ? false : status.IsPause;
+                        ProdDownloadState != null ? ProdDownloadState.IsPaused : false;
                     status.IsPredownloaded = true;
+
                     var donwResult = await GameLocalConfig.GetConfigAsync(
                         GameLocalSettingName.ProdDownloadFolderDone
                     );
@@ -379,7 +395,8 @@ public abstract partial class KuroGameContextBaseV2:IGameContextV2
                     {
                         status.PredownloadedDone = false;
                     }
-                    status.PredownloaAcion = status != null ? status.IsAction : false;
+                    status.PredownloaAcion =
+                        ProdDownloadState != null ? ProdDownloadState.IsActive : false;
                 }
             }
         }
@@ -391,7 +408,6 @@ public abstract partial class KuroGameContextBaseV2:IGameContextV2
         status.Gameing = this._isStarting;
         return status;
     }
-
 
     public async Task ReEmitLastOutputAsync(bool isPred = false)
     {
@@ -408,29 +424,121 @@ public abstract partial class KuroGameContextBaseV2:IGameContextV2
         throw new NotImplementedException();
     }
 
-    public async Task DeleteResourceAsync()
+    public async Task DeleteResourceAsync(
+        IProgress<(double deletedCount, double totalCount)> progress)
     {
-        var folder = await GameLocalConfig.GetConfigAsync(
-            GameLocalSettingName.GameLauncherBassFolder
-        );
-        await Task.Run(() =>
+        if (progress == null)
+            throw new ArgumentNullException(nameof(progress));
+        var rootFolder = await GameLocalConfig.GetConfigAsync(GameLocalSettingName.GameLauncherBassFolder);
+        if (string.IsNullOrWhiteSpace(rootFolder) || !Directory.Exists(rootFolder))
         {
-            Directory.Delete(folder, true);
-        });
-        await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.GameLauncherBassFolder, "");
-        await this.GameLocalConfig.SaveConfigAsync(
-            GameLocalSettingName.GameLauncherBassProgram,
-            ""
-        );
-        await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.LocalGameVersion, "");
+            await ClearLocalConfigAsync();
+            progress.Report((1, 1));
+            return;
+        }
+        try
+        {
+            var allFiles = Directory.EnumerateFiles(rootFolder, "*.*", SearchOption.AllDirectories).ToList();
+            long totalFileCount = allFiles.Count;
+            long deletedFileCount = 0;
+
+            if (totalFileCount == 0)
+            {
+                await ClearLocalConfigAsync();
+                progress.Report((1, 1));
+                return;
+            }
+
+            var parallelOptions = new ParallelOptions
+            {
+                MaxDegreeOfParallelism = 8
+            };
+
+            const int progressReportInterval = 10;
+
+            await Parallel.ForEachAsync(allFiles, parallelOptions, async (filePath, token) =>
+            {
+                try
+                {
+                    File.Delete(filePath);
+                    long current = Interlocked.Increment(ref deletedFileCount);
+                    if (current % progressReportInterval == 0 || current == totalFileCount)
+                    {
+                        progress.Report((current, totalFileCount));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"删除文件失败：{filePath}，错误：{ex.Message}");
+                }
+            });
+
+            DeleteEmptyDirectories(rootFolder);
+
+            await ClearLocalConfigAsync();
+
+            progress.Report((totalFileCount, totalFileCount));
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"批量删除资源失败：{ex.Message}");
+        }
     }
 
-    public Task<QueryPlayerInfo?> QueryPlayerInfoAsync(string oAutoCode, CancellationToken token = default)
+    #region 辅助方法
+    /// <summary>
+    /// 递归删除空目录
+    /// </summary>
+    private void DeleteEmptyDirectories(string directoryPath)
+    {
+        try
+        {
+            foreach (var subDir in Directory.EnumerateDirectories(directoryPath))
+            {
+                DeleteEmptyDirectories(subDir);
+            }
+
+            // 删除空文件夹
+            if (Directory.GetFiles(directoryPath).Length == 0 && Directory.GetDirectories(directoryPath).Length == 0)
+            {
+                Directory.Delete(directoryPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"删除空目录失败：{directoryPath}，错误：{ex.Message}");
+        }
+    }
+
+    private async Task ClearLocalConfigAsync()
+    {
+        await GameLocalConfig.SaveConfigAsync(GameLocalSettingName.GameLauncherBassFolder, "");
+        await GameLocalConfig.SaveConfigAsync(GameLocalSettingName.GameLauncherBassProgram, "");
+        await GameLocalConfig.SaveConfigAsync(GameLocalSettingName.LocalGameVersion, "");
+    }
+    #endregion
+
+
+
+
+    public Task<QueryPlayerInfo?> QueryPlayerInfoAsync(
+        string oAutoCode,
+        CancellationToken token = default
+    )
     {
         throw new NotImplementedException();
     }
 
-    public Task<QueryRoleInfo?> QueryRoleInfoAsync(string oautoCode, string playerId, string region, CancellationToken token = default)
+    public Task<QueryRoleInfo?> QueryRoleInfoAsync(
+        string oautoCode,
+        string playerId,
+        string region,
+        CancellationToken token = default
+    )
     {
         throw new NotImplementedException();
     }

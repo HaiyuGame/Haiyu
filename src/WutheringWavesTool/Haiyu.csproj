@@ -213,6 +213,15 @@
     <None Update="Assets\HpatchzResource\hpatchz.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <Page Update="Pages\Dialogs\DeleteFileDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Pages\Dialogs\SelectGameFolderDialogV2.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Pages\Dialogs\SelectDownoadGameDialogV2.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Controls\Styles\StorageRing.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -258,6 +267,7 @@
     <Folder Include="Assets\Languages\" />
     <Folder Include="Common\Plugins\" />
     <Folder Include="Pages\ColorGame\" />
+    <Folder Include="Themes\" />
   </ItemGroup>
   <PropertyGroup Label="Globals" />
   <!--
@@ -307,8 +317,11 @@
 	  <None Remove="Controls\Styles\HeaderTileCard.xaml" />
 	  <None Remove="Controls\Styles\LoadingCard.xaml" />
 	  <None Remove="Controls\Styles\StorageRing.xaml" />
+	  <None Remove="Pages\Dialogs\DeleteFileDialog.xaml" />
 	  <None Remove="Pages\Dialogs\GameEnhancedDialog.xaml" />
 	  <None Remove="Pages\Dialogs\LocalUserManagerDialog.xaml" />
+	  <None Remove="Pages\Dialogs\SelectDownoadGameDialogV2.xaml" />
+	  <None Remove="Pages\Dialogs\SelectGameFolderDialogV2.xaml" />
 	  <None Remove="Pages\Dialogs\UpdateGameDialog.xaml" />
 	  <None Remove="Pages\GamePages\PunishV2GamePage.xaml" />
 	  <None Remove="Pages\GamePages\WavesV2GamePage.xaml" />

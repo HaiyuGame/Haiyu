@@ -502,7 +502,6 @@
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         Command="{x:Bind ViewModel.ShowSelectInstallFolderCommand}"
-                        Style="{ThemeResource TransparentButtonStyle}"
                         ToolTipService.ToolTip="选择下载路径"
                         Visibility="{x:Bind ViewModel.GameInstallBthVisibility, Mode=OneWay}">
                         <FontIcon
@@ -510,11 +509,6 @@
                             FontSize="15"
                             Glyph="&#xE896;" />
                     </Button>
-                    <TextBlock
-                        VerticalAlignment="Center"
-                        FontWeight="Bold"
-                        Text="/"
-                        Visibility="{x:Bind ViewModel.GameInputFolderBthVisibility, Mode=OneWay}" />
                     <Button
                         Width="40"
                         Height="40"
@@ -523,7 +517,6 @@
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         Command="{x:Bind ViewModel.ShowSelectGameFolderCommand}"
-                        Style="{ThemeResource TransparentButtonStyle}"
                         ToolTipService.ToolTip="定位游戏位置"
                         Visibility="{x:Bind ViewModel.GameInputFolderBthVisibility, Mode=OneWay}">
                         <FontIcon

@@ -23,7 +23,7 @@ public interface IGameContextV2
     public string GamerConfigPath { get; internal set; }
     GameLocalConfig GameLocalConfig { get; }
 
-    public IGameEventPublisher GameEventPublisher { get;  }
+    public IGameEventPublisher GameEventPublisher { get; }
     GameProgressTracker ProgressState { get; }
     public KuroGameApiConfig Config { get; }
 
@@ -33,7 +33,9 @@ public interface IGameContextV2
     Task<FileVersion> GetLocalXeSSGenerateAsync();
     public Type ContextType { get; }
 
-    public DownloadState? DownloadState { get;}
+    public DownloadState? DownloadState { get; }
+
+    public DownloadState? ProdDownloadState { get; }
     public TimeSpan GetGameTime();
 
     public Task<bool> RepairGameAsync();
@@ -82,7 +84,6 @@ public interface IGameContextV2
     /// <returns></returns>
     Task<bool> StartProdDownloadGameResourceAsync();
 
-
     /// <summary>
     /// 恢复任务
     /// </summary>
@@ -125,14 +126,17 @@ public interface IGameContextV2
     /// </summary>
     /// <returns></returns>
     Task StartInstallGameResource(
-         GameLauncherSource launcher,
-         PatchConfig previous,
-         PatchIndexGameResource patch,
-         bool isProd = false
-     );
+        GameLauncherSource launcher,
+        PatchConfig previous,
+        PatchIndexGameResource patch,
+        bool isProd = false
+    );
     Task<bool> StartGameAsync();
     Task<bool> UpdateGameResourceAsync();
-    Task DeleteResourceAsync();
+    Task DeleteResourceAsync(
+        IProgress<(double deletedCount, double totalCount)> progress
+    );
+
     #endregion
 
     Task StartInstallGameResource(bool isProd = false);

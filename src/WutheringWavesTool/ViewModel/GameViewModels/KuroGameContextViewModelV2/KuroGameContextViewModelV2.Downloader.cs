@@ -94,7 +94,10 @@ partial class KuroGameContextViewModelV2
             );
         }
         this.ProgressState_OnProgressChanged(this.GameContext.ProgressState);
-        
+        this.ProgressValue = 0;
+        this.PreProgress = 0;
+        this.PreDownloadProgress = 0;
+        this.CurrentProgressValue = 0;
     }
 
     [RelayCommand]

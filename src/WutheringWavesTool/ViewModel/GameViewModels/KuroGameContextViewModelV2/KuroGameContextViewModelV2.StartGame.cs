@@ -47,13 +47,13 @@ partial class KuroGameContextViewModelV2
         var status = await this.GameContext.GetGameContextStatusAsync(this.CTS.Token);
         if (status == null)
             return;
-        if(GameContext.DownloadState== null)
+        if(GameContext.ProdDownloadState== null)
         {
             this.PreDownloadIcon = "\uEBD3";
             await this.GameContext.StartProdDownloadGameResourceAsync();
             return;
         }
-        if (status.IsPause || GameContext.DownloadState.IsPaused)
+        if (status.IsPause || GameContext.ProdDownloadState.IsPaused)
         {
             await this.GameContext.ResumeDownloadAsync();
             this.PreDownloadIcon = "\uE768";

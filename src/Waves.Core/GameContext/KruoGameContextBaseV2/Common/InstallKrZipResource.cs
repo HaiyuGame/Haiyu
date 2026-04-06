@@ -105,7 +105,11 @@ public class InstallKrZipResource : IProgressSetup,IAsyncDisposable
         {
             if (!File.Exists(item.Key))
             {
-                // 在此进行调试
+                GameEventPublisher.Publish(new GameContextOutputArgs()
+                {
+                    Type = GameContextActionType.TipMessage,
+                    TipMessage = "解压文件不存在，无法解压，请直接修复游戏",
+                });
                 return false;
             }
             var fileSize = await UnZipTask.GetZipEntriesSizeAsync(item.Key);
@@ -195,7 +199,7 @@ public class InstallKrZipResource : IProgressSetup,IAsyncDisposable
             {
                 await RunAsync();
             });
-            return null;
+            return true;
         }
     }
 

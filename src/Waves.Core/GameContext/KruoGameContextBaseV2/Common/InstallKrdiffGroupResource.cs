@@ -35,10 +35,7 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
 
     public bool CanStop => false;
 
-    public void SetParam(
-        Dictionary<string, object> param,
-        GameEventPublisher gameEventPublisher
-    )
+    public void SetParam(Dictionary<string, object> param, GameEventPublisher gameEventPublisher)
     {
         this.Param = param;
         this.GameEventPublisher = GameEventPublisher;
@@ -66,7 +63,7 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
         {
             return false;
         }
-        if(!Param.CheckParam<string>("decompressTempFolder",out var decompressTempFolder))
+        if (!Param.CheckParam<string>("decompressTempFolder", out var decompressTempFolder))
         {
             return false;
         }
@@ -101,25 +98,21 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
             Dictionary<string, string> newFiles = new();
             var tempFolder = decompressTempFolder;
             Directory.CreateDirectory(tempFolder);
-            for (int i = 0;i < groupFileInfos.Count; i++)
+            for (int i = 0; i < groupFileInfos.Count; i++)
             {
                 var size = groupFileInfos[i].DstFiles.Sum(x => x.Size);
                 var diskSize = await BuildFileHelper.GetDiskAvailableSize(baseFolderPath);
                 if (diskSize < size)
-                    {
-                        GameEventPublisher.Publish(
-                            new GameContextOutputArgs
-                            {
-                                Type = GameContextActionType.TipMessage,
-                                TipMessage = $"磁盘空间不足，剩余空间{GameProgressTracker.FormatBytes(diskSize)},需要空间{GameProgressTracker.FormatBytes(size)}，解压损坏！请修复游戏",
-                            }
-                        ); 
-                        GameEventPublisher.Publish(
-                            new GameContextOutputArgs
-                            {
-                                Type = GameContextActionType.None,
-                            }
-                        );
+                {
+                    GameEventPublisher.Publish(
+                        new GameContextOutputArgs
+                        {
+                            Type = GameContextActionType.TipMessage,
+                            TipMessage =
+                                $"磁盘空间不足，剩余空间{GameProgressTracker.FormatBytes(diskSize)},需要空间{GameProgressTracker.FormatBytes(size)}，解压损坏！请修复游戏",
+                        }
+                    );
+                    await Task.Delay(200);
                     return false;
                 }
                 var krdiffPath = BuildFileHelper.BuildFilePath(diffFolderPath, groupFileInfos[i]);
@@ -130,7 +123,7 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
                             GameEventPublisher.Publish(
                                 new GameContextOutputArgs
                                 {
-                                    Type =  GameContextActionType.Decompress,
+                                    Type = GameContextActionType.Decompress,
                                     CurrentSize = (long)s.Item3.PatchedCurrentBytes,
                                     TotalSize = (long)s.Item3.PatchTotalBytes,
                                     DownloadSpeed = 0,
@@ -167,11 +160,11 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
                         BuildFileHelper.BuildFilePath(baseFolderPath, groupFileInfos[i].DstFiles[j])
                     );
                     Logger.WriteError($"删除源文件{deleteFilePath}");
-                    if(File.Exists(deleteFilePath))
+                    if (File.Exists(deleteFilePath))
                         File.Delete(deleteFilePath);
                 }
                 Logger.WriteInfo("删除差异文件");
-                if(File.Exists(krdiffPath))
+                if (File.Exists(krdiffPath))
                     File.Delete(krdiffPath);
             }
             var keys = newFiles.Keys.ToList();
@@ -199,13 +192,9 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
         {
             return false;
         }
-        
     }
 
-    public void SetParam(
-        Dictionary<string, object> param,
-        IGameEventPublisher gameEventPublisher
-    )
+    public void SetParam(Dictionary<string, object> param, IGameEventPublisher gameEventPublisher)
     {
         this.Param = param;
         this.GameEventPublisher = gameEventPublisher;

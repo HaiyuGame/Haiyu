@@ -68,6 +68,18 @@ public class InstallKrdiffResource:IProgressSetup,IAsyncDisposable
         for (int i = 0; i < krdiffs.Count; i++)
         {
             //diffFolderPath 路径为下载补丁包路径
+            var diskSize = await BuildFileHelper.GetDiskAvailableSize(gameBaseFolder);
+            if (diskSize < krdiffs[i].Size)
+            {
+                GameEventPublisher.Publish(
+                    new GameContextOutputArgs
+                    {
+                        Type = GameContextActionType.TipMessage,
+                        ErrorString = $"磁盘空间不足，剩余可用空间{diskSize}字节,严重不足",
+                    }
+                );
+                return false;
+            }
             var krdiffPath = BuildFileHelper.BuildFilePath(diffFolderPath, krdiffs[i]);
             IProgress<(GameContextActionType, string, KrDiffDecompressResult)> progress =
                 new Progress<(GameContextActionType, string, KrDiffDecompressResult)>(
@@ -126,7 +138,7 @@ public class InstallKrdiffResource:IProgressSetup,IAsyncDisposable
         else
         {
             Task.Run(async() => await RunAsync());
-            return null;
+            return true;
         }
     }
 }

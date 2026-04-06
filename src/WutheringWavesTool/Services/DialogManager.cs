@@ -87,6 +87,8 @@ public abstract class DialogManager : IDialogManager
 
     public async Task<SelectDownloadFolderResult> ShowSelectGameFolderAsync(Type type) =>
         await GetDialogResultAsync<SelectGameFolderDialog, SelectDownloadFolderResult>(type);
+    public async Task<SelectDownloadFolderResult> ShowSelectGameFolderV2Async(Type type) =>
+        await GetDialogResultAsync<SelectGameFolderDialogV2, SelectDownloadFolderResult>(type);
 
     /// <summary>
     /// 显示更新游戏对话框
@@ -97,8 +99,14 @@ public abstract class DialogManager : IDialogManager
     public async Task<UpdateGameResult> ShowUpdateGameDialogAsync(string contextName, UpdateGameType type)=>
         await GetDialogResultAsync<UpdateGameDialog, UpdateGameResult>(new Tuple<string, UpdateGameType>(contextName, type));
 
+    public async Task ShowDeleteGameResource(string contentName) =>
+        await ShowDialogAsync<DeleteFileDialog>(contentName);
+
     public async Task<SelectDownloadFolderResult> ShowSelectDownloadFolderAsync(Type type) =>
         await GetDialogResultAsync<SelectDownoadGameDialog, SelectDownloadFolderResult>(type);
+
+    public async Task<SelectDownloadFolderResult> ShowSelectDownloadFolderV2Async(Type type) =>
+        await GetDialogResultAsync<SelectDownoadGameDialogV2, SelectDownloadFolderResult>(type);
 
     public async Task<CloseWindowResult> ShowCloseWindowResult() =>
         await GetDialogResultAsync<CloseDialog, CloseWindowResult>(null);
@@ -122,6 +130,7 @@ public abstract class DialogManager : IDialogManager
         dialog.DefaultButton = ContentDialogButton.Close;
         dialog.Content = new TextBlock() { Text = header };
         var result = await dialog.ShowAsync();
+        this._dialog = null;
         return result;
     }
 

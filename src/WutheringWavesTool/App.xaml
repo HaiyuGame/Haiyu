@@ -23,7 +23,8 @@
                 <ResourceDictionary Source="/Controls/Styles/DraggableCardControl.xaml" />
                 <ResourceDictionary Source="/Controls/Styles/UI.xaml" />
                 <ResourceDictionary Source="/Controls/Styles/Card.xaml" />
-                <ResourceDictionary Source="/Controls/Styles/ToolTipStyle.xaml" />
+                <!--
+                <ResourceDictionary Source="/Controls/Styles/ToolTipStyle.xaml" />-->
                 <ResourceDictionary Source="/Controls/Styles/ComboBoxStyle.xaml" />
                 <ResourceDictionary Source="/Controls/Styles/Shimmer.xaml" />
                 <ResourceDictionary Source="/Controls/Styles/HeaderTileCard.xaml" />

@@ -27,6 +27,7 @@
         <convert:StepOKColorConverter x:Key="StepOKColorConverter" />
         <convert:StepOKVisiblityConverter x:Key="StepOKVisiblityConverter" />
     </Page.Resources>
+
     <Grid x:Name="backGrid" Margin="-1,0,0,0">
         <Grid.RowDefinitions>
             <RowDefinition />
@@ -105,13 +106,12 @@
                         <RepositionThemeTransition />
                     </TransitionCollection>
                 </Grid.ChildrenTransitions>
-
                 <Grid
                     Grid.Row="1"
                     Width="300"
                     Height="230"
                     HorizontalAlignment="Right"
-                    Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+                    Background="{ThemeResource AcrylicInAppFillColorDefaultBrush}"
                     CornerRadius="5"
                     Visibility="{x:Bind ViewModel.GameDownloadingBthVisibility, Mode=OneWay}">
                     <Grid.ChildrenTransitions>
@@ -126,7 +126,6 @@
                     </Grid.RowDefinitions>
                     <Grid Margin="20" RowSpacing="10">
                         <Grid.RowDefinitions>
-                            <RowDefinition />
                             <RowDefinition />
                             <RowDefinition />
                             <RowDefinition />
@@ -240,17 +239,6 @@
                             <Run Text="{x:Bind ViewModel.CurrentByteText, Mode=OneWay}" />
                             <Run Text="/" />
                             <Run Text="{x:Bind ViewModel.MaxByteText, Mode=OneWay}" />
-                        </TextBlock>
-                        <TextBlock
-                            Grid.Row="5"
-                            FontFamily="{ThemeResource DefaultFont}"
-                            Text="任务类型" />
-                        <TextBlock
-                            Grid.Row="5"
-                            Grid.Column="1"
-                            HorizontalAlignment="Right"
-                            FontFamily="{ThemeResource DefaultFont}">
-                            <Run Text="{x:Bind ViewModel.CurrentActiveType, Mode=OneWay}" />
                         </TextBlock>
                     </Grid>
                     <NavigationViewItemSeparator Grid.Row="1" />
@@ -394,212 +382,113 @@
                         </Button>
                     </StackPanel>
                 </Grid>
+
                 <Grid
                     Grid.Row="1"
-                    Height="90"
+                    Height="80"
                     Margin="3"
                     Padding="5"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Bottom"
-                    CornerRadius="3">
+                    Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+                    CornerRadius="3"
+                    Visibility="{x:Bind ViewModel.GameLauncherBthVisibility, Mode=OneWay}">
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140" />
                         <ColumnDefinition Width="auto" />
-                        <ColumnDefinition />
                     </Grid.ColumnDefinitions>
-                    <Grid
-                        Margin="5"
+                    <Button
+                        Padding="0"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
-                        Visibility="{x:Bind ViewModel.PredCardVisibility, Mode=OneWay}">
-                        <Viewbox
-                            Width="70"
-                            Height="70"
-                            Margin="0,0,10,0"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            Stretch="UniformToFill">
-                            <Button
-                                Command="{x:Bind ViewModel.StartDownloadProdGameResourceCommand}"
-                                CornerRadius="70"
-                                Style="{ThemeResource DefaultAcrylicButtonStyle}"
-                                ToolTipService.ToolTip="右键查看正在下载信息">
-                                <Button.ContextFlyout>
-                                    <Flyout>
-                                        <Grid Width="180" Height="180">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition />
-                                                <ColumnDefinition />
-                                            </Grid.ColumnDefinitions>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="auto" />
-                                                <RowDefinition Height="auto" />
-                                                <RowDefinition Height="auto" />
-                                                <RowDefinition Height="auto" />
-                                            </Grid.RowDefinitions>
-                                            <TextBlock FontFamily="{ThemeResource DefaultFont}" Text="下载进度" />
-                                            <TextBlock
-                                                Grid.Column="1"
-                                                HorizontalAlignment="Right"
-                                                FontFamily="{ThemeResource DefaultFont}"
-                                                Text="{x:Bind ViewModel.PreProgress, Mode=OneWay}" />
-                                            <TextBlock
-                                                Grid.Row="1"
-                                                FontFamily="{ThemeResource DefaultFont}"
-                                                Text="任务步骤" />
-                                            <TextBlock
-                                                Grid.Row="1"
-                                                Grid.Column="1"
-                                                FontFamily="{ThemeResource DefaultFont}">
-                                                <Run Text="{x:Bind ViewModel.PreSetupHeaderText}" />
-                                                <Run Text="{x:Bind ViewModel.PreSetupText}" />
-                                            </TextBlock>
-                                            <TextBlock
-                                                Grid.Row="1"
-                                                FontFamily="{ThemeResource DefaultFont}"
-                                                Text="数据容量" />
-                                            <TextBlock
-                                                Grid.Row="1"
-                                                Grid.Column="1"
-                                                FontFamily="{ThemeResource DefaultFont}">
-                                                <Run Text="{x:Bind ViewModel.PreDownloadSizeText, Mode=OneWay}" />
-                                            </TextBlock>
-                                            <TextBlock
-                                                Grid.Row="1"
-                                                FontFamily="{ThemeResource DefaultFont}"
-                                                Text="下载速度" />
-                                            <TextBlock
-                                                Grid.Row="1"
-                                                Grid.Column="1"
-                                                FontFamily="{ThemeResource DefaultFont}">
-                                                <Run Text="{x:Bind ViewModel.PreSpeedText, Mode=OneWay}" />
-                                            </TextBlock>
-                                        </Grid>
-                                    </Flyout>
-                                </Button.ContextFlyout>
-                                <Grid>
-                                    <control:StorageRing
-                                        x:Name="ring"
-                                        Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"
-                                        MaxAngle="360"
-                                        MinAngle="0"
-                                        PercentCaution="75"
-                                        PercentCritical="90"
-                                        TrackRingThickness="10"
-                                        ValueRingThickness="10"
-                                        Value="{x:Bind ViewModel.PreProgress, Mode=OneWay}" />
-                                    <FontIcon
-                                        FontFamily="Segoe Fluent Icons"
-                                        FontSize="45"
-                                        Glyph="{x:Bind ViewModel.PreDownloadIcon, Mode=OneWay}" />
-                                </Grid>
-                            </Button>
-                        </Viewbox>
-                    </Grid>
-                    <Grid
-                        Grid.Column="1"
-                        Padding="5"
-                        Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
-                        CornerRadius="3"
-                        Visibility="{x:Bind ViewModel.GameLauncherBthVisibility, Mode=OneWay}">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="140" />
-                            <ColumnDefinition Width="auto" />
-                        </Grid.ColumnDefinitions>
-                        <Button
-                            Padding="0"
-                            HorizontalAlignment="Stretch"
-                            VerticalAlignment="Stretch"
-                            Background="{ThemeResource SystemFillColorSuccess}"
-                            BorderThickness="0"
-                            Command="{x:Bind ViewModel.UpdateGameCommand}"
-                            CornerRadius="4"
-                            Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
-                            IsEnabled="{x:Bind ViewModel.EnableStartGameBth, Mode=OneWay}"
-                            Style="{ThemeResource AccentButtonStyle}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition />
-                                    <ColumnDefinition />
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition />
-                                    <RowDefinition />
-                                </Grid.RowDefinitions>
-                                <FontIcon
-                                    Grid.RowSpan="2"
-                                    FontFamily="Segoe Fluent Icons"
-                                    FontSize="25"
-                                    Glyph="{x:Bind ViewModel.LauncherIcon, Mode=OneWay}" />
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Margin="10,0,0,0"
-                                    VerticalAlignment="Center"
-                                    FontFamily="{ThemeResource DefaultFont}"
-                                    FontSize="15"
-                                    Text="{x:Bind ViewModel.LauncheContent, Mode=OneWay}" />
-                                <TextBlock
-                                    Grid.Row="1"
-                                    Grid.Column="1"
-                                    Margin="15,0,0,0"
-                                    VerticalAlignment="Center"
-                                    FontSize="10"
-                                    Text="{x:Bind ViewModel.DisplayVersion, Mode=OneWay}" />
-                            </Grid>
-
-                        </Button>
-                        <Button
-                            Grid.Column="1"
-                            Width="60"
-                            Margin="3,0,0,0"
-                            HorizontalAlignment="Stretch"
-                            VerticalAlignment="Stretch"
-                            BorderThickness="0"
-                            IsEnabled="{x:Bind ViewModel.EnableStartGameBth, Mode=OneWay}"
-                            Style="{ThemeResource TransparentButtonStyle}">
+                        Background="{ThemeResource SystemFillColorSuccess}"
+                        BorderThickness="0"
+                        Command="{x:Bind ViewModel.UpdateGameCommand}"
+                        CornerRadius="4"
+                        Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                        IsEnabled="{x:Bind ViewModel.EnableStartGameBth, Mode=OneWay}"
+                        Style="{ThemeResource AccentButtonStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
                             <FontIcon
+                                Grid.RowSpan="2"
                                 FontFamily="Segoe Fluent Icons"
-                                FontSize="18"
-                                Glyph="&#xEC7A;" />
+                                FontSize="25"
+                                Glyph="{x:Bind ViewModel.LauncherIcon, Mode=OneWay}" />
+                            <TextBlock
+                                Grid.Column="1"
+                                Margin="10,0,0,0"
+                                VerticalAlignment="Center"
+                                FontFamily="{ThemeResource DefaultFont}"
+                                FontSize="15"
+                                Text="{x:Bind ViewModel.LauncheContent, Mode=OneWay}" />
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                Margin="15,0,0,0"
+                                VerticalAlignment="Center"
+                                FontSize="10"
+                                Text="{x:Bind ViewModel.DisplayVersion, Mode=OneWay}" />
+                        </Grid>
 
-                            <Button.Flyout>
-                                <MenuFlyout Placement="Bottom">
-                                    <MenuFlyoutItem
-                                        Command="{x:Bind ViewModel.RepirGameCommand}"
-                                        Text="修复游戏"
-                                        ToolTipService.ToolTip="此选项等同于下载，启动器会下载服务器资源进行自动覆盖（包含Mod资源）">
-                                        <MenuFlyoutItem.Icon>
-                                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xEC7A;" />
-                                        </MenuFlyoutItem.Icon>
-                                    </MenuFlyoutItem>
-                                    <MenuFlyoutSeparator />
-                                    <MenuFlyoutItem Command="{x:Bind ViewModel.ShowGameResourceCommand}" Text="游戏资源管理">
-                                        <MenuFlyoutItem.Icon>
-                                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xEF19;" />
-                                        </MenuFlyoutItem.Icon>
-                                    </MenuFlyoutItem>
-                                    <MenuFlyoutItem
-                                        Command="{x:Bind ViewModel.ShowGameLauncherCacheCommand}"
-                                        Text="游戏登陆管理"
-                                        ToolTipService.ToolTip="只包含已经登陆游戏的所有账号信息">
-                                        <MenuFlyoutItem.Icon>
-                                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE912;" />
-                                        </MenuFlyoutItem.Icon>
-                                    </MenuFlyoutItem>
-                                    <MenuFlyoutSeparator />
-                                    <MenuFlyoutItem
-                                        Command="{x:Bind ViewModel.DeleteGameResourceCommand}"
-                                        Text="卸载游戏"
-                                        ToolTipService.ToolTip="此选项将直接删除游戏文件夹">
-                                        <MenuFlyoutItem.Icon>
-                                            <SymbolIcon Symbol="Clear" />
-                                        </MenuFlyoutItem.Icon>
-                                    </MenuFlyoutItem>
-                                </MenuFlyout>
-                            </Button.Flyout>
-                        </Button>
-                    </Grid>
+                    </Button>
+                    <Button
+                        Grid.Column="1"
+                        Width="60"
+                        Margin="3,0,0,0"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        BorderThickness="0"
+                        IsEnabled="{x:Bind ViewModel.EnableStartGameBth, Mode=OneWay}">
+                        <FontIcon
+                            FontFamily="Segoe Fluent Icons"
+                            FontSize="18"
+                            Glyph="&#xEC7A;" />
+
+                        <Button.Flyout>
+                            <MenuFlyout Placement="Bottom">
+                                <MenuFlyoutItem
+                                    Command="{x:Bind ViewModel.RepirGameCommand}"
+                                    Text="修复游戏"
+                                    ToolTipService.ToolTip="此选项等同于下载，启动器会下载服务器资源进行自动覆盖（包含Mod资源）">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xEC7A;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutSeparator />
+                                <MenuFlyoutItem Command="{x:Bind ViewModel.ShowGameResourceCommand}" Text="游戏资源管理">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xEF19;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem
+                                    Command="{x:Bind ViewModel.ShowGameLauncherCacheCommand}"
+                                    Text="游戏登陆管理"
+                                    ToolTipService.ToolTip="只包含已经登陆游戏的所有账号信息">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE912;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutSeparator />
+                                <MenuFlyoutItem
+                                    Command="{x:Bind ViewModel.DeleteGameResourceCommand}"
+                                    Text="卸载游戏"
+                                    ToolTipService.ToolTip="此选项将直接删除游戏文件夹">
+                                    <MenuFlyoutItem.Icon>
+                                        <SymbolIcon Symbol="Clear" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                            </MenuFlyout>
+                        </Button.Flyout>
+                    </Button>
                 </Grid>
-
 
                 <StackPanel
                     Margin="5"
@@ -613,7 +502,8 @@
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         Command="{x:Bind ViewModel.ShowSelectInstallFolderCommand}"
-                        Style="{ThemeResource TransparentButtonStyle}"
+                        CornerRadius="5"
+                        Style="{ThemeResource DefaultAcrylicButtonStyle}"
                         ToolTipService.ToolTip="选择下载路径"
                         Visibility="{x:Bind ViewModel.GameInstallBthVisibility, Mode=OneWay}">
                         <FontIcon
@@ -621,11 +511,6 @@
                             FontSize="15"
                             Glyph="&#xE896;" />
                     </Button>
-                    <TextBlock
-                        VerticalAlignment="Center"
-                        FontWeight="Bold"
-                        Text="/"
-                        Visibility="{x:Bind ViewModel.GameInputFolderBthVisibility, Mode=OneWay}" />
                     <Button
                         Width="40"
                         Height="40"
@@ -634,7 +519,8 @@
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         Command="{x:Bind ViewModel.ShowSelectGameFolderCommand}"
-                        Style="{ThemeResource TransparentButtonStyle}"
+                        CornerRadius="5"
+                        Style="{ThemeResource DefaultAcrylicButtonStyle}"
                         ToolTipService.ToolTip="定位游戏位置"
                         Visibility="{x:Bind ViewModel.GameInputFolderBthVisibility, Mode=OneWay}">
                         <FontIcon

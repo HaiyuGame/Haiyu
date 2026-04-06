@@ -76,9 +76,9 @@ partial class KuroGameContextBaseV2
                 return false;
             HttpClientService?.BuildClient();
             _downloadCts = new CancellationTokenSource();
-            DownloadState = new DownloadState();
-            DownloadState.CancelToken = _downloadCts;
-            DownloadState.IsActive = true;
+            var state = GetInitDownloadState(false);
+            state.CancelToken = _downloadCts;
+            state.IsActive = true;
             downloadMethod = new(this.Logger);
             downloadMethod.ProgressName = "下载校验";
             GameEventPublisher.Publish(
@@ -133,7 +133,7 @@ partial class KuroGameContextBaseV2
             );
             _currentRunningAction = writeConfig;
             this.CurrentSetups = 1;
-            if (DownloadState.CancelToken.IsCancellationRequested)
+            if (state.CancelToken.IsCancellationRequested)
             {
                 await this.GameLocalConfig.SaveConfigAsync(
                     GameLocalSettingName.GameLauncherBassFolder,
@@ -162,7 +162,8 @@ partial class KuroGameContextBaseV2
             await this.GameEventPublisher.PublishStepAsync("写入配置", CurrentSetups, Setups);
             await writeConfig.WriteDownloadComplateAsync(this.GameEventPublisher, true);
             //通知UI刷新
-            DownloadState.IsActive = false;
+            state.IsActive = false;
+            SetCurrentStateNull(false);
             GameEventPublisher.Publish(
                 new GameContextOutputArgs() { Type = GameContextActionType.None }
             );
@@ -170,12 +171,12 @@ partial class KuroGameContextBaseV2
         }
         catch (OperationCanceledException)
         {
-            DownloadState.IsStop = true;
+            SetCurrentStateNull(false);
             return false;
         }
         finally
         {
-            DownloadState.IsActive = false;
+            SetCurrentStateNull(false);
         }
     }
 
