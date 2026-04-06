@@ -46,4 +46,43 @@ public static class BuildFileHelper
         }
         return path;
     }
+
+    public static Task<long> GetDiskAvailableSize(string? v)
+    {
+        if (string.IsNullOrWhiteSpace(v))
+        {
+            return Task.FromResult(0L);
+        }
+
+        try
+        {
+            var fullPath = Path.GetFullPath(v);
+            var root = Path.GetPathRoot(fullPath);
+            if (string.IsNullOrWhiteSpace(root))
+            {
+                return Task.FromResult(0L);
+            }
+
+            foreach (var drive in DriveInfo.GetDrives())
+            {
+                if (!string.Equals(drive.Name, root, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                if (!drive.IsReady)
+                {
+                    return Task.FromResult(0L);
+                }
+
+                return Task.FromResult(drive.AvailableFreeSpace);
+            }
+
+            return Task.FromResult(0L);
+        }
+        catch
+        {
+            return Task.FromResult(0L);
+        }
+    }
 }

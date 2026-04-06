@@ -23,7 +23,8 @@
                 <ResourceDictionary Source="/Controls/Styles/DraggableCardControl.xaml" />
                 <ResourceDictionary Source="/Controls/Styles/UI.xaml" />
                 <ResourceDictionary Source="/Controls/Styles/Card.xaml" />
-                <ResourceDictionary Source="/Controls/Styles/ToolTipStyle.xaml" />
+                <!--
+                <ResourceDictionary Source="/Controls/Styles/ToolTipStyle.xaml" />-->
                 <ResourceDictionary Source="/Controls/Styles/ComboBoxStyle.xaml" />
                 <ResourceDictionary Source="/Controls/Styles/Shimmer.xaml" />
                 <ResourceDictionary Source="/Controls/Styles/HeaderTileCard.xaml" />
@@ -32,6 +33,7 @@
                 <ResourceDictionary Source="/Controls/Styles/AnimatedTextBlock.xaml" />
                 <ResourceDictionary Source="/Controls/Styles/CardSwitcher.xaml" />
                 <ResourceDictionary Source="/Controls/Styles/LoadingCard.xaml" />
+                <ResourceDictionary Source="/Controls/Styles/StorageRing.xaml" />
                 <ResourceDictionary Source="ms-appx:///CommunityToolkit.WinUI.Controls.Segmented/Segmented/Segmented.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <converter:BoolReversalConvert x:Key="BoolReversalConvert" />

@@ -645,6 +645,7 @@
                             CornerRadius="5"
                             Foreground="{TemplateBinding Foreground}"
                             Icon="{TemplateBinding Icon}"
+                            InfoBadge="{TemplateBinding InfoBadge}"
                             IsTabStop="false"
                             UseSystemFocusVisuals="{TemplateBinding UseSystemFocusVisuals}" />
 

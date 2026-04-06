@@ -50,26 +50,21 @@ public static class ProcessScan
         IntPtr hSnapshot = IntPtr.Zero;
         try
         {
-            // 创建进程快照
             hSnapshot = CreateToolhelp32Snapshot(CREATE_TOOLHELP_SNAPSHOT_FLAGS.TH32CS_SNAPPROCESS, 0);
             if (hSnapshot == IntPtr.Zero)
                 return false;
 
-            // 初始化进程条目
             PROCESSENTRY32W lppe = new PROCESSENTRY32W
             {
                 dwSize = (uint)Marshal.SizeOf(typeof(PROCESSENTRY32W))
             };
 
-            // 获取第一个进程
             if (!Process32FirstW(hSnapshot, ref lppe))
                 return false;
 
             do
             {
                 filePath = GetProcessPath(lppe.th32ProcessID) ?? "";
-                Debug.WriteLine($"{lppe.th32ProcessID}\t{lppe.szExeFile}\t{filePath}");
-                Debug.WriteLine(lppe.szExeFile);
                 if(lppe.szExeFile == exeName && pid == lppe.th32ProcessID)
                 {
                     contained = true;
@@ -83,7 +78,6 @@ public static class ProcessScan
         }
         finally
         {
-            // 确保句柄关闭
             if (hSnapshot != IntPtr.Zero)
                 CloseHandle(hSnapshot);
         }
@@ -117,7 +111,6 @@ public static class ProcessScan
         QueryLimitedInformation = 0x00001000
     }
 
-    // 新增：获取进程的可执行文件路径
     [DllImport("psapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
     public static extern uint GetModuleFileNameEx(IntPtr hProcess, IntPtr hModule, StringBuilder lpFilename, int nSize);
 

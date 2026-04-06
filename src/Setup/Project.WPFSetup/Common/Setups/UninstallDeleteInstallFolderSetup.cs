@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Project.WPFSetup.Common.Setups
@@ -20,62 +21,32 @@ namespace Project.WPFSetup.Common.Setups
         )
         {
             var installFolder = property.InstallPath;
-            var result = await Remove(property, installFolder);
+            var uninstallDat =Path.Combine(installFolder, "unstall.dat");
+            if (File.Exists(uninstallDat))
+            {
+                var reader = File.OpenText(uninstallDat);
+                var list = JsonSerializer.Deserialize<List<string>>(await reader.ReadToEndAsync());
+                while (true)
+                {
+                    try
+                    {
+                        foreach (var file in list)
+                        {
+                            if (File.Exists(file))
+                            {
+                                File.Delete(file);
+                            }
+                        }
+                        break;
+                    }
+                    catch
+                    {
+                    }
+                }
+            }
             progress.Report((1, SetupName));
             return ("", true);
         }
 
-        public async Task<bool> Remove(SetupProperty setupProperty, string directoryPath)
-        {
-            return await Task.Run(() =>
-            {
-                try
-                {
-                    if (!Directory.Exists(directoryPath))
-                    {
-                        Console.WriteLine("指定的目录不存在。");
-                        return true;
-                    }
-                    foreach (
-                        var file in Directory.GetFiles(
-                            directoryPath,
-                            "*.*",
-                            SearchOption.TopDirectoryOnly
-                        )
-                    )
-                    {
-                        if (file.StartsWith(setupProperty.UninstallName))
-                        {
-                            continue;
-                        }
-                        try
-                        {
-                            File.Delete(file);
-                            Console.WriteLine($"已删除文件: {file}");
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"无法删除文件 {file}: {ex.Message}");
-                        }
-                    }
-                    foreach (
-                        var dir in Directory.GetDirectories(
-                            directoryPath,
-                            "*",
-                            SearchOption.TopDirectoryOnly
-                        )
-                    )
-                    {
-                        try
-                        {
-                            Directory.Delete(dir, true);
-                        }
-                        catch (Exception) { }
-                    }
-                }
-                catch (Exception ex) { }
-                return true;
-            });
-        }
     }
 }

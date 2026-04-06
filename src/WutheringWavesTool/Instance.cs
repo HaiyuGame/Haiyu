@@ -99,6 +99,8 @@ public static class InstanceBuilderExtensions
                     #region GameContext
                     .AddTransient<WavesGameContextViewModel>()
                     .AddTransient<PunishGameContextViewModel>()
+                    .AddTransient<PunishV2GameContextViewModel>()
+                    .AddTransient<WavesV2GameContextViewModel>()
                     #endregion
                     #region Wiki
                     .AddTransient<WavesWikiViewModel>()
@@ -131,16 +133,22 @@ public static class InstanceBuilderExtensions
                     .AddTransient<WebGameLogin>()
                     .AddTransient<WebGameViewModel>()
                     .AddTransient<SelectGameFolderDialog>()
+                    .AddTransient<SelectGameFolderDialogV2>()
                     .AddTransient<SelectGameFolderViewModel>()
+                    .AddTransient<SelectGameFolderViewModelV2>()
                     .AddTransient<CloseDialog>()
                     .AddTransient<SelectDownoadGameDialog>()
+                    .AddTransient<SelectDownoadGameDialogV2>()
                     .AddTransient<SelectDownloadGameViewModel>()
+                    .AddTransient<SelectGameFolderViewModelV2>()
                     .AddTransient<QRLoginDialog>()
                     .AddTransient<QrLoginViewModel>()
                     .AddTransient<UpdateGameDialog>()
                     .AddTransient<UpdateGameViewModel>()
                     .AddTransient<LocalUserManagerDialog>()
                     .AddTransient<LocalUserManagerViewModel>()
+                    .AddTransient<DeleteFileDialog>()
+                    .AddTransient<DeleteFileViewModel>()
                 #endregion
                 #endregion
                 #region More

@@ -15,11 +15,14 @@ public interface IDialogManager
         where Result : new();
     public Task ShowLocalUserManagerAsync();
     public Task<SelectDownloadFolderResult> ShowSelectGameFolderAsync(Type type);
+    public Task<SelectDownloadFolderResult> ShowSelectGameFolderV2Async(Type type);
     public Task<SelectDownloadFolderResult> ShowSelectDownloadFolderAsync(Type type);
+    public Task<SelectDownloadFolderResult> ShowSelectDownloadFolderV2Async(Type type);
     public Task<CloseWindowResult> ShowCloseWindowResult();
     public Task<QRScanResult> GetQRLoginResultAsync();
     public Task<UpdateGameResult> ShowUpdateGameDialogAsync(string contextName, UpdateGameType type);
 
+    public Task ShowDeleteGameResource(string contentName);
     public void CloseDialog();
 
     public Task<ContentDialogResult> ShowMessageDialog(string header, string content, string closeText);

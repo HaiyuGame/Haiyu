@@ -1,4 +1,5 @@
 ﻿using Waves.Core.GameContext.Contexts.PRG;
+using Waves.Core.GameContext.ContextsV2;
 
 namespace Haiyu.Models;
 
@@ -13,7 +14,7 @@ public class ServerDisplay
     /// <summary>
     /// 是否显示公告面板
     /// </summary>
-    public bool ShowCard { get; set;  }
+    public bool ShowCard { get; set; }
 
     public static ObservableCollection<ServerDisplay> GetWavesGames =>
         [
@@ -22,19 +23,21 @@ public class ServerDisplay
                 Display = "官服",
                 Key = $"{nameof(WavesMainGameContext)}",
                 Tag = "Main",
-                ShowCard= true
-            },new ServerDisplay()
+                ShowCard = true,
+            },
+            new ServerDisplay()
             {
                 Display = "Bilibili",
                 Key = $"{nameof(WavesBiliBiliGameContext)}",
                 Tag = "Main",
-                ShowCard= false
-            },new ServerDisplay()
+                ShowCard = false,
+            },
+            new ServerDisplay()
             {
                 Display = "国际服",
                 Key = $"{nameof(WavesGlobalGameContext)}",
                 Tag = "Main",
-                ShowCard= true
+                ShowCard = true,
             },
         ];
 
@@ -45,25 +48,51 @@ public class ServerDisplay
                 Display = "官服",
                 Key = $"{nameof(PunishMainGameContext)}",
                 Tag = "Main",
-                ShowCard= true
-            },new ServerDisplay()
+                ShowCard = true,
+            },
+            new ServerDisplay()
             {
                 Display = "Bilibili",
                 Key = $"{nameof(PunishBiliBiliGameContext)}",
                 Tag = "Main",
-                ShowCard= false
-            },new ServerDisplay()
+                ShowCard = false,
+            },
+            new ServerDisplay()
             {
                 Display = "国际服",
                 Key = $"{nameof(PunishGlobalGameContext)}",
                 Tag = "Main",
-                ShowCard= true
-            },new ServerDisplay()
+                ShowCard = true,
+            },
+            new ServerDisplay()
             {
                 Display = "台服",
                 Key = $"{nameof(PunishTwGameContext)}",
                 Tag = "Main",
-                ShowCard= true
+                ShowCard = true,
+            },
+        ];
+
+    public static ObservableCollection<ServerDisplay> GetPunishV2Games =>
+        [
+            new ServerDisplay()
+            {
+                Display = "官服",
+                Key = $"{nameof(PunishMainGameContextV2)}",
+                Tag = "Main",
+                ShowCard = true,
+            },
+        ];
+
+
+    public static ObservableCollection<ServerDisplay> GetWavesV2Games =>
+        [
+            new ServerDisplay()
+            {
+                Display = "官服",
+                Key = $"{nameof(WavesMainGameContextV2)}",
+                Tag = "Main",
+                ShowCard = true,
             }
         ];
 }
