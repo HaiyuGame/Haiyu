@@ -608,6 +608,7 @@ public partial class KuroGameContextBase
                         folder,
                         patch.GroupInfos[i].SrcFiles[j]
                     );
+                    //解压完成之后删除原文件
                     Logger.WriteError($"删除源文件{deleteFilePath}");
                     File.Delete(deleteFilePath);
                 }
@@ -711,7 +712,7 @@ public partial class KuroGameContextBase
                     this,
                     new GameContextOutputArgs()
                     {
-                        Type = GameContextActionType.DeleteFile,
+                        Type = GameContextActionType.BottomText,
                         FileTotal = patch.DeleteFiles.Count,
                         CurrentFile = i,
                         DeleteString =

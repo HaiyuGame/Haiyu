@@ -1,0 +1,97 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using Waves.Core.Models.Enums;
+
+namespace Haiyu.ViewModel.GameViewModels;
+
+partial class KuroGameContextViewModelV2
+{
+    /// <summary>
+    /// 预下载卡片可见性
+    /// </summary>
+    [ObservableProperty]
+    public partial Visibility PredCardVisibility { get; set; } = Visibility.Collapsed;
+
+
+    [ObservableProperty]
+    public partial Visibility PredDownloadBthVisibility { get; set; } = Visibility.Collapsed;
+
+    [ObservableProperty]
+    public partial Visibility PredDownloadingVisibility { get; set; } = Visibility.Collapsed;
+
+    [ObservableProperty]
+    public partial Visibility PredDownloadDoneVisibility { get; set; } = Visibility.Collapsed;
+
+    [ObservableProperty]
+    public partial double PreDownloadProgress { get; set; } = 0;
+
+    [ObservableProperty]
+    public partial string PreDownloadIcon { get; set; } = "\uEBD3";
+
+
+
+    /// <summary>
+    /// 预下载进度
+    /// </summary>
+    [ObservableProperty]
+    public partial double PreProgress { get; set; }
+
+    /// <summary>
+    /// 预下载执行步骤
+    /// </summary>
+    [ObservableProperty]
+    public partial string PreSetupText { get; set; }
+
+    [ObservableProperty]
+    public partial string PreSetupHeaderText { get; set; }
+
+    [ObservableProperty]
+    public partial string PreSpeedText { get; set; }
+
+    [ObservableProperty]
+    public partial string PreDownloadSizeText { get; set; }
+
+
+    [RelayCommand]
+    async Task StartPreDownloadGame()
+    {
+        var result = await DialogManager.ShowUpdateGameDialogAsync(
+            this.GameContext.ContextName,
+            UpdateGameType.ProDownload
+        );
+        if (result.IsOk)
+        {
+            await this.GameContext.StartProdDownloadGameResourceAsync();
+        }
+    }
+
+
+    [RelayCommand]
+    async Task StopDownloadGame()
+    {
+        await this.GameContext.StopCannelTaskAsync();
+    }
+
+    [RelayCommand]
+    async Task RepreCheck()
+    {
+        var done =  await this.GameContext.GameLocalConfig.GetConfigAsync(GameLocalSettingName.ProdDownloadFolderDone);
+        var version =  await this.GameContext.GameLocalConfig.GetConfigAsync(GameLocalSettingName.ProdDownloadVersion);
+        var path =  await this.GameContext.GameLocalConfig.GetConfigAsync(GameLocalSettingName.ProdDownloadPath);
+        var launcher = await this.GameContext.GetGameLauncherSourceAsync(null,this.CTS.Token);
+        if(string.IsNullOrWhiteSpace(version))
+        {
+            done = "false";
+        }
+        if (done!= null && done.ToLower() == "true" && Directory.Exists(path))
+        {
+            await this.GameContext.StartProdDownloadGameResourceAsync();
+        }
+        else
+        {
+            await StartPreDownloadGame();
+        }
+    }
+
+}

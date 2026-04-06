@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 namespace Waves.Core.INI;
 
 /// <summary>
-/// Ini ¶ÁÐ´Àà
+/// Ini ï¿½ï¿½Ð´ï¿½ï¿½
 /// </summary>
 public class Ini
 {
@@ -83,17 +83,17 @@ public class Ini
                 {
                     var match = Regex.Match(line, @"\[(?<inner>[^\[\]]+)\]");
                     if (!match.Success)
-                        throw new Exception("ÎÄ¼þËð»µ£¡");
+                        throw new Exception("ï¿½Ä¼ï¿½ï¿½ð»µ£ï¿½");
                     var sectionName = match.Groups["inner"].Value.Trim();
                     if (keyPairs.ContainsKey(sectionName))
-                        throw new Exception("ÖØ¸´µÄKey");
+                        throw new Exception("ï¿½Ø¸ï¿½ï¿½ï¿½Key");
                     keyPairs.Add(sectionName, new List<Tuple<string, string>>());
                     currentSection = sectionName;
                 }
                 else
                 {
                     if (string.IsNullOrEmpty(currentSection))
-                        throw new Exception("ÎÄ¼þ¸ñÊ½´íÎó£ºÔÚ½ÚÖ®Ç°´æÔÚ¼üÖµ¶Ô");
+                        throw new Exception("ï¿½Ä¼ï¿½ï¿½ï¿½Ê½ï¿½ï¿½ï¿½ï¿½ï¿½Ú½ï¿½Ö®Ç°ï¿½ï¿½ï¿½Ú¼ï¿½Öµï¿½ï¿½");
                     var idx = line.IndexOf('=');
                     if (idx < 0)
                     {

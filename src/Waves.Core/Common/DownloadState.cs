@@ -5,12 +5,12 @@ namespace Waves.Core.Common;
 
 public sealed class DownloadState
 {
-    public volatile bool _isPaused;
+    internal volatile bool _isPaused;
     private long _currentBytes;
 
     public SpeedLimiter SpeedLimiter { get; private set; }
     public bool IsActive { get; set; }
-    public CancellationToken CancelToken { get; set; }
+    public CancellationTokenSource CancelToken { get; set; }
     public PauseToken PauseToken => new PauseToken(this);
 
     public DownloadState()
@@ -34,12 +34,14 @@ public sealed class DownloadState
     public Task<bool> PauseAsync()
     {
         Volatile.Write(ref _isPaused, true);
+        IsActive = false;
         return Task.FromResult(true);
     }
 
     public Task<bool> ResumeAsync()
     {
         Volatile.Write(ref _isPaused, false);
+        IsActive = true;
         return Task.FromResult(true);
     }
 }
@@ -57,7 +59,7 @@ public readonly struct PauseToken
     {
         while (Volatile.Read(ref _state._isPaused))
         {
-            await Task.Delay(100, _state.CancelToken); // 低延迟轮询
+            await Task.Delay(100, _state.CancelToken.Token); // 低延迟轮询
         }
     }
 }

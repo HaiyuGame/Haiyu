@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog
+    x:Class="Haiyu.Pages.Dialogs.SelectGameFolderDialogV2"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:Haiyu.Pages.Dialogs"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="using:Haiyu.Controls"
+    Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+    CornerRadius="5"
+    mc:Ignorable="d">
+
+    <Grid Width="470" Height="270">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="auto" />
+            </Grid.ColumnDefinitions>
+            <TextBox
+                VerticalAlignment="Center"
+                FontFamily="{ThemeResource DefaultFont}"
+                IsReadOnly="True"
+                Text="{x:Bind ViewModel.ExePath, Mode=OneWay}" />
+            <Button
+                Grid.Column="1"
+                Margin="5,0,0,0"
+                VerticalAlignment="Center"
+                Command="{x:Bind ViewModel.SelectGameProgramCommand}"
+                Style="{ThemeResource TransparentButtonStyle}"
+                ToolTipService.ToolTip="选择主程序">
+                <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8E5;" />
+            </Button>
+        </Grid>
+        <TextBlock
+            Grid.Row="1"
+            Grid.RowSpan="2"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Text="{x:Bind ViewModel.TipMessage, Mode=OneWay}"
+            Visibility="{x:Bind ViewModel.IsVerify, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}" />
+        <ui:LayeredProgressBar
+            Grid.Row="1"
+            Margin="0,20,0,0"
+            Background="{ThemeResource AccentAcrylicBackgroundFillColorBaseBrush}"
+            BarHeight="10"
+            CornerRadius="5"
+            MaxValue="{x:Bind ViewModel.MaxValue, Mode=OneWay}"
+            Style="{ThemeResource DefaultLayeredProgressBarValue}"
+            Values="{x:Bind ViewModel.BarValues, Mode=OneWay}"
+            Visibility="{x:Bind ViewModel.IsVerify, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+            <ui:LayeredProgressBar.ItemTemplate>
+                <DataTemplate x:DataType="ui:LayerData">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <Rectangle
+                            Width="12"
+                            Height="12"
+                            Fill="{x:Bind Color, Mode=OneWay}" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            FontFamily="{ThemeResource DefaultFont}"
+                            Text="{x:Bind Label, Mode=OneWay}" />
+                    </StackPanel>
+                </DataTemplate>
+            </ui:LayeredProgressBar.ItemTemplate>
+        </ui:LayeredProgressBar>
+        <InfoBar
+            Title="游戏版本问题"
+            Grid.Row="2"
+            Margin="0,10,0,0"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            FontFamily="{ThemeResource DefaultFont}"
+            FontSize="15"
+            IsOpen="True"
+            Message="在选择一个新的路径时，程序无法确认此文件夹中游戏版本，这没关系，你可以继续下一步"
+            Severity="Warning"
+            Style="{ThemeResource NoCloseInfoBarStyle}"
+            Visibility="{x:Bind ViewModel.IsVerify, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Button
+                Margin="0,0,5,0"
+                HorizontalAlignment="Stretch"
+                Command="{x:Bind ViewModel.CloseCommand}"
+                Content="取消"
+                FontFamily="{ThemeResource DefaultFont}" />
+            <Button
+                Grid.Column="1"
+                Margin="5,0,0,0"
+                HorizontalAlignment="Stretch"
+                Command="{x:Bind ViewModel.StartVerifyCommand}"
+                Content="进入校验"
+                FontFamily="{ThemeResource DefaultFont}"
+                Style="{ThemeResource AccentButtonStyle}" />
+        </Grid>
+    </Grid>
+</ContentDialog>

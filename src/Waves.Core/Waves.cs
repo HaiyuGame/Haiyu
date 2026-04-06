@@ -3,6 +3,7 @@ using Waves.Core.Contracts;
 using Waves.Core.GameContext;
 using Waves.Core.GameContext.Contexts;
 using Waves.Core.GameContext.Contexts.PRG;
+using Waves.Core.GameContext.ContextsV2;
 using Waves.Core.Services;
 
 namespace Waves.Core;
@@ -80,7 +81,36 @@ public static class Waves
                     return context;
                 }
             )
-            
+            #region 新核心测试
+            //事件订阅发布器
+            .AddKeyedSingleton<GameEventPublisher>(nameof(PunishMainGameContextV2))
+            .AddKeyedSingleton<GameEventPublisher>(nameof(WavesMainGameContextV2))
+            .AddKeyedSingleton<IGameContextV2, PunishMainGameContextV2>(
+                nameof(PunishMainGameContextV2),
+                (provider,c) =>
+                {
+                    var context = GameContextFactory.GetMainPunishGameContextV2();
+                    context.HttpClientService = provider.GetRequiredService<IHttpClientService>();
+                    context.GameEventPublisher =
+                        provider.GetRequiredKeyedService<GameEventPublisher>(
+                            nameof(PunishMainGameContextV2)
+                        );
+                    return context;
+                }
+            ).AddKeyedSingleton<IGameContextV2, WavesMainGameContextV2>(
+                nameof(WavesMainGameContextV2),
+                (provider, c) =>
+                {
+                    var context = GameContextFactory.GetMainWavesGameContextV2();
+                    context.HttpClientService = provider.GetRequiredService<IHttpClientService>();
+                    context.GameEventPublisher =
+                        provider.GetRequiredKeyedService<GameEventPublisher>(
+                            nameof(WavesMainGameContextV2)
+                        );
+                    return context;
+                }
+            )
+        #endregion
             .AddTransient<IHttpClientService, HttpClientService>();
         return services;
     }

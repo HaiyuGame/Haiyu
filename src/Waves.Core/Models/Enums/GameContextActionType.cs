@@ -20,11 +20,13 @@ public enum GameContextActionType:uint
     /// <summary>
     /// 删除文件
     /// </summary>
-    DeleteFile,
+    BottomText,
     Error,
 
     Decompress,
     GameExit,
     TipMessage,
-    CdnSelect
+    CdnSelect,
+    ZipDecompress,
+    PublishStep
 }

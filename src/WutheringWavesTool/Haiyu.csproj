@@ -65,11 +65,11 @@
     <PackageReference Include="CommunityToolkit.WinUI.Extensions" Version="8.2.251219" />
     <PackageReference Include="CommunityToolkit.WinUI.Helpers" Version="8.2.251219" />
     <PackageReference Include="CommunityToolkit.WinUI.Media" Version="8.2.251219" />
-    <PackageReference Include="LiveChartsCore.SkiaSharpView.WinUI" Version="2.0.0-rc6.1" />
+    <PackageReference Include="LiveChartsCore.SkiaSharpView.WinUI" Version="2.0.0" />
     <PackageReference Include="MemoryPack" Version="1.21.4" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.1" />
-    <PackageReference Include="Microsoft.Graphics.Win2D" Version="1.3.2" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <!--<PackageReference Include="Microsoft.Graphics.Win2D" Version="1.3.2" />-->
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3650.58" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.7463" />
@@ -213,6 +213,24 @@
     <None Update="Assets\HpatchzResource\hpatchz.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <Page Update="Pages\Dialogs\DeleteFileDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Pages\Dialogs\SelectGameFolderDialogV2.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Pages\Dialogs\SelectDownoadGameDialogV2.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Controls\Styles\StorageRing.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Pages\GamePages\PunishV2GamePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Pages\GamePages\WavesV2GamePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Controls\Styles\CardSwitcher.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -249,6 +267,7 @@
     <Folder Include="Assets\Languages\" />
     <Folder Include="Common\Plugins\" />
     <Folder Include="Pages\ColorGame\" />
+    <Folder Include="Themes\" />
   </ItemGroup>
   <PropertyGroup Label="Globals" />
   <!--
@@ -297,9 +316,15 @@
 	  <None Remove="Controls\Styles\Colors.xaml" />
 	  <None Remove="Controls\Styles\HeaderTileCard.xaml" />
 	  <None Remove="Controls\Styles\LoadingCard.xaml" />
+	  <None Remove="Controls\Styles\StorageRing.xaml" />
+	  <None Remove="Pages\Dialogs\DeleteFileDialog.xaml" />
 	  <None Remove="Pages\Dialogs\GameEnhancedDialog.xaml" />
 	  <None Remove="Pages\Dialogs\LocalUserManagerDialog.xaml" />
+	  <None Remove="Pages\Dialogs\SelectDownoadGameDialogV2.xaml" />
+	  <None Remove="Pages\Dialogs\SelectGameFolderDialogV2.xaml" />
 	  <None Remove="Pages\Dialogs\UpdateGameDialog.xaml" />
+	  <None Remove="Pages\GamePages\PunishV2GamePage.xaml" />
+	  <None Remove="Pages\GamePages\WavesV2GamePage.xaml" />
 	  <None Remove="Pages\PluginPage.xaml" />
 	  <None Remove="Pages\XboxDisplayPage.xaml" />
 	</ItemGroup>

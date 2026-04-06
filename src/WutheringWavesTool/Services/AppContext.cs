@@ -2,6 +2,7 @@
 using Haiyu.Services.DialogServices;
 using Microsoft.UI.Dispatching;
 using Waves.Core.GameContext.Contexts.PRG;
+using Waves.Core.GameContext.ContextsV2;
 using Waves.Core.Services;
 using Waves.Core.Settings;
 using TitleBar = Haiyu.Controls.TitleBar;
@@ -60,6 +61,13 @@ public class AppContext<T> : IAppContext<T>
                 .InitAsync();
             await Instance.Host.Services!.GetRequiredKeyedService<IGameContext>(nameof(PunishTwGameContext))
                 .InitAsync();
+            #region 新核心测试
+
+            await Instance.Host.Services!.GetRequiredKeyedService<IGameContextV2>(nameof(PunishMainGameContextV2))
+                .InitAsync(); 
+            await Instance.Host.Services!.GetRequiredKeyedService<IGameContextV2>(nameof(WavesMainGameContextV2))
+                .InitAsync();
+            #endregion
             this.App = app;
             var win = new MainWindow();
             

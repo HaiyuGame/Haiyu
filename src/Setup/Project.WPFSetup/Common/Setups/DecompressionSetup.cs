@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.IO.Compression;
+using System.Text.Json;
 using SharpCompress.Archives.SevenZip;
 
 namespace Project.WPFSetup.Common.Setups;
@@ -30,6 +31,7 @@ public class DecompressionSetup : ISetup
     {
         try
         {
+            List<string> installFile = new List<string>();
             using (var memoryStream = new MemoryStream(fileBuffer))
             using (var archive = SharpCompress.Archives.Zip.ZipArchive.Open(memoryStream))
             {
@@ -80,8 +82,24 @@ public class DecompressionSetup : ISetup
                                 progress?.Report((percentComplete, SetupName));
                             }
                         }
+                        installFile.Add(path);
+                        //创建卸载快照
                     }
                 }
+
+                var datFile = Path.Combine(rootDir, "unstall.dat");
+                var unstallexe = Path.Combine(rootDir, "uninstall.exe");
+                if (File.Exists(datFile))
+                {
+                    File.Delete(datFile);
+                }
+                installFile.Add(datFile);
+                installFile.Add(unstallexe);
+                var datFs = File.CreateText(datFile);
+                var jsonStr = JsonSerializer.Serialize(installFile);
+                await datFs.WriteLineAsync(jsonStr);
+                await datFs.FlushAsync();
+                datFs.Dispose();
             }
             return ("", true);
         }

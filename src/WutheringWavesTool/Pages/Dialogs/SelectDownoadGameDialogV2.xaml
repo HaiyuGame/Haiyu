@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog
+    x:Class="Haiyu.Pages.Dialogs.SelectDownoadGameDialogV2"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:Haiyu.Pages.Dialogs"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="using:Haiyu.Controls"
+    Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+    mc:Ignorable="d">
+
+    <Grid Width="470" Height="300">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <TextBlock
+            FontFamily="{ThemeResource DefaultFont}"
+            FontSize="18"
+            Text="下载游戏"
+            Visibility="Visible" />
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="auto" />
+            </Grid.ColumnDefinitions>
+            <TextBox
+                x:Name="folderPath"
+                Grid.Row="1"
+                Margin="0,5,0,0"
+                VerticalAlignment="Center"
+                IsReadOnly="True" />
+            <Button
+                Grid.Column="1"
+                Margin="5,5,0,0"
+                VerticalAlignment="Center"
+                Click="SelectFolder_Click"
+                Style="{ThemeResource TransparentButtonStyle}">
+                <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8B7;" />
+            </Button>
+        </Grid>
+        <Grid
+            x:Name="layeredGrid"
+            Grid.Row="2"
+            Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <ui:LayeredProgressBar
+                x:Name="layered"
+                Grid.Row="0"
+                Margin="0,20,0,0"
+                Background="{ThemeResource AccentAcrylicBackgroundFillColorBaseBrush}"
+                BarHeight="10"
+                CornerRadius="5"
+                Style="{ThemeResource DefaultLayeredProgressBarValue}">
+                <ui:LayeredProgressBar.ItemTemplate>
+                    <DataTemplate x:DataType="ui:LayerData">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <Rectangle
+                                Width="12"
+                                Height="12"
+                                Fill="{x:Bind Color, Mode=OneWay}" />
+                            <TextBlock VerticalAlignment="Center" Text="{x:Bind Label, Mode=OneWay}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ui:LayeredProgressBar.ItemTemplate>
+            </ui:LayeredProgressBar>
+            <StackPanel
+                Grid.Row="1"
+                Margin="0,30,0,0"
+                Orientation="Vertical">
+                <TextBlock
+                    x:Name="TipMessage"
+                    Margin="0,5,0,0"
+                    FontFamily="{ThemeResource DefaultFont}" />
+            </StackPanel>
+            <Path
+                x:Name="download"
+                Grid.Row="1"
+                Width="60"
+                Height="60"
+                Margin="0,-15,30,0"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Data="M537 137c165.23 0 302.183 121.067 326.991 279.332C922.626 464.753 960 538.012 960 620c0 145.803-118.197 264-264 264H348c-156.942-0.542-284-127.933-284-285 0-115.73 68.98-215.348 168.067-259.984C282.35 220.296 399.947 137 537 137z m-25 255c-17.673 0-32 14.327-32 32v175.758l-45.373-45.383-0.377-0.372c-12.524-12.127-32.506-12.003-44.877 0.372-12.497 12.5-12.497 32.765 0 45.265l84.52 84.54 0.635 0.624c21.06 20.395 54.635 20.27 75.543-0.434l85.444-84.618 0.373-0.375c12.186-12.467 12.162-32.453-0.148-44.89-12.435-12.561-32.696-12.662-45.255-0.225L544 600.296V424c0-17.673-14.327-32-32-32z"
+                Fill="LightGray"
+                Opacity="1"
+                Stretch="Uniform" />
+        </Grid>
+        <TextBlock
+            x:Name="layerText"
+            Grid.Row="2"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            FontFamily="{ThemeResource DefaultFont}"
+            FontSize="18"
+            Text="选择驱动器以查看信息"
+            Visibility="Visible" />
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Button
+                x:Name="downloadBth"
+                Grid.Column="0"
+                Margin="0,0,2.5,0"
+                HorizontalAlignment="Stretch"
+                Click="Download_Click"
+                Content="下载"
+                IsEnabled="False"
+                Style="{ThemeResource AccentButtonStyle}" />
+            <Button
+                Grid.Column="1"
+                Margin="2.5,0,0,0"
+                HorizontalAlignment="Stretch"
+                Click="Close_Click"
+                Content="取消" />
+        </Grid>
+    </Grid>
+</ContentDialog>
