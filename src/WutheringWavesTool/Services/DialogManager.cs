@@ -28,6 +28,14 @@ public abstract class DialogManager : IDialogManager
         this._dialog = dialog;
         await _dialog.ShowAsync();
     }
+    public async Task ShowGameResourceV2DialogAsync(string contextName)
+    {
+        var dialog = Instance.Host.Services.GetRequiredService<GameResourceDialogV2>();
+        dialog.SetData(contextName);
+        dialog.XamlRoot = this.Root;
+        this._dialog = dialog;
+        await _dialog.ShowAsync();
+    }
 
 
     public async Task ShowDialogAsync<T>()

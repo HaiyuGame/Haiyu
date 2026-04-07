@@ -214,6 +214,9 @@
     <None Update="Assets\HpatchzResource\hpatchz.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <Page Update="Pages\Dialogs\GameResourceDialogV2.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Pages\Dialogs\UpdateGameDialogV2.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -323,6 +326,7 @@
 	  <None Remove="Controls\Styles\StorageRing.xaml" />
 	  <None Remove="Pages\Dialogs\DeleteFileDialog.xaml" />
 	  <None Remove="Pages\Dialogs\GameEnhancedDialog.xaml" />
+	  <None Remove="Pages\Dialogs\GameResourceDialogV2.xaml" />
 	  <None Remove="Pages\Dialogs\LocalUserManagerDialog.xaml" />
 	  <None Remove="Pages\Dialogs\SelectDownoadGameDialogV2.xaml" />
 	  <None Remove="Pages\Dialogs\SelectGameFolderDialogV2.xaml" />

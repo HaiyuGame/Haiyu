@@ -773,7 +773,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
     [RelayCommand]
     async Task ShowGameResource()
     {
-        await DialogManager.ShowGameResourceDialogAsync(this.GameContext.ContextName);
+        await DialogManager.ShowGameResourceV2DialogAsync(this.GameContext.ContextName);
     }
 
     [RelayCommand]
