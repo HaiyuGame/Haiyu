@@ -88,6 +88,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Astronomical\Astronomical.csproj" />
+    <ProjectReference Include="..\Haiyu.Plugin\Haiyu.Plugin.csproj" />
     <ProjectReference Include="..\Haiyu.ServiceHost\Haiyu.ServiceHost.csproj" />
     <ProjectReference Include="..\LanguageEditer.Model\LanguageEditer.Model.csproj" />
     <ProjectReference Include="..\Waves.Api\Waves.Api.csproj" />
@@ -213,6 +214,9 @@
     <None Update="Assets\HpatchzResource\hpatchz.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <Page Update="Pages\Dialogs\UpdateGameDialogV2.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Pages\Dialogs\DeleteFileDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -323,6 +327,7 @@
 	  <None Remove="Pages\Dialogs\SelectDownoadGameDialogV2.xaml" />
 	  <None Remove="Pages\Dialogs\SelectGameFolderDialogV2.xaml" />
 	  <None Remove="Pages\Dialogs\UpdateGameDialog.xaml" />
+	  <None Remove="Pages\Dialogs\UpdateGameDialogV2.xaml" />
 	  <None Remove="Pages\GamePages\PunishV2GamePage.xaml" />
 	  <None Remove="Pages\GamePages\WavesV2GamePage.xaml" />
 	  <None Remove="Pages\PluginPage.xaml" />

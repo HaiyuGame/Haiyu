@@ -99,6 +99,9 @@ public abstract class DialogManager : IDialogManager
     public async Task<UpdateGameResult> ShowUpdateGameDialogAsync(string contextName, UpdateGameType type)=>
         await GetDialogResultAsync<UpdateGameDialog, UpdateGameResult>(new Tuple<string, UpdateGameType>(contextName, type));
 
+    public async Task<UpdateGameResult> ShowUpdateGameDialogAsyncV2(string contextName, UpdateGameType type) =>
+        await GetDialogResultAsync<UpdateGameDialogV2, UpdateGameResult>(new Tuple<string, UpdateGameType>(contextName, type));
+
     public async Task ShowDeleteGameResource(string contentName) =>
         await ShowDialogAsync<DeleteFileDialog>(contentName);
 

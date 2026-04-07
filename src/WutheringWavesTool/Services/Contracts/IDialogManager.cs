@@ -21,6 +21,7 @@ public interface IDialogManager
     public Task<CloseWindowResult> ShowCloseWindowResult();
     public Task<QRScanResult> GetQRLoginResultAsync();
     public Task<UpdateGameResult> ShowUpdateGameDialogAsync(string contextName, UpdateGameType type);
+    public Task<UpdateGameResult> ShowUpdateGameDialogAsyncV2(string contextName, UpdateGameType type);
 
     public Task ShowDeleteGameResource(string contentName);
     public void CloseDialog();

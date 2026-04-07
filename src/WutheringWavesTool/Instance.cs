@@ -149,6 +149,8 @@ public static class InstanceBuilderExtensions
                     .AddTransient<LocalUserManagerViewModel>()
                     .AddTransient<DeleteFileDialog>()
                     .AddTransient<DeleteFileViewModel>()
+                    .AddTransient<UpdateGameDialogV2>()
+                    .AddTransient<UpdateGameViewModelV2>()
                 #endregion
                 #endregion
                 #region More

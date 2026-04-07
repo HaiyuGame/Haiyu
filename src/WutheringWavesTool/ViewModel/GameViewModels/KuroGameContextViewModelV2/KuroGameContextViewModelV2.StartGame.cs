@@ -18,6 +18,20 @@ partial class KuroGameContextViewModelV2
         }
         if (_buttonAction == ButtonActionType.PrepareUpdate)
         {
+            var localVersion = await GameContext.GameLocalConfig.GetConfigAsync(
+                GameLocalSettingName.LocalGameVersion
+            );
+            var result = await DialogManager.ShowUpdateGameDialogAsyncV2(
+                this.GameContext.ContextName,
+                UpdateGameType.UpdateGame
+            );
+
+            if (result == null)
+                return;
+            if (result.IsOk == false)
+            {
+                return;
+            }
             Task.Run(async () => await GameContext.UpdateGameResourceAsync());
         }
         if (_buttonAction == ButtonActionType.InstallPreDownload)
