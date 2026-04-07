@@ -68,7 +68,9 @@ partial class KuroGameContextViewModelV2
         var now = DateTime.Now;
         return
         [
-            now.AddSeconds(-3).Ticks,
+            now.AddSeconds(-30).Ticks,
+            now.AddSeconds(-20).Ticks,
+            now.AddSeconds(-10).Ticks,
             now.AddSeconds(-2).Ticks,
             now.AddSeconds(-1).Ticks,
             now.Ticks
@@ -85,7 +87,7 @@ partial class KuroGameContextViewModelV2
 
         return secsAgo < 1
             ? "now"
-            : $"{secsAgo:N0}s ago";
+            : $"{secsAgo:N0}秒前";
     }
     #region 通知
 

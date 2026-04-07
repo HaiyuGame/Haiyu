@@ -136,27 +136,37 @@
                         </Grid.RowDefinitions>
                         <lvc:CartesianChart
                             Margin="10"
+                            AutoUpdateEnabled="True"
                             Background="Transparent"
                             SyncContext="{x:Bind ViewModel.Sync, Mode=OneWay}">
                             <lvc:CartesianChart.Series>
                                 <lvc:SeriesCollection>
                                     <lvc:XamlLineSeries
+                                        DataLabelsPosition="Right"
                                         Fill="{x:Null}"
                                         GeometryFill="{x:Null}"
                                         GeometryStroke="{x:Null}"
                                         ScalesYAt="1"
+                                        SeriesName="下载"
+                                        ShowDataLabels="True"
                                         Values="{x:Bind ViewModel.DownloadSpeedPoints, Mode=OneWay}" />
                                     <lvc:XamlLineSeries
+                                        DataLabelsPosition="Right"
                                         Fill="{x:Null}"
                                         GeometryFill="{x:Null}"
                                         GeometryStroke="{x:Null}"
                                         ScalesYAt="0"
+                                        SeriesName="校验"
+                                        ShowDataLabels="True"
                                         Values="{x:Bind ViewModel.VerifySpeedPoints, Mode=OneWay}" />
                                     <lvc:XamlLineSeries
+                                        DataLabelsPosition="Right"
                                         Fill="{x:Null}"
                                         GeometryFill="{x:Null}"
                                         GeometryStroke="{x:Null}"
                                         ScalesYAt="2"
+                                        SeriesName="解压"
+                                        ShowDataLabels="True"
                                         Values="{x:Bind ViewModel.DecompressSpeedPoints, Mode=OneWay}" />
                                 </lvc:SeriesCollection>
                             </lvc:CartesianChart.Series>

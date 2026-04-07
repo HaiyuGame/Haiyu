@@ -384,21 +384,21 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         }
         foreach (var item in DownloadSpeedPoints.ToList())
         {
-            if((DateTime.Now- item.DateTime).Seconds > 6)
+            if((DateTime.Now- item.DateTime).Seconds > 30)
             {
                 DownloadSpeedPoints.Remove(item);
             }
         }
         foreach (var item in VerifySpeedPoints.ToList())
         {
-            if ((DateTime.Now - item.DateTime).Seconds > 6)
+            if ((DateTime.Now - item.DateTime).Seconds > 30)
             {
                 VerifySpeedPoints.Remove(item);
             }
         }
         foreach (var item in DecompressSpeedPoints.ToList())
         {
-            if ((DateTime.Now - item.DateTime).Seconds > 6)
+            if ((DateTime.Now - item.DateTime).Seconds > 30)
             {
                 DecompressSpeedPoints.Remove(item);
             }
@@ -432,9 +432,6 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         return string.Join(" | ", segments);
     }
 
-    /// <summary>
-    /// 按钮类型，用枚举替代魔法数字，便于扩展和可读性
-    /// </summary>
     private enum ButtonActionType
     {
         None = 0,
