@@ -329,7 +329,15 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         this.ProgressValue = tracker.Percentage;
         this.CurrentByteText = GameProgressTracker.FormatBytes(tracker.CurrentBytes);
         this.MaxByteText = GameProgressTracker.FormatBytes(tracker.TotalBytes);
+        var previousActiveType = this.CurrentActiveType;
         this.CurrentActiveType = args.Type;
+        if (
+            previousActiveType == Waves.Core.Models.Enums.GameContextActionType.Verify
+            && args.Type == Waves.Core.Models.Enums.GameContextActionType.Download
+        )
+        {
+            this.VerifySpeedPoints.Clear();
+        }
         var isPaused =
             status.IsPause
             || tracker.IsPaused
@@ -349,9 +357,8 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                 this.BottomBarContent = BuildTrackerProgressSummary(tracker);
             }
             PauseStartEnable = true;
-            return;
+            this.VerifySpeedPoints.Add(new LiveChartsCore.Defaults.DateTimePoint(DateTime.Now, GameProgressTracker.FormatDoubleBytes(tracker.VerifySpeed)));
         }
-
         if (args.Type == Waves.Core.Models.Enums.GameContextActionType.Download)
         {
             if (isPaused)
@@ -364,17 +371,39 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                 this.PauseIcon = "\uE769";
                 this.BottomBarContent = BuildTrackerProgressSummary(tracker);
             }
+            this.DownloadSpeedPoints.Add(new LiveChartsCore.Defaults.DateTimePoint(DateTime.Now, GameProgressTracker.FormatDoubleBytes(tracker.DownloadSpeed)));
             PauseStartEnable = true;
-            return;
         }
-
         if (args.Type == Waves.Core.Models.Enums.GameContextActionType.Decompress)
         {
             this.PauseIcon = "\uE769";
             this.BottomBarContent =
                 $"[{args.CurrentDecompressCount}/{args.MaxDecompressValue}] 已解压:{Math.Round((double)args.CurrentSize / 1024 / 1024 / 1024, 2)}GB,剩余:{Math.Round((double)(args.TotalSize - args.CurrentSize) / 1024 / 1024 / 1024, 2)}GB";
+            this.DecompressSpeedPoints.Add(new LiveChartsCore.Defaults.DateTimePoint(DateTime.Now, GameProgressTracker.FormatDoubleBytes(tracker.ZipSpeed)));
             PauseStartEnable = false;
         }
+        foreach (var item in DownloadSpeedPoints.ToList())
+        {
+            if((DateTime.Now- item.DateTime).Seconds > 6)
+            {
+                DownloadSpeedPoints.Remove(item);
+            }
+        }
+        foreach (var item in VerifySpeedPoints.ToList())
+        {
+            if ((DateTime.Now - item.DateTime).Seconds > 6)
+            {
+                VerifySpeedPoints.Remove(item);
+            }
+        }
+        foreach (var item in DecompressSpeedPoints.ToList())
+        {
+            if ((DateTime.Now - item.DateTime).Seconds > 6)
+            {
+                DecompressSpeedPoints.Remove(item);
+            }
+        }
+        this.DownloadSpeedSeparators = GetSeparators();
     }
 
     private static string BuildTrackerProgressSummary(GameProgressTracker tracker)

@@ -13,6 +13,7 @@
     xmlns:item="using:Waves.Core.Models"
     xmlns:launcheModel="using:Waves.Api.Models"
     xmlns:local="using:Haiyu.Pages.GamePages"
+    xmlns:lvc="using:LiveChartsCore.SkiaSharpView.WinUI"
     xmlns:m="using:Haiyu.Models"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:media="using:CommunityToolkit.WinUI.Media"
@@ -109,7 +110,7 @@
                 <Grid
                     Grid.Row="1"
                     Width="300"
-                    Height="230"
+                    Height="280"
                     HorizontalAlignment="Right"
                     Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
                     CornerRadius="5"
@@ -124,15 +125,80 @@
                         <RowDefinition Height="auto" />
                         <RowDefinition Height="auto" />
                     </Grid.RowDefinitions>
-                    <Grid Margin="20" RowSpacing="10">
+                    <Grid Margin="0,0">
                         <Grid.RowDefinitions>
                             <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
                         </Grid.RowDefinitions>
-                        <TextBlock FontFamily="{ThemeResource DefaultFont}">
+                        <lvc:CartesianChart
+                            Margin="10"
+                            Background="Transparent"
+                            SyncContext="{x:Bind ViewModel.Sync, Mode=OneWay}">
+                            <lvc:CartesianChart.Series>
+                                <lvc:SeriesCollection>
+                                    <lvc:XamlLineSeries
+                                        Fill="{x:Null}"
+                                        GeometryFill="{x:Null}"
+                                        GeometryStroke="{x:Null}"
+                                        ScalesYAt="1"
+                                        Values="{x:Bind ViewModel.DownloadSpeedPoints, Mode=OneWay}" />
+                                    <lvc:XamlLineSeries
+                                        Fill="{x:Null}"
+                                        GeometryFill="{x:Null}"
+                                        GeometryStroke="{x:Null}"
+                                        ScalesYAt="0"
+                                        Values="{x:Bind ViewModel.VerifySpeedPoints, Mode=OneWay}" />
+                                    <lvc:XamlLineSeries
+                                        Fill="{x:Null}"
+                                        GeometryFill="{x:Null}"
+                                        GeometryStroke="{x:Null}"
+                                        ScalesYAt="2"
+                                        Values="{x:Bind ViewModel.DecompressSpeedPoints, Mode=OneWay}" />
+                                </lvc:SeriesCollection>
+                            </lvc:CartesianChart.Series>
+                            <lvc:CartesianChart.XAxes>
+                                <lvc:AxesCollection>
+                                    <lvc:XamlDateTimeAxis
+                                        AnimationsSpeed="0"
+                                        CustomSeparators="{x:Bind ViewModel.DownloadSpeedSeparators}"
+                                        DateFormatter="{x:Bind ViewModel.LabelsFormatter}"
+                                        Interval="0:0:1"
+                                        SeparatorsPaint="{lvc:SolidColorPaint Color='64B4B4B4'}" />
+                                </lvc:AxesCollection>
+                            </lvc:CartesianChart.XAxes>
+                            <lvc:CartesianChart.YAxes>
+                                <lvc:AxesCollection>
+                                    <!--  校验速度轴  -->
+                                    <lvc:XamlAxis
+                                        Padding="{lvc:Padding Value='0,0'}"
+                                        LabelsPaint="{x:Null}"
+                                        MaxLimit="2000"
+                                        ShowSeparatorLines="False"
+                                        TextSize="0" />
+                                    <lvc:XamlAxis
+                                        Padding="{lvc:Padding Value='0,0'}"
+                                        LabelsPaint="{x:Null}"
+                                        MaxLimit="100"
+                                        ShowSeparatorLines="False"
+                                        TextSize="0" />
+                                    <lvc:XamlAxis
+                                        Padding="{lvc:Padding Value='0,0'}"
+                                        LabelsPaint="{x:Null}"
+                                        MaxLimit="300"
+                                        ShowSeparatorLines="False"
+                                        TextSize="0" />
+                                </lvc:AxesCollection>
+                            </lvc:CartesianChart.YAxes>
+                        </lvc:CartesianChart>
+                        <TextBlock
+                            Grid.Row="1"
+                            Margin="20,0"
+                            FontFamily="{ThemeResource DefaultFont}"
+                            FontSize="12">
                             <Run Text="任务步骤(" />
                             <Run Text="{x:Bind ViewModel.CurrentStep, Mode=OneWay}" />
                             <Run Text="/" />
@@ -140,40 +206,54 @@
                             <Run Text=")" />
                         </TextBlock>
                         <TextBlock
+                            Grid.Row="1"
                             Grid.Column="1"
+                            Margin="20,0"
                             HorizontalAlignment="Right"
-                            FontFamily="{ThemeResource DefaultFont}">
+                            FontFamily="{ThemeResource DefaultFont}"
+                            FontSize="12">
                             <Run Text="{x:Bind ViewModel.CurrentStepText, Mode=OneWay}" />
                         </TextBlock>
                         <TextBlock
-                            Grid.Row="1"
+                            Grid.Row="2"
+                            Margin="20,0"
                             FontFamily="{ThemeResource DefaultFont}"
+                            FontSize="12"
                             Text="步骤进度" />
                         <TextBlock
-                            Grid.Row="1"
+                            Grid.Row="2"
                             Grid.Column="1"
+                            Margin="20,0"
                             HorizontalAlignment="Right"
-                            FontFamily="{ThemeResource DefaultFont}">
+                            FontFamily="{ThemeResource DefaultFont}"
+                            FontSize="12">
                             <Run Text="{x:Bind ViewModel.ProgressValue, Mode=OneWay}" />
                             <Run Text="%" />
                         </TextBlock>
                         <TextBlock
-                            Grid.Row="2"
+                            Grid.Row="3"
+                            Margin="20,0"
                             FontFamily="{ThemeResource DefaultFont}"
+                            FontSize="12"
                             Text="处理速度" />
                         <TextBlock
-                            Grid.Row="2"
+                            Grid.Row="3"
                             Grid.Column="1"
+                            Margin="20,0"
                             HorizontalAlignment="Right"
                             FontFamily="{ThemeResource DefaultFont}"
+                            FontSize="12"
                             Text="{x:Bind ViewModel.SpeedText, Mode=OneWay}" />
                         <TextBlock
-                            Grid.Row="3"
+                            Grid.Row="4"
+                            Margin="20,0"
                             FontFamily="{ThemeResource DefaultFont}"
+                            FontSize="12"
                             Text="活动文件" />
                         <StackPanel
-                            Grid.Row="3"
+                            Grid.Row="4"
                             Grid.Column="1"
+                            Margin="20,0"
                             HorizontalAlignment="Right"
                             VerticalAlignment="Center"
                             Orientation="Horizontal">
@@ -181,6 +261,7 @@
                                 Width="120"
                                 VerticalAlignment="Center"
                                 FontFamily="{ThemeResource DefaultFont}"
+                                FontSize="12"
                                 Text="{x:Bind ViewModel.ActiveFile, Mode=OneWay}"
                                 TextTrimming="CharacterEllipsis" />
                             <Button
@@ -189,7 +270,7 @@
                                 ToolTipService.ToolTip="显示更多文件">
                                 <FontIcon
                                     FontFamily="Segoe Fluent Icons"
-                                    FontSize="15"
+                                    FontSize="12"
                                     Glyph="&#xE712;" />
                                 <Button.Flyout>
                                     <Flyout>
@@ -228,14 +309,18 @@
                             </Button>
                         </StackPanel>
                         <TextBlock
-                            Grid.Row="4"
+                            Grid.Row="5"
+                            Margin="20,0"
                             FontFamily="{ThemeResource DefaultFont}"
+                            FontSize="12"
                             Text="数据容量" />
                         <TextBlock
-                            Grid.Row="4"
+                            Grid.Row="5"
                             Grid.Column="1"
+                            Margin="20,0"
                             HorizontalAlignment="Right"
-                            FontFamily="{ThemeResource DefaultFont}">
+                            FontFamily="{ThemeResource DefaultFont}"
+                            FontSize="12">
                             <Run Text="{x:Bind ViewModel.CurrentByteText, Mode=OneWay}" />
                             <Run Text="/" />
                             <Run Text="{x:Bind ViewModel.MaxByteText, Mode=OneWay}" />
@@ -535,7 +620,7 @@
             Grid.RowSpan="2"
             Grid.Column="0"
             Grid.ColumnSpan="2"
-            Margin="0,-150,0,0"
+            Margin="0,-200,0,0"
             HorizontalAlignment="Right"
             VerticalAlignment="Top"
             Canvas.ZIndex="-2"

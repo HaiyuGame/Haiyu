@@ -1,4 +1,5 @@
-﻿using Waves.Core.Models.Enums;
+﻿using LiveChartsCore.Defaults;
+using Waves.Core.Models.Enums;
 
 namespace Haiyu.ViewModel.GameViewModels;
 
@@ -46,6 +47,46 @@ partial class KuroGameContextViewModelV2
     public partial GameContextActionType CurrentActiveType { get; set; }
     #endregion
 
+
+    #region 进度图表
+
+    #endregion
+    [ObservableProperty]
+    public partial ObservableCollection<DateTimePoint> DownloadSpeedPoints { get; set; } = new();
+    [ObservableProperty]
+    public partial ObservableCollection<DateTimePoint> VerifySpeedPoints { get; set; } = new();
+    [ObservableProperty]
+    public partial ObservableCollection<DateTimePoint> DecompressSpeedPoints { get; set; } = new();
+
+    public object Sync { get; } = new object();
+
+    [ObservableProperty]
+    public partial ObservableCollection<double> DownloadSpeedSeparators { get; set; }
+
+    private static ObservableCollection<double> GetSeparators()
+    {
+        var now = DateTime.Now;
+        return
+        [
+            now.AddSeconds(-3).Ticks,
+            now.AddSeconds(-2).Ticks,
+            now.AddSeconds(-1).Ticks,
+            now.Ticks
+        ];
+    }
+
+    [ObservableProperty]
+    public partial Func<DateTime, string> LabelsFormatter { get; set; } = Formatter;
+
+
+    private static string Formatter(DateTime date)
+    {
+        var secsAgo = (DateTime.Now - date).TotalSeconds;
+
+        return secsAgo < 1
+            ? "now"
+            : $"{secsAgo:N0}s ago";
+    }
     #region 通知
 
     #endregion

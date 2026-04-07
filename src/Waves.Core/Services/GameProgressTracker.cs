@@ -251,6 +251,19 @@ public sealed class GameProgressTracker : IAsyncDisposable
         return $"{dblSByte:0.##} {suffix[i]}";
     }
 
+    public static double FormatDoubleBytes(double bytes)
+    {
+        string[] suffix = { "B", "KB", "MB", "GB", "TB" };
+        int i = 0;
+        double dblSByte = bytes;
+        while (dblSByte >= 1024 && i < suffix.Length - 1)
+        {
+            dblSByte /= 1024;
+            i++;
+        }
+        return dblSByte;
+    }
+
     public async ValueTask DisposeAsync()
     {
         try
@@ -266,5 +279,16 @@ public sealed class GameProgressTracker : IAsyncDisposable
             }
         }
         catch { }
+    }
+
+    public double? GetSpeedValue()
+    {
+        return CurrentAction switch
+        {
+            GameContextActionType.Download => FormatDoubleBytes(DownloadSpeed),
+            GameContextActionType.Verify => FormatDoubleBytes(VerifySpeed),
+            GameContextActionType.Decompress => FormatDoubleBytes(ZipSpeed),
+            _ => null,
+        };
     }
 }
