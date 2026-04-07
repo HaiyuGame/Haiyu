@@ -1,4 +1,5 @@
 ﻿using LiveChartsCore.Defaults;
+using LiveChartsCore.Kernel;
 using Waves.Core.Models.Enums;
 
 namespace Haiyu.ViewModel.GameViewModels;
@@ -77,9 +78,12 @@ partial class KuroGameContextViewModelV2
         ];
     }
 
+
     [ObservableProperty]
     public partial Func<DateTime, string> LabelsFormatter { get; set; } = Formatter;
 
+    public Func<ChartPoint, string> DataLabelFormatter => (point) => 
+            $"{point.Coordinate.PrimaryValue:N0}mb/s";
 
     private static string Formatter(DateTime date)
     {

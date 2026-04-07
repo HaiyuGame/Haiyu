@@ -357,7 +357,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                 this.BottomBarContent = BuildTrackerProgressSummary(tracker);
             }
             PauseStartEnable = true;
-            this.VerifySpeedPoints.Add(new LiveChartsCore.Defaults.DateTimePoint(DateTime.Now, GameProgressTracker.FormatDoubleBytes(tracker.VerifySpeed)));
+            this.VerifySpeedPoints.Add(new LiveChartsCore.Defaults.DateTimePoint(DateTime.Now, ByteConversion.BytesToMegabytes((long)tracker.VerifySpeed, 2)));
         }
         if (args.Type == Waves.Core.Models.Enums.GameContextActionType.Download)
         {
@@ -371,7 +371,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                 this.PauseIcon = "\uE769";
                 this.BottomBarContent = BuildTrackerProgressSummary(tracker);
             }
-            this.DownloadSpeedPoints.Add(new LiveChartsCore.Defaults.DateTimePoint(DateTime.Now, GameProgressTracker.FormatDoubleBytes(tracker.DownloadSpeed)));
+            this.DownloadSpeedPoints.Add(new LiveChartsCore.Defaults.DateTimePoint(DateTime.Now, ByteConversion.BytesToMegabytes((long)tracker.DownloadSpeed, 2)));
             PauseStartEnable = true;
         }
         if (args.Type == Waves.Core.Models.Enums.GameContextActionType.Decompress)
@@ -379,26 +379,26 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
             this.PauseIcon = "\uE769";
             this.BottomBarContent =
                 $"[{args.CurrentDecompressCount}/{args.MaxDecompressValue}] 已解压:{Math.Round((double)args.CurrentSize / 1024 / 1024 / 1024, 2)}GB,剩余:{Math.Round((double)(args.TotalSize - args.CurrentSize) / 1024 / 1024 / 1024, 2)}GB";
-            this.DecompressSpeedPoints.Add(new LiveChartsCore.Defaults.DateTimePoint(DateTime.Now, GameProgressTracker.FormatDoubleBytes(tracker.ZipSpeed)));
+            this.DecompressSpeedPoints.Add(new LiveChartsCore.Defaults.DateTimePoint(DateTime.Now, ByteConversion.BytesToMegabytes((long)tracker.ZipSpeed, 2)));
             PauseStartEnable = false;
         }
         foreach (var item in DownloadSpeedPoints.ToList())
         {
-            if((DateTime.Now- item.DateTime).Seconds > 30)
+            if((DateTime.Now- item.DateTime).Seconds > 50)
             {
                 DownloadSpeedPoints.Remove(item);
             }
         }
         foreach (var item in VerifySpeedPoints.ToList())
         {
-            if ((DateTime.Now - item.DateTime).Seconds > 30)
+            if ((DateTime.Now - item.DateTime).Seconds > 50)
             {
                 VerifySpeedPoints.Remove(item);
             }
         }
         foreach (var item in DecompressSpeedPoints.ToList())
         {
-            if ((DateTime.Now - item.DateTime).Seconds > 30)
+            if ((DateTime.Now - item.DateTime).Seconds > 50)
             {
                 DecompressSpeedPoints.Remove(item);
             }
