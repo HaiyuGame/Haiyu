@@ -13,6 +13,16 @@ namespace Haiyu.ViewModel.GameViewModels;
 
 public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
 {
+    private const int ChartPointKeepSeconds = 50;
+    private const int ChartMaxPoints = 300;
+    private static readonly TimeSpan ChartPointInterval = TimeSpan.FromMilliseconds(200);
+    private static readonly TimeSpan SeparatorRefreshInterval = TimeSpan.FromMilliseconds(500);
+
+    private DateTime _lastDownloadPointTime = DateTime.MinValue;
+    private DateTime _lastVerifyPointTime = DateTime.MinValue;
+    private DateTime _lastDecompressPointTime = DateTime.MinValue;
+    private DateTime _lastSeparatorRefreshTime = DateTime.MinValue;
+
     public LoggerService Logger { get; }
     public IGameContextV2 GameContext { get; private set; }
     public IDialogManager DialogManager { get; }
@@ -324,6 +334,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         GameContextStatus status
     )
     {
+        var now = DateTime.Now;
         this.MaxProgressValue = tracker.TotalBytes;
         this.CurrentProgressValue = tracker.CurrentBytes;
         this.ProgressValue = tracker.Percentage;
@@ -357,7 +368,12 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                 this.BottomBarContent = BuildTrackerProgressSummary(tracker);
             }
             PauseStartEnable = true;
-            this.VerifySpeedPoints.Add(new LiveChartsCore.Defaults.DateTimePoint(DateTime.Now, ByteConversion.BytesToMegabytes((long)tracker.VerifySpeed, 2)));
+            TryAddChartPoint(
+                this.VerifySpeedPoints,
+                now,
+                ref _lastVerifyPointTime,
+                ByteConversion.BytesToMegabytes((long)tracker.VerifySpeed, 2)
+            );
         }
         if (args.Type == Waves.Core.Models.Enums.GameContextActionType.Download)
         {
@@ -371,7 +387,12 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                 this.PauseIcon = "\uE769";
                 this.BottomBarContent = BuildTrackerProgressSummary(tracker);
             }
-            this.DownloadSpeedPoints.Add(new LiveChartsCore.Defaults.DateTimePoint(DateTime.Now, ByteConversion.BytesToMegabytes((long)tracker.DownloadSpeed, 2)));
+            TryAddChartPoint(
+                this.DownloadSpeedPoints,
+                now,
+                ref _lastDownloadPointTime,
+                ByteConversion.BytesToMegabytes((long)tracker.DownloadSpeed, 2)
+            );
             PauseStartEnable = true;
         }
         if (args.Type == Waves.Core.Models.Enums.GameContextActionType.Decompress)
@@ -379,31 +400,51 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
             this.PauseIcon = "\uE769";
             this.BottomBarContent =
                 $"[{args.CurrentDecompressCount}/{args.MaxDecompressValue}] 已解压:{Math.Round((double)args.CurrentSize / 1024 / 1024 / 1024, 2)}GB,剩余:{Math.Round((double)(args.TotalSize - args.CurrentSize) / 1024 / 1024 / 1024, 2)}GB";
-            this.DecompressSpeedPoints.Add(new LiveChartsCore.Defaults.DateTimePoint(DateTime.Now, ByteConversion.BytesToMegabytes((long)tracker.ZipSpeed, 2)));
+            TryAddChartPoint(
+                this.DecompressSpeedPoints,
+                now,
+                ref _lastDecompressPointTime,
+                ByteConversion.BytesToMegabytes((long)tracker.ZipSpeed, 2)
+            );
             PauseStartEnable = false;
         }
-        foreach (var item in DownloadSpeedPoints.ToList())
+        TrimChartPoints(this.DownloadSpeedPoints, now);
+        TrimChartPoints(this.VerifySpeedPoints, now);
+        TrimChartPoints(this.DecompressSpeedPoints, now);
+
+        if ((now - _lastSeparatorRefreshTime) >= SeparatorRefreshInterval)
         {
-            if((DateTime.Now- item.DateTime).Seconds > 50)
-            {
-                DownloadSpeedPoints.Remove(item);
-            }
+            _lastSeparatorRefreshTime = now;
+            this.DownloadSpeedSeparators = GetSeparators();
         }
-        foreach (var item in VerifySpeedPoints.ToList())
+    }
+
+    private static void TrimChartPoints(ObservableCollection<LiveChartsCore.Defaults.DateTimePoint> points, DateTime now)
+    {
+        while (points.Count > 0 && (now - points[0].DateTime).TotalSeconds > ChartPointKeepSeconds)
         {
-            if ((DateTime.Now - item.DateTime).Seconds > 50)
-            {
-                VerifySpeedPoints.Remove(item);
-            }
+            points.RemoveAt(0);
         }
-        foreach (var item in DecompressSpeedPoints.ToList())
+
+        while (points.Count > ChartMaxPoints)
         {
-            if ((DateTime.Now - item.DateTime).Seconds > 50)
-            {
-                DecompressSpeedPoints.Remove(item);
-            }
+            points.RemoveAt(0);
         }
-        this.DownloadSpeedSeparators = GetSeparators();
+    }
+
+    private static void TryAddChartPoint(
+        ObservableCollection<LiveChartsCore.Defaults.DateTimePoint> points,
+        DateTime now,
+        ref DateTime lastPointTime,
+        double value)
+    {
+        if ((now - lastPointTime) < ChartPointInterval)
+        {
+            return;
+        }
+
+        lastPointTime = now;
+        points.Add(new LiveChartsCore.Defaults.DateTimePoint(now, value));
     }
 
     private static string BuildTrackerProgressSummary(GameProgressTracker tracker)
@@ -844,8 +885,13 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
     {
         if (!disposedValue)
         {
+            
             //取消数据接收接口
             this.GameContext.ProgressState.OnProgressChanged -= ProgressState_OnProgressChanged;
+            this.DownloadSpeedPoints.Clear();
+            this.DecompressSpeedPoints.Clear();
+            this.VerifySpeedPoints.Clear();
+            DownloadSpeedSeparators.Clear();
             if (disposing)
             {
                 DisposeAfter();

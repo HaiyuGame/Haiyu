@@ -135,36 +135,30 @@
                             <lvc:CartesianChart.Series>
                                 <lvc:SeriesCollection>
                                     <lvc:XamlLineSeries
-                                        Fill="{lvc:LinearGradientPaint Colors='#008EFFFF,#3FA7FFFF,#87CAFFFF,#C3E4FFFF, #FFFFFF00',
-                                                                       StrokeWidth=10}"
+                                        Fill="{ThemeResource DownloadSpeedPointSerialFillColor}"
                                         GeometryFill="{x:Null}"
                                         GeometryStroke="{x:Null}"
                                         ScalesYAt="1"
                                         SeriesName="下载"
-                                        Stroke="{lvc:SolidColorPaint Color=#008EFFFF,
-                                                                     StrokeWidth=5}"
+                                        Stroke="{ThemeResource DownloadSpeedPointSerialStrokeColor}"
                                         Values="{x:Bind ViewModel.DownloadSpeedPoints, Mode=OneWay}"
                                         YToolTipLabelFormatter="{x:Bind ViewModel.DataLabelFormatter, Mode=OneWay}" />
                                     <lvc:XamlLineSeries
-                                        Fill="{lvc:LinearGradientPaint Colors='#8500DAFF,#9A36DAFF,#AD68D8FF,#C39CDBFF, #FFFFFF00',
-                                                                       StrokeWidth=10}"
+                                        Fill="{ThemeResource VerifySpeedPointSerialFillColor}"
                                         GeometryFill="{x:Null}"
                                         GeometryStroke="{x:Null}"
                                         ScalesYAt="0"
                                         SeriesName="校验"
-                                        Stroke="{lvc:SolidColorPaint Color=#8500DAFF,
-                                                                     StrokeWidth=5}"
+                                        Stroke="{ThemeResource VerifySpeedPointSerialStrokeColor}"
                                         Values="{x:Bind ViewModel.VerifySpeedPoints, Mode=OneWay}"
                                         YToolTipLabelFormatter="{x:Bind ViewModel.DataLabelFormatter, Mode=OneWay}" />
                                     <lvc:XamlLineSeries
-                                        Fill="{lvc:LinearGradientPaint Colors='#FF0000FF,#F748ACFF,#F38BC6FF,#FFC3E5FF, #FFFFFF00',
-                                                                       StrokeWidth=10}"
+                                        Fill="{ThemeResource DecompressSpeedPointSerialFillColor}"
                                         GeometryFill="{x:Null}"
                                         GeometryStroke="{x:Null}"
                                         ScalesYAt="2"
                                         SeriesName="解压"
-                                        Stroke="{lvc:SolidColorPaint Color=#FF0000FF,
-                                                                     StrokeWidth=5}"
+                                        Stroke="{ThemeResource DecompressSpeedPointSerialStrokeColor}"
                                         Values="{x:Bind ViewModel.DecompressSpeedPoints, Mode=OneWay}"
                                         YToolTipLabelFormatter="{x:Bind ViewModel.DataLabelFormatter, Mode=OneWay}" />
                                 </lvc:SeriesCollection>
@@ -182,7 +176,6 @@
                             </lvc:CartesianChart.XAxes>
                             <lvc:CartesianChart.YAxes>
                                 <lvc:AxesCollection>
-                                    <!--  校验速度轴  -->
                                     <lvc:XamlAxis
                                         Padding="{lvc:Padding Value='0,0'}"
                                         LabelsPaint="{x:Null}"
@@ -204,6 +197,7 @@
                         <TextBlock
                             Grid.Row="1"
                             Margin="20,0"
+                            VerticalAlignment="Center"
                             FontFamily="{ThemeResource DefaultFont}"
                             FontSize="12">
                             <Run Text="任务步骤(" />
@@ -217,6 +211,7 @@
                             Grid.Column="1"
                             Margin="20,0"
                             HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
                             FontFamily="{ThemeResource DefaultFont}"
                             FontSize="12">
                             <Run Text="{x:Bind ViewModel.CurrentStepText, Mode=OneWay}" />
@@ -224,6 +219,7 @@
                         <TextBlock
                             Grid.Row="2"
                             Margin="20,0"
+                            VerticalAlignment="Center"
                             FontFamily="{ThemeResource DefaultFont}"
                             FontSize="12"
                             Text="步骤进度" />
@@ -232,6 +228,7 @@
                             Grid.Column="1"
                             Margin="20,0"
                             HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
                             FontFamily="{ThemeResource DefaultFont}"
                             FontSize="12">
                             <Run Text="{x:Bind ViewModel.ProgressValue, Mode=OneWay}" />
@@ -306,6 +303,7 @@
                         <TextBlock
                             Grid.Row="4"
                             Margin="20,0"
+                            VerticalAlignment="Center"
                             FontFamily="{ThemeResource DefaultFont}"
                             FontSize="12"
                             Text="数据容量" />
@@ -314,6 +312,7 @@
                             Grid.Column="1"
                             Margin="20,0"
                             HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
                             FontFamily="{ThemeResource DefaultFont}"
                             FontSize="12">
                             <Run Text="{x:Bind ViewModel.CurrentByteText, Mode=OneWay}" />

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Haiyu.Controls"
+    xmlns:lvc="using:LiveChartsCore.SkiaSharpView.WinUI"
+    xmlns:sys="using:System">
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Dark">
+            <!--  下载速度：青色 → 半透青 → 全透明  -->
+            <lvc:LinearGradientPaintExtension
+                x:Key="DownloadSpeedPointSerialFillColor"
+                Colors="#FF00E9FF,#8000E9FF,#0000E9FF"
+                StrokeWidth="5"
+                StartPoint="0.5,0"
+                EndPoint="0.5,1" />
+            <lvc:SolidColorPaintExtension
+                x:Key="DownloadSpeedPointSerialStrokeColor"
+                StrokeWidth="5"
+                Color="#FF00E9FF" />
+
+            <!--  校验速度：粉紫 → 半透粉紫 → 全透明  -->
+            <lvc:LinearGradientPaintExtension
+                x:Key="VerifySpeedPointSerialFillColor"
+                Colors="#FFE16AFF,#80E16AFF,#00E16AFF"
+                StrokeWidth="5"
+                StartPoint="0.5,0"
+                EndPoint="0.5,1" />
+            <lvc:SolidColorPaintExtension
+                x:Key="VerifySpeedPointSerialStrokeColor"
+                StrokeWidth="5"
+                Color="#FFE16AFF" />
+
+            <!--  解压速度：绿色 → 半透绿 → 全透明  -->
+            <lvc:LinearGradientPaintExtension
+                x:Key="DecompressSpeedPointSerialFillColor"
+                Colors="#FF54FF00,#8054FF00,#0054FF00"
+                StrokeWidth="5"
+                StartPoint="0.5,0"
+                EndPoint="0.5,1" />
+            <lvc:SolidColorPaintExtension
+                x:Key="DecompressSpeedPointSerialStrokeColor"
+                StrokeWidth="5"
+                Color="#FF54FF00" />
+        </ResourceDictionary>
+
+        <ResourceDictionary x:Key="Light">
+            <!--  下载速度：亮青 → 半透亮青 → 全透明  -->
+            <lvc:LinearGradientPaintExtension
+                x:Key="DownloadSpeedPointSerialFillColor"
+                Colors="#FF008EFF,#80008EFF,#00008EFF"
+                StrokeWidth="5"
+                StartPoint="0.5,0"
+                EndPoint="0.5,1" />
+            <lvc:SolidColorPaintExtension
+                x:Key="DownloadSpeedPointSerialStrokeColor"
+                StrokeWidth="5"
+                Color="#FF008EFF" />
+
+            <!--  校验速度：蓝紫 → 半透蓝紫 → 全透明  -->
+            <lvc:LinearGradientPaintExtension
+                x:Key="VerifySpeedPointSerialFillColor"
+                Colors="#FF8000D2,#808000D2,#008000D2"
+                StrokeWidth="5"
+                StartPoint="0.5,0"
+                EndPoint="0.5,1" />
+            <lvc:SolidColorPaintExtension
+                x:Key="VerifySpeedPointSerialStrokeColor"
+                StrokeWidth="5"
+                Color="#FF8000D2" />
+
+            <!--  解压速度：翠绿 → 半透翠绿 → 全透明  -->
+            <lvc:LinearGradientPaintExtension
+                x:Key="DecompressSpeedPointSerialFillColor"
+                Colors="#FF3CB700,#803CB700,#003CB700"
+                StrokeWidth="5"
+                StartPoint="0.5,0"
+                EndPoint="0.5,1" />
+            <lvc:SolidColorPaintExtension
+                x:Key="DecompressSpeedPointSerialStrokeColor"
+                StrokeWidth="10"
+                Color="#FF3CB700" />
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+
+</ResourceDictionary>

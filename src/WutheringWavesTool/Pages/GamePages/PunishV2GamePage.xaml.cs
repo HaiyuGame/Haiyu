@@ -33,6 +33,7 @@ public sealed partial class PunishV2GamePage : Page,IPage
     protected override void OnNavigatedFrom(NavigationEventArgs e)
     {
         this.Bindings.StopTracking();
+        this.ViewModel.Dispose();
         base.OnNavigatedTo(e);
         GC.Collect();
     }

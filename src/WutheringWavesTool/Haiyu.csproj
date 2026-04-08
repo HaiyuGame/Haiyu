@@ -25,15 +25,19 @@
     <Compile Remove="AppPackages\**" />
     <Compile Remove="BundleArtifacts\**" />
     <Compile Remove="Strings\**" />
+    <Compile Remove="Themes\**" />
     <EmbeddedResource Remove="AppPackages\**" />
     <EmbeddedResource Remove="BundleArtifacts\**" />
     <EmbeddedResource Remove="Strings\**" />
+    <EmbeddedResource Remove="Themes\**" />
     <None Remove="AppPackages\**" />
     <None Remove="BundleArtifacts\**" />
     <None Remove="Strings\**" />
+    <None Remove="Themes\**" />
     <Page Remove="AppPackages\**" />
     <Page Remove="BundleArtifacts\**" />
     <Page Remove="Strings\**" />
+    <Page Remove="Themes\**" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="Assets\Cursor\CursorResource.res" />
@@ -65,6 +69,8 @@
     <PackageReference Include="CommunityToolkit.WinUI.Extensions" Version="8.2.251219" />
     <PackageReference Include="CommunityToolkit.WinUI.Helpers" Version="8.2.251219" />
     <PackageReference Include="CommunityToolkit.WinUI.Media" Version="8.2.251219" />
+    <PackageReference Include="LiveChartsCore" Version="2.0.0" />
+    <PackageReference Include="LiveChartsCore.SkiaSharpView" Version="2.0.0" />
     <PackageReference Include="LiveChartsCore.SkiaSharpView.WinUI" Version="2.0.0" />
     <PackageReference Include="MemoryPack" Version="1.21.4" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.1" />
@@ -214,6 +220,9 @@
     <None Update="Assets\HpatchzResource\hpatchz.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <Page Update="Controls\Colors\GamePathChartColor.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Pages\Dialogs\GameResourceDialogV2.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -274,7 +283,6 @@
     <Folder Include="Assets\Languages\" />
     <Folder Include="Common\Plugins\" />
     <Folder Include="Pages\ColorGame\" />
-    <Folder Include="Themes\" />
   </ItemGroup>
   <PropertyGroup Label="Globals" />
   <!--
@@ -319,6 +327,7 @@
 	  <None Remove="Assets\appLogo.ico" />
 	  <None Remove="Assets\appLogo.png" />
 	  <None Remove="Assets\background.png" />
+	  <None Remove="Controls\Colors\GamePathChartColor.xaml" />
 	  <None Remove="Controls\Styles\CardSwitcher.xaml" />
 	  <None Remove="Controls\Styles\Colors.xaml" />
 	  <None Remove="Controls\Styles\HeaderTileCard.xaml" />
@@ -336,5 +345,8 @@
 	  <None Remove="Pages\GamePages\WavesV2GamePage.xaml" />
 	  <None Remove="Pages\PluginPage.xaml" />
 	  <None Remove="Pages\XboxDisplayPage.xaml" />
+	</ItemGroup>
+	<ItemGroup>
+	  <PRIResource Remove="Themes\**" />
 	</ItemGroup>
 </Project>
