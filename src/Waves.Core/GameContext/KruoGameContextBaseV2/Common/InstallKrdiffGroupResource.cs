@@ -136,6 +136,7 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
                                     FilePath = s.Item2,
                                     FileCurrentSize = (long)s.Item3.PatchedCurrentBytes,
                                     FileTotalSize = (long)s.Item3.PatchTotalBytes,
+                                    DiffSpeed=s.Item3.SpeedValue
                                 }
                             );
                             ProgressValue = s.Item3.TotalBytesProgress;

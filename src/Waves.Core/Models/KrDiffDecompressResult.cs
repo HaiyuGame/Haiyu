@@ -74,5 +74,7 @@ public struct KrDiffDecompressResult
     /// </summary>
     public double TotalBytesProgress =>
         PatchTotalBytes == 0 ? 0 : (double)PatchedCurrentBytes / PatchTotalBytes * 100;
+
+    public double SpeedValue { get; internal set; }
     #endregion
 }

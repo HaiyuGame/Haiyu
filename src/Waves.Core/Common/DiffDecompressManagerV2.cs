@@ -3,18 +3,36 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using Waves.Core.Models;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Waves.Core.Common;
 
-/// <summary>
-/// 解压方法v2版本，支持全部共享数据，不包括标准输入输出
-/// </summary>
 public class DiffDecompressManagerV2
 {
+    [StructLayout(LayoutKind.Sequential)]
+    private struct IO_COUNTERS
+    {
+        public ulong ReadOperationCount;
+        public ulong WriteOperationCount;
+        public ulong OtherOperationCount;
+        public ulong ReadTransferCount;
+        public ulong WriteTransferCount;
+        public ulong OtherTransferCount;
+    }
+
+    [DllImport("kernel32.dll")]
+    private static extern bool GetProcessIoCounters(IntPtr ProcessHandle, out IO_COUNTERS IoCounters);
+
     private string? sharedKey;
     private SharedMemory? _sharedMemory;
     private Process? _process;
-    ManualResetEventSlim? _processExited;
+    private ManualResetEventSlim? _processExited;
+
+    private ulong _lastTotalBytes;
+    private DateTime _lastCheckTime;
+
     public DiffDecompressManagerV2(string oldFolder, string newFolder, string diffFile)
     {
         OldFolder = oldFolder;
@@ -44,22 +62,46 @@ public class DiffDecompressManagerV2
                 UseShellExecute = false,
                 CreateNoWindow = true,
             };
-            Process _process = new Process();
+
             _process = new Process { StartInfo = processStartInfo, EnableRaisingEvents = true };
             _process.Exited += PatchProgressExitedEventHandler;
+
             if (_process.Start())
             {
+                GetProcessIoCounters(_process.Handle, out IO_COUNTERS initIo);
+                _lastTotalBytes = initIo.ReadTransferCount + initIo.WriteTransferCount;
+                _lastCheckTime = DateTime.Now;
+
                 while (!_process.HasExited)
                 {
                     await Task.Delay(1000);
                     var values = GetProgress(TimeSpan.FromSeconds(1));
                     if (values == null)
                         continue;
-                    if (values == null)
-                        continue;
-                    progress.Report(values.Value);
+
+                    if (GetProcessIoCounters(_process.Handle, out IO_COUNTERS io))
+                    {
+                        var now = DateTime.Now;
+                        double sec = (now - _lastCheckTime).TotalSeconds;
+                        if (sec <= 0)
+                        {
+                            continue;
+                        }
+
+                        ulong currentTotal = io.ReadTransferCount + io.WriteTransferCount;
+                        ulong delta = currentTotal - _lastTotalBytes;
+
+                        double speedBytesPerSecond = delta / sec;
+                        var result = values.Value;
+                        result.SpeedValue = speedBytesPerSecond;
+
+                        _lastTotalBytes = currentTotal;
+                        _lastCheckTime = now;
+                        progress.Report(result);
+                    }
                 }
             }
+
             await _process.WaitForExitAsync();
             return _process.ExitCode;
         }
@@ -74,9 +116,7 @@ public class DiffDecompressManagerV2
             _process = null;
             _processExited?.Dispose();
             _sharedMemory?.Dispose();
-
         }
-
     }
 
     KrDiffDecompressResult? GetProgress(TimeSpan? timeout = null)

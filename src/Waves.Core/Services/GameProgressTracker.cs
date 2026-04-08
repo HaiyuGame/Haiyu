@@ -113,6 +113,7 @@ public sealed class GameProgressTracker : IAsyncDisposable
 
     public string StepName { get; private set; }
     public bool IsCancel { get; private set; }
+    public double DiffSpeed { get; set; }
 
     private SynchronizationContext? _syncContext;
     private PeriodicTimer? _timer;
@@ -188,6 +189,8 @@ public sealed class GameProgressTracker : IAsyncDisposable
             args.TotalSize > 0
             || args.Type == GameContextActionType.Download
             || args.Type == GameContextActionType.Verify
+            || args.Type == GameContextActionType.Decompress
+            || args.Type == GameContextActionType.ZipDecompress
         )
         {
             CurrentBytes = args.CurrentSize;
@@ -197,6 +200,7 @@ public sealed class GameProgressTracker : IAsyncDisposable
             DownloadSpeed = args.DownloadSpeed;
             VerifySpeed = args.VerifySpeed;
             ZipSpeed = args.ZipSpeed;
+            this.DiffSpeed = args.DiffSpeed;
             this.IsCancel = args.IsCancel;
         }
         IsActive = args.IsAction;

@@ -132,7 +132,7 @@ public static class UnZipTask
                 if (accumulatedBytes > 0 && !isBreak)
                 {
                     progress?.Report((
-                        GameContextActionType.Decompress,
+                        GameContextActionType.ZipDecompress,
                         true,
                         accumulatedBytes,
                         fileFullPath,
