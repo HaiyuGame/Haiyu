@@ -69,9 +69,10 @@ partial class KuroGameContextViewModelV2
         var now = DateTime.Now;
         return
         [
-            now.AddSeconds(-30).Ticks,
-            now.AddSeconds(-20).Ticks,
             now.AddSeconds(-10).Ticks,
+            now.AddSeconds(-7).Ticks,
+            now.AddSeconds(-5).Ticks,
+            now.AddSeconds(-3).Ticks,
             now.AddSeconds(-2).Ticks,
             now.AddSeconds(-1).Ticks,
             now.Ticks

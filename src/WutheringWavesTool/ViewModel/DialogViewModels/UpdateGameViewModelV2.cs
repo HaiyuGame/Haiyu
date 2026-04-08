@@ -182,7 +182,7 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
             return;
         }
         var preious = await GameContext.GetPatchGameResourceAsync(cdnUrl.Url+patche.IndexFile);
-        if(preious != null && preious.ApplyTypes == null && preious.Resource != null)
+        if(preious != null && preious.ApplyTypes == null && preious.Resource != null  && launcher.ResourceDefault.Config.PatchConfig.IndexOf(patche) != launcher.ResourceDefault.Config.PatchConfig.Count-1)
         {
             LegacyMessageBox.ShowInformation(ownedHwnd, "警告：本地版本过于老旧，无法更新\r\n解决方案：建议进行 修复游戏 或 卸载之后重新下载\r\n原因说明：检索库洛服务器中不包含热补丁文件，无法进行增量更新","警告");
             return;

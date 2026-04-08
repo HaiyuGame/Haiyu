@@ -13,7 +13,7 @@ namespace Haiyu.ViewModel.GameViewModels;
 
 public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
 {
-    private const int ChartPointKeepSeconds = 50;
+    private const int ChartPointKeepSeconds = 10;
     private const int ChartMaxPoints = 300;
     private static readonly TimeSpan ChartPointInterval = TimeSpan.FromMilliseconds(200);
     private static readonly TimeSpan SeparatorRefreshInterval = TimeSpan.FromMilliseconds(500);
