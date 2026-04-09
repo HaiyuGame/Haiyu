@@ -25,6 +25,7 @@
     NavigationCacheMode="Disabled"
     mc:Ignorable="d">
 
+
     <Page.Resources>
         <convert:StepOKColorConverter x:Key="StepOKColorConverter" />
         <convert:StepOKVisiblityConverter x:Key="StepOKVisiblityConverter" />
@@ -126,11 +127,13 @@
                             <RowDefinition Height="auto" />
                             <RowDefinition Height="auto" />
                         </Grid.RowDefinitions>
+
                         <lvc:CartesianChart
                             Margin="10,5,10,0"
                             AutoUpdateEnabled="True"
                             Background="Transparent"
                             SyncContext="{x:Bind ViewModel.Sync, Mode=OneWay}">
+
                             <lvc:CartesianChart.Series>
                                 <lvc:SeriesCollection>
                                     <lvc:XamlLineSeries
@@ -478,29 +481,24 @@
                 </Grid>
 
                 <Grid
-                    Grid.Row="1"
-                    Height="80"
-                    Margin="3"
                     Padding="5"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Bottom"
-                    Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
-                    CornerRadius="3"
+                    Background="{ThemeResource AcrylicInAppFillColorDefaultBrush}"
+                    CornerRadius="4"
                     Visibility="{x:Bind ViewModel.GameLauncherBthVisibility, Mode=OneWay}">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="140" />
+                        <ColumnDefinition />
                         <ColumnDefinition Width="auto" />
                     </Grid.ColumnDefinitions>
-
                     <Button
-                        Padding="0"
+                        Height="60"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
+                        Background="{ThemeResource SystemFillColorSuccess}"
                         BorderThickness="0"
                         Command="{x:Bind ViewModel.UpdateGameCommand}"
-                        CornerRadius="15"
-                        IsEnabled="{x:Bind ViewModel.EnableStartGameBth, Mode=OneWay}"
-                        Style="{ThemeResource GamePageButtonStyle}">
+                        CornerRadius="4"
+                        Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                        IsEnabled="{x:Bind ViewModel.EnableStartGameBth, Mode=OneWay}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition />
@@ -536,13 +534,11 @@
                         Grid.Column="1"
                         Width="60"
                         Margin="3,0,0,0"
-                        Padding="0"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
+                        Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
                         BorderThickness="0"
-                        CornerRadius="15"
-                        IsEnabled="{x:Bind ViewModel.EnableStartGameBth, Mode=OneWay}"
-                        Style="{ThemeResource GamePageButtonStyle}">
+                        IsEnabled="{x:Bind ViewModel.EnableStartGameBth, Mode=OneWay}">
                         <FontIcon
                             FontFamily="Segoe Fluent Icons"
                             FontSize="18"
@@ -550,6 +546,10 @@
 
                         <Button.Flyout>
                             <MenuFlyout Placement="Bottom">
+                                <ToggleMenuFlyoutItem
+                                    IsChecked="{x:Bind ViewModel.IsDx11Launcher, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    Text="DX 11 启动"
+                                    ToolTipService.ToolTip="切换启动模式" />
                                 <MenuFlyoutItem
                                     Command="{x:Bind ViewModel.RepirGameCommand}"
                                     Text="修复游戏"
@@ -562,14 +562,6 @@
                                 <MenuFlyoutItem Command="{x:Bind ViewModel.ShowGameResourceCommand}" Text="游戏资源管理">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xEF19;" />
-                                    </MenuFlyoutItem.Icon>
-                                </MenuFlyoutItem>
-                                <MenuFlyoutItem
-                                    Command="{x:Bind ViewModel.ShowGameLauncherCacheCommand}"
-                                    Text="游戏登陆管理"
-                                    ToolTipService.ToolTip="只包含已经登陆游戏的所有账号信息">
-                                    <MenuFlyoutItem.Icon>
-                                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE912;" />
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
                                 <MenuFlyoutSeparator />

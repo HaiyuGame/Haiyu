@@ -18,8 +18,9 @@ public sealed partial class WavesV2GamePage : Page,IPage
     {
         this.Bindings.StopTracking();
         this.ViewModel.Dispose();
-        base.OnNavigatedTo(e);
+        this.ViewModel = null;
         GC.Collect();
+        base.OnNavigatedTo(e);
     }
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {

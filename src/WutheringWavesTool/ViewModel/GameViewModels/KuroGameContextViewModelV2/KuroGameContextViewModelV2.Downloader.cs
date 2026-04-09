@@ -50,27 +50,23 @@ partial class KuroGameContextViewModelV2
 
 
     #region 进度图表
-
-    #endregion
     [ObservableProperty]
-    public partial List<DateTimePoint> DownloadSpeedPoints { get; set; } = new();
+    public partial ObservableCollection<DateTimePoint> DownloadSpeedPoints { get; set; } = new();
     [ObservableProperty]
-    public partial List<DateTimePoint> VerifySpeedPoints { get; set; } = new();
+    public partial ObservableCollection<DateTimePoint> VerifySpeedPoints { get; set; } = new();
     [ObservableProperty]
-    public partial List<DateTimePoint> DecompressSpeedPoints { get; set; } = new();
+    public partial ObservableCollection<DateTimePoint> DecompressSpeedPoints { get; set; } = new();
 
     public object Sync { get; } = new object();
 
     [ObservableProperty]
-    public partial List<double> DownloadSpeedSeparators { get; set; } = new();
+    public partial ObservableCollection<double> DownloadSpeedSeparators { get; set; } = new();
 
-    private static List<double> GetSeparators()
+    private static ObservableCollection<double> GetSeparators()
     {
         var now = DateTime.Now;
         return
         [
-            now.AddSeconds(-10).Ticks,
-            now.AddSeconds(-7).Ticks,
             now.AddSeconds(-5).Ticks,
             now.AddSeconds(-3).Ticks,
             now.AddSeconds(-2).Ticks,
@@ -83,7 +79,7 @@ partial class KuroGameContextViewModelV2
     [ObservableProperty]
     public partial Func<DateTime, string> LabelsFormatter { get; set; } = Formatter;
 
-    public Func<ChartPoint, string> DataLabelFormatter => (point) => 
+    public Func<ChartPoint, string> DataLabelFormatter => (point) =>
             $"{point.Coordinate.PrimaryValue:N0}mb/s";
 
     private static string Formatter(DateTime date)
@@ -91,9 +87,11 @@ partial class KuroGameContextViewModelV2
         var secsAgo = (DateTime.Now - date).TotalSeconds;
 
         return secsAgo < 1
-            ? "now"
+            ? "现在"
             : $"{secsAgo:N0}秒前";
     }
+    #endregion
+
     #region 通知
 
     #endregion
