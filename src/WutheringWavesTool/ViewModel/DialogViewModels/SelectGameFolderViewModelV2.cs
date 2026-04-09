@@ -1,4 +1,6 @@
-﻿using Haiyu.Services.DialogServices;
+﻿using System.Text.RegularExpressions;
+using Haiyu.Services.DialogServices;
+using Microsoft.UI.Xaml.Shapes;
 
 namespace Haiyu.ViewModel.DialogViewModels;
 
@@ -30,9 +32,15 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
     public partial ObservableCollection<LayerData> BarValues { get; set; }
 
     [ObservableProperty]
+    public partial ObservableCollection<string> Versions { get; set; } = new();
+
+    [ObservableProperty]
+    public partial string SelectedVersion { get; set; }
+
+    [ObservableProperty]
     public partial double MaxValue { get; set; }
     public IPickersService PickersService { get; }
-    public GameLauncherSource Launcher { get; internal set; }
+    public GameLauncherSource? Launcher { get; internal set; }
 
     [RelayCommand]
     async Task SelectGameProgram()
@@ -46,11 +54,11 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
             return;
         }
         this.ExePath = exe.Path;
-        var folderPath = Path.GetDirectoryName(ExePath);
+        var folderPath = System.IO.Path.GetDirectoryName(ExePath);
         var directoryInfo = new DirectoryInfo(folderPath);
         var folderSizeBytes = await CalculateFolderSizeAsync(directoryInfo);
         var folderSizeGB = BytesToGigabytes(folderSizeBytes);
-        var rootPath = Path.GetPathRoot(ExePath);
+        var rootPath = System.IO.Path.GetPathRoot(ExePath);
         var driveInfo = GetDriveInfo(rootPath);
 
         if (driveInfo == null)
@@ -99,9 +107,67 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
         this.DialogManager.CloseDialog();
     }
 
+    [RelayCommand]
+    async Task Loaded()
+    {
+        Launcher = await this.GameContext.GetGameLauncherSourceAsync(token: this.CTS.Token);
+        if (Launcher == null)
+        {
+            return;
+        }
+        var configs = Launcher.ResourceDefault.Config.PatchConfig;
+        var versions = new List<string>();
+        foreach (var item in configs)
+        {
+            string pattern = @"\d+(?:\.\d+)+";
+
+            // 提取所有匹配结果
+            MatchCollection matches = Regex.Matches(item.IndexFile, pattern);
+            var result = matches.Select(x => x.Value).Distinct().ToList();
+            if (result.Count > 1)
+                versions.Add(result[1]);
+        }
+        Versions = versions.Reverse<string>().ToObservableCollection();
+        Versions.Insert(0, Launcher.ResourceDefault.Version);
+        SelectedVersion = Versions[0];
+    }
+
     partial void OnIsVerifyChanged(bool value)
     {
         this.StartVerifyCommand.NotifyCanExecuteChanged();
+    }
+
+    [RelayCommand]
+    async Task SelectVersion()
+    {
+        var folder = System.IO.Path.GetDirectoryName(this.ExePath);
+        if (
+            string.IsNullOrWhiteSpace(this.SelectedVersion)
+            || string.IsNullOrWhiteSpace(this.ExePath)
+            || string.IsNullOrWhiteSpace(folder)
+        )
+            return;
+        await this.GameContext.GameLocalConfig.SaveConfigAsync(
+                GameLocalSettingName.LocalGameVersion,
+                SelectedVersion
+            );
+        await this.GameContext.GameLocalConfig.SaveConfigAsync(
+                GameLocalSettingName.GameLauncherBassFolder,
+                folder
+            );
+        await this.GameContext.GameLocalConfig.SaveConfigAsync(
+                GameLocalSettingName.LocalGameUpdateing,
+                "False"
+            );
+        await this.GameContext.GameLocalConfig.SaveConfigAsync(
+                GameLocalSettingName.GameLauncherBassProgram,
+                ExePath
+            );
+        this.GameContext.GameEventPublisher.Publish(new GameContextOutputArgs()
+        {
+            Type = Waves.Core.Models.Enums.GameContextActionType.None
+        });
+        this.Close();
     }
 
     private async Task<long> CalculateFolderSizeAsync(DirectoryInfo directory)
