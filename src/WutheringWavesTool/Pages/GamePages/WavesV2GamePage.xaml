@@ -132,6 +132,7 @@
                             AutoUpdateEnabled="True"
                             Background="Transparent"
                             SyncContext="{x:Bind ViewModel.Sync, Mode=OneWay}">
+
                             <lvc:CartesianChart.Series>
                                 <lvc:SeriesCollection>
                                     <lvc:XamlLineSeries

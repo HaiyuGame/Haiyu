@@ -445,7 +445,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
     }
 
     private static void TrimChartPoints(
-        ObservableCollection<LiveChartsCore.Defaults.DateTimePoint> points,
+        IList<LiveChartsCore.Defaults.DateTimePoint> points,
         DateTime now
     )
     {
@@ -461,7 +461,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
     }
 
     private static void TryAddChartPoint(
-        ObservableCollection<LiveChartsCore.Defaults.DateTimePoint> points,
+        IList<LiveChartsCore.Defaults.DateTimePoint> points,
         DateTime now,
         ref DateTime lastPointTime,
         double value
@@ -627,6 +627,10 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                 await ShowCardAsync(showCard);
                 await LoadAfter();
             }
+            this.DecompressSpeedPoints.Clear();
+            this.DownloadSpeedPoints.Clear();
+            this.DecompressSpeedPoints.Clear();
+            this.DownloadSpeedSeparators.Clear();
             ProcessAction = false;
         }
         catch (Exception ex)

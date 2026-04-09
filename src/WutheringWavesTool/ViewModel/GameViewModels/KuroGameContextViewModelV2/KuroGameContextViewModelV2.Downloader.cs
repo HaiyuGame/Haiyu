@@ -53,18 +53,18 @@ partial class KuroGameContextViewModelV2
 
     #endregion
     [ObservableProperty]
-    public partial ObservableCollection<DateTimePoint> DownloadSpeedPoints { get; set; } = new();
+    public partial List<DateTimePoint> DownloadSpeedPoints { get; set; } = new();
     [ObservableProperty]
-    public partial ObservableCollection<DateTimePoint> VerifySpeedPoints { get; set; } = new();
+    public partial List<DateTimePoint> VerifySpeedPoints { get; set; } = new();
     [ObservableProperty]
-    public partial ObservableCollection<DateTimePoint> DecompressSpeedPoints { get; set; } = new();
+    public partial List<DateTimePoint> DecompressSpeedPoints { get; set; } = new();
 
     public object Sync { get; } = new object();
 
     [ObservableProperty]
-    public partial ObservableCollection<double> DownloadSpeedSeparators { get; set; }
+    public partial List<double> DownloadSpeedSeparators { get; set; } = new();
 
-    private static ObservableCollection<double> GetSeparators()
+    private static List<double> GetSeparators()
     {
         var now = DateTime.Now;
         return

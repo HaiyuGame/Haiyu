@@ -126,7 +126,6 @@
                             <RowDefinition Height="auto" />
                             <RowDefinition Height="auto" />
                         </Grid.RowDefinitions>
-
                         <lvc:CartesianChart
                             Margin="10,5,10,0"
                             AutoUpdateEnabled="True"

@@ -1,4 +1,5 @@
 ﻿using Haiyu.Helpers;
+using LiveChartsCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Windows.ApplicationModel.Resources;
 using Microsoft.Windows.AppLifecycle;
@@ -29,7 +30,6 @@ public partial class App : ClientApplication
             "Haiyu_Main"
         );
         mainInstance.Activated += MainInstance_Activated;
-        
     }
 
     private void MainInstance_Activated(object sender, AppActivationArguments e)
