@@ -491,17 +491,16 @@
                         <ColumnDefinition Width="140" />
                         <ColumnDefinition Width="auto" />
                     </Grid.ColumnDefinitions>
+
                     <Button
                         Padding="0"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
-                        Background="{ThemeResource SystemFillColorSuccess}"
                         BorderThickness="0"
                         Command="{x:Bind ViewModel.UpdateGameCommand}"
-                        CornerRadius="4"
-                        Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                        CornerRadius="15"
                         IsEnabled="{x:Bind ViewModel.EnableStartGameBth, Mode=OneWay}"
-                        Style="{ThemeResource AccentButtonStyle}">
+                        Style="{ThemeResource GamePageButtonStyle}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition />
@@ -537,10 +536,13 @@
                         Grid.Column="1"
                         Width="60"
                         Margin="3,0,0,0"
+                        Padding="0"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
                         BorderThickness="0"
-                        IsEnabled="{x:Bind ViewModel.EnableStartGameBth, Mode=OneWay}">
+                        CornerRadius="15"
+                        IsEnabled="{x:Bind ViewModel.EnableStartGameBth, Mode=OneWay}"
+                        Style="{ThemeResource GamePageButtonStyle}">
                         <FontIcon
                             FontFamily="Segoe Fluent Icons"
                             FontSize="18"

@@ -349,13 +349,6 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         this.MaxByteText = GameProgressTracker.FormatBytes(tracker.TotalBytes);
         var previousActiveType = this.CurrentActiveType;
         this.CurrentActiveType = args.Type;
-        if (
-            previousActiveType == Waves.Core.Models.Enums.GameContextActionType.Verify
-            && args.Type == Waves.Core.Models.Enums.GameContextActionType.Download
-        )
-        {
-            this.VerifySpeedPoints.Clear();
-        }
         var isPaused =
             status.IsPause
             || tracker.IsPaused

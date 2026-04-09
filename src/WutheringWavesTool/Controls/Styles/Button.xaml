@@ -3,6 +3,22 @@
     <ResourceDictionary.MergedDictionaries>
         <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
     </ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+            <SolidColorBrush x:Key="GameDirectoryButtonBackgroundBrush" Color="#FFF2F2F2" />
+            <SolidColorBrush x:Key="GameDirectoryButtonForegroundBrush" Color="#FF181818" />
+            <SolidColorBrush x:Key="GameDirectoryButtonBorderBrush" Color="#22000000" />
+            <SolidColorBrush x:Key="GameDirectoryButtonPointerOverBrush" Color="#FFFFFFFF" />
+            <SolidColorBrush x:Key="GameDirectoryButtonPressedBrush" Color="#FFE6E6E6" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+            <SolidColorBrush x:Key="GameDirectoryButtonBackgroundBrush" Color="#FF111111" />
+            <SolidColorBrush x:Key="GameDirectoryButtonForegroundBrush" Color="#FFF5F5F5" />
+            <SolidColorBrush x:Key="GameDirectoryButtonBorderBrush" Color="#33FFFFFF" />
+            <SolidColorBrush x:Key="GameDirectoryButtonPointerOverBrush" Color="#FF222222" />
+            <SolidColorBrush x:Key="GameDirectoryButtonPressedBrush" Color="#FF000000" />
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
     <StaticResource x:Key="TransparentDefaultForeground" ResourceKey="TextFillColorSecondaryBrush" />
     <StaticResource x:Key="TransparentPressedBackground" ResourceKey="CardBackgroundFillColorSecondaryBrush" />
     <StaticResource x:Key="TransparentPressedForeground" ResourceKey="TextFillColorTertiaryBrush" />
@@ -297,6 +313,99 @@
                             </VisualStateGroup>
                         </VisualStateManager.VisualStateGroups>
                     </ContentPresenter>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+
+    <Style x:Key="GamePageButtonStyle" TargetType="Button">
+        <Setter Property="Padding" Value="26,0" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{ThemeResource GameDirectoryButtonForegroundBrush}" />
+        <Setter Property="Background" Value="{ThemeResource GameDirectoryButtonBackgroundBrush}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid x:Name="Root">
+                        <Grid.RenderTransform>
+                            <TranslateTransform Y="0" />
+                        </Grid.RenderTransform>
+
+                        <Border
+                            x:Name="Surface"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="{TemplateBinding CornerRadius}">
+                            <Border.BorderBrush>
+                                <ThemeResource ResourceKey="GameDirectoryButtonBorderBrush" />
+                            </Border.BorderBrush>
+                            <Border.BorderThickness>1</Border.BorderThickness>
+                        </Border>
+
+                        <ContentPresenter
+                            x:Name="TextPresenter"
+                            Padding="{TemplateBinding Padding}"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Foreground="{TemplateBinding Foreground}" />
+
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal">
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="Root"
+                                            Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                                            To="0"
+                                            Duration="0:0:0.08" />
+                                    </Storyboard>
+                                    <VisualState.Setters>
+                                        <Setter Target="Surface.Background" Value="{ThemeResource GameDirectoryButtonBackgroundBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+
+                                <VisualState x:Name="PointerOver">
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="Root"
+                                            Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                                            To="0"
+                                            Duration="0:0:0.08" />
+                                    </Storyboard>
+                                    <VisualState.Setters>
+                                        <Setter Target="Surface.Background" Value="{ThemeResource GameDirectoryButtonPointerOverBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+
+                                <VisualState x:Name="Pressed">
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="Root"
+                                            Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                                            To="1"
+                                            Duration="0:0:0.06" />
+                                    </Storyboard>
+                                    <VisualState.Setters>
+                                        <Setter Target="Surface.Background" Value="{ThemeResource GameDirectoryButtonPressedBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+
+                                <VisualState x:Name="Disabled">
+                                    <Storyboard>
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="Root"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0.55"
+                                            Duration="0" />
+                                    </Storyboard>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                    </Grid>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
