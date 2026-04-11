@@ -3,6 +3,7 @@ using Haiyu.Services.DialogServices;
 using Microsoft.UI.Dispatching;
 using Waves.Core.GameContext.Contexts.PRG;
 using Waves.Core.GameContext.ContextsV2;
+using Waves.Core.GameContext.ContextsV2.Waves;
 using Waves.Core.Services;
 using Waves.Core.Settings;
 using TitleBar = Haiyu.Controls.TitleBar;
@@ -66,6 +67,10 @@ public class AppContext<T> : IAppContext<T>
             await Instance.Host.Services!.GetRequiredKeyedService<IGameContextV2>(nameof(PunishMainGameContextV2))
                 .InitAsync(); 
             await Instance.Host.Services!.GetRequiredKeyedService<IGameContextV2>(nameof(WavesMainGameContextV2))
+                .InitAsync();
+            await Instance.Host.Services!.GetRequiredKeyedService<IGameContextV2>(nameof(WavesBiliBiliGameContextV2))
+                .InitAsync();
+            await Instance.Host.Services!.GetRequiredKeyedService<IGameContextV2>(nameof(WavesGlobalGameContextV2))
                 .InitAsync();
             #endregion
             this.App = app;

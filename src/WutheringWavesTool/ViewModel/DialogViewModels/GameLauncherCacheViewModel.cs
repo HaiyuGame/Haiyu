@@ -11,7 +11,7 @@ public sealed partial class GameLauncherCacheViewModel : DialogViewModelBase
 {
     private GameLauncherCacheArgs _args;
 
-    public IGameContext GameContext { get; private set; }
+    public IGameContextV2 GameContext { get; private set; }
 
     [ObservableProperty]
     public partial ObservableCollection<KRSDKLauncherCacheWrapper> Items { get; private set; }
@@ -70,7 +70,7 @@ public sealed partial class GameLauncherCacheViewModel : DialogViewModelBase
         IsLoading = true;
         this._args = args;
         Items = [];
-        this.GameContext = Instance.Host.Services.GetRequiredKeyedService<IGameContext>(
+        this.GameContext = Instance.Host.Services.GetRequiredKeyedService<IGameContextV2>(
             args.GameContextName
         );
         var localSelect = await GameContext.GameLocalConfig.GetConfigAsync(

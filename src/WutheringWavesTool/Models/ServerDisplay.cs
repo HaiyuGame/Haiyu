@@ -1,5 +1,6 @@
 ﻿using Waves.Core.GameContext.Contexts.PRG;
 using Waves.Core.GameContext.ContextsV2;
+using Waves.Core.GameContext.ContextsV2.Waves;
 
 namespace Haiyu.Models;
 
@@ -84,7 +85,6 @@ public class ServerDisplay
             },
         ];
 
-
     public static ObservableCollection<ServerDisplay> GetWavesV2Games =>
         [
             new ServerDisplay()
@@ -93,6 +93,20 @@ public class ServerDisplay
                 Key = $"{nameof(WavesMainGameContextV2)}",
                 Tag = "Main",
                 ShowCard = true,
-            }
+            },
+            new ServerDisplay()
+            {
+                Display = "B服",
+                Key = $"{nameof(WavesBiliBiliGameContextV2)}",
+                Tag = "BiliBili",
+                ShowCard = false,
+            },
+            new ServerDisplay()
+            {
+                Display = "国际服",
+                Key = $"{nameof(WavesGlobalGameContextV2)}",
+                Tag = "Global",
+                ShowCard = true,
+            },
         ];
 }

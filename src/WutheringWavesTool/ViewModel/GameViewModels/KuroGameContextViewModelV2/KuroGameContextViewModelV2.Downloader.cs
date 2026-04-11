@@ -104,7 +104,6 @@ partial class KuroGameContextViewModelV2
         {
             if (await this.GameContext.ResumeDownloadAsync())
             {
-                this.BottomBarContent = "下载已恢复";
                 this.PauseIcon = "\uE769";
             }
         }
@@ -112,7 +111,6 @@ partial class KuroGameContextViewModelV2
         {
             if (await this.GameContext.PauseDownloadAsync())
             {
-                this.BottomBarContent = "下载已经暂停";
                 this.PauseIcon = "\uE768";
             }
         }

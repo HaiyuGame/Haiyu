@@ -8,6 +8,7 @@ using Waves.Api.Models;
 using Waves.Api.Models.Launcher;
 using Waves.Core.GameContext.Contexts;
 using Waves.Core.GameContext.Contexts.PRG;
+using Waves.Core.GameContext.ContextsV2.Waves;
 using Waves.Core.Models.CoreApi;
 using Waves.Core.Models.Downloader;
 using Waves.Core.Services;
@@ -29,6 +30,7 @@ namespace Waves.Core.GameContext
                     this.ContextName == nameof(WavesGlobalGameContext)
                     || this.ContextName == nameof(PunishGlobalGameContext)
                     || this.ContextName == nameof(PunishTwGameContext)
+                || this.ContextName == nameof(WavesGlobalGameContextV2)
                 )
                 {
                     url =
@@ -117,6 +119,7 @@ namespace Waves.Core.GameContext
                     this.ContextName == nameof(WavesGlobalGameContext)
                     || this.ContextName == nameof(PunishGlobalGameContext)
                     || this.ContextName == nameof(PunishTwGameContext)
+                || this.ContextName == nameof(WavesGlobalGameContextV2)
                 )
                 {
                     url =
@@ -150,6 +153,7 @@ namespace Waves.Core.GameContext
                 this.ContextName == nameof(WavesGlobalGameContext)
                 || this.ContextName == nameof(PunishGlobalGameContext)
                 || this.ContextName == nameof(PunishTwGameContext)
+                || this.ContextName == nameof(WavesGlobalGameContextV2)
             )
             {
                 url =
@@ -178,6 +182,7 @@ namespace Waves.Core.GameContext
                 this.ContextName == nameof(WavesGlobalGameContext)
                 || this.ContextName == nameof(PunishGlobalGameContext)
                 || this.ContextName == nameof(PunishTwGameContext)
+                || this.ContextName == nameof(WavesGlobalGameContextV2)
             )
             {
                 address = $"{KuroGameApiConfig.BaseAddress[1]}";

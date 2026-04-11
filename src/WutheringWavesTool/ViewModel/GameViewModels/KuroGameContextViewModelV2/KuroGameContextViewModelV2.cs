@@ -141,8 +141,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
             await this.CTS?.CancelAsync();
             this.CTS = null;
         }
-        GC.Collect();
-        await Task.Delay(500);
+        await Task.Delay(200);
         this.CTS = new CancellationTokenSource();
         if (GameContext != null)
         {
@@ -171,6 +170,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
             AppSettings.PunishAutoOpenContext = this.GameContext.ContextName;
         }
         await RefreshCoreAsync(showCard);
+        GC.Collect();
     }
 
     private async void ProgressState_OnProgressChanged(GameProgressTracker tracker)
@@ -219,7 +219,6 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                     ShowGameDownloadingBth(status);
                     this.MaxProgressValue = args.FileTotal;
                     this.CurrentProgressValue = args.CurrentFile;
-                    this.BottomBarContent = args.DeleteString;
                     PauseStartEnable = false;
                 }
 
@@ -227,7 +226,6 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                 {
                     ShowGameDownloadingBth(status);
                     PauseStartEnable = false;
-                    BottomBarContent = args.TipMessage;
                 }
             }
             else
@@ -360,12 +358,10 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
             if (isPaused)
             {
                 this.PauseIcon = "\uE768";
-                this.BottomBarContent = "下载已经暂停";
             }
             else
             {
                 this.PauseIcon = "\uE769";
-                this.BottomBarContent = BuildTrackerProgressSummary(tracker);
             }
             PauseStartEnable = true;
             TryAddChartPoint(
@@ -380,12 +376,10 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
             if (isPaused)
             {
                 this.PauseIcon = "\uE768";
-                this.BottomBarContent = "下载已经暂停";
             }
             else
             {
                 this.PauseIcon = "\uE769";
-                this.BottomBarContent = BuildTrackerProgressSummary(tracker);
             }
             TryAddChartPoint(
                 this.DownloadSpeedPoints,
@@ -401,8 +395,6 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         )
         {
             this.PauseIcon = "\uE769";
-            this.BottomBarContent =
-                $"[{args.CurrentDecompressCount}/{args.MaxDecompressValue}] 已解压:{Math.Round((double)args.CurrentSize / 1024 / 1024 / 1024, 2)}GB,剩余:{Math.Round((double)(args.TotalSize - args.CurrentSize) / 1024 / 1024 / 1024, 2)}GB";
             if (args.Type == GameContextActionType.Decompress) 
             {
                 var speedValue = Math.Round(tracker.DiffSpeed / 1_000_000d, 2);
@@ -664,7 +656,6 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                 if (bool.TryParse(doneDownload, out var done))
                 {
                     _buttonAction = ButtonActionType.InstallPreDownload;
-                    BottomBarContent = "游戏有更新";
                     LauncheContent = "安装更新";
                     DisplayVersion = localPredVersion;
                     EnableStartGameBth = true;
@@ -674,7 +665,6 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
             else
             {
                 _buttonAction = ButtonActionType.PrepareUpdate;
-                BottomBarContent = "游戏有更新";
                 LauncheContent = "更新游戏";
                 DisplayVersion = version;
                 EnableStartGameBth = true;
@@ -688,7 +678,6 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                 _buttonAction = ButtonActionType.InGame;
                 this.CurrentProgressValue = 0;
                 this.MaxProgressValue = 0;
-                BottomBarContent = "游戏正在进行";
                 LauncheContent = "正在运行";
                 EnableStartGameBth = false;
                 DisplayVersion = version;
@@ -803,8 +792,6 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         GameDownloadingBthVisibility = Visibility.Collapsed;
         GameLauncherBthVisibility = Visibility.Collapsed;
         PredCardVisibility = Visibility.Collapsed;
-        if (status.LasterArgs == null)
-            BottomBarContent = "游戏文件不存在";
     }
 
     private void ShowGameDownloadingBth(GameContextStatus status)
@@ -831,8 +818,6 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         GameDownloadingBthVisibility = Visibility.Collapsed;
         GameLauncherBthVisibility = Visibility.Collapsed;
         PredCardVisibility = Visibility.Collapsed;
-        if (status.LasterArgs == null)
-            BottomBarContent = "请点击右下角继续更新游戏";
     }
 
     [RelayCommand]

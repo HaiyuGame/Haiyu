@@ -1,7 +1,7 @@
 ﻿using Waves.Core.Contracts;
 using Waves.Core.GameContext.Contexts;
 using Waves.Core.GameContext.Contexts.PRG;
-using Waves.Core.GameContext.ContextsV2;
+using Waves.Core.GameContext.ContextsV2.Waves;
 using Waves.Core.Models.CoreApi;
 using Waves.Core.Services;
 
@@ -84,10 +84,22 @@ public static class GameContextFactory
             IsLimitSpeed = false,
         };
 
-    internal static ContextsV2.WavesMainGameContextV2 GetMainWavesGameContextV2() =>
-       new ContextsV2.WavesMainGameContextV2(KuroGameApiConfig.MainAPiConfig, nameof(ContextsV2.WavesMainGameContextV2))
+    internal static ContextsV2.Waves.WavesMainGameContextV2 GetMainWavesGameContextV2() =>
+       new ContextsV2.Waves.WavesMainGameContextV2(KuroGameApiConfig.MainAPiConfig, nameof(WavesMainGameContextV2))
        {
-           GamerConfigPath = GameContextFactory.GameBassPath + "\\MainWavesV2Config",
+           GamerConfigPath = GameContextFactory.GameBassPath + "\\MainConfig",
+           IsLimitSpeed = false,
+       }; 
+    internal static ContextsV2.Waves.WavesBiliBiliGameContextV2 GetBilibiliWavesGameContextV2() =>
+       new ContextsV2.Waves.WavesBiliBiliGameContextV2(KuroGameApiConfig.BilibiliConfig, nameof(WavesBiliBiliGameContextV2))
+       {
+           GamerConfigPath = GameContextFactory.GameBassPath + "\\BilibiliWavesV2Config",
+           IsLimitSpeed = false,
+       }; 
+    internal static ContextsV2.Waves.WavesGlobalGameContextV2 GetWavesGlobalGameContextV2() =>
+       new ContextsV2.Waves.WavesGlobalGameContextV2(KuroGameApiConfig.GlobalConfig, nameof(WavesGlobalGameContextV2))
+       {
+           GamerConfigPath = GameContextFactory.GameBassPath + "\\BilibiliWavesV2Config",
            IsLimitSpeed = false,
        };
     #endregion

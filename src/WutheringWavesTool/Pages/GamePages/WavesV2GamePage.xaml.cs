@@ -29,5 +29,6 @@ public sealed partial class WavesV2GamePage : Page,IPage
 
     private void Button_Click(object sender, RoutedEventArgs e)
     {
+        switcher.Switch();
     }
 }
