@@ -776,14 +776,18 @@
                                                 <Run Text="/" />
                                                 <Run FontSize="14" Text="{x:Bind ViewModel.Base.MaxEnergy, Mode=OneWay}" />
                                             </TextBlock>
-                                            <TextBlock
+                                            <StackPanel
                                                 Grid.Row="1"
                                                 Grid.Column="1"
-                                                Margin="4,0,0,0"
-                                                HorizontalAlignment="Left"
-                                                FontFamily="{ThemeResource DefaultFont}"
-                                                FontSize="12"
-                                                Text="{x:Bind ViewModel.Base.EnergyRecoverEndTime, Mode=OneWay}" />
+                                                Orientation="Horizontal">
+                                                <TextBlock
+                                                    Margin="4,0,0,0"
+                                                    HorizontalAlignment="Left"
+                                                    FontFamily="{ThemeResource DefaultFont}"
+                                                    FontSize="12"
+                                                    Text="{x:Bind ViewModel.Base.EnergyRecoverEndTime, Mode=OneWay}" />
+
+                                            </StackPanel>
                                         </StackPanel>
                                     </Grid>
                                     <Grid
@@ -803,17 +807,26 @@
                                             Height="30"
                                             Margin="15,0,0,0"
                                             Source="Assets/GameAssets/Waves/activity.png" />
-                                        <TextBlock
-                                            Grid.Column="1"
-                                            Margin="4,0,0,0"
-                                            HorizontalAlignment="Left"
-                                            VerticalAlignment="Center"
-                                            FontFamily="{ThemeResource DefaultFont}"
-                                            FontSize="16">
-                                            <Run Foreground="{ThemeResource AccentAAFillColorDefaultBrush}" Text="{x:Bind ViewModel.Base.Liveness, Mode=OneWay}" />
-                                            <Run Text="/" />
-                                            <Run Text="{x:Bind ViewModel.Base.LivenessMaxCount, Mode=OneWay}" />
-                                        </TextBlock>
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                            <TextBlock
+                                                Margin="4,0,0,0"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Center"
+                                                FontFamily="{ThemeResource DefaultFont}"
+                                                FontSize="16"
+                                                Visibility="{x:Bind ViewModel.Base.LivenessUnlock, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                <Run Foreground="{ThemeResource AccentAAFillColorDefaultBrush}" Text="{x:Bind ViewModel.Base.Liveness, Mode=OneWay}" />
+                                                <Run Text="/" />
+                                                <Run Text="{x:Bind ViewModel.Base.LivenessMaxCount, Mode=OneWay}" />
+                                            </TextBlock>
+                                            <FontIcon
+                                                VerticalAlignment="Center"
+                                                FontFamily="Segoe Fluent Icons"
+                                                FontSize="12"
+                                                Glyph="&#xE72E;"
+                                                Visibility="{x:Bind ViewModel.Base.LivenessUnlock, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}" />
+                                        </StackPanel>
+
                                     </Grid>
                                     <Grid
                                         Grid.Row="1"
@@ -894,15 +907,25 @@
                                             <Run Text="/" />
                                             <Run FontSize="12" Text="{x:Bind ViewModel.BattlePass.ExpLimit, Mode=OneWay}" />
                                         </TextBlock>
-                                        <TextBlock
+                                        <StackPanel
                                             Grid.Row="1"
                                             Grid.Column="1"
-                                            Margin="4,0,0,0"
-                                            HorizontalAlignment="Left"
-                                            FontFamily="{ThemeResource DefaultFont}">
-                                            <Run Text="Lv:" />
-                                            <Run Text="{x:Bind ViewModel.BattlePass.Level, Mode=OneWay}" />
-                                        </TextBlock>
+                                            Orientation="Horizontal">
+                                            <TextBlock
+                                                Margin="4,0,0,0"
+                                                HorizontalAlignment="Left"
+                                                FontFamily="{ThemeResource DefaultFont}"
+                                                Visibility="{x:Bind ViewModel.BattlePass.IsUnlock, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                <Run Text="Lv:" />
+                                                <Run Text="{x:Bind ViewModel.BattlePass.Level, Mode=OneWay}" />
+                                            </TextBlock>
+                                            <FontIcon
+                                                VerticalAlignment="Center"
+                                                FontFamily="Segoe Fluent Icons"
+                                                FontSize="12"
+                                                Glyph="&#xE72E;"
+                                                Visibility="{x:Bind ViewModel.BattlePass.IsUnlock, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}" />
+                                        </StackPanel>
                                     </Grid>
                                 </Grid>
 

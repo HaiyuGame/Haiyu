@@ -1,13 +1,13 @@
-﻿using System.Text.Json.Serialization;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System.Text.Json.Serialization;
+using System.Timers;
 using Waves.Core.Contracts;
 using Waves.Core.Models.Enums;
 
 namespace Waves.Core.Models;
 
-
 public class PunishQueryPlayerItem : ILocalGamerPlayer
 {
-
     [JsonPropertyName("playerId")]
     public int PlayerId
     {
@@ -34,71 +34,212 @@ public class PunishQueryPlayerItem : ILocalGamerPlayer
     public GameType Type { get; set; } = GameType.Punish;
 
     [JsonIgnore]
-    public string ServerName { get;  set; }
+    public string ServerName { get; set; }
     public string Id { get; set; }
 }
 
-
-public class PunishLocalGameRoleItem : ILocalGameRole
+public partial class PunishLocalGameRoleItem : ObservableObject, ILocalGameRole
 {
     [JsonPropertyName("roleId")]
-    public int Id { get; set; }
+    [ObservableProperty]
+    public partial int RoleId { get; set; }
 
     [JsonPropertyName("playerName")]
-    public string PlayerName { get; set; }
+    [ObservableProperty]
+    public partial string PlayerName { get; set; }
 
     [JsonPropertyName("playerLevel")]
-    public int PlayerLevel { get; set; }
+    [ObservableProperty]
+    public partial int PlayerLevel { get; set; }
 
     [JsonPropertyName("playerHonorLevel")]
-    public int PlayerHonorLevel { get; set; }
+    [ObservableProperty]
+    public partial int PlayerHonorLevel { get; set; }
 
     [JsonPropertyName("actionPoint")]
-    public int ActionPoint { get; set; }
+    [ObservableProperty]
+    public partial int ActionPoint { get; set; }
 
     [JsonPropertyName("actionPointTotal")]
-    public int ActionPointTotal { get; set; }
+    [ObservableProperty]
+    public partial int ActionPointTotal { get; set; }
 
     [JsonPropertyName("actionPointFullTime")]
-    public int ActionPointFullTime { get; set; }
+    [ObservableProperty]
+    public partial int ActionPointFullTime { get; set; }
 
     [JsonPropertyName("actionPointNextExpiredTime")]
-    public int ActionPointNextExpiredTime { get; set; }
+    [ObservableProperty]
+    public partial int ActionPointNextExpiredTime { get; set; }
+
+
+    [JsonIgnore]
+    [ObservableProperty]
+    public partial string ActionPointNextExpiredEndTime { get; set; }
 
     [JsonPropertyName("dormQuestUnlocked")]
-    public bool DormQuestUnlocked { get; set; }
+    [ObservableProperty]
+    public partial bool DormQuestUnlocked { get; set; }
+
+    [JsonPropertyName("dormQuestAchievedCount")]
+    [ObservableProperty]
+    public partial int DormQuestAchievedCount { get; set; }
 
     [JsonPropertyName("activenessUnlocked")]
-    public bool ActivenessUnlocked { get; set; }
+    [ObservableProperty]
+    public partial bool ActivenessUnlocked { get; set; }
+
+    [JsonPropertyName("activeness")]
+    [ObservableProperty]
+    public partial int Activeness { get; set; }
+
+    [JsonPropertyName("activenessTotal")]
+    public int ActivenessTotal { get; set; }
 
     [JsonPropertyName("bossSingleStatus")]
-    public int BossSingleStatus { get; set; }
+    [ObservableProperty]
+    public partial int BossSingleStatus { get; set; }
 
     [JsonPropertyName("bossSingleUnlocked")]
-    public bool BossSingleUnlocked { get; set; }
+    [ObservableProperty]
+    public partial bool BossSingleUnlocked { get; set; }
+
+    [JsonPropertyName("bossSingleRewardCount")]
+    public int BossSingleRewardCount { get; set; }
+
+    [JsonPropertyName("bossSingleRewardCountTotal")]
+    [ObservableProperty]
+    public partial int BossSingleRewardCountTotal { get; set; }
+
+    [JsonPropertyName("bossSingleLevelTypeSelected")]
+    [ObservableProperty]
+    public partial bool BossSingleLevelTypeSelected { get; set; }
+
+    [JsonPropertyName("bossSingleEndTime")]
+    [ObservableProperty]
+    public partial int BossSingleEndTime { get; set; }
 
     [JsonPropertyName("arenaStatus")]
-    public int ArenaStatus { get; set; }
+    [ObservableProperty]
+    public partial int ArenaStatus { get; set; }
 
     [JsonPropertyName("arenaUnlocked")]
-    public bool ArenaUnlocked { get; set; }
+    [ObservableProperty]
+    public partial bool ArenaUnlocked { get; set; }
+
+    [JsonPropertyName("arenaRewardCount")]
+    [ObservableProperty]
+    public partial int ArenaRewardCount { get; set; }
+
+    [JsonPropertyName("arenaRewardCountTotal")]
+    [ObservableProperty]
+    public partial int ArenaRewardCountTotal { get; set; }
+
+    [JsonPropertyName("arenaFightStartTime")]
+    [ObservableProperty]
+    public partial int ArenaFightStartTime { get; set; }
+
+    [JsonPropertyName("arenaEndTime")]
+    [ObservableProperty]
+    public partial int ArenaEndTime { get; set; }
 
     [JsonPropertyName("transfiniteStatus")]
-    public int TransfiniteStatus { get; set; }
+    [ObservableProperty]
+    public partial int TransfiniteStatus { get; set; }
 
     [JsonPropertyName("transfiniteUnlocked")]
-    public bool TransfiniteUnlocked { get; set; }
+    [ObservableProperty]
+    public partial bool TransfiniteUnlocked { get; set; }
 
     [JsonPropertyName("strongholdStatus")]
-    public int StrongholdStatus { get; set; }
+    [ObservableProperty]
+    public partial int StrongholdStatus { get; set; }
 
     [JsonPropertyName("strongholdUnlocked")]
-    public bool StrongholdUnlocked { get; set; }
+    [ObservableProperty]
+    public partial bool StrongholdUnlocked { get; set; }
 
     [JsonPropertyName("serverTimezone")]
-    public int ServerTimezone { get; set; }
+    [ObservableProperty]
+    public partial int ServerTimezone { get; set; }
+
+    [JsonIgnore]
+    [ObservableProperty]
+    public partial string ServerName { get; set; }
+
+    [JsonIgnore]
     public GameType Type { get; set; }
 
     [JsonIgnore]
-    public string ServerName { get; set; }
+    [ObservableProperty]
+    public partial string BossSingleEndtimeText { get;  set; }
+
+    [JsonIgnore]
+    [ObservableProperty]
+    public partial string ArenaEndTimeText { get;  set; }
+
+    partial void OnActionPointNextExpiredTimeChanged(int value)
+    {
+        if (value == 0)
+        {
+            this.ActionPointNextExpiredEndTime = "已充满";
+        }
+        else
+        {
+            var time = DateTimeOffset.FromUnixTimeMilliseconds(value).ToLocalTime().DateTime;
+            if (time > DateTime.Now)
+            {
+                var dateTimeOffset = time - DateTime.Now;
+                this.ActionPointNextExpiredEndTime =
+                    $"{dateTimeOffset.Hours}:{dateTimeOffset.Minutes}:{dateTimeOffset.Seconds}";
+                return;
+            }
+            this.ActionPointNextExpiredEndTime = "已充满";
+        }
+    }
+
+    partial void OnBossSingleEndTimeChanged(int value)
+    {
+        if (value == 0)
+        {
+            this.BossSingleEndtimeText = "已充满";
+        }
+        else
+        {
+            var time = DateTimeOffset.FromUnixTimeSeconds(value).ToLocalTime().DateTime;
+            if (time > DateTime.Now)
+            {
+                var dateTimeOffset = time - DateTime.Now;
+                this.BossSingleEndtimeText =
+                    $"{dateTimeOffset.Hours:D2}:{dateTimeOffset.Minutes:D2}:{dateTimeOffset.Seconds:D2}";
+                return;
+            }
+            this.BossSingleEndtimeText = "已充满";
+        }
+    }
+
+    partial void OnArenaEndTimeChanged(int value)
+    {
+        CalcelArenaTime();
+    }
+
+    partial void OnArenaFightStartTimeChanged(int value)
+    {
+        CalcelArenaTime();
+    }
+
+
+    void CalcelArenaTime()
+    {
+        if(ArenaEndTime == 0 || ArenaFightStartTime == 0)
+        {
+            return;
+        }
+        var starTime = DateTimeOffset.FromUnixTimeMilliseconds(ArenaFightStartTime).ToLocalTime().DateTime;
+        var endTime = DateTimeOffset.FromUnixTimeMilliseconds(ArenaEndTime).ToLocalTime().DateTime;
+        var dateTimeOffset = endTime - starTime;
+        this.ArenaEndTimeText =
+            $"{dateTimeOffset.Hours}:{dateTimeOffset.Minutes}:{dateTimeOffset.Seconds}";
+        return;
+    }
 }

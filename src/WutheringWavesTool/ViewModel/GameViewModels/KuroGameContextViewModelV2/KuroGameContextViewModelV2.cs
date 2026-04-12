@@ -52,12 +52,6 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         this.SelectServer = selectServer == null ? Servers[0] : selectServer;
     }
 
-    public static List<string> GetWavesServers() =>
-        [
-            nameof(WavesBiliBiliGameContext),
-            nameof(WavesGlobalGameContext),
-            nameof(WavesMainGameContext),
-        ];
 
     [ObservableProperty]
     public partial bool IsDx11Launcher { get; set; } = false;
@@ -910,6 +904,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                 DisposeAfter();
             }
             disposedValue = true;
+            base.Dispose();
         }
     }
 

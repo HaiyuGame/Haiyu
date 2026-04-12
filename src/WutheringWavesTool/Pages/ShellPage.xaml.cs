@@ -21,9 +21,7 @@ public sealed partial class ShellPage : Page
 
     private void HomeNavigationService_Navigated(object sender, NavigationEventArgs e)
     {
-        if (
-            e.SourcePageType == typeof(WavesGamePage)
-            || e.SourcePageType == typeof(PunishGamePage)
+        if ( e.SourcePageType == typeof(PunishGamePage)
             || e.SourcePageType == typeof(PunishV2GamePage)
             || e.SourcePageType == typeof(WavesV2GamePage)
         )

@@ -68,6 +68,12 @@ public sealed partial class ShellViewModel : ViewModelBase
     [ObservableProperty]
     public partial Visibility LoginBthVisibility { get; set; } = Visibility.Collapsed;
 
+    [RelayCommand]
+    public void ClearMemory()
+    {
+        GC.Collect();
+    }
+
     [ObservableProperty]
     public partial Visibility GamerRoleListsVisibility { get; set; } = Visibility.Collapsed;
 

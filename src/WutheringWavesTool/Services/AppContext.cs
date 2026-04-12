@@ -48,12 +48,6 @@ public class AppContext<T> : IAppContext<T>
                 await Instance.Host.Services.GetRequiredService<XBoxService>().StartAsync();
             }
             await Instance.Host.Services.GetRequiredService<IKuroClient>().InitAsync();
-            await Instance.Host.Services!.GetRequiredKeyedService<IGameContext>(nameof(WavesMainGameContext))
-                .InitAsync();
-            await Instance.Host.Services!.GetRequiredKeyedService<IGameContext>(nameof(WavesBiliBiliGameContext))
-                .InitAsync();
-            await Instance.Host.Services!.GetRequiredKeyedService<IGameContext>(nameof(WavesGlobalGameContext))
-                .InitAsync();
             await Instance.Host.Services!.GetRequiredKeyedService<IGameContext>(nameof(PunishMainGameContext))
                 .InitAsync();
             await Instance.Host.Services!.GetRequiredKeyedService<IGameContext>(nameof(PunishBiliBiliGameContext))

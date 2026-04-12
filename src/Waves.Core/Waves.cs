@@ -20,33 +20,6 @@ public static class Waves
     public static IServiceCollection AddGameContext(this IServiceCollection services)
     {
         services
-            .AddKeyedSingleton<IGameContext, WavesMainGameContext>(
-                nameof(WavesMainGameContext),
-                (provider, c) =>
-                {
-                    var context = GameContextFactory.GetMainGameContext();
-                    context.HttpClientService = provider.GetRequiredService<IHttpClientService>();
-                    return context;
-                }
-            )
-            .AddKeyedSingleton<IGameContext, WavesGlobalGameContext>(
-                nameof(WavesGlobalGameContext),
-                (provider, c) =>
-                {
-                    var context = GameContextFactory.GetGlobalGameContext();
-                    context.HttpClientService = provider.GetRequiredService<IHttpClientService>();
-                    return context;
-                }
-            )
-            .AddKeyedSingleton<IGameContext, WavesBiliBiliGameContext>(
-                nameof(WavesBiliBiliGameContext),
-                (provider, c) =>
-                {
-                    var context = GameContextFactory.GetBilibiliGameContext();
-                    context.HttpClientService = provider.GetRequiredService<IHttpClientService>();
-                    return context;
-                }
-            )
             .AddKeyedSingleton<IGameContext, PunishMainGameContext>(
                 nameof(PunishMainGameContext),
                 (provider, c) =>

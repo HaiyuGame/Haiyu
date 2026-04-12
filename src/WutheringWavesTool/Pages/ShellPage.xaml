@@ -60,6 +60,7 @@
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
                         BorderThickness="0"
+                        Command="{x:Bind ViewModel.ClearMemoryCommand}"
                         Style="{ThemeResource DefaultAcrylicButtonStyle}">
                         <ui:ImageEx
                             Width="25"
@@ -272,12 +273,18 @@
                             <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xEA8A;" />
                         </NavigationViewItem.Icon>
                     </NavigationViewItem>
-                    <NavigationViewItem property:NavigationItemClickHelper.NavigationKey="Haiyu.ViewModel.GameViewModels.GameContexts.WavesGameContextViewModel" Content="鸣潮">
+                    <NavigationViewItem property:NavigationItemClickHelper.NavigationKey="Haiyu.ViewModel.GameViewModels.GameContexts.WavesV2GameContextViewModel" Content="鸣潮V2">
+                        <NavigationViewItem.InfoBadge>
+                            <InfoBadge Value="2" />
+                        </NavigationViewItem.InfoBadge>
                         <NavigationViewItem.Icon>
                             <ImageIcon Source="ms-appx:///Assets/GameIcons/global.ico" />
                         </NavigationViewItem.Icon>
                     </NavigationViewItem>
-                    <NavigationViewItem property:NavigationItemClickHelper.NavigationKey="Haiyu.ViewModel.GameViewModels.GameContexts.PunishGameContextViewModel" Content="战双">
+                    <NavigationViewItem
+                        property:NavigationItemClickHelper.NavigationKey="Haiyu.ViewModel.GameViewModels.GameContexts.PunishGameContextViewModel"
+                        Content="战双"
+                        Visibility="Collapsed">
                         <NavigationViewItem.Icon>
                             <ImageIcon Source="ms-appx:///Assets/GameIcons/pgr.ico" />
                         </NavigationViewItem.Icon>
@@ -291,14 +298,7 @@
                             <ImageIcon Source="ms-appx:///Assets/GameIcons/pgr.ico" />
                         </NavigationViewItem.Icon>
                     </NavigationViewItem>
-                    <NavigationViewItem property:NavigationItemClickHelper.NavigationKey="Haiyu.ViewModel.GameViewModels.GameContexts.WavesV2GameContextViewModel" Content="鸣潮V2">
-                        <NavigationViewItem.InfoBadge>
-                            <InfoBadge Value="2" />
-                        </NavigationViewItem.InfoBadge>
-                        <NavigationViewItem.Icon>
-                            <ImageIcon Source="ms-appx:///Assets/GameIcons/global.ico" />
-                        </NavigationViewItem.Icon>
-                    </NavigationViewItem>
+
                     <NavigationViewItem property:NavigationItemClickHelper.NavigationKey="Haiyu.ViewModel.CloudGameViewModel" Content="云工具">
                         <NavigationViewItem.Icon>
                             <FontIcon FontFamily="Segoe UI Emoji" Glyph="&#x2601;" />

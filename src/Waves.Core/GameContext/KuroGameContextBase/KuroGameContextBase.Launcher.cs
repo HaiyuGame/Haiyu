@@ -3,6 +3,7 @@ using Waves.Api.Models;
 using Waves.Api.Models.Launcher;
 using Waves.Core.GameContext.Contexts;
 using Waves.Core.GameContext.Contexts.PRG;
+using Waves.Core.GameContext.ContextsV2.Waves;
 using Waves.Core.Models.CoreApi;
 using Waves.Core.Models.Downloader;
 
@@ -18,7 +19,7 @@ partial class KuroGameContextBase
         var url = "";
         try
         {
-            if (this.ContextName == nameof(WavesGlobalGameContext) || this.ContextName == nameof(PunishGlobalGameContext) || this.ContextName == nameof(PunishTwGameContext))
+            if (this.ContextName == nameof(PunishGlobalGameContext) || this.ContextName == nameof(PunishTwGameContext))
             {
                 url =
                     $"{KuroGameApiConfig.BaseAddress[1]}/launcher/game/{cacheConfig.GameID}/{cacheConfig.AppId}_{cacheConfig.AppKey}/index.json?_t={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
@@ -92,7 +93,7 @@ partial class KuroGameContextBase
         string url = "";
         try
         {
-            if (this.ContextName == nameof(WavesGlobalGameContext) || this.ContextName == nameof(PunishGlobalGameContext) || this.ContextName == nameof(PunishTwGameContext))
+            if (this.ContextName == nameof(WavesGlobalGameContextV2) || this.ContextName == nameof(PunishGlobalGameContext) || this.ContextName == nameof(PunishTwGameContext))
             {
                 url =
                     $"{KuroGameApiConfig.BaseAddress[1]}/launcher/{this.Config.AppId}_{this.Config.AppKey}/{this.Config.GameID}/information/{this.Config.Language}.json?_t={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
@@ -121,7 +122,7 @@ partial class KuroGameContextBase
     public virtual async Task<LIndex?> GetDefaultLauncherValue(CancellationToken token = default) 
     {
         string url = "";
-        if (this.ContextName == nameof(WavesGlobalGameContext) || this.ContextName == nameof(PunishGlobalGameContext)||this.ContextName == nameof(PunishTwGameContext))
+        if ( this.ContextName == nameof(PunishGlobalGameContext)||this.ContextName == nameof(PunishTwGameContext))
         {
 
             url = $"{KuroGameApiConfig.BaseAddress[1]}/launcher/launcher/{this.Config.AppId}_{this.Config.AppKey}/{this.Config.GameID}/index.json";
@@ -143,7 +144,7 @@ partial class KuroGameContextBase
     public virtual async Task<LauncherBackgroundData?> GetLauncherBackgroundDataAsync(string backgroundCode,CancellationToken token = default)
     {
         var address = "";
-        if (this.ContextName == nameof(WavesGlobalGameContext) || this.ContextName == nameof(PunishGlobalGameContext) || this.ContextName == nameof(PunishTwGameContext))
+        if (this.ContextName == nameof(WavesGlobalGameContextV2) || this.ContextName == nameof(PunishGlobalGameContext) || this.ContextName == nameof(PunishTwGameContext))
         {
 
             address = $"{KuroGameApiConfig.BaseAddress[1]}";

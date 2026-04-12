@@ -20,7 +20,7 @@ public sealed partial class WavesV2GamePage : Page,IPage
         this.ViewModel.Dispose();
         this.ViewModel = null;
         GC.Collect();
-        base.OnNavigatedTo(e);
+        base.OnNavigatedFrom(e);
     }
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {

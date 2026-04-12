@@ -34,6 +34,10 @@ namespace Haiyu.ViewModel.GameViewModels.GameContexts
 
         private async void LocalGameRefreshBindUserMethod(object recipient, LocalGameRefreshBindUser message)
         {
+            if (message.data?.PlayerItem?.Type != GameType.Punish)
+            {
+                return;
+            }
             await this.RefreshLocalGameUser(message.data);
         }
 
@@ -72,7 +76,11 @@ namespace Haiyu.ViewModel.GameViewModels.GameContexts
                     }
                     foreach (var player in userPlayers.Items)
                     {
-                        KRSDKLauncherCacheWrapper info = new KRSDKLauncherCacheWrapper(item, (PunishQueryPlayerItem)player);
+                        if (player is not PunishQueryPlayerItem punishPlayer)
+                        {
+                            continue;
+                        }
+                        KRSDKLauncherCacheWrapper info = new KRSDKLauncherCacheWrapper(item, punishPlayer);
                         if (info.GetKey == lastSelect)
                         {
                             selectItem = info;
@@ -88,7 +96,11 @@ namespace Haiyu.ViewModel.GameViewModels.GameContexts
                 IsLocalUserRefresh = false;
                 return;
             }
-            var playerItem = (PunishQueryPlayerItem)selectItem.PlayerItem;
+            if (selectItem.PlayerItem is not PunishQueryPlayerItem playerItem)
+            {
+                IsLocalUserRefresh = false;
+                return;
+            }
             LocalUserTitle = playerItem.RoleName;
             var result = await this.GameContext.QueryRoleInfoAsync(
                 KrKeyHelper.Xor(selectItem.Cache.OauthCode, 5),

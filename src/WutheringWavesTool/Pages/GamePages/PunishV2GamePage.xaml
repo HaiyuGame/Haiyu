@@ -479,103 +479,122 @@
                         </Button>
                     </StackPanel>
                 </Grid>
-
-                <Grid
-                    Padding="5"
-                    Background="{ThemeResource AcrylicInAppFillColorDefaultBrush}"
-                    CornerRadius="4"
-                    Visibility="{x:Bind ViewModel.GameLauncherBthVisibility, Mode=OneWay}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition />
-                        <ColumnDefinition Width="auto" />
-                    </Grid.ColumnDefinitions>
-                    <Button
-                        Height="60"
-                        HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch"
-                        Background="{ThemeResource SystemFillColorSuccess}"
-                        BorderThickness="0"
-                        Command="{x:Bind ViewModel.UpdateGameCommand}"
-                        CornerRadius="4"
-                        Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
-                        IsEnabled="{x:Bind ViewModel.EnableStartGameBth, Mode=OneWay}">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition />
-                                <ColumnDefinition />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition />
-                                <RowDefinition />
-                            </Grid.RowDefinitions>
-                            <FontIcon
-                                Grid.RowSpan="2"
-                                FontFamily="Segoe Fluent Icons"
-                                FontSize="25"
-                                Glyph="{x:Bind ViewModel.LauncherIcon, Mode=OneWay}" />
-                            <TextBlock
-                                Grid.Column="1"
-                                Margin="10,0,0,0"
-                                VerticalAlignment="Center"
-                                FontFamily="{ThemeResource DefaultFont}"
-                                FontSize="15"
-                                Text="{x:Bind ViewModel.LauncheContent, Mode=OneWay}" />
-                            <TextBlock
-                                Grid.Row="1"
-                                Grid.Column="1"
-                                Margin="15,0,0,0"
-                                VerticalAlignment="Center"
-                                FontSize="10"
-                                Text="{x:Bind ViewModel.DisplayVersion, Mode=OneWay}" />
-                        </Grid>
-
-                    </Button>
-                    <Button
-                        Grid.Column="1"
-                        Width="60"
-                        Margin="3,0,0,0"
-                        HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch"
+                <Grid Padding="5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <Border
+                        Margin="15,0,15,-2"
+                        Padding="5"
                         Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
-                        BorderThickness="0"
-                        IsEnabled="{x:Bind ViewModel.EnableStartGameBth, Mode=OneWay}">
-                        <FontIcon
-                            FontFamily="Segoe Fluent Icons"
-                            FontSize="18"
-                            Glyph="&#xEC7A;" />
+                        BorderBrush="{ThemeResource LayerOnMicaBaseAltFillColorSecondaryBrush}"
+                        BorderThickness="1,1,1,0"
+                        CornerRadius="5 5 0 0"
+                        Visibility="{x:Bind ViewModel.GameLauncherBthVisibility, Mode=OneWay}">
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            FontFamily="{ThemeResource DefaultFont}"
+                            Text="{x:Bind ViewModel.BottomBarContent, Mode=OneWay}" />
+                    </Border>
+                    <Grid
+                        Grid.Row="1"
+                        Padding="5"
+                        Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource LayerOnMicaBaseAltFillColorSecondaryBrush}"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Visibility="{x:Bind ViewModel.GameLauncherBthVisibility, Mode=OneWay}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="auto" />
+                        </Grid.ColumnDefinitions>
+                        <Button
+                            Grid.Row="1"
+                            Height="60"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            Background="{ThemeResource SystemFillColorSuccess}"
+                            BorderThickness="0"
+                            Command="{x:Bind ViewModel.UpdateGameCommand}"
+                            CornerRadius="4"
+                            Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                            IsEnabled="{x:Bind ViewModel.EnableStartGameBth, Mode=OneWay}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                <FontIcon
+                                    Grid.RowSpan="2"
+                                    FontFamily="Segoe Fluent Icons"
+                                    FontSize="25"
+                                    Glyph="{x:Bind ViewModel.LauncherIcon, Mode=OneWay}" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Margin="10,0,0,0"
+                                    VerticalAlignment="Center"
+                                    FontFamily="{ThemeResource DefaultFont}"
+                                    FontSize="15"
+                                    Text="{x:Bind ViewModel.LauncheContent, Mode=OneWay}" />
+                                <TextBlock
+                                    Grid.Row="1"
+                                    Grid.Column="1"
+                                    Margin="15,0,0,0"
+                                    VerticalAlignment="Center"
+                                    FontSize="10"
+                                    Text="{x:Bind ViewModel.DisplayVersion, Mode=OneWay}" />
+                            </Grid>
 
-                        <Button.Flyout>
-                            <MenuFlyout Placement="Bottom">
-                                <ToggleMenuFlyoutItem
-                                    IsChecked="{x:Bind ViewModel.IsDx11Launcher, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    Text="DX 11 启动"
-                                    ToolTipService.ToolTip="切换启动模式" />
-                                <MenuFlyoutItem
-                                    Command="{x:Bind ViewModel.RepirGameCommand}"
-                                    Text="修复游戏"
-                                    ToolTipService.ToolTip="此选项等同于下载，启动器会下载服务器资源进行自动覆盖（包含Mod资源）">
-                                    <MenuFlyoutItem.Icon>
-                                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xEC7A;" />
-                                    </MenuFlyoutItem.Icon>
-                                </MenuFlyoutItem>
-                                <MenuFlyoutSeparator />
-                                <MenuFlyoutItem Command="{x:Bind ViewModel.ShowGameResourceCommand}" Text="游戏资源管理">
-                                    <MenuFlyoutItem.Icon>
-                                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xEF19;" />
-                                    </MenuFlyoutItem.Icon>
-                                </MenuFlyoutItem>
-                                <MenuFlyoutSeparator />
-                                <MenuFlyoutItem
-                                    Command="{x:Bind ViewModel.DeleteGameResourceCommand}"
-                                    Text="卸载游戏"
-                                    ToolTipService.ToolTip="此选项将直接删除游戏文件夹">
-                                    <MenuFlyoutItem.Icon>
-                                        <SymbolIcon Symbol="Clear" />
-                                    </MenuFlyoutItem.Icon>
-                                </MenuFlyoutItem>
-                            </MenuFlyout>
-                        </Button.Flyout>
-                    </Button>
+                        </Button>
+                        <Button
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Width="60"
+                            Margin="3,0,0,0"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+                            BorderThickness="0"
+                            IsEnabled="{x:Bind ViewModel.EnableStartGameBth, Mode=OneWay}">
+                            <FontIcon
+                                FontFamily="Segoe Fluent Icons"
+                                FontSize="18"
+                                Glyph="&#xEC7A;" />
+
+                            <Button.Flyout>
+                                <MenuFlyout Placement="Bottom">
+                                    <MenuFlyoutItem
+                                        Command="{x:Bind ViewModel.RepirGameCommand}"
+                                        Text="修复游戏"
+                                        ToolTipService.ToolTip="此选项等同于下载，启动器会下载服务器资源进行自动覆盖（包含Mod资源）">
+                                        <MenuFlyoutItem.Icon>
+                                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xEC7A;" />
+                                        </MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                    <MenuFlyoutSeparator />
+                                    <MenuFlyoutItem Command="{x:Bind ViewModel.ShowGameResourceCommand}" Text="游戏资源管理">
+                                        <MenuFlyoutItem.Icon>
+                                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xEF19;" />
+                                        </MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                    <MenuFlyoutSeparator />
+                                    <MenuFlyoutItem
+                                        Command="{x:Bind ViewModel.DeleteGameResourceCommand}"
+                                        Text="卸载游戏"
+                                        ToolTipService.ToolTip="此选项将直接删除游戏文件夹">
+                                        <MenuFlyoutItem.Icon>
+                                            <SymbolIcon Symbol="Clear" />
+                                        </MenuFlyoutItem.Icon>
+                                    </MenuFlyoutItem>
+                                </MenuFlyout>
+                            </Button.Flyout>
+                        </Button>
+                    </Grid>
                 </Grid>
 
                 <StackPanel
@@ -618,6 +637,438 @@
         </Grid>
         <!--  下载结束  -->
 
+        <Grid
+            x:Name="leftControl"
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            Width="350"
+            Height="310"
+            Margin="10"
+            Padding="5"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Bottom"
+            CornerRadius="5"
+            Visibility="{x:Bind ViewModel.PlayerCardVisibility, Mode=OneWay}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="auto" />
+            </Grid.ColumnDefinitions>
+            <control:CardSwitcher x:Name="switcher" Style="{ThemeResource DefaultCardsSwitcher}">
+                <control:CardSwitcher.Card1>
+                    <Grid
+                        Padding="8"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        CornerRadius="5"
+                        Opacity="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                            <Button Command="{x:Bind ViewModel.RefreshLocalGameUserCommand}" Style="{ThemeResource TransparentButtonStyle}">
+                                <FontIcon
+                                    FontFamily="Segoe Fluent Icons"
+                                    FontSize="14"
+                                    Glyph="&#xE72C;" />
+                            </Button>
+                            <Button Command="{x:Bind ViewModel.ShowGameLauncherCacheCommand}" Style="{ThemeResource TransparentButtonStyle}">
+                                <FontIcon
+                                    FontFamily="Segoe Fluent Icons"
+                                    FontSize="14"
+                                    Glyph="&#xE8AB;" />
+                            </Button>
+                        </StackPanel>
+                        <TextBlock
+                            Margin="8,0,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            FontFamily="{ThemeResource DefaultFont}"
+                            FontSize="16"
+                            Text="{x:Bind ViewModel.LocalUserTitle, Mode=OneWay}" />
+
+                        <NavigationViewItemSeparator Grid.Row="1" />
+
+
+                        <Grid
+                            Grid.Row="2"
+                            Margin="0,10,5,10"
+                            ColumnSpacing="4"
+                            RowSpacing="4"
+                            Visibility="{x:Bind ViewModel.IsLocalUserRefresh, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                                <ColumnDefinition Width="auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                Margin="5,0,0,0"
+                                HorizontalAlignment="Left"
+                                FontFamily="{ThemeResource DefaultFont}">
+                                <Run Text="等级" />
+                                <Run Text="{x:Bind ViewModel.GameItem.PlayerLevel, Mode=OneWay}" />
+                            </TextBlock>
+                            <TextBlock
+                                Grid.Column="1"
+                                Margin="0,0,5,0"
+                                HorizontalAlignment="Right"
+                                FontFamily="{ThemeResource DefaultFont}">
+                                <Run Text="识别码:" />
+                                <Run Text="{x:Bind ViewModel.GameItem.RoleId, Mode=OneWay}" />
+                            </TextBlock>
+                            <Button
+                                Grid.Column="2"
+                                Padding="3"
+                                VerticalAlignment="Center">
+                                <FontIcon
+                                    FontFamily="Segoe Fluent Icons"
+                                    FontSize="10"
+                                    Glyph="&#xE8C8;" />
+                            </Button>
+                        </Grid>
+                        <NavigationViewItemSeparator Grid.Row="3" Visibility="{x:Bind ViewModel.IsLocalUserRefresh, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}" />
+                        <Grid
+                            Grid.Row="4"
+                            Margin="0,10,0,0"
+                            Visibility="{x:Bind ViewModel.IsLocalUserRefresh, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <Grid
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                CornerRadius="8">
+
+                                <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="auto" />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <control:ImageEx
+                                    Grid.RowSpan="2"
+                                    Width="30"
+                                    Height="30"
+                                    Margin="15,0,0,0"
+                                    Source="Assets/GameAssets/Punish/stats-item-1-eb0f9193.png" />
+                                <StackPanel
+                                    Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    Orientation="Vertical">
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Margin="4,0,0,0"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Center"
+                                        FontFamily="{ThemeResource DefaultFont}">
+                                        <Run
+                                            FontSize="17"
+                                            Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"
+                                            Text="{x:Bind ViewModel.GameItem.ActionPoint, Mode=OneWay}" />
+                                        <Run Text="/" />
+                                        <Run FontSize="14" Text="{x:Bind ViewModel.GameItem.ActionPointTotal, Mode=OneWay}" />
+                                    </TextBlock>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock
+                                            Margin="3,0,0,0"
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Center"
+                                            FontFamily="{ThemeResource DefaultFont}"
+                                            FontSize="12">
+                                            <Run Text="{x:Bind ViewModel.GameItem.ActionPointNextExpiredEndTime, Mode=OneWay}" />
+                                        </TextBlock>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid Grid.Column="1">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="auto" />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <control:ImageEx
+                                    Grid.RowSpan="2"
+                                    Width="30"
+                                    Height="30"
+                                    Margin="15,0,0,0"
+                                    Source="Assets/GameAssets/Punish/stats-item-2.png" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Margin="4,0,0,0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    FontFamily="{ThemeResource DefaultFont}">
+                                    <Run
+                                        FontSize="15"
+                                        Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"
+                                        Text="{x:Bind ViewModel.GameItem.Activeness, Mode=OneWay}" />
+                                    <Run Text="/" />
+                                    <Run FontSize="12" Text="{x:Bind ViewModel.GameItem.ActivenessTotal, Mode=OneWay}" />
+                                </TextBlock>
+                                <StackPanel
+                                    Grid.Row="1"
+                                    Grid.Column="1"
+                                    Orientation="Horizontal">
+                                    <FontIcon
+                                        Margin="4,0,0,0"
+                                        VerticalAlignment="Center"
+                                        FontFamily="Segoe Fluent Icons"
+                                        FontSize="12"
+                                        Glyph="&#xE72E;"
+                                        Visibility="{x:Bind ViewModel.GameItem.ActivenessUnlocked, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}" />
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid Grid.Row="1">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="auto" />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <control:ImageEx
+                                    Grid.RowSpan="2"
+                                    Width="30"
+                                    Height="30"
+                                    Margin="15,0,0,0"
+                                    Source="Assets/GameAssets/Punish/stats-item-3-8be0b58b.png" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Margin="4,0,0,0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    FontFamily="{ThemeResource DefaultFont}">
+                                    <Run
+                                        FontSize="15"
+                                        Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"
+                                        Text="{x:Bind ViewModel.GameItem.BossSingleRewardCount, Mode=OneWay}" />
+                                    <Run Text="/" />
+                                    <Run FontSize="12" Text="{x:Bind ViewModel.GameItem.BossSingleRewardCountTotal, Mode=OneWay}" />
+                                </TextBlock>
+                                <StackPanel
+                                    Grid.Row="1"
+                                    Grid.Column="1"
+                                    Margin="4,0,0,0"
+                                    Orientation="Horizontal">
+                                    <TextBlock
+                                        Margin="0,0,0,0"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Center"
+                                        FontFamily="{ThemeResource DefaultFont}"
+                                        FontSize="12"
+                                        Visibility="{x:Bind ViewModel.GameItem.BossSingleUnlocked, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <Run Text="{x:Bind ViewModel.GameItem.BossSingleEndtimeText, Mode=OneWay}" />
+                                    </TextBlock>
+                                    <FontIcon
+                                        Margin="4,0,0,0"
+                                        VerticalAlignment="Center"
+                                        FontFamily="Segoe Fluent Icons"
+                                        FontSize="12"
+                                        Glyph="&#xE72E;"
+                                        Visibility="{x:Bind ViewModel.GameItem.BossSingleUnlocked, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}" />
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid Grid.Row="1" Grid.Column="1">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="auto" />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <control:ImageEx
+                                    Grid.RowSpan="2"
+                                    Width="30"
+                                    Height="30"
+                                    Margin="15,0,0,0"
+                                    Source="Assets/GameAssets/Punish/stats-item-4-0075a871.png" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Margin="4,0,0,0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    FontFamily="{ThemeResource DefaultFont}">
+                                    <Run
+                                        FontSize="15"
+                                        Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"
+                                        Text="{x:Bind ViewModel.GameItem.ArenaRewardCount, Mode=OneWay}" />
+                                    <Run Text="/" />
+                                    <Run FontSize="12" Text="{x:Bind ViewModel.GameItem.ArenaRewardCountTotal, Mode=OneWay}" />
+                                </TextBlock>
+                                <StackPanel
+                                    Grid.Row="1"
+                                    Grid.Column="1"
+                                    Orientation="Horizontal">
+
+                                    <FontIcon
+                                        VerticalAlignment="Center"
+                                        FontFamily="Segoe Fluent Icons"
+                                        FontSize="12"
+                                        Glyph="&#xE72E;"
+                                        Visibility="{x:Bind ViewModel.GameItem.ArenaUnlocked, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}" />
+                                </StackPanel>
+                            </Grid>
+                        </Grid>
+                        <Grid
+                            Grid.Row="5"
+                            Margin="0,10,0,0"
+                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            Visibility="{x:Bind ViewModel.IsLocalUserRefresh, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}">
+                            <TextBlock
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                FontFamily="{ThemeResource DefaultFont}"
+                                Text="这里是空的" />
+                        </Grid>
+                        <ProgressRing
+                            Grid.Row="2"
+                            Grid.RowSpan="4"
+                            Visibility="{x:Bind ViewModel.IsLocalUserRefresh, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                    </Grid>
+                </control:CardSwitcher.Card1>
+                <control:CardSwitcher.Card2>
+                    <Grid
+                        Padding="5"
+                        Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="2"
+                        CornerRadius="5">
+                        <Grid.Transitions>
+                            <TransitionCollection>
+                                <EntranceThemeTransition FromVerticalOffset="-50" />
+                            </TransitionCollection>
+                        </Grid.Transitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="6*" />
+                            <RowDefinition Height="4*" />
+                        </Grid.RowDefinitions>
+                        <FlipView
+                            x:Name="fileView"
+                            Grid.Row="0"
+                            Background="Transparent"
+                            ItemsSource="{x:Bind ViewModel.SlideShows, Mode=OneWay}"
+                            Style="{ThemeResource DefaultFlipViewStyle}">
+                            <i:Interaction.Behaviors>
+                                <bs:FilpViewAutoPlayBehavior IsPlay="True" Duration="0:0:8" />
+                            </i:Interaction.Behaviors>
+                            <FlipView.ItemTemplate>
+                                <DataTemplate x:DataType="launcheModel:Slideshow">
+                                    <Grid>
+                                        <control:ImageEx Source="{x:Bind Url}" Stretch="UniformToFill" />
+                                        <Border
+                                            MaxWidth="120"
+                                            Padding="5"
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Bottom"
+                                            Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+                                            CornerRadius="0 5 0 0">
+                                            <HyperlinkButton
+                                                Content="前往"
+                                                FontSize="10"
+                                                NavigateUri="{x:Bind JumpUrl}" />
+                                        </Border>
+                                    </Grid>
+                                </DataTemplate>
+                            </FlipView.ItemTemplate>
+                        </FlipView>
+
+                        <Border
+                            Padding="10,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"
+                            Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+                            CornerRadius="5 0 0 0">
+                            <PipsPager
+                                x:Name="FlipViewPipsPager"
+                                FontFamily="Segoe Fluent Icons"
+                                NumberOfPages="{x:Bind ViewModel.SlideShows.Count, Mode=OneWay}"
+                                SelectedPageIndex="{x:Bind Path=fileView.SelectedIndex, Mode=TwoWay}">
+                                <PipsPager.SelectedPipStyle>
+                                    <Style BasedOn="{StaticResource PipsPagerButtonBaseStyle}" TargetType="Button">
+                                        <Setter Property="Content" Value="&#xE735;" />
+                                        <Setter Property="FontSize" Value="9" />
+                                        <Setter Property="Margin" Value="0,0" />
+                                    </Style>
+                                </PipsPager.SelectedPipStyle>
+                                <PipsPager.NormalPipStyle>
+                                    <Style BasedOn="{StaticResource PipsPagerButtonBaseStyle}" TargetType="Button">
+
+                                        <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+
+                                        <Setter Property="Content" Value="&#xE734;" />
+                                        <Setter Property="FontSize" Value="9" />
+                                        <Setter Property="Margin" Value="0,0" />
+                                    </Style>
+                                </PipsPager.NormalPipStyle>
+                            </PipsPager>
+                        </Border>
+                        <Grid Grid.Row="1" Margin="0,10,0,0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="auto" />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <wui:Segmented
+                                x:Name="tabNews"
+                                ItemsSource="{x:Bind ViewModel.Tabs, Mode=OneWay}"
+                                SelectedItem="{x:Bind ViewModel.SelectTab, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                Style="{ThemeResource PivotSegmentedStyle}" />
+                            <NavigationViewItemSeparator Grid.Row="1" HorizontalAlignment="Stretch" />
+                            <ScrollView Grid.Row="2">
+                                <ItemsRepeater ItemsSource="{x:Bind ViewModel.Contents, Mode=OneWay}">
+                                    <ItemsRepeater.ItemTemplate>
+                                        <DataTemplate x:DataType="launcheModel:Content">
+                                            <HyperlinkButton
+                                                HorizontalAlignment="Stretch"
+                                                HorizontalContentAlignment="Left"
+                                                FontSize="12"
+                                                NavigateUri="{x:Bind JumpUrl}">
+                                                <TextBlock Text="{x:Bind TContent}" TextTrimming="CharacterEllipsis" />
+                                            </HyperlinkButton>
+                                        </DataTemplate>
+                                    </ItemsRepeater.ItemTemplate>
+                                </ItemsRepeater>
+                            </ScrollView>
+                        </Grid>
+                    </Grid>
+                </control:CardSwitcher.Card2>
+            </control:CardSwitcher>
+            <Button
+                Grid.Column="1"
+                Height="40"
+                Margin="-4,0,0,0"
+                VerticalAlignment="Center"
+                Click="Button_Click"
+                CornerRadius="0 5 5 0"
+                Style="{ThemeResource DefaultAcrylicButtonStyle}"
+                ToolTipService.ToolTip="切换卡片">
+                <FontIcon
+                    FontFamily="Segoe Fluent Icons"
+                    FontSize="14"
+                    Glyph="&#xE8AB;" />
+            </Button>
+        </Grid>
         <control:ImageEx
             Grid.Row="0"
             Grid.RowSpan="2"

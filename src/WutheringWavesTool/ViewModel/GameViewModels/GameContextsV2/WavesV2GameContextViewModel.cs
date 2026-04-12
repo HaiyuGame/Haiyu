@@ -20,6 +20,10 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
         LocalGameRefreshBindUser message
     )
     {
+        if (message.data?.PlayerItem?.Type != GameType.Waves)
+        {
+            return;
+        }
         await this.RefreshLocalGameUser(message.data);
     }
 
@@ -208,7 +212,11 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
                 }
                 foreach (var player in userPlayers.Items)
                 {
-                    KRSDKLauncherCacheWrapper info = new KRSDKLauncherCacheWrapper(item, (WavesQueryPlayerItem)player);
+                    if (player is not WavesQueryPlayerItem wavesPlayer)
+                    {
+                        continue;
+                    }
+                    KRSDKLauncherCacheWrapper info = new KRSDKLauncherCacheWrapper(item, wavesPlayer);
                     if (info.GetKey == lastSelect)
                     {
                         selectItem = info;
@@ -228,7 +236,11 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
             IsLocalUserRefresh = false;
             return;
         }
-        var playerItem = (WavesQueryPlayerItem)selectItem.PlayerItem;
+        if (selectItem.PlayerItem is not WavesQueryPlayerItem playerItem)
+        {
+            IsLocalUserRefresh = false;
+            return;
+        }
         LocalUserTitle = playerItem.RoleName;
         var result = await this.GameContext.QueryRoleInfoAsync(
             KrKeyHelper.Xor(selectItem.Cache.OauthCode, 5),
@@ -247,10 +259,10 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
             return;
         }
         var wavesData = (result.Items[0] as WavesLocalGameRoleItem)!;
-        this.Base = wavesData.Base;
+        this.Base = wavesData.Base??new();
         this.MusicData = wavesData.MusicData;
-        this.BattlePass = wavesData.BattlePass;
-        this.MotorData = wavesData.MotorData;
+        this.BattlePass = wavesData.BattlePass??new();
+        this.MotorData = wavesData.MotorData??new();
         IsLocalUserRefresh = false;
     }
 }

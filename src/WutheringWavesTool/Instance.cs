@@ -97,7 +97,6 @@ public static class InstanceBuilderExtensions
                     #region ColorGame
                     #endregion
                     #region GameContext
-                    .AddTransient<WavesGameContextViewModel>()
                     .AddTransient<PunishGameContextViewModel>()
                     .AddTransient<PunishV2GameContextViewModel>()
                     .AddTransient<WavesV2GameContextViewModel>()

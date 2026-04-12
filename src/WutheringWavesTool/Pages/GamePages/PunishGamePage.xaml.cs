@@ -32,7 +32,7 @@ public sealed partial class PunishGamePage : Page,IPage
     {
         this.Bindings.StopTracking();
         this.ViewModel.Dispose();
-        base.OnNavigatedTo(e);
+        base.OnNavigatedFrom(e);
         GC.Collect();
     }
     protected override void OnNavigatedTo(NavigationEventArgs e)

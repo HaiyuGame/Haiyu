@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Haiyu.Common;
+using System;
 using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,7 +9,6 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Text.Unicode;
-using Haiyu.Common;
 using Waves.Api.Models;
 using Waves.Api.Models.Launcher;
 using Waves.Core.Common;
@@ -16,6 +16,7 @@ using Waves.Core.Contracts;
 using Waves.Core.Contracts.Events;
 using Waves.Core.GameContext.Contexts;
 using Waves.Core.GameContext.Contexts.PRG;
+using Waves.Core.GameContext.ContextsV2.Waves;
 using Waves.Core.GameContext.KruoGameContextBaseV2.Common;
 using Waves.Core.Helpers;
 using Waves.Core.Models;
@@ -645,6 +646,7 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
                 msg.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
                 var reponse = await client.SendAsync(msg, token);
+                var json2 =  await reponse.Content.ReadAsStringAsync(token);
                 var model = JsonSerializer.Deserialize<QueryRoleInfo>(
                     await reponse.Content.ReadAsStringAsync(token),
                     LocalGameUserContext.Default.QueryRoleInfo
@@ -697,7 +699,7 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
     {
         if (this.GameType == Models.Enums.GameType.Waves)
         {
-            if (this.ContextName == nameof(WavesGlobalGameContext))
+            if (this.ContextName == nameof(WavesGlobalGameContextV2))
             {
                 return $"https://pc-launcher-sdk-api.kurogame.net/game/queryPlayerInfo?_t={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
             }
@@ -732,7 +734,7 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
     {
         if (this.GameType == Models.Enums.GameType.Waves)
         {
-            if (this.ContextName == nameof(WavesGlobalGameContext))
+            if (this.ContextName == nameof(WavesGlobalGameContextV2))
             {
                 return $"https://pc-launcher-sdk-api.kurogame.net/game/queryRole?_t={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
             }

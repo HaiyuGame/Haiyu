@@ -10,6 +10,7 @@ using Waves.Api.Models;
 using Waves.Api.Models.Launcher;
 using Waves.Core.GameContext.Contexts;
 using Waves.Core.GameContext.Contexts.PRG;
+using Waves.Core.GameContext.ContextsV2.Waves;
 using Waves.Core.Models;
 
 namespace Waves.Core.GameContext;
@@ -224,7 +225,7 @@ partial class KuroGameContextBase
     {
         if (this.GameType == Models.Enums.GameType.Waves)
         {
-            if (this.ContextName == nameof(WavesGlobalGameContext))
+            if (this.ContextName == nameof(WavesGlobalGameContextV2))
             {
                 return $"https://pc-launcher-sdk-api.kurogame.net/game/queryPlayerInfo?_t={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
             }
@@ -259,7 +260,7 @@ partial class KuroGameContextBase
     {
         if (this.GameType == Models.Enums.GameType.Waves)
         {
-            if (this.ContextName == nameof(WavesGlobalGameContext))
+            if (this.ContextName == nameof(WavesGlobalGameContextV2))
             {
                 return $"https://pc-launcher-sdk-api.kurogame.net/game/queryRole?_t={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
             }

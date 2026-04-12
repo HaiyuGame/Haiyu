@@ -147,7 +147,6 @@ public class Base
                     $"{dateTimeOffset.Hours}:{dateTimeOffset.Minutes}:{dateTimeOffset.Seconds}S";
                 field = value;
                 return;
-
             }
             this.StoreEnergyRecoverEndTime = "已充满";
             field = value;
@@ -365,11 +364,7 @@ public class WavesLocalGameRoleItem : ILocalGameRole
 
     [JsonIgnore]
     public string ServerName { get; set; }
-    public GameType Type
-    {
-        get => throw new NotImplementedException();
-        set => throw new NotImplementedException();
-    }
+    public GameType Type { get; set; }
 }
 
 public class Skin

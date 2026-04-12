@@ -17,35 +17,12 @@ public static class GameContextFactory
     /// <returns></returns>
     public static IReadOnlyCollection<String> GameAllContext() =>
         [
-            nameof(WavesMainGameContext),
-            nameof(WavesBiliBiliGameContext),
-            nameof(WavesGlobalGameContext),
             nameof(PunishMainGameContext),
             nameof(PunishBiliBiliGameContext),
             nameof(PunishGlobalGameContext),
             nameof(PunishTwGameContext),
         ];
 
-    internal static WavesBiliBiliGameContext GetBilibiliGameContext() =>
-        new WavesBiliBiliGameContext(KuroGameApiConfig.BilibiliConfig)
-        {
-            GamerConfigPath = GameContextFactory.GameBassPath + "\\BiliBiliConfig",
-            IsLimitSpeed = false,
-        };
-
-    internal static WavesGlobalGameContext GetGlobalGameContext() =>
-        new WavesGlobalGameContext(KuroGameApiConfig.GlobalConfig)
-        {
-            GamerConfigPath = GameContextFactory.GameBassPath + "\\GlobalConfig",
-            IsLimitSpeed = false,
-        };
-
-    internal static WavesMainGameContext GetMainGameContext() =>
-        new WavesMainGameContext(KuroGameApiConfig.MainAPiConfig)
-        {
-            GamerConfigPath = GameContextFactory.GameBassPath + "\\MainConfig",
-            IsLimitSpeed = false,
-        };
 
     internal static PunishMainGameContext GetMainPGRGameContext() =>
         new PunishMainGameContext(KuroGameApiConfig.MainBGRConfig)

@@ -26,9 +26,7 @@ namespace Waves.Core.GameContext
             var url = "";
             try
             {
-                if (
-                    this.ContextName == nameof(WavesGlobalGameContext)
-                    || this.ContextName == nameof(PunishGlobalGameContext)
+                if (this.ContextName == nameof(PunishGlobalGameContext)
                     || this.ContextName == nameof(PunishTwGameContext)
                 || this.ContextName == nameof(WavesGlobalGameContextV2)
                 )
@@ -115,9 +113,7 @@ namespace Waves.Core.GameContext
             string url = "";
             try
             {
-                if (
-                    this.ContextName == nameof(WavesGlobalGameContext)
-                    || this.ContextName == nameof(PunishGlobalGameContext)
+                if ( this.ContextName == nameof(PunishGlobalGameContext)
                     || this.ContextName == nameof(PunishTwGameContext)
                 || this.ContextName == nameof(WavesGlobalGameContextV2)
                 )
@@ -149,9 +145,7 @@ namespace Waves.Core.GameContext
         )
         {
             string url = "";
-            if (
-                this.ContextName == nameof(WavesGlobalGameContext)
-                || this.ContextName == nameof(PunishGlobalGameContext)
+            if ( this.ContextName == nameof(PunishGlobalGameContext)
                 || this.ContextName == nameof(PunishTwGameContext)
                 || this.ContextName == nameof(WavesGlobalGameContextV2)
             )
@@ -178,9 +172,7 @@ namespace Waves.Core.GameContext
         )
         {
             var address = "";
-            if (
-                this.ContextName == nameof(WavesGlobalGameContext)
-                || this.ContextName == nameof(PunishGlobalGameContext)
+            if (this.ContextName == nameof(PunishGlobalGameContext)
                 || this.ContextName == nameof(PunishTwGameContext)
                 || this.ContextName == nameof(WavesGlobalGameContextV2)
             )
