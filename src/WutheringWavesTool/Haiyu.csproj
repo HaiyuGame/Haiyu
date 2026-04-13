@@ -232,6 +232,9 @@
 		<None Update="Assets\HpatchzResource\hpatchz.exe">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
+		<None Update="Controls\Styles\VersionSubtitle.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</None>
 		<Page Update="Controls\Colors\GamePathChartColor.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
