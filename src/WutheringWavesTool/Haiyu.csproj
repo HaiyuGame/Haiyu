@@ -232,9 +232,9 @@
 		<None Update="Assets\HpatchzResource\hpatchz.exe">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
-		<None Update="Controls\Styles\VersionSubtitle.xaml">
+		<Page Update="Controls\Styles\VersionSubtitle.xaml">
 		  <Generator>MSBuild:Compile</Generator>
-		</None>
+		</Page>
 		<Page Update="Controls\Colors\GamePathChartColor.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
@@ -348,6 +348,7 @@
 		<None Remove="Controls\Styles\HeaderTileCard.xaml" />
 		<None Remove="Controls\Styles\LoadingCard.xaml" />
 		<None Remove="Controls\Styles\StorageRing.xaml" />
+		<None Remove="Controls\Styles\VersionSubtitle.xaml" />
 		<None Remove="Pages\Dialogs\DeleteFileDialog.xaml" />
 		<None Remove="Pages\Dialogs\GameEnhancedDialog.xaml" />
 		<None Remove="Pages\Dialogs\GameResourceDialogV2.xaml" />

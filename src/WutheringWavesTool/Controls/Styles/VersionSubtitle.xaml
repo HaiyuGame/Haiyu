@@ -1,6 +1,47 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ResourceDictionary
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:Haiyu.Controls.AnimatedTextBlock"
-    xmlns:win2d="using:Microsoft.Graphics.Canvas.UI.Xaml" />
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <RichTextBlock x:Key="VersionSubtitleText" TextWrapping="Wrap">
+        <Paragraph>
+            <Run FontWeight="Bold">👉 1.2.20 版本内容摘要</Run>
+        </Paragraph>
+        <Paragraph Margin="0,10,0,0">
+            <Run FontWeight="Bold">😀全新游戏上下文内核</Run>
+        </Paragraph>
+        <Paragraph>
+            <Run>增加zip压缩包更新模式，现已补全库洛游戏更新全部功能。</Run><LineBreak />
+            <Run>全透明化下载更新流程，优化改进异步性能，使校验、下载过程中更加平滑。</Run><LineBreak />
+            <Run>重构取消与错误结构，在进行游戏更新、下载、修复时，全新的状态卡片可提供更多的状态数据，以及更新错误后的解决方案提示等。</Run><LineBreak />
+            <Run>完全兼容旧版游戏设置文件，开箱即用。</Run>
+        </Paragraph>
+        <Paragraph Margin="0,10,0,0">
+            <Run FontWeight="Bold">新增游戏主页体力卡片，游戏新闻与体力卡片二合一</Run>
+        </Paragraph>
+        <Paragraph>
+            <Run>支持鸣潮（官服、国际服）战双（官服、国际服、台服）5个服务器的体力卡片显示，可在游戏页面找到左下角的卡片区域，进行账号数据绑定。</Run>
+        </Paragraph>
+        <Paragraph Margin="0,10,0,0">
+            <Run FontWeight="Bold">😊其余更改</Run>
+        </Paragraph>
+        <Paragraph>
+            <Run>增加一些UI细节，安装包程序迭代，增加防呆措施及安装包体积优化。</Run><LineBreak />
+            <Run>重定向游戏文件夹时可选择本地安装版本进行跳过验证。</Run><LineBreak />
+            <Run>暂时移除自定义游戏安装文件下载路径。</Run>
+        </Paragraph>
+        <Paragraph Margin="0,10,0,0">
+            <Run FontWeight="Bold">😏修复BUG</Run>
+        </Paragraph>
+        <Paragraph>
+            <Run>1. 卸载游戏时出现不删除游戏文件的问题</Run><LineBreak />
+            <Run>2. 尝试解决启动器启动游戏后不断跳出鼠标的问题，此问题可在设置中，取消勾选“启动游戏后关闭启动器”选项解决。</Run><LineBreak />
+            <Run>3. 其余发现的BUG。</Run>
+        </Paragraph>
+        <Paragraph Margin="0,10,0,0">
+            <Run FontWeight="Bold">⚒️开发升级日志</Run>
+        </Paragraph>
+        <Paragraph>
+            <Run>更新依赖包到稳定版本。</Run>
+        </Paragraph>
+    </RichTextBlock>
+
+</ResourceDictionary>
