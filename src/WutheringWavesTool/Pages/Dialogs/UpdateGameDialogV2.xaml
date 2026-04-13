@@ -96,6 +96,7 @@
             HorizontalAlignment="Stretch"
             Command="{x:Bind ViewModel.SelectDiffPathCommand}"
             Content="{x:Bind ViewModel.DiffSavePath, Mode=OneWay}"
+            IsEnabled="False"
             ToolTipService.ToolTip="点击此处修改补丁文件下载位置" />
         <Grid
             Grid.Row="2"
