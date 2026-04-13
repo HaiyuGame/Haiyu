@@ -1,6 +1,7 @@
 ﻿using Waves.Core.Common;
 using Waves.Core.Models.CoreApi;
 using Waves.Core.Models.Enums;
+using Windows.ApplicationModel.DataTransfer;
 
 namespace Haiyu.ViewModel.GameViewModels.GameContexts;
 
@@ -156,6 +157,16 @@ public partial class PunishV2GameContextViewModel : KuroGameContextViewModelV2
     public override Task LoadAfter()
     {
         return Task.CompletedTask;
+    }
+
+    [RelayCommand]
+    public void CopyGameItemId()
+    {
+        if (GameItem == null)
+            return;
+        var package = new DataPackage();
+        package.SetText(GameItem.RoleId.ToString());
+        Clipboard.SetContent(package);
     }
 
     [ObservableProperty]

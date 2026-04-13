@@ -1,6 +1,8 @@
-﻿using Waves.Core.Common;
+﻿using LiveChartsCore.SkiaSharpView.Extensions;
+using Waves.Core.Common;
 using Waves.Core.Models.CoreApi;
 using Waves.Core.Models.Enums;
+using Windows.ApplicationModel.DataTransfer;
 
 namespace Haiyu.ViewModel.GameViewModels.GameContexts;
 
@@ -165,6 +167,8 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
         }
     }
 
+
+
     [RelayCommand]
     private async Task RefreshLocalGameUser(KRSDKLauncherCacheWrapper wrapper = null)
     {
@@ -264,5 +268,15 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
         this.BattlePass = wavesData.BattlePass??new();
         this.MotorData = wavesData.MotorData??new();
         IsLocalUserRefresh = false;
+    }
+
+    [RelayCommand]
+    public void CopyGameItemId()
+    {
+        if (Base.Id == null)
+            return;
+        var package = new DataPackage();
+        package.SetText(Base.Id.ToString());
+        Clipboard.SetContent(package);
     }
 }
