@@ -32,7 +32,7 @@ public abstract partial class KuroGameContextViewModel
         this.Servers =
             this.GameType == GameType.Waves
                 ? ServerDisplay.GetWavesV2Games
-                : ServerDisplay.GetPunishGames;
+                : ServerDisplay.GetPunishV2Games;
         var openService = this.GameType == GameType.Waves?AppSettings.WavesAutoOpenContext:AppSettings.PunishAutoOpenContext;
 
         var selectServer = Servers.Where(x=>x.Key == openService).FirstOrDefault();

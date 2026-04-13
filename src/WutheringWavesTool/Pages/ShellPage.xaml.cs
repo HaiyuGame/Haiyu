@@ -16,13 +16,12 @@ public sealed partial class ShellPage : Page
         this.ViewModel.TipShow.Owner = this.panel;
         //this.ViewModel.Image = this.image;
         this.ViewModel.AppContext.SetTitleControl(this.titlebar);
-
     }
 
     private void HomeNavigationService_Navigated(object sender, NavigationEventArgs e)
     {
-        if ( e.SourcePageType == typeof(PunishGamePage)
-            || e.SourcePageType == typeof(PunishV2GamePage)
+        if (
+            e.SourcePageType == typeof(PunishV2GamePage)
             || e.SourcePageType == typeof(WavesV2GamePage)
         )
         {
@@ -44,7 +43,10 @@ public sealed partial class ShellPage : Page
     private void ShellPage_Loaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
         this.notify.RegisterWin(Instance.GetService<IAppContext<App>>().App.MainWindow);
-        this.notify.CreateTrayIcon(AppDomain.CurrentDomain.BaseDirectory + "\\Assets\\appLogo.ico", "Haiyu");
+        this.notify.CreateTrayIcon(
+            AppDomain.CurrentDomain.BaseDirectory + "\\Assets\\appLogo.ico",
+            "Haiyu"
+        );
         this.ViewModel.DialogManager.RegisterRoot(this.XamlRoot);
         this.ViewModel.AppContext.WallpaperService.RegisterMediaHost(mediaControl);
     }

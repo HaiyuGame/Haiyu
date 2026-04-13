@@ -14,8 +14,7 @@ using Waves.Api.Models.Launcher;
 using Waves.Core.Common;
 using Waves.Core.Contracts;
 using Waves.Core.Contracts.Events;
-using Waves.Core.GameContext.Contexts;
-using Waves.Core.GameContext.Contexts.PRG;
+using Waves.Core.GameContext.ContextsV2.Punish;
 using Waves.Core.GameContext.ContextsV2.Waves;
 using Waves.Core.GameContext.KruoGameContextBaseV2.Common;
 using Waves.Core.Helpers;
@@ -715,8 +714,8 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
             //https://pc-launcher-sdk-haru-api.kurogames.com/game/queryRole?_t=1772959216
 
             if (
-                this.ContextName == nameof(PunishGlobalGameContext)
-                || this.ContextName == nameof(PunishTwGameContext)
+                this.ContextName == nameof(PunishGlobalGameContextV2)
+                || this.ContextName == nameof(PunishTwGameContextV2)
             )
             {
                 return $"https://pc-launcher-sdk-haru-api.kurogames.net/game/queryPlayerInfo?_t={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
@@ -747,8 +746,8 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
         if (this.GameType == Models.Enums.GameType.Punish)
         {
             if (
-                this.ContextName == nameof(PunishGlobalGameContext)
-                || this.ContextName == nameof(PunishTwGameContext)
+                this.ContextName == nameof(PunishGlobalGameContextV2)
+                || this.ContextName == nameof(PunishTwGameContextV2)
             )
             {
                 return $"https://pc-launcher-sdk-haru-api.kurogames.net/game/queryRole?_t={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";

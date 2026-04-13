@@ -22,8 +22,4 @@
     <ProjectReference Include="..\Waves.Api\Waves.Api.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="GameContext\Contexts\Waves\" />
-  </ItemGroup>
-
 </Project>

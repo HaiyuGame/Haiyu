@@ -2,9 +2,8 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Waves.Core.Contracts;
 using Waves.Core.GameContext;
-using Waves.Core.GameContext.Contexts;
-using Waves.Core.GameContext.Contexts.PRG;
 using Waves.Core.GameContext.ContextsV2;
+using Waves.Core.GameContext.ContextsV2.Punish;
 using Waves.Core.GameContext.ContextsV2.Waves;
 using Waves.Core.Services;
 
@@ -19,45 +18,9 @@ public static class Waves
     /// <returns></returns>
     public static IServiceCollection AddGameContext(this IServiceCollection services)
     {
+        #region 新核心测试
+        //事件订阅发布器
         services
-            .AddKeyedSingleton<IGameContext, PunishMainGameContext>(
-                nameof(PunishMainGameContext),
-                (provider, c) =>
-                {
-                    var context = GameContextFactory.GetMainPGRGameContext();
-                    context.HttpClientService = provider.GetRequiredService<IHttpClientService>();
-                    return context;
-                }
-            )
-            .AddKeyedSingleton<IGameContext, PunishBiliBiliGameContext>(
-                nameof(PunishBiliBiliGameContext),
-                (provider, c) =>
-                {
-                    var context = GameContextFactory.GetBiliBiliPRGGameContext();
-                    context.HttpClientService = provider.GetRequiredService<IHttpClientService>();
-                    return context;
-                }
-            )
-            .AddKeyedSingleton<IGameContext, PunishGlobalGameContext>(
-                nameof(PunishGlobalGameContext),
-                (provider, c) =>
-                {
-                    var context = GameContextFactory.GetGlobalPGRGameContext();
-                    context.HttpClientService = provider.GetRequiredService<IHttpClientService>();
-                    return context;
-                }
-            )
-            .AddKeyedSingleton<IGameContext, PunishTwGameContext>(
-                nameof(PunishTwGameContext),
-                (provider, c) =>
-                {
-                    var context = GameContextFactory.GetTwWavesGameContext();
-                    context.HttpClientService = provider.GetRequiredService<IHttpClientService>();
-                    return context;
-                }
-            )
-            #region 新核心测试
-            //事件订阅发布器
             .AddKeyedSingleton<GameEventPublisher>(nameof(PunishMainGameContextV2))
             .AddKeyedSingleton<IGameContextV2, PunishMainGameContextV2>(
                 nameof(PunishMainGameContextV2),
@@ -68,6 +31,48 @@ public static class Waves
                     context.GameEventPublisher =
                         provider.GetRequiredKeyedService<GameEventPublisher>(
                             nameof(PunishMainGameContextV2)
+                        );
+                    return context;
+                }
+            )
+            .AddKeyedSingleton<GameEventPublisher>(nameof(PunishBiliBiliGameContextV2))
+            .AddKeyedSingleton<IGameContextV2, PunishBiliBiliGameContextV2>(
+                nameof(PunishBiliBiliGameContextV2),
+                (provider, c) =>
+                {
+                    var context = GameContextFactory.GetBiliBiliPunishGameContextV2();
+                    context.HttpClientService = provider.GetRequiredService<IHttpClientService>();
+                    context.GameEventPublisher =
+                        provider.GetRequiredKeyedService<GameEventPublisher>(
+                            nameof(PunishBiliBiliGameContextV2)
+                        );
+                    return context;
+                }
+            )
+            .AddKeyedSingleton<GameEventPublisher>(nameof(PunishGlobalGameContextV2))
+            .AddKeyedSingleton<IGameContextV2, PunishGlobalGameContextV2>(
+                nameof(PunishGlobalGameContextV2),
+                (provider, c) =>
+                {
+                    var context = GameContextFactory.GetGlobalPunishGameContextV2();
+                    context.HttpClientService = provider.GetRequiredService<IHttpClientService>();
+                    context.GameEventPublisher =
+                        provider.GetRequiredKeyedService<GameEventPublisher>(
+                            nameof(PunishGlobalGameContextV2)
+                        );
+                    return context;
+                }
+            )
+            .AddKeyedSingleton<GameEventPublisher>(nameof(PunishTwGameContextV2))
+            .AddKeyedSingleton<IGameContextV2, PunishTwGameContextV2>(
+                nameof(PunishTwGameContextV2),
+                (provider, c) =>
+                {
+                    var context = GameContextFactory.GetTwPunishGameContextV2();
+                    context.HttpClientService = provider.GetRequiredService<IHttpClientService>();
+                    context.GameEventPublisher =
+                        provider.GetRequiredKeyedService<GameEventPublisher>(
+                            nameof(PunishTwGameContextV2)
                         );
                     return context;
                 }
@@ -114,7 +119,7 @@ public static class Waves
                     return context;
                 }
             )
-            #endregion
+        #endregion
             .AddTransient<IHttpClientService, HttpClientService>();
         return services;
     }

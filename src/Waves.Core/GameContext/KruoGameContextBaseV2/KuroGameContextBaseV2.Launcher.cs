@@ -6,8 +6,7 @@ using System.Text.Json;
 using Serilog.Core;
 using Waves.Api.Models;
 using Waves.Api.Models.Launcher;
-using Waves.Core.GameContext.Contexts;
-using Waves.Core.GameContext.Contexts.PRG;
+using Waves.Core.GameContext.ContextsV2.Punish;
 using Waves.Core.GameContext.ContextsV2.Waves;
 using Waves.Core.Models.CoreApi;
 using Waves.Core.Models.Downloader;
@@ -26,8 +25,8 @@ namespace Waves.Core.GameContext
             var url = "";
             try
             {
-                if (this.ContextName == nameof(PunishGlobalGameContext)
-                    || this.ContextName == nameof(PunishTwGameContext)
+                if (this.ContextName == nameof(PunishGlobalGameContextV2)
+                    || this.ContextName == nameof(PunishTwGameContextV2)
                 || this.ContextName == nameof(WavesGlobalGameContextV2)
                 )
                 {
@@ -113,8 +112,8 @@ namespace Waves.Core.GameContext
             string url = "";
             try
             {
-                if ( this.ContextName == nameof(PunishGlobalGameContext)
-                    || this.ContextName == nameof(PunishTwGameContext)
+                if ( this.ContextName == nameof(PunishGlobalGameContextV2)
+                    || this.ContextName == nameof(PunishTwGameContextV2)
                 || this.ContextName == nameof(WavesGlobalGameContextV2)
                 )
                 {
@@ -145,8 +144,8 @@ namespace Waves.Core.GameContext
         )
         {
             string url = "";
-            if ( this.ContextName == nameof(PunishGlobalGameContext)
-                || this.ContextName == nameof(PunishTwGameContext)
+            if ( this.ContextName == nameof(PunishGlobalGameContextV2)
+                || this.ContextName == nameof(PunishTwGameContextV2)
                 || this.ContextName == nameof(WavesGlobalGameContextV2)
             )
             {
@@ -172,8 +171,8 @@ namespace Waves.Core.GameContext
         )
         {
             var address = "";
-            if (this.ContextName == nameof(PunishGlobalGameContext)
-                || this.ContextName == nameof(PunishTwGameContext)
+            if (this.ContextName == nameof(PunishGlobalGameContextV2)
+                || this.ContextName == nameof(PunishTwGameContextV2)
                 || this.ContextName == nameof(WavesGlobalGameContextV2)
             )
             {

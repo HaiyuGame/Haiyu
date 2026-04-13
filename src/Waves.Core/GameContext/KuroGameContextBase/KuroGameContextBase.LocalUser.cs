@@ -8,8 +8,7 @@ using System.Text.Json;
 using System.Text.Unicode;
 using Waves.Api.Models;
 using Waves.Api.Models.Launcher;
-using Waves.Core.GameContext.Contexts;
-using Waves.Core.GameContext.Contexts.PRG;
+using Waves.Core.GameContext.ContextsV2.Punish;
 using Waves.Core.GameContext.ContextsV2.Waves;
 using Waves.Core.Models;
 
@@ -241,8 +240,8 @@ partial class KuroGameContextBase
             //https://pc-launcher-sdk-haru-api.kurogames.com/game/queryRole?_t=1772959216
 
             if (
-                this.ContextName == nameof(PunishGlobalGameContext)
-                || this.ContextName == nameof(PunishTwGameContext)
+                this.ContextName == nameof(PunishGlobalGameContextV2)
+                || this.ContextName == nameof(PunishTwGameContextV2)
             )
             {
                 return $"https://pc-launcher-sdk-haru-api.kurogames.net/game/queryPlayerInfo?_t={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
@@ -273,8 +272,8 @@ partial class KuroGameContextBase
         if (this.GameType == Models.Enums.GameType.Punish)
         {
             if (
-                this.ContextName == nameof(PunishGlobalGameContext)
-                || this.ContextName == nameof(PunishTwGameContext)
+                this.ContextName == nameof(PunishGlobalGameContextV2)
+                || this.ContextName == nameof(PunishTwGameContextV2)
             )
             {
                 return $"https://pc-launcher-sdk-haru-api.kurogames.net/game/queryRole?_t={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
