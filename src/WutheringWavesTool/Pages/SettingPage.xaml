@@ -256,13 +256,13 @@
                 </ui:SettingsCard>
                 <ui:SettingsCard
                     Margin="0,5,0,0"
-                    Description="在某些操作系统中，可能会出现鼠标乱跳问题，勾选此选项可尝试解决"
-                    Header="启动游戏后不关闭启动器">
+                    Description="在某些操作系统中，可能会出现鼠标乱跳问题，取消勾选次选项可尝试解决"
+                    Header="启动游戏后隐藏启动器">
                     <ui:SettingsCard.HeaderIcon>
                         <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xF45E;" />
                     </ui:SettingsCard.HeaderIcon>
                     <Border Width="30" MaxWidth="30">
-                        <CheckBox IsChecked="{x:Bind ViewModel.AutoCommunitySign, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <CheckBox IsChecked="{x:Bind ViewModel.StartGameAllowCloseMain, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </Border>
                 </ui:SettingsCard>
                 <ui:SettingsCard

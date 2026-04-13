@@ -11,7 +11,7 @@ partial class KuroGameContextViewModelV2
     {
         if (_buttonAction == ButtonActionType.StartGame)
         {
-            if (await GameContext.StartGameAsync())
+            if ((await GameContext.StartGameAsync()) && (AppSettings.StartGameAllowCloseMain == true))
             {
                 this.AppContext.MinToTaskbar();
             }
