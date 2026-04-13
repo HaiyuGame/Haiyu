@@ -137,6 +137,7 @@ public abstract class DialogManager : IDialogManager
         dialog.Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style;
         dialog.PrimaryButtonText = content;
         dialog.CloseButtonText = closeText;
+        dialog.RequestedTheme =  Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
         dialog.IsSecondaryButtonEnabled = false;
         dialog.DefaultButton = ContentDialogButton.Close;
         dialog.Content = new TextBlock() { Text = header };
