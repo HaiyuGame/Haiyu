@@ -84,6 +84,8 @@ public interface IGameContextV2
     /// <returns></returns>
     Task<bool> StartProdDownloadGameResourceAsync();
 
+    bool IsDownloadTaskCancel();
+
     /// <summary>
     /// 恢复任务
     /// </summary>

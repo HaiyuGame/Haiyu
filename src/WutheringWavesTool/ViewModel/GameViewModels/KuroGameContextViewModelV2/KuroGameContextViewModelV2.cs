@@ -52,7 +52,6 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         this.SelectServer = selectServer == null ? Servers[0] : selectServer;
     }
 
-
     [ObservableProperty]
     public partial bool IsDx11Launcher { get; set; } = false;
 
@@ -170,10 +169,10 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
     private async void ProgressState_OnProgressChanged(GameProgressTracker tracker)
     {
         var args = tracker.LastArgs;
+        if (this.GameContext == null)
+            return;
         await AppContext.TryInvokeAsync(async () =>
         {
-            if (this.GameContext == null)
-                return;
             var actionType = args.Type;
             var status = await this.GameContext.GetGameContextStatusAsync(this.CTS.Token);
             if (!tracker.Prod)
@@ -205,6 +204,10 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                     || actionType == GameContextActionType.ZipDecompress
                 )
                 {
+                    if (GameContext.IsDownloadTaskCancel())
+                    {
+                        return;
+                    }
                     UpdateTransferProgressDisplay(tracker, args, status);
                     ShowGameDownloadingBth(status);
                 }
@@ -224,35 +227,50 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
             }
             else
             {
-                this.PreProgress = tracker.Percentage;
-                this.PreSpeedText = tracker.GetSpeedText();
-                this.PreDownloadSizeText =
-                    $"{GameProgressTracker.FormatBytes(tracker.CurrentBytes)}/{GameProgressTracker.FormatBytes(tracker.TotalBytes)}";
-                var allSteps = tracker.AllSteps;
-                this.MaxStep = allSteps.Count;
-                if (allSteps.Count > 0)
-                {
-                    var safeStepIndex = Math.Clamp(tracker.CurrentStepIndex, 0, allSteps.Count - 1);
-                    PreSetupText = $"{allSteps[safeStepIndex]}";
-                    PreSetupHeaderText = $"[{safeStepIndex + 1}/{allSteps.Count}]";
-                }
-                else
-                {
-                    this.CurrentStep = 0;
-                    this.CurrentStepText = string.Empty;
-                }
                 if (
-                    (
-                        GameContext.ProdDownloadState != null
-                        && GameContext.ProdDownloadState!.IsPaused
-                    ) || args.IsPause
+                    args.Type == GameContextActionType.Download
+                    || args.Type == GameContextActionType.Verify
+                    || args.Type == GameContextActionType.Decompress
                 )
                 {
-                    this.PreDownloadIcon = "\uE768";
-                }
-                else
-                {
-                    this.PreDownloadIcon = "\uE769";
+                    if (GameContext.IsDownloadTaskCancel())
+                    {
+                        return;
+                    }
+                    this.PreProgress = tracker.Percentage;
+                    this.PreSpeedText = tracker.GetSpeedText();
+                    this.PreDownloadSizeText =
+                        $"{GameProgressTracker.FormatBytes(tracker.CurrentBytes)}/{GameProgressTracker.FormatBytes(tracker.TotalBytes)}";
+                    var allSteps = tracker.AllSteps;
+                    this.MaxStep = allSteps.Count;
+                    if (allSteps.Count > 0)
+                    {
+                        var safeStepIndex = Math.Clamp(
+                            tracker.CurrentStepIndex,
+                            0,
+                            allSteps.Count - 1
+                        );
+                        PreSetupText = $"{allSteps[safeStepIndex]}";
+                        PreSetupHeaderText = $"[{safeStepIndex + 1}/{allSteps.Count}]";
+                    }
+                    else
+                    {
+                        this.CurrentStep = 0;
+                        this.CurrentStepText = string.Empty;
+                    }
+                    if (
+                        (
+                            GameContext.ProdDownloadState != null
+                            && GameContext.ProdDownloadState!.IsPaused
+                        ) || args.IsPause
+                    )
+                    {
+                        this.PreDownloadIcon = "\uE768";
+                    }
+                    else
+                    {
+                        this.PreDownloadIcon = "\uE769";
+                    }
                 }
             }
             //显示消息
@@ -333,6 +351,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         GameContextStatus status
     )
     {
+        if (disposedValue) return;
         var now = DateTime.Now;
         this.MaxProgressValue = tracker.TotalBytes;
         this.CurrentProgressValue = tracker.CurrentBytes;
@@ -389,7 +408,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         )
         {
             this.PauseIcon = "\uE769";
-            if (args.Type == GameContextActionType.Decompress) 
+            if (args.Type == GameContextActionType.Decompress)
             {
                 var speedValue = Math.Round(tracker.DiffSpeed / 1_000_000d, 2);
                 TryAddChartPoint(
@@ -419,6 +438,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         if ((now - _lastSeparatorRefreshTime) >= SeparatorRefreshInterval)
         {
             _lastSeparatorRefreshTime = now;
+            this.DownloadSpeedSeparators?.Clear();
             this.DownloadSpeedSeparators = GetSeparators();
         }
     }
@@ -428,6 +448,8 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         DateTime now
     )
     {
+        if (points == null)
+            return;
         while (points.Count > 0 && (now - points[0].DateTime).TotalSeconds > ChartPointKeepSeconds)
         {
             points.RemoveAt(0);
@@ -446,6 +468,8 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         double value
     )
     {
+        if (points == null)
+            return;
         if ((now - lastPointTime) < ChartPointInterval)
         {
             return;
@@ -606,10 +630,10 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                 await ShowCardAsync(showCard);
                 await LoadAfter();
             }
-            this.DecompressSpeedPoints.Clear();
-            this.DownloadSpeedPoints.Clear();
-            this.DecompressSpeedPoints.Clear();
-            this.DownloadSpeedSeparators.Clear();
+            this.DecompressSpeedPoints?.Clear();
+            this.DownloadSpeedPoints?.Clear();
+            this.VerifySpeedPoints?.Clear();
+            this.DownloadSpeedSeparators?.Clear();
             ProcessAction = false;
         }
         catch (Exception ex)
@@ -889,21 +913,32 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
     {
         if (!disposedValue)
         {
-            //取消数据接收接口
+            disposedValue = true;
             this.GameContext.ProgressState.OnProgressChanged -= ProgressState_OnProgressChanged;
             if (DownloadSpeedPoints != null)
+            {
                 this.DownloadSpeedPoints.Clear();
+                this.DownloadSpeedPoints = null;
+            }
             if (DecompressSpeedPoints != null)
+            {
                 this.DecompressSpeedPoints.Clear();
+                this.DecompressSpeedPoints = null;
+            }
             if (VerifySpeedPoints != null)
+            {
                 this.VerifySpeedPoints.Clear();
+                this.VerifySpeedPoints = null;
+            }
             if (DownloadSpeedSeparators != null)
+            {
                 DownloadSpeedSeparators.Clear();
+                this.DownloadSpeedSeparators = null;
+            }
             if (disposing)
             {
                 DisposeAfter();
             }
-            disposedValue = true;
             base.Dispose();
         }
     }

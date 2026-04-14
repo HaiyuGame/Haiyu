@@ -1,10 +1,11 @@
-﻿using System.Windows;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Project.WPFSetup.Common;
 using Project.WPFSetup.Common.Setups;
 using Project.WPFSetup.Resources;
 using Project.WPFSetup.Services;
+using System.Diagnostics;
+using System.Windows;
 
 namespace Project.WPFSetup.ViewModels.UserViewModels;
 
@@ -112,6 +113,26 @@ public partial class UpdateViewModel : ObservableObject
         {
             MessageBox.Show($"安装失败！{result.Item2}");
             Environment.Exit(0);
+        }
+    }
+
+    [RelayCommand]
+    async Task Loaded()
+    {
+        var progress = Process.GetProcesses();
+        var current = progress.Where(x => x.ProcessName.Contains("Haiyu")).FirstOrDefault();
+        if (current != null)
+        {
+            var result = MessageBox.Show("Haiyu正在运行，是否关闭？", "警告", MessageBoxButton.OKCancel, MessageBoxImage.Warning, MessageBoxResult.OK);
+            if (result == MessageBoxResult.OK)
+            {
+                current.Kill();
+            }
+            else
+            {
+                MessageBox.Show("Haiyu正在运行，无法卸载");
+                Environment.Exit(0);
+            }
         }
     }
 }

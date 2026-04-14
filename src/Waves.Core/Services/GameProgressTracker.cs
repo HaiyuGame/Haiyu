@@ -94,15 +94,36 @@ public sealed class GameProgressTracker : IAsyncDisposable
     public ConcurrentDictionary<string, (long Current, long Total)> ActiveFiles { get; } =
         new(StringComparer.OrdinalIgnoreCase);
 
-    public ObservableCollection<DownloadActiveFileItem> ActiveFilesItem =>
-        new(
-            ActiveFiles.Select(x => new DownloadActiveFileItem()
+    private long _activeFilesVersion;
+    private long _cachedActiveFilesVersion = -1;
+    private ObservableCollection<DownloadActiveFileItem>? _cachedActiveFilesItem;
+
+    /// <summary>
+    /// 活跃文件列表的版本号，每次 ActiveFiles 变更时递增
+    /// </summary>
+    public long ActiveFilesVersion => Interlocked.Read(ref _activeFilesVersion);
+
+    public ObservableCollection<DownloadActiveFileItem> ActiveFilesItem
+    {
+        get
+        {
+            var currentVersion = Interlocked.Read(ref _activeFilesVersion);
+            if (_cachedActiveFilesItem != null && _cachedActiveFilesVersion == currentVersion)
             {
-                CurrentSize = x.Value.Current,
-                TotalSize = x.Value.Total,
-                FileName = x.Key,
-            })
-        );
+                return _cachedActiveFilesItem;
+            }
+            _cachedActiveFilesItem = new(
+                ActiveFiles.Select(x => new DownloadActiveFileItem()
+                {
+                    CurrentSize = x.Value.Current,
+                    TotalSize = x.Value.Total,
+                    FileName = x.Key,
+                })
+            );
+            _cachedActiveFilesVersion = currentVersion;
+            return _cachedActiveFilesItem;
+        }
+    }
 
     public event Action<GameProgressTracker>? OnProgressChanged;
 
@@ -216,10 +237,12 @@ public sealed class GameProgressTracker : IAsyncDisposable
             if (args.FileCurrentSize >= args.FileTotalSize && args.FileTotalSize > 0)
             {
                 ActiveFiles.TryRemove(fileName, out _);
+                Interlocked.Increment(ref _activeFilesVersion);
             }
             else
             {
                 ActiveFiles[fileName] = (args.FileCurrentSize, args.FileTotalSize);
+                Interlocked.Increment(ref _activeFilesVersion);
             }
         }
         if (!string.IsNullOrWhiteSpace(args.TipMessage))
@@ -276,6 +299,8 @@ public sealed class GameProgressTracker : IAsyncDisposable
             _subscription?.Dispose();
             _subscription = null;
             OnProgressChanged = null;
+            ActiveFiles.Clear();
+            _cachedActiveFilesItem = null;
 
             if (_timerTask != null)
             {

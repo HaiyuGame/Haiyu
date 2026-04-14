@@ -1,5 +1,4 @@
-﻿using Haiyu.Common;
-using System;
+﻿using System;
 using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,6 +8,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Text.Unicode;
+using Haiyu.Common;
 using Waves.Api.Models;
 using Waves.Api.Models.Launcher;
 using Waves.Core.Common;
@@ -318,7 +318,6 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
         return await GetLocalFileVersionAsync("libxess.dll", "Xess");
     }
 
-
     public async Task<GameContextStatus> GetGameContextStatusAsync(
         CancellationToken token = default
     )
@@ -412,7 +411,6 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
     {
         this.GameEventPublisher.Publish(this.ProgressState.LastArgs);
     }
-
 
     public async Task DeleteResourceAsync(
         IProgress<(double deletedCount, double totalCount)> progress
@@ -645,7 +643,7 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
                 msg.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
                 var reponse = await client.SendAsync(msg, token);
-                var json2 =  await reponse.Content.ReadAsStringAsync(token);
+                var json2 = await reponse.Content.ReadAsStringAsync(token);
                 var model = JsonSerializer.Deserialize<QueryRoleInfo>(
                     await reponse.Content.ReadAsStringAsync(token),
                     LocalGameUserContext.Default.QueryRoleInfo
@@ -792,5 +790,14 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
         {
             return null;
         }
+    }
+
+    public bool IsDownloadTaskCancel()
+    {
+        return DownloadState != null
+            && (
+                DownloadState.CancelToken == null
+                || DownloadState.CancelToken.IsCancellationRequested
+            );
     }
 }
