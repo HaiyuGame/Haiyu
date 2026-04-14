@@ -28,11 +28,11 @@ public class SpeedLimiter
         }
     }
 
-    public async Task LimitAsync(int bytesTransferred)
+    public async Task LimitAsync(int bytesTransferred,CancellationToken token = default)
     {
         if (_bytesPerSecond == 0)
             return;
-        await _sync.WaitAsync();
+        await _sync.WaitAsync(token).ConfigureAwait(false);
         try
         {
             var now = DateTime.UtcNow;
@@ -53,7 +53,7 @@ public class SpeedLimiter
             _tokenBucket += (int)(_maxBytesPerSecond * waitSeconds);
             _lastUpdate = now.AddSeconds(waitSeconds);
 
-            await Task.Delay(TimeSpan.FromSeconds(waitSeconds)).ConfigureAwait(false);
+            await Task.Delay(TimeSpan.FromSeconds(waitSeconds),token).ConfigureAwait(false);
         }
         finally
         {
