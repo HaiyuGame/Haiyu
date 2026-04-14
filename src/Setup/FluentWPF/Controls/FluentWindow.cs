@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
+using System.Windows.Media;
 using System.Windows.Shell;
 
 namespace FluentWPF.Controls;
@@ -174,6 +175,21 @@ public partial class FluentWindow : Window
             typeof(FluentWindow),
             new PropertyMetadata(Visibility.Visible)
         );
+
+
+
+
+    public object AppImageBackground
+    {
+        get { return (object)GetValue(AppImageBackgroundProperty); }
+        set { SetValue(AppImageBackgroundProperty, value); }
+    }
+
+    // Using a DependencyProperty as the backing store for AppImageBackground.  This enables animation, styling, binding, etc...
+    public static readonly DependencyProperty AppImageBackgroundProperty =
+        DependencyProperty.Register(nameof(AppImageBackground), typeof(object), typeof(FluentWindow), new PropertyMetadata(null));
+
+
 
     public override void OnApplyTemplate()
     {

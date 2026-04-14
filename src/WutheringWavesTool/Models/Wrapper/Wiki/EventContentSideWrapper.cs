@@ -48,10 +48,13 @@ public partial class EventContentSideWrapper : ObservableObject
     public partial double CurrentProgress { get; set; }
     internal void Cali()
     {
-        var time = this.StopTime - this.StartTime;
-        var time2 = this.StopTime - DateTime.Now;
-        this.MaxProgress = time.TotalSeconds;
-        this.CurrentProgress = (this.StopTime - DateTime.Now).TotalSeconds;
-        this.DisplayTime = $"{time2.Days}天{time2.Hours}小时{time2.Minutes}分{time2.Seconds}秒";
+        var now = DateTime.Now;
+        var totalTime = this.StopTime - this.StartTime;
+        var remainingTime = this.StopTime - now;
+        if (remainingTime.TotalSeconds < 0)
+            remainingTime = TimeSpan.Zero;
+        this.MaxProgress = totalTime.TotalSeconds;
+        this.CurrentProgress = remainingTime.TotalSeconds;
+        this.DisplayTime = $"{remainingTime.Days}天{remainingTime.Hours:D2}小时{remainingTime.Minutes:D2}分{remainingTime.Seconds:D2}秒";
     }
 }

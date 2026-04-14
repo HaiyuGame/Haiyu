@@ -575,8 +575,8 @@
                                             Grid.Row="1"
                                             HorizontalAlignment="Stretch"
                                             Background="Transparent"
-                                            Maximum="{x:Bind MaxProgress}"
-                                            Value="{x:Bind CurrentProgress}" />
+                                            Maximum="{x:Bind MaxProgress, Mode=OneWay}"
+                                            Value="{x:Bind CurrentProgress, Mode=OneWay}" />
                                         <Grid
                                             Grid.Row="2"
                                             Margin="0,3,0,0"

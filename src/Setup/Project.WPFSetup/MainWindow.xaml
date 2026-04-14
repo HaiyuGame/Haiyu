@@ -21,6 +21,17 @@
     ResizeMode="CanMinimize"
     Style="{DynamicResource DefaultWindowStyle}"
     mc:Ignorable="d">
+    <ui:FluentWindow.AppImageBackground>
+
+        <Image
+            Opacity="0.4"
+            Source="/Assets/Background.png"
+            Stretch="UniformToFill">
+            <Image.Effect>
+                <BlurEffect Radius="5" />
+            </Image.Effect>
+        </Image>
+    </ui:FluentWindow.AppImageBackground>
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Loaded">
             <i:InvokeCommandAction Command="{Binding LoadedCommand}" />
@@ -46,8 +57,7 @@
             UninstallTemplate="{StaticResource UninstallView}"
             UpdateTemplate="{StaticResource UpdateView}" />
     </ui:FluentWindow.Resources>
-    <ui:FluentWindow.SystemBackdrop>
-        <sysback:MicaBackdrop />
-    </ui:FluentWindow.SystemBackdrop>
-    <ContentControl Content="{Binding CurrentViewModel, Mode=OneWay}" ContentTemplateSelector="{StaticResource MainViewSelector}" />
+    <Grid>
+        <ContentControl Content="{Binding CurrentViewModel, Mode=OneWay}" ContentTemplateSelector="{StaticResource MainViewSelector}" />
+    </Grid>
 </ui:FluentWindow>
