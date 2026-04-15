@@ -41,6 +41,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
     private double _verifySpeed;
     private long _totalfileSize;
     private int _totalFileTotal;
+    private volatile bool _disposed;
     #endregion
 
     private DownloadState _downloadState;
@@ -236,6 +237,8 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
                         new Progress<(GameContextActionType, bool, long, string, long, long)>(
                             value =>
                             {
+                                if (_disposed || _downloadState.CancelToken.IsCancellationRequested)
+                                    return;
                                 var args = UpdateFileProgress(
                                     value.Item1,
                                     value.Item3,
@@ -283,12 +286,15 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
                             }
                             else
                             {
-                                var args = UpdateFileProgress(
-                                    GameContextActionType.Verify,
-                                    item.Size,
-                                    true
-                                );
-                                GameEventPublisher.Publish(args);
+                                if (!_disposed && !_downloadState.CancelToken.IsCancellationRequested)
+                                {
+                                    var args = UpdateFileProgress(
+                                        GameContextActionType.Verify,
+                                        item.Size,
+                                        true
+                                    );
+                                    GameEventPublisher.Publish(args);
+                                }
                             }
                         }
                         else
@@ -338,12 +344,15 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
                                 }
                                 else
                                 {
-                                    var args = UpdateFileProgress(
-                                        GameContextActionType.Verify,
-                                        item.ChunkInfos[i].End - item.ChunkInfos[i].Start,
-                                        true
-                                    );
-                                    GameEventPublisher.Publish(args);
+                                    if (!_disposed && !_downloadState.CancelToken.IsCancellationRequested)
+                                    {
+                                        var args = UpdateFileProgress(
+                                            GameContextActionType.Verify,
+                                            item.ChunkInfos[i].End - item.ChunkInfos[i].Start,
+                                            true
+                                        );
+                                        GameEventPublisher.Publish(args);
+                                    }
                                 }
                             }
                         }
@@ -448,6 +457,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
+        _disposed = true;
         await CancelAsync();
         this._resource.Clear();
         this._launcher = null;

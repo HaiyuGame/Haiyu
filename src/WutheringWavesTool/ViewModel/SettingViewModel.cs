@@ -54,6 +54,9 @@ public sealed partial class SettingViewModel : ViewModelBase
     public partial bool? AutoCommunitySign { get; set; }
 
     [ObservableProperty]
+    public partial bool? StartGameAllowCloseMain { get; set; }
+
+    [ObservableProperty]
     public partial int SelectCloseIndex { get; set; }
 
     [ObservableProperty]
@@ -91,6 +94,7 @@ public sealed partial class SettingViewModel : ViewModelBase
                 }
             }
             this.AutoCommunitySign = AppSettings.AutoSignCommunity;
+            this.StartGameAllowCloseMain = AppSettings.StartGameAllowCloseMain;
             switch (AppSettings.ElementTheme)
             {
                 case "Light":
@@ -106,7 +110,6 @@ public sealed partial class SettingViewModel : ViewModelBase
                     this.SelectTheme = Themes[0];
                     break;
             }
-
             this.InitCapture();
             GetAllVersion();
         });
@@ -152,6 +155,13 @@ public sealed partial class SettingViewModel : ViewModelBase
                 AppSettings.CloseWindow = "True";
                 break;
         }
+    }
+
+    partial void OnStartGameAllowCloseMainChanged(bool? value)
+    {
+        if (value == null)
+            return;
+        AppSettings.StartGameAllowCloseMain = value;
     }
 
     partial void OnAutoCommunitySignChanged(bool? value)

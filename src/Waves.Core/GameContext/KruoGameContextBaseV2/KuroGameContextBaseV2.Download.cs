@@ -135,28 +135,30 @@ partial class KuroGameContextBaseV2
             this.CurrentSetups = 1;
             if (state.CancelToken.IsCancellationRequested)
             {
-                await this.GameLocalConfig.SaveConfigAsync(
-                    GameLocalSettingName.GameLauncherBassFolder,
-                    ""
-                );
-                await this.GameLocalConfig.SaveConfigAsync(
-                    GameLocalSettingName.LocalGameVersion,
-                    ""
-                );
-                await this.GameLocalConfig.SaveConfigAsync(
-                    GameLocalSettingName.LocalGameUpdateing,
-                    "False"
-                );
+                if (!isRepir)
+                {
+                    await this.GameLocalConfig.SaveConfigAsync(
+                        GameLocalSettingName.GameLauncherBassFolder,
+                        ""
+                    );
+                    await this.GameLocalConfig.SaveConfigAsync(
+                        GameLocalSettingName.LocalGameVersion,
+                        ""
+                    );
+                    await this.GameLocalConfig.SaveConfigAsync(
+                        GameLocalSettingName.LocalGameUpdateing,
+                        "False"
+                    );
 
-                await this.GameLocalConfig.SaveConfigAsync(
-                    GameLocalSettingName.GameLauncherBassProgram,
-                    ""
-                );
-
+                    await this.GameLocalConfig.SaveConfigAsync(
+                        GameLocalSettingName.GameLauncherBassProgram,
+                        ""
+                    );
+                    
+                }
                 GameEventPublisher.Publish(
-                    new GameContextOutputArgs() { Type = GameContextActionType.None }
-                );
-
+                        new GameContextOutputArgs() { Type = GameContextActionType.None }
+                    );
                 return true;
             }
             await this.GameEventPublisher.PublishStepAsync("写入配置", CurrentSetups, Setups);

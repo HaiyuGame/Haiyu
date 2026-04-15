@@ -28,6 +28,14 @@ public abstract class DialogManager : IDialogManager
         this._dialog = dialog;
         await _dialog.ShowAsync();
     }
+    public async Task ShowGameResourceV2DialogAsync(string contextName)
+    {
+        var dialog = Instance.Host.Services.GetRequiredService<GameResourceDialogV2>();
+        dialog.SetData(contextName);
+        dialog.XamlRoot = this.Root;
+        this._dialog = dialog;
+        await _dialog.ShowAsync();
+    }
 
 
     public async Task ShowDialogAsync<T>()
@@ -99,6 +107,9 @@ public abstract class DialogManager : IDialogManager
     public async Task<UpdateGameResult> ShowUpdateGameDialogAsync(string contextName, UpdateGameType type)=>
         await GetDialogResultAsync<UpdateGameDialog, UpdateGameResult>(new Tuple<string, UpdateGameType>(contextName, type));
 
+    public async Task<UpdateGameResult> ShowUpdateGameDialogAsyncV2(string contextName, UpdateGameType type) =>
+        await GetDialogResultAsync<UpdateGameDialogV2, UpdateGameResult>(new Tuple<string, UpdateGameType>(contextName, type));
+
     public async Task ShowDeleteGameResource(string contentName) =>
         await ShowDialogAsync<DeleteFileDialog>(contentName);
 
@@ -126,6 +137,7 @@ public abstract class DialogManager : IDialogManager
         dialog.Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style;
         dialog.PrimaryButtonText = content;
         dialog.CloseButtonText = closeText;
+        dialog.RequestedTheme =  Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
         dialog.IsSecondaryButtonEnabled = false;
         dialog.DefaultButton = ContentDialogButton.Close;
         dialog.Content = new TextBlock() { Text = header };

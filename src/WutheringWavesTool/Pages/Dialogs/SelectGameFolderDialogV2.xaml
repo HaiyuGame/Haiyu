@@ -4,15 +4,21 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:local="using:Haiyu.Pages.Dialogs"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="using:Haiyu.Controls"
     Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
     CornerRadius="5"
     mc:Ignorable="d">
-
+    <i:Interaction.Behaviors>
+        <i:EventTriggerBehavior EventName="Loaded">
+            <i:InvokeCommandAction Command="{x:Bind ViewModel.LoadedCommand}" />
+        </i:EventTriggerBehavior>
+    </i:Interaction.Behaviors>
     <Grid Width="470" Height="270">
         <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
             <RowDefinition Height="auto" />
             <RowDefinition Height="auto" />
             <RowDefinition />
@@ -39,7 +45,7 @@
             </Button>
         </Grid>
         <TextBlock
-            Grid.Row="1"
+            Grid.Row="2"
             Grid.RowSpan="2"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
@@ -70,26 +76,34 @@
                 </DataTemplate>
             </ui:LayeredProgressBar.ItemTemplate>
         </ui:LayeredProgressBar>
-        <InfoBar
-            Title="游戏版本问题"
-            Grid.Row="2"
-            Margin="0,10,0,0"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch"
-            FontFamily="{ThemeResource DefaultFont}"
-            FontSize="15"
-            IsOpen="True"
-            Message="在选择一个新的路径时，程序无法确认此文件夹中游戏版本，这没关系，你可以继续下一步"
-            Severity="Warning"
-            Style="{ThemeResource NoCloseInfoBarStyle}"
-            Visibility="{x:Bind ViewModel.IsVerify, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
-        <Grid Grid.Row="3">
+        <Grid Grid.Row="2" Margin="0,15,0,0">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <TextBlock VerticalAlignment="Center" Text="选择版本：" />
+            <ComboBox
+                Grid.Column="1"
+                HorizontalAlignment="Stretch"
+                ItemsSource="{x:Bind ViewModel.Versions, Mode=OneWay}"
+                SelectedItem="{x:Bind ViewModel.SelectedVersion, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+        </Grid>
+        <InfoBar
+            Grid.Row="3"
+            Margin="0,15,0,0"
+            Content="可选择本地版本跳过校验"
+            IsClosable="False"
+            IsOpen="True"
+            Severity="Success" />
+        <Grid Grid.Row="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
                 <ColumnDefinition />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
             <Button
-                Margin="0,0,5,0"
+                Grid.Column="2"
+                Margin="5,0,0,0"
                 HorizontalAlignment="Stretch"
                 Command="{x:Bind ViewModel.CloseCommand}"
                 Content="取消"
@@ -100,6 +114,12 @@
                 HorizontalAlignment="Stretch"
                 Command="{x:Bind ViewModel.StartVerifyCommand}"
                 Content="进入校验"
+                FontFamily="{ThemeResource DefaultFont}" />
+            <Button
+                Margin="5,0,0,0"
+                HorizontalAlignment="Stretch"
+                Command="{x:Bind ViewModel.SelectVersionCommand}"
+                Content="选定版本(跳过校验)"
                 FontFamily="{ThemeResource DefaultFont}"
                 Style="{ThemeResource AccentButtonStyle}" />
         </Grid>

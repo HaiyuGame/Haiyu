@@ -1,4 +1,6 @@
-﻿using Waves.Core.Models.Enums;
+﻿using LiveChartsCore.Defaults;
+using LiveChartsCore.Kernel;
+using Waves.Core.Models.Enums;
 
 namespace Haiyu.ViewModel.GameViewModels;
 
@@ -46,6 +48,50 @@ partial class KuroGameContextViewModelV2
     public partial GameContextActionType CurrentActiveType { get; set; }
     #endregion
 
+
+    #region 进度图表
+    [ObservableProperty]
+    public partial ObservableCollection<DateTimePoint> DownloadSpeedPoints { get; set; } = new();
+    [ObservableProperty]
+    public partial ObservableCollection<DateTimePoint> VerifySpeedPoints { get; set; } = new();
+    [ObservableProperty]
+    public partial ObservableCollection<DateTimePoint> DecompressSpeedPoints { get; set; } = new();
+
+    public object Sync { get; } = new object();
+
+    [ObservableProperty]
+    public partial ObservableCollection<double> DownloadSpeedSeparators { get; set; } = new();
+
+    private static ObservableCollection<double> GetSeparators()
+    {
+        var now = DateTime.Now;
+        return
+        [
+            now.AddSeconds(-5).Ticks,
+            now.AddSeconds(-3).Ticks,
+            now.AddSeconds(-2).Ticks,
+            now.AddSeconds(-1).Ticks,
+            now.Ticks
+        ];
+    }
+
+
+    [ObservableProperty]
+    public partial Func<DateTime, string> LabelsFormatter { get; set; } = Formatter;
+
+    public Func<ChartPoint, string> DataLabelFormatter => (point) =>
+            $"{point.Coordinate.PrimaryValue:N0}mb/s";
+
+    private static string Formatter(DateTime date)
+    {
+        var secsAgo = (DateTime.Now - date).TotalSeconds;
+
+        return secsAgo < 1
+            ? "现在"
+            : $"{secsAgo:N0}秒前";
+    }
+    #endregion
+
     #region 通知
 
     #endregion
@@ -58,7 +104,6 @@ partial class KuroGameContextViewModelV2
         {
             if (await this.GameContext.ResumeDownloadAsync())
             {
-                this.BottomBarContent = "下载已恢复";
                 this.PauseIcon = "\uE769";
             }
         }
@@ -66,7 +111,6 @@ partial class KuroGameContextViewModelV2
         {
             if (await this.GameContext.PauseDownloadAsync())
             {
-                this.BottomBarContent = "下载已经暂停";
                 this.PauseIcon = "\uE768";
             }
         }

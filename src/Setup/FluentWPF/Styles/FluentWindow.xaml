@@ -23,6 +23,8 @@
                             <RowDefinition Height="{TemplateBinding TitleBarHeight}" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
+
+                        <ContentControl Grid.RowSpan="2" Content="{TemplateBinding AppImageBackground}" />
                         <Grid
                             Margin="15,0,0,0"
                             HorizontalAlignment="Stretch"

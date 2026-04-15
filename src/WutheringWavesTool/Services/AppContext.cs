@@ -1,8 +1,9 @@
 ﻿using CommunityToolkit.WinUI;
 using Haiyu.Services.DialogServices;
 using Microsoft.UI.Dispatching;
-using Waves.Core.GameContext.Contexts.PRG;
 using Waves.Core.GameContext.ContextsV2;
+using Waves.Core.GameContext.ContextsV2.Punish;
+using Waves.Core.GameContext.ContextsV2.Waves;
 using Waves.Core.Services;
 using Waves.Core.Settings;
 using TitleBar = Haiyu.Controls.TitleBar;
@@ -47,25 +48,20 @@ public class AppContext<T> : IAppContext<T>
                 await Instance.Host.Services.GetRequiredService<XBoxService>().StartAsync();
             }
             await Instance.Host.Services.GetRequiredService<IKuroClient>().InitAsync();
-            await Instance.Host.Services!.GetRequiredKeyedService<IGameContext>(nameof(WavesMainGameContext))
+            await Instance.Host.Services!.GetRequiredKeyedService<IGameContextV2>(nameof(PunishMainGameContextV2))
                 .InitAsync();
-            await Instance.Host.Services!.GetRequiredKeyedService<IGameContext>(nameof(WavesBiliBiliGameContext))
+            await Instance.Host.Services!.GetRequiredKeyedService<IGameContextV2>(nameof(PunishBiliBiliGameContextV2))
                 .InitAsync();
-            await Instance.Host.Services!.GetRequiredKeyedService<IGameContext>(nameof(WavesGlobalGameContext))
+            await Instance.Host.Services!.GetRequiredKeyedService<IGameContextV2>(nameof(PunishGlobalGameContextV2))
                 .InitAsync();
-            await Instance.Host.Services!.GetRequiredKeyedService<IGameContext>(nameof(PunishMainGameContext))
-                .InitAsync();
-            await Instance.Host.Services!.GetRequiredKeyedService<IGameContext>(nameof(PunishBiliBiliGameContext))
-                .InitAsync();
-            await Instance.Host.Services!.GetRequiredKeyedService<IGameContext>(nameof(PunishGlobalGameContext))
-                .InitAsync();
-            await Instance.Host.Services!.GetRequiredKeyedService<IGameContext>(nameof(PunishTwGameContext))
+            await Instance.Host.Services!.GetRequiredKeyedService<IGameContextV2>(nameof(PunishTwGameContextV2))
                 .InitAsync();
             #region 新核心测试
-
-            await Instance.Host.Services!.GetRequiredKeyedService<IGameContextV2>(nameof(PunishMainGameContextV2))
-                .InitAsync(); 
             await Instance.Host.Services!.GetRequiredKeyedService<IGameContextV2>(nameof(WavesMainGameContextV2))
+                .InitAsync();
+            await Instance.Host.Services!.GetRequiredKeyedService<IGameContextV2>(nameof(WavesBiliBiliGameContextV2))
+                .InitAsync();
+            await Instance.Host.Services!.GetRequiredKeyedService<IGameContextV2>(nameof(WavesGlobalGameContextV2))
                 .InitAsync();
             #endregion
             this.App = app;

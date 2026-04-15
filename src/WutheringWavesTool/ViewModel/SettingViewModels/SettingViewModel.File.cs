@@ -108,6 +108,11 @@ partial class SettingViewModel
                     WindowsIdentity.GetCurrent().User!.Value
                 );
                 var haiyu = packages.Where(x => x.DisplayName.Contains("Haiyu")).FirstOrDefault();
+                if(haiyu == null)
+                {
+                    await TipShow.ShowMessageAsync("当前应用程序为独立模式，无法创建桌面图标", Symbol.Accept);
+                    return;
+                }
                 CreateUwpShortcut(saveDialog.Path, $"shell:AppsFolder\\{haiyu.Id.FamilyName}!App");
                 await TipShow.ShowMessageAsync("桌面图标创建成功", Symbol.Accept);
             }

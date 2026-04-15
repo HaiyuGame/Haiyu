@@ -24,16 +24,15 @@
     </i:Interaction.Behaviors>
     <Grid Margin="5">
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition/>
+            <RowDefinition Height="auto" />
+            <RowDefinition />
         </Grid.RowDefinitions>
-        <TitleBar x:Name="title" Subtitle="鸣潮数据面板">
-        </TitleBar>
+        <TitleBar x:Name="title" Subtitle="鸣潮数据面板" />
 
         <!--  未登录  -->
         <Grid
-            Grid.Row="1"
             x:Name="loginBorder"
+            Grid.Row="1"
             Padding="20"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
@@ -54,8 +53,8 @@
         </Grid>
         <!--  未登录结束  -->
         <Grid
-            Grid.Row="1"
             x:Name="loginyes"
+            Grid.Row="1"
             Margin="25"
             Visibility="{x:Bind ViewModel.IsLogin, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
             <Grid.RowDefinitions>

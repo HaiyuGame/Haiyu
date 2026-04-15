@@ -97,8 +97,6 @@ public static class InstanceBuilderExtensions
                     #region ColorGame
                     #endregion
                     #region GameContext
-                    .AddTransient<WavesGameContextViewModel>()
-                    .AddTransient<PunishGameContextViewModel>()
                     .AddTransient<PunishV2GameContextViewModel>()
                     .AddTransient<WavesV2GameContextViewModel>()
                     #endregion
@@ -149,6 +147,10 @@ public static class InstanceBuilderExtensions
                     .AddTransient<LocalUserManagerViewModel>()
                     .AddTransient<DeleteFileDialog>()
                     .AddTransient<DeleteFileViewModel>()
+                    .AddTransient<UpdateGameDialogV2>()
+                    .AddTransient<UpdateGameViewModelV2>()
+                    .AddTransient<GameResourceDialogV2>()
+                    .AddTransient<GameResourceViewModelV2>()
                 #endregion
                 #endregion
                 #region More

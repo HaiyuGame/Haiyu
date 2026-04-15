@@ -824,6 +824,8 @@ partial class KuroGameContextBaseV2
             Logger
         );
         await writeConfig.WriteDownloadAndUpDateResultAsync(launcher);
+        //确保写入文件IO
+        await Task.Delay(100);
         if (isProd)
         {
             await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdDownloadPath, "");
@@ -835,6 +837,10 @@ partial class KuroGameContextBaseV2
                 GameLocalSettingName.ProdDownloadVersion,
                 ""
             );
+        }
+        else
+        {
+            
         }
         //删除下载文件夹
         if (!string.IsNullOrWhiteSpace(downloadBaseFolder))

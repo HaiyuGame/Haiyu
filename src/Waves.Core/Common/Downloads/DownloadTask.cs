@@ -42,7 +42,7 @@ public static class DownloadTask
         {
             try
             {
-                if (downloadCts == null || state?.IsStop == true)
+                if (downloadCts == null || downloadCts.IsCancellationRequested || state?.IsStop == true)
                 {
                     throw new OperationCanceledException();
                 }
@@ -75,7 +75,7 @@ public static class DownloadTask
                 bool isBreak = false;
                 while (totalWritten < chunkTotalSize)
                 {
-                    if (downloadCts.IsCancellationRequested || state?.IsStop == true)
+                    if (downloadCts == null || downloadCts.IsCancellationRequested || state?.IsStop == true)
                     {
                         throw new OperationCanceledException();
                     }
@@ -95,7 +95,7 @@ public static class DownloadTask
                         }
                         if (state != null)
                             await state
-                                .SpeedLimiter.LimitAsync(bytesRead)
+                                .SpeedLimiter.LimitAsync(bytesRead,downloadCts.Token)
                                 .ConfigureAwait(false);
                         await fileStream
                             .WriteAsync(buffer.AsMemory(0, bytesRead), downloadCts.Token)
@@ -228,7 +228,7 @@ public static class DownloadTask
                         isBreak = true;
                     }
                     if (state != null)
-                        await state.SpeedLimiter.LimitAsync(bytesRead).ConfigureAwait(false);
+                        await state.SpeedLimiter.LimitAsync(bytesRead, downloadCts.Token).ConfigureAwait(false);
                     await fileStream
                         .WriteAsync(buffer.AsMemory(0, bytesRead), downloadCts.Token)
                         .ConfigureAwait(false);

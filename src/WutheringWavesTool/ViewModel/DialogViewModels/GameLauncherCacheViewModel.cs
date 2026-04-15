@@ -11,7 +11,7 @@ public sealed partial class GameLauncherCacheViewModel : DialogViewModelBase
 {
     private GameLauncherCacheArgs _args;
 
-    public IGameContext GameContext { get; private set; }
+    public IGameContextV2 GameContext { get; private set; }
 
     [ObservableProperty]
     public partial ObservableCollection<KRSDKLauncherCacheWrapper> Items { get; private set; }
@@ -70,19 +70,28 @@ public sealed partial class GameLauncherCacheViewModel : DialogViewModelBase
         IsLoading = true;
         this._args = args;
         Items = [];
-        this.GameContext = Instance.Host.Services.GetRequiredKeyedService<IGameContext>(
+        var gameContext = Instance.Host.Services.GetRequiredKeyedService<IGameContextV2>(
             args.GameContextName
         );
-        var localSelect = await GameContext.GameLocalConfig.GetConfigAsync(
+        this.GameContext = gameContext;
+        var localSelect = await gameContext.GameLocalConfig.GetConfigAsync(
             GameLocalSettingName.LasterSelectLocalUser
         );
-        var result = await GameContext.GetLocalGameOAuthAsync(this.CTS.Token);
+        var result = await gameContext.GetLocalGameOAuthAsync(this.CTS.Token);
         if (result == null)
+        {
+            IsLoading = false;
             return;
+        }
         foreach (var item in result)
         {
             var code = KrKeyHelper.Xor(item.OauthCode, 5);
-            var userPlayers = await GameContext.QueryPlayerInfoAsync(code);
+            var userPlayers = await gameContext.QueryPlayerInfoAsync(code);
+
+            if (userPlayers == null)
+            {
+                continue;
+            }
 
             if(userPlayers.Code != 0)
             {
@@ -90,26 +99,11 @@ public sealed partial class GameLauncherCacheViewModel : DialogViewModelBase
             }
             foreach (var player in userPlayers.Items)
             {
-                KRSDKLauncherCacheWrapper? info = null;
-                if (this.GameContext.GameType == Waves.Core.Models.Enums.GameType.Waves)
+                var info = new KRSDKLauncherCacheWrapper(item, player);
+                if (info.GetKey == localSelect)
                 {
-                    info = new KRSDKLauncherCacheWrapper(item, (WavesQueryPlayerItem)player);
-                    if (info.GetKey == localSelect)
-                    {
-                        info.IsSelect = true;
-                    }
+                    info.IsSelect = true;
                 }
-
-                if(this.GameContext.GameType == Waves.Core.Models.Enums.GameType.Punish)
-                {
-                    info = new KRSDKLauncherCacheWrapper(item, (PunishQueryPlayerItem)player);
-                    if (info.GetKey == localSelect)
-                    {
-                        info.IsSelect = true;
-                    }
-                }
-                if (info == null)
-                    continue;
                 Items.Add(info);
             }
         }

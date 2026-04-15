@@ -71,4 +71,5 @@ public class GameContextOutputArgs
     public bool Prod { get; internal set; }
     public double ZipSpeed { get; internal set; }
     public bool IsCancel { get; internal set; }
+    public double DiffSpeed { get; internal set; }
 }

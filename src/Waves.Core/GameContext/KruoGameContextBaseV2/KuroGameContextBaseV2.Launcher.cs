@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using Serilog.Core;
 using Waves.Api.Models;
 using Waves.Api.Models.Launcher;
-using Waves.Core.GameContext.Contexts;
-using Waves.Core.GameContext.Contexts.PRG;
+using Waves.Core.GameContext.ContextsV2.Punish;
+using Waves.Core.GameContext.ContextsV2.Waves;
 using Waves.Core.Models.CoreApi;
 using Waves.Core.Models.Downloader;
 using Waves.Core.Services;
@@ -24,10 +25,9 @@ namespace Waves.Core.GameContext
             var url = "";
             try
             {
-                if (
-                    this.ContextName == nameof(WavesGlobalGameContext)
-                    || this.ContextName == nameof(PunishGlobalGameContext)
-                    || this.ContextName == nameof(PunishTwGameContext)
+                if (this.ContextName == nameof(PunishGlobalGameContextV2)
+                    || this.ContextName == nameof(PunishTwGameContextV2)
+                || this.ContextName == nameof(WavesGlobalGameContextV2)
                 )
                 {
                     url =
@@ -40,10 +40,10 @@ namespace Waves.Core.GameContext
                 }
                 var result = await HttpClientService.HttpClient.GetAsync(url);
                 var jsonStr = await result.Content.ReadAsStringAsync();
-                var launcherIndex = JsonSerializer.Deserialize<GameLauncherSource>(
-                    jsonStr,
+                var laucherIndex =  await result.Content.ReadFromJsonAsync<GameLauncherSource>(
                     GameLauncherSourceContext.Default.GameLauncherSource
                 );
+               
                 #region 测试
                 //launcherIndex.Predownload = new Predownload()
                 //{
@@ -60,7 +60,7 @@ namespace Waves.Core.GameContext
                 //    Version = launcherIndex.ResourceDefault.Version,
                 //};
                 #endregion
-                return launcherIndex;
+                return laucherIndex;
             }
             catch (Exception ex)
             {
@@ -78,12 +78,10 @@ namespace Waves.Core.GameContext
                 ResourceDefault.CdnList.Where(x => x.P != 0).OrderBy(x => x.P).First().Url
                 + ResourceDefault.Config.IndexFile;
             var result = await HttpClientService.HttpClient.GetAsync(resourceIndexUrl, token);
-            var jsonStr = await result.Content.ReadAsStringAsync();
-            var launcherIndex = JsonSerializer.Deserialize<IndexGameResource>(
-                jsonStr,
-                IndexGameResourceContext.Default.IndexGameResource
-            );
-            return launcherIndex;
+            return result.Content.ReadFromJsonAsync<IndexGameResource>(
+                IndexGameResourceContext.Default.IndexGameResource,
+                token
+            ).Result;
         }
 
         public async Task<PatchIndexGameResource?> GetPatchGameResourceAsync(
@@ -95,12 +93,10 @@ namespace Waves.Core.GameContext
             {
                 var result = await HttpClientService.HttpClient.GetAsync(url, token);
                 result.EnsureSuccessStatusCode();
-                var jsonStr = await result.Content.ReadAsStringAsync();
-                var pathIndexSource = JsonSerializer.Deserialize<PatchIndexGameResource>(
-                    jsonStr,
-                    PathIndexGameResourceContext.Default.PatchIndexGameResource
-                );
-                return pathIndexSource;
+                return result.Content.ReadFromJsonAsync<PatchIndexGameResource>(
+                    PathIndexGameResourceContext.Default.PatchIndexGameResource,
+                    token
+                ).Result;
             }
             catch (Exception ex)
             {
@@ -116,10 +112,9 @@ namespace Waves.Core.GameContext
             string url = "";
             try
             {
-                if (
-                    this.ContextName == nameof(WavesGlobalGameContext)
-                    || this.ContextName == nameof(PunishGlobalGameContext)
-                    || this.ContextName == nameof(PunishTwGameContext)
+                if ( this.ContextName == nameof(PunishGlobalGameContextV2)
+                    || this.ContextName == nameof(PunishTwGameContextV2)
+                || this.ContextName == nameof(WavesGlobalGameContextV2)
                 )
                 {
                     url =
@@ -132,12 +127,10 @@ namespace Waves.Core.GameContext
                 }
                 var result = await HttpClientService.HttpClient.GetAsync(url, token);
                 result.EnsureSuccessStatusCode();
-                var jsonStr = await result.Content.ReadAsStringAsync();
-                var pathIndexSource = JsonSerializer.Deserialize<GameLauncherStarter>(
-                    jsonStr,
-                    GameLauncherStarterContext.Default.GameLauncherStarter
-                );
-                return pathIndexSource;
+                return result.Content.ReadFromJsonAsync<GameLauncherStarter>(
+                    GameLauncherStarterContext.Default.GameLauncherStarter,
+                    token
+                ).Result;
             }
             catch (Exception ex)
             {
@@ -151,10 +144,9 @@ namespace Waves.Core.GameContext
         )
         {
             string url = "";
-            if (
-                this.ContextName == nameof(WavesGlobalGameContext)
-                || this.ContextName == nameof(PunishGlobalGameContext)
-                || this.ContextName == nameof(PunishTwGameContext)
+            if ( this.ContextName == nameof(PunishGlobalGameContextV2)
+                || this.ContextName == nameof(PunishTwGameContextV2)
+                || this.ContextName == nameof(WavesGlobalGameContextV2)
             )
             {
                 url =
@@ -167,12 +159,10 @@ namespace Waves.Core.GameContext
             }
             var result = await HttpClientService.HttpClient.GetAsync(url, token);
             result.EnsureSuccessStatusCode();
-            var jsonStr = await result.Content.ReadAsStringAsync();
-            var pathIndexSource = JsonSerializer.Deserialize<LIndex>(
-                jsonStr,
-                LauncherConfig.Default.LIndex
+            return await result.Content.ReadFromJsonAsync<LIndex>(
+                LauncherConfig.Default.LIndex,
+                token
             );
-            return pathIndexSource;
         }
 
         public virtual async Task<LauncherBackgroundData?> GetLauncherBackgroundDataAsync(
@@ -181,10 +171,9 @@ namespace Waves.Core.GameContext
         )
         {
             var address = "";
-            if (
-                this.ContextName == nameof(WavesGlobalGameContext)
-                || this.ContextName == nameof(PunishGlobalGameContext)
-                || this.ContextName == nameof(PunishTwGameContext)
+            if (this.ContextName == nameof(PunishGlobalGameContextV2)
+                || this.ContextName == nameof(PunishTwGameContextV2)
+                || this.ContextName == nameof(WavesGlobalGameContextV2)
             )
             {
                 address = $"{KuroGameApiConfig.BaseAddress[1]}";
@@ -197,12 +186,10 @@ namespace Waves.Core.GameContext
                 $"/launcher/{this.Config.AppId}_{this.Config.AppKey}/{this.Config.GameID}/background/{backgroundCode}/{this.Config.Language}.json";
             var result = await HttpClientService.HttpClient.GetAsync(address, token);
             result.EnsureSuccessStatusCode();
-            var jsonStr = await result.Content.ReadAsStringAsync();
-            var pathIndexSource = JsonSerializer.Deserialize<LauncherBackgroundData>(
-                jsonStr,
-                LauncherConfig.Default.LauncherBackgroundData
+            return await result.Content.ReadFromJsonAsync<LauncherBackgroundData>(
+                LauncherConfig.Default.LauncherBackgroundData,
+                token
             );
-            return pathIndexSource;
         }
     }
 }

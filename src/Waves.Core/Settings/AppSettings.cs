@@ -6,7 +6,7 @@ using Waves.Core.Models;
 
 namespace Waves.Core.Settings;
 
-public class AppSettings:SettingBase
+public class AppSettings : SettingBase
 {
     public static string BassFolder =>
         Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Waves";
@@ -19,8 +19,7 @@ public class AppSettings:SettingBase
 
     public static string ColorGameFolder => BassFolder + "\\ColorGameFolder";
 
-    public static string LocalUserFolder=>BassFolder+"\\LocalUser";
-
+    public static string LocalUserFolder => BassFolder + "\\LocalUser";
 
     public string ToolsPosionFilePath => BassFolder + "\\ToolsPostion.json";
 
@@ -31,13 +30,12 @@ public class AppSettings:SettingBase
 
     public const string RpcVersion = "1.0";
 
-
-    public AppSettings():base(SettingsFilePath)
+    public AppSettings()
+        : base(SettingsFilePath)
     {
         LoadSettings();
     }
 
-    
     public string? WallpaperType
     {
         get => Read();
@@ -55,11 +53,11 @@ public class AppSettings:SettingBase
         get => NullBoolAdaptive.Instance.GetForward(Read());
         set => Write(NullBoolAdaptive.Instance.GetBack(value));
     }
-    
+
     public string? LastSelectUser
     {
         get => Read();
-        set=>Write(value);
+        set => Write(value);
     }
 
     public string? WallpaperPath
@@ -129,5 +127,9 @@ public class AppSettings:SettingBase
         get => Read();
         set => Write(value);
     }
-
+    public bool? StartGameAllowCloseMain
+    {
+        get => NullBoolAdaptive.Instance.GetForward(Read());
+        set => Write(NullBoolAdaptive.Instance.GetBack(value));
+    }
 }

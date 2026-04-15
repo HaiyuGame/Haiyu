@@ -26,7 +26,7 @@ public class DiffDecompressTask
         IProgress<KrDiffDecompressResult> decompress = new Progress<KrDiffDecompressResult>();
         ((Progress<KrDiffDecompressResult>)decompress).ProgressChanged += async (s, e) =>
         {
-            progress?.Report((GameContextActionType.Download,System.IO.Path.GetFileName(krdiffPath),e));
+            progress?.Report((GameContextActionType.Decompress,System.IO.Path.GetFileName(krdiffPath),e));
         };
         var result = await manager.StartAsync(decompress);
         return result;

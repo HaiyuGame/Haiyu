@@ -1,4 +1,4 @@
-using Haiyu.ViewModel.GameViewModels.GameContexts;
+﻿using Haiyu.ViewModel.GameViewModels.GameContexts;
 
 namespace Haiyu.Pages.GamePages;
 
@@ -17,8 +17,10 @@ public sealed partial class WavesV2GamePage : Page,IPage
     protected override void OnNavigatedFrom(NavigationEventArgs e)
     {
         this.Bindings.StopTracking();
-        base.OnNavigatedTo(e);
+        this.ViewModel.Dispose();
+        this.ViewModel = null;
         GC.Collect();
+        base.OnNavigatedFrom(e);
     }
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
@@ -27,5 +29,6 @@ public sealed partial class WavesV2GamePage : Page,IPage
 
     private void Button_Click(object sender, RoutedEventArgs e)
     {
+        switcher.Switch();
     }
 }

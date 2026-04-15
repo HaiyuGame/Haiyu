@@ -127,6 +127,23 @@ namespace Haiyu.Controls
             }
         }
 
+        public int StartCardIndex
+        {
+            get { return (int)GetValue(StartCardIndexProperty); }
+            set { SetValue(StartCardIndexProperty, value); }
+        }
+
+        public static readonly DependencyProperty StartCardIndexProperty =
+            DependencyProperty.Register(nameof(StartCardIndex), typeof(int), typeof(CardSwitcher), new PropertyMetadata(0,OnStartIndexChanged));
+
+        private static void OnStartIndexChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if(e.NewValue is int index && d is CardSwitcher switcher && index == 2)
+            {
+                switcher.Switch();
+            }
+        }
+
         private void InitRenderTransform(UIElement border, double scale)
         {
             if (!(border.RenderTransform is ScaleTransform st))

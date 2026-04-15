@@ -11,9 +11,6 @@
     <Project Path="Astronomical/Astronomical.csproj" Id="1130a43f-a182-4633-b1ab-f68a92fdc860">
       <BuildType Solution="All|*" Project="Debug" />
     </Project>
-    <Project Path="Extensions/GameFileDiffTool/GameFileDiffTool.csproj" Id="7e92e004-3edc-46fe-83e9-402bdb530d81">
-      <BuildType Solution="All|*" Project="Debug" />
-    </Project>
     <Project Path="Extensions/Haiyu.RpcClient/Haiyu.RpcClient.csproj" Id="6f2d195d-bb29-4532-8aa5-0b0878dc0188">
       <BuildType Solution="All|*" Project="Debug" />
     </Project>
@@ -45,11 +42,6 @@
       <BuildType Solution="All|x86" Project="Debug" />
     </Project>
   </Folder>
-  <Folder Name="/Plugins/">
-    <Project Path="Plugins/GameModelApplication/GameModelApplication.csproj">
-      <BuildType Solution="All|*" Project="Debug" />
-    </Project>
-  </Folder>
   <Folder Name="/Server/">
     <Project Path="Server/HaiyuServer/HaiyuServer.csproj" Id="99ed4541-5feb-4f82-a8b4-62f82e1be42b">
       <BuildType Solution="All|*" Project="Debug" />
@@ -76,13 +68,6 @@
   <Folder Name="/Tests/">
     <Project Path="KuroGameDownloadProgram/KuroGameDownloadProgram.csproj" Id="3d00fcfd-9df9-4241-b422-ce04accdfa6f">
       <BuildType Solution="All|*" Project="Debug" />
-    </Project>
-    <Project Path="WinUIUnitTestApp1/WinUIUnitTestApp1.csproj" Id="208babd8-72b5-4a5f-92fd-6896f91000f0">
-      <BuildType Solution="All|*" Project="Debug" />
-      <Platform Solution="*|Any CPU" Project="x64" />
-      <Platform Solution="*|x64" Project="x64" />
-      <Platform Solution="*|x86" Project="x86" />
-      <Deploy />
     </Project>
   </Folder>
   <Project Path="Project.Test/Project.Test.csproj">

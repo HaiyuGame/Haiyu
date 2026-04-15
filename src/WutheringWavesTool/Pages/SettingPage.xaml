@@ -139,8 +139,33 @@
                 <ui:SettingsCard
                     Margin="0,5,0,0"
                     HorizontalAlignment="Stretch"
-                    HorizontalContentAlignment="Stretch"
-                    Header="游戏背景类型">
+                    HorizontalContentAlignment="Stretch">
+                    <ui:SettingsCard.Header>
+                        <StackPanel Orientation="Horizontal">
+
+                            <TextBlock VerticalAlignment="Center" Text="背景类型" />
+                            <Button
+                                Margin="10,0,0,0"
+                                Padding="0"
+                                Style="{ThemeResource TransparentButtonStyle}">
+                                <FontIcon
+                                    FontFamily="Segoe Fluent Icons"
+                                    FontSize="13"
+                                    Foreground="{ThemeResource SystemFillColorAttentionBrush}"
+                                    Glyph="&#xE752;" />
+                                <Button.Flyout>
+                                    <Flyout>
+                                        <TextBlock TextAlignment="Center">
+                                            <Run Text="选项为“视频”时会导致启动器内存占用极具上升" />
+                                            <LineBreak />
+                                            <Run Text="选择为“图片”时能看到更加完整的亚力克材质效果" />
+                                        </TextBlock>
+                                    </Flyout>
+                                </Button.Flyout>
+                            </Button>
+                        </StackPanel>
+
+                    </ui:SettingsCard.Header>
                     <ui:SettingsCard.HeaderIcon>
                         <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8B9;" />
                     </ui:SettingsCard.HeaderIcon>
@@ -231,6 +256,17 @@
                 </ui:SettingsCard>
                 <ui:SettingsCard
                     Margin="0,5,0,0"
+                    Description="在某些操作系统中，可能会出现鼠标乱跳问题，取消勾选次选项可尝试解决"
+                    Header="启动游戏后隐藏启动器">
+                    <ui:SettingsCard.HeaderIcon>
+                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xF45E;" />
+                    </ui:SettingsCard.HeaderIcon>
+                    <Border Width="30" MaxWidth="30">
+                        <CheckBox IsChecked="{x:Bind ViewModel.StartGameAllowCloseMain, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsThreeState="False" />
+                    </Border>
+                </ui:SettingsCard>
+                <ui:SettingsCard
+                    Margin="0,5,0,0"
                     Command="{x:Bind ViewModel.ShowGameEnhancedDialogCommand}"
                     Header="游戏监控工具"
                     IsClickEnabled="True">
@@ -291,6 +327,7 @@
                                 PasswordChar="*"
                                 PasswordRevealMode="Peek" />
                             <Button
+                                Margin="4,0,0,0"
                                 Command="{x:Bind ViewModel.SetRpcTokenCommand}"
                                 Content="确认"
                                 Style="{ThemeResource TransparentButtonStyle}" />

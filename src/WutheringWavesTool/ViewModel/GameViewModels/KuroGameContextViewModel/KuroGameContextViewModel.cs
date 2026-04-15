@@ -31,20 +31,13 @@ public abstract partial class KuroGameContextViewModel
         WallpaperService = Instance.GetService<IWallpaperService>();
         this.Servers =
             this.GameType == GameType.Waves
-                ? ServerDisplay.GetWavesGames
-                : ServerDisplay.GetPunishGames;
+                ? ServerDisplay.GetWavesV2Games
+                : ServerDisplay.GetPunishV2Games;
         var openService = this.GameType == GameType.Waves?AppSettings.WavesAutoOpenContext:AppSettings.PunishAutoOpenContext;
 
         var selectServer = Servers.Where(x=>x.Key == openService).FirstOrDefault();
         this.SelectServer = selectServer == null ? Servers[0] : selectServer;
     }
-
-    public static List<string> GetWavesServers() =>
-        [
-            nameof(WavesBiliBiliGameContext),
-            nameof(WavesGlobalGameContext),
-            nameof(WavesMainGameContext),
-        ];
 
 
 
@@ -555,6 +548,7 @@ public abstract partial class KuroGameContextViewModel
     public override void Dispose()
     {
         Dispose(disposing: true);
+        base.Dispose();
         GC.SuppressFinalize(this);
     }
 
@@ -564,8 +558,11 @@ public abstract partial class KuroGameContextViewModel
         {
             if (disposing)
             {
-                GameContext.GameContextOutput -= GameContext_GameContextOutput;
-                GameContext.GameContextProdOutput -= GameContext_GameContextProdOutput;
+                if (GameContext != null)
+                {
+                    GameContext.GameContextOutput -= GameContext_GameContextOutput;
+                    GameContext.GameContextProdOutput -= GameContext_GameContextProdOutput;
+                }
                 DisposeAfter();
             }
             disposedValue = true;

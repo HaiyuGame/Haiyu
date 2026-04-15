@@ -13,6 +13,16 @@ namespace Haiyu.ViewModel.GameViewModels;
 
 public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
 {
+    private const int ChartPointKeepSeconds = 5;
+    private const int ChartMaxPoints = 300;
+    private static readonly TimeSpan ChartPointInterval = TimeSpan.FromMilliseconds(200);
+    private static readonly TimeSpan SeparatorRefreshInterval = TimeSpan.FromMilliseconds(500);
+
+    private DateTime _lastDownloadPointTime = DateTime.MinValue;
+    private DateTime _lastVerifyPointTime = DateTime.MinValue;
+    private DateTime _lastDecompressPointTime = DateTime.MinValue;
+    private DateTime _lastSeparatorRefreshTime = DateTime.MinValue;
+
     public LoggerService Logger { get; }
     public IGameContextV2 GameContext { get; private set; }
     public IDialogManager DialogManager { get; }
@@ -41,13 +51,6 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         var selectServer = Servers.Where(x => x.Key == openService).FirstOrDefault();
         this.SelectServer = selectServer == null ? Servers[0] : selectServer;
     }
-
-    public static List<string> GetWavesServers() =>
-        [
-            nameof(WavesBiliBiliGameContext),
-            nameof(WavesGlobalGameContext),
-            nameof(WavesMainGameContext),
-        ];
 
     [ObservableProperty]
     public partial bool IsDx11Launcher { get; set; } = false;
@@ -131,8 +134,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
             await this.CTS?.CancelAsync();
             this.CTS = null;
         }
-        GC.Collect();
-        await Task.Delay(500);
+        await Task.Delay(200);
         this.CTS = new CancellationTokenSource();
         if (GameContext != null)
         {
@@ -161,15 +163,16 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
             AppSettings.PunishAutoOpenContext = this.GameContext.ContextName;
         }
         await RefreshCoreAsync(showCard);
+        GC.Collect();
     }
 
     private async void ProgressState_OnProgressChanged(GameProgressTracker tracker)
     {
         var args = tracker.LastArgs;
+        if (this.GameContext == null)
+            return;
         await AppContext.TryInvokeAsync(async () =>
         {
-            if (this.GameContext == null)
-                return;
             var actionType = args.Type;
             var status = await this.GameContext.GetGameContextStatusAsync(this.CTS.Token);
             if (!tracker.Prod)
@@ -198,8 +201,13 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                     actionType == Waves.Core.Models.Enums.GameContextActionType.Download
                     || actionType == Waves.Core.Models.Enums.GameContextActionType.Verify
                     || actionType == Waves.Core.Models.Enums.GameContextActionType.Decompress
+                    || actionType == GameContextActionType.ZipDecompress
                 )
                 {
+                    if (GameContext.IsDownloadTaskCancel())
+                    {
+                        return;
+                    }
                     UpdateTransferProgressDisplay(tracker, args, status);
                     ShowGameDownloadingBth(status);
                 }
@@ -208,7 +216,6 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                     ShowGameDownloadingBth(status);
                     this.MaxProgressValue = args.FileTotal;
                     this.CurrentProgressValue = args.CurrentFile;
-                    this.BottomBarContent = args.DeleteString;
                     PauseStartEnable = false;
                 }
 
@@ -216,34 +223,54 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                 {
                     ShowGameDownloadingBth(status);
                     PauseStartEnable = false;
-                    BottomBarContent = args.TipMessage;
                 }
             }
             else
             {
-                this.PreProgress = tracker.Percentage;
-                this.PreSpeedText = tracker.GetSpeedText();
-                this.PreDownloadSizeText = $"{GameProgressTracker.FormatBytes(tracker.CurrentBytes)}/{GameProgressTracker.FormatBytes(tracker.TotalBytes)}";
-                var allSteps = tracker.AllSteps;
-                this.MaxStep = allSteps.Count;
-                if (allSteps.Count > 0)
+                if (
+                    args.Type == GameContextActionType.Download
+                    || args.Type == GameContextActionType.Verify
+                    || args.Type == GameContextActionType.Decompress
+                )
                 {
-                    var safeStepIndex = Math.Clamp(tracker.CurrentStepIndex, 0, allSteps.Count - 1);
-                    PreSetupText = $"{allSteps[safeStepIndex]}";
-                    PreSetupHeaderText = $"[{safeStepIndex + 1}/{allSteps.Count}]";
-                }
-                else
-                {
-                    this.CurrentStep = 0;
-                    this.CurrentStepText = string.Empty;
-                }
-                if ((GameContext.ProdDownloadState != null && GameContext.ProdDownloadState!.IsPaused) || args.IsPause)
-                {
-                    this.PreDownloadIcon = "\uE768";
-                }
-                else
-                {
-                    this.PreDownloadIcon = "\uE769";
+                    if (GameContext.IsDownloadTaskCancel())
+                    {
+                        return;
+                    }
+                    this.PreProgress = tracker.Percentage;
+                    this.PreSpeedText = tracker.GetSpeedText();
+                    this.PreDownloadSizeText =
+                        $"{GameProgressTracker.FormatBytes(tracker.CurrentBytes)}/{GameProgressTracker.FormatBytes(tracker.TotalBytes)}";
+                    var allSteps = tracker.AllSteps;
+                    this.MaxStep = allSteps.Count;
+                    if (allSteps.Count > 0)
+                    {
+                        var safeStepIndex = Math.Clamp(
+                            tracker.CurrentStepIndex,
+                            0,
+                            allSteps.Count - 1
+                        );
+                        PreSetupText = $"{allSteps[safeStepIndex]}";
+                        PreSetupHeaderText = $"[{safeStepIndex + 1}/{allSteps.Count}]";
+                    }
+                    else
+                    {
+                        this.CurrentStep = 0;
+                        this.CurrentStepText = string.Empty;
+                    }
+                    if (
+                        (
+                            GameContext.ProdDownloadState != null
+                            && GameContext.ProdDownloadState!.IsPaused
+                        ) || args.IsPause
+                    )
+                    {
+                        this.PreDownloadIcon = "\uE768";
+                    }
+                    else
+                    {
+                        this.PreDownloadIcon = "\uE769";
+                    }
                 }
             }
             //显示消息
@@ -295,12 +322,12 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                         }
                     }
                     var donwResult = await GameContext.GameLocalConfig.GetConfigAsync(
-                       GameLocalSettingName.ProdDownloadFolderDone
-                   );
+                        GameLocalSettingName.ProdDownloadFolderDone
+                    );
                     var prodDownVersion = await GameContext.GameLocalConfig.GetConfigAsync(
                         GameLocalSettingName.ProdDownloadVersion
                     );
-                    if(bool.TryParse(donwResult,out var downloadDone) && downloadDone)
+                    if (bool.TryParse(donwResult, out var downloadDone) && downloadDone)
                     {
                         this.PreDownloadIcon = "\uE8FB";
                         this.PreProgress = 100;
@@ -308,7 +335,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                 }
                 else
                 {
-                    await RefreshCoreAsync(isRefreshBackground:false);
+                    await RefreshCoreAsync(isRefreshBackground: false);
                 }
                 if (actionType == Waves.Core.Models.Enums.GameContextActionType.GameExit)
                 {
@@ -324,11 +351,14 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         GameContextStatus status
     )
     {
+        if (disposedValue) return;
+        var now = DateTime.Now;
         this.MaxProgressValue = tracker.TotalBytes;
         this.CurrentProgressValue = tracker.CurrentBytes;
         this.ProgressValue = tracker.Percentage;
         this.CurrentByteText = GameProgressTracker.FormatBytes(tracker.CurrentBytes);
         this.MaxByteText = GameProgressTracker.FormatBytes(tracker.TotalBytes);
+        var previousActiveType = this.CurrentActiveType;
         this.CurrentActiveType = args.Type;
         var isPaused =
             status.IsPause
@@ -341,40 +371,112 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
             if (isPaused)
             {
                 this.PauseIcon = "\uE768";
-                this.BottomBarContent = "下载已经暂停";
             }
             else
             {
                 this.PauseIcon = "\uE769";
-                this.BottomBarContent = BuildTrackerProgressSummary(tracker);
             }
             PauseStartEnable = true;
-            return;
+            TryAddChartPoint(
+                this.VerifySpeedPoints,
+                now,
+                ref _lastVerifyPointTime,
+                ByteConversion.BytesToMegabytes((long)tracker.VerifySpeed, 2)
+            );
         }
-
         if (args.Type == Waves.Core.Models.Enums.GameContextActionType.Download)
         {
             if (isPaused)
             {
                 this.PauseIcon = "\uE768";
-                this.BottomBarContent = "下载已经暂停";
             }
             else
             {
                 this.PauseIcon = "\uE769";
-                this.BottomBarContent = BuildTrackerProgressSummary(tracker);
             }
+            TryAddChartPoint(
+                this.DownloadSpeedPoints,
+                now,
+                ref _lastDownloadPointTime,
+                ByteConversion.BytesToMegabytes((long)tracker.DownloadSpeed, 2)
+            );
             PauseStartEnable = true;
+        }
+        if (
+            args.Type == Waves.Core.Models.Enums.GameContextActionType.Decompress
+            || args.Type == GameContextActionType.ZipDecompress
+        )
+        {
+            this.PauseIcon = "\uE769";
+            if (args.Type == GameContextActionType.Decompress)
+            {
+                var speedValue = Math.Round(tracker.DiffSpeed / 1_000_000d, 2);
+                TryAddChartPoint(
+                    this.DecompressSpeedPoints,
+                    now,
+                    ref _lastDecompressPointTime,
+                    speedValue
+                );
+            }
+            else
+            {
+                TryAddChartPoint(
+                    this.DecompressSpeedPoints,
+                    now,
+                    ref _lastDecompressPointTime,
+                    ByteConversion.BytesToMegabytes((long)tracker.ZipSpeed, 2)
+                );
+            }
+
+            PauseStartEnable = false;
+        }
+
+        TrimChartPoints(this.DownloadSpeedPoints, now);
+        TrimChartPoints(this.VerifySpeedPoints, now);
+        TrimChartPoints(this.DecompressSpeedPoints, now);
+
+        if ((now - _lastSeparatorRefreshTime) >= SeparatorRefreshInterval)
+        {
+            _lastSeparatorRefreshTime = now;
+            this.DownloadSpeedSeparators?.Clear();
+            this.DownloadSpeedSeparators = GetSeparators();
+        }
+    }
+
+    private static void TrimChartPoints(
+        IList<LiveChartsCore.Defaults.DateTimePoint> points,
+        DateTime now
+    )
+    {
+        if (points == null)
+            return;
+        while (points.Count > 0 && (now - points[0].DateTime).TotalSeconds > ChartPointKeepSeconds)
+        {
+            points.RemoveAt(0);
+        }
+
+        while (points.Count > ChartMaxPoints)
+        {
+            points.RemoveAt(0);
+        }
+    }
+
+    private static void TryAddChartPoint(
+        IList<LiveChartsCore.Defaults.DateTimePoint> points,
+        DateTime now,
+        ref DateTime lastPointTime,
+        double value
+    )
+    {
+        if (points == null)
+            return;
+        if ((now - lastPointTime) < ChartPointInterval)
+        {
             return;
         }
 
-        if (args.Type == Waves.Core.Models.Enums.GameContextActionType.Decompress)
-        {
-            this.PauseIcon = "\uE769";
-            this.BottomBarContent =
-                $"[{args.CurrentDecompressCount}/{args.MaxDecompressValue}] 已解压:{Math.Round((double)args.CurrentSize / 1024 / 1024 / 1024, 2)}GB,剩余:{Math.Round((double)(args.TotalSize - args.CurrentSize) / 1024 / 1024 / 1024, 2)}GB";
-            PauseStartEnable = false;
-        }
+        lastPointTime = now;
+        points.Add(new LiveChartsCore.Defaults.DateTimePoint(now, value));
     }
 
     private static string BuildTrackerProgressSummary(GameProgressTracker tracker)
@@ -403,9 +505,6 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         return string.Join(" | ", segments);
     }
 
-    /// <summary>
-    /// 按钮类型，用枚举替代魔法数字，便于扩展和可读性
-    /// </summary>
     private enum ButtonActionType
     {
         None = 0,
@@ -420,7 +519,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
     private ButtonActionType _buttonAction = ButtonActionType.None;
     private bool disposedValue;
 
-    async Task RefreshCoreAsync(bool showCard = true,bool isRefreshBackground = true)
+    async Task RefreshCoreAsync(bool showCard = true, bool isRefreshBackground = true)
     {
         try
         {
@@ -531,6 +630,10 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                 await ShowCardAsync(showCard);
                 await LoadAfter();
             }
+            this.DecompressSpeedPoints?.Clear();
+            this.DownloadSpeedPoints?.Clear();
+            this.VerifySpeedPoints?.Clear();
+            this.DownloadSpeedSeparators?.Clear();
             ProcessAction = false;
         }
         catch (Exception ex)
@@ -571,7 +674,6 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                 if (bool.TryParse(doneDownload, out var done))
                 {
                     _buttonAction = ButtonActionType.InstallPreDownload;
-                    BottomBarContent = "游戏有更新";
                     LauncheContent = "安装更新";
                     DisplayVersion = localPredVersion;
                     EnableStartGameBth = true;
@@ -581,7 +683,6 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
             else
             {
                 _buttonAction = ButtonActionType.PrepareUpdate;
-                BottomBarContent = "游戏有更新";
                 LauncheContent = "更新游戏";
                 DisplayVersion = version;
                 EnableStartGameBth = true;
@@ -595,7 +696,6 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                 _buttonAction = ButtonActionType.InGame;
                 this.CurrentProgressValue = 0;
                 this.MaxProgressValue = 0;
-                BottomBarContent = "游戏正在进行";
                 LauncheContent = "正在运行";
                 EnableStartGameBth = false;
                 DisplayVersion = version;
@@ -710,8 +810,6 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         GameDownloadingBthVisibility = Visibility.Collapsed;
         GameLauncherBthVisibility = Visibility.Collapsed;
         PredCardVisibility = Visibility.Collapsed;
-        if (status.LasterArgs == null)
-            BottomBarContent = "游戏文件不存在";
     }
 
     private void ShowGameDownloadingBth(GameContextStatus status)
@@ -738,8 +836,6 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         GameDownloadingBthVisibility = Visibility.Collapsed;
         GameLauncherBthVisibility = Visibility.Collapsed;
         PredCardVisibility = Visibility.Collapsed;
-        if (status.LasterArgs == null)
-            BottomBarContent = "请点击右下角继续更新游戏";
     }
 
     [RelayCommand]
@@ -773,7 +869,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
     [RelayCommand]
     async Task ShowGameResource()
     {
-        await DialogManager.ShowGameResourceDialogAsync(this.GameContext.ContextName);
+        await DialogManager.ShowGameResourceV2DialogAsync(this.GameContext.ContextName);
     }
 
     [RelayCommand]
@@ -784,7 +880,6 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
             new GameContextOutputArgs() { Type = GameContextActionType.None }
         );
     }
-
 
     [RelayCommand]
     async Task ShowGameLauncherCache()
@@ -818,13 +913,33 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
     {
         if (!disposedValue)
         {
-            //取消数据接收接口
+            disposedValue = true;
             this.GameContext.ProgressState.OnProgressChanged -= ProgressState_OnProgressChanged;
+            if (DownloadSpeedPoints != null)
+            {
+                this.DownloadSpeedPoints.Clear();
+                this.DownloadSpeedPoints = null;
+            }
+            if (DecompressSpeedPoints != null)
+            {
+                this.DecompressSpeedPoints.Clear();
+                this.DecompressSpeedPoints = null;
+            }
+            if (VerifySpeedPoints != null)
+            {
+                this.VerifySpeedPoints.Clear();
+                this.VerifySpeedPoints = null;
+            }
+            if (DownloadSpeedSeparators != null)
+            {
+                DownloadSpeedSeparators.Clear();
+                this.DownloadSpeedSeparators = null;
+            }
             if (disposing)
             {
                 DisposeAfter();
             }
-            disposedValue = true;
+            base.Dispose();
         }
     }
 

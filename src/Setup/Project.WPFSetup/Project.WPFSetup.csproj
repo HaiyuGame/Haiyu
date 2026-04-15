@@ -22,6 +22,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Assets\Background.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <COMReference Include="IWshRuntimeLibrary">
       <WrapperTool>tlbimp</WrapperTool>
       <VersionMinor>0</VersionMinor>
@@ -61,6 +65,9 @@
 	  <ProjectReference Include="..\FluentWPF\FluentWPF.csproj">
 	    <EmbedInteropTypes>False</EmbedInteropTypes>
 	  </ProjectReference>
+	</ItemGroup>
+	<ItemGroup>
+	  <Resource Include="Assets\Background.png" />
 	</ItemGroup>
 	<ItemGroup>
 	  <Compile Update="Properties\Settings.Designer.cs">
