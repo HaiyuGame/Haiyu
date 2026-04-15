@@ -653,7 +653,10 @@
                 <ColumnDefinition />
                 <ColumnDefinition Width="auto" />
             </Grid.ColumnDefinitions>
-            <control:CardSwitcher x:Name="switcher" Style="{ThemeResource DefaultCardsSwitcher}">
+            <control:CardSwitcher
+                x:Name="switcher"
+                StartCardIndex="{x:Bind ViewModel.SwatchIndex, Mode=OneWay}"
+                Style="{ThemeResource DefaultCardsSwitcher}">
                 <control:CardSwitcher.Card1>
                     <Grid
                         Padding="8"

@@ -72,6 +72,10 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
     [ObservableProperty]
     public partial string SelectTab { get; set; }
 
+
+    [ObservableProperty]
+    public partial int SwatchIndex { get; set; }
+
     [ObservableProperty]
     public partial KRSDKLauncherCacheWrapper SelectDisplayerLocalUser { get; set; }
 
@@ -180,6 +184,8 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
         if (lastSelect == null)
         {
             LocalUserTitle = "请在右侧选择本地游戏账号信息";
+            IsLocalUserRefresh = false;
+            SwatchIndex = 2;
             return;
         }
         KRSDKLauncherCacheWrapper? selectItem = null;
@@ -267,6 +273,7 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
         this.MusicData = wavesData.MusicData;
         this.BattlePass = wavesData.BattlePass??new();
         this.MotorData = wavesData.MotorData??new();
+        SwatchIndex = 1;
         IsLocalUserRefresh = false;
     }
 

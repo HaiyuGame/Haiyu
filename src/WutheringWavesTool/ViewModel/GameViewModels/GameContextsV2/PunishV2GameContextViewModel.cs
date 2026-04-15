@@ -25,6 +25,9 @@ public partial class PunishV2GameContextViewModel : KuroGameContextViewModelV2
     [ObservableProperty]
     public partial PunishLocalGameRoleItem GameItem { get; set; }
 
+    [ObservableProperty]
+    public partial int SwatchIndex { get; set; }
+
     /// <summary>
     /// 本地账户标题信息
     /// </summary>
@@ -53,6 +56,9 @@ public partial class PunishV2GameContextViewModel : KuroGameContextViewModelV2
         );
         if (lastSelect == null)
         {
+            LocalUserTitle = "请选择账号";
+            IsLocalUserRefresh = false;
+            SwatchIndex = 2;
             return;
         }
         KRSDKLauncherCacheWrapper? selectItem = null;
@@ -66,7 +72,7 @@ public partial class PunishV2GameContextViewModel : KuroGameContextViewModelV2
             if (localUsers == null || localUsers.Count == 0)
             {
                 LocalUserTitle = "请选择账号";
-
+                IsLocalUserRefresh = false;
                 return;
             }
             foreach (var item in localUsers)
@@ -125,6 +131,7 @@ public partial class PunishV2GameContextViewModel : KuroGameContextViewModelV2
             LocalUserTitle = punishData.PlayerName;
             GameItem = punishData;
         }
+        SwatchIndex = 1;
         IsLocalUserRefresh = false;
     }
 
