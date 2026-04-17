@@ -125,21 +125,25 @@ public class Base
     public int MaxEnergy { get; set; }
 
     [JsonPropertyName("StoreEnergy")]
-    public int StoreEnergy { get; set; }
+    public long? StoreEnergy { get; set; }
 
     [JsonPropertyName("StoreEnergyRecoverTime")]
-    public int StoreEnergyRecoverTime
+    public long? StoreEnergyRecoverTime
     {
         get => field;
         set
         {
+            if (value == null)
+            {
+                field = 0;
+            }
             if (value == 0)
             {
                 this.StoreEnergyRecoverEndTime = "已充满";
                 field = value;
                 return;
             }
-            var time = DateTimeOffset.FromUnixTimeMilliseconds(value).ToLocalTime().DateTime;
+            var time = DateTimeOffset.FromUnixTimeMilliseconds(value!.Value).ToLocalTime().DateTime;
             if (time > DateTime.Now)
             {
                 var dateTimeOffset = time - DateTime.Now;
@@ -154,21 +158,25 @@ public class Base
     }
 
     [JsonPropertyName("MaxStoreEnergy")]
-    public int MaxStoreEnergy { get; set; }
+    public int? MaxStoreEnergy { get; set; }
 
     [JsonPropertyName("EnergyRecoverTime")]
-    public long EnergyRecoverTime
+    public long? EnergyRecoverTime
     {
         get => field;
         set
         {
+            if (value == null)
+            {
+                field = 0;
+            }
             if (value == 0)
             {
                 this.EnergyRecoverEndTime = "已充满";
                 field = value;
                 return;
             }
-            var time = DateTimeOffset.FromUnixTimeMilliseconds(value).ToLocalTime().DateTime;
+            var time = DateTimeOffset.FromUnixTimeMilliseconds(value!.Value).ToLocalTime().DateTime;
             if (time > DateTime.Now)
             {
                 var dateTimeOffset = time - DateTime.Now;
