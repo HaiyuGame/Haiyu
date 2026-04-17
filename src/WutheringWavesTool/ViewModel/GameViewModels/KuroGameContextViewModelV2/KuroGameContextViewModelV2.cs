@@ -39,6 +39,12 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         AppContext = appContext;
         TipShow = tipShow;
         WallpaperService = Instance.GetService<IWallpaperService>();
+    }
+
+    [RelayCommand]
+    public async Task Loaded()
+    {
+
         this.Servers =
             this.GameType == GameType.Waves
                 ? ServerDisplay.GetWavesV2Games
@@ -914,7 +920,8 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         if (!disposedValue)
         {
             disposedValue = true;
-            this.GameContext.ProgressState.OnProgressChanged -= ProgressState_OnProgressChanged;
+            if(this.GameContext!= null)
+                this.GameContext.ProgressState.OnProgressChanged -= ProgressState_OnProgressChanged;
             if (DownloadSpeedPoints != null)
             {
                 this.DownloadSpeedPoints.Clear();

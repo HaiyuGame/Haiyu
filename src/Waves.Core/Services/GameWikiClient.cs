@@ -101,6 +101,8 @@ public sealed partial class GameWikiClient : IGameWikiClient
 
     public List<HotContentSide>? GetEventData(WikiHomeModel model)
     {
+        if (model == null)
+            return null;
         var dataString = model
                 .Data.ContentJson.SideModules.Where(x => x.Type == "hot-content-side");
         if (dataString == null)

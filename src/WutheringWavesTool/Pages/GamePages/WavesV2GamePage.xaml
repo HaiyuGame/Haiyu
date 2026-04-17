@@ -24,7 +24,11 @@
     Background="Transparent"
     NavigationCacheMode="Disabled"
     mc:Ignorable="d">
-
+    <i:Interaction.Behaviors>
+        <i:EventTriggerBehavior EventName="Loaded">
+            <i:InvokeCommandAction Command="{x:Bind ViewModel.LoadedCommand}" />
+        </i:EventTriggerBehavior>
+    </i:Interaction.Behaviors>
     <Page.Resources>
         <convert:StepOKColorConverter x:Key="StepOKColorConverter" />
         <convert:StepOKVisiblityConverter x:Key="StepOKVisiblityConverter" />
