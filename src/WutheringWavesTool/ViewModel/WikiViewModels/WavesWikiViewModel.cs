@@ -10,9 +10,10 @@ namespace Haiyu.ViewModel.WikiViewModels;
 
 public partial class WavesWikiViewModel : WikiViewModelBase
 {
-    public WavesWikiViewModel()
+    public WavesWikiViewModel(IAppContext<App> appContext)
     {
         this.Messenger.Register<SelectUserMessanger>(this, LoginMessangerMethod);
+        AppContext = appContext;
     }
 
     private async void LoginMessangerMethod(object recipient, SelectUserMessanger message)
@@ -46,7 +47,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase
 
     [ObservableProperty]
     public partial GameRoilDataItem SelectGamer { get; set; }
-
+    public IAppContext<App> AppContext { get; }
 
     [RelayCommand]
     async Task Loaded()
@@ -114,24 +115,26 @@ public partial class WavesWikiViewModel : WikiViewModelBase
     [RelayCommand]
     void OpenDataCenter()
     {
-        //Instance.Host.Services.GetKeyedService<INavigationService>(nameof(HomeNavigationService))?.NavigationTo<CommunityViewModel>(
-        //            this.SelectGamer,
-        //            new Microsoft.UI.Xaml.Media.Animation.DrillInNavigationTransitionInfo());
-        var win = Instance.Host.Services.GetRequiredService<IViewFactorys>()!.ShowWavesDataCenter(this.SelectGamer);
-        win.ExtendsContentIntoTitleBar = true;
-        win.AppWindow.Show();
+        var session = this.WavesClient.AccountService.Current;
+        var win = WindowNative.GetWindowHandle(AppContext.App.MainWindow);
+        KuroDataCenterWindow window = new KuroDataCenterWindow(win,new WebSessionContext(session.Token,session.TokenDid,session.TokenId,this.SelectGamer.ServerId,this.SelectGamer.RoleId));
+        window.Manager.Width = 400;
+        window.Manager.Height = 700;
+
+        window.AppWindow.Show();
     }
 
     [RelayCommand]
     void OpenGameSign()
     {
-
         var win = Instance.Host.Services.GetRequiredService<IViewFactorys>()!.ShowSignWindow(this.SelectGamer);
         win.Manager.MaxHeight = 400;
         win.Manager.MaxWidth = 400;
         win.ExtendsContentIntoTitleBar = true;
         win.AppWindow.Show();
     }
+
+
     async partial void OnSelectGamerChanged(GameRoilDataItem value)
     {
         if (value == null)
@@ -145,7 +148,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase
         var result = await WavesClient.GetGamerBassDataAsync(value);
         if(result == null)
         {
-            TipShow.ShowMessage("获取账号基础数据失败，请检查网络或重试", Symbol.Clear);
+            TipShow.ShowMessage("获取账号数据多次出错，已经停止获取", Symbol.Clear);
             return;
         }
         this.Stamina = new(result);

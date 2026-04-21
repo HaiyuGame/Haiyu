@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<m:WindowModelBase
+    x:Class="Haiyu.WindowModels.KuroDataCenterWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:Haiyu.WindowModels"
+    xmlns:m="using:Haiyu.Common.Bases"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="using:Haiyu.Controls"
+    xmlns:winEx="using:WinUIEx"
+    Title="KuroDataCenterWindow"
+    mc:Ignorable="d">
+    <Grid x:Name="grid" Loaded="grid_Loaded">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <ui:TitleBar
+            x:Name="titleBar"
+            VerticalContentAlignment="Center"
+            IsExtendsContentIntoTitleBar="True"
+            TitleHorizontalAlignment="Center">
+            <ui:TitleBar.Title>
+                <TextBlock Margin="10,0,0,0" Text="数据面板" />
+            </ui:TitleBar.Title>
+        </ui:TitleBar>
+        <WebView2
+            x:Name="webView2"
+            Grid.Row="1"
+            DefaultBackgroundColor="Transparent">
+            <WebView2.Resources>
+                <SolidColorBrush x:Key="BrushForThemeBackgroundColor" Color="Transparent" />
+            </WebView2.Resources>
+        </WebView2>
+
+    </Grid>
+</m:WindowModelBase>
