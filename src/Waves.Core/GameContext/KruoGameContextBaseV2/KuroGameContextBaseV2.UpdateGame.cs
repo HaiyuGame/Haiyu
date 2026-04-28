@@ -845,9 +845,11 @@ partial class KuroGameContextBaseV2
         //删除下载文件夹
         if (!string.IsNullOrWhiteSpace(downloadBaseFolder))
             Directory.Delete(downloadBaseFolder, true);
-        SetCurrentStateNull(null);
+        await state.CancelToken.CancelAsync();
+        state.IsActive = false;
+        SetCurrentStateNull(false);
         this.GameEventPublisher.Publish(
-            new GameContextOutputArgs() { Type = GameContextActionType.None, Prod = false }
+            new GameContextOutputArgs() { Type = GameContextActionType.None}
         );
         #endregion
     }

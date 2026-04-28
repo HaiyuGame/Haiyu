@@ -679,6 +679,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
             {
                 if (bool.TryParse(doneDownload, out var done))
                 {
+                    BottomBarContent = "安装准备就绪";
                     _buttonAction = ButtonActionType.InstallPreDownload;
                     LauncheContent = "安装更新";
                     DisplayVersion = localPredVersion;
@@ -690,6 +691,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
             {
                 _buttonAction = ButtonActionType.PrepareUpdate;
                 LauncheContent = "更新游戏";
+                BottomBarContent = "游戏有更新";
                 DisplayVersion = version;
                 EnableStartGameBth = true;
                 LauncherIcon = "\uE898";
