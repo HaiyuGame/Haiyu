@@ -20,7 +20,7 @@ public sealed partial class UpdateGameViewModel : DialogViewModelBase
         PickersService = pickersService;
     }
 
-    public IGameContext GameContext { get; private set; }
+    public IGameContextV2 GameContext { get; private set; }
     public UpdateGameType InvokeType { get; private set; }
 
     [ObservableProperty]
@@ -213,7 +213,7 @@ public sealed partial class UpdateGameViewModel : DialogViewModelBase
         this.Close();
     }
 
-    internal void SetData(IGameContext context, UpdateGameType item2)
+    internal void SetData(IGameContextV2 context, UpdateGameType item2)
     {
         this.GameContext = context;
         this.InvokeType = item2;
