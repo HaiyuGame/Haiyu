@@ -482,6 +482,7 @@
                         </Button>
                     </StackPanel>
                 </Grid>
+
                 <Grid Padding="5">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto" />
@@ -603,7 +604,42 @@
                         </Button>
                     </Grid>
                 </Grid>
-
+                <Grid
+                    Margin="5"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Visibility="{x:Bind ViewModel.PredCardVisibility, Mode=OneWay}">
+                    <Viewbox
+                        Width="80"
+                        Height="80"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Stretch="UniformToFill">
+                        <Button CornerRadius="70" Style="{ThemeResource TransparentButtonStyle}">
+                            <Grid>
+                                <control:StorageRing
+                                    x:Name="ring"
+                                    Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"
+                                    MaxAngle="360"
+                                    MinAngle="0"
+                                    PercentCaution="75"
+                                    PercentCritical="90"
+                                    TrackRingThickness="10"
+                                    ValueRingThickness="10"
+                                    Value="{x:Bind ViewModel.PreProgress, Mode=OneWay}" />
+                                <FontIcon
+                                    FontFamily="Segoe Fluent Icons"
+                                    FontSize="45"
+                                    Glyph="&#xEBD3;" />
+                            </Grid>
+                            <Button.Flyout>
+                                <Flyout>
+                                    <Grid Width="210" Height="160" />
+                                </Flyout>
+                            </Button.Flyout>
+                        </Button>
+                    </Viewbox>
+                </Grid>
                 <StackPanel
                     Margin="5"
                     HorizontalAlignment="Center"
