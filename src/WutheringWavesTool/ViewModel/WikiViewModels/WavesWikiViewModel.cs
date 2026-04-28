@@ -30,8 +30,6 @@ public partial class WavesWikiViewModel : WikiViewModelBase
     [ObservableProperty]
     public partial bool KuroLogin { get; set; } = false;
 
-    [ObservableProperty]
-    public partial StaminaWrapper Stamina { get; set; }
 
     [ObservableProperty]
     public partial ObservableCollection<EventContentSideWrapper>? RoleActive { get; set; }
@@ -145,13 +143,6 @@ public partial class WavesWikiViewModel : WikiViewModelBase
     private async Task RefreshBaseData(GameRoilDataItem value)
     {
         await WavesClient.UpdateRefreshToken(value);
-        var result = await WavesClient.GetGamerBassDataAsync(value);
-        if(result == null)
-        {
-            TipShow.ShowMessage("获取账号数据多次出错，已经停止获取", Symbol.Clear);
-            return;
-        }
-        this.Stamina = new(result);
     }
 
     [RelayCommand]
@@ -187,7 +178,6 @@ public partial class WavesWikiViewModel : WikiViewModelBase
     {
         Actives.Clear();
         Actives = null;
-        Stamina = null;
         WeaponActive?.Clear();
         RoleActive?.Clear();
         WeaponActive = null;

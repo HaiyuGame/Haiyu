@@ -177,7 +177,7 @@
                     </Grid.ColumnDefinitions>
                     <Grid.ContextFlyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem Command="{x:Bind ViewModel.RefreshUserCommand}" Text="刷新">
+                            <MenuFlyoutItem Command="{x:Bind ViewModel.RefreshUserCommand}" Text="刷新账号数据缓存">
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE72C;" />
                                 </MenuFlyoutItem.Icon>
@@ -186,7 +186,7 @@
                     </Grid.ContextFlyout>
                     <Grid
                         Margin="0,0,1.5,0"
-                        Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+                        Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource ControlElevationBorderBrush}"
                         BorderThickness="1"
                         CornerRadius="5">
@@ -248,294 +248,16 @@
                         Grid.Column="1"
                         Margin="5,0,0,0"
                         Padding="5"
-                        Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+                        Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource ControlElevationBorderBrush}"
                         BorderThickness="1"
                         CornerRadius="5">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="auto" />
-                            <RowDefinition Height="auto" />
-                            <RowDefinition />
-                        </Grid.RowDefinitions>
-                        <Grid
-                            Grid.Row="0"
-                            Grid.Column="1"
-                            Margin="5,0"
-                            Padding="8"
-                            ui1:Effects.Shadow="{StaticResource CommonShadow}"
-                            Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
-                            CornerRadius="5">
-
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="auto" />
-                                <ColumnDefinition />
-                                <ColumnDefinition Width="auto" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition />
-                                <RowDefinition />
-                            </Grid.RowDefinitions>
-                            <ui:ImageEx
-                                Width="35"
-                                Height="35"
-                                Source="ms-appx:///Assets/GameIcons/global.ico" />
-                            <StackPanel
-                                Grid.Column="1"
-                                Margin="5,0,0,0"
-                                Orientation="Horizontal">
-                                <TextBlock
-                                    VerticalAlignment="Center"
-                                    FontSize="18"
-                                    Text="{x:Bind Name}" />
-                                <Border
-                                    Grid.Column="1"
-                                    Margin="5,0,0,0"
-                                    Padding="3"
-                                    VerticalAlignment="Center"
-                                    Background="{ThemeResource AccentAAFillColorDefaultBrush}"
-                                    CornerRadius="2"
-                                    ToolTipService.ToolTip="{x:Bind ViewModel.Stamina.CreateTime, Mode=OneWay}"
-                                    Visibility="{x:Bind ViewModel.Stamina.IsShowTime, Mode=OneWay}">
-                                    <TextBlock
-                                        FontSize="12"
-                                        Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
-                                        Text="开服玩家" />
-                                </Border>
-                                <Border
-                                    Grid.Column="1"
-                                    Margin="5,0,0,0"
-                                    Padding="3"
-                                    VerticalAlignment="Center"
-                                    Background="{ThemeResource AccentAAFillColorDefaultBrush}"
-                                    CornerRadius="2"
-                                    ToolTipService.ToolTip="{x:Bind ViewModel.Stamina.CreateTime, Mode=OneWay}">
-                                    <TextBlock FontSize="12" Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}">
-                                        <Run Text="活跃天数:" />
-                                        <Run Text="{x:Bind ViewModel.Stamina.ActiveDays, Mode=OneWay}" />
-                                    </TextBlock>
-                                </Border>
-                            </StackPanel>
-                            <TextBlock
-                                Grid.Column="2"
-                                HorizontalAlignment="Right"
-                                VerticalAlignment="Center"
-                                FontFamily="{ThemeResource DefaultFont}"
-                                TextAlignment="Center">
-                                <Run Text="Level:" />
-                                <Run
-                                    FontSize="17"
-                                    FontWeight="Bold"
-                                    Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"
-                                    Text="{x:Bind ViewModel.Stamina.UserLevel, Mode=OneWay}" />
-                            </TextBlock>
-                        </Grid>
-                        <Grid Grid.Row="1" Padding="5">
-                            <Grid.RowDefinitions>
-                                <RowDefinition />
-                                <RowDefinition />
-                                <RowDefinition />
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition />
-                                <ColumnDefinition />
-                                <ColumnDefinition />
-                            </Grid.ColumnDefinitions>
-                            <Border
-                                Margin="0,0,3,0"
-                                Padding="8"
-                                Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
-                                CornerRadius="2">
-                                <Grid Grid.Row="1">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="48" />
-                                        <RowDefinition />
-                                    </Grid.RowDefinitions>
-                                    <StackPanel Grid.Column="1" Orientation="Vertical">
-                                        <TextBlock HorizontalAlignment="Center" TextAlignment="Center">
-                                            <Run
-                                                FontSize="18"
-                                                FontWeight="Bold"
-                                                Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"
-                                                Text="{x:Bind ViewModel.Stamina.Energy, Mode=OneWay}" />
-                                            <LineBreak />
-                                            <Run Text="{x:Bind ViewModel.Stamina.MaxEnergy, Mode=OneWay}" />
-                                        </TextBlock>
-                                    </StackPanel>
-                                    <TextBlock
-                                        Grid.Row="1"
-                                        Grid.ColumnSpan="2"
-                                        HorizontalAlignment="Center"
-                                        FontFamily="{ThemeResource DefaultFont}"
-                                        Text="结晶波片" />
-                                </Grid>
-                            </Border>
-                            <Border
-                                Grid.Row="0"
-                                Grid.Column="1"
-                                Margin="0,0,3,0"
-                                Padding="8"
-                                Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
-                                CornerRadius="2">
-                                <Grid Grid.Row="1">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="48" />
-                                        <RowDefinition />
-                                    </Grid.RowDefinitions>
-                                    <StackPanel Grid.Column="1" Orientation="Vertical">
-                                        <TextBlock HorizontalAlignment="Center" TextAlignment="Center">
-                                            <Run
-                                                FontSize="18"
-                                                FontWeight="Bold"
-                                                Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"
-                                                Text="{x:Bind ViewModel.Stamina.StoreEnergy, Mode=OneWay}" />
-                                            <LineBreak />
-                                            <Run Text="{x:Bind ViewModel.Stamina.MaxStoreEnergy, Mode=OneWay}" />
-                                        </TextBlock>
-                                    </StackPanel>
-                                    <TextBlock
-                                        Grid.Row="1"
-                                        Grid.ColumnSpan="2"
-                                        HorizontalAlignment="Center"
-                                        FontFamily="{ThemeResource DefaultFont}"
-                                        Text="结晶单质" />
-                                </Grid>
-                            </Border>
-                            <Border
-                                Grid.Column="2"
-                                Margin="0,0,0,0"
-                                Padding="8"
-                                Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
-                                CornerRadius="2">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="48" />
-                                        <RowDefinition />
-                                    </Grid.RowDefinitions>
-
-                                    <StackPanel Grid.Column="1" Orientation="Vertical">
-                                        <TextBlock HorizontalAlignment="Center" TextAlignment="Center">
-                                            <Run
-                                                FontSize="18"
-                                                FontWeight="Bold"
-                                                Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"
-                                                Text="{x:Bind ViewModel.Stamina.Liveness, Mode=OneWay}" />
-                                            <LineBreak />
-                                            <Run Text="{x:Bind ViewModel.Stamina.MaxLiveness, Mode=OneWay}" />
-                                        </TextBlock>
-                                    </StackPanel>
-                                    <TextBlock
-                                        Grid.Row="1"
-                                        Grid.ColumnSpan="2"
-                                        HorizontalAlignment="Center"
-                                        FontFamily="{ThemeResource DefaultFont}"
-                                        Text="活跃度" />
-                                </Grid>
-                            </Border>
-                            <Grid
-                                Grid.Row="1"
-                                Grid.ColumnSpan="3"
-                                Margin="0,5,0,0"
-                                Padding="8"
-                                Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
-                                CornerRadius="3">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition />
-                                    <RowDefinition />
-                                </Grid.RowDefinitions>
-                                <TextBlock
-                                    HorizontalAlignment="Left"
-                                    VerticalAlignment="Center"
-                                    Text="千道门扉的异想"
-                                    TextAlignment="Center" />
-                                <ProgressBar
-                                    Grid.Row="1"
-                                    Margin="0,5,0,0"
-                                    HorizontalAlignment="Stretch"
-                                    Maximum="{x:Bind ViewModel.Stamina.MaxRougeScore, Mode=OneWay}"
-                                    Value="{x:Bind ViewModel.Stamina.RougeScore, Mode=OneWay}" />
-                                <TextBlock
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Center"
-                                    TextAlignment="Center">
-                                    <Run
-                                        FontSize="20"
-                                        Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"
-                                        Text="{x:Bind ViewModel.Stamina.RougeScore, Mode=OneWay}" />
-                                    <Run Text="/" />
-                                    <Run Text="{x:Bind ViewModel.Stamina.MaxRougeScore, Mode=OneWay}" />
-                                </TextBlock>
-                            </Grid>
-                            <Grid
-                                Grid.Row="2"
-                                Grid.ColumnSpan="3"
-                                Margin="0,5,0,0"
-                                Padding="8"
-                                Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
-                                CornerRadius="3">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition />
-                                    <RowDefinition />
-                                </Grid.RowDefinitions>
-                                <TextBlock
-                                    HorizontalAlignment="Left"
-                                    VerticalAlignment="Center"
-                                    Text="战歌重奏收取次数"
-                                    TextAlignment="Center" />
-                                <ProgressBar
-                                    Grid.Row="1"
-                                    Margin="0,5,0,0"
-                                    HorizontalAlignment="Stretch"
-                                    Maximum="{x:Bind ViewModel.Stamina.MaxWeekyInstCount, Mode=OneWay}"
-                                    Value="{x:Bind ViewModel.Stamina.WeekyInstCount, Mode=OneWay}" />
-                                <TextBlock
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Center"
-                                    TextAlignment="Center">
-                                    <Run
-                                        FontSize="20"
-                                        Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"
-                                        Text="{x:Bind ViewModel.Stamina.WeekyInstCount, Mode=OneWay}" />
-                                    <Run Text="/" />
-                                    <Run Text="{x:Bind ViewModel.Stamina.MaxWeekyInstCount, Mode=OneWay}" />
-                                </TextBlock>
-                            </Grid>
-                        </Grid>
-                        <Grid Grid.Row="2" Margin="5,0">
-                            <ScrollViewer
-                                HorizontalScrollBarVisibility="Visible"
-                                HorizontalScrollMode="Enabled"
-                                VerticalScrollMode="Disabled">
-                                <ItemsRepeater ItemsSource="{x:Bind ViewModel.Stamina.BoxList, Mode=OneWay}">
-                                    <ItemsRepeater.ItemTemplate>
-                                        <DataTemplate x:DataType="source:BoxList">
-                                            <Grid
-                                                Margin="2,0"
-                                                Padding="8"
-                                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                                CornerRadius="4">
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition />
-                                                    <RowDefinition />
-                                                </Grid.RowDefinitions>
-                                                <TextBlock
-                                                    FontSize="17"
-                                                    FontWeight="Bold"
-                                                    Text="{x:Bind Num}"
-                                                    TextAlignment="Center" />
-                                                <TextBlock
-                                                    Grid.Row="1"
-                                                    Margin="0,5,0,0"
-                                                    Text="{x:Bind BoxName}"
-                                                    TextAlignment="Center" />
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ItemsRepeater.ItemTemplate>
-                                    <ItemsRepeater.Layout>
-                                        <StackLayout Orientation="Horizontal" />
-                                    </ItemsRepeater.Layout>
-                                </ItemsRepeater>
-                            </ScrollViewer>
-                        </Grid>
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            FontFamily="{ThemeResource DefaultFont}"
+                            FontSize="18"
+                            Text="敬请期待" />
                     </Grid>
 
                 </Grid>
