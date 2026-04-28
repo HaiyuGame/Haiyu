@@ -609,9 +609,9 @@
                         </Grid>
                     </Grid>
                     <Grid
-                        Margin="5"
-                        HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch"
+                        Margin="0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
                         Visibility="{x:Bind ViewModel.PredCardVisibility, Mode=OneWay}">
                         <Viewbox
                             Width="80"

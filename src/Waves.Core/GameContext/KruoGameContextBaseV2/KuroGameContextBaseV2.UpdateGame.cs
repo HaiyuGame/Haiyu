@@ -465,7 +465,7 @@ partial class KuroGameContextBaseV2
             );
             var cdnResult = await TestCdnAsync(
                 _launcher.ResourceDefault.CdnList,
-                isResource ? resourceUrl : preiveResource,
+                isResource ? resources.First().FromFolder : preiveResource,
                 resources
             );
             if (cdnResult == null || !cdnResult.Value.Success)
@@ -479,7 +479,7 @@ partial class KuroGameContextBaseV2
                     }
                 );
             }
-            var baseUrl = cdnResult!.Value.Url + (isResource ? resourceUrl : preiveResource);
+            var baseUrl = cdnResult!.Value.Url + (isResource ? resources.First().FromFolder : preiveResource);
             return baseUrl;
         }
         catch (Exception)
