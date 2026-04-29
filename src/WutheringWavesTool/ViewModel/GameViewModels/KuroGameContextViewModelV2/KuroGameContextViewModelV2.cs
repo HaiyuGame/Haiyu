@@ -530,8 +530,9 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         try
         {
             ProcessAction = true;
-
+            
             var status = await this.GameContext.GetGameContextStatusAsync(this.CTS.Token);
+            
             if (!status.IsGameExists)
             {
                 Logger.WriteInfo("未找到游戏文件，显示下载按钮");

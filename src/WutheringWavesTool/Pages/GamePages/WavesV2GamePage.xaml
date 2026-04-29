@@ -609,7 +609,7 @@
                         </Grid>
                     </Grid>
                     <Grid
-                        Margin="0"
+                        Margin="0,10,0,0"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         Visibility="{x:Bind ViewModel.PredCardVisibility, Mode=OneWay}">
@@ -623,6 +623,9 @@
                                 Command="{x:Bind ViewModel.StartPreDownloadGameCommand}"
                                 CornerRadius="70"
                                 Style="{ThemeResource TransparentButtonStyle}">
+                                <ToolTipService.ToolTip>
+                                    <Grid Width="210" Height="160" />
+                                </ToolTipService.ToolTip>
                                 <Grid>
                                     <control:StorageRing
                                         x:Name="ring"
@@ -637,13 +640,8 @@
                                     <FontIcon
                                         FontFamily="Segoe Fluent Icons"
                                         FontSize="45"
-                                        Glyph="&#xEBD3;" />
+                                        Glyph="{x:Bind ViewModel.PreDownloadIcon, Mode=OneWay}" />
                                 </Grid>
-                                <Button.Flyout>
-                                    <Flyout>
-                                        <Grid Width="210" Height="160" />
-                                    </Flyout>
-                                </Button.Flyout>
                             </Button>
                         </Viewbox>
                     </Grid>

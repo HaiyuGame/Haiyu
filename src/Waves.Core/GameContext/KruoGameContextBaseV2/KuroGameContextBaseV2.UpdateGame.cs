@@ -463,9 +463,13 @@ partial class KuroGameContextBaseV2
                     Prod = isProd,
                 }
             );
+            if(resources == null || resources.Count == 0)
+            {
+                return _launcher.ResourceDefault.CdnList.FirstOrDefault()?.Url + resourceUrl;
+            }
             var cdnResult = await TestCdnAsync(
                 _launcher.ResourceDefault.CdnList,
-                isResource ? resources.First().FromFolder : preiveResource,
+                isResource ? resources.First().FromFolder! : preiveResource,
                 resources
             );
             if (cdnResult == null || !cdnResult.Value.Success)
@@ -474,10 +478,11 @@ partial class KuroGameContextBaseV2
                     new GameContextOutputArgs()
                     {
                         Type = GameContextActionType.TipMessage,
-                        TipMessage = "未找到可用的CDN地址，无法进行下载",
+                        TipMessage = "未找到可用的CDN地址，默认使用第一个CDN",
                         Prod = isProd,
                     }
                 );
+                return _launcher.ResourceDefault.CdnList.FirstOrDefault()?.Url + resourceUrl;
             }
             var baseUrl = cdnResult!.Value.Url + (isResource ? resources.First().FromFolder : preiveResource);
             return baseUrl;

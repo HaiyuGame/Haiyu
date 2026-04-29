@@ -221,16 +221,16 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
 
     public async Task<bool> PauseDownloadAsync()
     {
-        var state = DownloadState != null ? DownloadState : this.ProdDownloadState;
-        if (state != null)
+
+        if (DownloadState != null)
         {
-            if (state.IsActive && _currentRunningAction != null)
+            if (DownloadState.IsActive && _currentRunningAction != null)
             {
                 if (_currentRunningAction is IProgressSetup cancelTask)
                 {
                     if (cancelTask.CanPause)
                     {
-                        await state.PauseAsync();
+                        await DownloadState.PauseAsync();
                     }
                     else
                     {
@@ -246,8 +246,34 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
             }
             else
             {
-                //处于其他任务，直接暂停
-                await state.PauseAsync();
+                await DownloadState.PauseAsync();
+            }
+        }
+        else if (ProdDownloadState != null)
+        {
+            if (ProdDownloadState.IsActive && _currentRunningAction != null)
+            {
+                if (_currentRunningAction is IProgressSetup cancelTask)
+                {
+                    if (cancelTask.CanPause)
+                    {
+                        await ProdDownloadState.PauseAsync();
+                    }
+                    else
+                    {
+                        this.GameEventPublisher.Publish(
+                            new GameContextOutputArgs()
+                            {
+                                Type = GameContextActionType.TipMessage,
+                                TipMessage = "当前任务不支持",
+                            }
+                        );
+                    }
+                }
+            }
+            else
+            {
+                await ProdDownloadState.PauseAsync();
             }
         }
         return true;
