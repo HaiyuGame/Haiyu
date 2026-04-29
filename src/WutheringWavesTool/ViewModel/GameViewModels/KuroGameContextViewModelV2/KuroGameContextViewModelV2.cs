@@ -39,6 +39,17 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         AppContext = appContext;
         TipShow = tipShow;
         WallpaperService = Instance.GetService<IWallpaperService>();
+        RegisterMessager();
+    }
+
+    private void RegisterMessager()
+    {
+        this.Messenger.Register<RefreshGamePageMessager>(this, RefreshGamePageMethod);
+    }
+
+    private async void RefreshGamePageMethod(object recipient, RefreshGamePageMessager message)
+    {
+        await this.RefreshCoreAsync(this.SelectServer.ShowCard);
     }
 
     [RelayCommand]

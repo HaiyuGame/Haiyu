@@ -79,14 +79,33 @@ public sealed partial class UninstallViewModel : ObservableRecipient
     [RelayCommand]
     async Task Loaded()
     {
-        var progress = Process.GetProcesses();
-        var current = progress.Where(x=>x.ProcessName.Contains("Haiyu")).FirstOrDefault();
-        if(current != null)
+        Process[] processes = Process.GetProcessesByName("Haiyu");
+        if (processes.Length > 0)
         {
-            var result = MessageBox.Show("Haiyu正在运行，是否关闭？","警告",MessageBoxButton.OKCancel, MessageBoxImage.Warning,MessageBoxResult.OK);
-            if(result == MessageBoxResult.OK) 
+            var result = MessageBox.Show("Haiyu正在运行，是否关闭？", "警告", MessageBoxButton.OKCancel, MessageBoxImage.Warning, MessageBoxResult.OK);
+            if (result == MessageBoxResult.OK)
             {
-                current.Kill();
+                foreach (var item in processes)
+                {
+                    try
+                    {
+                        if (!item.HasExited)
+                        {
+                            item.Kill();
+                            item.WaitForExit(3000);
+                        }
+                    }
+                    catch (InvalidOperationException)
+                    {
+                    }
+                    catch (System.ComponentModel.Win32Exception)
+                    {
+                    }
+                    finally
+                    {
+                        item.Dispose();
+                    }
+                }
             }
             else
             {

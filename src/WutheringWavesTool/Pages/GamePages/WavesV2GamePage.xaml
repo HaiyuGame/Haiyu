@@ -623,9 +623,9 @@
                                 Command="{x:Bind ViewModel.StartPreDownloadGameCommand}"
                                 CornerRadius="70"
                                 Style="{ThemeResource TransparentButtonStyle}">
-                                <ToolTipService.ToolTip>
+                                <!--<ToolTipService.ToolTip>
                                     <Grid Width="210" Height="160" />
-                                </ToolTipService.ToolTip>
+                                </ToolTipService.ToolTip>-->
                                 <Grid>
                                     <control:StorageRing
                                         x:Name="ring"
