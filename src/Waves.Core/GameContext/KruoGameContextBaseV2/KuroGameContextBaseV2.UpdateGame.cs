@@ -778,6 +778,8 @@ partial class KuroGameContextBaseV2
             }
             if (installTasks[i].Item4 == InstallGameResourceType.CheckAllFiles)
             {
+                var checkAllResource = await this.GetGameResourceAsync(launcher.ResourceDefault);
+
                 var downloadMethod = new DownloadAndVerifyResource(this.Logger)
                 {
                     ProgressName = "重新校验文件",
@@ -793,7 +795,7 @@ partial class KuroGameContextBaseV2
                 var cdnResult = await TestCdnAsync(
                     launcher.ResourceDefault.CdnList,
                     launcher.ResourceDefault.ResourcesBasePath,
-                    patch.Resource
+                    checkAllResource!.Resource
                 );
                 if (cdnResult == null)
                 {

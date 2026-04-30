@@ -625,9 +625,25 @@
                                 Command="{x:Bind ViewModel.StartPreDownloadGameCommand}"
                                 CornerRadius="70"
                                 Style="{ThemeResource TransparentButtonStyle}">
-                                <!--<ToolTipService.ToolTip>
-                                    <Grid Width="210" Height="160" />
-                                </ToolTipService.ToolTip>-->
+                                <ToolTipService.ToolTip>
+                                    <Grid Width="210" Height="160">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition />
+                                            <RowDefinition />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition />
+                                            <ColumnDefinition />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="下载步骤" />
+                                        <TextBlock Text="{x:Bind ViewModel.PreSetupHeaderText, Mode=OneWay}" />
+                                        <TextBlock Grid.Row="1" Text="处理速度" />
+                                        <TextBlock
+                                            Grid.Row="1"
+                                            Grid.Column="1"
+                                            Text="{x:Bind ViewModel.PreDownloadSizeText, Mode=OneWay}" />
+                                    </Grid>
+                                </ToolTipService.ToolTip>
                                 <Grid>
                                     <control:StorageRing
                                         x:Name="ring"
