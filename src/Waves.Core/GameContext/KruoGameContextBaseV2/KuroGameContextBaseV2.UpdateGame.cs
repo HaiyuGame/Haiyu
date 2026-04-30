@@ -463,9 +463,13 @@ partial class KuroGameContextBaseV2
                     Prod = isProd,
                 }
             );
+            if(resources == null || resources.Count == 0)
+            {
+                return _launcher.ResourceDefault.CdnList.FirstOrDefault()?.Url + resourceUrl;
+            }
             var cdnResult = await TestCdnAsync(
                 _launcher.ResourceDefault.CdnList,
-                isResource ? resourceUrl : preiveResource,
+                isResource ? resources.First().FromFolder! : preiveResource,
                 resources
             );
             if (cdnResult == null || !cdnResult.Value.Success)
@@ -474,12 +478,13 @@ partial class KuroGameContextBaseV2
                     new GameContextOutputArgs()
                     {
                         Type = GameContextActionType.TipMessage,
-                        TipMessage = "未找到可用的CDN地址，无法进行下载",
+                        TipMessage = "未找到可用的CDN地址，默认使用第一个CDN",
                         Prod = isProd,
                     }
                 );
+                return _launcher.ResourceDefault.CdnList.FirstOrDefault()?.Url + resourceUrl;
             }
-            var baseUrl = cdnResult!.Value.Url + (isResource ? resourceUrl : preiveResource);
+            var baseUrl = cdnResult!.Value.Url + (isResource ? resources.First().FromFolder : preiveResource);
             return baseUrl;
         }
         catch (Exception)
@@ -773,6 +778,8 @@ partial class KuroGameContextBaseV2
             }
             if (installTasks[i].Item4 == InstallGameResourceType.CheckAllFiles)
             {
+                var checkAllResource = await this.GetGameResourceAsync(launcher.ResourceDefault);
+
                 var downloadMethod = new DownloadAndVerifyResource(this.Logger)
                 {
                     ProgressName = "重新校验文件",
@@ -788,7 +795,7 @@ partial class KuroGameContextBaseV2
                 var cdnResult = await TestCdnAsync(
                     launcher.ResourceDefault.CdnList,
                     launcher.ResourceDefault.ResourcesBasePath,
-                    patch.Resource
+                    checkAllResource!.Resource
                 );
                 if (cdnResult == null)
                 {
@@ -845,9 +852,11 @@ partial class KuroGameContextBaseV2
         //删除下载文件夹
         if (!string.IsNullOrWhiteSpace(downloadBaseFolder))
             Directory.Delete(downloadBaseFolder, true);
-        SetCurrentStateNull(null);
+        await state.CancelToken.CancelAsync();
+        state.IsActive = false;
+        SetCurrentStateNull(false);
         this.GameEventPublisher.Publish(
-            new GameContextOutputArgs() { Type = GameContextActionType.None, Prod = false }
+            new GameContextOutputArgs() { Type = GameContextActionType.None}
         );
         #endregion
     }

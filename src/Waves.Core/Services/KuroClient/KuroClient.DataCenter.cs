@@ -30,23 +30,27 @@ partial class KuroClient
             new MediaTypeHeaderValue("application/x-www-form-urlencoded"),
             content
         );
-        var result = await HttpClientService.HttpClient.SendAsync(request, token);
-        var jsonStr = await result.Content.ReadAsStringAsync(token);
-
-        var resultCode = JsonSerializer.Deserialize(
-            jsonStr,
-            CommunityContext.Default.GamerBassString
-        );
-        if (resultCode == null || resultCode.Code != 200)
+        for (int i = 0; i < 5; i++)
         {
-            return null;
-        }
+            var result = await HttpClientService.HttpClient.SendAsync(request, token);
+            var jsonStr = await result.Content.ReadAsStringAsync(token);
 
-        var bassData = JsonSerializer.Deserialize(
-            resultCode.Data,
-            CommunityContext.Default.GamerBassData
-        );
-        return bassData;
+            var resultCode = JsonSerializer.Deserialize(
+                jsonStr,
+                CommunityContext.Default.GamerBassString
+            );
+            if (resultCode == null || resultCode.Code != 200)
+            {
+                continue;
+            }
+
+            var bassData = JsonSerializer.Deserialize(
+                resultCode.Data,
+                CommunityContext.Default.GamerBassData
+            );
+            return bassData;
+        }
+        return null;
     }
 
     public async Task<GamerRoleData?> GetGamerRoleDataAsync(
@@ -417,10 +421,7 @@ partial class KuroClient
         try
         {
             var header = GetWebHeader(true);
-            var content = new Dictionary<string, string>()
-            {
-
-            };
+            var content = new Dictionary<string, string>() { };
             var request = await BuildRequestAsync(
                 "https://api.kurobbs.com/aki/resource/period/list",
                 HttpMethod.Get,
@@ -431,10 +432,7 @@ partial class KuroClient
             var result = await this.HttpClientService.HttpClient.SendAsync(request, token);
             var jsonStr = await result.Content.ReadAsStringAsync(token);
 
-            return JsonSerializer.Deserialize(
-                jsonStr,
-                CommunityContext.Default.BriefHeader
-            );
+            return JsonSerializer.Deserialize(jsonStr, CommunityContext.Default.BriefHeader);
         }
         catch (Exception)
         {
@@ -442,29 +440,70 @@ partial class KuroClient
         }
     }
 
-    public async Task<ResourceBrefItem> GetVersionBrefItemAsync(string roleId, string serverId, string versionId, CancellationToken token = default)
+    public async Task<ResourceBrefItem> GetVersionBrefItemAsync(
+        string roleId,
+        string serverId,
+        string versionId,
+        CancellationToken token = default
+    )
     {
+        return await GetBrefItemAsync(
+            "https://api.kurobbs.com/aki/resource/version",
+            roleId,
+            serverId,
+            versionId,
+            token
+        );
+    }
 
-        return await GetBrefItemAsync("https://api.kurobbs.com/aki/resource/version", roleId, serverId, versionId, token);
-    }
-    public async Task<ResourceBrefItem> GetWeekBrefItemAsync(string roleId, string serverId, string versionId, CancellationToken token = default)
+    public async Task<ResourceBrefItem> GetWeekBrefItemAsync(
+        string roleId,
+        string serverId,
+        string versionId,
+        CancellationToken token = default
+    )
     {
-        return await GetBrefItemAsync("https://api.kurobbs.com/aki/resource/week", roleId, serverId, versionId, token);
+        return await GetBrefItemAsync(
+            "https://api.kurobbs.com/aki/resource/week",
+            roleId,
+            serverId,
+            versionId,
+            token
+        );
     }
-    public async Task<ResourceBrefItem> GetMonthBrefItemAsync(string roleId, string serverId, string versionId, CancellationToken token = default)
+
+    public async Task<ResourceBrefItem> GetMonthBrefItemAsync(
+        string roleId,
+        string serverId,
+        string versionId,
+        CancellationToken token = default
+    )
     {
-        return await GetBrefItemAsync("https://api.kurobbs.com/aki/resource/month", roleId, serverId, versionId, token);
+        return await GetBrefItemAsync(
+            "https://api.kurobbs.com/aki/resource/month",
+            roleId,
+            serverId,
+            versionId,
+            token
+        );
     }
-    private async Task<ResourceBrefItem> GetBrefItemAsync(string url, string roleId, string serverId, string versionId, CancellationToken token = default)
+
+    private async Task<ResourceBrefItem> GetBrefItemAsync(
+        string url,
+        string roleId,
+        string serverId,
+        string versionId,
+        CancellationToken token = default
+    )
     {
         try
         {
             var header = GetWebHeader(true);
             var content = new Dictionary<string, string>()
             {
-                {"period" ,versionId },
-                {"roleId" ,roleId },
-                {"serverId" ,serverId },
+                { "period", versionId },
+                { "roleId", roleId },
+                { "serverId", serverId },
             };
             var request = await BuildRequestAsync(
                 url,
@@ -476,10 +515,7 @@ partial class KuroClient
             var result = await this.HttpClientService.HttpClient.SendAsync(request, token);
             var jsonStr = await result.Content.ReadAsStringAsync(token);
 
-            return JsonSerializer.Deserialize(
-                jsonStr,
-                CommunityContext.Default.ResourceBrefItem
-            );
+            return JsonSerializer.Deserialize(jsonStr, CommunityContext.Default.ResourceBrefItem);
         }
         catch (Exception)
         {

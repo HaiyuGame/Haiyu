@@ -98,6 +98,12 @@ public sealed partial class ShellViewModel : ViewModelBase
     [ObservableProperty]
     public partial CollectionViewSource RoleViewSource { get; set; }
 
+    [RelayCommand]
+    void RefreshCurrentPage()
+    {
+        WeakReferenceMessenger.Default.Send<RefreshGamePageMessager>(new(true));
+    }
+
     private void RegisterMessanger()
     {
         this.Messenger.Register<SelectUserMessanger>(this, LoginMessangerMethod);

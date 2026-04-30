@@ -60,9 +60,9 @@ public partial class PunishWikiViewModel : WikiViewModelBase
     }
     public override void Dispose()
     {
-        Sides.Clear();
-        EveryWeekContent.Dispose();
-        BannerListContentWrapper.Dispose();
+        Sides?.Clear();
+        EveryWeekContent?.Dispose();
+        BannerListContentWrapper?.Dispose();
         if (EveryWeekContent != null) EveryWeekContent = null;
         if (BannerListContentWrapper != null) BannerListContentWrapper = null;
         WeakReferenceMessenger.Default.UnregisterAll(this);

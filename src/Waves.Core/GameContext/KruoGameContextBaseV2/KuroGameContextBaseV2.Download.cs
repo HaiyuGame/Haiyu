@@ -156,19 +156,16 @@ partial class KuroGameContextBaseV2
                     );
                     
                 }
-                GameEventPublisher.Publish(
-                        new GameContextOutputArgs() { Type = GameContextActionType.None }
-                    );
+                this.SetCurrentStateNull(false);
                 return true;
             }
             await this.GameEventPublisher.PublishStepAsync("写入配置", CurrentSetups, Setups);
             await writeConfig.WriteDownloadComplateAsync(this.GameEventPublisher, true);
             //通知UI刷新
+            await state.CancelToken.CancelAsync();
             state.IsActive = false;
+            await Task.Delay(100);
             SetCurrentStateNull(false);
-            GameEventPublisher.Publish(
-                new GameContextOutputArgs() { Type = GameContextActionType.None }
-            );
             return true;
         }
         catch (OperationCanceledException)

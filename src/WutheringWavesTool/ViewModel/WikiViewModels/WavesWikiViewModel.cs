@@ -10,9 +10,10 @@ namespace Haiyu.ViewModel.WikiViewModels;
 
 public partial class WavesWikiViewModel : WikiViewModelBase
 {
-    public WavesWikiViewModel()
+    public WavesWikiViewModel(IAppContext<App> appContext)
     {
         this.Messenger.Register<SelectUserMessanger>(this, LoginMessangerMethod);
+        AppContext = appContext;
     }
 
     private async void LoginMessangerMethod(object recipient, SelectUserMessanger message)
@@ -29,8 +30,6 @@ public partial class WavesWikiViewModel : WikiViewModelBase
     [ObservableProperty]
     public partial bool KuroLogin { get; set; } = false;
 
-    [ObservableProperty]
-    public partial StaminaWrapper Stamina { get; set; }
 
     [ObservableProperty]
     public partial ObservableCollection<EventContentSideWrapper>? RoleActive { get; set; }
@@ -46,7 +45,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase
 
     [ObservableProperty]
     public partial GameRoilDataItem SelectGamer { get; set; }
-
+    public IAppContext<App> AppContext { get; }
 
     [RelayCommand]
     async Task Loaded()
@@ -56,7 +55,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase
             await this.GameWikiClient.GetHomePageAsync(WikiType.Waves, this.CTS.Token)
         );
         await RefreshUserAsync();
-        if (wikiPage.Code == 0 || (wikiPage.Result != null && wikiPage.Result.Data.ContentJson.Shortcuts != null))
+        if ((wikiPage.Result != null && wikiPage.Result.Data.ContentJson.Shortcuts != null))
         {
             Actives = GameWikiClient.GetEventData(wikiPage.Result)!.Format()??[];
             var sides = wikiPage.Result.Data.ContentJson.SideModules.Where(x => x.Type == "events-side").ToList();
@@ -114,24 +113,26 @@ public partial class WavesWikiViewModel : WikiViewModelBase
     [RelayCommand]
     void OpenDataCenter()
     {
-        //Instance.Host.Services.GetKeyedService<INavigationService>(nameof(HomeNavigationService))?.NavigationTo<CommunityViewModel>(
-        //            this.SelectGamer,
-        //            new Microsoft.UI.Xaml.Media.Animation.DrillInNavigationTransitionInfo());
-        var win = Instance.Host.Services.GetRequiredService<IViewFactorys>()!.ShowWavesDataCenter(this.SelectGamer);
-        win.ExtendsContentIntoTitleBar = true;
-        win.AppWindow.Show();
+        var session = this.WavesClient.AccountService.Current;
+        var win = WindowNative.GetWindowHandle(AppContext.App.MainWindow);
+        KuroDataCenterWindow window = new KuroDataCenterWindow(win,new WebSessionContext(session.Token,session.TokenDid,session.TokenId,this.SelectGamer.ServerId,this.SelectGamer.RoleId));
+        window.Manager.Width = 400;
+        window.Manager.Height = 700;
+
+        window.AppWindow.Show();
     }
 
     [RelayCommand]
     void OpenGameSign()
     {
-
         var win = Instance.Host.Services.GetRequiredService<IViewFactorys>()!.ShowSignWindow(this.SelectGamer);
         win.Manager.MaxHeight = 400;
         win.Manager.MaxWidth = 400;
         win.ExtendsContentIntoTitleBar = true;
         win.AppWindow.Show();
     }
+
+
     async partial void OnSelectGamerChanged(GameRoilDataItem value)
     {
         if (value == null)
@@ -142,13 +143,6 @@ public partial class WavesWikiViewModel : WikiViewModelBase
     private async Task RefreshBaseData(GameRoilDataItem value)
     {
         await WavesClient.UpdateRefreshToken(value);
-        var result = await WavesClient.GetGamerBassDataAsync(value);
-        if(result == null)
-        {
-            TipShow.ShowMessage("获取账号基础数据失败，请检查网络或重试", Symbol.Clear);
-            return;
-        }
-        this.Stamina = new(result);
     }
 
     [RelayCommand]
@@ -184,7 +178,6 @@ public partial class WavesWikiViewModel : WikiViewModelBase
     {
         Actives.Clear();
         Actives = null;
-        Stamina = null;
         WeaponActive?.Clear();
         RoleActive?.Clear();
         WeaponActive = null;

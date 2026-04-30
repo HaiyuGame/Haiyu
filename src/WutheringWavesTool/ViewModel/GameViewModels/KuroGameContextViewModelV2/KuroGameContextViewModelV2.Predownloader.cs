@@ -56,6 +56,22 @@ partial class KuroGameContextViewModelV2
     [RelayCommand]
     async Task StartPreDownloadGame()
     {
+        if(GameContext.ProdDownloadState != null &&( GameContext.ProdDownloadState.IsActive || !GameContext.ProdDownloadState.CancelToken.IsCancellationRequested))
+        {
+            if (this.GameContext.ProdDownloadState.IsPaused)
+            {
+                this.PreDownloadIcon = "\uE769";
+                await this.GameContext.ResumeDownloadAsync();
+                return;
+            }
+            else
+            {
+                this.PreDownloadIcon = "\uE769";
+                await this.GameContext.PauseDownloadAsync();
+                return;
+            }
+            // 正在下载中，进行暂停逻辑
+        }
         var result = await DialogManager.ShowUpdateGameDialogAsync(
             this.GameContext.ContextName,
             UpdateGameType.ProDownload

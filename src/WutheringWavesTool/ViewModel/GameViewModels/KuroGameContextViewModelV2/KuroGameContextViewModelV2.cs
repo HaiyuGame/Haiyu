@@ -39,6 +39,23 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         AppContext = appContext;
         TipShow = tipShow;
         WallpaperService = Instance.GetService<IWallpaperService>();
+        RegisterMessager();
+    }
+
+    private void RegisterMessager()
+    {
+        this.Messenger.Register<RefreshGamePageMessager>(this, RefreshGamePageMethod);
+    }
+
+    private async void RefreshGamePageMethod(object recipient, RefreshGamePageMessager message)
+    {
+        await this.RefreshCoreAsync(this.SelectServer.ShowCard);
+    }
+
+    [RelayCommand]
+    public async Task Loaded()
+    {
+
         this.Servers =
             this.GameType == GameType.Waves
                 ? ServerDisplay.GetWavesV2Games
@@ -524,8 +541,9 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         try
         {
             ProcessAction = true;
-
+            
             var status = await this.GameContext.GetGameContextStatusAsync(this.CTS.Token);
+            
             if (!status.IsGameExists)
             {
                 Logger.WriteInfo("未找到游戏文件，显示下载按钮");
@@ -673,6 +691,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
             {
                 if (bool.TryParse(doneDownload, out var done))
                 {
+                    BottomBarContent = "安装准备就绪";
                     _buttonAction = ButtonActionType.InstallPreDownload;
                     LauncheContent = "安装更新";
                     DisplayVersion = localPredVersion;
@@ -684,6 +703,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
             {
                 _buttonAction = ButtonActionType.PrepareUpdate;
                 LauncheContent = "更新游戏";
+                BottomBarContent = "游戏有更新";
                 DisplayVersion = version;
                 EnableStartGameBth = true;
                 LauncherIcon = "\uE898";
@@ -914,7 +934,8 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         if (!disposedValue)
         {
             disposedValue = true;
-            this.GameContext.ProgressState.OnProgressChanged -= ProgressState_OnProgressChanged;
+            if(this.GameContext!= null)
+                this.GameContext.ProgressState.OnProgressChanged -= ProgressState_OnProgressChanged;
             if (DownloadSpeedPoints != null)
             {
                 this.DownloadSpeedPoints.Clear();
