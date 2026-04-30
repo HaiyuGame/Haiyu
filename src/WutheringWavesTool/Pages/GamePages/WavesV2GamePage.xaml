@@ -103,6 +103,7 @@
                         <RepositionThemeTransition />
                     </TransitionCollection>
                 </Grid.ChildrenTransitions>
+
                 <Grid
                     Grid.Row="1"
                     Width="300"
@@ -725,10 +726,8 @@
                 Style="{ThemeResource DefaultCardsSwitcher}">
                 <control:CardSwitcher.Card1>
                     <Grid
-                        Padding="8"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
-                        Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         CornerRadius="5"
                         Opacity="1">
@@ -738,13 +737,21 @@
                             <RowDefinition />
                             <RowDefinition Height="auto" />
                         </Grid.RowDefinitions>
+                        <SystemBackdropElement Grid.RowSpan="4" CornerRadius="5">
+                            <SystemBackdropElement.SystemBackdrop>
+                                <DesktopAcrylicBackdrop />
+                            </SystemBackdropElement.SystemBackdrop>
+                        </SystemBackdropElement>
                         <TextBlock
-                            Margin="8,0,0,0"
+                            Margin="10,10,0,0"
                             VerticalAlignment="Center"
                             FontFamily="{ThemeResource DefaultFont}"
                             FontSize="16"
                             Text="{x:Bind ViewModel.LocalUserTitle, Mode=OneWay}" />
-                        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                        <StackPanel
+                            Margin="0,5,5,0"
+                            HorizontalAlignment="Right"
+                            Orientation="Horizontal">
                             <Button Command="{x:Bind ViewModel.RefreshLocalGameUserCommand}" Style="{ThemeResource TransparentButtonStyle}">
                                 <FontIcon
                                     FontFamily="Segoe Fluent Icons"
@@ -1065,8 +1072,6 @@
                 </control:CardSwitcher.Card1>
                 <control:CardSwitcher.Card2>
                     <Grid
-                        Padding="5"
-                        Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="2"
                         CornerRadius="5">
@@ -1079,6 +1084,11 @@
                             <RowDefinition Height="6*" />
                             <RowDefinition Height="4*" />
                         </Grid.RowDefinitions>
+                        <SystemBackdropElement Grid.RowSpan="2" CornerRadius="5">
+                            <SystemBackdropElement.SystemBackdrop>
+                                <DesktopAcrylicBackdrop />
+                            </SystemBackdropElement.SystemBackdrop>
+                        </SystemBackdropElement>
                         <FlipView
                             x:Name="fileView"
                             Grid.Row="0"

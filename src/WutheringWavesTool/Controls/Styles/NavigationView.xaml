@@ -983,7 +983,7 @@
                             Grid.ColumnSpan="2"
                             Width="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TemplateSettings.OpenPaneLength}"
                             HorizontalAlignment="Left"
-                            Background="{TemplateBinding PaneBackground}"
+                            Background="Transparent"
                             Canvas.ZIndex="1"
                             Visibility="Collapsed">
                             <Grid.BackgroundTransition>
@@ -999,6 +999,11 @@
                             <Grid.RenderTransform>
                                 <CompositeTransform x:Name="PaneTransform" />
                             </Grid.RenderTransform>
+                            <SystemBackdropElement>
+                                <SystemBackdropElement.SystemBackdrop>
+                                    <DesktopAcrylicBackdrop />
+                                </SystemBackdropElement.SystemBackdrop>
+                            </SystemBackdropElement>
                             <Border Child="{TemplateBinding Pane}" />
                             <Rectangle
                                 x:Name="HCPaneBorder"

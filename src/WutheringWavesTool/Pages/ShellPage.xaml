@@ -54,39 +54,58 @@
                     Margin="0,0,0,0"
                     HorizontalAlignment="Left"
                     Orientation="Horizontal">
-                    <Button
-                        Width="60"
-                        Margin="0,0,0,0"
-                        HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch"
-                        BorderThickness="0"
-                        Command="{x:Bind ViewModel.ClearMemoryCommand}"
-                        Style="{ThemeResource DefaultAcrylicButtonStyle}">
-                        <ui:ImageEx
-                            Width="25"
-                            Height="25"
+                    <Grid>
+                        <SystemBackdropElement>
+                            <SystemBackdropElement.SystemBackdrop>
+                                <DesktopAcrylicBackdrop />
+                            </SystemBackdropElement.SystemBackdrop>
+                        </SystemBackdropElement>
+                        <Button
+                            Width="60"
                             Margin="0,0,0,0"
-                            VerticalAlignment="Center"
-                            Source="ms-appx:///Assets/appLogo.ico"
-                            Stretch="UniformToFill" />
-                    </Button>
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            BorderThickness="0"
+                            Command="{x:Bind ViewModel.ClearMemoryCommand}"
+                            Style="{ThemeResource TransparentButtonStyle}">
+                            <ui:ImageEx
+                                Width="25"
+                                Height="25"
+                                Margin="0,0,0,0"
+                                VerticalAlignment="Center"
+                                Source="ms-appx:///Assets/appLogo.ico"
+                                Stretch="UniformToFill" />
+                        </Button>
+                    </Grid>
 
-                    <StackPanel
+                    <Grid
                         Margin="5,5,0,0"
-                        Padding="5"
-                        Background="{ThemeResource AcrylicInAppFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource AccentAAFillColorDisabled}"
                         BorderThickness="1"
-                        CornerRadius="5"
-                        Orientation="Horizontal">
-                        <StackPanel.ChildrenTransitions>
+                        CornerRadius="5">
+                        <Grid.ChildrenTransitions>
                             <TransitionCollection>
                                 <RepositionThemeTransition />
                             </TransitionCollection>
-                        </StackPanel.ChildrenTransitions>
+                        </Grid.ChildrenTransitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <SystemBackdropElement
+                            Grid.ColumnSpan="4"
+                            HorizontalAlignment="Stretch"
+                            CornerRadius="5">
+                            <SystemBackdropElement.SystemBackdrop>
+                                <DesktopAcrylicBackdrop />
+                            </SystemBackdropElement.SystemBackdrop>
+                        </SystemBackdropElement>
                         <Button
                             Width="40"
                             Height="40"
+                            Margin="5"
                             Padding="5"
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Center"
@@ -101,6 +120,7 @@
 
                         </Button>
                         <Button
+                            Grid.Column="1"
                             Width="40"
                             VerticalAlignment="Center"
                             Command="{x:Bind ViewModel.LoginCommand}"
@@ -114,6 +134,7 @@
                                 Glyph="&#xE710;" />
                         </Button>
                         <Button
+                            Grid.Column="2"
                             Width="40"
                             Padding="0"
                             Command="{x:Bind ViewModel.ShowOpenLocalUserCommand}"
@@ -127,6 +148,7 @@
                                 Glyph="&#xEC7A;" />
                         </Button>
                         <Button
+                            Grid.Column="3"
                             CornerRadius="5"
                             Style="{ThemeResource TransparentButtonStyle}"
                             ToolTipService.ToolTip="工具箱"
@@ -158,7 +180,7 @@
                                 </MenuFlyout>
                             </Button.Flyout>
                         </Button>
-                    </StackPanel>
+                    </Grid>
 
                 </StackPanel>
             </ui:TitleBar.Header>
