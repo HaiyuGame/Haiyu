@@ -5,6 +5,15 @@ namespace Waves.Core.Models;
 
 public class GameContextOutputArgs
 {
+    public GameContextOutputArgs()
+    {
+        this.CreateTime = DateTime.Now;
+    }
+
+    public GameContextOutputArgs(DateTime cT)
+    {
+        this.CreateTime = cT ;
+    }
 
     public GameContextActionType Type { get; set; }
 
@@ -72,4 +81,5 @@ public class GameContextOutputArgs
     public double ZipSpeed { get; internal set; }
     public bool IsCancel { get; internal set; }
     public double DiffSpeed { get; internal set; }
+    public DateTime CreateTime { get; internal set; }
 }

@@ -98,18 +98,23 @@
                     <RowDefinition />
                     <RowDefinition />
                 </Grid.RowDefinitions>
+
                 <Grid.ChildrenTransitions>
                     <TransitionCollection>
                         <RepositionThemeTransition />
                     </TransitionCollection>
                 </Grid.ChildrenTransitions>
 
+                <SystemBackdropElement Grid.RowSpan="3" CornerRadius="5">
+                    <SystemBackdropElement.SystemBackdrop>
+                        <DesktopAcrylicBackdrop />
+                    </SystemBackdropElement.SystemBackdrop>
+                </SystemBackdropElement>
                 <Grid
                     Grid.Row="1"
                     Width="300"
                     Height="280"
                     HorizontalAlignment="Right"
-                    Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
                     CornerRadius="5"
                     Visibility="{x:Bind ViewModel.GameDownloadingBthVisibility, Mode=OneWay}">
                     <Grid.ChildrenTransitions>
@@ -493,23 +498,26 @@
                             <RowDefinition Height="auto" />
                             <RowDefinition />
                         </Grid.RowDefinitions>
-                        <Border
+                        <Grid
                             Margin="15,0,15,-2"
                             Padding="5"
-                            Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource LayerOnMicaBaseAltFillColorSecondaryBrush}"
                             BorderThickness="1,1,1,0"
                             CornerRadius="5 5 0 0"
                             Visibility="{x:Bind ViewModel.GameLauncherBthVisibility, Mode=OneWay}">
+                            <SystemBackdropElement Grid.ColumnSpan="2" CornerRadius="5">
+                                <SystemBackdropElement.SystemBackdrop>
+                                    <DesktopAcrylicBackdrop />
+                                </SystemBackdropElement.SystemBackdrop>
+                            </SystemBackdropElement>
                             <TextBlock
                                 HorizontalAlignment="Center"
                                 FontFamily="{ThemeResource DefaultFont}"
                                 Text="{x:Bind ViewModel.BottomBarContent, Mode=OneWay}" />
-                        </Border>
+                        </Grid>
                         <Grid
                             Grid.Row="1"
                             Padding="5"
-                            Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource LayerOnMicaBaseAltFillColorSecondaryBrush}"
                             BorderThickness="1"
                             CornerRadius="4"
@@ -518,6 +526,11 @@
                                 <ColumnDefinition />
                                 <ColumnDefinition Width="auto" />
                             </Grid.ColumnDefinitions>
+                            <SystemBackdropElement Grid.ColumnSpan="2" CornerRadius="5">
+                                <SystemBackdropElement.SystemBackdrop>
+                                    <DesktopAcrylicBackdrop />
+                                </SystemBackdropElement.SystemBackdrop>
+                            </SystemBackdropElement>
                             <Button
                                 Grid.Row="1"
                                 Height="60"
@@ -567,9 +580,9 @@
                                 Margin="3,0,0,0"
                                 HorizontalAlignment="Stretch"
                                 VerticalAlignment="Stretch"
-                                Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
                                 BorderThickness="0"
-                                IsEnabled="{x:Bind ViewModel.EnableStartGameBth, Mode=OneWay}">
+                                IsEnabled="{x:Bind ViewModel.EnableStartGameBth, Mode=OneWay}"
+                                Style="{ThemeResource TransparentButtonStyle}">
                                 <FontIcon
                                     FontFamily="Segoe Fluent Icons"
                                     FontSize="18"

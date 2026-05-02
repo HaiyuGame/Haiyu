@@ -303,7 +303,6 @@
 		<Folder Include="Assets\GameAssets\Punish\" />
 		<Folder Include="Assets\Languages\" />
 		<Folder Include="Common\Plugins\" />
-		<Folder Include="Pages\ColorGame\" />
 	</ItemGroup>
 	<PropertyGroup Label="Globals" />
 	<!--

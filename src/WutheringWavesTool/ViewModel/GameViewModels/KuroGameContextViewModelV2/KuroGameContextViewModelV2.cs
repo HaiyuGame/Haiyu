@@ -188,6 +188,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         var args = tracker.LastArgs;
         if (this.GameContext == null)
             return;
+        
         await AppContext.TryInvokeAsync(async () =>
         {
             var actionType = args.Type;
