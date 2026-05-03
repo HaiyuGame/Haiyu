@@ -78,11 +78,7 @@
                         </Button>
                     </Grid>
 
-                    <Grid
-                        Margin="5,5,0,0"
-                        BorderBrush="{ThemeResource AccentAAFillColorDisabled}"
-                        BorderThickness="1"
-                        CornerRadius="5">
+                    <Grid Margin="5,5,0,0" CornerRadius="5">
                         <Grid.ChildrenTransitions>
                             <TransitionCollection>
                                 <RepositionThemeTransition />
@@ -136,7 +132,7 @@
                         <Button
                             Grid.Column="2"
                             Width="40"
-                            Padding="0"
+                            VerticalAlignment="Center"
                             Command="{x:Bind ViewModel.ShowOpenLocalUserCommand}"
                             CornerRadius="5"
                             Style="{ThemeResource TransparentButtonStyle}"
@@ -149,6 +145,8 @@
                         </Button>
                         <Button
                             Grid.Column="3"
+                            Width="40"
+                            VerticalAlignment="Center"
                             CornerRadius="5"
                             Style="{ThemeResource TransparentButtonStyle}"
                             ToolTipService.ToolTip="工具箱"
@@ -357,9 +355,12 @@
                     </Button>
                 </NavigationView.PaneFooter>
                 <Grid>
+
                     <Frame x:Name="frame" />
                 </Grid>
             </NavigationView>
         </Grid>
+
+
     </Grid>
 </Page>
