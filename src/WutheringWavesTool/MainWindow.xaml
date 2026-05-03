@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<ex:WindowEx
+<Window
     x:Class="Haiyu.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -8,9 +8,4 @@
     xmlns:ex="using:WinUIEx"
     xmlns:local="using:Haiyu"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Title="{x:Bind a:App.AppVersion}"
-    mc:Ignorable="d">
-    <ex:WindowEx.SystemBackdrop>
-        <MicaBackdrop />
-    </ex:WindowEx.SystemBackdrop>
-</ex:WindowEx>
+    mc:Ignorable="d" />
