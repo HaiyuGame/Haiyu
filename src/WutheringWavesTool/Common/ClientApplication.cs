@@ -2,5 +2,5 @@
 
 public abstract class ClientApplication : Application
 {
-    public Window MainWindow { get; set; }
+    public WindowEx MainWindow { get; set; }
 }
