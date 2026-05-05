@@ -13,13 +13,10 @@
 		<SatelliteResourceLanguages></SatelliteResourceLanguages>
 		<InvariantGlobalization>true</InvariantGlobalization>
 		<WinUISDKReferences>false</WinUISDKReferences>
-		<EnableMsixTooling>true</EnableMsixTooling>
+		<EnableMsixTooling>false</EnableMsixTooling>
 		<PublishAot>true</PublishAot>
 		<PublishTrimmed>true</PublishTrimmed>
 		<WindowsPackageType>None</WindowsPackageType>
-		<!--
-		-->
-		<UserSecretsId>e239e9df-797b-4568-b3e5-8397f5b3faa6</UserSecretsId>
 	</PropertyGroup>
 	<ItemGroup>
 		<Compile Remove="AppPackages\**" />
@@ -344,32 +341,16 @@
 		<PRIResource Remove="Strings\**" />
 	</ItemGroup>
 	<ItemGroup>
-		<None Remove="Assets\appLogo.ico" />
-		<None Remove="Assets\appLogo.png" />
-		<None Remove="Assets\background.png" />
-		<None Remove="Controls\Colors\GamePathChartColor.xaml" />
-		<None Remove="Controls\Styles\CardSwitcher.xaml" />
-		<None Remove="Controls\Styles\Colors.xaml" />
-		<None Remove="Controls\Styles\HeaderTileCard.xaml" />
-		<None Remove="Controls\Styles\LoadingCard.xaml" />
-		<None Remove="Controls\Styles\StorageRing.xaml" />
-		<None Remove="Controls\Styles\VersionSubtitle.xaml" />
-		<None Remove="Pages\Communitys\KuroDataCenterWindow.xaml" />
-		<None Remove="Pages\Dialogs\DeleteFileDialog.xaml" />
-		<None Remove="Pages\Dialogs\GameEnhancedDialog.xaml" />
-		<None Remove="Pages\Dialogs\GameResourceDialogV2.xaml" />
-		<None Remove="Pages\Dialogs\LocalUserManagerDialog.xaml" />
-		<None Remove="Pages\Dialogs\SelectDownoadGameDialogV2.xaml" />
-		<None Remove="Pages\Dialogs\SelectGameFolderDialogV2.xaml" />
-		<None Remove="Pages\Dialogs\UpdateGameDialog.xaml" />
-		<None Remove="Pages\Dialogs\UpdateGameDialogV2.xaml" />
-		<None Remove="Pages\GamePages\PunishV2GamePage.xaml" />
-		<None Remove="Pages\GamePages\WavesV2GamePage.xaml" />
-		<None Remove="Pages\PluginPage.xaml" />
-		<None Remove="Pages\XboxDisplayPage.xaml" />
-		<None Remove="WindowModels\KuroDataCenterWindow.xaml" />
-	</ItemGroup>
-	<ItemGroup>
 		<PRIResource Remove="Themes\**" />
 	</ItemGroup>
+	<Target Name="CopyXamlResourcesForAot" AfterTargets="Publish"
+        Condition="'$(PublishAot)' == 'true'">
+		<ItemGroup>
+			<_XamlResources Include="$(OutputPath)**\*.xbf" />
+			<_XamlResources Include="$(OutputPath)$(AssemblyName).pri" />
+		</ItemGroup>
+		<Copy SourceFiles="@(_XamlResources)"
+				DestinationFiles="@(_XamlResources->'$(PublishDir)%(RecursiveDir)%(Filename)%(Extension)')"
+				SkipUnchangedFiles="true" />
+	</Target>
 </Project>
