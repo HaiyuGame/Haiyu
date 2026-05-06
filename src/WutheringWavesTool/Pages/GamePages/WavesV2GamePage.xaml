@@ -105,7 +105,11 @@
                         <RepositionThemeTransition />
                     </TransitionCollection>
                 </Grid.ChildrenTransitions>
-
+                <SystemBackdropElement Grid.RowSpan="2" CornerRadius="5">
+                    <SystemBackdropElement.SystemBackdrop>
+                        <DesktopAcrylicBackdrop />
+                    </SystemBackdropElement.SystemBackdrop>
+                </SystemBackdropElement>
                 <Grid
                     Grid.Row="1"
                     Width="300"
