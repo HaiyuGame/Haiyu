@@ -150,13 +150,18 @@
                     <ColumnDefinition />
                     <ColumnDefinition Width="240" />
                 </Grid.ColumnDefinitions>
-                <Border
+                <Grid
                     Margin="5"
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource SystemColorGrayTextBrush}"
                     BorderThickness="1"
                     CornerRadius="4"
                     Visibility="{x:Bind ViewModel.KuroLogin, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}">
+                    <SystemBackdropElement>
+                        <SystemBackdropElement.SystemBackdrop>
+                            <DesktopAcrylicBackdrop />
+                        </SystemBackdropElement.SystemBackdrop>
+                    </SystemBackdropElement>
                     <StackPanel
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
@@ -166,7 +171,7 @@
                             FontSize="18"
                             Text="未登录或登陆过期" />
                     </StackPanel>
-                </Border>
+                </Grid>
                 <Grid
                     Margin="5"
                     CornerRadius="4"

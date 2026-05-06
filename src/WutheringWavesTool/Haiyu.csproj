@@ -81,6 +81,7 @@
 		<PackageReference Include="Serilog" Version="4.3.1-dev-02373" />
 		<PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
 		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+		<PackageReference Include="WinUI.TableView" Version="1.4.1" />
 		<PackageReference Include="WinUIEx" Version="2.9.0" />
 		<PackageReference Include="ZLinq" Version="1.5.6" />
 		<PackageReference Include="ZXing.Net" Version="0.16.11" />
@@ -343,14 +344,11 @@
 	<ItemGroup>
 		<PRIResource Remove="Themes\**" />
 	</ItemGroup>
-	<Target Name="CopyXamlResourcesForAot" AfterTargets="Publish"
-        Condition="'$(PublishAot)' == 'true'">
+	<Target Name="CopyXamlResourcesForAot" AfterTargets="Publish" Condition="'$(PublishAot)' == 'true'">
 		<ItemGroup>
 			<_XamlResources Include="$(OutputPath)**\*.xbf" />
 			<_XamlResources Include="$(OutputPath)$(AssemblyName).pri" />
 		</ItemGroup>
-		<Copy SourceFiles="@(_XamlResources)"
-				DestinationFiles="@(_XamlResources->'$(PublishDir)%(RecursiveDir)%(Filename)%(Extension)')"
-				SkipUnchangedFiles="true" />
+		<Copy SourceFiles="@(_XamlResources)" DestinationFiles="@(_XamlResources->'$(PublishDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
 	</Target>
 </Project>

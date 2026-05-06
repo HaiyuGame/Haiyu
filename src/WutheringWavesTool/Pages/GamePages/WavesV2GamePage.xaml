@@ -752,7 +752,7 @@
                             </SystemBackdropElement.SystemBackdrop>
                         </SystemBackdropElement>
                         <TextBlock
-                            Margin="10,10,0,0"
+                            Margin="10,5,0,0"
                             VerticalAlignment="Center"
                             FontFamily="{ThemeResource DefaultFont}"
                             FontSize="16"
@@ -760,6 +760,7 @@
                         <StackPanel
                             Margin="0,5,5,0"
                             HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
                             Orientation="Horizontal">
                             <Button Command="{x:Bind ViewModel.RefreshLocalGameUserCommand}" Style="{ThemeResource TransparentButtonStyle}">
                                 <FontIcon
@@ -790,7 +791,10 @@
                                     <RowDefinition Height="auto" />
                                     <RowDefinition Height="80" />
                                 </Grid.RowDefinitions>
-                                <TextBlock FontFamily="{ThemeResource DefaultFont}" FontSize="15">
+                                <TextBlock
+                                    Margin="3,0,0,0"
+                                    FontFamily="{ThemeResource DefaultFont}"
+                                    FontSize="15">
                                     <Run Text="联觉等级" />
                                     <Run Text="{x:Bind ViewModel.Base.Level, Mode=OneWay}" />
                                 </TextBlock>
@@ -1023,7 +1027,10 @@
                                 </Grid>
 
                                 <NavigationViewItemSeparator Grid.Row="3" Margin="-8,5,-8,0" />
-                                <Grid Grid.Row="4" VerticalAlignment="Center">
+                                <Grid
+                                    Grid.Row="4"
+                                    Margin="10,0"
+                                    VerticalAlignment="Center">
                                     <Grid.RowDefinitions>
                                         <RowDefinition />
                                         <RowDefinition />
