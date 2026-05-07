@@ -17,6 +17,7 @@
 		<PublishAot>true</PublishAot>
 		<PublishTrimmed>true</PublishTrimmed>
 		<WindowsPackageType>None</WindowsPackageType>
+		<WindowsAppSDKSelfContained>false</WindowsAppSDKSelfContained>
 	</PropertyGroup>
 	<ItemGroup>
 		<Compile Remove="AppPackages\**" />
