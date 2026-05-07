@@ -13,13 +13,10 @@
 		<SatelliteResourceLanguages></SatelliteResourceLanguages>
 		<InvariantGlobalization>true</InvariantGlobalization>
 		<WinUISDKReferences>false</WinUISDKReferences>
-		<EnableMsixTooling>true</EnableMsixTooling>
+		<EnableMsixTooling>false</EnableMsixTooling>
 		<PublishAot>true</PublishAot>
 		<PublishTrimmed>true</PublishTrimmed>
 		<WindowsPackageType>None</WindowsPackageType>
-		<!--
-		-->
-		<UserSecretsId>e239e9df-797b-4568-b3e5-8397f5b3faa6</UserSecretsId>
 	</PropertyGroup>
 	<ItemGroup>
 		<Compile Remove="AppPackages\**" />
@@ -79,15 +76,16 @@
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1" />
 		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3912.50" />
 		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.7463" />
-		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.251106002" />
+		<PackageReference Include="Microsoft.WindowsAppSDK" Version="2.0.1" />
 		<PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="3.0.1" />
 		<PackageReference Include="Serilog" Version="4.3.1-dev-02373" />
 		<PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
 		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+		<PackageReference Include="WinUI.TableView" Version="1.4.1" />
 		<PackageReference Include="WinUIEx" Version="2.9.0" />
 		<PackageReference Include="ZLinq" Version="1.5.6" />
 		<PackageReference Include="ZXing.Net" Version="0.16.11" />
-		<PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.269">
+		<PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.275">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
@@ -303,7 +301,6 @@
 		<Folder Include="Assets\GameAssets\Punish\" />
 		<Folder Include="Assets\Languages\" />
 		<Folder Include="Common\Plugins\" />
-		<Folder Include="Pages\ColorGame\" />
 	</ItemGroup>
 	<PropertyGroup Label="Globals" />
 	<!--
@@ -345,32 +342,13 @@
 		<PRIResource Remove="Strings\**" />
 	</ItemGroup>
 	<ItemGroup>
-		<None Remove="Assets\appLogo.ico" />
-		<None Remove="Assets\appLogo.png" />
-		<None Remove="Assets\background.png" />
-		<None Remove="Controls\Colors\GamePathChartColor.xaml" />
-		<None Remove="Controls\Styles\CardSwitcher.xaml" />
-		<None Remove="Controls\Styles\Colors.xaml" />
-		<None Remove="Controls\Styles\HeaderTileCard.xaml" />
-		<None Remove="Controls\Styles\LoadingCard.xaml" />
-		<None Remove="Controls\Styles\StorageRing.xaml" />
-		<None Remove="Controls\Styles\VersionSubtitle.xaml" />
-		<None Remove="Pages\Communitys\KuroDataCenterWindow.xaml" />
-		<None Remove="Pages\Dialogs\DeleteFileDialog.xaml" />
-		<None Remove="Pages\Dialogs\GameEnhancedDialog.xaml" />
-		<None Remove="Pages\Dialogs\GameResourceDialogV2.xaml" />
-		<None Remove="Pages\Dialogs\LocalUserManagerDialog.xaml" />
-		<None Remove="Pages\Dialogs\SelectDownoadGameDialogV2.xaml" />
-		<None Remove="Pages\Dialogs\SelectGameFolderDialogV2.xaml" />
-		<None Remove="Pages\Dialogs\UpdateGameDialog.xaml" />
-		<None Remove="Pages\Dialogs\UpdateGameDialogV2.xaml" />
-		<None Remove="Pages\GamePages\PunishV2GamePage.xaml" />
-		<None Remove="Pages\GamePages\WavesV2GamePage.xaml" />
-		<None Remove="Pages\PluginPage.xaml" />
-		<None Remove="Pages\XboxDisplayPage.xaml" />
-		<None Remove="WindowModels\KuroDataCenterWindow.xaml" />
-	</ItemGroup>
-	<ItemGroup>
 		<PRIResource Remove="Themes\**" />
 	</ItemGroup>
+	<Target Name="CopyXamlResourcesForAot" AfterTargets="Publish" Condition="'$(PublishAot)' == 'true'">
+		<ItemGroup>
+			<_XamlResources Include="$(OutputPath)**\*.xbf" />
+			<_XamlResources Include="$(OutputPath)$(AssemblyName).pri" />
+		</ItemGroup>
+		<Copy SourceFiles="@(_XamlResources)" DestinationFiles="@(_XamlResources->'$(PublishDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+	</Target>
 </Project>

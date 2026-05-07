@@ -109,12 +109,8 @@ public class AppContext<T> : IAppContext<T>
             }
             catch(Exception ex)
             {
-                win.MaxWidth = 1100;
-                win.MaxHeight = 700;
             }
 
-            win.IsResizable = false;
-            win.IsMaximizable = false;
             this.App.MainWindow = win;
             this.App.MainWindow.Activate();
             (win.AppWindow.Presenter as OverlappedPresenter)!.SetBorderAndTitleBar(true, false);

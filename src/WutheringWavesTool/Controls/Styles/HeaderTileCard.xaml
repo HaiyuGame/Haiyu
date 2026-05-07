@@ -12,7 +12,6 @@
                     <Grid
                         Width="{TemplateBinding Width}"
                         Height="{TemplateBinding Height}"
-                        Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
                         CornerRadius="{TemplateBinding CornerRadius}">
                         <Grid.Resources>
                             <ResourceDictionary>
@@ -38,6 +37,11 @@
                                 </ResourceDictionary.ThemeDictionaries>
                             </ResourceDictionary>
                         </Grid.Resources>
+                        <SystemBackdropElement CornerRadius="{TemplateBinding CornerRadius}">
+                            <SystemBackdropElement.SystemBackdrop>
+                                <DesktopAcrylicBackdrop />
+                            </SystemBackdropElement.SystemBackdrop>
+                        </SystemBackdropElement>
                         <HyperlinkButton
                             x:Name="PART_HyperLink"
                             Padding="-1"

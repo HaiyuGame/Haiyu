@@ -164,7 +164,7 @@ partial class KuroGameContextBaseV2
             //通知UI刷新
             await state.CancelToken.CancelAsync();
             state.IsActive = false;
-            await Task.Delay(100);
+            await Task.Delay(200);
             SetCurrentStateNull(false);
             return true;
         }

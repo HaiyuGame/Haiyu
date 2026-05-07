@@ -84,7 +84,7 @@ public class RpcService : IHostedService
     public HttpListener SocketServer { get; private set; }
     public Dictionary<string, Func<string, List<RpcParams>, Task<string>>> Method { get; private set; }
 
-    public int Port => 9084;
+    public int Port => 10010;
 
     public RpcService(ILogger<RpcService> logger)
     {

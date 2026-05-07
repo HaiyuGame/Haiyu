@@ -1,6 +1,6 @@
 ﻿namespace Haiyu;
 
-public sealed partial class MainWindow : WinUIEx.WindowEx
+public sealed partial class MainWindow : WindowEx
 {
     public MainWindow()
     {

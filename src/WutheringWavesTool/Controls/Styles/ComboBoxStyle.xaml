@@ -11,7 +11,7 @@
         <Setter Property="Padding" Value="{ThemeResource ComboBoxPadding}" />
         <Setter Property="MaxDropDownHeight" Value="504" />
         <Setter Property="Foreground" Value="{ThemeResource ComboBoxForeground}" />
-        <Setter Property="Background" Value="{ThemeResource AcrylicInAppFillColorDefaultBrush}" />
+        <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderBrush" Value="{ThemeResource ComboBoxBorderBrush}" />
         <Setter Property="BorderThickness" Value="{ThemeResource ComboBoxBorderThemeThickness}" />
         <Setter Property="TabNavigation" Value="Once" />
@@ -73,6 +73,14 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="38" />
                         </Grid.ColumnDefinitions>
+                        <SystemBackdropElement
+                            Grid.RowSpan="3"
+                            Grid.ColumnSpan="2"
+                            CornerRadius="{TemplateBinding CornerRadius}">
+                            <SystemBackdropElement.SystemBackdrop>
+                                <DesktopAcrylicBackdrop />
+                            </SystemBackdropElement.SystemBackdrop>
+                        </SystemBackdropElement>
                         <ContentPresenter
                             x:Name="HeaderContentPresenter"
                             Grid.Row="0"

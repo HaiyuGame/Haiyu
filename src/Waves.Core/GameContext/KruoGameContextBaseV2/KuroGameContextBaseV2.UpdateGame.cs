@@ -880,6 +880,10 @@ partial class KuroGameContextBaseV2
         {
             ProgressState.ActiveFiles.TryRemove(item);
         }
+        this.GameEventPublisher.Publish(new()
+        {
+            Type = GameContextActionType.None
+        });
     }
 
     public async Task StartInstallGameResource(bool isProd = false)

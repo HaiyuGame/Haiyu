@@ -43,6 +43,7 @@
             <ColumnDefinition />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
+
         <ProgressBar
             Grid.ColumnSpan="2"
             HorizontalAlignment="Stretch"
@@ -98,17 +99,22 @@
                     <RowDefinition />
                     <RowDefinition />
                 </Grid.RowDefinitions>
+
                 <Grid.ChildrenTransitions>
                     <TransitionCollection>
                         <RepositionThemeTransition />
                     </TransitionCollection>
                 </Grid.ChildrenTransitions>
+                <SystemBackdropElement Grid.RowSpan="2" CornerRadius="5">
+                    <SystemBackdropElement.SystemBackdrop>
+                        <DesktopAcrylicBackdrop />
+                    </SystemBackdropElement.SystemBackdrop>
+                </SystemBackdropElement>
                 <Grid
                     Grid.Row="1"
                     Width="300"
                     Height="280"
                     HorizontalAlignment="Right"
-                    Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
                     CornerRadius="5"
                     Visibility="{x:Bind ViewModel.GameDownloadingBthVisibility, Mode=OneWay}">
                     <Grid.ChildrenTransitions>
@@ -492,23 +498,25 @@
                             <RowDefinition Height="auto" />
                             <RowDefinition />
                         </Grid.RowDefinitions>
-                        <Border
+                        <Grid
                             Margin="15,0,15,-2"
-                            Padding="5"
-                            Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource LayerOnMicaBaseAltFillColorSecondaryBrush}"
                             BorderThickness="1,1,1,0"
                             CornerRadius="5 5 0 0"
                             Visibility="{x:Bind ViewModel.GameLauncherBthVisibility, Mode=OneWay}">
+                            <SystemBackdropElement Grid.ColumnSpan="2" CornerRadius="5 5 0 0">
+                                <SystemBackdropElement.SystemBackdrop>
+                                    <DesktopAcrylicBackdrop />
+                                </SystemBackdropElement.SystemBackdrop>
+                            </SystemBackdropElement>
                             <TextBlock
+                                Margin="4"
                                 HorizontalAlignment="Center"
                                 FontFamily="{ThemeResource DefaultFont}"
                                 Text="{x:Bind ViewModel.BottomBarContent, Mode=OneWay}" />
-                        </Border>
+                        </Grid>
                         <Grid
                             Grid.Row="1"
-                            Padding="5"
-                            Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
                             BorderBrush="{ThemeResource LayerOnMicaBaseAltFillColorSecondaryBrush}"
                             BorderThickness="1"
                             CornerRadius="4"
@@ -517,9 +525,15 @@
                                 <ColumnDefinition />
                                 <ColumnDefinition Width="auto" />
                             </Grid.ColumnDefinitions>
+                            <SystemBackdropElement Grid.ColumnSpan="2" CornerRadius="5">
+                                <SystemBackdropElement.SystemBackdrop>
+                                    <DesktopAcrylicBackdrop />
+                                </SystemBackdropElement.SystemBackdrop>
+                            </SystemBackdropElement>
                             <Button
                                 Grid.Row="1"
                                 Height="60"
+                                Margin="5,5,0,5"
                                 HorizontalAlignment="Stretch"
                                 VerticalAlignment="Stretch"
                                 Background="{ThemeResource SystemFillColorSuccess}"
@@ -563,12 +577,12 @@
                                 Grid.Row="1"
                                 Grid.Column="1"
                                 Width="60"
-                                Margin="3,0,0,0"
+                                Margin="5,5,5,5"
                                 HorizontalAlignment="Stretch"
                                 VerticalAlignment="Stretch"
-                                Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
                                 BorderThickness="0"
-                                IsEnabled="{x:Bind ViewModel.EnableStartGameBth, Mode=OneWay}">
+                                IsEnabled="{x:Bind ViewModel.EnableStartGameBth, Mode=OneWay}"
+                                Style="{ThemeResource TransparentButtonStyle}">
                                 <FontIcon
                                     FontFamily="Segoe Fluent Icons"
                                     FontSize="18"
@@ -725,10 +739,8 @@
                 Style="{ThemeResource DefaultCardsSwitcher}">
                 <control:CardSwitcher.Card1>
                     <Grid
-                        Padding="8"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
-                        Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         CornerRadius="5"
                         Opacity="1">
@@ -738,13 +750,22 @@
                             <RowDefinition />
                             <RowDefinition Height="auto" />
                         </Grid.RowDefinitions>
+                        <SystemBackdropElement Grid.RowSpan="4" CornerRadius="5">
+                            <SystemBackdropElement.SystemBackdrop>
+                                <DesktopAcrylicBackdrop />
+                            </SystemBackdropElement.SystemBackdrop>
+                        </SystemBackdropElement>
                         <TextBlock
-                            Margin="8,0,0,0"
+                            Margin="10,5,0,0"
                             VerticalAlignment="Center"
                             FontFamily="{ThemeResource DefaultFont}"
                             FontSize="16"
                             Text="{x:Bind ViewModel.LocalUserTitle, Mode=OneWay}" />
-                        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                        <StackPanel
+                            Margin="0,5,5,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Orientation="Horizontal">
                             <Button Command="{x:Bind ViewModel.RefreshLocalGameUserCommand}" Style="{ThemeResource TransparentButtonStyle}">
                                 <FontIcon
                                     FontFamily="Segoe Fluent Icons"
@@ -774,7 +795,10 @@
                                     <RowDefinition Height="auto" />
                                     <RowDefinition Height="80" />
                                 </Grid.RowDefinitions>
-                                <TextBlock FontFamily="{ThemeResource DefaultFont}" FontSize="15">
+                                <TextBlock
+                                    Margin="3,0,0,0"
+                                    FontFamily="{ThemeResource DefaultFont}"
+                                    FontSize="15">
                                     <Run Text="联觉等级" />
                                     <Run Text="{x:Bind ViewModel.Base.Level, Mode=OneWay}" />
                                 </TextBlock>
@@ -1007,7 +1031,10 @@
                                 </Grid>
 
                                 <NavigationViewItemSeparator Grid.Row="3" Margin="-8,5,-8,0" />
-                                <Grid Grid.Row="4" VerticalAlignment="Center">
+                                <Grid
+                                    Grid.Row="4"
+                                    Margin="10,0"
+                                    VerticalAlignment="Center">
                                     <Grid.RowDefinitions>
                                         <RowDefinition />
                                         <RowDefinition />
@@ -1065,8 +1092,6 @@
                 </control:CardSwitcher.Card1>
                 <control:CardSwitcher.Card2>
                     <Grid
-                        Padding="5"
-                        Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="2"
                         CornerRadius="5">
@@ -1079,6 +1104,11 @@
                             <RowDefinition Height="6*" />
                             <RowDefinition Height="4*" />
                         </Grid.RowDefinitions>
+                        <SystemBackdropElement Grid.RowSpan="2" CornerRadius="5">
+                            <SystemBackdropElement.SystemBackdrop>
+                                <DesktopAcrylicBackdrop />
+                            </SystemBackdropElement.SystemBackdrop>
+                        </SystemBackdropElement>
                         <FlipView
                             x:Name="fileView"
                             Grid.Row="0"

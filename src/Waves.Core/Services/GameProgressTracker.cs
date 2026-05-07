@@ -141,6 +141,7 @@ public sealed class GameProgressTracker : IAsyncDisposable
     private Task? _timerTask;
     private GameContextOutputArgs _lastArgs;
     private volatile bool _isDirty;
+    private DateTime? lastTime;
 
     /// <summary>
     /// UI线程启动收集数据
@@ -192,6 +193,15 @@ public sealed class GameProgressTracker : IAsyncDisposable
     {
         if (args == null)
             return;
+        if (this.lastTime == null || this.lastTime == DateTime.MinValue)
+        {
+            this.lastTime = args.CreateTime;
+        }
+        if(args.CreateTime< this.lastTime)
+        {
+            // 避免旧数据覆盖通知
+            return;
+        }
         if (args.Type != GameContextActionType.None)
         {
             CurrentAction = args.Type;
@@ -251,6 +261,7 @@ public sealed class GameProgressTracker : IAsyncDisposable
         }
         this._lastArgs = args;
         _isDirty = true;
+        
         await ValueTask.CompletedTask;
     }
 

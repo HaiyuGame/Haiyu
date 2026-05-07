@@ -22,6 +22,7 @@ public static class Instance
     public static void InitService()
     {
         Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder().AppBuilder().Build();
+        Task.Run(async()=>await Instance.Host.StartAsync());
     }
 
     public static T? GetService<T>()

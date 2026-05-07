@@ -8,9 +8,4 @@
     xmlns:ex="using:WinUIEx"
     xmlns:local="using:Haiyu"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Title="{x:Bind a:App.AppVersion}"
-    mc:Ignorable="d">
-    <ex:WindowEx.SystemBackdrop>
-        <MicaBackdrop />
-    </ex:WindowEx.SystemBackdrop>
-</ex:WindowEx>
+    mc:Ignorable="d" />

@@ -12,6 +12,7 @@
     xmlns:m2="using:Haiyu.Models"
     xmlns:m3="using:Waves.Api.Models.CloudGame"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:table="using:WinUI.TableView"
     xmlns:ui="using:Haiyu.Controls"
     xmlns:wui="using:CommunityToolkit.WinUI.Controls"
     mc:Ignorable="d">
@@ -103,44 +104,69 @@
                 HorizontalAlignment="Right"
                 Orientation="Horizontal">
                 <StackPanel
-                    Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{ThemeResource AccentAAFillColorDisabled}"
                     BorderThickness="1"
                     CornerRadius="5"
                     Orientation="Horizontal">
-                    <Button
-                        Command="{x:Bind ViewModel.ShowAddCommand}"
-                        Style="{ThemeResource TransparentButtonStyle}"
-                        ToolTipService.ToolTip="添加账号">
-                        <FontIcon
-                            FontFamily="Segoe Fluent Icons"
-                            FontSize="13.5"
-                            Glyph="&#xE8FA;" />
-                    </Button>
-                    <Button
-                        Command="{x:Bind ViewModel.LoadedCommand}"
-                        Style="{ThemeResource TransparentButtonStyle}"
-                        ToolTipService.ToolTip="刷新会话">
-                        <FontIcon
-                            FontFamily="Segoe Fluent Icons"
-                            FontSize="13.5"
-                            Glyph="&#xE72C;" />
-                    </Button>
-                    <Button
-                        Command="{x:Bind ViewModel.SaveAsPlayCardDataCommand}"
-                        Style="{ThemeResource TransparentButtonStyle}"
-                        ToolTipService.ToolTip="另存抽卡记录">
-                        <FontIcon
-                            FontFamily="Segoe Fluent Icons"
-                            FontSize="13.5"
-                            Glyph="&#xE74E;" />
-                    </Button>
-                    <Button Style="{ThemeResource TransparentButtonStyle}" ToolTipService.ToolTip="云工具为云鸣潮账户数据">
-                        <FontIcon
-                            FontFamily="Segoe Fluent Icons"
-                            FontSize="13.5"
-                            Glyph="&#xE7BA;" />
-                    </Button>
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        FontFamily="{ThemeResource DefaultFont}"
+                        Text="唤取类型：" />
+                    <ComboBox
+                        x:Name="selectComboBox"
+                        Grid.Column="1"
+                        Padding="10,5"
+                        HorizontalAlignment="Stretch"
+                        x:Load="{x:Bind ViewModel.IsLoadCardItem, Mode=OneWay}"
+                        CornerRadius="10 3 10 3"
+                        ItemsSource="{x:Bind ViewModel.RecordNavigationItems, Mode=OneWay}"
+                        SelectedItem="{x:Bind ViewModel.SelectRecordType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="m2:GameRecordNavigationItem">
+                                <TextBlock FontFamily="{ThemeResource DefaultFont}" Text="{x:Bind DisplayName}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <StackPanel
+                        Margin="10,0,0,0"
+                        Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource AccentAAFillColorDisabled}"
+                        CornerRadius="5"
+                        Orientation="Horizontal">
+                        <Button
+                            Command="{x:Bind ViewModel.ShowAddCommand}"
+                            Style="{ThemeResource TransparentButtonStyle}"
+                            ToolTipService.ToolTip="添加账号">
+                            <FontIcon
+                                FontFamily="Segoe Fluent Icons"
+                                FontSize="13.5"
+                                Glyph="&#xE8FA;" />
+                        </Button>
+                        <Button
+                            Command="{x:Bind ViewModel.LoadedCommand}"
+                            Style="{ThemeResource TransparentButtonStyle}"
+                            ToolTipService.ToolTip="刷新会话">
+                            <FontIcon
+                                FontFamily="Segoe Fluent Icons"
+                                FontSize="13.5"
+                                Glyph="&#xE72C;" />
+                        </Button>
+                        <Button
+                            Command="{x:Bind ViewModel.SaveAsPlayCardDataCommand}"
+                            Style="{ThemeResource TransparentButtonStyle}"
+                            ToolTipService.ToolTip="另存抽卡记录">
+                            <FontIcon
+                                FontFamily="Segoe Fluent Icons"
+                                FontSize="13.5"
+                                Glyph="&#xE74E;" />
+                        </Button>
+                        <Button Style="{ThemeResource TransparentButtonStyle}" ToolTipService.ToolTip="云工具为云鸣潮账户数据">
+                            <FontIcon
+                                FontFamily="Segoe Fluent Icons"
+                                FontSize="13.5"
+                                Glyph="&#xE7BA;" />
+                        </Button>
+                    </StackPanel>
+
 
                 </StackPanel>
                 <StackPanel
@@ -171,7 +197,6 @@
 
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="auto" />
                         <RowDefinition />
                         <RowDefinition Height="auto" />
                     </Grid.RowDefinitions>
@@ -180,26 +205,43 @@
                         <ColumnDefinition />
                         <ColumnDefinition Width="auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock
-                        VerticalAlignment="Center"
-                        FontFamily="{ThemeResource DefaultFont}"
-                        Text="唤取类型：" />
-                    <ComboBox
-                        x:Name="selectComboBox"
-                        Grid.Column="1"
-                        Padding="10,5"
-                        HorizontalAlignment="Stretch"
-                        x:Load="{x:Bind ViewModel.IsLoadCardItem, Mode=OneWay}"
-                        CornerRadius="10 3 10 3"
-                        ItemsSource="{x:Bind ViewModel.RecordNavigationItems, Mode=OneWay}"
-                        SelectedItem="{x:Bind ViewModel.SelectRecordType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate x:DataType="m2:GameRecordNavigationItem">
-                                <TextBlock FontFamily="{ThemeResource DefaultFont}" Text="{x:Bind DisplayName}" />
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-                    <ScrollViewer Grid.Row="1" Grid.ColumnSpan="3">
+                    <table:TableView
+                        Grid.ColumnSpan="3"
+                        Margin="0,10,0,0"
+                        AutoGenerateColumns="False"
+                        CanFilterColumns="False"
+                        CanReorderColumns="False"
+                        CanReorderItems="False"
+                        CanSortColumns="False"
+                        ItemsSource="{x:Bind ViewModel.ResourceItems, Mode=OneWay}"
+                        SelectionMode="Extended"
+                        ShowExportOptions="False"
+                        ShowsScrollingPlaceholders="True">
+                        <table:TableView.Columns>
+                            <table:TableViewTemplateColumn Width="*" Header="名称">
+                                <table:TableViewTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="m:RecordCardItemWrapper">
+                                        <TextBlock Margin="5,0,0,0" Text="{x:Bind Name, Mode=OneWay}" />
+                                    </DataTemplate>
+                                </table:TableViewTemplateColumn.CellTemplate>
+                            </table:TableViewTemplateColumn>
+                            <table:TableViewTemplateColumn Width="auto" Header="类型">
+                                <table:TableViewTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="m:RecordCardItemWrapper">
+                                        <TextBlock Margin="5,0,0,0" Text="{x:Bind ResourceType, Mode=OneWay}" />
+                                    </DataTemplate>
+                                </table:TableViewTemplateColumn.CellTemplate>
+                            </table:TableViewTemplateColumn>
+                            <table:TableViewTemplateColumn Width="*" Header="日期">
+                                <table:TableViewTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="m:RecordCardItemWrapper">
+                                        <TextBlock Margin="5,0,0,0" Text="{x:Bind Time, Mode=OneWay}" />
+                                    </DataTemplate>
+                                </table:TableViewTemplateColumn.CellTemplate>
+                            </table:TableViewTemplateColumn>
+                        </table:TableView.Columns>
+                    </table:TableView>
+                    <!--<ScrollViewer Grid.Row="1" Grid.ColumnSpan="3">
                         <ItemsControl ItemsSource="{x:Bind ViewModel.ResourceItems, Mode=OneWay}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="m:RecordCardItemWrapper">
@@ -245,7 +287,7 @@
                             </ItemsControl.ItemContainerTransitions>
                         </ItemsControl>
 
-                    </ScrollViewer>
+                    </ScrollViewer>-->
 
                     <StackPanel
                         Grid.Row="2"
