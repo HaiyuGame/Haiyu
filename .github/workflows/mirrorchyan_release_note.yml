@@ -12,9 +12,9 @@ on:
 jobs:
   mirrorchyan:
     runs-on: macos-latest
-    if: ${{ github.repository_owner == 'BlameTwo' }}
+    if: ${{ github.repository_owner == 'HaiyuGame' }}
     env:
-      owner: BlameTwo
+      owner: HaiyuGame
       repo: Haiyu
       github_token: ${{ secrets.GITHUB_TOKEN }}
 
