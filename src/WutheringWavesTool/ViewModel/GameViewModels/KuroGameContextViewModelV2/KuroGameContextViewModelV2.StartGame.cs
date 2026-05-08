@@ -14,6 +14,7 @@ partial class KuroGameContextViewModelV2
             if ((await GameContext.StartGameAsync()) && (AppSettings.StartGameAllowCloseMain == true))
             {
                 this.AppContext.MinToTaskbar();
+                this.WallpaperService.PauseVideo();
             }
         }
         if (_buttonAction == ButtonActionType.PrepareUpdate)

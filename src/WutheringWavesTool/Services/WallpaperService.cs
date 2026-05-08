@@ -131,4 +131,14 @@ public class WallpaperService : IWallpaperService
         }
         this.Media.UpdateMedia();
     }
+
+    public void PauseVideo()
+    {
+        this.Media.Play();
+    }
+
+    public void RestartVideo()
+    {
+        this.Media.Pause();
+    }
 }

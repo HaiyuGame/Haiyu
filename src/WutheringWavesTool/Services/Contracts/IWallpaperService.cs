@@ -17,4 +17,8 @@ public interface IWallpaperService
     IAsyncEnumerable<WallpaperModel> GetFilesAsync(CancellationToken token = default);
     void RegisterMediaHost(ApplicationBackgroundControl media);
     void SetMediaForUrl(WallpaperShowType type, string backgroundFile);
+
+    void PauseVideo();
+
+    void RestartVideo();
 }
