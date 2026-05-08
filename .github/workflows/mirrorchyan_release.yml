@@ -1,0 +1,32 @@
+name: mirrorchyan_release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        default: ""
+        required: false
+  release:
+    types: [released]
+
+jobs:
+  mirrorchyan:
+    runs-on: macos-latest
+    if: ${{ github.repository_owner == 'HaiyuGame' }}
+    env:
+      owner: HaiyuGame
+      repo: Haiyu
+      github_token: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: MirrorChyan/uploading-action@v1
+        with:
+          filetype: latest-release
+          filename: "Haiyu*"
+          tag: ${{ inputs.tag  }}
+
+          mirrorchyan_rid: Haiyu
+
+          owner: ${{ env.owner }}
+          repo: ${{ env.repo }}
+          github_token: ${{ env.github_token }}
+          upload_token: ${{ secrets.MirrorChyanUploadToken }}
