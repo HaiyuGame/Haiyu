@@ -13,11 +13,28 @@
 		<SatelliteResourceLanguages></SatelliteResourceLanguages>
 		<InvariantGlobalization>true</InvariantGlobalization>
 		<WinUISDKReferences>false</WinUISDKReferences>
-		<EnableMsixTooling>false</EnableMsixTooling>
+		<EnableMsixTooling>true</EnableMsixTooling>
 		<PublishAot>true</PublishAot>
-		<PublishTrimmed>true</PublishTrimmed>
-		<WindowsPackageType>None</WindowsPackageType>
+		<PublishTrimmed Condition="'$(Configuration)' == 'Debug'">False</PublishTrimmed>
+		<PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
 		<WindowsAppSDKSelfContained>false</WindowsAppSDKSelfContained>
+		<PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
+		<PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
+		<GenerateAppInstallerFile>False</GenerateAppInstallerFile>
+		<AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
+		<PackageCertificateThumbprint>9A058084F8990CF8FEAA9817CB4E3FC0A7C56294</PackageCertificateThumbprint>
+		<AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
+		<AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
+		<GenerateTestArtifacts>False</GenerateTestArtifacts>
+		<AppxBundle>Auto</AppxBundle>
+		<AppxBundlePlatforms>x64</AppxBundlePlatforms>
+		<HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
+		<AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
+		<ApplicationIcon>Assets\appLogo.ico</ApplicationIcon>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+		<WindowsPackageType>MSIX</WindowsPackageType>
 	</PropertyGroup>
 	<ItemGroup>
 		<Compile Remove="AppPackages\**" />
@@ -76,7 +93,7 @@
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1" />
 		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3912.50" />
-		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.7463" />
+		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.1839" />
 		<PackageReference Include="Microsoft.WindowsAppSDK" Version="2.0.1" />
 		<PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="3.0.1" />
 		<PackageReference Include="Serilog" Version="4.3.1-dev-02373" />
@@ -312,27 +329,7 @@
 	<PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
 		<HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
 	</PropertyGroup>
-	<PropertyGroup>
-		<PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
-		<PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
-		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<GenerateAppInstallerFile>False</GenerateAppInstallerFile>
-		<AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
-		<PackageCertificateThumbprint>5E3FC358956D46C6784EC5D4D2ECCCF64EDC6A7D</PackageCertificateThumbprint>
-		<AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
-		<AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
-		<GenerateTestArtifacts>False</GenerateTestArtifacts>
-		<AppxBundle>Auto</AppxBundle>
-		<AppxBundlePlatforms>x64</AppxBundlePlatforms>
-		<HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
-		<AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
-		<ApplicationIcon>Assets\appLogo.ico</ApplicationIcon>
-		<ApplicationManifest>app.manifest</ApplicationManifest>
-		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-		<StartupObject>Haiyu.Program</StartupObject>
-
-	</PropertyGroup>
+	
 	<ItemGroup>
 		<PRIResource Remove="AppPackages\**" />
 	</ItemGroup>
