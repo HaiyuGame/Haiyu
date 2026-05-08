@@ -326,6 +326,15 @@ public sealed partial class ShellViewModel : ViewModelBase
         );
         await RefreshHeaderUser();
         OpenMain();
+        //检查更新
+        
+        var gitService = Instance.Host.Services.GetKeyedService<Haiyu.Plugin.Contracts.IUpdateService>("GitHub");
+        if(!DesktopBridge.IsRunningAsUwp() && await gitService.CheckProgramUpdateAsync(App.AppVersion))
+        {
+            var info = await gitService.GetLasterProgramInfoAsync();
+
+        }
+        
     }
 
     [RelayCommand]

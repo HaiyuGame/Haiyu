@@ -34,6 +34,7 @@
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+		<!--<WindowsPackageType>None</WindowsPackageType>-->
 		<WindowsPackageType>MSIX</WindowsPackageType>
 	</PropertyGroup>
 	<ItemGroup>

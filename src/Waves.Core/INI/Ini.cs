@@ -6,8 +6,11 @@ namespace Waves.Core.INI;
 /// <summary>
 /// Ini ��д��
 /// </summary>
-public class Ini
+public partial class Ini
 {
+    [GeneratedRegex(@"\[(?<inner>[^\[\]]+)\]")]
+    public static partial Regex Inner();
+
     private Dictionary<string, List<Tuple<string, string>>> _inis = new Dictionary<string, List<Tuple<string, string>>>();
 
     public string FilePath { get; private set; }
@@ -81,7 +84,7 @@ public class Ini
                     continue;
                 if (line.StartsWith("["))
                 {
-                    var match = Regex.Match(line, @"\[(?<inner>[^\[\]]+)\]");
+                    var match = Ini.Inner().Match(line);
                     if (!match.Success)
                         throw new Exception("�ļ��𻵣�");
                     var sectionName = match.Groups["inner"].Value.Trim();
