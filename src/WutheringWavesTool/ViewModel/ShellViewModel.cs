@@ -1,8 +1,9 @@
-﻿using System.Linq;
-using Astronomical;
+﻿using Astronomical;
 using Haiyu.Models.Wrapper;
+using Haiyu.Plugin.Contracts;
 using Haiyu.Services.DialogServices;
 using Microsoft.UI.Xaml;
+using System.Linq;
 using Waves.Core.Common;
 using Waves.Core.Models.Enums;
 using Windows.ApplicationModel.DataTransfer;
@@ -326,8 +327,6 @@ public sealed partial class ShellViewModel : ViewModelBase
         );
         await RefreshHeaderUser();
         OpenMain();
-        //检查更新
-
         await CheckAppUpdate();
         
     }
@@ -338,13 +337,23 @@ public sealed partial class ShellViewModel : ViewModelBase
         {
             return;
         }
-        var gitService = Instance.Host.Services.GetKeyedService<Haiyu.Plugin.Contracts.IUpdateService>("GitHub");
-        if ( await gitService.CheckProgramUpdateAsync(App.AppVersion))
+        IUpdateService? service = null;
+        if (AppSettings.UpdateType == "Github")
         {
-            var info = await gitService.GetLasterProgramInfoAsync();
+            service = Instance.Host.Services.GetKeyedService<Haiyu.Plugin.Contracts.IUpdateService>("GitHub");
+        }
+        else
+        {
+            throw new Exception("未实现Mirror更新源");
+        }
+        if (service == null)
+            return;
+        if (await service.CheckProgramUpdateAsync(App.AppVersion))
+        {
+            var info = await service.GetLasterProgramInfoAsync();
             if (info != null)
             {
-
+                await this.DialogManager.ShowUpdateDialog(info);
             }
             else
             {

@@ -52,8 +52,10 @@ partial class SettingViewModel
         }
         else
         {
-
+            throw new Exception("未实现Mirror更新源");
         }
+        if (service == null)
+            return;
         if (await service.CheckProgramUpdateAsync(App.AppVersion))
         {
             var info = await service.GetLasterProgramInfoAsync();

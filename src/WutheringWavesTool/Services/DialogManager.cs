@@ -1,4 +1,5 @@
 ﻿using Haiyu.Models.Dialogs;
+using Haiyu.Plugin.Models;
 using Waves.Core.Models.Enums;
 
 namespace Haiyu.Services;
@@ -49,6 +50,9 @@ public abstract class DialogManager : IDialogManager
         var result = await _dialog.ShowAsync();
         _dialog = null;
     }
+
+    public async Task ShowUpdateDialog(DisplayVersionInfo info)=>
+        await ShowDialogAsync<UpdateAppDialog>(info);
 
     public async Task<ContentDialogResult> ShowDialogAsync<T>(object data)
         where T : ContentDialog, IDialog

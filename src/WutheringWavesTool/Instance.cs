@@ -154,6 +154,8 @@ public static class InstanceBuilderExtensions
                     .AddTransient<UpdateGameViewModelV2>()
                     .AddTransient<GameResourceDialogV2>()
                     .AddTransient<GameResourceViewModelV2>()
+                    .AddTransient<UpdateAppDialog>()
+                    .AddTransient<UpdateAppViewModel>()
                 #endregion
                 #endregion
                 #region More
