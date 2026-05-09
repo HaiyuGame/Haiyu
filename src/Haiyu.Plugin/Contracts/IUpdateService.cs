@@ -1,11 +1,12 @@
-﻿using Haiyu.Plugin.Models;
-using System;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
+using Haiyu.Plugin.Models;
 
 namespace Haiyu.Plugin.Contracts;
 
 /// <summary>
-/// Mirror 酱 更新服务接口
+/// 应用更新源API
 /// </summary>
 public interface IUpdateService
 {
@@ -13,20 +14,26 @@ public interface IUpdateService
     /// 检查应用是否更新
     /// </summary>
     /// <returns></returns>
-    public Task<bool> CheckProgramUpdateAsync(string currentVersion);
+    public Task<bool> CheckProgramUpdateAsync(
+        string currentVersion,
+        CancellationToken token = default
+    );
 
     /// <summary>
     /// 检查应用最后更新信息
     /// </summary>
     /// <returns></returns>
-    public Task<DisplayVersionInfo?> GetLasterProgramInfoAsync();
+    public Task<DisplayVersionInfo?> GetLasterProgramInfoAsync(CancellationToken token = default);
 
     /// <summary>
     /// 下载应用更新信息
     /// </summary>
     /// <param name="progress"></param>
     /// <returns></returns>
-    public Task DownloadProgramInfoAsync(IProgress<double> progress);
+    public Task<string?> DownloadProgramInfoAsync(
+        IProgress<double> progress,
+        CancellationToken token = default
+    );
 
     /// <summary>
     /// 开始安装

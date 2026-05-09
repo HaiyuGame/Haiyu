@@ -19,5 +19,8 @@ public partial class DisplayVersionInfo:ObservableObject
     [ObservableProperty]
     public string DownloadLink { get; set; }
 
-
+    /// <summary>
+    /// 是否显示跳过
+    /// </summary>
+    public bool IsApply { get; set; }
 }

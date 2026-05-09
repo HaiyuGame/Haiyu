@@ -327,40 +327,9 @@ public sealed partial class ShellViewModel : ViewModelBase
         );
         await RefreshHeaderUser();
         OpenMain();
-        await CheckAppUpdate();
-        
+        await AppContext.UpdateAppAsync();
     }
 
-    private async Task CheckAppUpdate()
-    {
-        if (DesktopBridge.IsRunningAsMsix())
-        {
-            return;
-        }
-        IUpdateService? service = null;
-        if (AppSettings.UpdateType == "Github")
-        {
-            service = Instance.Host.Services.GetKeyedService<Haiyu.Plugin.Contracts.IUpdateService>("GitHub");
-        }
-        else
-        {
-            throw new Exception("未实现Mirror更新源");
-        }
-        if (service == null)
-            return;
-        if (await service.CheckProgramUpdateAsync(App.AppVersion))
-        {
-            var info = await service.GetLasterProgramInfoAsync();
-            if (info != null)
-            {
-                await this.DialogManager.ShowUpdateDialog(info);
-            }
-            else
-            {
-                await TipShow.ShowMessageAsync("检查更新失败，请稍后再试", Symbol.Clear);
-            }
-        }
-    }
 
     [RelayCommand]
     public void ShowDeviceInfo()
