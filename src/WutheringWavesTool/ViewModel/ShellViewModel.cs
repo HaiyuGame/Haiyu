@@ -328,6 +328,7 @@ public sealed partial class ShellViewModel : ViewModelBase
         await RefreshHeaderUser();
         OpenMain();
         await AppContext.UpdateAppAsync();
+        await KuroClient.InitMapPostion();
     }
 
 

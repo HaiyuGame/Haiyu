@@ -65,7 +65,8 @@
                 <TextBox
                     Grid.Row="2"
                     Margin="0,10,0,0"
-                    PlaceholderText="设备Did" />
+                    PlaceholderText="设备Did"
+                    Text="{x:Bind ViewModel.TokenDid, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             </Grid>
         </Border>
 

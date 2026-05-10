@@ -165,8 +165,14 @@ public interface IKuroClient
 
     public Task InitAsync();
 
+
+
     #region Wiki
     public Task<WikiHomeModel> GetMainWikiAsync(CancellationToken token = default);
     Task SetAutoUserAsync(CancellationToken token);
+    #endregion
+
+    #region KuroMap
+    public Task InitMapPostion();
     #endregion
 }
