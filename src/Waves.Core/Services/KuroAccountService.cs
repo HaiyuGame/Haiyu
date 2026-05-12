@@ -184,7 +184,6 @@ public class KuroAccountService : IKuroAccountService
         {
             if (_cache == null)
             {
-                // 无用户
                 return;
             }
             return;
