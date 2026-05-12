@@ -1,4 +1,6 @@
 ﻿using Haiyu.Helpers;
+using Haiyu.Plugin.Contracts;
+using Haiyu.Plugin.Services;
 using Haiyu.ServiceHost;
 using Haiyu.ServiceHost.XBox.Commons;
 using Haiyu.Services.DialogServices;
@@ -152,6 +154,8 @@ public static class InstanceBuilderExtensions
                     .AddTransient<UpdateGameViewModelV2>()
                     .AddTransient<GameResourceDialogV2>()
                     .AddTransient<GameResourceViewModelV2>()
+                    .AddTransient<UpdateAppDialog>()
+                    .AddTransient<UpdateAppViewModel>()
                 #endregion
                 #endregion
                 #region More
@@ -161,6 +165,8 @@ public static class InstanceBuilderExtensions
                     .AddKeyedTransient<ITipShow, PageTipShow>("Cache")
                     .AddKeyedTransient<IDialogManager, MainDialogService>("Cache")
                     .AddTransient<IColorGameManager, ColorGameManager>()
+                    .AddKeyedSingleton<IUpdateService,GithubUpdateService>("GitHub")
+                    .AddKeyedSingleton<IUpdateService,MirrorUpdateService>("Mirror")
                     #endregion
                     #region Base
                     .AddSingleton<IAppContext<App>, AppContext<App>>()

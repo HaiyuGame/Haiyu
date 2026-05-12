@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Haiyu.Plugin.Contracts;
 using Haiyu.Plugin.Models;
 using Haiyu.Plugin.Models.Enums;
+using Waves.Core.Contracts;
 using Waves.Core.GameContext;
 using Waves.Core.Helpers;
 using Waves.Core.Models;
@@ -50,8 +51,8 @@ public class GameServerSwitchTool : ITool
     /// <param name="token"></param>
     /// <returns></returns>
     public async Task<ServerAnalyseModel> AnalyseAsync(
-        IGameContext inputGameContext,
-        IGameContext outputGameContext,
+        IGameContextV2 inputGameContext,
+        IGameContextV2 outputGameContext,
         CancellationToken token = default
     )
     {

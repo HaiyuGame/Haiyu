@@ -179,16 +179,48 @@
                         </ComboBox>
                     </ui:SettingsCard.Content>
                 </ui:SettingsCard>
+                <ui:SettingsExpander
+                    Margin="0,5,0,0"
+                    Description="{x:Bind a:App.AppVersion}"
+                    Header="版本"
+                    Visibility="{x:Bind ViewModel.CheckUpdateVisibility, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <ui:SettingsExpander.HeaderIcon>
+                        <FontIcon FontFamily="Segoe UI Emoji" Glyph="&#x1F5DD;" />
+                    </ui:SettingsExpander.HeaderIcon>
+                    <ui:SettingsExpander.Content>
+                        <Button Command="{x:Bind ViewModel.UpdateVersionCommand}" Content="检查更新" />
+                    </ui:SettingsExpander.Content>
+                    <ui:SettingsExpander.Items>
+                        <ui:SettingsCard Header="更新源">
+                            <ui:SettingsCard.Content>
+                                <ComboBox ItemsSource="{x:Bind ViewModel.UpdateAppType, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectUpdateAppType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            </ui:SettingsCard.Content>
+                        </ui:SettingsCard>
+                        <ui:SettingsCard Header="Mirror Key">
+                            <ui:SettingsCard.Content>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBox Width="200" Text="{x:Bind ViewModel.MirrorKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <Button
+                                        Margin="5,0,0,0"
+                                        Command="{x:Bind ViewModel.SetMirrorKeyCommand}"
+                                        Content="确认" />
+                                    <Button Click="Button_Click" Margin="5,0,0,0">
+                                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE897;" />
+                                    </Button>
+                                </StackPanel>
+                            </ui:SettingsCard.Content>
+                        </ui:SettingsCard>
+                    </ui:SettingsExpander.Items>
+                </ui:SettingsExpander>
                 <ui:SettingsCard
                     Margin="0,5,0,0"
                     Description="{x:Bind a:App.AppVersion}"
-                    Header="版本">
+                    Header="版本"
+                    Visibility="{x:Bind ViewModel.CheckUpdateVisibility, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}">
                     <ui:SettingsCard.HeaderIcon>
                         <FontIcon FontFamily="Segoe UI Emoji" Glyph="&#x1F5DD;" />
                     </ui:SettingsCard.HeaderIcon>
-                    <ui:SettingsCard.Content>
-                        <Button Command="{x:Bind ViewModel.UpdateVersionCommand}" Content="检查更新" />
-                    </ui:SettingsCard.Content>
+
                 </ui:SettingsCard>
                 <ui:SettingsExpander Margin="0,5,0,0" Header="截图">
                     <ToggleSwitch

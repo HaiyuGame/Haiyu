@@ -62,6 +62,9 @@ public sealed partial class SettingViewModel : ViewModelBase
     [ObservableProperty]
     public partial bool ProgressAction { get; set; }
 
+    [ObservableProperty]
+    public partial bool CheckUpdateVisibility { get; set; }
+
     [RelayCommand]
     async Task Loaded()
     {
@@ -112,6 +115,7 @@ public sealed partial class SettingViewModel : ViewModelBase
             }
             this.InitCapture();
             GetAllVersion();
+            LoadUpdateAppType();
         });
         ProgressAction = false;
     }

@@ -39,6 +39,8 @@ public interface IAppContext<T>
     /// <param name="titleBar"></param>
     void SetTitleControl(Controls.TitleBar titleBar);
 
+    Task UpdateAppAsync(bool isApply = false, CancellationToken token = default);
+
     /// <summary>
     /// 最小化主窗口
     /// </summary>

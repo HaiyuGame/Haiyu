@@ -1,8 +1,9 @@
-﻿using System.Linq;
-using Astronomical;
+﻿using Astronomical;
 using Haiyu.Models.Wrapper;
+using Haiyu.Plugin.Contracts;
 using Haiyu.Services.DialogServices;
 using Microsoft.UI.Xaml;
+using System.Linq;
 using Waves.Core.Common;
 using Waves.Core.Models.Enums;
 using Windows.ApplicationModel.DataTransfer;
@@ -326,7 +327,10 @@ public sealed partial class ShellViewModel : ViewModelBase
         );
         await RefreshHeaderUser();
         OpenMain();
+        await AppContext.UpdateAppAsync();
+        await KuroClient.InitMapPostion();
     }
+
 
     [RelayCommand]
     public void ShowDeviceInfo()

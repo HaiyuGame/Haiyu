@@ -358,6 +358,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                 if (actionType == Waves.Core.Models.Enums.GameContextActionType.GameExit)
                 {
                     this.AppContext.App.MainWindow.Show();
+                    this.AppContext.WallpaperService.RestartVideo();
                 }
             }
         });

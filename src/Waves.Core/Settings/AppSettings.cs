@@ -127,9 +127,27 @@ public class AppSettings : SettingBase
         get => Read();
         set => Write(value);
     }
+
+    public string? UpdateType
+    {
+        get => Read();
+        set => Write(value);
+    }
+
+    public string? SkipAppVersion
+    {
+        get => Read();
+        set=> Write(value);
+    }
+
     public bool? StartGameAllowCloseMain
     {
         get => NullBoolAdaptive.Instance.GetForward(Read());
         set => Write(NullBoolAdaptive.Instance.GetBack(value));
+    }
+    public string MirrorKey
+    {
+        get => Read();
+        set => Write(value);
     }
 }

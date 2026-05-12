@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.WinUI;
+using Haiyu.Plugin.Contracts;
 using Haiyu.Services.DialogServices;
 using Microsoft.UI.Dispatching;
 using Waves.Core.GameContext.ContextsV2;
@@ -66,7 +67,12 @@ public class AppContext<T> : IAppContext<T>
             #endregion
             this.App = app;
             var win = new MainWindow();
-            
+            #region Mirror
+            if (Instance.Host.Services.GetRequiredKeyedService<IUpdateService>("Mirror") is IMirrorUpdateService mirror)
+            {
+                mirror.SetMirrorKey(AppSettings.MirrorKey);
+            }
+            #endregion
             try
             {
                 var scale = TitleBar.GetScaleAdjustment(win);
@@ -217,5 +223,54 @@ public class AppContext<T> : IAppContext<T>
     public void MinToTaskbar()
     {
         this.App.MainWindow.Hide();
+    }
+
+    public async Task UpdateAppAsync(bool isApply=false, CancellationToken token = default)
+    {
+        try
+        {
+            if (DesktopBridge.IsRunningAsMsix())
+            {
+                return;
+            }
+            IUpdateService? service = null;
+            if (AppSettings.UpdateType == "Github")
+            {
+                service = Instance.Host.Services.GetKeyedService<Haiyu.Plugin.Contracts.IUpdateService>("GitHub");
+            }
+            else
+            {
+                service = Instance.Host.Services.GetKeyedService<Haiyu.Plugin.Contracts.IUpdateService>("Mirror");
+            }
+            if (service == null)
+                return;
+            if (await service.CheckProgramUpdateAsync(Haiyu.App.AppVersion, token))
+            {
+                var info = await service.GetLasterProgramInfoAsync(token);
+                if (info != null)
+                {
+                    if (!isApply && info.Version == AppSettings.SkipAppVersion)
+                    {
+                        return;
+                    }
+                    info.IsApply = isApply;
+                    await this.DialogManager.ShowUpdateDialog(info);
+                }
+                else
+                {
+                    LoggerService.WriteError("获取更新信息失败");
+                }
+            }
+            else
+            {
+                await Instance.Host.Services.GetService<ITipShow>().ShowMessageAsync("当前已是最新版本",Symbol.Accept);
+            }
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+        
     }
 }

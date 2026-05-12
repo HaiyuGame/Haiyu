@@ -1,4 +1,5 @@
 ﻿using Haiyu.Models.Dialogs;
+using Haiyu.Plugin.Models;
 using Waves.Core.Models.Enums;
 
 namespace Haiyu.Services.Contracts;
@@ -14,6 +15,7 @@ public interface IDialogManager
         where T : ContentDialog, IResultDialog<Result>, new()
         where Result : new();
     public Task ShowLocalUserManagerAsync();
+    public Task ShowUpdateDialog(DisplayVersionInfo info);
     public Task<SelectDownloadFolderResult> ShowSelectGameFolderAsync(Type type);
     public Task<SelectDownloadFolderResult> ShowSelectGameFolderV2Async(Type type);
     public Task<SelectDownloadFolderResult> ShowSelectDownloadFolderAsync(Type type);

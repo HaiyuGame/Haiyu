@@ -7,7 +7,7 @@ on:
         default: ""
         required: false
   release:
-    types: [edited,released]
+    types: [released]
 
 jobs:
   mirrorchyan:
@@ -30,5 +30,3 @@ jobs:
           repo: ${{ env.repo }}
           github_token: ${{ env.github_token }}
           upload_token: ${{ secrets.MirrorChyanUploadToken }}
-
-

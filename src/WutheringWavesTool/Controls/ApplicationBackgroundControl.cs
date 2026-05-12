@@ -175,6 +175,8 @@ public partial class ApplicationBackgroundControl : Control
         MediaControl.MediaPlayer.Play();
     }
 
+
+
     public void SetMediaSource(string backgroundFile)
     {
         if (this.MediaBackground != backgroundFile)
