@@ -1,6 +1,8 @@
-﻿using Waves.Core.Models.CloudGame;
+﻿using System.Net;
+using System.Net.Http.Headers;
+using Waves.Core.Models.CloudGame;
 
-namespace Waves.Core.Services.CloudGameService.CloudGameService;
+namespace Waves.Core.Services.CloudGameServices;
 
 /// <summary>
 /// 云游戏进程服务
@@ -28,11 +30,28 @@ public class CloudGameSessionService
 
 
     private static readonly PingNode[] DefaultPingNodes =
-   {
+    {
         new("2001010", 16),
         new("2001027", 22),
         new("2001021", 23),
         new("2001020", 27),
         new("2001028", 45)
     };
+
+    private static HttpClient CreateHttpClient(SessionLaunchOptions options)
+    {
+        var handler = new HttpClientHandler
+        {
+            AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate | DecompressionMethods.Brotli,
+            UseCookies = false
+        };
+
+        var client = new HttpClient(handler)
+        {
+            BaseAddress = new Uri(ApiBaseUrl)
+        };
+
+
+        return client;
+    }
 }

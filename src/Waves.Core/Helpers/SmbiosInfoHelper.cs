@@ -99,6 +99,14 @@ public class HardwareIdGenerator
         }
     }
 
+    public static string GenerateDeviceId()
+    {
+        var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        var timeHex = now.ToString("x").PadLeft(12, '0');
+        var random = Guid.NewGuid().ToString("N")[..12];
+        return $"019{timeHex[1..12]}{random[..12]}";
+    }
+
     /// <summary>
     /// 生成模拟硬件ID V2版本
     /// </summary>

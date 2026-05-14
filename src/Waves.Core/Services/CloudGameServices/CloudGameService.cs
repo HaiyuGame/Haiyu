@@ -5,7 +5,7 @@ using Waves.Api.Models.CloudGame;
 using Waves.Core.Contracts;
 using Waves.Core.Helpers;
 
-namespace Waves.Core.Services.CloudGameService;
+namespace Waves.Core.Services.CloudGameServices;
 
 public class CloudGameService : ICloudGameService
 {
@@ -52,7 +52,7 @@ public class CloudGameService : ICloudGameService
             { "projectId", "G152" },
             { "productId", "A1493" },
             { "channelId", "211" },
-            { "deviceNum", HardwareIdGenerator.GenerateUniqueId() },
+            { "deviceNum", HardwareIdGenerator.GenerateDeviceId() },
             { "version", "2.1.2" },
             { "sdkVersion", "2.1.2" },
             { "response_type", "code" },
@@ -164,7 +164,7 @@ public class CloudGameService : ICloudGameService
             endLogin.UserName = data.Username.ToString();
             endLogin.Platform = "web-pc";
             endLogin.AppVersion = "1.0.6";
-            endLogin.DeviceId = HardwareIdGenerator.GenerateUniqueId();
+            endLogin.DeviceId = HardwareIdGenerator.GenerateDeviceId();
             HttpRequestMessage message = new HttpRequestMessage(
                 HttpMethod.Post,
                 "/Login/Login"
@@ -172,7 +172,7 @@ public class CloudGameService : ICloudGameService
             var content = JsonSerializer.Serialize(endLogin, CloundContext.Default.EndLoginRequest);
             message.Content = new StringContent(
                 content,
-                new MediaTypeHeaderValue("application/json")
+                new MediaTypeHeaderValue("application/json","UTF-8")
             );
             message.Headers.Add(
                 "User-Agent",
