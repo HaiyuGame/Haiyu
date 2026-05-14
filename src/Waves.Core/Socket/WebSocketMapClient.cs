@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Net.WebSockets;
 using System.Text;
 
-namespace Haiyu.RpcClient;
+namespace Waves.Core.Socket;
 
 public class WebSocketMapClient : IDisposable, IAsyncDisposable
 {
