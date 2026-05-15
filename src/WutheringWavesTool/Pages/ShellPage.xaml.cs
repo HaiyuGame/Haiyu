@@ -23,6 +23,7 @@ public sealed partial class ShellPage : Page
         if (
             e.SourcePageType == typeof(PunishV2GamePage)
             || e.SourcePageType == typeof(WavesV2GamePage)
+            ||e.SourcePageType == typeof(WavesCloudGamePage)
         )
         {
             To0.Start();

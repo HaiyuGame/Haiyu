@@ -5,7 +5,7 @@ using Waves.Api.Models.CloudGame;
 using Waves.Core.Contracts;
 using Waves.Core.Helpers;
 
-namespace Waves.Core.Services.CloudGameServices;
+namespace Waves.Core.Services;
 
 public class CloudGameService : ICloudGameService
 {
@@ -20,7 +20,8 @@ public class CloudGameService : ICloudGameService
     private const string ProductId = "A1493";
     private const string Pkg = "com.kurogame.mingchao";
     private const string UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36 Edg/139.0.0.0";
-
+    private const string Platform = "web-pc";
+    private const string AppVersion = "1.0.6";
     #endregion
     public HttpClient SdkClient { get; private set; }
     public HttpClient CloudClient { get; private set; }
@@ -162,8 +163,8 @@ public class CloudGameService : ICloudGameService
             endLogin.LoginType = 1;
             endLogin.UserId = data.Id.ToString();
             endLogin.UserName = data.Username.ToString();
-            endLogin.Platform = "web-pc";
-            endLogin.AppVersion = "1.0.6";
+            endLogin.Platform = Platform;
+            endLogin.AppVersion = AppVersion;
             endLogin.DeviceId = HardwareIdGenerator.GenerateDeviceId();
             HttpRequestMessage message = new HttpRequestMessage(
                 HttpMethod.Post,

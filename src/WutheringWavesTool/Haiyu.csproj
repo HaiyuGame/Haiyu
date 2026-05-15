@@ -153,6 +153,9 @@
 		<Content Update="Assets\GameIcons\pgr.ico">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
+		<Content Update="Assets\GameIcons\wavescloud.ico">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
 		<Content Update="Assets\geet.html">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
@@ -249,6 +252,9 @@
 		<None Update="Assets\HpatchzResource\hpatchz.exe">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
+		<Page Update="Pages\GamePages\WavesCloudGamePage.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</Page>
 		<Page Update="WindowModels\KuroDataCenterWindow.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</Page>
@@ -342,6 +348,9 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PRIResource Remove="Themes\**" />
+	</ItemGroup>
+	<ItemGroup>
+	  <None Remove="Pages\GamePages\WavesCloudGamePage.xaml" />
 	</ItemGroup>
 	<Target Name="CopyXamlResourcesForAot" AfterTargets="Publish" Condition="'$(PublishAot)' == 'true'">
 		<ItemGroup>

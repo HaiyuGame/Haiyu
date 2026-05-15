@@ -313,6 +313,14 @@
                             <ImageIcon Source="ms-appx:///Assets/GameIcons/global.ico" />
                         </NavigationViewItem.Icon>
                     </NavigationViewItem>
+                    <NavigationViewItem property:NavigationItemClickHelper.NavigationKey="Haiyu.ViewModel.GameViewModels.WavesCloudGameViewModel" Content="云鸣潮">
+                        <NavigationViewItem.InfoBadge>
+                            <InfoBadge Value="2" />
+                        </NavigationViewItem.InfoBadge>
+                        <NavigationViewItem.Icon>
+                            <ImageIcon Source="ms-appx:///Assets/GameIcons/wavescloud.ico" />
+                        </NavigationViewItem.Icon>
+                    </NavigationViewItem>
                     <NavigationViewItem
                         property:NavigationItemClickHelper.NavigationKey="Haiyu.ViewModel.GameViewModels.GameContexts.PunishGameContextViewModel"
                         Content="战双"
