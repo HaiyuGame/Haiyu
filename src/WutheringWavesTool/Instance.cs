@@ -12,7 +12,9 @@ using Haiyu.ViewModel.WikiViewModels;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Waves.Api.Models.Rpc;
+using Waves.Core.Contracts.CloudGame;
 using Waves.Core.Services;
+using Waves.Core.Services.CloudGameServices;
 using Waves.Core.Settings;
 
 namespace Haiyu;
@@ -166,6 +168,7 @@ public static class InstanceBuilderExtensions
                     .AddKeyedTransient<ITipShow, PageTipShow>("Cache")
                     .AddKeyedTransient<IDialogManager, MainDialogService>("Cache")
                     .AddTransient<IColorGameManager, ColorGameManager>()
+                    .AddSingleton<IWavesCloudGameService,WavesCloudGameService>()
                     .AddKeyedSingleton<IUpdateService,GithubUpdateService>("GitHub")
                     .AddKeyedSingleton<IUpdateService,MirrorUpdateService>("Mirror")
                     #endregion

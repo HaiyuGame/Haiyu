@@ -24,8 +24,14 @@ public interface ICloudGameService
         CancellationToken token = default
     );
 
+    public void SetLoginData(LoginData data);
+
     Task<EndLoginReponse> GetTokenAsync(PhoneTokenData data, string token);
+
+
     Task<AccessToken> GetAccessTokenAsync(string code, CancellationToken token = default);
+
+
     Task<PhoneTokenModel> LoginPhoneTokenAsync(
         string phoneToken,
         string phone,

@@ -1,4 +1,6 @@
 ﻿using Haiyu.Services.DialogServices;
+using Waves.Core.Contracts.CloudGame;
+using Waves.Core.Models.CloudGame;
 
 namespace Haiyu.ViewModel.DialogViewModels;
 
@@ -9,7 +11,7 @@ public sealed partial class WebGameViewModel : DialogViewModelBase
     public WebGameViewModel(
         IAppContext<App> appContext,
         IViewFactorys viewFactorys,
-        ICloudGameService cloudGameService,
+        IWavesCloudGameService cloudGameService,
         [FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager
     )
         : base(dialogManager)
@@ -45,11 +47,14 @@ public sealed partial class WebGameViewModel : DialogViewModelBase
 
     [ObservableProperty]
     public partial string TipMessage { get; set; }
+
+    private CloudGameLoginSnapshot _snapshot;
+
     public string GeetValue { get; set; }
 
     public IAppContext<App> AppContext { get; }
     public IViewFactorys ViewFactorys { get; }
-    public ICloudGameService CloudGameService { get; }
+    public IWavesCloudGameService CloudGameService { get; }
 
     private async void GeeSuccessMethod(object recipient, GeeSuccessMessanger message)
     {
@@ -67,12 +72,13 @@ public sealed partial class WebGameViewModel : DialogViewModelBase
                 geetData.LotNumber,
                 this.CTS.Token
             );
-            if (sendSMS == null)
+            if (sendSMS.Item1 == null)
             {
                 TipMessage = "发生验证码失败！";
                 return;
             }
-            TipMessage = sendSMS.ErrorDescription;
+            TipMessage = sendSMS.Item1.ErrorDescription;
+            this._snapshot = sendSMS.Item2;
         }
     }
 
@@ -88,7 +94,7 @@ public sealed partial class WebGameViewModel : DialogViewModelBase
     [RelayCommand]
     async Task Login()
     {
-        var result = await CloudGameService.LoginAsync(this.Phone, this.Code, this.CTS.Token);
+        var result = await CloudGameService.LoginAsync(this._snapshot,this.Phone, this.Code, this.CTS.Token);
         if (result.Code != 0)
         {
             TipMessage = result.Msg;

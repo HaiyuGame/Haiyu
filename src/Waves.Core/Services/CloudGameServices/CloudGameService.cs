@@ -4,12 +4,12 @@ using Waves.Api.Models;
 using Waves.Api.Models.CloudGame;
 using Waves.Core.Contracts;
 using Waves.Core.Helpers;
+using Waves.Core.Models.CloudGame;
 
 namespace Waves.Core.Services;
 
 public class CloudGameService : ICloudGameService
 {
-
     #region 常量定义
     public const string SDKBaseUrl = "https://sdkapi.kurogame.com/";
     public const string CloudBaseUrl = "https://cloud-game-sh.aki-game.com/";
@@ -19,7 +19,8 @@ public class CloudGameService : ICloudGameService
     private const string GameId = "G152";
     private const string ProductId = "A1493";
     private const string Pkg = "com.kurogame.mingchao";
-    private const string UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36 Edg/139.0.0.0";
+    private const string UserAgent =
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36 Edg/139.0.0.0";
     private const string Platform = "web-pc";
     private const string AppVersion = "1.0.6";
     #endregion
@@ -28,11 +29,10 @@ public class CloudGameService : ICloudGameService
     public CloudConfigManager ConfigManager { get; }
     public string RecordToken { get; private set; }
 
-    public CloudGameService(
-        CloudConfigManager cloudConfigManager
-    )
+    public CloudGameService(CloudConfigManager cloudConfigManager)
     {
         ConfigManager = cloudConfigManager;
+        Session = new();
         BuildClient();
     }
 
@@ -42,28 +42,40 @@ public class CloudGameService : ICloudGameService
         this.CloudClient = new HttpClient() { BaseAddress = new(CloudBaseUrl) };
     }
 
+    public CloudGameLoginSession Session { get; private set; }
 
-    public Dictionary<string, string> GetClientData()
+    /// <summary>
+    /// 设置登录缓存
+    /// </summary>
+    public void SetLoginData(LoginData data)
+    {
+        Session.OrginData = data;
+    }
+
+    public Dictionary<string, string> GetClientData(CloudGameLoginSession session = null)
     {
         var query = new Dictionary<string, string>
         {
             { "redirect_uri", "1" },
             { "__e__", "1" },
             { "pack_mark", "1" },
-            { "projectId", "G152" },
-            { "productId", "A1493" },
-            { "channelId", "211" },
-            { "deviceNum", HardwareIdGenerator.GenerateDeviceId() },
+            { "projectId", GameId },
+            { "productId", ProductId },
+            { "channelId", ChannelId },
             { "version", "2.1.2" },
             { "sdkVersion", "2.1.2" },
             { "response_type", "code" },
-            { "client_id", "vvkewnskrxxwfo0yi61cy24l" },
+            { "client_id", ClientId },
             { "deviceModel", "Chrome" },
             { "os", "Windows" },
             { "pkg", "com.kurogame.mingchao" },
-            { "client_secret", "g9ej0i1jf3y68wchb0ncm266" },
-            { "platform", "h5" }
+            { "client_secret", ClientSecret },
+            { "platform", "h5" },
         };
+        if (session != null && session.OrginData != null && session.OrginData.LoginDid != null)
+        {
+            query.Add("deviceNum", session.OrginData.LoginDid);
+        }
         return query;
     }
 
@@ -76,7 +88,7 @@ public class CloudGameService : ICloudGameService
         CancellationToken token = default
     )
     {
-        var query = GetClientData();
+        var query = GetClientData(Session);
         query.Add("phone", phone);
         query.Add("geetestCaptchaOutput", geetestCaptchaOutput);
         query.Add("geetestPassToken", geetestPassToken);
@@ -98,17 +110,24 @@ public class CloudGameService : ICloudGameService
         CancellationToken token = default
     )
     {
+        var id = HardwareIdGenerator.GenerateDeviceId();
         var query = GetClientData();
         query.Add("phone", phone);
         query.Add("code", code);
-        var request = BuildRequestMessage(
-            "/sdkcom/v2/login/phoneCode.lg",
-            HttpMethod.Post,
-            query
-        );
+        query.Add("deviceNum", HardwareIdGenerator.GenerateDeviceId());
+        var request = BuildRequestMessage("/sdkcom/v2/login/phoneCode.lg", HttpMethod.Post, query);
         var result = await SdkClient.SendAsync(request, token);
-        var model = await result.Content.ReadAsStringAsync();
-        return JsonSerializer.Deserialize<LoginResult>(model, CloundContext.Default.LoginResult);
+        var json = await result.Content.ReadAsStringAsync();
+        var model = JsonSerializer.Deserialize<LoginResult>(
+            json,
+            CloundContext.Default.LoginResult
+        );
+        if (model == null || model.Code != 0)
+        {
+            return null;
+        }
+        model.Data.LoginDid = id;
+        return model;
     }
 
     /// <summary>
@@ -123,14 +142,10 @@ public class CloudGameService : ICloudGameService
         CancellationToken token = default
     )
     {
-        var query = GetClientData();
+        var query = GetClientData(Session);
         query.Add("phone", phone);
         query.Add("token", phoneToken);
-        var request = BuildRequestMessage(
-            "/sdkcom/v2/login/phoneToken.lg",
-            HttpMethod.Post,
-            query
-        );
+        var request = BuildRequestMessage("/sdkcom/v2/login/phoneToken.lg", HttpMethod.Post, query);
         var result = await SdkClient.SendAsync(request, token);
         var model = await result.Content.ReadAsStringAsync();
         return JsonSerializer.Deserialize(model, CloundContext.Default.PhoneTokenModel);
@@ -141,7 +156,7 @@ public class CloudGameService : ICloudGameService
         CancellationToken token = default
     )
     {
-        var query = GetClientData();
+        var query = GetClientData(Session);
         query.Add("code", code);
         query.Add("grant_type", "authorization_code");
         var request = BuildRequestMessage(
@@ -166,14 +181,11 @@ public class CloudGameService : ICloudGameService
             endLogin.Platform = Platform;
             endLogin.AppVersion = AppVersion;
             endLogin.DeviceId = HardwareIdGenerator.GenerateDeviceId();
-            HttpRequestMessage message = new HttpRequestMessage(
-                HttpMethod.Post,
-                "/Login/Login"
-            );
+            HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Post, "/Login/Login");
             var content = JsonSerializer.Serialize(endLogin, CloundContext.Default.EndLoginRequest);
             message.Content = new StringContent(
                 content,
-                new MediaTypeHeaderValue("application/json","UTF-8")
+                new MediaTypeHeaderValue("application/json", "UTF-8")
             );
             message.Headers.Add(
                 "User-Agent",
@@ -211,7 +223,12 @@ public class CloudGameService : ICloudGameService
         return model;
     }
 
-    public async Task<PlayerReponse> GetGameRecordResource(string recordId, string userId, int poolType, CancellationToken token = default)
+    public async Task<PlayerReponse> GetGameRecordResource(
+        string recordId,
+        string userId,
+        int poolType,
+        CancellationToken token = default
+    )
     {
         RecardQuery query = new RecardQuery();
         query.CardPoolId = "5c13a63f85465e9fcc0f24d6efb15083";
@@ -220,10 +237,7 @@ public class CloudGameService : ICloudGameService
         query.PlayerId = userId;
         query.CardPoolType = poolType;
         query.ServerId = "76402e5b20be2c39f095a152090afddc";
-        HttpRequestMessage message = new HttpRequestMessage(
-            HttpMethod.Post,
-            "/gacha/record/query"
-        );
+        HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Post, "/gacha/record/query");
         var content = JsonSerializer.Serialize(query, CloundContext.Default.RecardQuery);
         message.Content = new StringContent(content, new MediaTypeHeaderValue("application/json"));
         message.Headers.Add(
@@ -242,7 +256,7 @@ public class CloudGameService : ICloudGameService
         CancellationToken token = default
     )
     {
-        HttpRequestMessage message = new HttpRequestMessage(post,v);
+        HttpRequestMessage message = new HttpRequestMessage(post, v);
         if (post == HttpMethod.Post)
         {
             var endcod = new FormUrlEncodedContent(values);
@@ -256,16 +270,20 @@ public class CloudGameService : ICloudGameService
         return message;
     }
 
-    public async Task<(bool, string)> OpenUserAsync(LoginData loginData, CancellationToken token = default)
+    public async Task<(bool, string)> OpenUserAsync(
+        LoginData loginData,
+        CancellationToken token = default
+    )
     {
         try
         {
+            this.SetLoginData(loginData);
             var accessToken = await LoginPhoneTokenAsync(
                 loginData.PhoneToken,
                 loginData.Phone,
                 token
             );
-            if (accessToken.Code == 20001)
+            if (accessToken.Code != 0)
             {
                 return (false, "登陆失效");
             }
@@ -287,7 +305,8 @@ public class CloudGameService : ICloudGameService
 
     public async Task GetUserInfoAsync(LoginData data)
     {
-        var url = $"/UserRegion/GetUserInfo?loginType={data.LoginType}&userId={data.Id}&token={data.AutoToken}&userName={data.Username}";
+        var url =
+            $"/UserRegion/GetUserInfo?loginType={data.LoginType}&userId={data.Id}&token={data.AutoToken}&userName={data.Username}";
         var result = await CloudClient.GetStringAsync(url);
     }
 }

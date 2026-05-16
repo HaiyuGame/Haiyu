@@ -56,6 +56,9 @@ public class LoginData
 
     [JsonPropertyName("phoneToken")]
     public string PhoneToken { get; set; }
+
+    [JsonPropertyName("loginDid")]
+    public string? LoginDid { get; set; }
 }
 
 public class LoginResult

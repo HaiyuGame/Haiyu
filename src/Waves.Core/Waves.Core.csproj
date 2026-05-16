@@ -11,6 +11,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="WebGameContext\**" />
+    <EmbeddedResource Remove="WebGameContext\**" />
+    <None Remove="WebGameContext\**" />
+  </ItemGroup>
+
+  <ItemGroup>
 	  <PackageReference Include="MemoryPack" Version="1.21.4" />
 	  <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.7" />
 
@@ -21,10 +27,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Waves.Api\Waves.Api.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="WebGameContext\" />
   </ItemGroup>
 
 </Project>

@@ -140,9 +140,6 @@ public partial class CloudGameViewModel : ViewModelBase
     {
         if (value == null)
             return;
-        var url = await TryInvokeAsync(async () =>
-            await CloudGameService.GetRecordAsync(this.CTS.Token)
-        );
         IsLoading = true;
         NoLoginVisibility = Visibility.Collapsed;
         this.LoadVisibility = Visibility.Visible;
