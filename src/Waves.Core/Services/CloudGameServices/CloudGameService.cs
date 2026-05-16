@@ -242,11 +242,9 @@ public class CloudGameService : ICloudGameService
         CancellationToken token = default
     )
     {
-        HttpRequestMessage message = new HttpRequestMessage();
+        HttpRequestMessage message = new HttpRequestMessage(post,v);
         if (post == HttpMethod.Post)
         {
-            message.Method = post;
-            message.RequestUri = new(v);
             var endcod = new FormUrlEncodedContent(values);
             message.Content = endcod;
         }

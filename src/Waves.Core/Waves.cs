@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Waves.Core.Contracts;
+using Waves.Core.Contracts.CloudGame;
 using Waves.Core.GameContext;
 using Waves.Core.GameContext.ContextsV2;
 using Waves.Core.GameContext.ContextsV2.Punish;
@@ -120,7 +121,8 @@ public static class Waves
                 }
             )
         #endregion
-            .AddTransient<IHttpClientService, HttpClientService>();
+            .AddTransient<IHttpClientService, HttpClientService>()
+            .AddSingleton<IKuroCloudGameContext, KuroCloudGameContext>();
         return services;
     }
 }

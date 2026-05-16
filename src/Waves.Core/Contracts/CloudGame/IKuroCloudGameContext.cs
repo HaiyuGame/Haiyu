@@ -13,4 +13,11 @@ public interface IKuroCloudGameContext
     /// 云鸣潮接口
     /// </summary>
     ICloudGameService CloudGameService { get; }
+
+    /// <summary>
+    /// 检查本地存储
+    /// 1. 清除过期Token
+    /// </summary>
+    /// <returns></returns>
+    Task CheckLocalUserAsync(CancellationToken token);
 }

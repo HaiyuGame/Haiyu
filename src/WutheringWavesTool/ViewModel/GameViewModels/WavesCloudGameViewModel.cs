@@ -2,20 +2,27 @@
 
 namespace Haiyu.ViewModel.GameViewModels;
 
-public sealed partial class WavesCloudGameViewModel:ViewModelBase
+public sealed partial class WavesCloudGameViewModel : ViewModelBase
 {
     public IKuroCloudGameContext KuroCloudGameContext { get; }
     public IWallpaperService WallpaperService { get; }
 
-    public WavesCloudGameViewModel(IWallpaperService wallpaperService)
+    public WavesCloudGameViewModel(
+        IWallpaperService wallpaperService,
+        IKuroCloudGameContext kuroCloudGameContext
+    )
     {
         WallpaperService = wallpaperService;
-        
+        KuroCloudGameContext = kuroCloudGameContext;
     }
 
     [RelayCommand]
     async Task Loaded()
     {
-        WallpaperService.SetMediaForUrl(Waves.Core.Models.Enums.WallpaperShowType.Image, "https://aki-gm-resources-back.aki-game.com/pv/cg/login.webp");
+        WallpaperService.SetMediaForUrl(
+            Waves.Core.Models.Enums.WallpaperShowType.Image,
+            "https://aki-gm-resources-back.aki-game.com/pv/cg/login.webp"
+        );
+        await KuroCloudGameContext.CheckLocalUserAsync(this.CTS.Token);
     }
 }

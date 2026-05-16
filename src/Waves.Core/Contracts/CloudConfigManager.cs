@@ -79,4 +79,21 @@ public sealed partial class CloudConfigManager
             return false;
         }
     }
+
+    /// <summary>
+    /// 删除本地账号
+    /// </summary>
+    /// <param name="id">账户ID</param>
+    /// <returns></returns>
+    public async Task DeleteUserAsync(string id)
+    {
+        await Task.Run(() =>
+        {
+            var path = System.IO.Path.Combine(this.Path, $"{id}.json");
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+        }).ConfigureAwait(false);
+    }
 }
