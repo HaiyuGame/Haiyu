@@ -101,7 +101,7 @@ public class CloudGameService : ICloudGameService
         );
         var result = await SdkClient.SendAsync(request, token);
         var str = await result.Content.ReadAsStringAsync();
-        return JsonSerializer.Deserialize<CloudSendSMS>(str, CloundContext.Default.CloudSendSMS);
+        return JsonSerializer.Deserialize<CloudSendSMS>(str, CloudGameContext.Default.CloudSendSMS);
     }
 
     /// <summary>
@@ -121,7 +121,7 @@ public class CloudGameService : ICloudGameService
         message.Headers.Add("x-token", RecordToken);
         var result = await CloudClient.SendAsync(message, token);
         var str = await result.Content.ReadAsStringAsync(token);
-        var model = JsonSerializer.Deserialize(str, CloundContext.Default.RecordModel);
+        var model = JsonSerializer.Deserialize(str, CloudGameContext.Default.RecordModel);
         return model;
     }
 
@@ -140,7 +140,7 @@ public class CloudGameService : ICloudGameService
         query.CardPoolType = poolType;
         query.ServerId = "76402e5b20be2c39f095a152090afddc";
         HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Post, "/gacha/record/query");
-        var content = JsonSerializer.Serialize(query, CloundContext.Default.RecardQuery);
+        var content = JsonSerializer.Serialize(query, CloudGameContext.Default.RecardQuery);
         message.Content = new StringContent(content, new MediaTypeHeaderValue("application/json"));
         message.Headers.Add(
             "User-Agent",

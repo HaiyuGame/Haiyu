@@ -27,7 +27,7 @@ public sealed partial class CloudConfigManager
             {
                 var result = JsonSerializer.Deserialize(
                     await File.ReadAllTextAsync(item, token),
-                    CloundContext.Default.CloudGameLoginData
+                    CloudGameContext.Default.CloudGameLoginData
                 );
                 logins.Add(result);
             }
@@ -61,7 +61,7 @@ public sealed partial class CloudConfigManager
             {
                 var result = JsonSerializer.Deserialize(
                     await File.ReadAllTextAsync(item),
-                    CloundContext.Default.CloudGameLoginData
+                    CloudGameContext.Default.CloudGameLoginData
                 );
                 if (result.Username == loginResult.Username)
                 {
@@ -70,7 +70,7 @@ public sealed partial class CloudConfigManager
             }
             await File.WriteAllTextAsync(
                 Path + $"\\{loginResult.Username}.json",
-                JsonSerializer.Serialize(loginResult, CloundContext.Default.CloudGameLoginData)
+                JsonSerializer.Serialize(loginResult, CloudGameContext.Default.CloudGameLoginData)
             );
             return true;
         }

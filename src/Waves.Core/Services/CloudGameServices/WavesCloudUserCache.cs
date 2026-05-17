@@ -17,13 +17,13 @@ public class WavesCloudUserCache
         var id = data.Username + data.Sdkuserid;
         if (!queryList.ContainsKey(id))
         {
-            flage = false;
+            flage = true;
             return flage;
         }
         //五小时自动刷新
         if(DateTime.Now- queryList[id].SaveTime>TimeSpan.FromHours(5))
         {
-            return false;
+            return true;
         }
         return flage;
     }

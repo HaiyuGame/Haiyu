@@ -68,7 +68,6 @@ namespace Waves.Core.GameContext
                 Logger.WriteError($"游戏启动错误{ex.Message}");
 
                 this.GameEventPublisher.Publish(new GameContextOutputArgs { Type = GameContextActionType.None });
-                    return false;
                 return false;
             }
         }

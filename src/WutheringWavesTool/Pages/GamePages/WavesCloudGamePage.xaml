@@ -7,6 +7,7 @@
     xmlns:cloud="using:Waves.Core.Models.CloudGame"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
+    xmlns:labs="using:CommunityToolkit.WinUI.Controls"
     xmlns:local="using:Haiyu.Pages.GamePages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="using:Haiyu.Controls"
@@ -38,18 +39,23 @@
                     <ColumnDefinition Width="auto" />
                 </Grid.ColumnDefinitions>
                 <ComboBox
-                    Padding="20"
                     HorizontalAlignment="Stretch"
+                    VerticalAlignment="Center"
                     Background="Transparent"
                     BorderBrush="Transparent"
                     ItemsSource="{x:Bind ViewModel.Logins, Mode=OneWay}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate x:DataType="cloud:CloudGameLoginSession">
-                            <TextBlock Text="{x:Bind OrginData.Username}" />
+                            <Grid>
+                                <TextBlock Text="{x:Bind OrginData.Phone}" />
+                            </Grid>
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
-                <Button Grid.Column="1" Style="{ThemeResource TransparentButtonStyle}">
+                <Button
+                    Grid.Column="1"
+                    Width="50"
+                    Style="{ThemeResource TransparentButtonStyle}">
                     <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE712;" />
                     <Button.Flyout>
                         <MenuFlyout>

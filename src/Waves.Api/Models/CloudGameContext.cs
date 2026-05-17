@@ -11,7 +11,9 @@ namespace Waves.Api.Models;
 [JsonSerializable(typeof(PhoneTokenData))]
 [JsonSerializable(typeof(CloudApiResponse<PhoneTokenData>))]
 [JsonSerializable(typeof(CloudApiResponse<EndLoginReponseData>))]
+[JsonSerializable(typeof(CloudApiResponse<List<CloudGameNode>>))]
 [JsonSerializable(typeof(CloudApiResponse<bool>))]
+[JsonSerializable(typeof(CloudApiResponse<bool?>))]
 [JsonSerializable(typeof(EndLoginData))]
 [JsonSerializable(typeof(EndLoginRequest))]
 [JsonSerializable(typeof(ExperienceCardInfo))]
@@ -25,4 +27,8 @@ namespace Waves.Api.Models;
 [JsonSerializable(typeof(RecordModel))]
 [JsonSerializable(typeof(RecordData))]
 [JsonSerializable(typeof(RecardQuery))]
-public partial class CloundContext : JsonSerializerContext { }
+[JsonSerializable(typeof(WalletData))]
+[JsonSerializable(typeof(CloudApiResponse<WalletData>))]
+[JsonSerializable(typeof(CloudNetworkOrgin))]
+[JsonSerializable(typeof(List<CloudNetworkOrgin>))]
+public partial class CloudGameContext : JsonSerializerContext { }

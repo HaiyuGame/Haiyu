@@ -54,7 +54,7 @@ public partial class WavesCloudSurvivalService:IDisposable,IAsyncDisposable
         }
         _cts = new CancellationTokenSource();
         var users = await WavesCloudGameService.ConfigManager.GetUsersAsync();
-        timer = new System.Threading.PeriodicTimer(TimeSpan.FromSeconds(1));
+        timer = new System.Threading.PeriodicTimer(TimeSpan.FromSeconds(3));
         _ = Task.Run(() => StartTask(users));
     }
 
@@ -82,7 +82,7 @@ public partial class WavesCloudSurvivalService:IDisposable,IAsyncDisposable
     {
         try
         {
-            if (!this.Cache.IsCheck(data))
+            if (this.Cache.IsCheck(data))
             {
                 var isLogin = await WavesCloudGameService.RefreshPhoneTokenAsync(data, token);
                 if (isLogin != null && isLogin.Code == 0)
@@ -142,6 +142,12 @@ public partial class WavesCloudSurvivalService:IDisposable,IAsyncDisposable
                 Message = $"异常:{ex.Message}"
             });
         }
+    }
+
+    public async Task<CloudApiResponse<WalletData>?> GetUserWalletData(CloudGameLoginSession session,CancellationToken token =default)
+    {
+        var result = await this.WavesCloudGameService.GetWalletDataAsync(session, token);
+        return result;
     }
 
     public async Task StartAsync()

@@ -11,10 +11,13 @@ partial class KuroGameContextViewModelV2
     {
         if (_buttonAction == ButtonActionType.StartGame)
         {
-            if ((await GameContext.StartGameAsync()) && (AppSettings.StartGameAllowCloseMain == true))
+            if ((await GameContext.StartGameAsync()))
+            {
+                this.WallpaperService.PauseVideo();
+            }
+            if((AppSettings.StartGameAllowCloseMain == true))
             {
                 this.AppContext.MinToTaskbar();
-                this.WallpaperService.PauseVideo();
             }
         }
         if (_buttonAction == ButtonActionType.PrepareUpdate)

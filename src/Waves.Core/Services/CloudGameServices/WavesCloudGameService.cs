@@ -1,10 +1,12 @@
 ﻿using System.Net;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using Waves.Api.Models;
 using Waves.Api.Models.CloudGame;
+using Waves.Core.Common;
 using Waves.Core.Contracts;
 using Waves.Core.Contracts.CloudGame;
 using Waves.Core.Helpers;
@@ -22,6 +24,8 @@ public class WavesCloudGameService : IWavesCloudGameService
 
     private const string CloudBaseUrl = "https://cloud-game-sh.aki-game.com/";
 
+    public CloudNetworkSpeedTestService CloudNetworkSpeedTestService { get; private set; }
+
     private const string ClientId = "vvkewnskrxxwfo0yi61cy24l";
 
     private const string ClientSecret = "g9ej0i1jf3y68wchb0ncm266";
@@ -35,6 +39,7 @@ public class WavesCloudGameService : IWavesCloudGameService
     private const string Pkg = "com.kurogame.mingchao";
     private const string Platform = "web-pc";
     private const string AppVersion = "1.0.6";
+
     /// <summary>
     /// 登录请求使用的浏览器标识头。
     /// </summary>
@@ -73,6 +78,7 @@ public class WavesCloudGameService : IWavesCloudGameService
         this.ConfigManager = cloudConfigManager;
         _sdkClient = CreateClient(SdkBaseUrl);
         _cloudClient = CreateClient(CloudBaseUrl);
+        CloudNetworkSpeedTestService = new CloudNetworkSpeedTestService();
     }
 
     public async Task<Tuple<CloudSendSMS?, CloudGameLoginSnapshot>> GetPhoneSMSAsync(
@@ -98,7 +104,7 @@ public class WavesCloudGameService : IWavesCloudGameService
             token
         );
         return new Tuple<CloudSendSMS?, CloudGameLoginSnapshot>(
-            JsonSerializer.Deserialize<CloudSendSMS?>(str, CloundContext.Default.CloudSendSMS),
+            JsonSerializer.Deserialize<CloudSendSMS?>(str, CloudGameContext.Default.CloudSendSMS),
             loginSnapshot
         );
     }
@@ -113,17 +119,12 @@ public class WavesCloudGameService : IWavesCloudGameService
         var query = GetClientData(snapshot);
         query.Add("phone", phone);
         query.Add("code", code);
-        var str = await PostFormAsync(
-            _sdkClient,
-            "sdkcom/v2/login/phoneCode.lg",
-            query,
-            token
-        );
+        var str = await PostFormAsync(_sdkClient, "sdkcom/v2/login/phoneCode.lg", query, token);
         var model = JsonSerializer.Deserialize(
             str,
-            CloundContext.Default.CloudApiResponseCloudGameLoginData
+            CloudGameContext.Default.CloudApiResponseCloudGameLoginData
         );
-        if(model != null && model.Data!= null)
+        if (model != null && model.Data != null)
         {
             model.Data.LoginDid = snapshot.DeviceNum;
         }
@@ -136,35 +137,48 @@ public class WavesCloudGameService : IWavesCloudGameService
     /// <param name="data"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task AuthenticateAsync(
+    public async Task AuthenticateAsync(CloudGameLoginData data, CancellationToken ct = default) { }
+
+    public async Task<CloudApiResponse<PhoneTokenData>?> RefreshPhoneTokenAsync(
         CloudGameLoginData data,
         CancellationToken ct = default
     )
-    {
-
-    }
-
-    public async Task<CloudApiResponse<PhoneTokenData>?> RefreshPhoneTokenAsync(CloudGameLoginData data, CancellationToken ct = default)
     {
         var snapshot = CloudGameLoginSnapshot.Create(data);
         var querys = GetClientData(snapshot);
         querys.Add("phone", data.Phone);
         querys.Add("token", data.PhoneToken);
-        var json = await PostFormAsync(this._sdkClient, "sdkcom/v2/login/phoneToken.lg", querys, ct);
-        return JsonSerializer.Deserialize(json, CloundContext.Default.CloudApiResponsePhoneTokenData);
+        var json = await PostFormAsync(
+            this._sdkClient,
+            "sdkcom/v2/login/phoneToken.lg",
+            querys,
+            ct
+        );
+        return JsonSerializer.Deserialize(
+            json,
+            CloudGameContext.Default.CloudApiResponsePhoneTokenData
+        );
     }
 
-    public async Task<CloudApiResponse<AccessData>?> GetAccessToken(CloudGameLoginData data,string refreshPhoneToken, CancellationToken ct = default)
+    public async Task<CloudApiResponse<AccessData>?> GetAccessToken(
+        CloudGameLoginData data,
+        string refreshPhoneToken,
+        CancellationToken ct = default
+    )
     {
         var snapshot = CloudGameLoginSnapshot.Create(data);
         var query = GetClientData(snapshot);
         query.Add("code", refreshPhoneToken);
         query.Add("grant_type", "authorization_code");
         var json = await PostFormAsync(this._sdkClient, "sdkcom/v2/auth/getToken.lg", query, ct);
-        return JsonSerializer.Deserialize(json, CloundContext.Default.CloudApiResponseAccessData);
+        return JsonSerializer.Deserialize(json, CloudGameContext.Default.CloudApiResponseAccessData);
     }
 
-    public async Task<CloudApiResponse<EndLoginReponseData>?> GetTokenAsync(CloudGameLoginData data,string accessToken,CancellationToken ct = default)
+    public async Task<CloudApiResponse<EndLoginReponseData>?> GetTokenAsync(
+        CloudGameLoginData data,
+        string accessToken,
+        CancellationToken ct = default
+    )
     {
         var req = new EndLoginRequest
         {
@@ -176,9 +190,12 @@ public class WavesCloudGameService : IWavesCloudGameService
             AppVersion = "1.0.6",
             DeviceId = data.LoginDid,
         };
-        var json = JsonSerializer.Serialize(req, CloundContext.Default.EndLoginRequest);
-        var result = await PostJsonAsync(_cloudClient,"Login/Login",json,ct);
-        return JsonSerializer.Deserialize(result,CloundContext.Default.CloudApiResponseEndLoginReponseData);
+        var json = JsonSerializer.Serialize(req, CloudGameContext.Default.EndLoginRequest);
+        var result = await PostJsonAsync(_cloudClient, "Login/Login", json, ct);
+        return JsonSerializer.Deserialize(
+            result,
+            CloudGameContext.Default.CloudApiResponseEndLoginReponseData
+        );
     }
 
     public Dictionary<string, string> GetClientData(CloudGameLoginSnapshot session = null)
@@ -208,22 +225,56 @@ public class WavesCloudGameService : IWavesCloudGameService
         return query;
     }
 
-    public async Task<CloudApiResponse<bool>> FetchMesageAsync(CloudGameLoginSession session,CancellationToken ct = default)
+    public async Task<CloudApiResponse<bool?>?> FetchMesageAsync(
+        CloudGameLoginSession session,
+        CancellationToken ct = default
+    )
     {
-        using var client = BuildClientData(session, "Message/FetchMessage",method:HttpMethod.Get);
-        var result = await _cloudClient.SendAsync(client,ct);
+        using var client = BuildClientData(session, "Message/FetchMessage", method: HttpMethod.Get);
+        var result = await _cloudClient.SendAsync(client, ct);
         var str = await result.Content.ReadAsStringAsync();
-        return JsonSerializer.Deserialize<CloudApiResponse<bool>>(str, CloundContext.Default.CloudApiResponseBoolean);
+        return JsonSerializer.Deserialize<CloudApiResponse<bool?>>(
+            str,
+            CloudGameContext.Default.CloudApiResponseNullableBoolean
+        );
     }
 
-    public HttpRequestMessage BuildClientData(CloudGameLoginSession session,string path,HttpMethod method)
+    public async Task<CloudApiResponse<List<CloudGameNode>>?> GetPingGameNodeAsync(CloudGameLoginSession session, CancellationToken ct = default)
+    {
+        using var client = BuildClientData(session, "GamePlay/GetRegionToScore", method: HttpMethod.Get);
+        var result = await _cloudClient.SendAsync(client, ct);
+        var str = await result.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize(
+            str,
+            CloudGameContext.Default.CloudApiResponseListCloudGameNode
+        );
+    }
+
+    public async Task<CloudApiResponse<WalletData>?> GetWalletDataAsync(CloudGameLoginSession session, CancellationToken ct = default)
+    {
+        using var client = BuildClientData(session, "Message/WalletInfo", method: HttpMethod.Get);
+        var result = await _cloudClient.SendAsync(client, ct);
+        var str = await result.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<CloudApiResponse<WalletData>?>(
+            str,
+            CloudGameContext.Default.CloudApiResponseWalletData
+        );
+    }
+
+    public HttpRequestMessage BuildClientData(
+        CloudGameLoginSession session,
+        string path,
+        HttpMethod method
+    )
     {
         HttpRequestMessage message = new(method, path);
         message.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         message.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/plain"));
         message.Headers.AcceptLanguage.ParseAdd("zh-CN,zh;q=0.9");
         message.Headers.Referrer = new Uri("https://mc.kurogames.com/cloud/index.html");
-        message.Headers.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.120.0 Chrome/142.0.7444.265 Electron/39.8.8 Safari/537.36");
+        message.Headers.UserAgent.ParseAdd(
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.120.0 Chrome/142.0.7444.265 Electron/39.8.8 Safari/537.36"
+        );
         message.Headers.TryAddWithoutValidation("Origin", "https://mc.kurogames.com");
         message.Headers.TryAddWithoutValidation("Cookie", BuildCookieHeader(session));
         message.Headers.TryAddWithoutValidation("x-os", "web");
@@ -258,13 +309,10 @@ public class WavesCloudGameService : IWavesCloudGameService
             cookies["token"] = options.EndLoginData.Token;
         }
 
-        if (cookies.Count == 0)
-        {
-        }
+        if (cookies.Count == 0) { }
 
         return string.Join("; ", cookies.Select(pair => $"{pair.Key}={pair.Value}"));
     }
-
 
     private static async Task<string> PostFormAsync(
         HttpClient client,
@@ -293,3 +341,6 @@ public class WavesCloudGameService : IWavesCloudGameService
     }
 
 }
+
+
+

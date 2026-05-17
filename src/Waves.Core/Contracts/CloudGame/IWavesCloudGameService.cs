@@ -1,4 +1,5 @@
 ﻿using Waves.Api.Models.CloudGame;
+using Waves.Core.Common;
 using Waves.Core.Models.CloudGame;
 
 namespace Waves.Core.Contracts.CloudGame;
@@ -6,6 +7,9 @@ namespace Waves.Core.Contracts.CloudGame;
 public interface IWavesCloudGameService
 {
     public CloudConfigManager ConfigManager { get; }
+
+    public CloudNetworkSpeedTestService CloudNetworkSpeedTestService { get;}
+
     public Task<Tuple<CloudSendSMS?, CloudGameLoginSnapshot>> GetPhoneSMSAsync(
         string phone,
         string geetestCaptchaOutput,
@@ -45,5 +49,21 @@ public interface IWavesCloudGameService
     /// <param name="session"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    public Task<CloudApiResponse<bool>> FetchMesageAsync(CloudGameLoginSession session, CancellationToken ct = default);
+    public Task<CloudApiResponse<bool?>> FetchMesageAsync(CloudGameLoginSession session, CancellationToken ct = default);
+
+    /// <summary>
+    /// 云鸣潮计费
+    /// </summary>
+    /// <param name="session"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    public Task<CloudApiResponse<WalletData>?> GetWalletDataAsync(CloudGameLoginSession session, CancellationToken ct = default);
+
+    /// <summary>
+    /// 获取节点
+    /// </summary>
+    /// <param name="session"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    public Task<CloudApiResponse<List<CloudGameNode>>?> GetPingGameNodeAsync(CloudGameLoginSession session, CancellationToken ct = default);
 }

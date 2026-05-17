@@ -23,7 +23,16 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
         WallpaperService = wallpaperService;
         KuroCloudGameContext = kuroCloudGameContext;
         DialogManager = dialogManager;
+        KuroCloudGameContext.WavesCloudSurivivalService.MessageHandler += WavesCloudSurivivalService_MessageHandler;
         RegisterMessager();
+    }
+
+    private async void WavesCloudSurivivalService_MessageHandler(object sender, CloudMessageArgs session)
+    {
+        if(session.Type == Waves.Core.Models.Enums.CloudCoreType.DeleteUser)
+        {
+            await this.RefreshUserAsync();
+        }
     }
 
     private void RegisterMessager()
@@ -44,6 +53,14 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
         var users =
              KuroCloudGameContext.WavesCloudSurivivalService.Cache.ToList();
         this.Logins = [.. users];
+        //var wallData = await KuroCloudGameContext.WavesCloudSurivivalService.WavesCloudGameService.GetPingGameNodeAsync(this.Logins[0]);
+        var nodes = await KuroCloudGameContext.WavesCloudSurivivalService.WavesCloudGameService.CloudNetworkSpeedTestService.RunSpeedTestAsync(this.CTS.Token);
+    }
+
+    public override void Dispose()
+    {
+        KuroCloudGameContext.WavesCloudSurivivalService.MessageHandler -= WavesCloudSurivivalService_MessageHandler;
+        base.Dispose();
     }
 
     [RelayCommand]

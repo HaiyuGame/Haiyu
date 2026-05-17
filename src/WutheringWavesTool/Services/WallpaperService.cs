@@ -134,11 +134,11 @@ public class WallpaperService : IWallpaperService
 
     public void PauseVideo()
     {
-        this.Media.Play();
+        this.Media.Pause();
     }
 
     public void RestartVideo()
     {
-        this.Media.Pause();
+        this.Media.Play();
     }
 }

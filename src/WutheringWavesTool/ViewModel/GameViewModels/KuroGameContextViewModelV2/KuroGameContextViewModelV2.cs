@@ -647,6 +647,10 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                 this.VersionLogo = new BitmapImage(new(background.Slogan));
                 var coreConfig = await GameContext.ReadContextConfigAsync(this.CTS.Token);
                 this.DownloadSpeedValue = coreConfig.LimitSpeed / 1000 / 1000;
+                if (status.Gameing)
+                {
+                    WallpaperService.PauseVideo();
+                }
                 await ShowCardAsync(showCard);
                 await LoadAfter();
             }
