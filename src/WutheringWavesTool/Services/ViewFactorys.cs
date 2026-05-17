@@ -65,7 +65,7 @@ public class ViewFactorys : IViewFactorys
     }
 
 
-    public Window ShowAnalysisRecord(LoginData data)
+    public Window ShowAnalysisRecord(CloudGameLoginData data)
 
     {
         var win = ShowWindowBase<AnalysisRecordPage>(data);

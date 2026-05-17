@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System.Runtime.CompilerServices;
 using Waves.Api.Models.CloudGame;
 using Waves.Core.Helpers;
 
@@ -7,11 +8,22 @@ namespace Waves.Core.Models.CloudGame;
 /// <summary>
 /// 云游戏登录快照
 /// </summary>
-public partial class CloudGameLoginSession
+public partial class CloudGameLoginSession:ObservableObject
 {
-    public LoginData OrginData { get; set; }
+    [ObservableProperty]
+    public partial CloudGameLoginData OrginData { get; set; }
 
-    
+    [ObservableProperty]
+    public partial PhoneTokenData PhoneToken { get; internal set; }
+
+    [ObservableProperty]
+    public partial AccessData AccessData { get; internal set; }
+
+    [ObservableProperty]
+    public partial EndLoginReponseData EndLoginData { get; internal set; }
+    public string TraceId { get; internal set; }
+
+    public DateTime SaveTime { get; internal set; }
 }
 
 /// <summary>
@@ -33,5 +45,10 @@ public partial class CloudGameLoginSnapshot
     public static CloudGameLoginSnapshot Create()
     {
         return new(HardwareIdGenerator.GenerateDeviceId());
+    }
+
+    public static CloudGameLoginSnapshot Create(CloudGameLoginData? data)
+    {
+        return new CloudGameLoginSnapshot(data?.LoginDid ?? HardwareIdGenerator.GenerateDeviceId());
     }
 }

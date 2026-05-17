@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Waves.Core.Services.CloudGameServices;
 
 namespace Waves.Core.Contracts.CloudGame;
 
@@ -9,9 +10,8 @@ namespace Waves.Core.Contracts.CloudGame;
 /// </summary>
 public interface IKuroCloudGameContext
 {
-    /// <summary>
-    /// 云鸣潮接口
-    /// </summary>
-    IWavesCloudGameService CloudGameService { get; }
 
+    WavesCloudSurvivalService WavesCloudSurivivalService { get; }
+
+    public Task InitAsync();
 }

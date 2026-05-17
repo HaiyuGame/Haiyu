@@ -67,6 +67,7 @@ public static class InstanceBuilderExtensions
                             return service;
                         }
                     )
+                    .AddSingleton<WavesCloudSurvivalService>()
                     .AddSingleton<AppSettings>()
                 #region XBox
                     .AddSingleton<XBoxConfig>()

@@ -33,7 +33,7 @@ public partial class AnalysisRecordViewModel : ViewModelBase
     [ObservableProperty]
     public partial bool IsLoading { get; set;  }
     public ICloudGameService CloudGameService { get; }
-    public LoginData LoginData { get; internal set; }
+    public CloudGameLoginData LoginData { get; internal set; }
 
     [RelayCommand]
     async Task Loaded()

@@ -16,17 +16,3 @@ public class AccessData
     public int ExpiresIn { get; set; }
 }
 
-public class AccessToken
-{
-    [JsonPropertyName("data")]
-    public AccessData Data { get; set; }
-
-    [JsonPropertyName("code")]
-    public int Code { get; set; }
-
-    [JsonPropertyName("msg")]
-    public string Msg { get; set; }
-
-    [JsonPropertyName("timestamp")]
-    public long Timestamp { get; set; }
-}

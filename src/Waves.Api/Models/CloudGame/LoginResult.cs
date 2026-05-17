@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Waves.Api.Models.CloudGame;
 
-public class LoginData
+public class CloudGameLoginData
 {
     [JsonPropertyName("username")]
     public string Username { get; set; }
@@ -61,17 +61,3 @@ public class LoginData
     public string? LoginDid { get; set; }
 }
 
-public class LoginResult
-{
-    [JsonPropertyName("data")]
-    public LoginData Data { get; set; }
-
-    [JsonPropertyName("code")]
-    public int Code { get; set; }
-
-    [JsonPropertyName("msg")]
-    public string Msg { get; set; }
-
-    [JsonPropertyName("timestamp")]
-    public long Timestamp { get; set; }
-}

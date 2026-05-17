@@ -22,15 +22,4 @@ namespace Waves.Api.Models.CloudGame
         public HsstsToken HsstsToken { get; set; }
     }
 
-    public class EndLoginReponse
-    {
-        [JsonPropertyName("code")]
-        public int Code { get; set; }
-
-        [JsonPropertyName("msg")]
-        public string Msg { get; set; }
-
-        [JsonPropertyName("data")]
-        public EndLoginReponseData Data { get; set; }
-    }
 }

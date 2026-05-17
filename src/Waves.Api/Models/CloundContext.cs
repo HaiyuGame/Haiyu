@@ -3,12 +3,15 @@ using Waves.Api.Models.CloudGame;
 
 namespace Waves.Api.Models;
 
-[JsonSerializable(typeof(LoginResult))]
+[JsonSerializable(typeof(CloudGameLoginData))]
+[JsonSerializable(typeof(CloudApiResponse<CloudGameLoginData>))]
 [JsonSerializable(typeof(CloudSendSMS))]
-[JsonSerializable(typeof(AccessToken))]
 [JsonSerializable(typeof(AccessData))]
+[JsonSerializable(typeof(CloudApiResponse<AccessData>))]
 [JsonSerializable(typeof(PhoneTokenData))]
-[JsonSerializable(typeof(PhoneTokenModel))]
+[JsonSerializable(typeof(CloudApiResponse<PhoneTokenData>))]
+[JsonSerializable(typeof(CloudApiResponse<EndLoginReponseData>))]
+[JsonSerializable(typeof(CloudApiResponse<bool>))]
 [JsonSerializable(typeof(EndLoginData))]
 [JsonSerializable(typeof(EndLoginRequest))]
 [JsonSerializable(typeof(ExperienceCardInfo))]
@@ -19,7 +22,6 @@ namespace Waves.Api.Models;
 [JsonSerializable(typeof(TimeCardInfo))]
 [JsonSerializable(typeof(WalletData))]
 [JsonSerializable(typeof(EndLoginReponseData))]
-[JsonSerializable(typeof(EndLoginReponse))]
 [JsonSerializable(typeof(RecordModel))]
 [JsonSerializable(typeof(RecordData))]
 [JsonSerializable(typeof(RecardQuery))]

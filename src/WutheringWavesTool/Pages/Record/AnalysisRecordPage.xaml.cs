@@ -21,7 +21,7 @@ public sealed partial class AnalysisRecordPage : Page, IWindowPage
 
     public void SetData(object value)
     {
-        if (value is LoginData data)
+        if (value is CloudGameLoginData data)
         {
 
             this.ViewModel.LoginData = data;
@@ -33,7 +33,7 @@ public sealed partial class AnalysisRecordPage : Page, IWindowPage
         this.titlebar.Window = window;
     }
 
-    internal void SetData(LoginData data)
+    internal void SetData(CloudGameLoginData data)
     {
     }
 }

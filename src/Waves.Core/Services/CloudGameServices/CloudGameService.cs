@@ -47,7 +47,7 @@ public class CloudGameService : ICloudGameService
     /// <summary>
     /// 设置登录缓存
     /// </summary>
-    public void SetLoginData(LoginData data)
+    public void SetLoginData(CloudGameLoginData data)
     {
         Session.OrginData = data;
     }
@@ -102,104 +102,6 @@ public class CloudGameService : ICloudGameService
         var result = await SdkClient.SendAsync(request, token);
         var str = await result.Content.ReadAsStringAsync();
         return JsonSerializer.Deserialize<CloudSendSMS>(str, CloundContext.Default.CloudSendSMS);
-    }
-
-    public async Task<LoginResult> LoginAsync(
-        string phone,
-        string code,
-        CancellationToken token = default
-    )
-    {
-        var id = HardwareIdGenerator.GenerateDeviceId();
-        var query = GetClientData();
-        query.Add("phone", phone);
-        query.Add("code", code);
-        query.Add("deviceNum", HardwareIdGenerator.GenerateDeviceId());
-        var request = BuildRequestMessage("/sdkcom/v2/login/phoneCode.lg", HttpMethod.Post, query);
-        var result = await SdkClient.SendAsync(request, token);
-        var json = await result.Content.ReadAsStringAsync();
-        var model = JsonSerializer.Deserialize<LoginResult>(
-            json,
-            CloundContext.Default.LoginResult
-        );
-        if (model == null || model.Code != 0)
-        {
-            return null;
-        }
-        model.Data.LoginDid = id;
-        return model;
-    }
-
-    /// <summary>
-    /// 创建新会话确认登陆是否有效
-    /// </summary>
-    /// <param name="phoneToken"></param>
-    /// <param name="token"></param>
-    /// <returns></returns>
-    public async Task<PhoneTokenModel> LoginPhoneTokenAsync(
-        string phoneToken,
-        string phone,
-        CancellationToken token = default
-    )
-    {
-        var query = GetClientData(Session);
-        query.Add("phone", phone);
-        query.Add("token", phoneToken);
-        var request = BuildRequestMessage("/sdkcom/v2/login/phoneToken.lg", HttpMethod.Post, query);
-        var result = await SdkClient.SendAsync(request, token);
-        var model = await result.Content.ReadAsStringAsync();
-        return JsonSerializer.Deserialize(model, CloundContext.Default.PhoneTokenModel);
-    }
-
-    public async Task<AccessToken> GetAccessTokenAsync(
-        string code,
-        CancellationToken token = default
-    )
-    {
-        var query = GetClientData(Session);
-        query.Add("code", code);
-        query.Add("grant_type", "authorization_code");
-        var request = BuildRequestMessage(
-            "https://sdkapi.kurogame.com/sdkcom/v2/auth/getToken.lg",
-            HttpMethod.Post,
-            query
-        );
-        var result = await SdkClient.SendAsync(request, token);
-        var model = await result.Content.ReadAsStringAsync();
-        return JsonSerializer.Deserialize(model, CloundContext.Default.AccessToken);
-    }
-
-    public async Task<EndLoginReponse> GetTokenAsync(PhoneTokenData data, string token)
-    {
-        try
-        {
-            var endLogin = new EndLoginRequest();
-            endLogin.Token = token;
-            endLogin.LoginType = 1;
-            endLogin.UserId = data.Id.ToString();
-            endLogin.UserName = data.Username.ToString();
-            endLogin.Platform = Platform;
-            endLogin.AppVersion = AppVersion;
-            endLogin.DeviceId = HardwareIdGenerator.GenerateDeviceId();
-            HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Post, "/Login/Login");
-            var content = JsonSerializer.Serialize(endLogin, CloundContext.Default.EndLoginRequest);
-            message.Content = new StringContent(
-                content,
-                new MediaTypeHeaderValue("application/json", "UTF-8")
-            );
-            message.Headers.Add(
-                "User-Agent",
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36 Edg/139.0.0.0"
-            );
-            var result = await CloudClient.SendAsync(message);
-            var str = await result.Content.ReadAsStringAsync();
-            var model = JsonSerializer.Deserialize(str, CloundContext.Default.EndLoginReponse);
-            return model;
-        }
-        catch (Exception)
-        {
-            throw;
-        }
     }
 
     /// <summary>
@@ -271,39 +173,40 @@ public class CloudGameService : ICloudGameService
     }
 
     public async Task<(bool, string)> OpenUserAsync(
-        LoginData loginData,
+        CloudGameLoginData loginData,
         CancellationToken token = default
     )
     {
-        try
-        {
-            this.SetLoginData(loginData);
-            var accessToken = await LoginPhoneTokenAsync(
-                loginData.PhoneToken,
-                loginData.Phone,
-                token
-            );
-            if (accessToken.Code != 0)
-            {
-                return (false, "登陆失效");
-            }
-            var getToken = await GetAccessTokenAsync(accessToken.Data.Code);
+        //try
+        //{
+        //    this.SetLoginData(loginData);
+        //    var accessToken = await LoginPhoneTokenAsync(
+        //        loginData.PhoneToken,
+        //        loginData.Phone,
+        //        token
+        //    );
+        //    if (accessToken.Code != 0)
+        //    {
+        //        return (false, "登陆失效");
+        //    }
+        //    var getToken = await GetAccessTokenAsync(accessToken.Data.Code);
 
-            var endLogin = await GetTokenAsync(accessToken.Data, getToken.Data.AccessToken);
-            if (endLogin.Code == 305)
-            {
-                return (false, endLogin.Msg);
-            }
-            this.RecordToken = endLogin.Data.Token;
-            return (true, "成功");
-        }
-        catch (Exception ex)
-        {
-            return (false, ex.Message);
-        }
+        //    var endLogin = await GetTokenAsync(accessToken.Data, getToken.Data.AccessToken);
+        //    if (endLogin.Code == 305)
+        //    {
+        //        return (false, endLogin.Msg);
+        //    }
+        //    this.RecordToken = endLogin.Data.Token;
+        //    return (true, "成功");
+        //}
+        //catch (Exception ex)
+        //{
+        //    return (false, ex.Message);
+        //}
+        return (true, "");
     }
 
-    public async Task GetUserInfoAsync(LoginData data)
+    public async Task GetUserInfoAsync(CloudGameLoginData data)
     {
         var url =
             $"/UserRegion/GetUserInfo?loginType={data.LoginType}&userId={data.Id}&token={data.AutoToken}&userName={data.Username}";

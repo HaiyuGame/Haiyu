@@ -62,7 +62,7 @@ public partial class CloudGameViewModel : ViewModelBase
         new Dictionary<int, IList<RecordCardItemWrapper>>();
 
     [ObservableProperty]
-    public partial ObservableCollection<LoginData> Users { get; set; }
+    public partial ObservableCollection<CloudGameLoginData> Users { get; set; }
 
     [ObservableProperty]
     public partial ObservableCollection<GameRecordNavigationItem> RecordNavigationItems { get; set; } =
@@ -72,7 +72,7 @@ public partial class CloudGameViewModel : ViewModelBase
     public partial GameRecordNavigationItem SelectRecordType { get; set; }
 
     [ObservableProperty]
-    public partial LoginData SelectedUser { get; set; }
+    public partial CloudGameLoginData SelectedUser { get; set; }
 
     [ObservableProperty]
     public partial bool IsLoading { get; set; }
@@ -136,7 +136,7 @@ public partial class CloudGameViewModel : ViewModelBase
         ViewFactorys.ShowAnalysisRecord(this.SelectedUser).AppWindow.Show();
     }
 
-    async partial void OnSelectedUserChanged(LoginData value)
+    async partial void OnSelectedUserChanged(CloudGameLoginData value)
     {
         if (value == null)
             return;

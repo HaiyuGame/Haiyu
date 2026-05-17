@@ -2,6 +2,7 @@
 using Haiyu.Plugin.Contracts;
 using Haiyu.Services.DialogServices;
 using Microsoft.UI.Dispatching;
+using Waves.Core.Contracts.CloudGame;
 using Waves.Core.GameContext.ContextsV2;
 using Waves.Core.GameContext.ContextsV2.Punish;
 using Waves.Core.GameContext.ContextsV2.Waves;
@@ -57,14 +58,13 @@ public class AppContext<T> : IAppContext<T>
                 .InitAsync();
             await Instance.Host.Services!.GetRequiredKeyedService<IGameContextV2>(nameof(PunishTwGameContextV2))
                 .InitAsync();
-            #region 新核心测试
             await Instance.Host.Services!.GetRequiredKeyedService<IGameContextV2>(nameof(WavesMainGameContextV2))
-                .InitAsync();
+                 .InitAsync();
             await Instance.Host.Services!.GetRequiredKeyedService<IGameContextV2>(nameof(WavesBiliBiliGameContextV2))
                 .InitAsync();
             await Instance.Host.Services!.GetRequiredKeyedService<IGameContextV2>(nameof(WavesGlobalGameContextV2))
                 .InitAsync();
-            #endregion
+            await Instance.Host.Services!.GetRequiredService<IKuroCloudGameContext>().InitAsync();
             this.App = app;
             var win = new MainWindow();
             #region Mirror

@@ -326,6 +326,7 @@
 		<Folder Include="Assets\GameAssets\Punish\" />
 		<Folder Include="Assets\Languages\" />
 		<Folder Include="Common\Plugins\" />
+		<Folder Include="Services\CloudGameServices\" />
 	</ItemGroup>
 	<PropertyGroup Label="Globals" />
 	<!--

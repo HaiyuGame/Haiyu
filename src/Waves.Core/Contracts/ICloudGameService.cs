@@ -18,25 +18,8 @@ public interface ICloudGameService
         CancellationToken token = default
     );
 
-    public Task<LoginResult> LoginAsync(
-        string phone,
-        string code,
-        CancellationToken token = default
-    );
+    public void SetLoginData(CloudGameLoginData data);
 
-    public void SetLoginData(LoginData data);
-
-    Task<EndLoginReponse> GetTokenAsync(PhoneTokenData data, string token);
-
-
-    Task<AccessToken> GetAccessTokenAsync(string code, CancellationToken token = default);
-
-
-    Task<PhoneTokenModel> LoginPhoneTokenAsync(
-        string phoneToken,
-        string phone,
-        CancellationToken token = default
-    );
     Task<RecordModel> GetRecordAsync(CancellationToken token = default);
     Task<PlayerReponse> GetGameRecordResource(string recordId, string userId, int poolType, CancellationToken token = default);
     /// <summary>
@@ -45,5 +28,5 @@ public interface ICloudGameService
     /// <param name="loginData"></param>
     /// <param name="token"></param>
     /// <returns></returns>
-    Task<(bool, string)> OpenUserAsync(LoginData loginData, CancellationToken token = default);
+    Task<(bool, string)> OpenUserAsync(CloudGameLoginData loginData, CancellationToken token = default);
 }

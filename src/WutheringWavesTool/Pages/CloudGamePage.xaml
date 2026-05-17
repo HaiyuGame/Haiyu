@@ -70,27 +70,7 @@
                     CornerRadius="10 3 10 3"
                     IsEnabled="{x:Bind ViewModel.IsLoginUser, Mode=OneWay}"
                     ItemsSource="{x:Bind ViewModel.Users, Mode=OneWay}"
-                    SelectedItem="{x:Bind ViewModel.SelectedUser, Mode=TwoWay}">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate x:DataType="m3:LoginData">
-                            <Grid VerticalAlignment="Center">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="auto" />
-                                    <ColumnDefinition />
-                                </Grid.ColumnDefinitions>
-                                <ui:ImageEx
-                                    Width="20"
-                                    Height="20"
-                                    Source="https://mc.kurogames.com/cloud/assets/avatar-cb06ab22.png" />
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Margin="5,-3,0,0"
-                                    VerticalAlignment="Center"
-                                    Text="{x:Bind Phone}" />
-                            </Grid>
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
+                    SelectedItem="{x:Bind ViewModel.SelectedUser, Mode=TwoWay}" />
                 <TextBlock
                     Margin="15,0,0,0"
                     VerticalAlignment="Center"

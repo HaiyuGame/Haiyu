@@ -1,6 +1,7 @@
 ﻿using Haiyu.Services.DialogServices;
 using Waves.Api.Models.CloudGame;
 using Waves.Core.Contracts.CloudGame;
+using Waves.Core.Models.CloudGame;
 
 namespace Haiyu.ViewModel.GameViewModels;
 
@@ -11,7 +12,7 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
     public IWallpaperService WallpaperService { get; }
 
     [ObservableProperty]
-    public partial ObservableCollection<LoginData> Logins { get; set; }
+    public partial ObservableCollection<CloudGameLoginSession> Logins { get; set; }
 
     public WavesCloudGameViewModel(
         IWallpaperService wallpaperService,
@@ -32,14 +33,16 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
 
     private async void CloudLoginMethod(object recipient, CloudLoginMessager message)
     {
+        await this.KuroCloudGameContext.WavesCloudSurivivalService.RefreshTaskAsync();
+        await Task.Delay(2000);
         await this.RefreshUserAsync();
+
     }
 
     async Task RefreshUserAsync()
     {
-        var users = await KuroCloudGameContext.CloudGameService.ConfigManager.GetUsersAsync(
-            this.CTS.Token
-        );
+        var users =
+             KuroCloudGameContext.WavesCloudSurivivalService.Cache.ToList();
         this.Logins = [.. users];
     }
 
@@ -50,7 +53,7 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
             Waves.Core.Models.Enums.WallpaperShowType.Image,
             "https://aki-gm-resources-back.aki-game.com/pv/cg/login.webp"
         );
-        await KuroCloudGameContext.CheckLocalUserAsync(this.CTS.Token);
+        await RefreshUserAsync();
     }
 
     [RelayCommand]

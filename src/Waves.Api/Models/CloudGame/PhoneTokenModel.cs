@@ -53,17 +53,3 @@ public class PhoneTokenData
     public string PhoneToken { get; set; }
 }
 
-public class PhoneTokenModel
-{
-    [JsonPropertyName("data")]
-    public PhoneTokenData Data { get; set; }
-
-    [JsonPropertyName("code")]
-    public int Code { get; set; }
-
-    [JsonPropertyName("msg")]
-    public string Msg { get; set; }
-
-    [JsonPropertyName("timestamp")]
-    public long Timestamp { get; set; }
-}

@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:api="using:Waves.Api.Models.CloudGame"
+    xmlns:cloud="using:Waves.Core.Models.CloudGame"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:local="using:Haiyu.Pages.GamePages"
@@ -43,8 +44,8 @@
                     BorderBrush="Transparent"
                     ItemsSource="{x:Bind ViewModel.Logins, Mode=OneWay}">
                     <ComboBox.ItemTemplate>
-                        <DataTemplate x:DataType="api:LoginData">
-                            <TextBlock Text="{x:Bind Username}" />
+                        <DataTemplate x:DataType="cloud:CloudGameLoginSession">
+                            <TextBlock Text="{x:Bind OrginData.Username}" />
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>

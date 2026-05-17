@@ -14,20 +14,20 @@ public sealed partial class CloudConfigManager
         this.Path = savePath;
     }
 
-    public Dictionary<string, LoginData> cacheData;
+    public Dictionary<string, CloudGameLoginData> cacheData;
 
 
 
-    public async Task<ObservableCollection<LoginData>> GetUsersAsync(CancellationToken token = default)
+    public async Task<ObservableCollection<CloudGameLoginData>> GetUsersAsync(CancellationToken token = default)
     {
-        ObservableCollection<LoginData> logins = new ObservableCollection<LoginData>();
+        ObservableCollection<CloudGameLoginData> logins = new ObservableCollection<CloudGameLoginData>();
         foreach (var item in Directory.GetFiles(this.Path, "*.json"))
         {
             try
             {
                 var result = JsonSerializer.Deserialize(
                     await File.ReadAllTextAsync(item, token),
-                    CloundContext.Default.LoginData
+                    CloundContext.Default.CloudGameLoginData
                 );
                 logins.Add(result);
             }
@@ -43,9 +43,9 @@ public sealed partial class CloudConfigManager
         return logins;
     }
 
-    public async Task<LoginData?> GetUserAsync(string userName,CancellationToken token = default)
+    public async Task<CloudGameLoginData?> GetUserAsync(string userName,CancellationToken token = default)
     {
-        List<LoginData> items = null;
+        List<CloudGameLoginData> items = null;
         if(cacheData == null || cacheData.Count == 0)
             items = (await GetUsersAsync()).ToList();
         else
@@ -53,7 +53,7 @@ public sealed partial class CloudConfigManager
         return items.Where(x => x.Username == userName).FirstOrDefault();
     }
 
-    public async Task<bool> SaveUserAsync(LoginData loginResult)
+    public async Task<bool> SaveUserAsync(CloudGameLoginData loginResult)
     {
         try
         {
@@ -61,7 +61,7 @@ public sealed partial class CloudConfigManager
             {
                 var result = JsonSerializer.Deserialize(
                     await File.ReadAllTextAsync(item),
-                    CloundContext.Default.LoginData
+                    CloundContext.Default.CloudGameLoginData
                 );
                 if (result.Username == loginResult.Username)
                 {
@@ -70,7 +70,7 @@ public sealed partial class CloudConfigManager
             }
             await File.WriteAllTextAsync(
                 Path + $"\\{loginResult.Username}.json",
-                JsonSerializer.Serialize(loginResult, CloundContext.Default.LoginData)
+                JsonSerializer.Serialize(loginResult, CloundContext.Default.CloudGameLoginData)
             );
             return true;
         }
