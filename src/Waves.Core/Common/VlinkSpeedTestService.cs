@@ -207,8 +207,6 @@ public class CloudNetworkSpeedTestService : IDisposable
 
                 var sendTimestamp = Stopwatch.GetTimestamp();
 
-                // 发送: {"type":"ping","index":i,"ws_index":0}
-                // 对应JS I(t,e) 函数
                 var pingMsg = $$"""{"type":"ping","index":{{i}},"ws_index":0}""";
                 var sendBytes = Encoding.UTF8.GetBytes(pingMsg);
                 await ws.SendAsync(
@@ -241,7 +239,6 @@ public class CloudNetworkSpeedTestService : IDisposable
                 }
             }
 
-            // 对应JS C(t)函数: 计算平均延迟
             if (rtts.Count == 0)
                 return null;
 
