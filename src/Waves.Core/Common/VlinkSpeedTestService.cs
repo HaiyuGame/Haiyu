@@ -49,7 +49,6 @@ public class CloudNetworkSpeedTestService : IDisposable
 
         try
         {
-            // Step 1: 获取节点列表（对应JS z() 函数）
             var pingResponse = await GetNodeListAsync(DefaultBaseUrl, ct);
             if (pingResponse == null)
             {
@@ -62,15 +61,12 @@ public class CloudNetworkSpeedTestService : IDisposable
                 return [];
             }
 
-            // Step 2: 应用服务器返回的配置（对应JS setConstantsBySpeedConf）
             ApplyConfig(pingResponse);
             result.Origin = pingResponse;
 
-            // Step 3: 对每个节点进行WebSocket延迟测试（对应JS I() + C() 函数）
             var nodeDelays = await PingAllNodesAsync(pingResponse.Lines, ct);
             result.NodeDelays = nodeDelays;
 
-            // Step 4: 按延迟升序排序，选最优节点
             if (nodeDelays.Count > 0)
             {
                 var best = nodeDelays.OrderBy(n => n.Delay).First();
@@ -119,7 +115,7 @@ public class CloudNetworkSpeedTestService : IDisposable
     private void ApplyConfig(CloudNetworkOrgin config)
     {
         if (TryParseInt(config.NodeRefreshTime, out var refresh) && refresh > 0)
-            _nodeRefreshTimeMs = refresh * 60 * 1000; // 分钟 → 毫秒
+            _nodeRefreshTimeMs = refresh * 60 * 1000;
 
         if (TryParseInt(config.PingNum, out var pingNum) && pingNum > 0)
             _pingCount = pingNum;
