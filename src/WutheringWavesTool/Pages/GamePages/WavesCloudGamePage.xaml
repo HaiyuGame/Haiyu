@@ -168,12 +168,13 @@
                                     Grid.RowSpan="2"
                                     FontFamily="Segoe Fluent Icons"
                                     FontSize="22"
+                                    Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                                     Glyph="&#xE8C7;" />
                                 <TextBlock
                                     Grid.Column="1"
                                     Margin="10,0,0,0"
                                     FontFamily="{ThemeResource DefaultFont}"
-                                    FontSize="20"
+                                    FontSize="16"
                                     FontWeight="Bold"
                                     Text="{x:Bind ViewModel.WallData.PayString, Mode=OneWay}" />
                                 <TextBlock
@@ -226,6 +227,7 @@
                                     Grid.RowSpan="2"
                                     FontFamily="Segoe Fluent Icons"
                                     FontSize="22"
+                                    Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                                     Glyph="&#xF6FA;" />
 
                                 <TextBlock

@@ -10,6 +10,7 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
 {
     public IKuroCloudGameContext KuroCloudGameContext { get; }
     public IDialogManager DialogManager { get; }
+    public IAppContext<App> App { get; }
     public IWallpaperService WallpaperService { get; }
 
     [ObservableProperty]
@@ -30,12 +31,14 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
     public WavesCloudGameViewModel(
         IWallpaperService wallpaperService,
         IKuroCloudGameContext kuroCloudGameContext,
-        [FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager
+        [FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager,
+        IAppContext<App> app
     )
     {
         WallpaperService = wallpaperService;
         KuroCloudGameContext = kuroCloudGameContext;
         DialogManager = dialogManager;
+        App = app;
         KuroCloudGameContext.WavesCloudSurivivalService.MessageHandler +=
             WavesCloudSurivivalService_MessageHandler;
         RegisterMessager();
@@ -55,7 +58,15 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
         wrapper.PlayerCard = DateTimeOffset.FromUnixTimeSeconds(
             result.Data.TimeCardInfo.ExpireTimeSeconds
         );
+
         wrapper.PayTimer = TimeSpan.FromSeconds(result.Data.PayTimeInfo.LeftSeconds);
+        if(result.Data.ExperienceCardInfo!= null)
+            wrapper.ExperienceTime = new TimeSpan(
+                result.Data.ExperienceCardInfo.Day,
+                result.Data.ExperienceCardInfo.Hour,
+                result.Data.ExperienceCardInfo.Minute,
+                result.Data.ExperienceCardInfo.Second
+            );
         wrapper.Coin = result.Data.Coin;
         this.WallData = wrapper;
     }
@@ -86,11 +97,14 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
     async Task RefreshUserAsync()
     {
         var users = KuroCloudGameContext.WavesCloudSurivivalService.Cache.ToList();
-        this.Logins = new(users);
-        if (Logins.Count > 0)
+        await App.TryInvokeAsync(async () =>
         {
-            SelectLogin = Logins[0];
-        }
+            this.Logins = new(users);
+            if (Logins.Count > 0)
+            {
+                SelectLogin = Logins[0];
+            }
+        });
     }
 
     public override void Dispose()
@@ -129,7 +143,6 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
         await this.RefreshCloudNodesAsync();
         IsRefreshing = false;
     }
-
 
     private async Task RefreshCloudNodesAsync()
     {

@@ -27,6 +27,17 @@ public partial class WallDataWrapper:ObservableObject
             field = value;
         }
     }
+    public TimeSpan ExperienceTime
+    {
+        get=> field;
+        set
+        {
+            if(string.IsNullOrWhiteSpace(this.PlayerCardString) || this.PlayerCardString == "1970-01-01")
+                this.PayString = $"{value.Days}:{value.Hours}:{value.Minutes}";
+            field = value;
+        }
+    }
+
     public DateTimeOffset PlayerCard
     {
         get => field;
