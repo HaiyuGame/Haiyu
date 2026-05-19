@@ -55,10 +55,6 @@ namespace Waves.Core.Models.CloudGame
         /// </summary>
         public IReadOnlyList<string> HeaderHostPatterns { get; init; } = new List<string>();
 
-        /// <summary>
-        /// 页面初始化时执行的预加载脚本。
-        /// </summary>
-        public string PreloadScript { get; init; } = string.Empty;
 
         /// <summary>
         /// 本次启动使用的串流画质配置。

@@ -25,7 +25,7 @@ public static class CloudGameDataFactory
             { "username", login.OrginData.Username },
             { "cuid", login.OrginData.Cuid },
             { "useMcCloudGameDid", login.OrginData.LoginDid },
-            { "refreshToken",login.PhoneToken.PhoneToken },
+            { "refreshToken", login.PhoneToken.PhoneToken },
             { "welink_cloud_game_uuid", Guid.NewGuid().ToString().ToUpperInvariant() },
             {
                 "sdkLoginInfo",
@@ -129,14 +129,38 @@ public static class CloudGameDataFactory
     {
         return new Dictionary<string, string>()
         {
-            {"token",login.AccessData.AccessToken },
-            {"autoToken",login.OrginData.AutoToken },
-            {"phoneToken",login.OrginData.PhoneToken },
-            {"username",login.OrginData.Username },
-            {"sdkuserid",login.OrginData.Sdkuserid },
-            {"cuid",login.OrginData.Cuid },
-            {"code",login.OrginData.Code },
+            { "token", login.AccessData.AccessToken },
+            { "autoToken", login.OrginData.AutoToken },
+            { "phoneToken", login.OrginData.PhoneToken },
+            { "username", login.OrginData.Username },
+            { "sdkuserid", login.OrginData.Sdkuserid },
+            { "cuid", login.OrginData.Cuid },
+            { "code", login.OrginData.Code },
+        };
+    }
 
+    public static SessionLaunchOptions BuildLaunchOption(CloudGameLoginSession session)
+    {
+        return new SessionLaunchOptions
+        {
+            GameUrl = "https://mc.kurogames.com/cloud/index.html",
+            BootstrapUrl = "https://mc.kurogames.com/cloud/index.html",
+            AccessToken = session.AccessData.AccessToken,
+            RefreshToken = session.PhoneToken.PhoneToken,
+            CookieDomain = ".kurogames.com",
+            AdditionalHeaders = new Dictionary<string, string>(),
+            Cookies = BuildCookieItems(session),
+            StorageItems = BuildWebStorageItems(session),
+            HeaderHostPatterns =
+            [
+                "mc.kurogames.com",
+                "cloud-game-sh.aki-game.com",
+                "usercenter.kurogames.com",
+                "*.aki-game.com",
+                "*.kurogames.com",
+            ],
+            Quality = new StreamQualityOptions(18000, 8000, 60, 1920, 1080, 21, "0", true, "clear")
+            
         };
     }
 }
