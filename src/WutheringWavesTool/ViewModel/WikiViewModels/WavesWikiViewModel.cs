@@ -31,6 +31,14 @@ public partial class WavesWikiViewModel : WikiViewModelBase
             CenterOnScreen = true,
         };
 
+    private static readonly WindowsOption CommunityMapOption = new()
+    {
+        Width = 1000,
+        Height = 500,
+        IsResizable = false,
+        CenterOnScreen = false
+    };
+
     public WavesWikiViewModel(IAppContext<App> appContext)
     {
         this.Messenger.Register<SelectUserMessanger>(this, LoginMessangerMethod);
@@ -150,6 +158,18 @@ public partial class WavesWikiViewModel : WikiViewModelBase
     }
 
     [RelayCommand]
+    void OpenCalendar()
+    {
+        OpenKuroCommunityWindow(CreateCalendarSessionContext());
+    }
+
+    [RelayCommand]
+    void OpenMap()
+    {
+        OpenKuroCommunityWindow(CreateMapSessionContext());
+    }
+
+    [RelayCommand]
     void OpenGameSign()
     {
         var win = Instance.Host.Services.GetRequiredService<IViewFactorys>()!.ShowSignWindow(this.SelectGamer);
@@ -228,37 +248,25 @@ public partial class WavesWikiViewModel : WikiViewModelBase
 
     private WebSessionContext? CreateDataCenterSessionContext()
     {
-        var snapshot = CreateLoginSnapshot();
-        if (snapshot is null || SelectGamer is null)
-        {
-            return null;
-        }
-
-        return WebSessionContext.CreateDataCenter(
-            snapshot,
-            SelectGamer.ServerId,
-            SelectGamer.RoleId,
-            SelectGamer.ServerName,
-            SelectGamer.RoleName);
+        return CreateCommunitySessionContext(WebSessionContext.CreateDataCenter);
     }
 
     private WebSessionContext? CreateGrowthCalculatorSessionContext()
     {
-        var snapshot = CreateLoginSnapshot();
-        if (snapshot is null || SelectGamer is null)
-        {
-            return null;
-        }
-
-        return WebSessionContext.CreateGrowthCalculator(
-            snapshot,
-            SelectGamer.ServerId,
-            SelectGamer.RoleId,
-            SelectGamer.ServerName,
-            SelectGamer.RoleName);
+        return CreateCommunitySessionContext(WebSessionContext.CreateGrowthCalculator);
     }
 
     private WebSessionContext? CreateResourceBriefingSessionContext()
+    {
+        return CreateCommunitySessionContext(WebSessionContext.CreateResourceBriefing);
+    }
+
+    private WebSessionContext? CreateCalendarSessionContext()
+    {
+        return CreateCommunitySessionContext(WebSessionContext.CreateCalendar);
+    }
+
+    private WebSessionContext? CreateMapSessionContext()
     {
         var snapshot = CreateLoginSnapshot();
         if (snapshot is null || SelectGamer is null)
@@ -266,7 +274,24 @@ public partial class WavesWikiViewModel : WikiViewModelBase
             return null;
         }
 
-        return WebSessionContext.CreateResourceBriefing(
+        return WebSessionContext.CreateMap(
+            snapshot,
+            SelectGamer.ServerId,
+            SelectGamer.RoleId,
+            SelectGamer.ServerName,
+            SelectGamer.RoleName);
+    }
+
+    private WebSessionContext? CreateCommunitySessionContext(
+        Func<KuroLoginSnapshot, string, string, string?, string?, WebSessionContext> factory)
+    {
+        var snapshot = CreateLoginSnapshot();
+        if (snapshot is null || SelectGamer is null)
+        {
+            return null;
+        }
+
+        return factory(
             snapshot,
             SelectGamer.ServerId,
             SelectGamer.RoleId,
@@ -288,6 +313,10 @@ public partial class WavesWikiViewModel : WikiViewModelBase
             Did = session.TokenDid ?? string.Empty,
             UserId = session.TokenId ?? string.Empty,
             AppVersion = App.AppVersion,
+            ChannelId = "8",
+            EnterSource = "12",
+            UserAgentName = "KuroGameBox",
+            Os = "Android",
         };
     }
 }

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <Page
     x:Class="Haiyu.Pages.GamePages.WavesCloudGamePage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -357,10 +357,13 @@
             </SystemBackdropElement>
             <StackPanel Orientation="Horizontal">
                 <Button Command="{x:Bind ViewModel.ShowWavesAnalysisCommand}" Style="{ThemeResource TransparentButtonStyle}">
-                    <FontIcon
-                        FontFamily="Segoe Fluent Icons"
-                        FontSize="15"
-                        Glyph="&#xF133;" />
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <FontIcon
+                            FontFamily="Segoe Fluent Icons"
+                            FontSize="15"
+                            Glyph="&#xF133;" />
+                        <TextBlock Text="抽卡分析" />
+                    </StackPanel>
                 </Button>
             </StackPanel>
         </Grid>

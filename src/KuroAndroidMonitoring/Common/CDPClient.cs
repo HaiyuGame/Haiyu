@@ -44,6 +44,8 @@ public sealed class CDPClient : IAsyncDisposable
 
     public event EventHandler<CdpConnectionStateChangedEventArgs>? ConnectionStateChanged;
 
+    public event EventHandler<Exception>? EventHandlerException;
+
     public async Task ConnectAsync(CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
@@ -315,7 +317,19 @@ public sealed class CDPClient : IAsyncDisposable
 
         foreach (IEventSink subscriber in subscribers)
         {
-            _ = Task.Run(() => subscriber.TryHandleAsync(payload), _connectionCancellationSource.Token);
+            _ = Task.Run(
+                async () =>
+                {
+                    try
+                    {
+                        await subscriber.TryHandleAsync(payload);
+                    }
+                    catch (Exception ex)
+                    {
+                        EventHandlerException?.Invoke(this, ex);
+                    }
+                },
+                _connectionCancellationSource.Token);
         }
     }
 

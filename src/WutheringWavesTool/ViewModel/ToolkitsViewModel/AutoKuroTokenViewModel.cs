@@ -16,6 +16,8 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
     private readonly AdbClient _adbClient = new();
     private readonly List<IDisposable> _networkSubscriptions = [];
     private readonly HashSet<string> _trackedRequestIds = [];
+    private readonly Lock _trackedRequestGate = new();
+    private readonly Queue<string> _logLines = [];
 
     private CDPClient? _cdpClient;
     private string? _webSocketDebuggerUrl;
@@ -99,13 +101,49 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
             return;
         }
 
-        var socket = sockets[0];
-        _webSocketDebuggerUrl = await _adbClient.GetWebSocketDebuggerUrlAsync(
-            SelectDevice.Serial,
-            socket.SocketName,
-            Port,
-            CTS.Token
-        );
+        (WebViewSocketInfo Socket, DevToolsTargetInfo Target)? selectedTarget = null;
+        foreach (var socket in sockets)
+        {
+            IReadOnlyList<DevToolsTargetInfo> targets;
+            try
+            {
+                targets = await _adbClient.GetDevToolsTargetsAsync(
+                    SelectDevice.Serial,
+                    socket.SocketName,
+                    Port,
+                    CTS.Token
+                );
+            }
+            catch (Exception ex)
+            {
+                AppendLog($"跳过 Socket {socket.SocketName}: {ex.Message}");
+                continue;
+            }
+
+            foreach (var target in targets.Where(static target => target.IsPageLike))
+            {
+                AppendLog($"发现页面: [{socket.SocketName}] {target.Title} {target.Url}");
+            }
+
+            var candidate = targets
+                .Where(static target => target.IsPageLike)
+                .Where(static target => !string.Equals(target.Url, "about:blank", StringComparison.OrdinalIgnoreCase))
+                .Select(target => (Socket: socket, Target: target))
+                .FirstOrDefault();
+            if (selectedTarget is null && candidate.Target is not null)
+            {
+                selectedTarget = candidate;
+            }
+        }
+
+        if (selectedTarget is null)
+        {
+            AppendLog("未找到可监控的非空白 WebView 页面。");
+            return;
+        }
+
+        AppendLog($"选中页面: {selectedTarget.Value.Target.Title} {selectedTarget.Value.Target.Url}");
+        _webSocketDebuggerUrl = selectedTarget.Value.Target.WebSocketDebuggerUrl;
         await ConnectCdpClientAsync(_webSocketDebuggerUrl);
     }
 
@@ -128,6 +166,7 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
         await _cdpClient.ReconnectAsync(CTS.Token);
         ResetTrackedRequests();
         AppendLog("CDP 已重连。");
+        await StartTrafficMonitorAsync();
     }
 
     [RelayCommand]
@@ -151,18 +190,18 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
                     if (IsTargetUrl(e.Request.Url))
                     {
                         _requestHeader = e.Request.Headers;
-                        if (_requestHeader.TryGetValue("did", out var did))
+                        if (TryGetHeader(_requestHeader, "did", out var did))
                         {
                             this.Window.DispatcherQueue.TryEnqueue(() =>
                             {
-                                this.Did = did.ToString();
+                                this.Did = did?.ToString();
                             });
                         }
-                        if (_requestHeader.TryGetValue("token", out var token))
+                        if (TryGetHeader(_requestHeader, "token", out var token))
                         {
                             this.Window.DispatcherQueue.TryEnqueue(() =>
                             {
-                                this.Token = token.ToString();
+                                this.Token = token?.ToString();
                             });
                         }
                         AppendLog($"捕获请求: {e.Request.Method} {e.Request.Url}");
@@ -180,7 +219,11 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
                 {
                     if (IsTargetUrl(e.Response.Url))
                     {
-                        _trackedRequestIds.Add(e.RequestId);
+                        lock (_trackedRequestGate)
+                        {
+                            _trackedRequestIds.Add(e.RequestId);
+                        }
+
                         AppendLog($"响应头已到达: {e.Response.Status} {e.Response.Url}");
                     }
 
@@ -194,22 +237,30 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
                 CdpJsonContext.Default.LoadingFinishedEvent,
                 async e =>
                 {
-                    if (_trackedRequestIds.Remove(e.RequestId))
+                    if (RemoveTrackedRequest(e.RequestId))
                     {
                         _lastReadableResponseRequestId = e.RequestId;
-                        var result = await _cdpClient!.SendCommandAsync(
-                            "Network.getResponseBody",
-                            new GetResponseBodyParams(e.RequestId),
-                            CdpJsonContext.Default.GetResponseBodyParams,
-                            CdpJsonContext.Default.CdpCommandResponseGetResponseBodyResult,
-                            CTS.Token
-                        );
-                        var jsonO = JsonObject.Parse(result.Body);
-                        var playerId = jsonO["data"]["userId"];
-                        this.Window.DispatcherQueue.TryEnqueue(() =>
+                        try
                         {
-                            this.PlayerId = playerId.ToString();
-                        });
+                            var result = await _cdpClient!.SendCommandAsync(
+                                "Network.getResponseBody",
+                                new GetResponseBodyParams(e.RequestId),
+                                CdpJsonContext.Default.GetResponseBodyParams,
+                                CdpJsonContext.Default.CdpCommandResponseGetResponseBodyResult,
+                                CTS.Token
+                            );
+                            var jsonO = JsonObject.Parse(result.Body);
+                            var playerId = jsonO?["data"]?["userId"];
+                            this.Window.DispatcherQueue.TryEnqueue(() =>
+                            {
+                                this.PlayerId = playerId?.ToString();
+                            });
+                            AppendLog($"已读取目标响应 Body: {e.RequestId}");
+                        }
+                        catch (Exception ex)
+                        {
+                            AppendLog($"读取响应 Body 失败: {ex.Message}");
+                        }
                     }
                 }
             )
@@ -220,7 +271,7 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
                 CdpJsonContext.Default.LoadingFailedEvent,
                 e =>
                 {
-                    if (_trackedRequestIds.Remove(e.RequestId))
+                    if (RemoveTrackedRequest(e.RequestId))
                     {
                         AppendLog($"响应失败，无法读取 Body: {e.ErrorText}");
                     }
@@ -232,7 +283,10 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
 
         await _cdpClient.SendCommandAsync(
             "Network.enable",
-            new NetworkEnableParams(),
+            new NetworkEnableParams(
+                MaxTotalBufferSize: 100 * 1024 * 1024,
+                MaxResourceBufferSize: 10 * 1024 * 1024,
+                MaxPostDataSize: 1024 * 1024),
             CdpJsonContext.Default.NetworkEnableParams,
             CdpJsonContext.Default.CdpCommandResponseEmptyResult,
             CTS.Token
@@ -274,14 +328,17 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
         if (_cdpClient is not null)
         {
             _cdpClient.ConnectionStateChanged -= OnCdpClientConnectionStateChanged;
+            _cdpClient.EventHandlerException -= OnCdpClientEventHandlerException;
             await _cdpClient.DisposeAsync();
         }
 
         ResetTrackedRequests();
         _cdpClient = new CDPClient(webSocketDebuggerUrl);
         _cdpClient.ConnectionStateChanged += OnCdpClientConnectionStateChanged;
+        _cdpClient.EventHandlerException += OnCdpClientEventHandlerException;
         await _cdpClient.ConnectAsync(CTS.Token);
         AppendLog($"CDP 已连接: {webSocketDebuggerUrl}");
+        await StartTrafficMonitorAsync();
     }
 
     private void OnCdpClientConnectionStateChanged(
@@ -296,6 +353,11 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
         });
     }
 
+    private void OnCdpClientEventHandlerException(object? sender, Exception e)
+    {
+        AppendLog($"CDP 事件处理异常: {e.Message}");
+    }
+
     private static bool IsTargetUrl(string url)
     {
         return url.Contains(RoleListApi, StringComparison.OrdinalIgnoreCase);
@@ -308,16 +370,53 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
 
     private void ResetTrackedRequests()
     {
-        _trackedRequestIds.Clear();
+        lock (_trackedRequestGate)
+        {
+            _trackedRequestIds.Clear();
+        }
+
         _lastReadableResponseRequestId = null;
         _requestHeader = null;
+    }
+
+    private bool RemoveTrackedRequest(string requestId)
+    {
+        lock (_trackedRequestGate)
+        {
+            return _trackedRequestIds.Remove(requestId);
+        }
+    }
+
+    private static bool TryGetHeader(
+        IReadOnlyDictionary<string, object?> headers,
+        string name,
+        out object? value
+    )
+    {
+        foreach (var header in headers)
+        {
+            if (string.Equals(header.Key, name, StringComparison.OrdinalIgnoreCase))
+            {
+                value = header.Value;
+                return true;
+            }
+        }
+
+        value = null;
+        return false;
     }
 
     private void AppendLog(string message)
     {
         Window.DispatcherQueue.TryEnqueue(() =>
         {
-            LogText = $"{DateTime.Now:HH:mm:ss} {message}{Environment.NewLine}{LogText}";
+            _logLines.Enqueue($"{DateTime.Now:HH:mm:ss} {message}");
+            while (_logLines.Count > 200)
+            {
+                _logLines.Dequeue();
+            }
+
+            LogText = string.Join(Environment.NewLine, _logLines.Reverse());
         });
     }
 
@@ -356,9 +455,11 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
         if (_cdpClient is not null)
         {
             _cdpClient.ConnectionStateChanged -= OnCdpClientConnectionStateChanged;
+            _cdpClient.EventHandlerException -= OnCdpClientEventHandlerException;
             _ = _cdpClient.DisposeAsync();
         }
 
+        _adbClient.Dispose();
         base.Dispose();
     }
 }
