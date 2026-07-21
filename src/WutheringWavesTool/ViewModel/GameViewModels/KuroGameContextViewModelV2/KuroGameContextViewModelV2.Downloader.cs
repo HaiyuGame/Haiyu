@@ -60,7 +60,7 @@ partial class KuroGameContextViewModelV2
     public object Sync { get; } = new object();
 
     [ObservableProperty]
-    public partial ObservableCollection<double> DownloadSpeedSeparators { get; set; } = new();
+    public partial ObservableCollection<double> DownloadSpeedSeparators { get; set; } = GetSeparators();
 
     private static ObservableCollection<double> GetSeparators()
     {
@@ -73,6 +73,33 @@ partial class KuroGameContextViewModelV2
             now.AddSeconds(-1).Ticks,
             now.Ticks
         ];
+    }
+
+    private static void UpdateSeparators(ObservableCollection<double> separators, DateTime now)
+    {
+        double[] values =
+        [
+            now.AddSeconds(-5).Ticks,
+            now.AddSeconds(-3).Ticks,
+            now.AddSeconds(-2).Ticks,
+            now.AddSeconds(-1).Ticks,
+            now.Ticks
+        ];
+
+        while (separators.Count < values.Length)
+        {
+            separators.Add(values[separators.Count]);
+        }
+
+        for (var i = 0; i < values.Length; i++)
+        {
+            separators[i] = values[i];
+        }
+
+        while (separators.Count > values.Length)
+        {
+            separators.RemoveAt(separators.Count - 1);
+        }
     }
 
 

@@ -140,7 +140,9 @@
                         </Grid.RowDefinitions>
 
                         <lvc:CartesianChart
+                            x:Name="TransferChart"
                             Margin="10,5,10,0"
+                            x:Load="{x:Bind ViewModel.IsTransferChartLoaded, Mode=OneWay}"
                             AutoUpdateEnabled="True"
                             Background="Transparent"
                             SyncContext="{x:Bind ViewModel.Sync, Mode=OneWay}">

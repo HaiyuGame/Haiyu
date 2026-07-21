@@ -34,12 +34,9 @@ public sealed partial class PunishV2GamePage : Page,IPage
     {
         this.Bindings.StopTracking();
         this.ViewModel.Dispose();
-        base.OnNavigatedFrom(e);
+        this.ViewModel = null;
         GC.Collect();
-    }
-    protected override void OnNavigatedTo(NavigationEventArgs e)
-    {
-
+        base.OnNavigatedFrom(e);
     }
 
     private void Button_Click(object sender, RoutedEventArgs e)

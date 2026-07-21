@@ -1,5 +1,6 @@
+using System.Diagnostics;
 using Waves.Core.Models.Enums;
-using Windows.Media;
+using Windows.Media.Core;
 using Windows.Media.Playback;
 
 namespace Haiyu.Controls;
@@ -9,183 +10,293 @@ namespace Haiyu.Controls;
 [TemplateVisualState(GroupName = "CommonStates", Name = "MediaLoading")]
 [TemplateVisualState(GroupName = "CommonStates", Name = "ImageLoading")]
 [TemplatePart(Name = "MediaControl", Type = typeof(MediaPlayerPresenter))]
-[TemplatePart(Name = "MediaBorder", Type = typeof(Border))]
 [TemplatePart(Name = "ImageControl", Type = typeof(ImageEx))]
-[TemplatePart(Name = "LoadingControl", Type = typeof(ProgressBar))]
 public partial class ApplicationBackgroundControl : Control
 {
-    protected override void OnApplyTemplate()
-    {
-        this.ImageControl = (ImageEx)GetTemplateChild("ImageControl");
-        this.MediaControl = (MediaPlayerPresenter)GetTemplateChild("MediaControl");
-    }
+    private MediaPlayer? mediaPlayer;
+    private MediaSource? activeMediaSource;
+    private bool isLoaded;
+    private bool isPaused;
 
     public ApplicationBackgroundControl()
     {
-        this.DefaultStyleKey = typeof(ApplicationBackgroundControl);
+        DefaultStyleKey = typeof(ApplicationBackgroundControl);
+        Loaded += OnLoaded;
+        Unloaded += OnUnloaded;
     }
 
-    public string MediaSource
+    protected override void OnApplyTemplate()
     {
-        get { return (string)GetValue(MediaSourceProperty); }
-        set { SetValue(MediaSourceProperty, value); }
+        if (MediaControl is not null)
+        {
+            MediaControl.MediaPlayer = null;
+        }
+
+        base.OnApplyTemplate();
+        ImageControl = GetTemplateChild("ImageControl") as ImageEx;
+        MediaControl = GetTemplateChild("MediaControl") as MediaPlayerPresenter;
+
+        if (MediaControl is not null && mediaPlayer is not null)
+        {
+            MediaControl.MediaPlayer = mediaPlayer;
+        }
+
+        if (isLoaded)
+        {
+            UpdateMedia();
+        }
+    }
+
+    public string? MediaSource
+    {
+        get => (string?)GetValue(MediaSourceProperty);
+        set => SetValue(MediaSourceProperty, value);
     }
 
     public static readonly DependencyProperty MediaSourceProperty = DependencyProperty.Register(
-        "MediaSource",
+        nameof(MediaSource),
         typeof(string),
         typeof(ApplicationBackgroundControl),
-        new PropertyMetadata(null, OnMediaPlayerChanged)
+        new PropertyMetadata(null, OnSourceChanged)
     );
 
-    private static void OnMediaPlayerChanged(
-        DependencyObject d,
-        DependencyPropertyChangedEventArgs e
-    )
+    public string? ImageSource
     {
-        (d as ApplicationBackgroundControl).UpdateMedia();
-    }
-
-    public void UpdateMedia()
-    {
-        if (this.ShowType == WallpaperShowType.Video && string.IsNullOrWhiteSpace(this.MediaSource))
-            return;
-        if (this.ShowType == WallpaperShowType.Image && string.IsNullOrWhiteSpace(this.ImageSource))
-            return;
-        try
-        {
-            
-            if (this.ShowType == WallpaperShowType.Image)
-            {
-                if (MediaControl.MediaPlayer != null)
-                {
-                    MediaControl.MediaPlayer.MediaOpened -= Player_MediaOpened;
-                    MediaControl.MediaPlayer.Dispose();
-                    MediaControl.MediaPlayer = null;
-                }
-                this.ImageControl.Source = new BitmapImage(new(this.ImageSource));
-                MediaControl.MediaPlayer = null;
-                VisualStateManager.GoToState(this, "ShowImage", false);
-            }
-            else
-            {
-                if(this.MediaControl.MediaPlayer == null)
-                {
-                    var MediaPlayer = new MediaPlayer() { IsLoopingEnabled = true, AutoPlay = true };
-                    MediaPlayer.CommandManager.IsEnabled = false;
-                    MediaPlayer.MediaOpened += Player_MediaOpened;
-                    this.MediaControl.MediaPlayer = MediaPlayer;
-                }
-                var source = Windows.Media.Core.MediaSource.CreateFromUri(new Uri(MediaSource));
-                this.MediaControl.MediaPlayer?.Source = source;
-                this.DispatcherQueue.TryEnqueue(() =>
-                {
-                    VisualStateManager.GoToState(this, "MediaLoading", false);
-                });
-            }
-        }
-        catch (Exception) { }
-        finally
-        {
-            GC.Collect();
-        }
-    }
-
-    private void Player_MediaOpened(MediaPlayer sender, object args)
-    {
-        this.DispatcherQueue.TryEnqueue(async () =>
-        {
-            VisualStateManager.GoToState(this, "ShowMedia", false);
-            await Task.Delay(500);
-        });
-    }
-
-    public string ImageSource
-    {
-        get { return (string)GetValue(ImageSourceProperty); }
-        set { SetValue(ImageSourceProperty, value); }
+        get => (string?)GetValue(ImageSourceProperty);
+        set => SetValue(ImageSourceProperty, value);
     }
 
     public static readonly DependencyProperty ImageSourceProperty = DependencyProperty.Register(
-        "ImageSource",
+        nameof(ImageSource),
         typeof(string),
         typeof(ApplicationBackgroundControl),
-        new PropertyMetadata(null, OnImageSourceChanged)
+        new PropertyMetadata(null, OnSourceChanged)
     );
-
-    private static void OnImageSourceChanged(
-        DependencyObject d,
-        DependencyPropertyChangedEventArgs e
-    )
-    {
-        //(d as ApplicationBackgroundControl).UpdateMedia();
-    }
 
     public WallpaperShowType ShowType
     {
-        get { return (WallpaperShowType)GetValue(ShowTypeProperty); }
-        set { SetValue(ShowTypeProperty, value); }
+        get => (WallpaperShowType)GetValue(ShowTypeProperty);
+        set => SetValue(ShowTypeProperty, value);
     }
 
-    // Using a DependencyProperty as the backing store for ShowType.  This enables animation, styling, binding, etc...
     public static readonly DependencyProperty ShowTypeProperty = DependencyProperty.Register(
-        "ShowType",
+        nameof(ShowType),
         typeof(WallpaperShowType),
         typeof(ApplicationBackgroundControl),
-        new PropertyMetadata(WallpaperShowType.Image, OnWallpaperTypeChanged)
+        new PropertyMetadata(WallpaperShowType.Image)
     );
-
-    private static void OnWallpaperTypeChanged(
-        DependencyObject d,
-        DependencyPropertyChangedEventArgs e
-    )
-    {
-        //(d as ApplicationBackgroundControl).UpdateMedia();
-    }
 
     public Stretch Stretch
     {
-        get { return (Stretch)GetValue(StretchProperty); }
-        set { SetValue(StretchProperty, value); }
+        get => (Stretch)GetValue(StretchProperty);
+        set => SetValue(StretchProperty, value);
     }
 
-    public ImageEx ImageControl { get; private set; }
-    public MediaPlayerPresenter MediaControl { get; private set; }
-    public string MediaBackground { get; private set; }
-    public string ImageBackground { get; private set; }
-
     public static readonly DependencyProperty StretchProperty = DependencyProperty.Register(
-        "Stretch",
+        nameof(Stretch),
         typeof(Stretch),
         typeof(ApplicationBackgroundControl),
         new PropertyMetadata(Stretch.Uniform)
     );
 
+    public ImageEx? ImageControl { get; private set; }
+    public MediaPlayerPresenter? MediaControl { get; private set; }
+    public string? MediaBackground { get; private set; }
+    public string? ImageBackground { get; private set; }
+
+    private static void OnSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is ApplicationBackgroundControl control && control.isLoaded)
+        {
+            control.UpdateMedia();
+        }
+    }
+
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        isLoaded = true;
+        UpdateMedia();
+    }
+
+    private void OnUnloaded(object sender, RoutedEventArgs e)
+    {
+        isLoaded = false;
+        ReleaseMediaPlayer();
+    }
+
+    public void UpdateMedia()
+    {
+        if (!isLoaded || MediaControl is null || ImageControl is null)
+        {
+            return;
+        }
+
+        try
+        {
+            if (ShowType == WallpaperShowType.Image)
+            {
+                ReleaseMediaPlayer();
+                if (!string.IsNullOrWhiteSpace(ImageSource))
+                {
+                    ImageControl.Source = new BitmapImage(new Uri(ImageSource));
+                }
+
+                VisualStateManager.GoToState(this, "ShowImage", false);
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(MediaSource))
+            {
+                ReleaseMediaPlayer();
+                return;
+            }
+
+            EnsureMediaPlayer();
+            ReplaceMediaSource(MediaSource);
+            VisualStateManager.GoToState(this, "MediaLoading", false);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Unable to update application background: {ex}");
+            ReleaseMediaPlayer();
+        }
+    }
+
+    private void EnsureMediaPlayer()
+    {
+        if (mediaPlayer is not null)
+        {
+            return;
+        }
+
+        mediaPlayer = new MediaPlayer
+        {
+            IsLoopingEnabled = true,
+            AutoPlay = true,
+        };
+        mediaPlayer.CommandManager.IsEnabled = false;
+        mediaPlayer.MediaOpened += Player_MediaOpened;
+        mediaPlayer.MediaFailed += Player_MediaFailed;
+        MediaControl!.MediaPlayer = mediaPlayer;
+    }
+
+    private void ReplaceMediaSource(string sourcePath)
+    {
+        if (activeMediaSource is not null && MediaBackground == sourcePath)
+        {
+            if (!isPaused && mediaPlayer!.PlaybackSession.PlaybackState != MediaPlaybackState.Playing)
+            {
+                mediaPlayer.Play();
+            }
+            return;
+        }
+
+        var newSource = Windows.Media.Core.MediaSource.CreateFromUri(new Uri(sourcePath));
+        var previousSource = activeMediaSource;
+        activeMediaSource = newSource;
+        MediaBackground = sourcePath;
+        mediaPlayer!.Source = newSource;
+        previousSource?.Dispose();
+
+        if (isPaused)
+        {
+            mediaPlayer.Pause();
+        }
+    }
+
+    private void Player_MediaOpened(MediaPlayer sender, object args)
+    {
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            if (!isLoaded || sender != mediaPlayer)
+            {
+                return;
+            }
+
+            VisualStateManager.GoToState(this, "ShowMedia", false);
+            if (isPaused)
+            {
+                sender.Pause();
+            }
+        });
+    }
+
+    private void Player_MediaFailed(MediaPlayer sender, MediaPlayerFailedEventArgs args)
+    {
+        Debug.WriteLine($"Application background playback failed: {args.Error} - {args.ErrorMessage}");
+    }
+
+    private void ReleaseMediaPlayer()
+    {
+        var player = mediaPlayer;
+        mediaPlayer = null;
+
+        if (MediaControl is not null)
+        {
+            MediaControl.MediaPlayer = null;
+        }
+
+        if (player is not null)
+        {
+            player.MediaOpened -= Player_MediaOpened;
+            player.MediaFailed -= Player_MediaFailed;
+            player.Pause();
+            player.Source = null;
+            player.Dispose();
+        }
+
+        activeMediaSource?.Dispose();
+        activeMediaSource = null;
+        MediaBackground = null;
+    }
+
     public void Pause()
     {
-        if (MediaControl.MediaPlayer == null)
-            return;
-        MediaControl.MediaPlayer.Pause();
+        isPaused = true;
+        // A paused MediaPlayer keeps its decoder and frame surfaces alive. Background
+        // playback can remain paused for the entire lifetime of a game, so release it.
+        ReleaseMediaPlayer();
     }
 
     public void Play()
     {
-        if (MediaControl.MediaPlayer == null)
+        isPaused = false;
+        if (!isLoaded || ShowType != WallpaperShowType.Video)
+        {
             return;
-        MediaControl.MediaPlayer.Play();
+        }
+
+        if (mediaPlayer is null || activeMediaSource is null)
+        {
+            UpdateMedia();
+        }
+        else
+        {
+            mediaPlayer.Play();
+        }
     }
-
-
 
     public void SetMediaSource(string backgroundFile)
     {
-        if (this.MediaBackground != backgroundFile)
-            this.MediaSource = backgroundFile;
+        if (MediaSource == backgroundFile)
+        {
+            UpdateMedia();
+            return;
+        }
+
+        MediaBackground = null;
+        MediaSource = backgroundFile;
     }
 
     public void SetImageSource(string backgroundFile)
     {
-        if (this.ImageBackground != backgroundFile)
-            this.ImageSource = backgroundFile;
+        if (ImageSource == backgroundFile)
+        {
+            UpdateMedia();
+            return;
+        }
+
+        ImageBackground = backgroundFile;
+        ImageSource = backgroundFile;
     }
 }

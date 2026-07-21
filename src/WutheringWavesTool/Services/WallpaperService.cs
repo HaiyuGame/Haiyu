@@ -8,6 +8,7 @@ namespace Haiyu.Services;
 public class WallpaperService : IWallpaperService
 {
     private string mediaCacheUrl;
+    private WallpaperShowType? mediaCacheType;
 
     public WallpaperService(ITipShow tipShow)
     {
@@ -119,7 +120,7 @@ public class WallpaperService : IWallpaperService
 
     public void SetMediaForUrl(WallpaperShowType type, string backgroundFile)
     {
-        if (Media == null||mediaCacheUrl == backgroundFile)
+        if (Media == null || (mediaCacheType == type && mediaCacheUrl == backgroundFile))
             return;
         Media.ShowType = type;
         
@@ -132,7 +133,7 @@ public class WallpaperService : IWallpaperService
             Media.SetImageSource(backgroundFile);
         }
         this.mediaCacheUrl = backgroundFile;
-        this.Media.UpdateMedia();
+        this.mediaCacheType = type;
     }
 
     public void PauseVideo()

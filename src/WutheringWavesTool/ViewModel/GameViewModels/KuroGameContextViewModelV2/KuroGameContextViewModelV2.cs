@@ -16,7 +16,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
 {
     private const int ChartPointKeepSeconds = 5;
     private const int ChartMaxPoints = 300;
-    private static readonly TimeSpan ChartPointInterval = TimeSpan.FromMilliseconds(200);
+    private static readonly TimeSpan ChartPointInterval = TimeSpan.FromMilliseconds(500);
     private static readonly TimeSpan SeparatorRefreshInterval = TimeSpan.FromMilliseconds(500);
 
     private DateTime _lastDownloadPointTime = DateTime.MinValue;
@@ -102,6 +102,14 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
     /// </summary>
     [ObservableProperty]
     public partial Visibility GameDownloadingBthVisibility { get; set; } = Visibility.Collapsed;
+
+    [ObservableProperty]
+    public partial bool IsTransferChartLoaded { get; set; }
+
+    partial void OnGameDownloadingBthVisibilityChanged(Visibility value)
+    {
+        IsTransferChartLoaded = value == Visibility.Visible;
+    }
 
     [ObservableProperty]
     public partial Visibility GameLauncherBthVisibility { get; set; } = Visibility.Collapsed;
@@ -476,8 +484,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         if ((now - _lastSeparatorRefreshTime) >= SeparatorRefreshInterval)
         {
             _lastSeparatorRefreshTime = now;
-            this.DownloadSpeedSeparators?.Clear();
-            this.DownloadSpeedSeparators = GetSeparators();
+            UpdateSeparators(this.DownloadSpeedSeparators, now);
         }
     }
 
