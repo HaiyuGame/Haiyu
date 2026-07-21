@@ -1,4 +1,4 @@
-﻿using Haiyu.Models.Wrapper.Wiki;
+using Haiyu.Models.Wrapper.Wiki;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +12,7 @@ public static class WikiExtensions
 {
     extension(IEnumerable<HotContentSide> source)
     {
-        public ObservableCollection<HotContentSideWrapper>? Format()
+        public ObservableCollection<HotContentSideWrapper>? Format(WikiType type)
         {
             ObservableCollection<HotContentSideWrapper> wrappers = new();
             if (source == null)
@@ -25,8 +25,27 @@ public static class WikiExtensions
                     ImageUrl = item.ContentUrl,
                     StartTime = item.CountDown == null ? DateTime.Now.ToString() : item.CountDown.DateRange[0],
                     EndTime = item.CountDown == null ? DateTime.Now.AddYears(1).ToString() : item.CountDown.DateRange[1],
-                    JumpUrl = item.LinkConfig.LinkUrl
+                    
                 };
+                var route = "";
+                if (item.LinkConfig.Equals != null && type == WikiType.Waves)
+                {
+                    route = "mc";
+                }
+                else if(type == WikiType.BGR)
+                {
+                    route = "pns";
+                }
+
+                if(item.LinkConfig.EntryId!= null)
+                {
+                    value.JumpUrl = $"https://wiki.kurobbs.com/{route}/item/{item.LinkConfig.EntryId}";
+                }
+                else
+                {
+                    value.JumpUrl = item.LinkConfig.LinkUrl;
+                }
+
                 if (item.CountDown != null)
                 {
                     var spanResult = (DateTime.Parse(item.CountDown.DateRange[1]) - DateTime.Now);

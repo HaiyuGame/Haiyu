@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Waves.Api.Models.GameWikiiClient;
 
@@ -37,6 +37,9 @@ public class SideEventLinkConfig
 
     [JsonPropertyName("linkType")]
     public int LinkType { get; set; }
+
+    [JsonPropertyName("entryId")]
+    public string EntryId { get; set; }
 }
 
 public class Repeat

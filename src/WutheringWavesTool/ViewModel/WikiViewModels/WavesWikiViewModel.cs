@@ -78,7 +78,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase
         await RefreshUserAsync();
         if ((wikiPage.Result != null && wikiPage.Result.Data.ContentJson.Shortcuts != null))
         {
-            Actives = GameWikiClient.GetEventData(wikiPage.Result)!.Format()??[];
+            Actives = GameWikiClient.GetEventData(wikiPage.Result)!.Format(WikiType.Waves)??[];
             var sides = wikiPage.Result.Data.ContentJson.SideModules.Where(x => x.Type == "events-side").ToList();
             if(sides.Count == 2)
             {
