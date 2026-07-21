@@ -42,6 +42,8 @@ namespace Haiyu.Models
     {
         private const string DataCenterUrlTemplate = "https://web-static.kurobbs.com/mcbox/index.html#/mc-role-box?accessType=1&roleId={0}&serverId={1}";
         private const string GrowthCalculatorUrl = "https://web-static.kurobbs.com/growth-calculator/index.html#/";
+        private const string CalendarUrl = "https://web-static.kurobbs.com/mccalendar/index.html#/";
+        private const string MapUrlTemplate = "https://www.kurobbs.com/mc/map/?v=4.0&state={0}&country={1}&x={2}&y={3}&zoom={4}";
         private const string ResourceBriefingUrl = "https://web-static.kurobbs.com/resource-briefing/index.html#/home";
 
         private WebSessionContext(
@@ -131,6 +133,21 @@ namespace Haiyu.Models
             return ResourceBriefingUrl;
         }
 
+        public string GetCalendarUrl()
+        {
+            return CalendarUrl;
+        }
+
+        public string GetMapUrl(
+            int state = 8,
+            int country = 1,
+            double x = 0,
+            double y = 0,
+            string zoom = "0.00")
+        {
+            return string.Format(MapUrlTemplate, state, country, x, y, zoom);
+        }
+
         public string GetPageUrl()
         {
             return PageUrl;
@@ -178,6 +195,43 @@ namespace Haiyu.Models
             return new WebSessionContext(
                 snapshot,
                 ResourceBriefingUrl,
+                serverId,
+                roleId,
+                serverName ?? string.Empty,
+                roleName ?? string.Empty);
+        }
+
+        public static WebSessionContext CreateCalendar(
+            KuroLoginSnapshot snapshot,
+            string serverId,
+            string roleId,
+            string? serverName = null,
+            string? roleName = null)
+        {
+            return new WebSessionContext(
+                snapshot,
+                CalendarUrl,
+                serverId,
+                roleId,
+                serverName ?? string.Empty,
+                roleName ?? string.Empty);
+        }
+
+        public static WebSessionContext CreateMap(
+            KuroLoginSnapshot snapshot,
+            string serverId,
+            string roleId,
+            string? serverName = null,
+            string? roleName = null,
+            int state = 8,
+            int country = 1,
+            double x = 0,
+            double y = 0,
+            string zoom = "0.00")
+        {
+            return new WebSessionContext(
+                snapshot,
+                string.Format(MapUrlTemplate, state, country, x, y, zoom),
                 serverId,
                 roleId,
                 serverName ?? string.Empty,
@@ -252,6 +306,13 @@ namespace Haiyu.Models
     [JsonSerializable(typeof(KuroLoginSnapshot))]
     [JsonSerializable(typeof(WebSessionContext))]
     [JsonSerializable(typeof(KuroBootstrapPayload))]
+    [JsonSerializable(typeof(Dictionary<string, object?>))]
+    [JsonSerializable(typeof(Dictionary<string, string>))]
+    [JsonSerializable(typeof(string))]
+    [JsonSerializable(typeof(int))]
+    [JsonSerializable(typeof(long))]
+    [JsonSerializable(typeof(double))]
+    [JsonSerializable(typeof(bool))]
     public partial class KuroSessionContext : JsonSerializerContext
     {
     }

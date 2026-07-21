@@ -5,9 +5,11 @@ using ChromeCDPSharp.Serialization;
 
 namespace ChromeCDPSharp.Common;
 
-public sealed class AdbClient
+public sealed class AdbClient : IDisposable
 {
     private readonly HttpClient _httpClient = new();
+    private readonly Lock _forwardGate = new();
+    private readonly HashSet<ForwardedPort> _forwardedPorts = [];
 
     public string AdbPath { get; private set; }
 
@@ -23,6 +25,7 @@ public sealed class AdbClient
             throw new ArgumentException("ADB executable path cannot be null or empty.", nameof(exePath));
         }
 
+        RemoveTrackedForwardsAsync().GetAwaiter().GetResult();
         AdbPath = exePath;
     }
 
@@ -73,11 +76,43 @@ public sealed class AdbClient
     public async Task ForwardAsync(string deviceSerial, int localPort, string socketName, CancellationToken cancellationToken = default)
     {
         await RunAndEnsureAsync($"-s {Quote(deviceSerial)} forward tcp:{localPort} localabstract:{Quote(socketName)}", "Failed to forward adb port.", cancellationToken);
+        lock (_forwardGate)
+        {
+            _forwardedPorts.Add(new ForwardedPort(deviceSerial, localPort));
+        }
     }
 
     public async Task RemoveForwardAsync(string deviceSerial, int localPort, CancellationToken cancellationToken = default)
     {
         await RunAdbAsync($"-s {Quote(deviceSerial)} forward --remove tcp:{localPort}", cancellationToken);
+        lock (_forwardGate)
+        {
+            _forwardedPorts.Remove(new ForwardedPort(deviceSerial, localPort));
+        }
+    }
+
+    public async Task RemoveTrackedForwardsAsync(CancellationToken cancellationToken = default)
+    {
+        ForwardedPort[] forwardedPorts;
+        lock (_forwardGate)
+        {
+            forwardedPorts = [.. _forwardedPorts];
+        }
+
+        foreach (ForwardedPort forwardedPort in forwardedPorts)
+        {
+            try
+            {
+                await RemoveForwardAsync(forwardedPort.DeviceSerial, forwardedPort.LocalPort, cancellationToken);
+            }
+            catch (InvalidOperationException)
+            {
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+        }
     }
 
     public async Task<IReadOnlyList<DevToolsTargetInfo>> GetDevToolsTargetsAsync(
@@ -356,6 +391,21 @@ public sealed class AdbClient
     }
 
     private sealed record CommandResult(int ExitCode, string StandardOutput, string StandardError);
+
+    private sealed record ForwardedPort(string DeviceSerial, int LocalPort);
+
+    public void Dispose()
+    {
+        try
+        {
+            RemoveTrackedForwardsAsync().GetAwaiter().GetResult();
+        }
+        catch (InvalidOperationException)
+        {
+        }
+
+        _httpClient.Dispose();
+    }
 }
 
 public sealed record AdbDeviceInfo(
