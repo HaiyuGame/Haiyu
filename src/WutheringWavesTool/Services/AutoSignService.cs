@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Waves.Core.Services;
+using Waves.Core.Services.Tasks;
 using Waves.Core.Settings;
 
 public sealed class AutoSignService : IHostedService
@@ -51,7 +52,7 @@ public sealed class AutoSignService : IHostedService
             var accounts = await KuroAccountService.GetUsersAsync();
             foreach (var account in accounts)
             {
-                SignKuroClient.AccountService.SetCurrentUser(account,false);
+                SignKuroClient.AccountService.SetCurrentUser(account, false);
                 var wavesGamers = await SignKuroClient.GetGamerAsync(
                     Waves.Core.Models.Enums.GameType.Waves,
                     token
@@ -74,11 +75,13 @@ public sealed class AutoSignService : IHostedService
                     }
                 }
             }
-            SystemEventPublisher.Publish(new()
-            {
-                Message = $"签到结果{successCount}个成功，总数{successCount + errorCount}",
-                Delay = 5
-            });
+            SystemEventPublisher.Publish(
+                new()
+                {
+                    Message = $"签到结果{successCount}个成功，总数{successCount + errorCount}",
+                    Delay = 5,
+                }
+            );
             await SignKuroClient.AccountService.SetAutoUser();
         }
         catch (Exception ex)
@@ -142,4 +145,25 @@ public sealed class AutoSignService : IHostedService
         DateTime today2Am = DateTime.Today.AddHours(2);
         return DateTime.Now > today2Am ? today2Am.AddDays(1) : today2Am;
     }
+}
+
+public sealed class AutoKuroGameSignService : TimedTaskServiceBase
+{
+    private readonly IKuroAccountService _kuroAccountService;
+    private readonly IKuroClient _kuroClient;
+    public AutoKuroGameSignService(
+        SystemEventPublisher publisher,
+        [FromKeyedServices("AppLog")] LoggerService logger,
+        IKuroAccountService kuroAccountService,
+        IKuroClient kuroClient
+    )
+        : base(publisher, logger)
+    {
+        //8点执行
+        TargetTime = new TimeOnly(8, 0);
+        this._kuroAccountService = kuroAccountService;
+        this._kuroClient = kuroClient;
+    }
+
+    public override async Task InvokeAsync(CancellationToken token = default) { }
 }
