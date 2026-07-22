@@ -1,0 +1,3 @@
+Haiyu Chart控件
+
+此控件由Gpt编写，通过Win2D高性能渲染引擎渲染图表，替代LiveChart带来的渲染高内存占用问题。

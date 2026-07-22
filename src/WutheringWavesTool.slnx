@@ -87,4 +87,8 @@
     <BuildType Solution="All|x86" Project="Debug" />
     <Platform Project="x64" />
   </Project>
+  <Project Path="Haiyu.Charts.WinUI/Haiyu.Charts.WinUI.csproj">
+    <BuildType Solution="All|*" Project="Debug" />
+    <Platform Project="x64" />
+  </Project>
 </Solution>

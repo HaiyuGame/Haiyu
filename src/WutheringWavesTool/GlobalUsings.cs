@@ -4,6 +4,7 @@ global using CommunityToolkit.Mvvm.Messaging;
 global using Haiyu.Common;
 global using Haiyu.Common.Bases;
 global using Haiyu.Controls;
+global using Haiyu.Charts.WinUI;
 global using Haiyu.Controls.Propertys;
 global using Haiyu.Models;
 global using Haiyu.Models.Args;

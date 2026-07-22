@@ -42,6 +42,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         TipShow = tipShow;
         IoCircuitBreaker = Instance.Host.Services.GetRequiredService<IIoCircuitBreaker>();
         WallpaperService = Instance.GetService<IWallpaperService>();
+        InitializeTransferChart();
         RegisterMessager();
     }
 
@@ -489,7 +490,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
     }
 
     private static void TrimChartPoints(
-        IList<LiveChartsCore.Defaults.DateTimePoint> points,
+        IList<DateTimeChartPoint> points,
         DateTime now
     )
     {
@@ -507,7 +508,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
     }
 
     private static void TryAddChartPoint(
-        IList<LiveChartsCore.Defaults.DateTimePoint> points,
+        IList<DateTimeChartPoint> points,
         DateTime now,
         ref DateTime lastPointTime,
         double value
@@ -521,7 +522,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         }
 
         lastPointTime = now;
-        points.Add(new LiveChartsCore.Defaults.DateTimePoint(now, value));
+        points.Add(new DateTimeChartPoint(now, value));
     }
 
     private ButtonActionType _buttonAction = ButtonActionType.None;
@@ -637,7 +638,8 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                 {
                     WallpaperService.SetMediaForUrl(
                         Waves.Core.Models.Enums.WallpaperShowType.Video,
-                        background.BackgroundFile
+                        background.BackgroundFile,
+                        background.FirstFrameImage
                     );
                 }
                 else

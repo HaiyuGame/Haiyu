@@ -17,6 +17,7 @@ public partial class ApplicationBackgroundControl : Control
     private MediaSource? activeMediaSource;
     private bool isLoaded;
     private bool isPaused;
+    private bool suppressSourceUpdate;
 
     public ApplicationBackgroundControl()
     {
@@ -27,6 +28,11 @@ public partial class ApplicationBackgroundControl : Control
 
     protected override void OnApplyTemplate()
     {
+        if (ImageControl is not null)
+        {
+            ImageControl.ImageExFailed -= ImageControl_ImageExFailed;
+        }
+
         if (MediaControl is not null)
         {
             MediaControl.MediaPlayer = null;
@@ -35,6 +41,11 @@ public partial class ApplicationBackgroundControl : Control
         base.OnApplyTemplate();
         ImageControl = GetTemplateChild("ImageControl") as ImageEx;
         MediaControl = GetTemplateChild("MediaControl") as MediaPlayerPresenter;
+
+        if (ImageControl is not null)
+        {
+            ImageControl.ImageExFailed += ImageControl_ImageExFailed;
+        }
 
         if (MediaControl is not null && mediaPlayer is not null)
         {
@@ -73,6 +84,19 @@ public partial class ApplicationBackgroundControl : Control
         new PropertyMetadata(null, OnSourceChanged)
     );
 
+    public string? DefaultImageSource
+    {
+        get => (string?)GetValue(DefaultImageSourceProperty);
+        set => SetValue(DefaultImageSourceProperty, value);
+    }
+
+    public static readonly DependencyProperty DefaultImageSourceProperty = DependencyProperty.Register(
+        nameof(DefaultImageSource),
+        typeof(string),
+        typeof(ApplicationBackgroundControl),
+        new PropertyMetadata(null)
+    );
+
     public WallpaperShowType ShowType
     {
         get => (WallpaperShowType)GetValue(ShowTypeProperty);
@@ -106,7 +130,9 @@ public partial class ApplicationBackgroundControl : Control
 
     private static void OnSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        if (d is ApplicationBackgroundControl control && control.isLoaded)
+        if (d is ApplicationBackgroundControl control
+            && control.isLoaded
+            && !control.suppressSourceUpdate)
         {
             control.UpdateMedia();
         }
@@ -149,6 +175,11 @@ public partial class ApplicationBackgroundControl : Control
             {
                 ReleaseMediaPlayer();
                 return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(ImageSource))
+            {
+                ImageControl.Source = new BitmapImage(new Uri(ImageSource));
             }
 
             EnsureMediaPlayer();
@@ -224,6 +255,35 @@ public partial class ApplicationBackgroundControl : Control
     private void Player_MediaFailed(MediaPlayer sender, MediaPlayerFailedEventArgs args)
     {
         Debug.WriteLine($"Application background playback failed: {args.Error} - {args.ErrorMessage}");
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            if (!isLoaded || sender != mediaPlayer)
+            {
+                return;
+            }
+
+            ReleaseMediaPlayer();
+            VisualStateManager.GoToState(this, "ShowImage", false);
+        });
+    }
+
+    private void ImageControl_ImageExFailed(object sender, ImageExFailedEventArgs e)
+    {
+        Debug.WriteLine($"Application background image failed: {e.ErrorMessage}");
+        if (ImageControl is null || string.IsNullOrWhiteSpace(DefaultImageSource))
+        {
+            return;
+        }
+
+        try
+        {
+            ImageControl.Source = new BitmapImage(new Uri(DefaultImageSource));
+            VisualStateManager.GoToState(this, "ShowImage", false);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Default application background failed: {ex}");
+        }
     }
 
     private void ReleaseMediaPlayer()
@@ -286,6 +346,27 @@ public partial class ApplicationBackgroundControl : Control
 
         MediaBackground = null;
         MediaSource = backgroundFile;
+    }
+
+    public void SetVideoSource(string backgroundFile, string? fallbackImage)
+    {
+        suppressSourceUpdate = true;
+        try
+        {
+            ImageBackground = fallbackImage;
+            ImageSource = fallbackImage;
+            if (MediaSource != backgroundFile)
+            {
+                MediaBackground = null;
+                MediaSource = backgroundFile;
+            }
+        }
+        finally
+        {
+            suppressSourceUpdate = false;
+        }
+
+        UpdateMedia();
     }
 
     public void SetImageSource(string backgroundFile)

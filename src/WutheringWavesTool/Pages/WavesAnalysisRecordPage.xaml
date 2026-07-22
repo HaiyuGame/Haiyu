@@ -10,7 +10,7 @@
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:itemWrapper="using:Haiyu.Models.Wrapper"
     xmlns:local="using:Haiyu.Pages"
-    xmlns:lvc="using:LiveChartsCore.SkiaSharpView.WinUI"
+    xmlns:charts="using:Haiyu.Charts.WinUI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:model1="using:Waves.Api.Models.Record"
     mc:Ignorable="d">
@@ -379,19 +379,10 @@
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>
                         </ComboBox>
-                        <lvc:PieChart
+                        <charts:PieChart
                             Grid.Row="1"
                             Background="Transparent"
-                            SeriesSource="{x:Bind ViewModel.GuaranteeChart, Mode=OneWay}">
-                            <lvc:PieChart.SeriesTemplate>
-                                <DataTemplate x:DataType="cm:PipeData">
-                                    <lvc:XamlPieSeries
-                                        MaxRadialColumnWidth="60"
-                                        SeriesName="{x:Bind Name, Mode=OneWay}"
-                                        Values="{x:Bind Values, Mode=OneWay}" />
-                                </DataTemplate>
-                            </lvc:PieChart.SeriesTemplate>
-                        </lvc:PieChart>
+                            Series="{x:Bind ViewModel.GuaranteeChart, Mode=OneWay}" />
                     </Grid>
                     <Grid
                         Grid.Row="1"
@@ -409,19 +400,10 @@
                             HorizontalAlignment="Center"
                             Text="出货占比"
                             TextAlignment="Left" />
-                        <lvc:PieChart
+                        <charts:PieChart
                             Grid.Row="1"
                             Background="Transparent"
-                            SeriesSource="{x:Bind ViewModel.StarRatioChart, Mode=OneWay}">
-                            <lvc:PieChart.SeriesTemplate>
-                                <DataTemplate x:DataType="cm:PipeData">
-                                    <lvc:XamlPieSeries
-                                        MaxRadialColumnWidth="60"
-                                        SeriesName="{x:Bind Name, Mode=OneWay}"
-                                        Values="{x:Bind Values, Mode=OneWay}" />
-                                </DataTemplate>
-                            </lvc:PieChart.SeriesTemplate>
-                        </lvc:PieChart>
+                            Series="{x:Bind ViewModel.StarRatioChart, Mode=OneWay}" />
                     </Grid>
                     <Grid
                         Grid.Row="1"
@@ -436,19 +418,10 @@
                             <RowDefinition />
                         </Grid.RowDefinitions>
                         <TextBlock Text="各卡池抽数" TextAlignment="Left" />
-                        <lvc:PieChart
+                        <charts:PieChart
                             Grid.Row="1"
                             Background="Transparent"
-                            SeriesSource="{x:Bind ViewModel.PoolChart, Mode=OneWay}">
-                            <lvc:PieChart.SeriesTemplate>
-                                <DataTemplate x:DataType="cm:PipeData">
-                                    <lvc:XamlPieSeries
-                                        MaxRadialColumnWidth="60"
-                                        SeriesName="{x:Bind Name, Mode=OneWay}"
-                                        Values="{x:Bind Values, Mode=OneWay}" />
-                                </DataTemplate>
-                            </lvc:PieChart.SeriesTemplate>
-                        </lvc:PieChart>
+                            Series="{x:Bind ViewModel.PoolChart, Mode=OneWay}" />
                     </Grid>
                     <Grid
                         Grid.Row="2"
@@ -463,27 +436,14 @@
                             <RowDefinition />
                         </Grid.RowDefinitions>
                         <TextBlock Text="每日抽数" TextAlignment="Left" />
-                        <lvc:CartesianChart
+                        <charts:CartesianChart
                             Grid.Row="1"
-                            AutoUpdateEnabled="True"
                             Background="Transparent"
-                            ZoomMode="Both">
-                            <lvc:CartesianChart.Series>
-                                <lvc:SeriesCollection>
-                                    <lvc:XamlColumnSeries Values="{x:Bind ViewModel.TimeLineChart, Mode=OneWay}" />
-                                </lvc:SeriesCollection>
-                            </lvc:CartesianChart.Series>
-                            <lvc:CartesianChart.XAxes>
-                                <lvc:AxesCollection>
-                                    <lvc:XamlDateTimeAxis DateFormatter="{x:Bind ViewModel.Formatter}" />
-                                </lvc:AxesCollection>
-                            </lvc:CartesianChart.XAxes>
-                            <lvc:CartesianChart.YAxes>
-                                <lvc:AxesCollection>
-                                    <lvc:XamlAxis TextSize="10" />
-                                </lvc:AxesCollection>
-                            </lvc:CartesianChart.YAxes>
-                        </lvc:CartesianChart>
+                            PanMode="Both"
+                            Series="{x:Bind ViewModel.TimeLineSeries, Mode=OneWay}"
+                            XAxes="{x:Bind ViewModel.TimeLineXAxes, Mode=OneWay}"
+                            YAxes="{x:Bind ViewModel.TimeLineYAxes, Mode=OneWay}"
+                            ZoomMode="Both" />
                     </Grid>
                 </Grid>
             </Grid>

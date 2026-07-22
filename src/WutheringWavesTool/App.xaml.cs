@@ -1,6 +1,5 @@
 using System.Globalization;
 using Haiyu.Helpers;
-using LiveChartsCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Windows.ApplicationModel.Resources;
 using Microsoft.Windows.AppLifecycle;

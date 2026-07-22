@@ -93,9 +93,6 @@
 		<PackageReference Include="CommunityToolkit.WinUI.Extensions" Version="8.2.251219" />
 		<PackageReference Include="CommunityToolkit.WinUI.Helpers" Version="8.2.251219" />
 		<PackageReference Include="CommunityToolkit.WinUI.Media" Version="8.2.251219" />
-		<PackageReference Include="LiveChartsCore" Version="2.0.4" />
-		<PackageReference Include="LiveChartsCore.SkiaSharpView" Version="2.0.4" />
-		<PackageReference Include="LiveChartsCore.SkiaSharpView.WinUI" Version="2.0.4" />
 		<PackageReference Include="MemoryPack" Version="1.21.4" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
@@ -123,6 +120,7 @@
 		<ProjectReference Include="..\KuroAndroidMonitoring\ChromeCDPSharp.csproj" />
 		<ProjectReference Include="..\Waves.Core\Waves.Core.csproj" />
 		<ProjectReference Include="..\Haiyu.Controls\Haiyu.Controls.csproj" />
+		<ProjectReference Include="..\Haiyu.Charts.WinUI\Haiyu.Charts.WinUI.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<Content Update="Assets\background.png">

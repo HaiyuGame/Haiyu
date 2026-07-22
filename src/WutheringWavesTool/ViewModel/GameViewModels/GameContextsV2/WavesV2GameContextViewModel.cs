@@ -1,4 +1,3 @@
-using LiveChartsCore.SkiaSharpView.Extensions;
 using Waves.Core.Common;
 using Waves.Core.Models.CoreApi;
 using Waves.Core.Models.Enums;

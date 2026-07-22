@@ -3,7 +3,7 @@
     x:Class="Haiyu.Pages.Dialogs.UpdateGameDialogV2"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:charts="using:LiveChartsCore.SkiaSharpView.WinUI"
+    xmlns:charts="using:Haiyu.Charts.WinUI"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:local="using:Haiyu.Pages.Dialogs"
@@ -74,21 +74,8 @@
 
         <charts:PieChart
             Grid.Column="1"
-            AutoUpdateEnabled="True"
             Background="Transparent"
-            SeriesSource="{x:Bind ViewModel.DiskPipePoint, Mode=OneWay}">
-            <charts:PieChart.SeriesTemplate>
-                <DataTemplate x:DataType="m:PieData">
-                    <charts:XamlPieSeries
-                        DataLabelsFormatter="{x:Bind Formatter}"
-                        OuterRadiusOffset="{x:Bind Offset}"
-                        SeriesName="{x:Bind Name}"
-                        ShowDataLabels="True"
-                        ToolTipLabelFormatter="{x:Bind Formatter}"
-                        Values="{x:Bind Values}" />
-                </DataTemplate>
-            </charts:PieChart.SeriesTemplate>
-        </charts:PieChart>
+            Series="{x:Bind ViewModel.DiskPipePoint, Mode=OneWay}" />
         <Button
             Grid.Row="1"
             Grid.ColumnSpan="2"

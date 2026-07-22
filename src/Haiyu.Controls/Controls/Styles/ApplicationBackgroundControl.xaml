@@ -56,13 +56,13 @@
                                             <DoubleAnimation
                                                 Storyboard.TargetName="ImageControl"
                                                 Storyboard.TargetProperty="Opacity"
-                                                To="0"
-                                                Duration="0:0:1" />
+                                                To="1"
+                                                Duration="0" />
                                             <DoubleAnimation
                                                 Storyboard.TargetName="MediaBorder"
                                                 Storyboard.TargetProperty="Opacity"
                                                 To="0"
-                                                Duration="0:0:1" />
+                                                Duration="0" />
                                         </Storyboard>
                                     </VisualState.Storyboard>
                                 </VisualState>
