@@ -4,11 +4,11 @@ namespace Waves.Core.Contracts;
 
 public interface ITaskManager
 {
-    public Task RegsiterTaskAsync<ITask>(ITask task)
+    public void RegsiterTask<ITask>(ITask task)
         where ITask : ITaskService, ITaskName;
 
 
-    public IEnumerable<string> GetTasks();
+    public IEnumerable<Tuple<string,string,string>> GetTasks();
 
     public Task InvokeTaskAsync(string taskName, CancellationToken cts = default);
 

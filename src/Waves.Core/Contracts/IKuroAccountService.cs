@@ -7,6 +7,7 @@ public interface IKuroAccountService
 {
 
     public LocalAccount? Current { get; }
+    public KuroAccount? CurrentAccount { get; }
     public AppSettings AppSettings { get; }
 
     /// <summary>

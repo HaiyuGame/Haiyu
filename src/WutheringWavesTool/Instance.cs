@@ -8,6 +8,7 @@ using Haiyu.ServiceHost;
 using Haiyu.ServiceHost.XBox.Commons;
 using Haiyu.Services.DialogServices;
 using Haiyu.Services.Navigations.NavigationViewServices;
+using Haiyu.Services.Tasks;
 using Haiyu.ViewModel.Communitys;
 using Haiyu.ViewModel.GameViewModels;
 using Haiyu.ViewModel.GameViewModels.GameContexts;
@@ -32,11 +33,11 @@ public static class Instance
 {
     public static IHost Host { get; private set; }
 
-    public static void InitService()
+    public static async Task InitServiceAsync()
     {
         EnsureMemoryPackFormatters();
         Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder().AppBuilder().Build();
-        Task.Run(async () => await Instance.Host.StartAsync());
+        _ = Task.Run(async()=> await Host.StartAsync());
     }
 
     static void EnsureMemoryPackFormatters()
@@ -89,8 +90,8 @@ public static class InstanceBuilderExtensions
                     )
                     .AddSingleton<AppSettings>()
                     .AddSingleton<GithubIpSettings>()
-                    .AddSingleton<IIoCircuitBreaker,IoCircuitBreaker>()
-                    .AddTransient<IAppActivation,AppActivation>()
+                    .AddSingleton<IIoCircuitBreaker, IoCircuitBreaker>()
+                    .AddTransient<IAppActivation, AppActivation>()
                     #region XBox
                     .AddSingleton<XBoxConfig>()
                     .AddSingleton<XBoxController>()
@@ -175,7 +176,8 @@ public static class InstanceBuilderExtensions
                     .AddTransient<IViewFactorys, ViewFactorys>()
                     .AddSingleton<IThemeService, ThemeService>()
                     .AddSingleton<IKuroAccountService, KuroAccountService>()
-                    .AddHostedService<AutoSignService>()
+                    .AddSingleton<AutoKuroGameSignService>()
+                    .AddSingleton<ITaskManager, TaskManager>(s => CreateTask(s))
                     .AddSingleton<CloudConfigManager>(
                         (s) =>
                         {
@@ -216,14 +218,13 @@ public static class InstanceBuilderExtensions
                     .AddTransient<IWavesPlayerCardCacheServices, WavesPlayerCardCacheServices>(
                         _ => new WavesPlayerCardCacheServices(AppSettings.WavesRecordFolder)
                     )
-                #endregion
-                #region Toolkit
+                    #endregion
+                    #region Toolkit
                     .AddTransient<ToolkitPage>()
                     .AddTransient<ToolkitViewModel>()
-
                     .AddTransient<AutoKuroTokenPage>()
                     .AddTransient<AutoKuroTokenViewModel>()
-                #endregion
+                    #endregion
                     .AddKeyedSingleton<IDialogManager, MainDialogService>(nameof(MainDialogService))
                     .AddKeyedSingleton<LoggerService>(
                         "AppLog",
@@ -251,5 +252,15 @@ public static class InstanceBuilderExtensions
             }
         );
         return builder;
+    }
+
+    private static TaskManager CreateTask(IServiceProvider s)
+    {
+        TaskManager taskManager = new TaskManager();
+        #region 自动签到
+        var autoSignTask = s.GetRequiredService<AutoKuroGameSignService>();
+        taskManager.RegsiterTask(autoSignTask);
+        #endregion
+        return taskManager;
     }
 }

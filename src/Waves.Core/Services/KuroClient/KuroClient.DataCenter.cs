@@ -3,12 +3,13 @@ namespace Waves.Core.Services;
 partial class KuroClient
 {
     public async Task<GamerBassData?> GetGamerBassDataAsync(
+        KuroAccount account,
         GameRoilDataItem roil,
         CancellationToken token = default
     )
     {
-        await this.UpdateRefreshToken(roil, token);
-        var header = GetWebHeader(false);
+        var session = await UpdateRefreshToken(account, roil, token);
+        var header = GetWebHeader(account, session?.AccessToken);
         var content = new Dictionary<string, string>()
         {
             { "gameId", roil.GameId.ToString() },
@@ -47,12 +48,13 @@ partial class KuroClient
     }
 
     public async Task<GamerRoleData?> GetGamerRoleDataAsync(
+        KuroAccount account,
         GameRoilDataItem roil,
         CancellationToken token = default
     )
     {
-        await this.UpdateRefreshToken(roil, token);
-        var header = GetWebHeader(false);
+        var session = await UpdateRefreshToken(account, roil, token);
+        var header = GetWebHeader(account, session?.AccessToken);
         var content = new Dictionary<string, string>()
         {
             { "gameId", roil.GameId.ToString() },
@@ -83,12 +85,13 @@ partial class KuroClient
     }
 
     public async Task<GamerCalabashData?> GetGamerCalabashDataAsync(
+        KuroAccount account,
         GameRoilDataItem roil,
         CancellationToken token = default
     )
     {
-        await this.UpdateRefreshToken(roil, token);
-        var header = GetWebHeader(false);
+        var session = await UpdateRefreshToken(account, roil, token);
+        var header = GetWebHeader(account, session?.AccessToken);
         var content = new Dictionary<string, string>()
         {
             { "gameId", roil.GameId.ToString() },
@@ -120,12 +123,13 @@ partial class KuroClient
     }
 
     public async Task<GamerTowerModel?> GetGamerTowerIndexDataAsync(
+        KuroAccount account,
         GameRoilDataItem roil,
         CancellationToken token = default
     )
     {
-        await this.UpdateRefreshToken(roil, token);
-        var header = GetWebHeader(false);
+        var session = await UpdateRefreshToken(account, roil, token);
+        var header = GetWebHeader(account, session?.AccessToken);
         var content = new Dictionary<string, string>()
         {
             { "gameId", roil.GameId.ToString() },
@@ -154,12 +158,13 @@ partial class KuroClient
     }
 
     public async Task<GamerExploreIndexData?> GetGamerExploreIndexDataAsync(
+        KuroAccount account,
         GameRoilDataItem roil,
         CancellationToken token = default
     )
     {
-        await this.UpdateRefreshToken(roil, token);
-        var header = GetWebHeader(false);
+        var session = await UpdateRefreshToken(account, roil, token);
+        var header = GetWebHeader(account, session?.AccessToken);
         var content = new Dictionary<string, string>()
         {
             { "gameId", roil.GameId.ToString() },
@@ -189,12 +194,13 @@ partial class KuroClient
     }
 
     public async Task<GamerChallengeIndexData?> GetGamerChallengeIndexDataAsync(
+        KuroAccount account,
         GameRoilDataItem roil,
         CancellationToken token = default
     )
     {
-        await this.UpdateRefreshToken(roil, token);
-        var header = GetWebHeader(false);
+        var session = await UpdateRefreshToken(account, roil, token);
+        var header = GetWebHeader(account, session?.AccessToken);
         var content = new Dictionary<string, string>()
         {
             { "gameId", roil.GameId.ToString() },
@@ -228,12 +234,13 @@ partial class KuroClient
     }
 
     public async Task<GamerDataBool?> RefreshGamerDataAsync(
+        KuroAccount account,
         GameRoilDataItem roil,
         CancellationToken token = default
     )
     {
-        await this.UpdateRefreshToken(roil, token);
-        var header = GetWebHeader(false);
+        var session = await UpdateRefreshToken(account, roil, token);
+        var header = GetWebHeader(account, session?.AccessToken);
         var content = new Dictionary<string, string>()
         {
             { "gameId", roil.GameId.ToString() },
@@ -253,13 +260,14 @@ partial class KuroClient
     }
 
     public async Task<GamerRoilDetily?> GetGamerRoilDetily(
+        KuroAccount account,
         GameRoilDataItem roil,
         long roleId,
         CancellationToken token = default
     )
     {
-        await this.UpdateRefreshToken(roil, token);
-        var header = GetWebHeader(false);
+        var session = await UpdateRefreshToken(account, roil, token);
+        var header = GetWebHeader(account, session?.AccessToken);
         var content = new Dictionary<string, string>()
         {
             { "gameId", roil.GameId.ToString() },
@@ -289,13 +297,14 @@ partial class KuroClient
     }
 
     public async Task<GamerChallengeDetily?> GetGamerChallengeDetails(
+        KuroAccount account,
         GameRoilDataItem roil,
         int countryCode,
         CancellationToken token = default
     )
     {
-        await this.UpdateRefreshToken(roil, token);
-        var header = GetWebHeader(false);
+        var session = await UpdateRefreshToken(account, roil, token);
+        var header = GetWebHeader(account, session?.AccessToken);
         var content = new Dictionary<string, string>()
         {
             { "gameId", roil.GameId.ToString() },
@@ -331,12 +340,13 @@ partial class KuroClient
     }
 
     public async Task<GamerSkin?> GetGamerSkinAsync(
+        KuroAccount account,
         GameRoilDataItem roil,
         CancellationToken token = default
     )
     {
-        await this.UpdateRefreshToken(roil, token);
-        var header = GetWebHeader(false);
+        var session = await UpdateRefreshToken(account, roil, token);
+        var header = GetWebHeader(account, session?.AccessToken);
         var content = new Dictionary<string, string>()
         {
             { "gameId", roil.GameId.ToString() },
@@ -366,14 +376,15 @@ partial class KuroClient
     }
 
     public async Task<GamerSlashDetailData?> GetGamerSlashDetailAsync(
+        KuroAccount account,
         GameRoilDataItem roil,
         CancellationToken token = default
     )
     {
         try
         {
-            await this.UpdateRefreshToken(roil, token);
-            var header = GetWebHeader(false);
+            var session = await UpdateRefreshToken(account, roil, token);
+            var header = GetWebHeader(account, session?.AccessToken);
             var content = new Dictionary<string, string>()
             {
                 { "gameId", roil.GameId.ToString() },
@@ -409,11 +420,14 @@ partial class KuroClient
         }
     }
 
-    public async Task<BriefHeader?> GetBriefHeaderAsync(CancellationToken token = default)
+    public async Task<BriefHeader?> GetBriefHeaderAsync(
+        KuroAccount account,
+        CancellationToken token = default
+    )
     {
         try
         {
-            var header = GetWebHeader(true);
+            var header = GetWebHeader(account);
             var content = new Dictionary<string, string>() { };
             var request = await BuildRequestAsync(
                 "https://api.kurobbs.com/aki/resource/period/list",
@@ -434,6 +448,7 @@ partial class KuroClient
     }
 
     public async Task<ResourceBrefItem> GetVersionBrefItemAsync(
+        KuroAccount account,
         string roleId,
         string serverId,
         string versionId,
@@ -441,6 +456,7 @@ partial class KuroClient
     )
     {
         return await GetBrefItemAsync(
+            account,
             "https://api.kurobbs.com/aki/resource/version",
             roleId,
             serverId,
@@ -450,6 +466,7 @@ partial class KuroClient
     }
 
     public async Task<ResourceBrefItem> GetWeekBrefItemAsync(
+        KuroAccount account,
         string roleId,
         string serverId,
         string versionId,
@@ -457,6 +474,7 @@ partial class KuroClient
     )
     {
         return await GetBrefItemAsync(
+            account,
             "https://api.kurobbs.com/aki/resource/week",
             roleId,
             serverId,
@@ -466,6 +484,7 @@ partial class KuroClient
     }
 
     public async Task<ResourceBrefItem> GetMonthBrefItemAsync(
+        KuroAccount account,
         string roleId,
         string serverId,
         string versionId,
@@ -473,6 +492,7 @@ partial class KuroClient
     )
     {
         return await GetBrefItemAsync(
+            account,
             "https://api.kurobbs.com/aki/resource/month",
             roleId,
             serverId,
@@ -482,6 +502,7 @@ partial class KuroClient
     }
 
     private async Task<ResourceBrefItem> GetBrefItemAsync(
+        KuroAccount account,
         string url,
         string roleId,
         string serverId,
@@ -491,7 +512,7 @@ partial class KuroClient
     {
         try
         {
-            var header = GetWebHeader(true);
+            var header = GetWebHeader(account);
             var content = new Dictionary<string, string>()
             {
                 { "period", versionId },

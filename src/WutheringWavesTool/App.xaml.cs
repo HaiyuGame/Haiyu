@@ -79,8 +79,7 @@ public partial class App : ClientApplication
 
     protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
-        Instance.InitService();
-        Task.Run(async () => await Instance.Host.RunAsync());
+        await Instance.InitServiceAsync();
         this.AppSettings = Instance.Host.Services.GetRequiredService<AppSettings>();
         this.UnhandledException += App_UnhandledException;
         CreateFolder();

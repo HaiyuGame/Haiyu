@@ -3,11 +3,12 @@ namespace Waves.Core.Services;
 partial class KuroClient
 {
     public async Task<GamerDataModel?> GetGamerDataAsync(
+        KuroAccount account,
         GameRoilDataItem gamerRoil,
         CancellationToken token = default
     )
     {
-        var header = GetDeviceHeader(true);
+        var header = GetDeviceHeader(account);
         var queryData = new Dictionary<string, string>()
         {
             { "gameId", "3" },
@@ -31,11 +32,12 @@ partial class KuroClient
     }
 
     public async Task<GamerRoil?> GetGamerAsync(
+        KuroAccount account,
         GameType gameId,
         CancellationToken token = default
     )
     {
-        var header = GetDeviceHeader(true);
+        var header = GetDeviceHeader(account);
         var content = new Dictionary<string, string>()
         {
             { "gameId", gameId == GameType.Waves ? "3" : "2" },

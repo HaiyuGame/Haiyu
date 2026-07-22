@@ -24,6 +24,7 @@ public sealed partial class ShellViewModel : ViewModelBase
         IViewFactorys viewFactorys,
         IWallpaperService wallpaperService,
         IKuroClient kuroClient,
+        IKuroAccountService kuroAccountService,
         SystemEventPublisher systemEventPublisher
     )
     {
@@ -35,6 +36,7 @@ public sealed partial class ShellViewModel : ViewModelBase
         ViewFactorys = viewFactorys;
         WallpaperService = wallpaperService;
         KuroClient = kuroClient;
+        KuroAccountService = kuroAccountService;
         SystemEventPublisher = systemEventPublisher;
         RegisterMessanger();
         SystemMenu = new NotifyIconMenu()
@@ -58,6 +60,7 @@ public sealed partial class ShellViewModel : ViewModelBase
     public IViewFactorys ViewFactorys { get; }
     public IWallpaperService WallpaperService { get; }
     public IKuroClient KuroClient { get; }
+    public IKuroAccountService KuroAccountService { get; }
     public SystemEventPublisher SystemEventPublisher { get; }
 
     [ObservableProperty]
@@ -278,15 +281,15 @@ public sealed partial class ShellViewModel : ViewModelBase
     [RelayCommand]
     public async Task RefreshHeaderUser()
     {
-        if (KuroClient.AccountService.Current == null)
+        if (KuroAccountService.Current is null)
             return;
-        var current = KuroClient.AccountService.Current;
+        var current = KuroAccountService.Current;
+        var account = KuroAccount.From(current);
         if (long.TryParse(current.TokenId, out var _id))
         {
             var result = await KuroClient.GetWavesMineAsync(
+                account,
                 _id,
-                current.TokenId,
-                current.Token,
                 this.CTS.Token
             );
             if (result == null)
@@ -310,8 +313,9 @@ public sealed partial class ShellViewModel : ViewModelBase
     async Task Loaded()
     {
         if (await AppSettings.GetAutoSignCommunityAsync() == false)
-            await KuroClient.SetAutoUserAsync(this.CTS.Token);
-        var result = await KuroClient.IsLoginAsync(this.CTS.Token);
+            await KuroAccountService.SetAutoUser();
+        var account = KuroAccountService.CurrentAccount;
+        var result = account is not null && await KuroClient.IsLoginAsync(account, this.CTS.Token);
         if (!result)
         {
             this.LoginBthVisibility = Visibility.Visible;

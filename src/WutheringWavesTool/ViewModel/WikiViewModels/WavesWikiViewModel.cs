@@ -188,7 +188,9 @@ public partial class WavesWikiViewModel : WikiViewModelBase
 
     private async Task RefreshBaseData(GameRoilDataItem value)
     {
-        await WavesClient.UpdateRefreshToken(value);
+        var account = AccountService.CurrentAccount;
+        if (account is not null)
+            await WavesClient.UpdateRefreshToken(account, value);
     }
 
     [RelayCommand]
@@ -197,10 +199,11 @@ public partial class WavesWikiViewModel : WikiViewModelBase
         try
         {
             this.SelectGamer = null;
-            if (await WavesClient.IsLoginAsync(CTS.Token))
+            var account = AccountService.CurrentAccount;
+            if (account is not null && await WavesClient.IsLoginAsync(account, CTS.Token))
             {
                 var roles = await TryInvokeAsync(async () =>
-                    await WavesClient.GetGamerAsync(Waves.Core.Models.Enums.GameType.Waves, this.CTS.Token)
+                    await WavesClient.GetGamerAsync(account, Waves.Core.Models.Enums.GameType.Waves, this.CTS.Token)
                 );
                 if (roles.Code != 0)
                 {
@@ -301,7 +304,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase
 
     private KuroLoginSnapshot? CreateLoginSnapshot()
     {
-        var session = WavesClient.AccountService.Current;
+        var session = AccountService.Current;
         if (session is null)
         {
             return null;

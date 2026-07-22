@@ -4,10 +4,14 @@ namespace Waves.Core.Services;
 
 public class TaskManager : ITaskManager
 {
-    private readonly IDictionary<string, ITaskService> _tasks =
-        new Dictionary<string, ITaskService>();
+    private readonly IDictionary<string, ITaskService> _tasks;
 
-    public async Task RegsiterTaskAsync<ITask>(ITask task)
+    public TaskManager()
+    {
+        _tasks = new Dictionary<string, ITaskService>();
+    }
+
+    public void RegsiterTask<ITask>(ITask task)
         where ITask : ITaskService, ITaskName
     {
         var name = typeof(ITask).FullName;
@@ -19,8 +23,10 @@ public class TaskManager : ITaskManager
         this._tasks.Add(name, task);
     }
 
-    public IEnumerable<string> GetTasks() =>
-        _tasks.Values.OfType<ITaskName>().Select(x => x.DisplayName);
+    public IEnumerable<Tuple<string, string,string>> GetTasks() =>
+        _tasks
+            .Values.OfType<ITaskName>()
+            .Select(x => Tuple.Create<string, string,string>(x.Guid,x.DisplayName, x.Description));
 
     public async Task InvokeTaskAsync(string taskName, CancellationToken cts = default)
     {

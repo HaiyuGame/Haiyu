@@ -2,11 +2,14 @@ namespace Waves.Core.Services;
 
 partial class KuroClient
 {
-    public async Task<WikiHomeModel> GetMainWikiAsync(CancellationToken token = default)
+    public async Task<WikiHomeModel> GetMainWikiAsync(
+        KuroAccount account,
+        CancellationToken token = default
+    )
     {
         var header = new Dictionary<string, string>()
         {
-            { "devcode", AccountService.Current?.TokenDid?? "" },
+            { "devcode", account.DeviceId },
             { "wiki_type", "9" },
         };
         var request = await BuildRequestAsync(

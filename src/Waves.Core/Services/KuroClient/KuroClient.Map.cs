@@ -3,9 +3,11 @@ namespace Waves.Core.Services;
 partial class KuroClient
 {
     public HttpClient MapClient { get; private set; }
+    private KuroAccount? _mapAccount;
 
-    public async Task InitMapPostion()
+    public async Task InitMapPostion(KuroAccount account)
     {
+        _mapAccount = account;
         MapClient = new HttpClient()
         {
             BaseAddress = new Uri("https://api.kurobbs.com")
@@ -22,7 +24,8 @@ partial class KuroClient
     public string BuildUri()
     {
         var builder = new UriBuilder("wss://api.kurobbs.com/ws-map");
-        var query = $"devcode={this.AccountService.Current.TokenDid}&token={this.AccountService.Current.Token}&source=android";
+        var account = _mapAccount ?? throw new InvalidOperationException("地图客户端尚未初始化账号。");
+        var query = $"devcode={account.DeviceId}&token={account.Token}&source=android";
         builder.Query = query;
         //wss://api.kurobbs.com/ws-map?devcode=v3gMmf9EnuSrdMCgZHrxauEWB2VZoyEj&token=eyJhbGciOiJIUzI1NiJ9.eyJjcmVhdGVkIjoxNzc4NDI1OTAwNjU5LCJ1c2VySWQiOjE3MzAxNDg0fQ.G0viXGZuvAKWLizzeDR15ocCYQO6ktEXj0TSsDH4hrE&source=android
         return builder.Uri.AbsoluteUri;
@@ -55,10 +58,10 @@ partial class KuroClient
     public HttpRequestMessage BuildMapRequest(HttpMethod method,string url,string body = null,string @paramQuery = null)
     {
         var postData = new HttpRequestMessage(method,url);
-        if(AccountService.Current != null)
+        if (_mapAccount is not null)
         {
-            postData.Headers.TryAddWithoutValidation("token", AccountService.Current.Token);
-            postData.Headers.TryAddWithoutValidation("devcode", AccountService.Current.TokenDid);
+            postData.Headers.TryAddWithoutValidation("token", _mapAccount.Token);
+            postData.Headers.TryAddWithoutValidation("devcode", _mapAccount.DeviceId);
             postData.Headers.TryAddWithoutValidation("source", "android");
             postData.Headers.TryAddWithoutValidation("wiki_type", "10");
             postData.Headers.TryAddWithoutValidation("Referer", "https://www.kurobbs.com/");

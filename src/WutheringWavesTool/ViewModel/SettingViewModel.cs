@@ -12,6 +12,7 @@ public sealed partial class SettingViewModel : ViewModelBase
     public SettingViewModel(
         [FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager,
         IKuroClient wavesClient,
+        IKuroAccountService accountService,
         IAppContext<App> appContext,
         IViewFactorys viewFactorys,
         ITipShow tipShow,
@@ -23,6 +24,7 @@ public sealed partial class SettingViewModel : ViewModelBase
     {
         DialogManager = dialogManager;
         WavesClient = wavesClient;
+        AccountService = accountService;
         AppContext = appContext;
         ViewFactorys = viewFactorys;
         TipShow = tipShow;
@@ -47,6 +49,7 @@ public sealed partial class SettingViewModel : ViewModelBase
 
     public IDialogManager DialogManager { get; }
     public IKuroClient WavesClient { get; }
+    public IKuroAccountService AccountService { get; }
     public IAppContext<App> AppContext { get; }
     public IViewFactorys ViewFactorys { get; }
     public ITipShow TipShow { get; }
@@ -162,7 +165,8 @@ public sealed partial class SettingViewModel : ViewModelBase
             TipShow.ShowMessage("系统用户验证失败！", Symbol.Clear);
             return;
         }
-        if (await WavesClient.IsLoginAsync())
+        var account = AccountService.CurrentAccount;
+        if (account is not null && await WavesClient.IsLoginAsync(account))
         {
             DataPackage package = new();
             package.SetText("NULL");

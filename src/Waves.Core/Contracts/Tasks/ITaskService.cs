@@ -31,4 +31,8 @@ public interface ITaskName
 {
 
     public string DisplayName { get; }
+
+    public string Description { get; }
+
+    public string Guid { get; }
 }
