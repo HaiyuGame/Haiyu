@@ -42,4 +42,5 @@ public abstract class DefaultTaskServiceBase : ITaskService
     }
 
     public abstract Task BeginAsync(CancellationToken token);
+    public bool IsRuning() => false;
 }

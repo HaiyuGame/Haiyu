@@ -10,6 +10,8 @@ public abstract class TimerTaskServiceBase : ITimerTaskService, IAsyncDisposable
     private readonly SemaphoreSlim _lifecycleLock = new(1, 1);
     private bool _disposed;
 
+    public bool IsRuning { get; }
+
     protected TimerTaskServiceBase(
         SystemEventPublisher publisher,
         LoggerService logger

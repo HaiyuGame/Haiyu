@@ -25,8 +25,17 @@ public interface ITaskService
     /// </summary>
     /// <returns></returns>
     public Task CancelAsync();
+
+    /// <summary>
+    /// 是否在运行
+    /// </summary>
+    /// <returns></returns>
+    public bool IsRuning { get; }
 }
 
+/// <summary>
+/// 任务描述
+/// </summary>
 public interface ITaskName
 {
 
