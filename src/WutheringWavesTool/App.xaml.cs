@@ -58,6 +58,10 @@ public partial class App : ClientApplication
         Microsoft.UI.Xaml.UnhandledExceptionEventArgs e
     )
     {
+        if(e.Exception is OperationCanceledException)
+        {
+            return;
+        }
         try
         {
             Instance.Host.Services.GetService<ITipShow>().ShowMessage(e.Message, Symbol.Clear);
