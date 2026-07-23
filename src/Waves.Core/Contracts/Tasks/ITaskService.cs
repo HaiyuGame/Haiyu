@@ -44,4 +44,9 @@ public interface ITaskName
     public string Description { get; }
 
     public string Guid { get; }
+
+    /// <summary>
+    /// 外部传参使用
+    /// </summary>
+    public string Note { get; }
 }

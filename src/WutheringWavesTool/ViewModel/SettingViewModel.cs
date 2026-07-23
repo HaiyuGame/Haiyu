@@ -57,8 +57,6 @@ public sealed partial class SettingViewModel : ViewModelBase
     public IPickersService PickersService { get; }
     public IThemeService ThemeService { get; }
     public GithubIpSettings GithubIpSettings { get; }
-    [ObservableProperty]
-    public partial bool? AutoCommunitySign { get; set; }
 
     [ObservableProperty]
     public partial bool? StartGameAllowCloseMain { get; set; }
@@ -115,7 +113,6 @@ public sealed partial class SettingViewModel : ViewModelBase
                 this.SelectWallpaperName = WallpaperTypes[1];
             }
         }
-        this.AutoCommunitySign = await AppSettings.GetAutoSignCommunityAsync();
         this.StartGameAllowCloseMain = await AppSettings.GetStartGameAllowCloseMainAsync();
         switch (await AppSettings.GetElementThemeAsync())
         {
@@ -195,10 +192,6 @@ public sealed partial class SettingViewModel : ViewModelBase
         _ = AppSettings.SetStartGameAllowCloseMainAsync(value);
     }
 
-    partial void OnAutoCommunitySignChanged(bool? value)
-    {
-        _ = AppSettings.SetAutoSignCommunityAsync(value);
-    }
 
     private async Task OnSelectCloseIndexChangedAsync(int value)
     {

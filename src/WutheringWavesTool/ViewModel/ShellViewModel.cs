@@ -25,7 +25,8 @@ public sealed partial class ShellViewModel : ViewModelBase
         IWallpaperService wallpaperService,
         IKuroClient kuroClient,
         IKuroAccountService kuroAccountService,
-        SystemEventPublisher systemEventPublisher
+        SystemEventPublisher systemEventPublisher,
+        ITaskManager taskManager
     )
     {
         HomeNavigationService = homeNavigationService;
@@ -38,6 +39,7 @@ public sealed partial class ShellViewModel : ViewModelBase
         KuroClient = kuroClient;
         KuroAccountService = kuroAccountService;
         SystemEventPublisher = systemEventPublisher;
+        TaskManager = taskManager;
         RegisterMessanger();
         SystemMenu = new NotifyIconMenu()
         {
@@ -62,7 +64,7 @@ public sealed partial class ShellViewModel : ViewModelBase
     public IKuroClient KuroClient { get; }
     public IKuroAccountService KuroAccountService { get; }
     public SystemEventPublisher SystemEventPublisher { get; }
-
+    public ITaskManager TaskManager { get; }
     [ObservableProperty]
     public partial string ServerName { get; set; }
 
@@ -312,8 +314,6 @@ public sealed partial class ShellViewModel : ViewModelBase
     [RelayCommand]
     async Task Loaded()
     {
-        if (await AppSettings.GetAutoSignCommunityAsync() == false)
-            await KuroAccountService.SetAutoUser();
         var account = KuroAccountService.CurrentAccount;
         var result = account is not null && await KuroClient.IsLoginAsync(account, this.CTS.Token);
         if (!result)
@@ -337,8 +337,8 @@ public sealed partial class ShellViewModel : ViewModelBase
         await RefreshHeaderUser();
         await OpenMain();
         await AppContext.UpdateAppAsync();
-
         await SystemEventPublisher.SubscribeAsync(OnMessageChanged);
+        _ = Task.Run(async()=>await TaskManager.InitializeAutoLaunchTasksAsync());
     }
 
     private async ValueTask OnMessageChanged(SystemMessagerModel model)

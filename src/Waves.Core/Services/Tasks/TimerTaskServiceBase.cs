@@ -10,7 +10,7 @@ public abstract class TimerTaskServiceBase : ITimerTaskService, IAsyncDisposable
     private readonly SemaphoreSlim _lifecycleLock = new(1, 1);
     private bool _disposed;
 
-    public bool IsRuning { get; }
+    public bool IsRuning { get; set; }
 
     protected TimerTaskServiceBase(
         SystemEventPublisher publisher,
@@ -53,6 +53,8 @@ public abstract class TimerTaskServiceBase : ITimerTaskService, IAsyncDisposable
 
             _timer = new PeriodicTimer(period);
             _cts = new CancellationTokenSource();
+            IsRuning = true;
+            await InvokeAsync(this._cts.Token);
             _loopTask = LoopRunAsync(_timer, _cts.Token);
         }
         finally
@@ -67,6 +69,7 @@ public abstract class TimerTaskServiceBase : ITimerTaskService, IAsyncDisposable
         {
             try
             {
+                this.IsRuning = true;
                 if (!await timer.WaitForNextTickAsync(token).ConfigureAwait(false))
                     break;
 
@@ -111,7 +114,6 @@ public abstract class TimerTaskServiceBase : ITimerTaskService, IAsyncDisposable
         var cts = _cts;
         var timer = _timer;
         var loopTask = _loopTask;
-
         _cts = null;
         _timer = null;
         _loopTask = null;
@@ -134,7 +136,7 @@ public abstract class TimerTaskServiceBase : ITimerTaskService, IAsyncDisposable
                 // 正常取消。
             }
         }
-
+        IsRuning = false;
         cts?.Dispose();
     }
 

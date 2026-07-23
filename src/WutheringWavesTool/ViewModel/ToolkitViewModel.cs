@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Waves.Core.Models.Tasks;
 
 namespace Haiyu.ViewModel;
 
@@ -10,7 +11,14 @@ public sealed partial class ToolkitViewModel:ViewModelBase
     {
         ViewFactorys = viewFactorys;
         TaskManager = taskManager;
+        ReisterMessager();
     }
+
+    private void ReisterMessager()
+    {
+        WeakReferenceMessenger.Default.Register<SendTaskMessager>(this, SendTaskMethod);
+    }
+
 
     public IViewFactorys ViewFactorys { get; }
 
@@ -20,9 +28,15 @@ public sealed partial class ToolkitViewModel:ViewModelBase
     public partial ObservableCollection<TaskWrapper> Tasks { get; set; }
 
     [RelayCommand]
-    void Loaded()
+    async Task Loaded()
     {
-        this.Tasks = TaskManager.GetTasks().Select(x=>x.Create()).ToObservableCollection();
+        await RefreshTasks();
+    }
+
+    [RelayCommand]
+    async Task RefreshTasks()
+    {
+        this.Tasks =(await TaskManager.GetTasksAsync()).ToObservableCollection();
     }
 
     [RelayCommand]
@@ -30,5 +44,33 @@ public sealed partial class ToolkitViewModel:ViewModelBase
     {
         var window = ViewFactorys.ShowAutoKruoTokenWindow();
         window.AppWindow.Show();
+    }
+
+
+    private async void SendTaskMethod(object recipient, SendTaskMessager message)
+    {
+        switch (message.type)
+        {
+            case SendTaskType.Start:
+                await TaskManager.StartTaskAsync(message.wrapper.Guid);
+                await this.RefreshTasks();
+                break;
+            case SendTaskType.Stop:
+                await TaskManager.StopTaskAsync(message.wrapper.Guid);
+                await this.RefreshTasks();
+                break;
+            case SendTaskType.Invoke:
+                await TaskManager.InvokeTaskAsync(message.wrapper.Guid,this.CTS.Token);
+                break;
+            case SendTaskType.Launche:
+                await AppSettings.WriteAsync(message.wrapper.AutoLaunche.ToString(), message.wrapper.SettingName);
+                if (message.wrapper.AutoLaunche)
+                {
+                    await TaskManager.StartTaskAsync(message.wrapper.Guid);
+                }
+                break;
+            default:
+                break;
+        }
     }
 }

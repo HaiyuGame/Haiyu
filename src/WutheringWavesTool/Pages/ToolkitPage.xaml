@@ -9,7 +9,8 @@
     xmlns:local="using:Haiyu.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="using:Haiyu.Controls"
-    xmlns:wrapper="using:Haiyu.Models.Wrapper"
+    xmlns:wrapper="using:Waves.Core.Models.Tasks"
+    NavigationCacheMode="Disabled"
     mc:Ignorable="d">
     <i:Interaction.Behaviors>
         <i:EventTriggerBehavior EventName="Loaded">
@@ -43,11 +44,31 @@
                     </StackPanel>
                 </Button>
             </cui:SettingsCard>
-            <TextBlock
-                FontFamily="{ThemeResource DefaultFont}"
-                FontSize="18"
-                Text="服务" />
+            <Grid Margin="0,15,0,0" VerticalAlignment="Center">
+                <TextBlock
+                    VerticalAlignment="Center"
+                    FontFamily="{ThemeResource DefaultFont}"
+                    FontSize="18"
+                    Text="服务" />
+                <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                    <Button Command="{x:Bind ViewModel.RefreshTasksCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <FontIcon
+                                FontFamily="Segoe Fluent Icons"
+                                FontSize="13"
+                                Glyph="&#xE72C;" />
+                            <TextBlock FontSize="13" Text="刷新" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
             <ItemsControl ItemsSource="{x:Bind ViewModel.Tasks, Mode=OneWay}">
+                <ItemsControl.ItemContainerTransitions>
+                    <TransitionCollection>
+                        <AddDeleteThemeTransition />
+                        <RepositionThemeTransition />
+                    </TransitionCollection>
+                </ItemsControl.ItemContainerTransitions>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="wrapper:TaskWrapper">
                         <cui:SettingsCard
@@ -55,22 +76,38 @@
                             Description="{x:Bind Description}"
                             Header="{x:Bind Header}">
                             <cui:SettingsCard.HeaderIcon>
-                                <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xF7EC;" />
+                                <FontIcon
+                                    FontFamily="Segoe Fluent Icons"
+                                    Foreground="{x:Bind IsRun, Converter={StaticResource BoolToSolidBrushColorConverter}}"
+                                    Glyph="&#xE91F;" />
                             </cui:SettingsCard.HeaderIcon>
                             <StackPanel Orientation="Horizontal" Spacing="5">
-                                <Button Style="{ThemeResource TransparentButtonStyle}">
+                                <ToggleSwitch
+                                    IsOn="{x:Bind AutoLaunche, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    OffContent="手动"
+                                    OnContent="自启" />
+                                <Button
+                                    Command="{x:Bind SendStartCommand}"
+                                    Style="{ThemeResource TransparentButtonStyle}"
+                                    ToolTipService.ToolTip="开始服务">
                                     <FontIcon
                                         FontFamily="Segoe Fluent Icons"
                                         FontSize="17"
                                         Glyph="&#xE768;" />
                                 </Button>
-                                <Button Style="{ThemeResource TransparentButtonStyle}">
+                                <Button
+                                    Command="{x:Bind SendStopCommand}"
+                                    Style="{ThemeResource TransparentButtonStyle}"
+                                    ToolTipService.ToolTip="终止服务">
                                     <FontIcon
                                         FontFamily="Segoe Fluent Icons"
                                         FontSize="17"
                                         Glyph="&#xE71A;" />
                                 </Button>
-                                <Button Style="{ThemeResource TransparentButtonStyle}">
+                                <Button
+                                    Command="{x:Bind SendInvokeCommand}"
+                                    Style="{ThemeResource TransparentButtonStyle}"
+                                    ToolTipService.ToolTip="单次执行">
                                     <FontIcon
                                         FontFamily="Segoe Fluent Icons"
                                         FontSize="17"

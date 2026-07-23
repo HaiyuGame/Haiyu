@@ -18,6 +18,8 @@ public sealed class AutoKuroGameSignService : TimedTaskServiceBase,ITaskName
 
     public string Guid => "17A23862-4CEE-48F0-BF95-8B1CEF119158";
 
+    public string Note => "AutoSignCommunity";
+
     private readonly IKuroAccountService _kuroAccountService;
     private readonly IKuroClient _kuroClient;
     public AutoKuroGameSignService(

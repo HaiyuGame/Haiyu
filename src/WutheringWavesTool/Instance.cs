@@ -256,7 +256,7 @@ public static class InstanceBuilderExtensions
 
     private static TaskManager CreateTask(IServiceProvider s)
     {
-        TaskManager taskManager = new TaskManager();
+        TaskManager taskManager = new TaskManager(s.GetRequiredService<AppSettings>());
         #region 自动签到
         var autoSignTask = s.GetRequiredService<AutoKuroGameSignService>();
         taskManager.RegsiterTask(autoSignTask);
