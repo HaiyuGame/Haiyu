@@ -380,7 +380,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                 }
                 else
                 {
-                    await RefreshCoreAsync(isRefreshBackground: false);
+                    await RefreshCoreAsync();
                 }
                 if (actionType == Waves.Core.Models.Enums.GameContextActionType.GameExit)
                 {
@@ -634,34 +634,36 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
             }
             if (isRefreshBackground && background != null) //是否刷新资源背景
             {
-                if (wallpaperType == "Video")
-                {
-                    WallpaperService.SetMediaForUrl(
-                        Waves.Core.Models.Enums.WallpaperShowType.Video,
-                        background.BackgroundFile,
-                        background.FirstFrameImage
-                    );
-                }
-                else
+                if (status.Gameing)
                 {
                     WallpaperService.SetMediaForUrl(
                         Waves.Core.Models.Enums.WallpaperShowType.Image,
                         background.FirstFrameImage
                     );
                 }
+                else
+                {
+                    if (wallpaperType == "Video")
+                    {
+                        WallpaperService.SetMediaForUrl(
+                            Waves.Core.Models.Enums.WallpaperShowType.Video,
+                            background.BackgroundFile,
+                            background.FirstFrameImage
+                        );
+                        WallpaperService.RestartVideo();
+                    }
+                    else
+                    {
+                        WallpaperService.SetMediaForUrl(
+                            Waves.Core.Models.Enums.WallpaperShowType.Image,
+                            background.FirstFrameImage
+                        );
+                    }
+                }
                 this.VersionLogo = new BitmapImage(new(background.Slogan));
                 var coreConfig = await GameContext.ReadContextConfigAsync(this.CTS.Token);
                 this.DownloadSpeedValue = coreConfig.LimitSpeed / 1000 / 1000;
-                if (status.Gameing)
-                {
-                    WallpaperService.PauseVideo();
-                }
-                else
-                {
-                    WallpaperService.RestartVideo();
-                }
-                await ShowCardAsync(showCard);
-                await LoadAfter();
+                await Task.WhenAll(ShowCardAsync(showCard), LoadAfter());
             }
             this.DecompressSpeedPoints?.Clear();
             this.DownloadSpeedPoints?.Clear();

@@ -239,9 +239,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase
         {
             return;
         }
-
-        var win = WindowNative.GetWindowHandle(AppContext.App.MainWindow);
-        KuroDataCenterWindow window = new KuroDataCenterWindow(win, context, CommunityWindowOption);
+        KuroDataCenterWindow window = new KuroDataCenterWindow( context, CommunityWindowOption);
         if(window.Content is FrameworkElement element)
         {
             element.RequestedTheme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
