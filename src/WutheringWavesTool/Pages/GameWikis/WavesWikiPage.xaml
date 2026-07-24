@@ -159,7 +159,7 @@
                     Visibility="{x:Bind ViewModel.KuroLogin, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}">
                     <SystemBackdropElement>
                         <SystemBackdropElement.SystemBackdrop>
-                            <DesktopAcrylicBackdrop />
+                            <MicaBackdrop />
                         </SystemBackdropElement.SystemBackdrop>
                     </SystemBackdropElement>
                     <StackPanel
@@ -201,7 +201,7 @@
                         </Grid.RowDefinitions>
                         <SystemBackdropElement Grid.RowSpan="4" CornerRadius="5">
                             <SystemBackdropElement.SystemBackdrop>
-                                <DesktopAcrylicBackdrop />
+                                <MicaBackdrop />
                             </SystemBackdropElement.SystemBackdrop>
                         </SystemBackdropElement>
                         <ListView
@@ -234,32 +234,6 @@
                                 </DataTemplate>
                             </ListView.ItemTemplate>
                         </ListView>
-                        <Border
-                            Grid.Row="1"
-                            Height="1"
-                            Margin="20,0"
-                            Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
-                        <StackPanel
-                            Grid.Row="2"
-                            Margin="0,5,0,0"
-                            Padding="5"
-                            HorizontalAlignment="Center"
-                            CornerRadius="4"
-                            Orientation="Horizontal">
-                            <Button Command="{x:Bind ViewModel.OpenDataCenterCommand}" Content="数据面板" />
-                            <Button
-                                Margin="5,0,0,0"
-                                Command="{x:Bind ViewModel.OpenResourceBriefingCommand}"
-                                Content="资源简报" />
-                            <Button
-                                Margin="5,0,0,0"
-                                Command="{x:Bind ViewModel.OpenGrowthCalculatorCommand}"
-                                Content="养成计算器" />
-                            <Button
-                                Margin="5,0,0,0"
-                                Command="{x:Bind ViewModel.OpenGameSignCommand}"
-                                Content="游戏签到" />
-                        </StackPanel>
                     </Grid>
                     <Grid
                         Grid.Column="1"
@@ -267,18 +241,198 @@
                         BorderBrush="{ThemeResource ControlElevationBorderBrush}"
                         BorderThickness="1"
                         CornerRadius="5">
-                        <SystemBackdropElement CornerRadius="5">
+                        <Grid.RowDefinitions />
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <SystemBackdropElement
+                            Grid.RowSpan="3"
+                            Grid.ColumnSpan="3"
+                            CornerRadius="5">
 
                             <SystemBackdropElement.SystemBackdrop>
-                                <DesktopAcrylicBackdrop />
+                                <MicaBackdrop />
                             </SystemBackdropElement.SystemBackdrop>
                         </SystemBackdropElement>
-                        <TextBlock
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            FontFamily="{ThemeResource DefaultFont}"
-                            FontSize="18"
-                            Text="敬请期待" />
+
+                        <Grid
+                            Grid.Row="2"
+                            Grid.ColumnSpan="3"
+                            Margin="12"
+                            Padding="8"
+                            ColumnSpacing="5"
+                            CornerRadius="5"
+                            RowSpacing="15">
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+
+                            <Button
+                                Grid.Column="0"
+                                Grid.ColumnSpan="2"
+                                Margin="0,0,8,0"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                Command="{x:Bind ViewModel.OpenDataCenterCommand}"
+                                CornerRadius="3">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition />
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
+                                    <ui:ImageEx Height="50" Source="Assets\KuroClient\waves-dataCenter.png" />
+                                    <TextBlock
+                                        Grid.Row="1"
+                                        Margin="8"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Bottom"
+                                        Text="数据面板" />
+                                </Grid>
+                            </Button>
+                            <Button
+                                Grid.Column="2"
+                                Grid.ColumnSpan="2"
+                                Margin="8,0"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                Command="{x:Bind ViewModel.OpenResourceBriefingCommand}"
+                                CornerRadius="3">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition />
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
+                                    <ui:ImageEx Height="50" Source="Assets\KuroClient\waves-resource.gif" />
+                                    <TextBlock
+                                        Grid.Row="1"
+                                        Margin="8"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Bottom"
+                                        Text="资源简报" />
+                                </Grid>
+                            </Button>
+                            <Button
+                                Grid.Column="4"
+                                Grid.ColumnSpan="2"
+                                Margin="8,0,0,0"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                Command="{x:Bind ViewModel.OpenGrowthCalculatorCommand}"
+                                CornerRadius="3">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition />
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
+                                    <ui:ImageEx Height="50" Source="Assets\KuroClient\waves-cali.png" />
+                                    <TextBlock
+                                        Grid.Row="1"
+                                        Margin="8"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Bottom"
+                                        Text="养成计算器" />
+                                </Grid>
+                            </Button>
+                            <Button
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                Grid.ColumnSpan="2"
+                                Margin="0,0,8,0"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                Command="{x:Bind ViewModel.OpenCalendarCommand}"
+                                CornerRadius="3">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition />
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
+                                    <ui:ImageEx Height="50" Source="Assets\KuroClient\waves-active.gif" />
+                                    <TextBlock
+                                        Grid.Row="1"
+                                        Margin="8"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Bottom"
+                                        Text="活动日历" />
+                                </Grid>
+                            </Button>
+                            <Button
+                                Grid.Row="1"
+                                Grid.Column="2"
+                                Grid.ColumnSpan="2"
+                                Margin="8,0"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                Command="{x:Bind ViewModel.OpenMapCommand}"
+                                CornerRadius="3">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition />
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
+                                    <ui:ImageEx Height="50" Source="Assets\KuroClient\waves-map.png" />
+                                    <TextBlock
+                                        Grid.Row="1"
+                                        Margin="8"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Bottom"
+                                        Text="大地图" />
+                                </Grid>
+                            </Button>
+                            <Button
+                                Grid.Row="1"
+                                Grid.Column="4"
+                                Grid.ColumnSpan="2"
+                                Margin="8,0,0,0"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                Command="{x:Bind ViewModel.OpenGameSignCommand}"
+                                CornerRadius="3">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition />
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
+                                    <ui:ImageEx Height="50" Source="Assets\KuroClient\waves-sign.png" />
+                                    <TextBlock
+                                        Grid.Row="1"
+                                        Margin="8"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Bottom"
+                                        Text="游戏签到" />
+                                </Grid>
+                            </Button>
+                        </Grid>
+
                     </Grid>
 
                 </Grid>
@@ -299,7 +453,7 @@
                         <Grid Grid.Row="1" Margin="0,4,0,0">
                             <SystemBackdropElement Grid.RowSpan="4" CornerRadius="5">
                                 <SystemBackdropElement.SystemBackdrop>
-                                    <DesktopAcrylicBackdrop />
+                                    <MicaBackdrop />
                                 </SystemBackdropElement.SystemBackdrop>
                             </SystemBackdropElement>
                             <FlipView Background="Transparent" ItemsSource="{x:Bind ViewModel.RoleActive, Mode=OneWay}">
@@ -355,7 +509,7 @@
                         <Grid Grid.Row="0" VerticalAlignment="Top">
                             <SystemBackdropElement Grid.RowSpan="4" CornerRadius="5">
                                 <SystemBackdropElement.SystemBackdrop>
-                                    <DesktopAcrylicBackdrop />
+                                    <MicaBackdrop />
                                 </SystemBackdropElement.SystemBackdrop>
                             </SystemBackdropElement>
                             <FlipView Background="Transparent" ItemsSource="{x:Bind ViewModel.WeaponActive, Mode=OneWay}">

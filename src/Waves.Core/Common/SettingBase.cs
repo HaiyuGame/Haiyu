@@ -18,7 +18,7 @@ public abstract class SettingBase
 
     protected virtual JsonTypeInfo? GetJsonTypeInfo(string key) => null;
 
-    protected async Task<string?> ReadAsync(string key, CancellationToken ct = default)
+    public async Task<string?> ReadAsync(string key, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(key))
             throw new ArgumentException("配置键名不能为空", nameof(key));
@@ -36,7 +36,7 @@ public abstract class SettingBase
         }
     }
 
-    protected async Task WriteAsync(string? value, string key, CancellationToken ct = default)
+    public async Task WriteAsync(string? value, string key, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(key))
             throw new ArgumentException("配置键名不能为空", nameof(key));

@@ -1,15 +1,17 @@
-﻿using Waves.Core.Models.Enums;
+using Waves.Core.Models.Enums;
 
 namespace Haiyu.ViewModel.Communitys;
 
 public sealed partial class GamerSignViewModel : ViewModelBase
 {
-    public GamerSignViewModel(IKuroClient wavesClient)
+    public GamerSignViewModel(IKuroClient wavesClient, IKuroAccountService accountService)
     {
         WavesClient = wavesClient;
+        AccountService = accountService;
     }
 
     public IKuroClient WavesClient { get; }
+    public IKuroAccountService AccountService { get; }
     public GameRoilDataItem SignRoil { get; internal set; }
 
     [ObservableProperty]
@@ -48,8 +50,11 @@ public sealed partial class GamerSignViewModel : ViewModelBase
 
     async Task RefreshSignHistoryAsync()
     {
+        var account = AccountService.CurrentAccount;
+        if (account is null)
+            return;
         var game = await TryInvokeAsync(async () =>
-            await WavesClient.GetGamerAsync((GameType)this.SignRoil.GameId, this.CTS.Token)
+            await WavesClient.GetGamerAsync(account, (GameType)this.SignRoil.GameId, this.CTS.Token)
         );
         if (game.Item1 != 0)
         {
@@ -59,6 +64,7 @@ public sealed partial class GamerSignViewModel : ViewModelBase
         if (games.Count() != 0)
         {
             var result = await WavesClient.GetSignInDataAsync(
+                account,
                 SignRoil
             );
             var signCount = result!.Data.SigInNum;
@@ -102,8 +108,12 @@ public sealed partial class GamerSignViewModel : ViewModelBase
     [RelayCommand]
     async Task SignAsync()
     {
+        var account = AccountService.CurrentAccount;
+        if (account is null)
+            return;
         var result = await TryInvokeAsync(async () =>
             await WavesClient.SignInAsync(
+                account,
                 SignRoil,
                 this.CTS.Token
             )

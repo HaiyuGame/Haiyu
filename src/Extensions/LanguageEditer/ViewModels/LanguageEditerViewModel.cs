@@ -9,11 +9,11 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Haiyu.Pickers;
 using LanguageEditer.Model;
 using Microsoft.UI.Xaml.Controls;
 using Org.BouncyCastle.Crypto;
 using Syncfusion.UI.Xaml.DataGrid;
-using Windows.Storage.Pickers;
 using WinRT.Interop;
 
 namespace LanguageEditer.ViewModels;
@@ -21,6 +21,7 @@ namespace LanguageEditer.ViewModels;
 public partial class LanguageEditerViewModel : ObservableObject
 {
     private SfDataGrid _dataGrid;
+    private readonly NativePickersService _pickers = new(() => WindowNative.GetWindowHandle(App.Window));
 
     [RelayCommand]
     void CreateNewProject() { }
@@ -34,11 +35,9 @@ public partial class LanguageEditerViewModel : ObservableObject
     [RelayCommand]
     async Task OpenDocument()
     {
-        var picker = new FileOpenPicker();
-        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.Window);
-        picker.FileTypeFilter.Add(".json");
-        WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
-        var file = await picker.PickSingleFileAsync();
+        var file = await _pickers.GetFileOpenPicker([".json"]);
+        if (file is null)
+            return;
         if (File.Exists(file.Path))
         {
             ObservableCollection<ProjectLanguageModel> models = JsonSerializer.Deserialize(
@@ -52,20 +51,7 @@ public partial class LanguageEditerViewModel : ObservableObject
     [RelayCommand]
     async Task SaveDocument()
     {
-        var picker = new FileSavePicker();
-        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.Window);
-
-        WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
-        picker.DefaultFileExtension = ".json";
-
-        picker.FileTypeChoices.Add("Json", [".json"]);
-        picker.SuggestedFileName = "NewDocument";
-
-        picker.CommitButtonText = "Save File";
-
-        picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-
-        var file = await picker.PickSaveFileAsync();
+        var file = await _pickers.GetFileSavePicker([".json"], "NewDocument");
         if (file == null)
             return;
         if (File.Exists(file.Path))
@@ -95,18 +81,13 @@ public partial class LanguageEditerViewModel : ObservableObject
     {
         try
         {
-            FolderPicker picker = new FolderPicker();
-            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.Window);
-            picker.ViewMode = PickerViewMode.List;
-            picker.CommitButtonText = "Select Folder";
-            WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
-            var result = await picker.PickSingleFolderAsync();
+            var result = await _pickers.GetFolderPicker();
+            if (result is null)
+                return;
             if (Directory.GetFiles(result.Path, "*", SearchOption.AllDirectories).Count() > 0)
             {
                 MessageBox(IntPtr.Zero, $"选择的必须是一个空文件夹！", "警告", 0);
             }
-            if (result == null)
-                return;
             Dictionary<string, List<LanguageItem>> items =
                 new Dictionary<string, List<LanguageItem>>();
             var list = this

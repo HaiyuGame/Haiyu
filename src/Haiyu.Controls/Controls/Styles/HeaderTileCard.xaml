@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -39,7 +39,7 @@
                         </Grid.Resources>
                         <SystemBackdropElement CornerRadius="{TemplateBinding CornerRadius}">
                             <SystemBackdropElement.SystemBackdrop>
-                                <DesktopAcrylicBackdrop />
+                                <MicaBackdrop />
                             </SystemBackdropElement.SystemBackdrop>
                         </SystemBackdropElement>
                         <HyperlinkButton

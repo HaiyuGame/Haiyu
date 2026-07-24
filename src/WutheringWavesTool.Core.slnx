@@ -46,4 +46,7 @@
   <Project Path="D:/WorkSpace/Haiyu/src/Extensions/ProxyExtensions/ProxyExtensions.csproj" Id="5e689f49-98ad-49b7-a9e1-5d8714328cf1">
     <BuildType Solution="All|*" Project="Debug" />
   </Project>
+  <Project Path="Haiyu.Pickers/Haiyu.Pickers.csproj">
+    <BuildType Solution="All|*" Project="Debug" />
+  </Project>
 </Solution>

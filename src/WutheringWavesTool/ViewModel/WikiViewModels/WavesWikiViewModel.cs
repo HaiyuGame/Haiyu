@@ -31,6 +31,14 @@ public partial class WavesWikiViewModel : WikiViewModelBase
             CenterOnScreen = true,
         };
 
+    private static readonly WindowsOption CommunityMapOption = new()
+    {
+        Width = 1000,
+        Height = 500,
+        IsResizable = false,
+        CenterOnScreen = false
+    };
+
     public WavesWikiViewModel(IAppContext<App> appContext)
     {
         this.Messenger.Register<SelectUserMessanger>(this, LoginMessangerMethod);
@@ -78,7 +86,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase
         await RefreshUserAsync();
         if ((wikiPage.Result != null && wikiPage.Result.Data.ContentJson.Shortcuts != null))
         {
-            Actives = GameWikiClient.GetEventData(wikiPage.Result)!.Format()??[];
+            Actives = GameWikiClient.GetEventData(wikiPage.Result)!.Format(WikiType.Waves)??[];
             var sides = wikiPage.Result.Data.ContentJson.SideModules.Where(x => x.Type == "events-side").ToList();
             if(sides.Count == 2)
             {
@@ -150,6 +158,18 @@ public partial class WavesWikiViewModel : WikiViewModelBase
     }
 
     [RelayCommand]
+    void OpenCalendar()
+    {
+        OpenKuroCommunityWindow(CreateCalendarSessionContext());
+    }
+
+    [RelayCommand]
+    void OpenMap()
+    {
+        OpenKuroCommunityWindow(CreateMapSessionContext());
+    }
+
+    [RelayCommand]
     void OpenGameSign()
     {
         var win = Instance.Host.Services.GetRequiredService<IViewFactorys>()!.ShowSignWindow(this.SelectGamer);
@@ -168,7 +188,9 @@ public partial class WavesWikiViewModel : WikiViewModelBase
 
     private async Task RefreshBaseData(GameRoilDataItem value)
     {
-        await WavesClient.UpdateRefreshToken(value);
+        var account = AccountService.CurrentAccount;
+        if (account is not null)
+            await WavesClient.UpdateRefreshToken(account, value);
     }
 
     [RelayCommand]
@@ -177,10 +199,11 @@ public partial class WavesWikiViewModel : WikiViewModelBase
         try
         {
             this.SelectGamer = null;
-            if (await WavesClient.IsLoginAsync(CTS.Token))
+            var account = AccountService.CurrentAccount;
+            if (account is not null && await WavesClient.IsLoginAsync(account, CTS.Token))
             {
                 var roles = await TryInvokeAsync(async () =>
-                    await WavesClient.GetGamerAsync(Waves.Core.Models.Enums.GameType.Waves, this.CTS.Token)
+                    await WavesClient.GetGamerAsync(account, Waves.Core.Models.Enums.GameType.Waves, this.CTS.Token)
                 );
                 if (roles.Code != 0)
                 {
@@ -216,9 +239,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase
         {
             return;
         }
-
-        var win = WindowNative.GetWindowHandle(AppContext.App.MainWindow);
-        KuroDataCenterWindow window = new KuroDataCenterWindow(win, context, CommunityWindowOption);
+        KuroDataCenterWindow window = new KuroDataCenterWindow( context, CommunityWindowOption);
         if(window.Content is FrameworkElement element)
         {
             element.RequestedTheme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
@@ -228,37 +249,25 @@ public partial class WavesWikiViewModel : WikiViewModelBase
 
     private WebSessionContext? CreateDataCenterSessionContext()
     {
-        var snapshot = CreateLoginSnapshot();
-        if (snapshot is null || SelectGamer is null)
-        {
-            return null;
-        }
-
-        return WebSessionContext.CreateDataCenter(
-            snapshot,
-            SelectGamer.ServerId,
-            SelectGamer.RoleId,
-            SelectGamer.ServerName,
-            SelectGamer.RoleName);
+        return CreateCommunitySessionContext(WebSessionContext.CreateDataCenter);
     }
 
     private WebSessionContext? CreateGrowthCalculatorSessionContext()
     {
-        var snapshot = CreateLoginSnapshot();
-        if (snapshot is null || SelectGamer is null)
-        {
-            return null;
-        }
-
-        return WebSessionContext.CreateGrowthCalculator(
-            snapshot,
-            SelectGamer.ServerId,
-            SelectGamer.RoleId,
-            SelectGamer.ServerName,
-            SelectGamer.RoleName);
+        return CreateCommunitySessionContext(WebSessionContext.CreateGrowthCalculator);
     }
 
     private WebSessionContext? CreateResourceBriefingSessionContext()
+    {
+        return CreateCommunitySessionContext(WebSessionContext.CreateResourceBriefing);
+    }
+
+    private WebSessionContext? CreateCalendarSessionContext()
+    {
+        return CreateCommunitySessionContext(WebSessionContext.CreateCalendar);
+    }
+
+    private WebSessionContext? CreateMapSessionContext()
     {
         var snapshot = CreateLoginSnapshot();
         if (snapshot is null || SelectGamer is null)
@@ -266,7 +275,24 @@ public partial class WavesWikiViewModel : WikiViewModelBase
             return null;
         }
 
-        return WebSessionContext.CreateResourceBriefing(
+        return WebSessionContext.CreateMap(
+            snapshot,
+            SelectGamer.ServerId,
+            SelectGamer.RoleId,
+            SelectGamer.ServerName,
+            SelectGamer.RoleName);
+    }
+
+    private WebSessionContext? CreateCommunitySessionContext(
+        Func<KuroLoginSnapshot, string, string, string?, string?, WebSessionContext> factory)
+    {
+        var snapshot = CreateLoginSnapshot();
+        if (snapshot is null || SelectGamer is null)
+        {
+            return null;
+        }
+
+        return factory(
             snapshot,
             SelectGamer.ServerId,
             SelectGamer.RoleId,
@@ -276,7 +302,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase
 
     private KuroLoginSnapshot? CreateLoginSnapshot()
     {
-        var session = WavesClient.AccountService.Current;
+        var session = AccountService.Current;
         if (session is null)
         {
             return null;
@@ -288,6 +314,10 @@ public partial class WavesWikiViewModel : WikiViewModelBase
             Did = session.TokenDid ?? string.Empty,
             UserId = session.TokenId ?? string.Empty,
             AppVersion = App.AppVersion,
+            ChannelId = "8",
+            EnterSource = "12",
+            UserAgentName = "KuroGameBox",
+            Os = "Android",
         };
     }
 }

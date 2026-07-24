@@ -24,7 +24,9 @@ public sealed partial class ShellViewModel : ViewModelBase
         IViewFactorys viewFactorys,
         IWallpaperService wallpaperService,
         IKuroClient kuroClient,
-        SystemEventPublisher systemEventPublisher
+        IKuroAccountService kuroAccountService,
+        SystemEventPublisher systemEventPublisher,
+        ITaskManager taskManager
     )
     {
         HomeNavigationService = homeNavigationService;
@@ -35,7 +37,9 @@ public sealed partial class ShellViewModel : ViewModelBase
         ViewFactorys = viewFactorys;
         WallpaperService = wallpaperService;
         KuroClient = kuroClient;
+        KuroAccountService = kuroAccountService;
         SystemEventPublisher = systemEventPublisher;
+        TaskManager = taskManager;
         RegisterMessanger();
         SystemMenu = new NotifyIconMenu()
         {
@@ -58,8 +62,9 @@ public sealed partial class ShellViewModel : ViewModelBase
     public IViewFactorys ViewFactorys { get; }
     public IWallpaperService WallpaperService { get; }
     public IKuroClient KuroClient { get; }
+    public IKuroAccountService KuroAccountService { get; }
     public SystemEventPublisher SystemEventPublisher { get; }
-
+    public ITaskManager TaskManager { get; }
     [ObservableProperty]
     public partial string ServerName { get; set; }
 
@@ -278,15 +283,15 @@ public sealed partial class ShellViewModel : ViewModelBase
     [RelayCommand]
     public async Task RefreshHeaderUser()
     {
-        if (KuroClient.AccountService.Current == null)
+        if (KuroAccountService.Current is null)
             return;
-        var current = KuroClient.AccountService.Current;
+        var current = KuroAccountService.Current;
+        var account = KuroAccount.From(current);
         if (long.TryParse(current.TokenId, out var _id))
         {
             var result = await KuroClient.GetWavesMineAsync(
+                account,
                 _id,
-                current.TokenId,
-                current.Token,
                 this.CTS.Token
             );
             if (result == null)
@@ -309,9 +314,8 @@ public sealed partial class ShellViewModel : ViewModelBase
     [RelayCommand]
     async Task Loaded()
     {
-        if (await AppSettings.GetAutoSignCommunityAsync() == false)
-            await KuroClient.SetAutoUserAsync(this.CTS.Token);
-        var result = await KuroClient.IsLoginAsync(this.CTS.Token);
+        var account = KuroAccountService.CurrentAccount;
+        var result = account is not null && await KuroClient.IsLoginAsync(account, this.CTS.Token);
         if (!result)
         {
             this.LoginBthVisibility = Visibility.Visible;
@@ -326,15 +330,12 @@ public sealed partial class ShellViewModel : ViewModelBase
             await this.RefreshHeaderUser();
         }
         this.AppContext.MainTitle.UpDate();
-        WallpaperService.SetMediaForUrl(
-            WallpaperShowType.Image,
-            AppDomain.CurrentDomain.BaseDirectory + "Assets\\background.png"
-        );
+        await this.KuroAccountService.SetAutoUser();
         await RefreshHeaderUser();
         await OpenMain();
         await AppContext.UpdateAppAsync();
-
         await SystemEventPublisher.SubscribeAsync(OnMessageChanged);
+        _ = Task.Run(async()=>await TaskManager.InitializeAutoLaunchTasksAsync());
     }
 
     private async ValueTask OnMessageChanged(SystemMessagerModel model)

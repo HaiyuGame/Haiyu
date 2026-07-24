@@ -32,9 +32,10 @@ public partial class DeviceInfoViewModel : WindowViewModelBase, IDisposable
 {
     private bool disposedValue;
 
-    public DeviceInfoViewModel(IKuroClient wavesClient)
+    public DeviceInfoViewModel(IKuroClient wavesClient, IKuroAccountService accountService)
     {
         WavesClient = wavesClient;
+        AccountService = accountService;
     }
 
     [ObservableProperty]
@@ -60,6 +61,7 @@ public partial class DeviceInfoViewModel : WindowViewModelBase, IDisposable
     [ObservableProperty]
     public partial Visibility GamerRoleVisibility { get; set; }
     public IKuroClient WavesClient { get; }
+    public IKuroAccountService AccountService { get; }
 
     [ObservableProperty]
     public partial string VerifyCode { get; set; }
@@ -92,7 +94,10 @@ public partial class DeviceInfoViewModel : WindowViewModelBase, IDisposable
     [RelayCommand]
     async Task RefreshAsync()
     {
-        var devices = await WavesClient.GetDeviceInfosAsync();
+        var account = AccountService.CurrentAccount;
+        if (account is null)
+            return;
+        var devices = await WavesClient.GetDeviceInfosAsync(account);
         if (devices != null)
             this.Devices = devices.Data.Where(x => x != null).ToObservableCollection();
     }
@@ -117,7 +122,10 @@ public partial class DeviceInfoViewModel : WindowViewModelBase, IDisposable
     {
         if (value == null)
             return;
-        var gameServer = await WavesClient.GetBindServerAsync(value.Id, this.CTS.Token);
+        var account = AccountService.CurrentAccount;
+        if (account is null)
+            return;
+        var gameServer = await WavesClient.GetBindServerAsync(account, value.Id, this.CTS.Token);
         if (gameServer != null && gameServer.Code == 200)
             this.UserServers = gameServer.Data.ToObservableCollection();
     }
@@ -128,6 +136,7 @@ public partial class DeviceInfoViewModel : WindowViewModelBase, IDisposable
         if (SelectUserServer == null || SelectGamer == null)
             return;
         var result = await WavesClient.SendVerifyGameCode(
+            AccountService.CurrentAccount ?? throw new InvalidOperationException("当前未选择账号。"),
             SelectGamer.Id.ToString(),
             SelectUserServer.ServerId,
             this.BindRoleId,
@@ -158,6 +167,7 @@ public partial class DeviceInfoViewModel : WindowViewModelBase, IDisposable
         )
             return;
         var result = await WavesClient.BindGamer(
+            AccountService.CurrentAccount ?? throw new InvalidOperationException("当前未选择账号。"),
             SelectGamer.Id.ToString(),
             SelectUserServer.ServerId,
             this.BindRoleId,

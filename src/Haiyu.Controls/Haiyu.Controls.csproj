@@ -20,17 +20,17 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4022.49" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.1839" />
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.2.0" />
+    <PackageReference Include="Microsoft.WindowsAppSDK.WinUI" Version="2.3.2" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="3.0.1" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-    <PackageReference Include="CommunityToolkit.WinUI.Animations" Version="8.2.251219" />
-    <PackageReference Include="CommunityToolkit.WinUI.Behaviors" Version="8.2.251219" />
-    <PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" Version="8.2.251219" />
-    <PackageReference Include="CommunityToolkit.WinUI.Controls.Segmented" Version="8.2.251219" />
-    <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.251219" />
-    <PackageReference Include="CommunityToolkit.WinUI.Extensions" Version="8.2.251219" />
-    <PackageReference Include="CommunityToolkit.WinUI.Helpers" Version="8.2.251219" />
-    <PackageReference Include="CommunityToolkit.WinUI.Media" Version="8.2.251219" />
+    <PackageReference Include="CommunityToolkit.WinUI.Animations" Version="8.3.260402-preview2" />
+    <PackageReference Include="CommunityToolkit.WinUI.Behaviors" Version="8.3.260402-preview2" />
+    <PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" Version="8.3.260402-preview2" />
+    <PackageReference Include="CommunityToolkit.WinUI.Controls.Segmented" Version="8.3.260402-preview2" />
+    <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.3.260402-preview2" />
+    <PackageReference Include="CommunityToolkit.WinUI.Extensions" Version="8.3.260402-preview2" />
+    <PackageReference Include="CommunityToolkit.WinUI.Helpers" Version="8.3.260402-preview2" />
+    <PackageReference Include="CommunityToolkit.WinUI.Media" Version="8.3.260402-preview2" />
     <PackageReference Include="Microsoft.Graphics.Win2D" Version="1.4.0" />
     <PackageReference Include="WinUIEx" Version="2.9.1" />
   </ItemGroup>

@@ -1,5 +1,3 @@
-using LiveChartsCore.Defaults;
-using LiveChartsCore.Kernel;
 using Waves.Core.Models.Enums;
 
 namespace Haiyu.ViewModel.GameViewModels;
@@ -51,16 +49,19 @@ partial class KuroGameContextViewModelV2
 
     #region 进度图表
     [ObservableProperty]
-    public partial ObservableCollection<DateTimePoint> DownloadSpeedPoints { get; set; } = new();
+    public partial ObservableCollection<DateTimeChartPoint> DownloadSpeedPoints { get; set; } = new();
     [ObservableProperty]
-    public partial ObservableCollection<DateTimePoint> VerifySpeedPoints { get; set; } = new();
+    public partial ObservableCollection<DateTimeChartPoint> VerifySpeedPoints { get; set; } = new();
     [ObservableProperty]
-    public partial ObservableCollection<DateTimePoint> DecompressSpeedPoints { get; set; } = new();
+    public partial ObservableCollection<DateTimeChartPoint> DecompressSpeedPoints { get; set; } = new();
 
-    public object Sync { get; } = new object();
+    public ObservableCollection<ChartSeries> TransferChartSeries { get; private set; } = [];
+
+    public ObservableCollection<ChartAxis> TransferChartXAxes { get; private set; } = [];
+    public ObservableCollection<ChartAxis> TransferChartYAxes { get; private set; } = [];
 
     [ObservableProperty]
-    public partial ObservableCollection<double> DownloadSpeedSeparators { get; set; } = new();
+    public partial ObservableCollection<double> DownloadSpeedSeparators { get; set; } = GetSeparators();
 
     private static ObservableCollection<double> GetSeparators()
     {
@@ -75,12 +76,66 @@ partial class KuroGameContextViewModelV2
         ];
     }
 
+    private static void UpdateSeparators(ObservableCollection<double> separators, DateTime now)
+    {
+        double[] values =
+        [
+            now.AddSeconds(-5).Ticks,
+            now.AddSeconds(-3).Ticks,
+            now.AddSeconds(-2).Ticks,
+            now.AddSeconds(-1).Ticks,
+            now.Ticks
+        ];
+
+        while (separators.Count < values.Length)
+        {
+            separators.Add(values[separators.Count]);
+        }
+
+        for (var i = 0; i < values.Length; i++)
+        {
+            separators[i] = values[i];
+        }
+
+        while (separators.Count > values.Length)
+        {
+            separators.RemoveAt(separators.Count - 1);
+        }
+    }
+
 
     [ObservableProperty]
     public partial Func<DateTime, string> LabelsFormatter { get; set; } = Formatter;
 
-    public Func<ChartPoint, string> DataLabelFormatter => (point) =>
-            $"{point.Coordinate.PrimaryValue:N0}mb/s";
+    public Func<double, string> DataLabelFormatter => value => $"{value:N0}mb/s";
+
+    private void InitializeTransferChart()
+    {
+        TransferChartSeries =
+        [
+            CreateSpeedSeries("下载", DownloadSpeedPoints, Color.FromArgb(255, 0, 142, 255), 1),
+            CreateSpeedSeries("校验", VerifySpeedPoints, Color.FromArgb(255, 128, 0, 210), 0),
+            CreateSpeedSeries("解压", DecompressSpeedPoints, Color.FromArgb(255, 60, 183, 0), 2),
+        ];
+        TransferChartXAxes = [new DateTimeAxis { DateFormatter = Formatter, Interval = TimeSpan.FromSeconds(1) }];
+        TransferChartYAxes =
+        [
+            new NumericAxis { ShowLabels = false, ShowSeparatorLines = false },
+            new NumericAxis { ShowLabels = false, ShowSeparatorLines = false },
+            new NumericAxis { ShowLabels = false, ShowSeparatorLines = false },
+        ];
+    }
+
+    private LineSeries CreateSpeedSeries(string name, IReadOnlyList<DateTimeChartPoint> values, Color color, int axis) =>
+        new()
+        {
+            Name = name,
+            Values = values,
+            YAxisIndex = axis,
+            Stroke = new SolidChartPaint(color, 5),
+            Fill = new LinearGradientChartPaint(Color.FromArgb(128, color.R, color.G, color.B), Color.FromArgb(0, color.R, color.G, color.B)),
+            TooltipFormatter = DataLabelFormatter,
+        };
 
     private static string Formatter(DateTime date)
     {

@@ -2,71 +2,70 @@ namespace WavesLauncher.Core.Contracts;
 
 public interface IKuroClient
 {
+    IHttpClientService HttpClientService { get; }
 
-    public Task<bool> IsLoginAsync(CancellationToken token = default);
-
-    public IKuroAccountService AccountService { get; }
-    public IHttpClientService HttpClientService { get; }
-
-    public Task<GamerDataModel?> GetGamerDataAsync(
-        GameRoilDataItem gamerRoil,
+    Task<bool> IsLoginAsync(KuroAccount account, CancellationToken token = default);
+    Task<GamerDataModel?> GetGamerDataAsync(
+        KuroAccount account,
+        GameRoilDataItem role,
         CancellationToken token = default
     );
-    public Task<GamerRoil?> GetGamerAsync(GameType gameId, CancellationToken token = default);
+    Task<GamerRoil?> GetGamerAsync(
+        KuroAccount account,
+        GameType gameId,
+        CancellationToken token = default
+    );
 
-    public Task<SMSResultModel?> SendSMSAsync(
+    Task<SMSResultModel?> SendSMSAsync(
         string mobile,
         string geeTestData,
         string tokenDid,
         CancellationToken token = default
     );
-
-    public Task<SignIn?> GetSignInDataAsync(GameRoilDataItem item);
-
-    public Task<AccountModel?> LoginAsync(
+    Task<AccountModel?> LoginAsync(
         string mobile,
         string code,
         string tokenDid,
         CancellationToken token = default
     );
-
-    public Task<SignRecord?> GetSignRecordAsync(GameRoilDataItem item);
-    public Task<SignInResult?> SignInAsync(
+    Task<SignIn?> GetSignInDataAsync(KuroAccount account, GameRoilDataItem item);
+    Task<SignRecord?> GetSignRecordAsync(KuroAccount account, GameRoilDataItem item);
+    Task<SignInResult?> SignInAsync(
+        KuroAccount account,
         GameRoilDataItem item,
         CancellationToken token = default
     );
-    public Task<AccountMine?> GetWavesMineAsync(long id, CancellationToken token = default);
-
-    public Task<AccountMine?> GetWavesMineAsync(long id, string tokenDid, string tokenValue, CancellationToken token = default);
-
-    public Task<ScanScreenModel?> PostQrValueAsync(
-        string qrText,
+    Task<AccountMine?> GetWavesMineAsync(
+        KuroAccount account,
+        long id,
         CancellationToken token = default
     );
 
-    public Task<QRLoginResult?> QRLoginAsync(
+    Task<ScanScreenModel?> PostQrValueAsync(KuroAccount account, string qrText, CancellationToken token = default);
+    Task<QRLoginResult?> QRLoginAsync(
+        KuroAccount account,
         string qrText,
         string verifyCode,
         string id,
         CancellationToken token = default
     );
+    Task<SMSModel?> GetQrCodeAsync(KuroAccount account, string qrCode, CancellationToken token = default);
 
-    public Task<SMSModel?> GetQrCodeAsync(string qrCode, CancellationToken token = default);
-
-    public Task<DeviceInfo?> GetDeviceInfosAsync(CancellationToken token = default);
-    public Task<AddUserGameServer?> GetBindServerAsync(
+    Task<DeviceInfo?> GetDeviceInfosAsync(KuroAccount account, CancellationToken token = default);
+    Task<AddUserGameServer?> GetBindServerAsync(
+        KuroAccount account,
         int gameId,
         CancellationToken token = default
     );
-
-    public Task<SendGameVerifyCode?> SendVerifyGameCode(
+    Task<SendGameVerifyCode?> SendVerifyGameCode(
+        KuroAccount account,
         string gameId,
         string serverId,
         string roldId,
         CancellationToken token = default
     );
-
-    public Task<BindGameVerifyCode?> BindGamer(
+    Task<BindGameVerifyCode?> BindGamer(
+        KuroAccount account,
         string gameId,
         string serverId,
         string roleId,
@@ -74,96 +73,92 @@ public interface IKuroClient
         CancellationToken token = default
     );
 
-    #region 数据终端
     Task<GamerBassData?> GetGamerBassDataAsync(
-        GameRoilDataItem roil,
+        KuroAccount account,
+        GameRoilDataItem role,
         CancellationToken token = default
     );
     Task<GamerRoleData?> GetGamerRoleDataAsync(
-        GameRoilDataItem roil,
+        KuroAccount account,
+        GameRoilDataItem role,
         CancellationToken token = default
     );
-
     Task<GamerCalabashData?> GetGamerCalabashDataAsync(
-        GameRoilDataItem roil,
+        KuroAccount account,
+        GameRoilDataItem role,
         CancellationToken token = default
     );
-
     Task<GamerTowerModel?> GetGamerTowerIndexDataAsync(
-        GameRoilDataItem roil,
+        KuroAccount account,
+        GameRoilDataItem role,
         CancellationToken token = default
     );
-
     Task<GamerExploreIndexData?> GetGamerExploreIndexDataAsync(
-        GameRoilDataItem roil,
+        KuroAccount account,
+        GameRoilDataItem role,
         CancellationToken token = default
     );
-
     Task<GamerChallengeIndexData?> GetGamerChallengeIndexDataAsync(
-        GameRoilDataItem roil,
+        KuroAccount account,
+        GameRoilDataItem role,
         CancellationToken token = default
     );
-
     Task<GamerDataBool?> RefreshGamerDataAsync(
-        GameRoilDataItem roil,
+        KuroAccount account,
+        GameRoilDataItem role,
         CancellationToken token = default
     );
-
     Task<GamerRoilDetily?> GetGamerRoilDetily(
-        GameRoilDataItem roil,
+        KuroAccount account,
+        GameRoilDataItem role,
         long roleId,
         CancellationToken token = default
     );
-
     Task<GamerChallengeDetily?> GetGamerChallengeDetails(
-        GameRoilDataItem roil,
+        KuroAccount account,
+        GameRoilDataItem role,
         int countryCode,
         CancellationToken token = default
     );
-
-    Task<GamerSkin?> GetGamerSkinAsync(GameRoilDataItem roil, CancellationToken token = default);
-
-    public Task<GamerSlashDetailData?> GetGamerSlashDetailAsync(
-        GameRoilDataItem roil,
+    Task<GamerSkin?> GetGamerSkinAsync(
+        KuroAccount account,
+        GameRoilDataItem role,
         CancellationToken token = default
     );
-
-    Task<BriefHeader?> GetBriefHeaderAsync(CancellationToken token = default);
-
-    public Task<ResourceBrefItem> GetVersionBrefItemAsync(
+    Task<GamerSlashDetailData?> GetGamerSlashDetailAsync(
+        KuroAccount account,
+        GameRoilDataItem role,
+        CancellationToken token = default
+    );
+    Task<BriefHeader?> GetBriefHeaderAsync(KuroAccount account, CancellationToken token = default);
+    Task<ResourceBrefItem> GetVersionBrefItemAsync(
+        KuroAccount account,
         string roleId,
         string serverId,
         string versionId,
         CancellationToken token = default
     );
-    public Task<ResourceBrefItem> GetWeekBrefItemAsync(
+    Task<ResourceBrefItem> GetWeekBrefItemAsync(
+        KuroAccount account,
         string roleId,
         string serverId,
         string versionId,
         CancellationToken token = default
     );
-    public Task<ResourceBrefItem> GetMonthBrefItemAsync(
+    Task<ResourceBrefItem> GetMonthBrefItemAsync(
+        KuroAccount account,
         string roleId,
         string serverId,
         string versionId,
         CancellationToken token = default
     );
-    #endregion
-    public Task<RefreshToken?> UpdateRefreshToken(
+    Task<RefreshToken?> UpdateRefreshToken(
+        KuroAccount account,
         GameRoilDataItem item,
         CancellationToken token = default
     );
 
-    public Task InitAsync();
-
-
-
-    #region Wiki
-    public Task<WikiHomeModel> GetMainWikiAsync(CancellationToken token = default);
-    Task SetAutoUserAsync(CancellationToken token);
-    #endregion
-
-    #region KuroMap
-    public Task InitMapPostion();
-    #endregion
+    Task InitAsync();
+    Task<WikiHomeModel> GetMainWikiAsync(KuroAccount account, CancellationToken token = default);
+    Task InitMapPostion(KuroAccount account);
 }

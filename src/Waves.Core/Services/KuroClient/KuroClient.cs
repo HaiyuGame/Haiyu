@@ -4,24 +4,22 @@ public sealed partial class KuroClient : IKuroClient
 {
     public IHttpClientService HttpClientService { get; }
     public LoggerService LoggerService { get; }
-    public string? BAT { get; private set; }
     public string Ip { get; private set; }
-
-    public IKuroAccountService AccountService { get; }
 
     public KuroClient(
         IHttpClientService httpClientService,
-        [FromKeyedServices("AppLog")] LoggerService loggerService,
-        IKuroAccountService accountService
+        [FromKeyedServices("AppLog")] LoggerService loggerService
     )
     {
         HttpClientService = httpClientService;
         LoggerService = loggerService;
-        AccountService = accountService;
         HttpClientService.BuildClient();
     }
 
-    private Dictionary<string, string> GetDeviceHeader(bool isNeedToken, bool isNeedBAT = true)
+    private static Dictionary<string, string> GetDeviceHeader(
+        KuroAccount? account = null,
+        string? accessToken = null
+    )
     {
         var dict = new Dictionary<string, string>()
         {
@@ -29,28 +27,27 @@ public sealed partial class KuroClient : IKuroClient
             { "Accept-Encoding", "gzip, deflate" },
             { "Accept-Language", "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7" },
             { "source", "android" },
-            { "devCode", AccountService.Current?.TokenDid ?? "" },
+            { "devCode", account?.DeviceId ?? "" },
             //{ "model","23117RK66C"},
             { "version", "2.5.3" },
             { "lang", "zh-Hans" },
             { "countryCode", "CN" },
         };
-        if (isNeedBAT)
+        if (!string.IsNullOrWhiteSpace(accessToken))
         {
-            if (!string.IsNullOrWhiteSpace(this.BAT))
-                dict.Add("b-at", this.BAT ?? "");
+            dict.Add("b-at", accessToken);
         }
-        if (isNeedToken)
+        if (account is not null)
         {
-            if (AccountService.Current != null)
-            {
-                dict.Add("token", this.AccountService.Current.Token);
-            }
+            dict.Add("token", account.Token);
         }
         return dict;
     }
 
-    private Dictionary<string, string> GetWebHeader(bool isNeedToken, bool isNeedBAT = true)
+    private Dictionary<string, string> GetWebHeader(
+        KuroAccount? account = null,
+        string? accessToken = null
+    )
     {
         var dict = new Dictionary<string, string>()
         {
@@ -61,24 +58,20 @@ public sealed partial class KuroClient : IKuroClient
                 "User-Agent",
                 "Mozilla/5.0 (Linux; Android 12; 23117RK66C Build/V417IR; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/101.0.4951.61 Safari/537.36 Kuro/2.5.3 KuroGameBox/2.5.3"
             },
-            { "did", AccountService.Current?.TokenDid ?? "" },
+            { "did", account?.DeviceId ?? "" },
             { "source", "android" },
             {
                 "devCode",
                 $"{this.Ip}, Mozilla/5.0 (Linux; Android 12; 23117RK66C Build/V417IR; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/101.0.4951.61 Safari/537.36 Kuro/2.5.3 KuroGameBox/2.5.3"
             },
         };
-        if (isNeedBAT)
+        if (!string.IsNullOrWhiteSpace(accessToken))
         {
-            if (!string.IsNullOrWhiteSpace(this.BAT))
-                dict.Add("b-at", this.BAT ?? "");
+            dict.Add("b-at", accessToken);
         }
-        if (isNeedToken)
+        if (account is not null)
         {
-            if (AccountService.Current != null)
-            {
-                dict.Add("token", this.AccountService.Current.Token);
-            }
+            dict.Add("token", account.Token);
         }
         return dict;
     }
@@ -128,7 +121,7 @@ public sealed partial class KuroClient : IKuroClient
         return request;
     }
 
-    public async Task<SignIn?> GetSignInDataAsync(GameRoilDataItem item)
+    public async Task<SignIn?> GetSignInDataAsync(KuroAccount account, GameRoilDataItem item)
     {
         var queryData = new Dictionary<string, string>()
         {
@@ -137,7 +130,7 @@ public sealed partial class KuroClient : IKuroClient
             { "roleId", item.RoleId },
             { "userId", item.UserId },
         };
-        var header = GetDeviceHeader(true);
+        var header = GetDeviceHeader(account);
         var request = await BuildRequestAsync(
             "https://api.kurobbs.com/encourage/signIn/initSignInV2",
             HttpMethod.Post,
@@ -152,9 +145,9 @@ public sealed partial class KuroClient : IKuroClient
         return sign;
     }
 
-    public async Task<SignRecord?> GetSignRecordAsync(GameRoilDataItem item)
+    public async Task<SignRecord?> GetSignRecordAsync(KuroAccount account, GameRoilDataItem item)
     {
-        var header = GetDeviceHeader(true);
+        var header = GetDeviceHeader(account);
         var queryData = new Dictionary<string, string>()
         {
             { "gameId", item.GameId.ToString() },
@@ -177,11 +170,12 @@ public sealed partial class KuroClient : IKuroClient
     }
 
     public async Task<SignInResult?> SignInAsync(
+        KuroAccount account,
         GameRoilDataItem item,
         CancellationToken token = default
     )
     {
-        var header = GetDeviceHeader(true, false);
+        var header = GetDeviceHeader(account);
         var queryData = new Dictionary<string, string>()
         {
             { "gameId", item.GameId.ToString() },
@@ -206,35 +200,13 @@ public sealed partial class KuroClient : IKuroClient
         return JsonSerializer.Deserialize(jsonStr, CommunityContext.Default.SignInResult);
     }
 
-    public async Task<AccountMine?> GetWavesMineAsync(long id, CancellationToken token = default)
-    {
-        var header = GetDeviceHeader(true);
-        var content = new Dictionary<string, string>() { { "otherUserId", id.ToString() } };
-        var request = await BuildRequestAsync(
-            "https://api.kurobbs.com/user/mineV2",
-            HttpMethod.Post,
-            header,
-            new MediaTypeHeaderValue("application/x-www-form-urlencoded", "utf-8"),
-            content,
-            true,
-            token
-        );
-        var result = await HttpClientService.HttpClient.SendAsync(request);
-        var jsonStr = await result.Content.ReadAsStringAsync();
-        return (AccountMine?)
-            JsonSerializer.Deserialize(jsonStr, typeof(AccountMine), CommunityContext.Default);
-    }
-
     public async Task<AccountMine?> GetWavesMineAsync(
+        KuroAccount account,
         long id,
-        string tokenDid,
-        string tokenValue,
         CancellationToken token = default
     )
     {
-        var header = GetDeviceHeader(true);
-        header["devCode"] = tokenDid;
-        header["token"] = tokenValue;
+        var header = GetDeviceHeader(account);
         var content = new Dictionary<string, string>() { { "otherUserId", id.ToString() } };
         var request = await BuildRequestAsync(
             "https://api.kurobbs.com/user/mineV2",
@@ -251,20 +223,11 @@ public sealed partial class KuroClient : IKuroClient
             JsonSerializer.Deserialize(jsonStr, typeof(AccountMine), CommunityContext.Default);
     }
 
-    public async Task<bool> IsLoginAsync(CancellationToken token = default)
+    public async Task<bool> IsLoginAsync(KuroAccount account, CancellationToken token = default)
     {
-        if (this.AccountService.Current == null)
+        if (long.TryParse(account.UserId, out var result))
         {
-            return false;
-        }
-        if (long.TryParse(AccountService.Current.TokenId, out var result))
-        {
-            var mine = await GetWavesMineAsync(
-                result,
-                AccountService.Current.TokenDid,
-                AccountService.Current.Token,
-                token
-            );
+            var mine = await GetWavesMineAsync(account, result, token);
             if (mine != null)
             {
                 if (mine.Code == 200)
@@ -275,12 +238,11 @@ public sealed partial class KuroClient : IKuroClient
     }
 
     public async Task<RefreshToken?> UpdateRefreshToken(
+        KuroAccount account,
         GameRoilDataItem item,
         CancellationToken token = default
     )
     {
-        if (AccountService.Current == null)
-            return null;
         var url = "https://api.kurobbs.com/aki/roleBox/requestToken";
         var header = new Dictionary<string, string>()
         {
@@ -291,9 +253,9 @@ public sealed partial class KuroClient : IKuroClient
                 "devCode",
                 "Mozilla/5.0 (Linux; Android 12; 23117RK66C Build/V417IR; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/101.0.4951.61 Safari/537.36 Kuro/2.5.3 KuroGameBox/2.5.3"
             },
-            { "did", AccountService.Current.TokenDid },
+            { "did", account.DeviceId },
             { "source", "android" },
-            { "token", AccountService.Current.Token },
+            { "token", account.Token },
             { "Connection", "keep-alive" },
         };
         var request = await BuildRequestAsync(
@@ -326,14 +288,11 @@ public sealed partial class KuroClient : IKuroClient
             resultCode.Data,
             AccessTokenContext.Default.RefreshToken
         );
-        if (bassData != null)
-        {
-            this.BAT = bassData.AccessToken;
-        }
         return bassData;
     }
 
     public async Task<ScanScreenModel?> PostQrValueAsync(
+        KuroAccount account,
         string qrText,
         CancellationToken token = default
     )
@@ -342,7 +301,7 @@ public sealed partial class KuroClient : IKuroClient
         var request = await BuildRequestAsync(
             url,
             HttpMethod.Post,
-            GetDeviceHeader(true, false),
+            GetDeviceHeader(account),
             new MediaTypeHeaderValue("application/x-www-form-urlencoded"),
             new Dictionary<string, string>() { { "qrCode", qrText } },
             true
@@ -356,6 +315,7 @@ public sealed partial class KuroClient : IKuroClient
     }
 
     public async Task<QRLoginResult?> QRLoginAsync(
+        KuroAccount account,
         string qrText,
         string verifyCode,
         string id,
@@ -366,7 +326,7 @@ public sealed partial class KuroClient : IKuroClient
         var request = await BuildRequestAsync(
             url,
             HttpMethod.Post,
-            GetDeviceHeader(true, false),
+            GetDeviceHeader(account),
             new MediaTypeHeaderValue("application/x-www-form-urlencoded"),
             new Dictionary<string, string>()
             {
@@ -382,12 +342,16 @@ public sealed partial class KuroClient : IKuroClient
         return JsonSerializer.Deserialize<QRLoginResult>(jsonStr, QRContext.Default.QRLoginResult);
     }
 
-    public async Task<SMSModel?> GetQrCodeAsync(string qrCode, CancellationToken token = default)
+    public async Task<SMSModel?> GetQrCodeAsync(
+        KuroAccount account,
+        string qrCode,
+        CancellationToken token = default
+    )
     {
         var query = new Dictionary<string, string>() { { "geeTestData", "" } };
         var request = await BuildLoginRequest(
             "https://api.kurobbs.com/user/sms/scanSms",
-            GetDeviceHeader(true, false),
+            GetDeviceHeader(account),
             new MediaTypeHeaderValue("application/x-www-form-urlencoded"),
             query
         );
@@ -396,12 +360,12 @@ public sealed partial class KuroClient : IKuroClient
         return (SMSModel?)JsonSerializer.Deserialize(jsonStr, QRContext.Default.SMSModel);
     }
 
-    public async Task<DeviceInfo?> GetDeviceInfosAsync(CancellationToken token = default)
+    public async Task<DeviceInfo?> GetDeviceInfosAsync(KuroAccount account, CancellationToken token = default)
     {
         var url = "https://api.kurobbs.com/user/auth/device/list";
         var request = await BuildLoginRequest(
             url,
-            GetDeviceHeader(true, false),
+            GetDeviceHeader(account),
             new MediaTypeHeaderValue("application/x-www-form-urlencoded"),
             []
         );
@@ -411,6 +375,7 @@ public sealed partial class KuroClient : IKuroClient
     }
 
     public async Task<SendGameVerifyCode?> SendVerifyGameCode(
+        KuroAccount account,
         string gameId,
         string serverId,
         string roleId,
@@ -420,7 +385,7 @@ public sealed partial class KuroClient : IKuroClient
         var url = "https://api.kurobbs.com/user/role/sendVerifyCode";
         var request = await BuildLoginRequest(
             url,
-            GetDeviceHeader(true, false),
+            GetDeviceHeader(account),
             new MediaTypeHeaderValue("application/x-www-form-urlencoded"),
             new Dictionary<string, string>()
             {
@@ -435,6 +400,7 @@ public sealed partial class KuroClient : IKuroClient
     }
 
     public async Task<AddUserGameServer?> GetBindServerAsync(
+        KuroAccount account,
         int gameId,
         CancellationToken token = default
     )
@@ -442,7 +408,7 @@ public sealed partial class KuroClient : IKuroClient
         var url = "https://api.kurobbs.com/config/findGameServerList";
         var request = await BuildLoginRequest(
             url,
-            GetDeviceHeader(true, false),
+            GetDeviceHeader(account),
             new MediaTypeHeaderValue("application/x-www-form-urlencoded"),
             new Dictionary<string, string>() { { "gameId", gameId.ToString() } }
         );
@@ -452,6 +418,7 @@ public sealed partial class KuroClient : IKuroClient
     }
 
     public async Task<BindGameVerifyCode?> BindGamer(
+        KuroAccount account,
         string gameId,
         string serverId,
         string roleId,
@@ -462,7 +429,7 @@ public sealed partial class KuroClient : IKuroClient
         var url = "https://api.kurobbs.com/user/role/bindUserRole";
         var request = await BuildLoginRequest(
             url,
-            GetDeviceHeader(true, false),
+            GetDeviceHeader(account),
             new MediaTypeHeaderValue("application/x-www-form-urlencoded"),
             new Dictionary<string, string>()
             {
@@ -485,6 +452,7 @@ public sealed partial class KuroClient : IKuroClient
         }
     }
 
+#if false
     public async Task SetAutoUserAsync(CancellationToken token = default)
     {
         try
@@ -547,4 +515,5 @@ public sealed partial class KuroClient : IKuroClient
             await AccountService.AppSettings.SetLastSelectUserAsync(item.TokenId).ConfigureAwait(false);
         }
     }
+#endif
 }

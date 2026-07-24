@@ -12,6 +12,7 @@ public sealed partial class SettingViewModel : ViewModelBase
     public SettingViewModel(
         [FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager,
         IKuroClient wavesClient,
+        IKuroAccountService accountService,
         IAppContext<App> appContext,
         IViewFactorys viewFactorys,
         ITipShow tipShow,
@@ -23,6 +24,7 @@ public sealed partial class SettingViewModel : ViewModelBase
     {
         DialogManager = dialogManager;
         WavesClient = wavesClient;
+        AccountService = accountService;
         AppContext = appContext;
         ViewFactorys = viewFactorys;
         TipShow = tipShow;
@@ -47,6 +49,7 @@ public sealed partial class SettingViewModel : ViewModelBase
 
     public IDialogManager DialogManager { get; }
     public IKuroClient WavesClient { get; }
+    public IKuroAccountService AccountService { get; }
     public IAppContext<App> AppContext { get; }
     public IViewFactorys ViewFactorys { get; }
     public ITipShow TipShow { get; }
@@ -54,8 +57,6 @@ public sealed partial class SettingViewModel : ViewModelBase
     public IPickersService PickersService { get; }
     public IThemeService ThemeService { get; }
     public GithubIpSettings GithubIpSettings { get; }
-    [ObservableProperty]
-    public partial bool? AutoCommunitySign { get; set; }
 
     [ObservableProperty]
     public partial bool? StartGameAllowCloseMain { get; set; }
@@ -112,7 +113,6 @@ public sealed partial class SettingViewModel : ViewModelBase
                 this.SelectWallpaperName = WallpaperTypes[1];
             }
         }
-        this.AutoCommunitySign = await AppSettings.GetAutoSignCommunityAsync();
         this.StartGameAllowCloseMain = await AppSettings.GetStartGameAllowCloseMainAsync();
         switch (await AppSettings.GetElementThemeAsync())
         {
@@ -162,7 +162,8 @@ public sealed partial class SettingViewModel : ViewModelBase
             TipShow.ShowMessage("系统用户验证失败！", Symbol.Clear);
             return;
         }
-        if (await WavesClient.IsLoginAsync())
+        var account = AccountService.CurrentAccount;
+        if (account is not null && await WavesClient.IsLoginAsync(account))
         {
             DataPackage package = new();
             package.SetText("NULL");
@@ -191,10 +192,6 @@ public sealed partial class SettingViewModel : ViewModelBase
         _ = AppSettings.SetStartGameAllowCloseMainAsync(value);
     }
 
-    partial void OnAutoCommunitySignChanged(bool? value)
-    {
-        _ = AppSettings.SetAutoSignCommunityAsync(value);
-    }
 
     private async Task OnSelectCloseIndexChangedAsync(int value)
     {

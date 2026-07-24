@@ -33,7 +33,6 @@
                 <ResourceDictionary Source="ms-appx:///Haiyu.Controls/Controls/Styles/SVGPath.xaml" />
                 <ResourceDictionary Source="ms-appx:///Haiyu.Controls/Controls/Styles/LoadingCard.xaml" />
                 <ResourceDictionary Source="ms-appx:///Haiyu.Controls/Controls/Styles/StorageRing.xaml" />
-                <ResourceDictionary Source="/Controls/GamePathChartColor.xaml" />
                 <ResourceDictionary Source="ms-appx:///CommunityToolkit.WinUI.Controls.Segmented/Segmented/Segmented.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <converter:BoolReversalConvert x:Key="BoolReversalConvert" />
@@ -43,6 +42,7 @@
             <converter:StarLevelColorConverter x:Key="StarLevelColorConverter" />
             <converter:BoolToVisibilityConverter x:Key="BoolToVisibilityReversalConverter" Reversal="True" />
             <converter:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" Reversal="False" />
+            <converter:BoolToSolidBrushColorConverter x:Key="BoolToSolidBrushColorConverter" />
             <converter:IntToSecondTimeConverter x:Key="IntToSecondTimeConverter" />
             <FontFamily x:Key="DefaultFont">ms-appx:///Assets/Font.ttf#文鼎方新书H7GBK</FontFamily>
             <FontFamily x:Key="RoilDetilyFont">ms-appx:///Assets/Fonts/gameIcon.ttf#wavesRole</FontFamily>

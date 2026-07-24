@@ -1,6 +1,6 @@
 <div align="center">
 
-#  Haiyu
+# Haiyu
 
 **一款好看高性能的库洛游戏启动器**
 
@@ -23,15 +23,19 @@
 ## ✨ 它能干什么？
 
 ### 🎮 游戏管理
+
 管理你的鸣潮和战双游戏文件——下载、更新、校验。国服、国际服、B服、台服等四种渠道。
 
 ### 📊 库街区集成
+
 支持手机号、Token 登录库街区，登录后支持扫描二维码登陆游戏，以及数据面板信息、自动签到等功能。
 
 ### ☁️ 云游戏
+
 集成云鸣潮，可在启动器中一键登录游玩，以及抽卡记录分析等功能。
 
 ### 📸 截图功能
+
 支持自定义功能键截图。
 
 ---
@@ -39,8 +43,6 @@
 ## 🚀 下载安装
 
 去 [Release](https://github.com/BlameTwo/WutheringWavesTool/releases) 页面拿最新版。
-
-备选：[夸克网盘](https://pan.quark.cn/s/ff6e179a2462)
 
 Microsoft Store 也可以直接装👇
 
@@ -68,14 +70,14 @@ Microsoft Store 也可以直接装👇
 
 ### 技术栈
 
-| 层级 | 技术 |
-|------|------|
-| 框架 | .NET 10 + WinUI 3 (Windows App SDK 2.0) |
-| 语言 | C# preview+ |
-| 模式 | MVVM+DI Service |
-| 打包 | MSIX / 独立 EXE 双模式发布 |
+| 层级  | 技术                                      |
+| --- | --------------------------------------- |
+| 框架  | .NET 10 + WinUI 3 (Windows App SDK 2.0) |
+| 语言  | C# preview+                             |
+| 模式  | MVVM+DI Service                         |
+| 打包  | MSIX / 独立 EXE 双模式发布                     |
 
-### 项目结构速览
+### 项目结构速览（不完整）
 
 ```
 src/
@@ -90,18 +92,21 @@ src/
 └── Server/HaiyuServer/     ← 服务端
 ```
 
+### 怎么跑起来以及编译注意事项
 
-### 怎么跑起来
-
-1.  **Visual Studio 2026**，负载：.Net 桌面开发、Windows开发模板，Windows SDK
-2. 克隆仓库，打开 `src/WutheringWavesTool.slnx`
+1. 注意PC编译环境配置，由于开启了AOT兼容，所有类型边界为强类型，编译环境会全开检查，在Visual Studio 2026编译环境中，Devhub.exe的RAM占用异常高，因此推荐配置CPU单核主频越高越好，RAM最低要求32GB，硬盘无要求。
+2. 关于第一点的解释，在IDE中进行不断地跳转代码页时，IDE会自身的增量分析这些文件（编译会全量分析），如果RAM内存和磁盘交换不及时则会造成代码分析缓慢、报错信息消失、语法检查消失等严重的问题。
+3. **Visual Studio 2026**，负载：.Net 桌面开发、Windows开发模板，Windows SDK
+4. 克隆仓库，打开 `src/WutheringWavesTool.slnx`
 
 > 想打独立 EXE 包？看 [发布方式说明](src/ReadMe.md)
 
 ### 想深入？
+
 可以翻阅以下AI生成的技术文档查看：
 
 - [项目结构与布局](https://zread.ai/BlameTwo/Haiyu/3-project-structure-and-layout)
 - [WinUI3 应用启动流程](https://zread.ai/BlameTwo/Haiyu/5-winui3-application-bootstrap-flow)
 - [游戏上下文 V2 生命周期与状态机](https://zread.ai/BlameTwo/Haiyu/8-game-context-v2-lifecycle-and-state-machine)
+
 ---

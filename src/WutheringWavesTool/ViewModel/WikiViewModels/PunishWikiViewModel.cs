@@ -1,4 +1,4 @@
-﻿
+
 using Haiyu.Helpers;
 using Haiyu.Models.Wrapper.Wiki;
 using Waves.Api.Models.GameWikiiClient;
@@ -25,7 +25,7 @@ public partial class PunishWikiViewModel : WikiViewModelBase
         );
         if (wikiPage.Code == 0 || (wikiPage.Result != null && wikiPage.Result.Data.ContentJson.Shortcuts != null))
         {
-            Sides = GameWikiClient.GetEventData(wikiPage.Result).Format() ?? [];
+            Sides = GameWikiClient.GetEventData(wikiPage.Result).Format(WikiType.BGR) ?? [];
             if (EveryWeekContent == null) EveryWeekContent = new();
             if (BannerListContentWrapper == null) BannerListContentWrapper = new();
 

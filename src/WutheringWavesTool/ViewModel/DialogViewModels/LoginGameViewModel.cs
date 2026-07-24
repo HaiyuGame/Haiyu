@@ -144,7 +144,13 @@ public sealed partial class LoginGameViewModel : DialogViewModelBase
         {
             if(long.TryParse(TokenId,out var _tokenID)) 
             {
-                var mine = await WavesClient.GetWavesMineAsync(_tokenID, TokenDid, Token);
+                var requestAccount = new KuroAccount
+                {
+                    UserId = TokenId,
+                    Token = Token,
+                    DeviceId = TokenDid,
+                };
+                var mine = await WavesClient.GetWavesMineAsync(requestAccount, _tokenID);
                 if (mine != null && mine.Code == 200)
                 {
                     LocalAccount account = new LocalAccount();

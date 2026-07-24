@@ -43,11 +43,18 @@
     <BuildType Solution="All|*" Project="Debug" />
     <Platform Project="x64" />
   </Project>
+  <Project Path="Haiyu.Charts.WinUI/Haiyu.Charts.WinUI.csproj">
+    <BuildType Solution="All|*" Project="Debug" />
+    <Platform Project="x64" />
+  </Project>
   <Project Path="WutheringWavesTool/Haiyu.csproj" Id="ee4fdbd7-face-4eba-bf07-cd8fbdcf1997">
     <BuildType Solution="All|Any CPU" Project="Release" />
     <BuildType Solution="All|x64" Project="Debug" />
     <BuildType Solution="All|x86" Project="Debug" />
     <Platform Project="x64" />
     <Deploy />
+  </Project>
+  <Project Path="Haiyu.Pickers/Haiyu.Pickers.csproj">
+    <BuildType Solution="All|*" Project="Debug" />
   </Project>
 </Solution>

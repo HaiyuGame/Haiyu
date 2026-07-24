@@ -32,6 +32,7 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
         IPickersService pickersService
     )
     {
+        InitializeCharts();
         this.CloudGameContext = cloudGameContext;
         Cache = cache;
         PickersService = pickersService;

@@ -12,10 +12,11 @@ namespace Haiyu.ViewModel.DialogViewModels;
 
 public partial class QrLoginViewModel : DialogViewModelBase
 {
-    public QrLoginViewModel([FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager, IAppContext<App> appContext, IKuroClient wavesClient) : base(dialogManager)
+    public QrLoginViewModel([FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager, IAppContext<App> appContext, IKuroClient wavesClient, IKuroAccountService accountService) : base(dialogManager)
     {
         AppContext = appContext;
         WavesClient = wavesClient;
+        AccountService = accountService;
     }
 
     private CanvasDevice _canvasDevice;
@@ -24,6 +25,7 @@ public partial class QrLoginViewModel : DialogViewModelBase
 
     public IAppContext<App> AppContext { get; }
     public IKuroClient WavesClient { get; }
+    public IKuroAccountService AccountService { get; }
 
     [ObservableProperty]
     public partial Visibility SelectWindowVisibility { get; set; } = Visibility.Visible;
@@ -118,7 +120,10 @@ public partial class QrLoginViewModel : DialogViewModelBase
             if (result2.Text != null)
             {
                 this.QRResult = result2.Text;
-                var result = await WavesClient.PostQrValueAsync(QRResult, CTS.Token);
+                var account = AccountService.CurrentAccount;
+                if (account is null)
+                    return;
+                var result = await WavesClient.PostQrValueAsync(account, QRResult, CTS.Token);
                 if (result == null) return;
                 if (result.Code == 200 && result.Success == true)
                 {
@@ -212,7 +217,10 @@ public partial class QrLoginViewModel : DialogViewModelBase
     [RelayCommand]
     async Task LoginAsync()
     {
-        var result = await WavesClient.QRLoginAsync(QRResult, VerifyCode, this.SelectDatum.Id, CTS.Token);
+        var account = AccountService.CurrentAccount;
+        if (account is null)
+            return;
+        var result = await WavesClient.QRLoginAsync(account, QRResult, VerifyCode, this.SelectDatum.Id, CTS.Token);
         if (result == null)
         {
             TipMessage = "登陆失败，请及时联系开发者";
@@ -221,7 +229,7 @@ public partial class QrLoginViewModel : DialogViewModelBase
         if (result.Code == 2240)
         {
             TipMessage = "该设备不安全，安全验证已经发送至手机";
-            var result2 = await WavesClient.GetQrCodeAsync(QRResult);
+            var result2 = await WavesClient.GetQrCodeAsync(account, QRResult);
             ShowVerifyState();
             return;
         }

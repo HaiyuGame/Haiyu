@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<m:WindowModelBase
+<Window
     x:Class="Haiyu.WindowModels.KuroDataCenterWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -13,7 +13,7 @@
     mc:Ignorable="d">
     <Grid x:Name="grid" Loaded="grid_Loaded">
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto" />
+            <RowDefinition Height="48" />
             <RowDefinition />
         </Grid.RowDefinitions>
         <ui:TitleBar
@@ -25,14 +25,26 @@
                 <TextBlock Margin="10,0,0,0" Text="数据" />
             </ui:TitleBar.Title>
         </ui:TitleBar>
-        <WebView2
-            x:Name="webView2"
-            Grid.Row="1"
-            DefaultBackgroundColor="Transparent">
-            <WebView2.Resources>
-                <SolidColorBrush x:Key="BrushForThemeBackgroundColor" Color="Transparent" />
-            </WebView2.Resources>
-        </WebView2>
+        <Grid x:Name="content" Grid.Row="1">
+            <Grid.ContextFlyout>
+                <MenuFlyout>
+                    <ToggleMenuFlyoutItem Click="ToggleMenuFlyoutItem_Click" Text="窗口置顶" />
+                    <ToggleMenuFlyoutItem Click="ToggleMenuFlyoutItem_Click_1" Text="隐藏标题栏" />
+                </MenuFlyout>
+            </Grid.ContextFlyout>
+            <Button
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Content="显示标题栏" />
+            <WebView2
+                x:Name="webView2"
+                Grid.Row="1"
+                DefaultBackgroundColor="Transparent">
+                <WebView2.Resources>
+                    <SolidColorBrush x:Key="BrushForThemeBackgroundColor" Color="Transparent" />
+                </WebView2.Resources>
+            </WebView2>
+        </Grid>
 
     </Grid>
-</m:WindowModelBase>
+</Window>

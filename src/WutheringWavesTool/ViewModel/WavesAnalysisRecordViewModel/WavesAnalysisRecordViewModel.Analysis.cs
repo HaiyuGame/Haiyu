@@ -2,10 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using LiveChartsCore;
-using LiveChartsCore.Defaults;
-using LiveChartsCore.Kernel;
-using LiveChartsCore.SkiaSharpView;
 using Waves.Api.Models.Enums;
 using Windows.ApplicationModel.VoiceCommands;
 
@@ -125,17 +121,17 @@ partial class WavesAnalysisRecordViewModel
         };
 
         //各卡池抽数分布
-        var poolChart = new ObservableCollection<object>();
+        var poolChart = new ObservableCollection<PieSeries>();
         foreach (var item in Cards.Items)
         {
             var resourceCount = item.Resource?.Count() ?? 0;
             if (resourceCount > 0)
             {
                 poolChart.Add(
-                    new Models.Charts.PipeData()
+                    new PieSeries()
                     {
                         Name = item.GetRecordNavItem().DisplayName,
-                        Values = [resourceCount],
+                        Value = resourceCount,
                     }
                 );
             }
@@ -144,10 +140,10 @@ partial class WavesAnalysisRecordViewModel
 
         //出货占比饼图
         var fourStarTotal = allResources.Count(x => x.QualityLevel == 4);
-        StarRatioChart = new ObservableCollection<object>()
+        StarRatioChart = new ObservableCollection<PieSeries>()
         {
-            new Models.Charts.PipeData() { Name = "4星", Values = [fourStarTotal] },
-            new Models.Charts.PipeData() { Name = "5星", Values = [allStarTotal] },
+            new PieSeries() { Name = "4星", Value = fourStarTotal },
+            new PieSeries() { Name = "5星", Value = allStarTotal },
         };
 
         if (TimeLineChart == null)
@@ -155,12 +151,11 @@ partial class WavesAnalysisRecordViewModel
         TimeLineChart.Clear();
         //每日抽数柱状图
         var timeLine = Cards.GetTimeLine();
-        TimeLineChart = new ObservableCollection<DateTimePoint>();
         foreach (var point in timeLine)
         {
             if (point.DateTime == DateTime.MinValue)
                 continue;
-            TimeLineChart.Add(new DateTimePoint(point.DateTime, point.Values));
+            TimeLineChart.Add(new DateTimeChartPoint(point.DateTime, point.Values));
         }
     }
 
@@ -171,10 +166,10 @@ partial class WavesAnalysisRecordViewModel
         if (this.GuaranteeChart == null)
             GuaranteeChart = new();
         GuaranteeChart.Clear();
-        this.GuaranteeChart = new ObservableCollection<object>()
+        this.GuaranteeChart = new ObservableCollection<PieSeries>()
         {
-            new Models.Charts.PipeData() { Name = "中", Values = [value.OK] },
-            new Models.Charts.PipeData() { Name = "歪", Values = [value.NG] },
+            new PieSeries() { Name = "中", Value = value.OK },
+            new PieSeries() { Name = "歪", Value = value.NG },
         };
         GuaranteeHeader = $"保底状态：{value.GuaranteeStatus}";
     }

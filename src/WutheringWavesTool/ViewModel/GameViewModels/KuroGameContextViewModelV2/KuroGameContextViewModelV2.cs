@@ -16,7 +16,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
 {
     private const int ChartPointKeepSeconds = 5;
     private const int ChartMaxPoints = 300;
-    private static readonly TimeSpan ChartPointInterval = TimeSpan.FromMilliseconds(200);
+    private static readonly TimeSpan ChartPointInterval = TimeSpan.FromMilliseconds(500);
     private static readonly TimeSpan SeparatorRefreshInterval = TimeSpan.FromMilliseconds(500);
 
     private DateTime _lastDownloadPointTime = DateTime.MinValue;
@@ -42,6 +42,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         TipShow = tipShow;
         IoCircuitBreaker = Instance.Host.Services.GetRequiredService<IIoCircuitBreaker>();
         WallpaperService = Instance.GetService<IWallpaperService>();
+        InitializeTransferChart();
         RegisterMessager();
     }
 
@@ -102,6 +103,14 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
     /// </summary>
     [ObservableProperty]
     public partial Visibility GameDownloadingBthVisibility { get; set; } = Visibility.Collapsed;
+
+    [ObservableProperty]
+    public partial bool IsTransferChartLoaded { get; set; }
+
+    partial void OnGameDownloadingBthVisibilityChanged(Visibility value)
+    {
+        IsTransferChartLoaded = value == Visibility.Visible;
+    }
 
     [ObservableProperty]
     public partial Visibility GameLauncherBthVisibility { get; set; } = Visibility.Collapsed;
@@ -201,7 +210,9 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         await AppContext.TryInvokeAsync(async () =>
         {
             var actionType = args.Type;
-            var status = await this.GameContext.GetGameContextStatusAsync(this.CTS.Token);
+            var status = await this.GameContext.GetGameContextStatusAsync(
+                this.CTS == null ? default : this.CTS.Token
+            );
             if (!tracker.Prod)
             {
                 var activeFiles = tracker.ActiveFilesItem;
@@ -371,7 +382,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                 }
                 else
                 {
-                    await RefreshCoreAsync(isRefreshBackground: false);
+                    await RefreshCoreAsync(this.SelectServer.ShowCard);
                 }
                 if (actionType == Waves.Core.Models.Enums.GameContextActionType.GameExit)
                 {
@@ -476,15 +487,11 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         if ((now - _lastSeparatorRefreshTime) >= SeparatorRefreshInterval)
         {
             _lastSeparatorRefreshTime = now;
-            this.DownloadSpeedSeparators?.Clear();
-            this.DownloadSpeedSeparators = GetSeparators();
+            UpdateSeparators(this.DownloadSpeedSeparators, now);
         }
     }
 
-    private static void TrimChartPoints(
-        IList<LiveChartsCore.Defaults.DateTimePoint> points,
-        DateTime now
-    )
+    private static void TrimChartPoints(IList<DateTimeChartPoint> points, DateTime now)
     {
         if (points == null)
             return;
@@ -500,7 +507,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
     }
 
     private static void TryAddChartPoint(
-        IList<LiveChartsCore.Defaults.DateTimePoint> points,
+        IList<DateTimeChartPoint> points,
         DateTime now,
         ref DateTime lastPointTime,
         double value
@@ -514,7 +521,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         }
 
         lastPointTime = now;
-        points.Add(new LiveChartsCore.Defaults.DateTimePoint(now, value));
+        points.Add(new DateTimeChartPoint(now, value));
     }
 
     private ButtonActionType _buttonAction = ButtonActionType.None;
@@ -626,33 +633,36 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
             }
             if (isRefreshBackground && background != null) //是否刷新资源背景
             {
-                if (wallpaperType == "Video")
-                {
-                    WallpaperService.SetMediaForUrl(
-                        Waves.Core.Models.Enums.WallpaperShowType.Video,
-                        background.BackgroundFile
-                    );
-                }
-                else
+                if (status.Gameing)
                 {
                     WallpaperService.SetMediaForUrl(
                         Waves.Core.Models.Enums.WallpaperShowType.Image,
                         background.FirstFrameImage
                     );
                 }
+                else
+                {
+                    if (wallpaperType == "Video")
+                    {
+                        WallpaperService.SetMediaForUrl(
+                            Waves.Core.Models.Enums.WallpaperShowType.Video,
+                            background.BackgroundFile,
+                            background.FirstFrameImage
+                        );
+                        WallpaperService.RestartVideo();
+                    }
+                    else
+                    {
+                        WallpaperService.SetMediaForUrl(
+                            Waves.Core.Models.Enums.WallpaperShowType.Image,
+                            background.FirstFrameImage
+                        );
+                    }
+                }
                 this.VersionLogo = new BitmapImage(new(background.Slogan));
                 var coreConfig = await GameContext.ReadContextConfigAsync(this.CTS.Token);
                 this.DownloadSpeedValue = coreConfig.LimitSpeed / 1000 / 1000;
-                if (status.Gameing)
-                {
-                    WallpaperService.PauseVideo();
-                }
-                else
-                {
-                    WallpaperService.RestartVideo();
-                }
-                await ShowCardAsync(showCard);
-                await LoadAfter();
+                await Task.WhenAll(ShowCardAsync(showCard), LoadAfter());
             }
             this.DecompressSpeedPoints?.Clear();
             this.DownloadSpeedPoints?.Clear();

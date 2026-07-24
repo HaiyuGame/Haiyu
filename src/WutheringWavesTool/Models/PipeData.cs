@@ -1,27 +1,16 @@
-﻿using LiveChartsCore.Kernel;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace Haiyu.Models;
 
-public partial class PieData : ObservableObject
+public class PieData : PieSeries
 {
-    [ObservableProperty]
-    public partial string Name { get; set; }
+    public double[] Values
+    {
+        get => [Value];
+        set => Value = value?.FirstOrDefault() ?? 0;
+    }
 
-    [ObservableProperty]
-    public partial double[] Values { get; set; }
-
-    [ObservableProperty]
-    public partial double Offset { get; set; }
-
-    public Func<ChartPoint, string> Formatter { get; set; } =
-        point =>
-        {
-            var pv = point.Coordinate.PrimaryValue;
-            var sv = point.StackedValue!;
-
-            return $"{Math.Round(pv / sv.Total * 100, 2)}%";
-        };
+    public double Offset
+    {
+        get => OuterRadiusOffset;
+        set => OuterRadiusOffset = value;
+    }
 }

@@ -1,4 +1,4 @@
-﻿using Haiyu.Models.Dialogs;
+using Haiyu.Models.Dialogs;
 using Haiyu.Services.DialogServices;
 
 namespace Haiyu.Pages.Dialogs;
@@ -52,6 +52,12 @@ public sealed partial class SelectDownoadGameDialogV2
 
     private async void Download_Click(object sender, RoutedEventArgs e)
     {
+        await RefreshDiskAsync();
+        if (!downloadBth.IsEnabled)
+        {
+            return;
+        }
+
         var launcher = await this.GameContext.GetGameLauncherSourceAsync();
         if (launcher == null)
         {
@@ -77,13 +83,18 @@ public sealed partial class SelectDownoadGameDialogV2
             return;
         }
         this.folderPath.Text = folderPath.Path;
+        await RefreshDiskAsync();
+    }
+
+    async Task RefreshDiskAsync()
+    {
         string? rootPath = Path.GetPathRoot(this.folderPath.Text);
         DriveInfo? selectedDrive = DriveInfo
             .GetDrives()
             .FirstOrDefault(drive =>
                 drive.Name.Equals(rootPath, StringComparison.OrdinalIgnoreCase)
             );
-        var isVild = Path.GetPathRoot(folderPath.Path) == folderPath.Path;
+        var isVild = !IsInstallDirectory(folderPath.Text);
         if (isVild)
         {
             layeredGrid.Visibility = Visibility.Visible;
@@ -95,8 +106,8 @@ public sealed partial class SelectDownoadGameDialogV2
         }
         if (selectedDrive == null)
             return;
-        double totalSizeMB = (double)selectedDrive.TotalSize / (1024 * 1024 * 1024);
-        double freeSpaceMB = (double)selectedDrive.TotalFreeSpace / (1024 * 1024 * 1024);
+        double totalSizeMB = (double) selectedDrive.TotalSize / (1024 * 1024 * 1024);
+        double freeSpaceMB = (double) selectedDrive.TotalFreeSpace / (1024 * 1024 * 1024);
         double usedSpaceMB = totalSizeMB - freeSpaceMB;
         layered.MaxValue = totalSizeMB;
         layeredGrid.Visibility = Visibility.Visible;
@@ -142,6 +153,40 @@ public sealed partial class SelectDownoadGameDialogV2
                 $"本次更新大小约为{Launcher.ResourceDefault.Config.Size / 1024 / 1024 / 1024}GB";
             downloadBth.IsEnabled = true;
             download.Fill = new SolidColorBrush(Colors.Green);
+        }
+    }
+
+    private async void RefreshDisk_Click(object sender, RoutedEventArgs e)
+    {
+        await RefreshDiskAsync();
+    }
+
+    private static bool IsInstallDirectory(string? folderPath)
+    {
+        if (string.IsNullOrWhiteSpace(folderPath) || !Path.IsPathFullyQualified(folderPath))
+        {
+            return false;
+        }
+
+        try
+        {
+            var fullPath = Path.GetFullPath(folderPath);
+            var rootPath = Path.GetPathRoot(fullPath);
+            return !string.IsNullOrEmpty(rootPath)
+                && !string.Equals(
+                    Path.TrimEndingDirectorySeparator(fullPath),
+                    Path.TrimEndingDirectorySeparator(rootPath),
+                    StringComparison.OrdinalIgnoreCase
+                )
+                && Directory.Exists(fullPath);
+        }
+        catch (Exception exception) when (
+            exception is ArgumentException
+                or NotSupportedException
+                or PathTooLongException
+        )
+        {
+            return false;
         }
     }
 }

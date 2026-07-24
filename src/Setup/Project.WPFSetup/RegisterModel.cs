@@ -38,7 +38,7 @@ public class RegisterModel
                     "UninstallString",
                     (
                         RegistryValueKind.String,
-                        property.UninstallString + $" {property.UnInstallArgs}"
+                        $"\"{property.UninstallString}\" {property.UnInstallArgs}"
                     )
                 },
                 { "DisplayVersion", (RegistryValueKind.String, property.Version) },

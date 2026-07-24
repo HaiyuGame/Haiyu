@@ -1,4 +1,4 @@
-﻿namespace Waves.Core.Services;
+namespace Waves.Core.Services;
 
 public class KuroAccountService : IKuroAccountService
 {
@@ -18,6 +18,7 @@ public class KuroAccountService : IKuroAccountService
     public LoggerService LoggerService { get; }
     public AppSettings AppSettings { get; }
     public LocalAccount? Current { get; private set; }
+    public KuroAccount? CurrentAccount => Current is null ? null : KuroAccount.From(Current);
 
     public async Task<LocalAccount?> GetUserAsync(string userId)
     {
