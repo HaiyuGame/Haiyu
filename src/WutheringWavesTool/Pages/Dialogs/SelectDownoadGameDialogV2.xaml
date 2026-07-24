@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentDialog
     x:Class="Haiyu.Pages.Dialogs.SelectDownoadGameDialogV2"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -26,13 +26,13 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="auto" />
             </Grid.ColumnDefinitions>
             <TextBox
                 x:Name="folderPath"
                 Grid.Row="1"
                 Margin="0,5,0,0"
-                VerticalAlignment="Center"
-                IsReadOnly="True" />
+                VerticalAlignment="Center" />
             <Button
                 Grid.Column="1"
                 Margin="5,5,0,0"
@@ -40,6 +40,14 @@
                 Click="SelectFolder_Click"
                 Style="{ThemeResource TransparentButtonStyle}">
                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8B7;" />
+            </Button>
+            <Button
+                Grid.Column="2"
+                Margin="5,5,0,0"
+                VerticalAlignment="Center"
+                Click="RefreshDisk_Click"
+                Style="{ThemeResource TransparentButtonStyle}">
+                <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE72C;" />
             </Button>
         </Grid>
         <Grid

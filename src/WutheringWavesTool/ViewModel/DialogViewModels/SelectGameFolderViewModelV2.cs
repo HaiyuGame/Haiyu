@@ -54,6 +54,14 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
             return;
         }
         this.ExePath = exe.Path;
+        await RefreshDiskAsync();
+    }
+
+    [RelayCommand]
+    async Task RefreshDiskAsync()
+    {
+        if (!File.Exists(ExePath))
+            return;
         var folderPath = System.IO.Path.GetDirectoryName(ExePath);
         var directoryInfo = new DirectoryInfo(folderPath);
         var folderSizeBytes = await CalculateFolderSizeAsync(directoryInfo);
@@ -99,6 +107,7 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
         ]);
         IsVerify = true;
     }
+
 
     [RelayCommand]
     void StartVerify()

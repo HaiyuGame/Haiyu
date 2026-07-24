@@ -210,7 +210,9 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         await AppContext.TryInvokeAsync(async () =>
         {
             var actionType = args.Type;
-            var status = await this.GameContext.GetGameContextStatusAsync(this.CTS.Token);
+            var status = await this.GameContext.GetGameContextStatusAsync(
+                this.CTS == null ? default : this.CTS.Token
+            );
             if (!tracker.Prod)
             {
                 var activeFiles = tracker.ActiveFilesItem;
@@ -380,7 +382,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                 }
                 else
                 {
-                    await RefreshCoreAsync();
+                    await RefreshCoreAsync(this.SelectServer.ShowCard);
                 }
                 if (actionType == Waves.Core.Models.Enums.GameContextActionType.GameExit)
                 {
@@ -489,10 +491,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         }
     }
 
-    private static void TrimChartPoints(
-        IList<DateTimeChartPoint> points,
-        DateTime now
-    )
+    private static void TrimChartPoints(IList<DateTimeChartPoint> points, DateTime now)
     {
         if (points == null)
             return;

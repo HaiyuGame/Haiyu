@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -48,4 +48,5 @@ public sealed partial class SelectGameFolderDialogV2
             ViewModel.SetData(type);
         }
     }
+
 }

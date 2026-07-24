@@ -274,7 +274,6 @@
         <ui:ApplicationBackgroundControl
             x:Name="mediaControl"
             Grid.RowSpan="2"
-            DefaultImageSource="ms-appx:///Assets/background.png"
             Stretch="UniformToFill"
             Style="{ThemeResource DefaultApplicationBackgroundControlStyle}">
             <ani:Explicit.Animations>

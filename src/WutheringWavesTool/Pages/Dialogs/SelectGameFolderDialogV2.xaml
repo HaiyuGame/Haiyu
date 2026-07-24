@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentDialog
     x:Class="Haiyu.Pages.Dialogs.SelectGameFolderDialogV2"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -28,12 +28,12 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="auto" />
             </Grid.ColumnDefinitions>
             <TextBox
                 VerticalAlignment="Center"
                 FontFamily="{ThemeResource DefaultFont}"
-                IsReadOnly="True"
-                Text="{x:Bind ViewModel.ExePath, Mode=OneWay}" />
+                Text="{x:Bind ViewModel.ExePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             <Button
                 Grid.Column="1"
                 Margin="5,0,0,0"
@@ -42,6 +42,14 @@
                 Style="{ThemeResource TransparentButtonStyle}"
                 ToolTipService.ToolTip="选择主程序">
                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8E5;" />
+            </Button>
+            <Button
+                Grid.Column="2"
+                Margin="5,5,0,0"
+                VerticalAlignment="Center"
+                Command="{x:Bind ViewModel.RefreshDiskCommand}"
+                Style="{ThemeResource TransparentButtonStyle}">
+                <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE72C;" />
             </Button>
         </Grid>
         <TextBlock

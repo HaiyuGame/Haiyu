@@ -330,10 +330,7 @@ public sealed partial class ShellViewModel : ViewModelBase
             await this.RefreshHeaderUser();
         }
         this.AppContext.MainTitle.UpDate();
-        WallpaperService.SetMediaForUrl(
-            WallpaperShowType.Image,
-            AppDomain.CurrentDomain.BaseDirectory + "Assets\\background.png"
-        );
+        await this.KuroAccountService.SetAutoUser();
         await RefreshHeaderUser();
         await OpenMain();
         await AppContext.UpdateAppAsync();
