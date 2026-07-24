@@ -54,10 +54,16 @@ public sealed class AutoKuroGameSignService : TimedTaskServiceBase,ITaskName
                 Waves.Core.Models.Enums.GameType.Punish,
                 token
             );
+            if (wavesGamers == null || wavesGamers.Code != 200 || punish==null || punish.Code != 200)
+                return;
             var items = wavesGamers.Data.Concat(punish.Data);
             foreach (var item in items)
             {
                 var sign = await _kuroClient.SignInAsync(requestAccount, item, token);
+                if(sign == null)
+                {
+                    return;
+                }
                 if (sign.Code == 1511 || sign.Code == 0)
                 {
                     successCount++;

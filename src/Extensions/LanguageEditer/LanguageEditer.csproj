@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LanguageEditer.Model\LanguageEditer.Model.csproj" />
+    <ProjectReference Include="..\..\Haiyu.Pickers\Haiyu.Pickers.csproj" />
   </ItemGroup>
 
   <!--

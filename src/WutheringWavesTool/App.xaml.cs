@@ -21,7 +21,7 @@ public partial class App : ClientApplication
     private const int PROCESS_PER_MONITOR_DPI_AWARE = 2;
     private AppInstance mainInstance;
 
-    public static string AppVersion => "1.3.3";
+    public static string AppVersion => "1.3.4";
 
     public AppSettings AppSettings { get; private set; }
 
@@ -34,7 +34,7 @@ public partial class App : ClientApplication
         mainInstance.Activated += MainInstance_Activated;
     }
 
-    private async void MainInstance_Activated(object sender, AppActivationArguments e)
+    private async void MainInstance_Activated(object? sender, AppActivationArguments e) 
     {
         var active = Instance.Host.Services.GetRequiredService<IAppActivation>();
         await active.ExecLaunchActivatedEventArgs(e);
@@ -49,7 +49,7 @@ public partial class App : ClientApplication
         Directory.CreateDirectory(AppSettings.WrallpaperFolder);
         Directory.CreateDirectory(AppSettings.ScreenCaptures);
         Directory.CreateDirectory(AppSettings.LocalUserFolder);
-        Directory.CreateDirectory(Path.GetDirectoryName(AppSettings.LogPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(AppSettings.LogPath)!);
         Directory.CreateDirectory(AppSettings.CloudFolderPath);
     }
 
@@ -64,12 +64,12 @@ public partial class App : ClientApplication
         }
         try
         {
-            Instance.Host.Services.GetService<ITipShow>().ShowMessage(e.Message, Symbol.Clear);
-            Instance.Host.Services.GetKeyedService<LoggerService>("AppLog").WriteError(e.Message);
+            Instance.Host.Services.GetRequiredService<ITipShow>().ShowMessage(e.Message, Symbol.Clear);
+            Instance.Host.Services.GetRequiredKeyedService<LoggerService>("AppLog").WriteError(e.Message);
         }
         catch (Exception ex)
         {
-            Instance.Host.Services.GetKeyedService<LoggerService>("AppLog").WriteError(ex.Message);
+            Instance.Host.Services.GetRequiredKeyedService<LoggerService>("AppLog").WriteError(ex.Message);
         }
         finally
         {

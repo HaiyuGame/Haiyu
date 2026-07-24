@@ -123,6 +123,7 @@
 		<ProjectReference Include="..\Waves.Core\Waves.Core.csproj" />
 		<ProjectReference Include="..\Haiyu.Controls\Haiyu.Controls.csproj" />
 		<ProjectReference Include="..\Haiyu.Charts.WinUI\Haiyu.Charts.WinUI.csproj" />
+		<ProjectReference Include="..\Haiyu.Pickers\Haiyu.Pickers.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<Content Update="Assets\background.png">
@@ -198,6 +199,24 @@
 		</Content>
 		<Content Update="Assets\kLogo.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="Assets\KuroClient\waves-active.gif">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="Assets\KuroClient\waves-cali.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="Assets\KuroClient\waves-dataCenter.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="Assets\KuroClient\waves-map.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="Assets\KuroClient\waves-resource.gif">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="Assets\KuroClient\waves-sign.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Update="Assets\kuroRobot.png">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

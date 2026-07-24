@@ -54,4 +54,7 @@
     <Platform Project="x64" />
     <Deploy />
   </Project>
+  <Project Path="Haiyu.Pickers/Haiyu.Pickers.csproj">
+    <BuildType Solution="All|*" Project="Debug" />
+  </Project>
 </Solution>

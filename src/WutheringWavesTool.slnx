@@ -91,4 +91,7 @@
     <BuildType Solution="All|*" Project="Debug" />
     <Platform Project="x64" />
   </Project>
+  <Project Path="Haiyu.Pickers/Haiyu.Pickers.csproj">
+    <BuildType Solution="All|*" Project="Debug" />
+  </Project>
 </Solution>

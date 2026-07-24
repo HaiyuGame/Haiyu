@@ -158,7 +158,17 @@ public static class InstanceBuilderExtensions
                 #endregion
                     #region More
                     .AddTransient<IPageService, PageService>()
-                    .AddTransient<IPickersService, PickersService>()
+                    .AddTransient<IPickersService>(
+                        serviceProvider =>
+                            new NativePickersService(
+                                () =>
+                                    WinRT.Interop.WindowNative.GetWindowHandle(
+                                        serviceProvider
+                                            .GetRequiredService<IAppContext<App>>()
+                                            .App.MainWindow
+                                    )
+                            )
+                    )
                     .AddSingleton<ITipShow, TipShow>()
                     .AddKeyedTransient<ITipShow, PageTipShow>("Cache")
                     .AddKeyedTransient<IDialogManager, MainDialogService>("Cache")

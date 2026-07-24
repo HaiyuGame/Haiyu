@@ -290,7 +290,13 @@
                                 Command="{x:Bind ViewModel.OpenDataCenterCommand}"
                                 CornerRadius="3">
                                 <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition />
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
+                                    <ui:ImageEx Height="50" Source="Assets\KuroClient\waves-dataCenter.png" />
                                     <TextBlock
+                                        Grid.Row="1"
                                         Margin="8"
                                         HorizontalAlignment="Left"
                                         VerticalAlignment="Bottom"
@@ -309,7 +315,13 @@
                                 Command="{x:Bind ViewModel.OpenResourceBriefingCommand}"
                                 CornerRadius="3">
                                 <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition />
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
+                                    <ui:ImageEx Height="50" Source="Assets\KuroClient\waves-resource.gif" />
                                     <TextBlock
+                                        Grid.Row="1"
                                         Margin="8"
                                         HorizontalAlignment="Left"
                                         VerticalAlignment="Bottom"
@@ -328,7 +340,13 @@
                                 Command="{x:Bind ViewModel.OpenGrowthCalculatorCommand}"
                                 CornerRadius="3">
                                 <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition />
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
+                                    <ui:ImageEx Height="50" Source="Assets\KuroClient\waves-cali.png" />
                                     <TextBlock
+                                        Grid.Row="1"
                                         Margin="8"
                                         HorizontalAlignment="Left"
                                         VerticalAlignment="Bottom"
@@ -348,7 +366,13 @@
                                 Command="{x:Bind ViewModel.OpenCalendarCommand}"
                                 CornerRadius="3">
                                 <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition />
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
+                                    <ui:ImageEx Height="50" Source="Assets\KuroClient\waves-active.gif" />
                                     <TextBlock
+                                        Grid.Row="1"
                                         Margin="8"
                                         HorizontalAlignment="Left"
                                         VerticalAlignment="Bottom"
@@ -368,7 +392,13 @@
                                 Command="{x:Bind ViewModel.OpenMapCommand}"
                                 CornerRadius="3">
                                 <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition />
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
+                                    <ui:ImageEx Height="50" Source="Assets\KuroClient\waves-map.png" />
                                     <TextBlock
+                                        Grid.Row="1"
                                         Margin="8"
                                         HorizontalAlignment="Left"
                                         VerticalAlignment="Bottom"
@@ -388,7 +418,13 @@
                                 Command="{x:Bind ViewModel.OpenGameSignCommand}"
                                 CornerRadius="3">
                                 <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition />
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
+                                    <ui:ImageEx Height="50" Source="Assets\KuroClient\waves-sign.png" />
                                     <TextBlock
+                                        Grid.Row="1"
                                         Margin="8"
                                         HorizontalAlignment="Left"
                                         VerticalAlignment="Bottom"

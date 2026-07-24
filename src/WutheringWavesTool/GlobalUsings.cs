@@ -14,6 +14,7 @@ global using Haiyu.Pages;
 global using Haiyu.Pages.Dialogs;
 global using Haiyu.Services;
 global using Haiyu.Services.Contracts;
+global using Haiyu.Pickers;
 global using Haiyu.Services.Navigations;
 global using Haiyu.Services.Navigations.Base;
 global using Haiyu.ViewModel;
