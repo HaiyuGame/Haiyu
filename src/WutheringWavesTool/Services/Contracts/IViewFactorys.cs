@@ -20,5 +20,4 @@ public interface IViewFactorys
 
     public WindowModelBase ShowAutoKruoTokenWindow();
 
-    WindowModelBase ShowGameLocalTokenWindowAsync(string contextName);
 }

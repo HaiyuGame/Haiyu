@@ -1,6 +1,6 @@
 namespace Haiyu.Pages.Dialogs;
 
-public sealed partial class LocalGameTokenDialog : Page, IWindowPage
+public sealed partial class LocalGameTokenDialog : ContentDialog,IDialog
 {
     public LocalGameTokenDialog()
     {
@@ -24,15 +24,4 @@ public sealed partial class LocalGameTokenDialog : Page, IWindowPage
         }
     }
 
-    public void SetWindow(Window window)
-    {
-        this.ViewModel.Initialization(window);
-        title.Window = this.ViewModel.Window;
-        title.Window.Closed += Window_Closed;
-    }
-
-    private void Window_Closed(object sender, WindowEventArgs args)
-    {
-        this.ViewModel?.Dispose();
-    }
 }

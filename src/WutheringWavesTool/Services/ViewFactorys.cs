@@ -98,9 +98,4 @@ public class ViewFactorys : IViewFactorys
         return this.ShowWindowBase<AutoKuroTokenPage>(null);
     }
 
-
-    public WindowModelBase ShowGameLocalTokenWindowAsync(string contextName)
-    {
-        return this.ShowWindowBase<LocalGameTokenDialog>(contextName);
-    }
 }

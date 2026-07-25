@@ -890,9 +890,15 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
             var gameLaunche = Path.Combine(gameLocal, $"{this.Config.PKGId}\\KRSDKUserCache.json");
             if (Directory.Exists(gameLocal) && File.Exists(gameLaunche))
             {
-                var fileStr = await File.ReadAllTextAsync(gameLaunche, token);
+                var encrypted = await File.ReadAllBytesAsync(gameLaunche, token);
+                var decrypted = KrKeyHelper.Xor(encrypted, 9);
+                if (decrypted == null)
+                {
+                    return null;
+                }
+                var json = Encoding.UTF8.GetString(decrypted);
                 var model = JsonSerializer.Deserialize(
-                    fileStr,
+                    json,
                     LauncherConfig.Default.KRSDKGameTokenModel
                 );
                 return model;
@@ -946,7 +952,13 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
                 currentTokens,
                 LauncherConfig.Default.KRSDKGameTokenModel
             );
-            await File.WriteAllTextAsync(gameLaunche, json, token);
+
+            var encrypted = KrKeyHelper.Xor(Encoding.UTF8.GetBytes(json), 9);
+            if (encrypted == null)
+            {
+                return false;
+            }
+            await File.WriteAllBytesAsync(gameLaunche, encrypted, token);
             return true;
         }
         catch (Exception ex)

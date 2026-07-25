@@ -1,6 +1,8 @@
 using Haiyu.Models.Enums;
 using Microsoft.Windows.AppNotifications;
 using Microsoft.Windows.AppNotifications.Builder;
+using Waves.Core.GameContext.ContextsV2.Punish;
+using Waves.Core.GameContext.ContextsV2.Waves;
 using Waves.Core.Models.Enums;
 
 namespace Haiyu.ViewModel.GameViewModels;
@@ -87,7 +89,14 @@ partial class KuroGameContextViewModelV2
     [RelayCommand]
     async Task ShowGameLocalTokenWindow()
     {
-        var window = this.ViewFactory.ShowGameLocalTokenWindowAsync(this.GameContext.ContextName);
-        window.AppWindow.Show();
+        if (!(GameContext.ContextName == nameof(WavesMainGameContextV2) || GameContext.ContextName == nameof(PunishMainGameContextV2)))
+        {
+            await DialogManager.ShowMessageDialog(new ShowDialogOption()
+            {
+                Context = "不支持的游戏类型"
+            });
+            return;
+        }
+        await this.DialogManager.ShowGameLocalTokenAsync(this.GameContext.ContextName);
     }
 }

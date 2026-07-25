@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentDialog
     x:Class="Haiyu.Pages.Dialogs.GameLauncherCacheManager"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -22,7 +22,7 @@
             Margin="5,5,0,0"
             FontFamily="{ThemeResource DefaultFont}"
             FontSize="18"
-            Text="本地游戏记录" />
+            Text="绑定游戏首页体力" />
         <Button
             Margin="0,0,0,0"
             HorizontalAlignment="Right"

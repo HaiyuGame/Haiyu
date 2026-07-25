@@ -37,4 +37,7 @@ public interface IDialogManager
     Task<ContentDialogResult> ShowOKDialogAsync(string header, string content);
     Task ShowGameSettingAsync(string contextName);
     Task ShowGameEnhancedDialogAsync();
+
+
+    Task ShowGameLocalTokenAsync(string contextName);
 }
