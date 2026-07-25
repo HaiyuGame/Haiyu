@@ -8,11 +8,6 @@ public static class CloudGameDataHelper
     public const string WelinkTenantKey = "1853717215719854081";
     public const string WelinkGameId = "1853717365355843585600007";
     public const string MainUrl = "https://mc.kurogames.com/cloud/index.html";
-    private const int MinStreamWidth = 640;
-    private const int MinStreamHeight = 360;
-    private const int MaxStreamWidth = 3840;
-    private const int MaxStreamHeight = 2160;
-
     public static void BuildLauncheOption(CloudGameLoginSession login) { }
 
     public static Dictionary<string, string> BuildWebStorageItems(CloudGameLoginSession login)
@@ -206,18 +201,17 @@ public static class CloudGameDataHelper
         bool clampToWindow
     )
     {
-        var dpiScale = quality.DPI / 96.0;
         var isSmooth = quality.Type ==  Models.Enums.CloudQualityType.Smooth;
-        double maxScale = isSmooth ? 2.0 / 3.0 : 1.0;
-        var maxW = (int)Math.Round(quality.Width * maxScale);
-        var maxH = (int)Math.Round(quality.Height * maxScale); 
-        var physicalWidth = (int)Math.Round(quality.Width * dpiScale);
-        var physicalHeight = (int)Math.Round(quality.Height * dpiScale); 
-        physicalWidth = ClampEven(physicalWidth, 640, maxW);
-        physicalHeight = ClampEven(physicalHeight, 360, maxH);
-        const double targetBitratePerPixel = 0.013;
-        var targetBitRate = (int)(physicalWidth * physicalHeight * targetBitratePerPixel);
-        targetBitRate = Math.Clamp(targetBitRate, 5000, 50000);
+        var physicalWidth = isSmooth
+            ? CloudGameMethod.MinStreamWidth
+            : CloudGameMethod.MaxStreamWidth;
+        var physicalHeight = isSmooth
+            ? CloudGameMethod.MinStreamHeight
+            : CloudGameMethod.MaxStreamHeight;
+        var targetBitRate = isSmooth
+            ? (int)(physicalWidth * physicalHeight * 0.013)
+            : CloudGameMethod.ClarityBitRate;
+        targetBitRate = Math.Clamp(targetBitRate, 5000, CloudGameMethod.ClarityBitRate);
         return new StreamQualityOptions(
             targetBitRate,
             quality.BitRateMin,
@@ -314,12 +308,16 @@ public static class CloudGameDataHelper
 
     private static string GetPreferredResolution(int dpi, int maxWidth, int maxHeight)
     {
-        var dpiScale = Math.Max(1.0, dpi / 96.0);
-        var screenWidth = (int)Math.Round(maxWidth * dpiScale);
-        var screenHeight = (int)Math.Round(maxHeight * dpiScale);
-
-        screenWidth = ClampEven(screenWidth, MinStreamWidth, MaxStreamWidth);
-        screenHeight = ClampEven(screenHeight, MinStreamHeight, MaxStreamHeight);
+        var screenWidth = ClampEven(
+            maxWidth,
+            CloudGameMethod.MinStreamWidth,
+            CloudGameMethod.MaxStreamWidth
+        );
+        var screenHeight = ClampEven(
+            maxHeight,
+            CloudGameMethod.MinStreamHeight,
+            CloudGameMethod.MaxStreamHeight
+        );
 
         return $"{screenWidth}x{screenHeight}";
     }

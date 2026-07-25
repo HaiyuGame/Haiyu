@@ -89,10 +89,16 @@ partial class CloudGameingViewModel
 
     public override void Dispose()
     {
-        WebView2.Close();
-        this._cursorTimer.Stop();
-        this._hotkeyTimer.Stop();
+        ShowSystemCursor();
+        ReleaseWebViewCursorSubclass();
+        if (Window is not null)
+        {
+            Window.Activated -= Window_Activated;
+        }
+        WebView2?.Close();
+        this._cursorTimer?.Stop();
         this._cursorTimer = null;
+        this._hotkeyTimer?.Stop();
         this._hotkeyTimer = null;
     }
 }

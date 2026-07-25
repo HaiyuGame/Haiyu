@@ -820,10 +820,15 @@ public static class CloudGameBuilder
             const getPhysicalResolution = () => {
                 const viewport = getViewportResolution();
                 const scale = Number(window.devicePixelRatio) > 0 ? Number(window.devicePixelRatio) : 1;
-                const physical = normalizeResolution(viewport.width * scale, viewport.height * scale);
+                const configuredWidth = Number(payload.bridgeConfig?.targetWidth);
+                const configuredHeight = Number(payload.bridgeConfig?.targetHeight);
+                const physical = configuredWidth > 0 && configuredHeight > 0
+                    ? normalizeResolution(configuredWidth, configuredHeight)
+                    : normalizeResolution(viewport.width * scale, viewport.height * scale);
                 return {
-                    ...viewport,
                     ...physical,
+                    viewportWidth: viewport.width,
+                    viewportHeight: viewport.height,
                     scale
                 };
             };
@@ -1172,40 +1177,6 @@ public static class CloudGameBuilder
                 setTimeout(() => overlay?.remove(), 260);
             };
 
-            // Pointer lock state tracking (matching official kurogames behavior)
-            let isPointerLocked = false;
-            let pointerLockEscTimer = null;
-
-            document.addEventListener("pointerlockchange", () => {
-                clearTimeout(pointerLockEscTimer);
-                const video = document.getElementById("WelinkGameVideo");
-                if (document.pointerLockElement === video) {
-                    isPointerLocked = true;
-                } else {
-                    isPointerLocked = false;
-                    pointerLockEscTimer = setTimeout(() => {
-                        if (sdk && sdk.gameInstance && sdk.gameInstance.configs && sdk.gameInstance.configs.enableReplenishEsc) {
-                            try {
-                                if (typeof sdk.sendDataToGame === "function") {
-                                    sdk.sendDataToGame(new Uint8Array([0x1b]));
-                                }
-                            } catch {
-                            }
-                        }
-                    }, 200);
-                }
-            });
-
-            const requestPointerLockOnVideo = () => {
-                const video = document.getElementById("WelinkGameVideo");
-                if (video && typeof video.requestPointerLock === "function") {
-                    try {
-                        video.requestPointerLock();
-                    } catch {
-                    }
-                }
-            };
-
             const setupVideoMouseHandlers = () => {
                 const video = document.getElementById("WelinkGameVideo");
                 if (!video || video._kuroMouseHandlersSetup) {
@@ -1213,8 +1184,7 @@ public static class CloudGameBuilder
                 }
                 video._kuroMouseHandlersSetup = true;
 
-                video.addEventListener("mousedown", (e) => {
-                    requestPointerLockOnVideo();
+                video.addEventListener("mousedown", () => {
                     focusSurface();
                 }, true);
 
@@ -1353,6 +1323,17 @@ public static class CloudGameBuilder
                             message: `Welink startGameError: code=${code}${suffix}`,
                             code,
                             detail
+                        });
+                    };
+                }
+
+                if (typeof sdk.onCursorData !== "undefined") {
+                    sdk.onCursorData = (visible, url, xHotspot, yHotspot) => {
+                        post("cursor-data", {
+                            visible: Boolean(visible),
+                            hasImage: Boolean(url),
+                            xHotspot: Number(xHotspot) || 0,
+                            yHotspot: Number(yHotspot) || 0
                         });
                     };
                 }
