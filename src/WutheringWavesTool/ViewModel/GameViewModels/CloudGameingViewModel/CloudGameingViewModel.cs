@@ -66,6 +66,14 @@ public sealed partial class CloudGameingViewModel:ViewModelBase
         this.Window = window;
         this.Option = option;
         this.Window.Closed += Window_Closed;
+        this.Window.Activated += Window_Activated;
+    }
+
+    private void Window_Activated(object sender, WindowActivatedEventArgs args)
+    {
+        ApplyWindowActivationState(
+            args.WindowActivationState != WindowActivationState.Deactivated
+        );
     }
 
     private async void Window_Closed(object sender, WindowEventArgs args)
@@ -318,8 +326,7 @@ public sealed partial class CloudGameingViewModel:ViewModelBase
                     UpdateNetworkDisplay(model);
                     break;
                 case "cursor-data":
-                    break;
-                case "pointer-lock":
+                    ApplyCloudCursorVisibility(model.Visible);
                     break;
                 case "error":
                     ShowSystemCursor();

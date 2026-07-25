@@ -24,5 +24,6 @@ public class CloudGameMethod
     public const int MinStreamHeight = 720;
     public const int MaxStreamWidth = 1920;
     public const int MaxStreamHeight = 1080;
+    public const int ClarityBitRate = 25000;
 
 }
