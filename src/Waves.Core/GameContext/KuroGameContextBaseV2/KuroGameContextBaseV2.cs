@@ -472,8 +472,10 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
 
     private async Task ClearVersion(GameLauncherSource indexSource)
     {
-        var currentVersion = await this.GameLocalConfig.GetConfigAsync(GameLocalSettingName.LocalGameVersion);
-        if(currentVersion == indexSource.ResourceDefault.Version)
+        var currentVersion = await this.GameLocalConfig.GetConfigAsync(
+            GameLocalSettingName.LocalGameVersion
+        );
+        if (currentVersion == indexSource.ResourceDefault.Version)
         {
             await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdIsAdvance, "False");
         }
@@ -870,6 +872,94 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
         catch (Exception ex)
         {
             return null;
+        }
+    }
+
+    public virtual async Task<KRSDKGameTokenModel?> GetSDKGameTokenAsync(
+        CancellationToken token = default
+    )
+    {
+        try
+        {
+            if (this.Config.PKGId == null)
+            {
+                return null;
+            }
+            var roming = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var gameLocal = Path.Combine(roming, $"KR_{this.Config.GameID}");
+            var gameLaunche = Path.Combine(gameLocal, $"{this.Config.PKGId}\\KRSDKUserCache.json");
+            if (Directory.Exists(gameLocal) && File.Exists(gameLaunche))
+            {
+                var fileStr = await File.ReadAllTextAsync(gameLaunche, token);
+                var model = JsonSerializer.Deserialize(
+                    fileStr,
+                    LauncherConfig.Default.KRSDKGameTokenModel
+                );
+                return model;
+            }
+            return null;
+        }
+        catch (Exception ex)
+        {
+            return null;
+        }
+    }
+
+    public async Task<bool> SetCurrentLoginSdkToken(
+        KRSDKGameTokenCache cache,
+        CancellationToken token = default
+    )
+    {
+        try
+        {
+            if (cache == null)
+            {
+                this.SystemEventPublisher.Publish(
+                    new SystemMessagerModel()
+                    {
+                        Message = "请输入一个正确的账号",
+                        Delay = TimeSpan.FromSeconds(10).TotalSeconds,
+                    }
+                );
+                return false;
+            }
+            var currentTokens = await this.GetSDKGameTokenAsync(token);
+            if (currentTokens == null)
+            {
+                this.SystemEventPublisher.Publish(
+                    new SystemMessagerModel()
+                    {
+                        Message = "当前本地缓存中没有此账号数据",
+                        Delay = TimeSpan.FromSeconds(10).TotalSeconds,
+                    }
+                );
+                return false;
+            }
+            if (currentTokens.AccountList.Any(x => x.Cuid == cache.Cuid))
+            {
+                currentTokens.LastLoginCuid = cache.Cuid;
+            }
+            var roming = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var gameLocal = Path.Combine(roming, $"KR_{this.Config.GameID}");
+            var gameLaunche = Path.Combine(gameLocal, $"{this.Config.PKGId}\\KRSDKUserCache.json");
+            var json = JsonSerializer.Serialize(
+                currentTokens,
+                LauncherConfig.Default.KRSDKGameTokenModel
+            );
+            await File.WriteAllTextAsync(gameLaunche, json, token);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            this.SystemEventPublisher.Publish(
+                    new SystemMessagerModel()
+                    {
+                        Message = $"选择账号保存异常",
+                        Delay = TimeSpan.FromSeconds(10).TotalSeconds,
+                    }
+                );
+            Logger.WriteError($"选择账号保存异常:{ex.Message},{ex.StackTrace}");
+            return false;
         }
     }
 

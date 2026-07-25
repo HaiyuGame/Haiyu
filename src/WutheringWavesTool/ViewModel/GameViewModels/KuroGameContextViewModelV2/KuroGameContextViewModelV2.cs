@@ -31,17 +31,19 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
     public ITipShow TipShow { get; }
     public IIoCircuitBreaker IoCircuitBreaker { get; }
     public IWallpaperService WallpaperService { get; }
+    public IViewFactorys ViewFactory { get; }
 
     protected KuroGameContextViewModelV2(IAppContext<App> appContext, ITipShow tipShow)
     {
-        this.Logger = Instance.Host.Services.GetKeyedService<LoggerService>("AppLog");
+        this.Logger = Instance.Host.Services.GetRequiredKeyedService<LoggerService>("AppLog");
         DialogManager = Instance.Host.Services.GetRequiredKeyedService<IDialogManager>(
             nameof(MainDialogService)
         );
         AppContext = appContext;
         TipShow = tipShow;
         IoCircuitBreaker = Instance.Host.Services.GetRequiredService<IIoCircuitBreaker>();
-        WallpaperService = Instance.GetService<IWallpaperService>();
+        WallpaperService = Instance.Host.Services.GetRequiredService<IWallpaperService>();
+        this.ViewFactory = Instance.Host.Services.GetRequiredService<IViewFactorys>();
         InitializeTransferChart();
         RegisterMessager();
     }

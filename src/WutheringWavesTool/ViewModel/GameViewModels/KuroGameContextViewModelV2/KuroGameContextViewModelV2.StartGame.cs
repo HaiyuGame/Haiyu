@@ -83,4 +83,11 @@ partial class KuroGameContextViewModelV2
             this.PreDownloadIcon = "\uE768";
         }
     }
+
+    [RelayCommand]
+    async Task ShowGameLocalTokenWindow()
+    {
+        var window = this.ViewFactory.ShowGameLocalTokenWindowAsync(this.GameContext.ContextName);
+        window.AppWindow.Show();
+    }
 }

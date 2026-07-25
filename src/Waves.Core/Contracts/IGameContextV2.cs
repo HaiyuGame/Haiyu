@@ -168,4 +168,15 @@ public interface IGameContextV2
         CancellationToken token = default
     );
     #endregion
+
+    #region 选择登录账号
+    Task<KRSDKGameTokenModel?> GetSDKGameTokenAsync(
+        CancellationToken token = default
+    );
+
+    Task<bool> SetCurrentLoginSdkToken(
+        KRSDKGameTokenCache cache,
+        CancellationToken token = default
+    );
+    #endregion
 }

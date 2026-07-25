@@ -33,9 +33,6 @@ public sealed partial class KuroDataCenterWindow : Window
         await hostInitializer.InitializeAsync(webView2, Context);
         this.webView2.CoreWebView2.Navigate(Context.GetPageUrl());
         this.AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
-        this.webView2.CoreWebView2.Settings.AreDefaultContextMenusEnabled = false;
-        this.webView2.CoreWebView2.Settings.AreBrowserAcceleratorKeysEnabled = false;
-        this.webView2.CoreWebView2.Settings.AreDevToolsEnabled = false;
     }
 
 

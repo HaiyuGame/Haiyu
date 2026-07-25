@@ -154,6 +154,8 @@ public static class InstanceBuilderExtensions
                     .AddTransient<CloudGameSettingDialog>()
                     .AddTransient<KuroGameSettingDialog>()
                     .AddTransient<KuroGameSettingViewModel>()
+                    .AddTransient<LocalGameTokenDialog>()
+                    .AddTransient<LocalGameTokenViewModel>()
                     #endregion
                 #endregion
                     #region More

@@ -200,4 +200,5 @@ public abstract class DialogManager : IDialogManager
 
     public async Task ShowWavesCloudSettingAsync(GameType type) =>
         await ShowDialogAsync<CloudGameSettingDialog>(type);
+
 }
