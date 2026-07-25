@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using Microsoft.Win32;
 using Project.WPFSetup.Common;
 using Project.WPFSetup.Resources;

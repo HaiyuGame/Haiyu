@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
@@ -22,7 +22,9 @@ public sealed partial class InstallViewModel : ObservableRecipient
         this.SelectInstallVisibility = Visibility.Visible;
         InstallingVisibility = Visibility.Collapsed;
         InstalledVisibility = Visibility.Collapsed;
-        this.InstallFolder = Path.Combine(Environment.GetFolderPath(Environment.Is64BitProcess? Environment.SpecialFolder.ProgramFiles: Environment.SpecialFolder.ProgramFilesX86),"Haiyu");    }
+        this.InstallFolder = Path.Combine( Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"Haiyu");
+
+    }
 
     [ObservableProperty]
     public partial string InstallFolder { get; set; }

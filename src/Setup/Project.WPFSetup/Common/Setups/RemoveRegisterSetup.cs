@@ -1,4 +1,4 @@
-﻿using Project.WPFSetup.Resources;
+using Project.WPFSetup.Resources;
 
 namespace Project.WPFSetup.Common.Setups;
 
