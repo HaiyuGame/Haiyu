@@ -16,13 +16,14 @@ public sealed partial class KuroClient : IKuroClient
         HttpClientService.BuildClient();
     }
 
-    private static Dictionary<string, string> GetDeviceHeader(
+    private Dictionary<string, string> GetDeviceHeader(
         KuroAccount? account = null,
         string? accessToken = null
     )
     {
         var dict = new Dictionary<string, string>()
         {
+            {"ip",this.Ip },
             { "Accept", "application/json, text/plain, */*" },
             { "Accept-Encoding", "gzip, deflate" },
             { "Accept-Language", "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7" },
@@ -30,8 +31,15 @@ public sealed partial class KuroClient : IKuroClient
             { "devCode", account?.DeviceId ?? "" },
             //{ "model","23117RK66C"},
             { "version", "3.1.2" },
+            { "versionCode", "30102" },
             { "lang", "zh-Hans" },
             { "countryCode", "CN" },
+            { "channelId", "8" },
+            { "User-Agent", "okhttp/3.11.0" },
+            {
+                "Cookie",
+                "user_token=eyJhbGciOiJIUzI1NiJ9.eyJjcmVhdGVkIjoxNzg0NjQ5OTczOTI1LCJ1c2VySWQiOjE3MzAxNDg0fQ.wm9nBDf92iHarfezDcPYJml3wt3-kEptS1fiurFyBtI; acw_tc=69285024-8dc9-4b1f-b0ae-067472c01ef259f5bb25288cea29f688b42560d2ea06"
+            },
         };
         if (!string.IsNullOrWhiteSpace(accessToken))
         {
@@ -110,6 +118,7 @@ public sealed partial class KuroClient : IKuroClient
         {
             request.Headers.Add(item.Key, item.Value);
         }
+
         request.RequestUri = new Uri(url);
         var endcod = new FormUrlEncodedContent(queryValues);
         var query = await endcod.ReadAsStringAsync(token);
@@ -356,7 +365,10 @@ public sealed partial class KuroClient : IKuroClient
         return (SMSModel?)JsonSerializer.Deserialize(jsonStr, QRContext.Default.SMSModel);
     }
 
-    public async Task<DeviceInfo?> GetDeviceInfosAsync(KuroAccount account, CancellationToken token = default)
+    public async Task<DeviceInfo?> GetDeviceInfosAsync(
+        KuroAccount account,
+        CancellationToken token = default
+    )
     {
         var url = "https://api.kurobbs.com/user/auth/device/list";
         var request = await BuildLoginRequest(

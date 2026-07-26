@@ -9,7 +9,7 @@ using Waves.Core.Services;
 using Waves.Core.Settings;
 using WavesLauncher.Core.Contracts;
 
-namespace KuroGameDownloadProgram;
+namespace KuroGameDownloadProgram.Tests;
 
 internal static class RefreshDataDiagnostic
 {

@@ -5,6 +5,7 @@ namespace Waves.Core.Settings;
 [SettingsAttribute<string>(Name = "WallpaperType", Nullable = true)]
 [SettingsAttribute<string>(Name = "AreaCounterPostion", Nullable = true)]
 [SettingsAttribute<bool>(Name = "AutoSignCommunity", Nullable = true, DefaultValue = "False")]
+[SettingsAttribute<bool>(Name = "AutoKuroTaskEnable", Nullable = true, DefaultValue = "False")]
 [SettingsAttribute<string>(Name = "LastSelectUser", Nullable = true)]
 [SettingsAttribute<string>(Name = "WallpaperPath", Nullable = true)]
 [SettingsAttribute<string>(Name = "CloseWindow", Nullable = true)]

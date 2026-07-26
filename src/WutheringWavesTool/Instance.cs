@@ -189,6 +189,7 @@ public static class InstanceBuilderExtensions
                     .AddSingleton<IThemeService, ThemeService>()
                     .AddSingleton<IKuroAccountService, KuroAccountService>()
                     .AddSingleton<AutoKuroGameSignService>()
+                    .AddSingleton<AutoKuroClientSignService>()
                     .AddSingleton<ITaskManager, TaskManager>(s => CreateTask(s))
                     .AddSingleton<CloudConfigManager>(
                         (s) =>
@@ -271,7 +272,9 @@ public static class InstanceBuilderExtensions
         TaskManager taskManager = new TaskManager(s.GetRequiredService<AppSettings>());
         #region 自动签到
         var autoSignTask = s.GetRequiredService<AutoKuroGameSignService>();
+        var kuroTask = s.GetRequiredService<AutoKuroClientSignService>();
         taskManager.RegsiterTask(autoSignTask);
+        taskManager.RegsiterTask(kuroTask);
         #endregion
         return taskManager;
     }

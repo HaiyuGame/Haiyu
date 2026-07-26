@@ -1,4 +1,4 @@
-﻿using Serilog.Core;
+using Serilog.Core;
 using System.Buffers;
 using System.Diagnostics;
 using System.Net.Http.Headers;
@@ -11,12 +11,22 @@ using Waves.Core.Models.Downloader;
 using Waves.Core.Models.Enums;
 using Waves.Core.Services;
 
-namespace KuroGameDownloadProgram;
+namespace KuroGameDownloadProgram.Tests;
 
 public class DownloadClient
 {
     const int MaxBufferSize = 65536; // 64KB缓冲区
     const long UpdateThreshold = 1048576; // 1MB进度更新阈值
+
+    public static async Task StartTest()
+    {
+        DownloadClient downloadClient = new();
+        var resource = await downloadClient.GetVersionResource("https://pcdownload-aliyun.aki-game.com/launcher/game/G152/10003/3.3.0/LwvQueHvaDihmfrFKvPkzsBMsZoMxIAD/resource/10003/3.3.0/indexFile.json");
+
+        downloadClient.InitDownload(resource, "https://pcdownload-aliyun.aki-game.com/launcher/game/G152/10003/3.3.0/LwvQueHvaDihmfrFKvPkzsBMsZoMxIAD/zip/", "D:\\WutheringWavesGame");
+        await downloadClient.WaitDownloadAsync();
+    }
+
     public DownloadClient()
     {
         HttpClient = new HttpClient();
