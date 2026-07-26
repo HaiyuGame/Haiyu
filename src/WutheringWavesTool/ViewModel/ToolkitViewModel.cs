@@ -64,10 +64,6 @@ public sealed partial class ToolkitViewModel:ViewModelBase
                 break;
             case SendTaskType.Launche:
                 await AppSettings.WriteAsync(message.wrapper.AutoLaunche.ToString(), message.wrapper.SettingName);
-                if (message.wrapper.AutoLaunche)
-                {
-                    await TaskManager.StartTaskAsync(message.wrapper.Guid);
-                }
                 break;
             default:
                 break;
