@@ -222,8 +222,6 @@
                     <Button
                         Width="37"
                         Height="37"
-                        BorderBrush="{ThemeResource ApplicationPageBackgroundThemeBrush}"
-                        BorderThickness="0.5"
                         Command="{x:Bind ViewModel.RefreshCurrentPageCommand}"
                         CornerRadius="40"
                         ToolTipService.ToolTip="刷新当前页面">
@@ -235,8 +233,6 @@
                     <Button
                         Width="37"
                         Height="37"
-                        BorderBrush="{ThemeResource ApplicationPageBackgroundThemeBrush}"
-                        BorderThickness="0.5"
                         Command="{x:Bind ViewModel.MinCommand}"
                         CornerRadius="40"
                         ToolTipService.ToolTip="最小化"
@@ -250,8 +246,6 @@
                         Width="37"
                         Height="37"
                         Margin="0,0,5,0"
-                        BorderBrush="{ThemeResource ApplicationPageBackgroundThemeBrush}"
-                        BorderThickness="0.5"
                         Command="{x:Bind ViewModel.CloseWindowCommand}"
                         CornerRadius="40"
                         ToolTipService.ToolTip="关闭"

@@ -620,9 +620,17 @@ public static class CloudGameBuilder
                 }
 
                 const noReport = Boolean(options.noReport);
-                const targetBitRate = Number(nextConfig.bitRate) || 18000;
-                const minBitRate = Number(nextConfig.bitRateMin) || 0;
-                const maxBitRate = Number(nextConfig.bitRateMax) || targetBitRate;
+                const resolution = getPhysicalResolution();
+                const configuredBitRate = Number(nextConfig.bitRate) || 18000;
+                const resolutionBitRate = Math.max(
+                    6000,
+                    Math.round(resolution.width * resolution.height * 0.010)
+                );
+                const targetBitRate = Math.min(configuredBitRate, resolutionBitRate);
+                const configuredMinBitRate = Number(nextConfig.bitRateMin) || 0;
+                const minBitRate = Math.min(configuredMinBitRate, targetBitRate);
+                const configuredMaxBitRate = Number(nextConfig.bitRateMax) || configuredBitRate;
+                const maxBitRate = Math.min(configuredMaxBitRate, targetBitRate);
                 const streamStrategy = nextConfig.streamStrategy;
 
                 if (typeof sdk?.setStreamStrategy === "function" && streamStrategy !== undefined && streamStrategy !== null) {
@@ -753,6 +761,7 @@ public static class CloudGameBuilder
             let preopenState = 0;
             let keepAliveTimer = null;
             let lastPreLaunchResolution = null;
+            let firstFramePresented = false;
 
             const readStateItem = (key) => {
                 try {
@@ -820,11 +829,7 @@ public static class CloudGameBuilder
             const getPhysicalResolution = () => {
                 const viewport = getViewportResolution();
                 const scale = Number(window.devicePixelRatio) > 0 ? Number(window.devicePixelRatio) : 1;
-                const configuredWidth = Number(payload.bridgeConfig?.targetWidth);
-                const configuredHeight = Number(payload.bridgeConfig?.targetHeight);
-                const physical = configuredWidth > 0 && configuredHeight > 0
-                    ? normalizeResolution(configuredWidth, configuredHeight)
-                    : normalizeResolution(viewport.width * scale, viewport.height * scale);
+                const physical = normalizeResolution(viewport.width * scale, viewport.height * scale);
                 return {
                     ...physical,
                     viewportWidth: viewport.width,
@@ -1177,6 +1182,42 @@ public static class CloudGameBuilder
                 setTimeout(() => overlay?.remove(), 260);
             };
 
+            const handleFirstVideoFrame = () => {
+                if (firstFramePresented) {
+                    return;
+                }
+
+                firstFramePresented = true;
+
+                if (typeof sdk?.gameVideoPlay === "function") {
+                    try {
+                        sdk.gameVideoPlay();
+                    } catch {
+                    }
+                }
+
+                if (typeof sdk?.unblockKeyboard === "function") {
+                    try {
+                        sdk.unblockKeyboard();
+                    } catch {
+                    }
+                }
+
+                if (typeof sdk?.unblockMouse === "function") {
+                    try {
+                        sdk.unblockMouse();
+                    } catch {
+                    }
+                }
+
+                applyQualityProfile(payload.bridgeConfig);
+                applyMediaAudioState(document);
+                hideOverlay();
+                focusSurface();
+                notifyForeground("first-video-frame");
+                post("first-frame");
+            };
+
             const setupVideoMouseHandlers = () => {
                 const video = document.getElementById("WelinkGameVideo");
                 if (!video || video._kuroMouseHandlersSetup) {
@@ -1238,6 +1279,110 @@ public static class CloudGameBuilder
             window.addEventListener("beforeunload", stopKeepAliveLoop, true);
             window.addEventListener("pagehide", stopKeepAliveLoop, true);
 
+            const installWebViewPointerFilter = () => {
+                if (window.__KURO_POINTER_FILTER_INSTALLED__) {
+                    return;
+                }
+
+                window.__KURO_POINTER_FILTER_INSTALLED__ = true;
+
+                const originalAddEventListener = EventTarget.prototype.addEventListener;
+                const originalRemoveEventListener = EventTarget.prototype.removeEventListener;
+                const wrappedListeners = new WeakMap();
+                let lastRawMove = null;
+
+                const getWrappedListener = (target, type, listener) => {
+                    if (!listener || (type !== "mousemove" && type !== "pointerrawupdate")) {
+                        return listener;
+                    }
+
+                    let targetListeners = wrappedListeners.get(target);
+                    if (!targetListeners) {
+                        targetListeners = new Map();
+                        wrappedListeners.set(target, targetListeners);
+                    }
+
+                    let listenerTypes = targetListeners.get(listener);
+                    if (!listenerTypes) {
+                        listenerTypes = new Map();
+                        targetListeners.set(listener, listenerTypes);
+                    }
+
+                    if (listenerTypes.has(type)) {
+                        return listenerTypes.get(type);
+                    }
+
+                    const wrapped = function (event) {
+                        if (document.pointerLockElement) {
+                            const movementX = Number(event.movementX) || 0;
+                            const movementY = Number(event.movementY) || 0;
+                            const now = Number(event.timeStamp) || performance.now();
+                            const maxMovementX = Math.max(160, window.innerWidth * 0.2);
+                            const maxMovementY = Math.max(120, window.innerHeight * 0.2);
+
+                            // WebView2 emits one synthetic move when Chromium
+                            // recenters a locked pointer. It is not user input.
+                            if (
+                                Math.abs(movementX) > maxMovementX
+                                || Math.abs(movementY) > maxMovementY
+                            ) {
+                                post("pointer-filter", {
+                                    reason: "recenter-spike",
+                                    movementX,
+                                    movementY
+                                });
+                                return;
+                            }
+
+                            if (type === "pointerrawupdate") {
+                                lastRawMove = { movementX, movementY, timeStamp: now };
+                            } else if (
+                                lastRawMove
+                                && now - lastRawMove.timeStamp >= 0
+                                && now - lastRawMove.timeStamp <= 12
+                                && movementX === lastRawMove.movementX
+                                && movementY === lastRawMove.movementY
+                            ) {
+                                // WebView2 can deliver the same physical move
+                                // through both raw-update and mousemove.
+                                return;
+                            }
+                        }
+
+                        if (typeof listener === "function") {
+                            return listener.call(this, event);
+                        }
+
+                        return listener.handleEvent(event);
+                    };
+
+                    listenerTypes.set(type, wrapped);
+                    return wrapped;
+                };
+
+                EventTarget.prototype.addEventListener = function (type, listener, options) {
+                    return originalAddEventListener.call(
+                        this,
+                        type,
+                        getWrappedListener(this, type, listener),
+                        options
+                    );
+                };
+
+                EventTarget.prototype.removeEventListener = function (type, listener, options) {
+                    const wrapped = wrappedListeners
+                        .get(this)
+                        ?.get(listener)
+                        ?.get(type);
+                    return originalRemoveEventListener.call(
+                        this,
+                        type,
+                        wrapped || listener,
+                        options
+                    );
+                };
+            };
+
             const loadScript = (source) => new Promise((resolve, reject) => {
                 const element = document.createElement("script");
                 element.src = source;
@@ -1266,18 +1411,22 @@ public static class CloudGameBuilder
 
             window.addEventListener("error", (event) => {
                 const message = event?.message || "桥页脚本执行失败。";
-                setMessage(message, "error");
-                post("error", { message });
+                post("warning", {
+                    message,
+                    source: event?.filename || "",
+                    line: Number(event?.lineno) || 0,
+                    column: Number(event?.colno) || 0
+                });
             });
 
             window.addEventListener("unhandledrejection", (event) => {
                 const message = event?.reason?.message || String(event?.reason || "桥页出现未处理异常。");
-                setMessage(message, "error");
-                post("error", { message });
+                post("warning", { message });
             });
 
             (async () => {
                 setMessage("正在加载 WelinkCloudGame SDK...");
+                installWebViewPointerFilter();
                 await loadScript(payload.scriptUrl);
 
                 if (typeof window.WelinkCloudGame !== "function") {
@@ -1298,34 +1447,28 @@ public static class CloudGameBuilder
                 window.__KURO_STREAM_SDK__ = sdk;
                 window.WLCG = sdk;
 
-                if (typeof sdk.onGameData !== "undefined") {
-                    sdk.onGameData = (data) => {
-                        handleGameMessage(decodePayload(data));
-                    };
-                }
+                // Welink 5.15 no longer predeclares these callback properties.
+                // Assign them unconditionally, as the official adapter does.
+                sdk.onGameData = (data) => {
+                    handleGameMessage(decodePayload(data));
+                };
 
-                if (typeof sdk.onGameDataWithKey !== "undefined") {
-                    sdk.onGameDataWithKey = (key, data) => {
-                        handleGameMessageWithKey(key, decodePayload(data));
-                    };
-                }
+                sdk.onGameDataWithKey = (key, data) => {
+                    handleGameMessageWithKey(key, decodePayload(data));
+                };
 
-                if (typeof sdk.startGameInfo !== "undefined") {
-                    sdk.startGameInfo = (code, detail) => {
-                        handleSdkMessage(code, detail);
-                    };
-                }
+                sdk.startGameInfo = (code, detail) => {
+                    handleSdkMessage(code, detail);
+                };
 
-                if (typeof sdk.startGameError !== "undefined") {
-                    sdk.startGameError = (code, detail) => {
-                        const suffix = detail ? ` | ${typeof detail === "string" ? detail : JSON.stringify(detail)}` : "";
-                        post("warning", {
-                            message: `Welink startGameError: code=${code}${suffix}`,
-                            code,
-                            detail
-                        });
-                    };
-                }
+                sdk.startGameError = (code, detail) => {
+                    const suffix = detail ? ` | ${typeof detail === "string" ? detail : JSON.stringify(detail)}` : "";
+                    post("warning", {
+                        message: `Welink startGameError: code=${code}${suffix}`,
+                        code,
+                        detail
+                    });
+                };
 
                 if (typeof sdk.onCursorData !== "undefined") {
                     sdk.onCursorData = (visible, url, xHotspot, yHotspot) => {
@@ -1360,34 +1503,7 @@ public static class CloudGameBuilder
                 }
 
                 wrapMethod(sdk, "onFirstVideoFrame", () => {
-                    if (typeof sdk.gameVideoPlay === "function") {
-                        try {
-                            sdk.gameVideoPlay();
-                        } catch {
-                        }
-                    }
-
-                    if (typeof sdk.unblockKeyboard === "function") {
-                        try {
-                            sdk.unblockKeyboard();
-                        } catch {
-                        }
-                    }
-
-                    if (typeof sdk.unblockMouse === "function") {
-                        try {
-                            sdk.unblockMouse();
-                        } catch {
-                        }
-                    }
-
-                    applyQualityProfile(payload.bridgeConfig);
-
-                    applyMediaAudioState(document);
-                    hideOverlay();
-                    focusSurface();
-                    notifyForeground("first-video-frame");
-                    post("first-frame");
+                    handleFirstVideoFrame();
                 });
 
                 wrapMethod(sdk, "handleStartGameError", (code, detail, notThrow) => {

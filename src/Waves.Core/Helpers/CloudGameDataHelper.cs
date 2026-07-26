@@ -201,17 +201,28 @@ public static class CloudGameDataHelper
         bool clampToWindow
     )
     {
+        var dpiScale = Math.Max(1.0, quality.DPI / 96.0);
         var isSmooth = quality.Type ==  Models.Enums.CloudQualityType.Smooth;
-        var physicalWidth = isSmooth
-            ? CloudGameMethod.MinStreamWidth
-            : CloudGameMethod.MaxStreamWidth;
-        var physicalHeight = isSmooth
-            ? CloudGameMethod.MinStreamHeight
-            : CloudGameMethod.MaxStreamHeight;
-        var targetBitRate = isSmooth
-            ? (int)(physicalWidth * physicalHeight * 0.013)
-            : CloudGameMethod.ClarityBitRate;
-        targetBitRate = Math.Clamp(targetBitRate, 5000, CloudGameMethod.ClarityBitRate);
+        var qualityScale = isSmooth ? 2.0 / 3.0 : 1.0;
+        var maxWidth = Math.Max(640, (int)Math.Round(quality.Width * qualityScale));
+        var maxHeight = Math.Max(360, (int)Math.Round(quality.Height * qualityScale));
+        var physicalWidth = ClampEven(
+            (int)Math.Round(quality.Width * dpiScale * qualityScale),
+            640,
+            maxWidth
+        );
+        var physicalHeight = ClampEven(
+            (int)Math.Round(quality.Height * dpiScale * qualityScale),
+            360,
+            maxHeight
+        );
+        const double targetBitRatePerPixel = 0.010;
+        var targetBitRate = (int)(physicalWidth * physicalHeight * targetBitRatePerPixel);
+        targetBitRate = Math.Clamp(
+            targetBitRate,
+            CloudGameMethod.MinBitRate,
+            CloudGameMethod.DefaultBitRate
+        );
         return new StreamQualityOptions(
             targetBitRate,
             quality.BitRateMin,
@@ -274,7 +285,7 @@ public static class CloudGameDataHelper
     {
         return new CloudBizData(
             "Code/1.120.0 Chrome/142.0.7444.265 Electron/39.8.8 Safari/537.36",
-            "5.11.2.251216145523-wlweb-release",
+            CloudGameMethod.WelinkClientVersion,
             nodes
         );
     }

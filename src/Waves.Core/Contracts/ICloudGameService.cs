@@ -7,7 +7,7 @@ public interface ICloudGameService
 {
     public CloudConfigManager ConfigManager { get; }
 
-    public Task<CloudSendSMS> GetPhoneSMSAsync(
+    public Task<CloudSendSMS?> GetPhoneSMSAsync(
         string phone,
         string geetestCaptchaOutput,
         string geetestPassToken,

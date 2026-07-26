@@ -283,7 +283,10 @@ public sealed partial class CloudGameingViewModel:ViewModelBase
                 EnvType = "pc",
                 FillVideo = false,
                 EnableInitSpeed = false,
+                // WebView2 needs Welink's input layer to discard the synthetic
+                // mouse move generated when pointer lock recenters the cursor.
                 UseGamePlayLayer = true,
+                EnableReplenishEsc = true,
                 EnableReportLog = true,
                 EnableReconnect = true,
                 BitRate = Option.Quality.BitRate,
