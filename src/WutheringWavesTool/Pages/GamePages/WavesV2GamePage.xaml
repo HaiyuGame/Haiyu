@@ -872,7 +872,7 @@
                                                     Margin="4,0,0,0"
                                                     HorizontalAlignment="Left"
                                                     FontFamily="{ThemeResource DefaultFont}"
-                                                    FontSize="12"
+                                                    FontSize="10"
                                                     Text="{x:Bind ViewModel.Base.EnergyRecoverEndTime, Mode=OneWay}" />
 
                                             </StackPanel>
@@ -958,7 +958,7 @@
                                                 Margin="4,0,0,0"
                                                 HorizontalAlignment="Left"
                                                 FontFamily="{ThemeResource DefaultFont}"
-                                                FontSize="12"
+                                                FontSize="10"
                                                 Text="{x:Bind ViewModel.Base.StoreEnergyRecoverEndTime, Mode=OneWay}" />
                                         </StackPanel>
                                     </Grid>
@@ -984,7 +984,7 @@
                                             Source="Assets/GameAssets/Waves/podcast.png" />
                                         <TextBlock
                                             Grid.Column="1"
-                                            Margin="4,0,0,0"
+                                            Margin="4,5,0,0"
                                             HorizontalAlignment="Left"
                                             VerticalAlignment="Center"
                                             FontFamily="{ThemeResource DefaultFont}">
@@ -1003,6 +1003,7 @@
                                                 Margin="4,0,0,0"
                                                 HorizontalAlignment="Left"
                                                 FontFamily="{ThemeResource DefaultFont}"
+                                                FontSize="10"
                                                 Visibility="{x:Bind ViewModel.BattlePass.IsUnlock, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                                                 <Run Text="Lv:" />
                                                 <Run Text="{x:Bind ViewModel.BattlePass.Level, Mode=OneWay}" />

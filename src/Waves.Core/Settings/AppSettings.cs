@@ -36,6 +36,8 @@ public partial class AppSettings : SettingBase
 
     public static string ScreenCaptures => BassFolder + "\\ScreenCaptures";
 
+    public static string WebCacheFolder => BassFolder + "\\WebCache";
+
     public static string ColorGameFolder => BassFolder + "\\ColorGameFolder";
 
     public static string LocalUserFolder => BassFolder + "\\LocalUser";

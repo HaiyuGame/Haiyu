@@ -72,7 +72,7 @@ partial class KuroClient
             { "model", "23127PN0CC" },
             { "source", "android" },
             { "lang", "zh-Hans" },
-            { "version", "2.5.3" },
+            { "version", "3.1.2" },
             { "channelId", "2" },
             { "Accept-Encoding", "gzip" },
             { "User-Agent", "okhttp/3.11.0" },

@@ -439,7 +439,8 @@
                     Margin="0,5,0,0"
                     Command="{x:Bind ViewModel.CreateLinkCommand}"
                     Header="创建快捷方式"
-                    IsClickEnabled="True">
+                    IsClickEnabled="True"
+                    Visibility="Collapsed">
                     <ui:SettingsCard.HeaderIcon>
                         <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE71B;" />
                     </ui:SettingsCard.HeaderIcon>

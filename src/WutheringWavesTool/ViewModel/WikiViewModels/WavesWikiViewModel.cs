@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Haiyu.Helpers;
 using Haiyu.Models.Wrapper.Wiki;
 using Waves.Api.Models.GameWikiiClient;
+using Waves.Core.Services;
 
 namespace Haiyu.ViewModel.WikiViewModels;
 
@@ -39,10 +40,14 @@ public partial class WavesWikiViewModel : WikiViewModelBase
         CenterOnScreen = false
     };
 
-    public WavesWikiViewModel(IAppContext<App> appContext)
+    public IKuroClient KuroClient { get; }
+    public IKuroAccountService KuroAccountService { get; }
+    public WavesWikiViewModel(IAppContext<App> appContext,IKuroClient  kuroClient,IKuroAccountService kuroAccountService)
     {
         this.Messenger.Register<SelectUserMessanger>(this, LoginMessangerMethod);
         AppContext = appContext;
+        this.KuroClient = kuroClient;
+        this.KuroAccountService = kuroAccountService;
     }
 
     private async void LoginMessangerMethod(object recipient, SelectUserMessanger message)
@@ -140,37 +145,37 @@ public partial class WavesWikiViewModel : WikiViewModelBase
 
 
     [RelayCommand]
-    void OpenDataCenter()
+    async Task OpenDataCenter()
     {
-        OpenKuroCommunityWindow(CreateDataCenterSessionContext());
+        OpenKuroCommunityWindow(await CreateDataCenterSessionContext());
     }
 
     [RelayCommand]
-    void OpenGrowthCalculator()
+    async Task OpenGrowthCalculator()
     {
-        OpenKuroCommunityWindow(CreateGrowthCalculatorSessionContext());
+        OpenKuroCommunityWindow(await CreateGrowthCalculatorSessionContext());
     }
 
     [RelayCommand]
-    void OpenResourceBriefing()
+    async Task OpenResourceBriefing()
     {
-        OpenKuroCommunityWindow(CreateResourceBriefingSessionContext());
+        OpenKuroCommunityWindow(await CreateResourceBriefingSessionContext());
     }
 
     [RelayCommand]
-    void OpenCalendar()
+    async Task OpenCalendar()
     {
-        OpenKuroCommunityWindow(CreateCalendarSessionContext());
+        OpenKuroCommunityWindow(await CreateCalendarSessionContext());
     }
 
     [RelayCommand]
-    void OpenMap()
+    async Task OpenMap()
     {
         OpenKuroCommunityWindow(CreateMapSessionContext());
     }
 
     [RelayCommand]
-    void OpenGameSign()
+    async Task OpenGameSign()
     {
         var win = Instance.Host.Services.GetRequiredService<IViewFactorys>()!.ShowSignWindow(this.SelectGamer);
         win.ApplyWindowsOption(SignWindowOption);
@@ -247,24 +252,24 @@ public partial class WavesWikiViewModel : WikiViewModelBase
         window.AppWindow.Show();
     }
 
-    private WebSessionContext? CreateDataCenterSessionContext()
+    private async Task<WebSessionContext?> CreateDataCenterSessionContext()
     {
-        return CreateCommunitySessionContext(WebSessionContext.CreateDataCenter);
+        return await CreateCommunitySessionContext(WebSessionContext.CreateDataCenter);
     }
 
-    private WebSessionContext? CreateGrowthCalculatorSessionContext()
+    private async Task<WebSessionContext?> CreateGrowthCalculatorSessionContext()
     {
-        return CreateCommunitySessionContext(WebSessionContext.CreateGrowthCalculator);
+        return await CreateCommunitySessionContext(WebSessionContext.CreateGrowthCalculator);
     }
 
-    private WebSessionContext? CreateResourceBriefingSessionContext()
+    private async Task<WebSessionContext?> CreateResourceBriefingSessionContext()
     {
-        return CreateCommunitySessionContext(WebSessionContext.CreateResourceBriefing);
+        return await CreateCommunitySessionContext(WebSessionContext.CreateResourceBriefing);
     }
 
-    private WebSessionContext? CreateCalendarSessionContext()
+    private async Task<WebSessionContext?> CreateCalendarSessionContext()
     {
-        return CreateCommunitySessionContext(WebSessionContext.CreateCalendar);
+        return await CreateCommunitySessionContext(WebSessionContext.CreateCalendar);
     }
 
     private WebSessionContext? CreateMapSessionContext()
@@ -283,7 +288,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase
             SelectGamer.RoleName);
     }
 
-    private WebSessionContext? CreateCommunitySessionContext(
+    private async Task<WebSessionContext?> CreateCommunitySessionContext(
         Func<KuroLoginSnapshot, string, string, string?, string?, WebSessionContext> factory)
     {
         var snapshot = CreateLoginSnapshot();
@@ -291,7 +296,26 @@ public partial class WavesWikiViewModel : WikiViewModelBase
         {
             return null;
         }
-
+        var current = this.KuroAccountService.CurrentAccount;
+        if(current == null)
+        {
+            SystemEventMessager.Publish(new()
+            {
+                Message = "请选择一个账号",
+                Delay = TimeSpan.FromSeconds(10).TotalSeconds
+            });
+            return null;
+        }
+        var refreshData = await this.KuroClient.RefreshGamerDataAsync(current, SelectGamer, this.CTS.Token);
+        if (refreshData == null || !refreshData.Success)
+        {
+            SystemEventMessager.Publish(new()
+            {
+                Message = "当前账号异常，请重新登录",
+                Delay = TimeSpan.FromSeconds(10).TotalSeconds
+            });
+            return null;
+        }
         return factory(
             snapshot,
             SelectGamer.ServerId,

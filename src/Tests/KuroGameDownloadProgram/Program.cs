@@ -20,6 +20,12 @@ using Waves.Core.Models.Enums;
 using Waves.Core.Services;
 using Waves.Core.Settings;
 
+if (args.Any(static arg => arg.Equals("--refresh-data", StringComparison.OrdinalIgnoreCase)))
+{
+    await RefreshDataDiagnostic.RunAsync(args);
+    return;
+}
+
 GameContextFactory.GameBassPath =
     Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\Waves";
 

@@ -16,20 +16,16 @@
             <i:InvokeCommandAction Command="{x:Bind ViewModel.LoadedCommand}" />
         </i:EventTriggerBehavior>
     </i:Interaction.Behaviors>
-    <Grid RowSpacing="5">
-        <Grid.ChildrenTransitions>
+    <StackPanel
+        HorizontalAlignment="Stretch"
+        Orientation="Vertical"
+        Spacing="5">
+        <StackPanel.ChildrenTransitions>
             <TransitionCollection>
                 <RepositionThemeTransition />
             </TransitionCollection>
-        </Grid.ChildrenTransitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto" />
-            <RowDefinition Height="auto" />
-            <RowDefinition Height="auto" />
-            <RowDefinition />
-            <RowDefinition />
-            <RowDefinition />
-        </Grid.RowDefinitions>
+        </StackPanel.ChildrenTransitions>
+
         <TextBlock
             HorizontalAlignment="Center"
             FontFamily="{ThemeResource DefaultFont}"
@@ -63,6 +59,7 @@
             VerticalAlignment="Top"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             CornerRadius="5"
+            RowSpacing="5"
             Visibility="{x:Bind ViewModel.WavesSettingVisibility, Mode=OneWay}">
             <ani:Implicit.ShowAnimations>
                 <ani:OpacityAnimation To="1" Duration="0:0:0.5" />
@@ -126,5 +123,5 @@
             HorizontalAlignment="Center"
             Command="{x:Bind ViewModel.CloseCommand}"
             Content="保存" />
-    </Grid>
+    </StackPanel>
 </ContentDialog>

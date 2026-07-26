@@ -52,7 +52,7 @@ namespace Waves.Api.Models.Communitys.DataCenter
         ///
         /// </summary>
         [JsonPropertyName("data")]
-        public bool Data { get; set; }
+        public bool? Data { get; set; }
 
         /// <summary>
         /// 请求成功

@@ -71,7 +71,6 @@ public class AppContext<T> : IAppContext<T>
                 win.Content = page;
             }
             catch (Exception ex) { }
-
             this.App.MainWindow = win;
             this.App.MainWindow.Activate();
             (win.AppWindow.Presenter as OverlappedPresenter)!.SetBorderAndTitleBar(true, false);
@@ -112,6 +111,7 @@ public class AppContext<T> : IAppContext<T>
             var context = Instance.Host.Services.GetRequiredKeyedService<IKuroCloudGameContext>(item);
             await context.InitAsync();
         }
+        await KuroClient.InitAsync();
     }
 
     private async Task CreateJumpListAsync()

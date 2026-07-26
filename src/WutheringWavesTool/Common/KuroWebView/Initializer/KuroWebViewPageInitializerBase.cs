@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Encodings.Web;
+using Haiyu.Common.KuroWebView;
 
 namespace Haiyu.Common.KuroWebView.Initializer
 {
@@ -22,8 +23,7 @@ namespace Haiyu.Common.KuroWebView.Initializer
         {
             _currentSession = session;
 
-            var environment = await CoreWebView2Environment.CreateAsync();
-            await webView.EnsureCoreWebView2Async(environment);
+            await WebView2EnvironmentProvider.EnsureInitializedAsync(webView);
             webView.CoreWebView2.Settings.UserAgent = AndroidAppUserAgent;
             webView.CoreWebView2.Settings.IsStatusBarEnabled = false;
             webView.CoreWebView2.Settings.AreDefaultContextMenusEnabled = true;

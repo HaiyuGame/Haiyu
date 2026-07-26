@@ -91,7 +91,7 @@ public sealed partial class CloudGameingViewModel:ViewModelBase
         WebView2!.NavigationStarting += Browser_NavigationStarting;
         WebView2.NavigationCompleted += Browser_NavigationCompleted;
         this.WindowHandle = Window.GetWindowHandle();
-        await WebView2.EnsureCoreWebView2Async();
+        await WebView2EnvironmentProvider.EnsureInitializedAsync(WebView2);
         WebView2.CoreWebView2.Settings.AreDefaultContextMenusEnabled = true;
         WebView2.CoreWebView2.Settings.AreDevToolsEnabled = true;
         WebView2.CoreWebView2.Settings.IsPinchZoomEnabled = false;

@@ -59,18 +59,11 @@ partial class SettingViewModel
     [RelayCommand]
     async Task DeleteWebCacheCommand()
     {
-        if (
-            Directory.Exists(
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Haiyu.exe.WebView2")
-            )
-        )
+        if (Directory.Exists(AppSettings.WebCacheFolder))
         {
             await Task.Run(() =>
             {
-                Directory.Delete(
-                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Haiyu.exe.WebView2"),
-                    true
-                );
+                Directory.Delete(AppSettings.WebCacheFolder, true);
             });
         }
     }

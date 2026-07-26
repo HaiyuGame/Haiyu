@@ -29,7 +29,7 @@ public sealed partial class KuroClient : IKuroClient
             { "source", "android" },
             { "devCode", account?.DeviceId ?? "" },
             //{ "model","23117RK66C"},
-            { "version", "2.5.3" },
+            { "version", "3.1.2" },
             { "lang", "zh-Hans" },
             { "countryCode", "CN" },
         };
@@ -49,29 +49,25 @@ public sealed partial class KuroClient : IKuroClient
         string? accessToken = null
     )
     {
+        const string userAgent =
+            "Mozilla/5.0 (Linux; Android 9; 2509FPN0BC Build/PQ3B.190801.07131748; wv) "
+            + "AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 "
+            + "Chrome/91.0.4472.114 Safari/537.36 Kuro/3.1.2 KuroGameBox/3.1.2";
         var dict = new Dictionary<string, string>()
         {
             { "Accept", "application/json, text/plain, */*" },
             { "Accept-Encoding", "gzip, deflate" },
             { "Accept-Language", "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7" },
-            {
-                "User-Agent",
-                "Mozilla/5.0 (Linux; Android 12; 23117RK66C Build/V417IR; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/101.0.4951.61 Safari/537.36 Kuro/2.5.3 KuroGameBox/2.5.3"
-            },
+            { "User-Agent", userAgent },
             { "did", account?.DeviceId ?? "" },
             { "source", "android" },
-            {
-                "devCode",
-                $"{this.Ip}, Mozilla/5.0 (Linux; Android 12; 23117RK66C Build/V417IR; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/101.0.4951.61 Safari/537.36 Kuro/2.5.3 KuroGameBox/2.5.3"
-            },
+            { "devCode", $"{this.Ip}, {userAgent}" },
+            { "Origin", "https://web-static.kurobbs.com" },
+            { "X-Requested-With", "com.kurogame.kjq" },
         };
         if (!string.IsNullOrWhiteSpace(accessToken))
         {
             dict.Add("b-at", accessToken);
-        }
-        if (account is not null)
-        {
-            dict.Add("token", account.Token);
         }
         return dict;
     }
@@ -251,7 +247,7 @@ public sealed partial class KuroClient : IKuroClient
             { "Accept-Language", "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7" },
             {
                 "devCode",
-                "Mozilla/5.0 (Linux; Android 12; 23117RK66C Build/V417IR; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/101.0.4951.61 Safari/537.36 Kuro/2.5.3 KuroGameBox/2.5.3"
+                "Mozilla/5.0 (Linux; Android 12; 23117RK66C Build/V417IR; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/101.0.4951.61 Safari/537.36 Kuro/3.1.2 KuroGameBox/3.1.2"
             },
             { "did", account.DeviceId },
             { "source", "android" },

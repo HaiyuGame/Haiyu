@@ -185,8 +185,6 @@
                     <Grid
                         Width="80"
                         Height="37"
-                        BorderBrush="{ThemeResource ApplicationPageBackgroundThemeBrush}"
-                        BorderThickness="1"
                         CornerRadius="20">
                         <SystemBackdropElement CornerRadius="20">
                             <SystemBackdropElement.SystemBackdrop>
@@ -222,8 +220,10 @@
                     <Button
                         Width="37"
                         Height="37"
+                        Padding="5"
                         Command="{x:Bind ViewModel.RefreshCurrentPageCommand}"
                         CornerRadius="40"
+                        Style="{ThemeResource DefaultAcrylicButtonStyle}"
                         ToolTipService.ToolTip="刷新当前页面">
                         <FontIcon
                             FontFamily="Segoe Fluent Icons"
@@ -235,6 +235,7 @@
                         Height="37"
                         Command="{x:Bind ViewModel.MinCommand}"
                         CornerRadius="40"
+                        Style="{ThemeResource DefaultAcrylicButtonStyle}"
                         ToolTipService.ToolTip="最小化"
                         Visibility="Visible">
                         <FontIcon
@@ -248,6 +249,7 @@
                         Margin="0,0,5,0"
                         Command="{x:Bind ViewModel.CloseWindowCommand}"
                         CornerRadius="40"
+                        Style="{ThemeResource DefaultAcrylicButtonStyle}"
                         ToolTipService.ToolTip="关闭"
                         Visibility="Visible">
 
