@@ -198,7 +198,6 @@
                             Height="37"
                             Padding="0"
                             Click="OpenMessagePane"
-                            Style="{ThemeResource TransparentButtonStyle}"
                             ToolTipService.ToolTip="系统消息">
                             <Grid Margin="0,-2,0,0">
                                 <Grid.ColumnDefinitions>
@@ -227,7 +226,6 @@
                         BorderThickness="0.5"
                         Command="{x:Bind ViewModel.RefreshCurrentPageCommand}"
                         CornerRadius="40"
-                        Style="{ThemeResource DefaultAcrylicButtonStyle}"
                         ToolTipService.ToolTip="刷新当前页面">
                         <FontIcon
                             FontFamily="Segoe Fluent Icons"
@@ -241,7 +239,6 @@
                         BorderThickness="0.5"
                         Command="{x:Bind ViewModel.MinCommand}"
                         CornerRadius="40"
-                        Style="{ThemeResource DefaultAcrylicButtonStyle}"
                         ToolTipService.ToolTip="最小化"
                         Visibility="Visible">
                         <FontIcon
@@ -257,7 +254,6 @@
                         BorderThickness="0.5"
                         Command="{x:Bind ViewModel.CloseWindowCommand}"
                         CornerRadius="40"
-                        Style="{ThemeResource DefaultAcrylicButtonStyle}"
                         ToolTipService.ToolTip="关闭"
                         Visibility="Visible">
 

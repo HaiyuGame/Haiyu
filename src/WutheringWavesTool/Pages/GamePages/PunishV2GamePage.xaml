@@ -6,6 +6,7 @@
     xmlns:ani="using:CommunityToolkit.WinUI.Animations"
     xmlns:b="using:CommunityToolkit.WinUI.Behaviors"
     xmlns:bs="using:Haiyu.Behaviors"
+    xmlns:charts="using:Haiyu.Charts.WinUI"
     xmlns:control="using:Haiyu.Controls"
     xmlns:convert="using:Haiyu.Converter.DownloadState"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -13,7 +14,6 @@
     xmlns:item="using:Waves.Core.Models"
     xmlns:launcheModel="using:Waves.Api.Models"
     xmlns:local="using:Haiyu.Pages.GamePages"
-    xmlns:charts="using:Haiyu.Charts.WinUI"
     xmlns:m="using:Haiyu.Models"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:media="using:CommunityToolkit.WinUI.Media"
@@ -769,7 +769,7 @@
                                 RowSpacing="4"
                                 Visibility="{x:Bind ViewModel.IsLocalUserRefresh, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition />
+                                    <ColumnDefinition Width="auto" />
                                     <ColumnDefinition />
                                     <ColumnDefinition Width="auto" />
                                 </Grid.ColumnDefinitions>
