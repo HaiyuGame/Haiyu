@@ -3,6 +3,7 @@
     x:Class="Haiyu.Pages.Dialogs.UpdateAppDialog"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helper="using:Haiyu.Helpers"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:Haiyu.Pages.Dialogs"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -20,13 +21,13 @@
             <TextBlock
                 FontFamily="{ThemeResource DefaultFont}"
                 FontSize="18"
-                Text="应用程序有更新" />
+                Text="{x:Bind helper:LanguageService.GetString('Display_AnAppUpdateIsAvailable')}" />
             <TextBlock Margin="0,10,0,0" Foreground="{ThemeResource SystemColorGrayTextBrush}">
-                <Run Text="新版本：" />
+                <Run Text="{x:Bind helper:LanguageService.GetString('Display_NewVersion')}" />
                 <Run Text="{x:Bind ViewModel.Version, Mode=OneWay}" />
             </TextBlock>
             <TextBlock Margin="0,10,0,0" Foreground="{ThemeResource SystemColorGrayTextBrush}">
-                <Run Text="下载大小：" />
+                <Run Text="{x:Bind helper:LanguageService.GetString('Display_SEm')}" />
                 <Run Text="{x:Bind ViewModel.Size, Mode=OneWay}" />
             </TextBlock>
         </StackPanel>
@@ -44,18 +45,18 @@
             <Button
                 HorizontalAlignment="Stretch"
                 Command="{x:Bind ViewModel.DownloadAppUpdateCommand}"
-                Content="下载更新并安装" />
+                Content="{x:Bind helper:LanguageService.GetString('Display_UpdatesInstall')}" />
             <Button
                 Grid.Column="1"
                 HorizontalAlignment="Stretch"
                 Command="{x:Bind ViewModel.SkipAppUpdateCommand}"
-                Content="跳过此版本"
+                Content="{x:Bind helper:LanguageService.GetString('Display_SkipThisVersion')}"
                 Visibility="{x:Bind ViewModel.SkipVisiblity, Mode=OneWay}" />
             <Button
                 Grid.Column="2"
                 HorizontalAlignment="Stretch"
                 Command="{x:Bind ViewModel.CloseCommand}"
-                Content="取消" />
+                Content="{x:Bind helper:LanguageService.GetString('Display_SDecline')}" />
         </Grid>
     </Grid>
 </ContentDialog>

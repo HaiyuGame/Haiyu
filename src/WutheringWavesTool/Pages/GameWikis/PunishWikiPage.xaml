@@ -3,6 +3,7 @@
     x:Class="Haiyu.Pages.GameWikis.PunishWikiPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helper="using:Haiyu.Helpers"
     xmlns:converter="using:Haiyu.Converter"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
@@ -31,7 +32,7 @@
                 Margin="15,0,0,0"
                 FontFamily="{ThemeResource DefaultFont}"
                 FontSize="20"
-                Text="当前活动" />
+                Text="{x:Bind helper:LanguageService.GetString('Display_CurrentActivity')}" />
             <ScrollViewer
                 Padding="10"
                 VerticalAlignment="Top"
@@ -128,7 +129,7 @@
                 Margin="15,0,0,0"
                 FontFamily="{ThemeResource DefaultFont}"
                 FontSize="20"
-                Text="研发池" />
+                Text="{x:Bind helper:LanguageService.GetString('Display_RDPool')}" />
             <Grid
                 Margin="15,5,15,0"
                 HorizontalAlignment="Center"
@@ -230,7 +231,7 @@
                                                 FontSize="16"
                                                 FontWeight="Bold"
                                                 Foreground="White"
-                                                Text="进行中：" />
+                                                Text="{x:Bind helper:LanguageService.GetString('Display_InProgress')}" />
                                             <TextBlock
                                                 Grid.Row="0"
                                                 Grid.ColumnSpan="2"
@@ -284,7 +285,7 @@
                 Margin="15,10,0,0"
                 FontFamily="{ThemeResource DefaultFont}"
                 FontSize="20"
-                Text="周常活动" />
+                Text="{x:Bind helper:LanguageService.GetString('Display_WeeklyActivities')}" />
             <Grid
                 Margin="15,5,15,0"
                 ColumnSpacing="15"
@@ -326,7 +327,7 @@
                                 VerticalAlignment="Center"
                                 FontSize="18"
                                 FontWeight="Bold"
-                                Text="幻痛囚笼" />
+                                Text="{x:Bind helper:LanguageService.GetString('Display_Item7')}" />
 
                         </StackPanel>
 
@@ -353,7 +354,7 @@
                                 FontSize="16"
                                 FontWeight="Bold"
                                 Foreground="White"
-                                Text="进行中: " />
+                                Text="{x:Bind helper:LanguageService.GetString('Display_Ongoing')}" />
                             <TextBlock
                                 Margin="0,3,0,0"
                                 HorizontalAlignment="Center"
@@ -409,7 +410,7 @@
                     <TextBlock
                         FontSize="30"
                         FontWeight="Bold"
-                        Text="高级区" />
+                        Text="{x:Bind helper:LanguageService.GetString('Display_HighLevelArea')}" />
                 </StackPanel>
                 <TextBlock
                     Grid.Row="0"
@@ -419,7 +420,7 @@
                     VerticalAlignment="Bottom"
                     FontSize="30"
                     FontWeight="Bold"
-                    Text="终极区" />
+                    Text="{x:Bind helper:LanguageService.GetString('Display_UltimateZone')}" />
 
 
 
@@ -448,7 +449,7 @@
                                 VerticalAlignment="Center"
                                 FontSize="16"
                                 FontWeight="Bold"
-                                Text="诺曼复兴战" />
+                                Text="{x:Bind helper:LanguageService.GetString('Display_NormanRevival')}" />
                         </StackPanel>
 
                         <Rectangle
@@ -474,7 +475,7 @@
                                     <TextBlock
                                         FontSize="14"
                                         FontWeight="Bold"
-                                        Text="进行中: " />
+                                        Text="{x:Bind helper:LanguageService.GetString('Display_Ongoing')}" />
                                     <TextBlock
                                         Margin="5,0,0,0"
                                         FontSize="14"
@@ -528,7 +529,7 @@
                             <TextBlock
                                 FontSize="16"
                                 FontWeight="Bold"
-                                Text="历战映射" />
+                                Text="{x:Bind helper:LanguageService.GetString('Display_BattleMapping')}" />
                         </StackPanel>
 
                         <Grid
@@ -546,7 +547,7 @@
                                 <TextBlock
                                     FontSize="16"
                                     FontWeight="Bold"
-                                    Text="进行中: " />
+                                    Text="{x:Bind helper:LanguageService.GetString('Display_Ongoing')}" />
                                 <TextBlock
                                     Margin="5,0,0,0"
                                     FontSize="16"
@@ -625,7 +626,7 @@
                                 VerticalAlignment="Center"
                                 FontSize="16"
                                 FontWeight="Bold"
-                                Text="纷争战区" />
+                                Text="{x:Bind helper:LanguageService.GetString('Display_WarZones')}" />
                         </StackPanel>
 
                         <Rectangle
@@ -680,7 +681,7 @@
                                                 <TextBlock
                                                     FontSize="10"
                                                     Foreground="{ThemeResource SystemColorGrayTextBrush}"
-                                                    Text="进行中：" />
+                                                    Text="{x:Bind helper:LanguageService.GetString('Display_InProgress')}" />
                                                 <TextBlock
                                                     FontSize="10"
                                                     Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"

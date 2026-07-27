@@ -1,6 +1,7 @@
 using Haiyu.Models.Settings;
 using Haiyu.Plugin.Common;
 using Haiyu.Services.DialogServices;
+using Haiyu.ViewModel.OOBEViewModels;
 using Waves.Core.Helpers;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Security.Credentials.UI;
@@ -19,7 +20,8 @@ public sealed partial class SettingViewModel : ViewModelBase
         IScreenCaptureService screenCaptureService,
         IPickersService pickersService,
         IThemeService themeService,
-        GithubIpSettings githubIpSettings
+        GithubIpSettings githubIpSettings,
+        LanguageSelectViewModel languageSelectViewModel
     )
     {
         DialogManager = dialogManager;
@@ -32,6 +34,7 @@ public sealed partial class SettingViewModel : ViewModelBase
         PickersService = pickersService;
         ThemeService = themeService;
         GithubIpSettings = githubIpSettings;
+        LanguageSelectViewModel = languageSelectViewModel;
         RegisterMessanger();
     }
 

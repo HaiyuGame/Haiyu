@@ -3,6 +3,7 @@
     x:Class="Haiyu.Pages.GamePages.WavesCloudGamePage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helper="using:Haiyu.Helpers"
     xmlns:api="using:Waves.Api.Models.CloudGame"
     xmlns:cloud="using:Waves.Core.Models.CloudGame"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -52,7 +53,7 @@
                             FontFamily="{ThemeResource DefaultFont}"
                             FontSize="18"
                             FontWeight="SemiBold"
-                            Text="余额概况" />
+                            Text="{x:Bind helper:LanguageService.GetString('Display_BalanceOverview')}" />
                     </StackPanel>
                     <Button
                         Grid.Column="1"
@@ -94,7 +95,7 @@
                         Padding="4"
                         Command="{x:Bind ViewModel.AddUserCommand}"
                         Style="{ThemeResource TransparentButtonStyle}"
-                        ToolTipService.ToolTip="创建账号">
+                        ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_CreateAnAccount')}">
                         <FontIcon
                             FontFamily="Segoe Fluent Icons"
                             FontSize="15"
@@ -142,7 +143,7 @@
                                     FontFamily="{ThemeResource DefaultFont}"
                                     FontSize="12"
                                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Text="免费额度" />
+                                    Text="{x:Bind helper:LanguageService.GetString('Display_Item5')}" />
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -175,7 +176,7 @@
                                     FontFamily="{ThemeResource DefaultFont}"
                                     FontSize="12"
                                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Text="畅享卡" />
+                                    Text="{x:Bind helper:LanguageService.GetString('Display_EnjoyYourCard')}" />
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -208,7 +209,7 @@
                                     FontFamily="{ThemeResource DefaultFont}"
                                     FontSize="12"
                                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Text="付费时间" />
+                                    Text="{x:Bind helper:LanguageService.GetString('Display_PaidTime')}" />
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -242,7 +243,7 @@
                                     FontFamily="{ThemeResource DefaultFont}"
                                     FontSize="12"
                                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Text="体验卡时间" />
+                                    Text="{x:Bind helper:LanguageService.GetString('Display_CardTime')}" />
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -335,7 +336,7 @@
                             Glyph="&#xEC7A;" />
                         <Button.Flyout>
                             <MenuFlyout>
-                                <MenuFlyoutItem Command="{x:Bind ViewModel.OpenSettingsDialogCommand}" Text="设置">
+                                <MenuFlyoutItem Command="{x:Bind ViewModel.OpenSettingsDialogCommand}" Text="{x:Bind helper:LanguageService.GetString('Shell_NavigationSettings')}">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xF8B0;" />
                                     </MenuFlyoutItem.Icon>
@@ -365,7 +366,7 @@
                             FontFamily="Segoe Fluent Icons"
                             FontSize="15"
                             Glyph="&#xF133;" />
-                        <TextBlock FontSize="12" Text="抽卡分析" />
+                        <TextBlock FontSize="12" Text="{x:Bind helper:LanguageService.GetString('Display_DrawAnalysis')}" />
                     </StackPanel>
                 </Button>
             </StackPanel>

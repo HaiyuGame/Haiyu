@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -84,10 +84,7 @@ public partial class LanguageEditerViewModel : ObservableObject
             var result = await _pickers.GetFolderPicker();
             if (result is null)
                 return;
-            if (Directory.GetFiles(result.Path, "*", SearchOption.AllDirectories).Count() > 0)
-            {
-                MessageBox(IntPtr.Zero, $"选择的必须是一个空文件夹！", "警告", 0);
-            }
+           
             Dictionary<string, List<LanguageItem>> items =
                 new Dictionary<string, List<LanguageItem>>();
             var list = this
@@ -144,7 +141,7 @@ public partial class LanguageEditerViewModel : ObservableObject
             await File.WriteAllTextAsync(
                 result.Path + "\\zh-Hans.json",
                 jtJson,
-                encoding: Encoding.UTF8
+                encoding: Encoding.UTF8, default
             );
             await File.WriteAllTextAsync(
                 result.Path + "\\zh-Hant.json",

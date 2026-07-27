@@ -3,6 +3,7 @@
     x:Class="Haiyu.Pages.Toolkits.AutoKuroTokenPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helper="using:Haiyu.Helpers"
     xmlns:adb="using:ChromeCDPSharp.Common"
     xmlns:controls="using:Haiyu.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -28,7 +29,7 @@
 
         <controls:TitleBar
             x:Name="titleBar"
-            Title="库街区 Token 读取"
+            Title="{x:Bind helper:LanguageService.GetString('Display_Read2')}"
             IsExtendsContentIntoTitleBar="True" />
 
         <ScrollView Grid.Row="1" VerticalScrollBarVisibility="Auto">
@@ -42,7 +43,7 @@
                 </Grid.RowDefinitions>
 
                 <InfoBar
-                    Title="准备工作"
+                    Title="{x:Bind helper:LanguageService.GetString('Display_PREPARATION')}"
                     IsClosable="False"
                     IsOpen="True"
                     Message="请先在安卓设备上开启 USB 调试，并连接到PC上，并根据提示允许本机进行USB调试，随后打开库街区的数据面板页面"
@@ -69,7 +70,7 @@
                                     <RowDefinition Height="auto" />
                                     <RowDefinition Height="auto" />
                                 </Grid.RowDefinitions>
-                                <TextBlock FontWeight="SemiBold" Text="ADB 路径" />
+                                <TextBlock FontWeight="SemiBold" Text="{x:Bind helper:LanguageService.GetString('Display_ADBPath')}" />
                                 <Grid Grid.Row="1" ColumnSpacing="8">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition />
@@ -77,7 +78,7 @@
                                     </Grid.ColumnDefinitions>
                                     <TextBox
                                         IsReadOnly="True"
-                                        PlaceholderText="请选择 adb.exe"
+                                        PlaceholderText="{x:Bind helper:LanguageService.GetString('Display_PleaseSelectAdbExe')}"
                                         Text="{x:Bind ViewModel.AdbPath, Mode=OneWay}" />
                                     <Button Grid.Column="1" Command="{x:Bind ViewModel.SelectAdbPathCommand}">
                                         <StackPanel Orientation="Horizontal" Spacing="6">
@@ -85,7 +86,7 @@
                                                 FontFamily="Segoe Fluent Icons"
                                                 FontSize="14"
                                                 Glyph="&#xE838;" />
-                                            <TextBlock Text="浏览" />
+                                            <TextBlock Text="{x:Bind helper:LanguageService.GetString('Display_Browse')}" />
                                         </StackPanel>
                                     </Button>
                                 </Grid>
@@ -108,7 +109,7 @@
                                     <RowDefinition Height="auto" />
                                     <RowDefinition Height="auto" />
                                 </Grid.RowDefinitions>
-                                <TextBlock FontWeight="SemiBold" Text="调试端口" />
+                                <TextBlock FontWeight="SemiBold" Text="{x:Bind helper:LanguageService.GetString('Display_DebugPort')}" />
                                 <NumberBox
                                     Grid.Row="1"
                                     Maximum="65535"
@@ -141,7 +142,7 @@
                                     <RowDefinition Height="auto" />
                                     <RowDefinition Height="auto" />
                                 </Grid.RowDefinitions>
-                                <TextBlock FontWeight="SemiBold" Text="安卓设备" />
+                                <TextBlock FontWeight="SemiBold" Text="{x:Bind helper:LanguageService.GetString('Display_AndroidOSDevices')}" />
                                 <TextBlock
                                     Grid.Row="1"
                                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -151,7 +152,7 @@
                                     MinWidth="320"
                                     HorizontalAlignment="Stretch"
                                     ItemsSource="{x:Bind ViewModel.Devices, Mode=OneWay}"
-                                    PlaceholderText="暂无设备"
+                                    PlaceholderText="{x:Bind helper:LanguageService.GetString('Display_NoDevice')}"
                                     SelectedItem="{x:Bind ViewModel.SelectDevice, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate x:DataType="adb:AdbDeviceInfo">
@@ -199,7 +200,7 @@
                                     FontFamily="Segoe Fluent Icons"
                                     FontSize="14"
                                     Glyph="&#xE72C;" />
-                                <TextBlock Text="刷新设备" />
+                                <TextBlock Text="{x:Bind helper:LanguageService.GetString('Display_RefreshDevice')}" />
                             </StackPanel>
                         </Button>
 
@@ -214,7 +215,7 @@
                                     FontFamily="Segoe Fluent Icons"
                                     FontSize="14"
                                     Glyph="&#xE8CE;" />
-                                <TextBlock Text="连接" />
+                                <TextBlock Text="{x:Bind helper:LanguageService.GetString('Display_CONNECTION')}" />
                             </StackPanel>
                         </Button>
 
@@ -228,7 +229,7 @@
                                     FontFamily="Segoe Fluent Icons"
                                     FontSize="14"
                                     Glyph="&#xE777;" />
-                                <TextBlock Text="手动重连" />
+                                <TextBlock Text="{x:Bind helper:LanguageService.GetString('Display_ManuallyReconnect')}" />
                             </StackPanel>
                         </Button>
 
@@ -243,7 +244,7 @@
                                     FontFamily="Segoe Fluent Icons"
                                     FontSize="14"
                                     Glyph="&#xE9D9;" />
-                                <TextBlock Text="监控流量" />
+                                <TextBlock Text="{x:Bind helper:LanguageService.GetString('Display_MonitorTraffic')}" />
                             </StackPanel>
                         </Button>
 
@@ -273,10 +274,10 @@
                                 </Grid.RowDefinitions>
 
                                 <StackPanel>
-                                    <TextBlock FontWeight="SemiBold" Text="连接状态" />
+                                    <TextBlock FontWeight="SemiBold" Text="{x:Bind helper:LanguageService.GetString('Display_ConnectStatus')}" />
                                     <TextBlock
                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                        Text="浏览器调试连接与 CDP 客户端状态。"
+                                        Text="{x:Bind helper:LanguageService.GetString('Display_CDPClient')}"
                                         TextWrapping="Wrap" />
                                 </StackPanel>
 
@@ -321,7 +322,7 @@
                                 FontFamily="Segoe Fluent Icons"
                                 Glyph="&#xE9D9;" />
                             <StackPanel Grid.Column="1" Spacing="8">
-                                <TextBlock FontWeight="SemiBold" Text="过滤结果" />
+                                <TextBlock FontWeight="SemiBold" Text="{x:Bind helper:LanguageService.GetString('Display_FilterResults')}" />
 
                             </StackPanel>
                             <Button
@@ -333,7 +334,7 @@
                                         FontFamily="Segoe Fluent Icons"
                                         FontSize="12"
                                         Glyph="&#xE8C8;" />
-                                    <TextBlock FontSize="12" Text="复制" />
+                                    <TextBlock FontSize="12" Text="{x:Bind helper:LanguageService.GetString('Display_Copy')}" />
                                 </StackPanel>
                             </Button>
                             <Grid
@@ -410,7 +411,7 @@
                                 <TextBlock
                                     Grid.Row="1"
                                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Text="浏览器调试连接的底层状态。"
+                                    Text="{x:Bind helper:LanguageService.GetString('Display_DebugConnection')}"
                                     TextWrapping="Wrap" />
                                 <TextBlock
                                     Grid.Row="2"
@@ -441,7 +442,7 @@
                                 <TextBlock
                                     Grid.Row="1"
                                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Text="Chrome DevTools Protocol 客户端状态。"
+                                    Text="{x:Bind helper:LanguageService.GetString('Display_ClientState')}"
                                     TextWrapping="Wrap" />
                                 <TextBlock
                                     Grid.Row="2"
@@ -456,7 +457,7 @@
                 <TextBox
                     Grid.Row="4"
                     IsReadOnly="True"
-                    PlaceholderText="日志"
+                    PlaceholderText="{x:Bind helper:LanguageService.GetString('Display_Log')}"
                     Text="{x:Bind ViewModel.LogText, Mode=OneWay}"
                     TextWrapping="Wrap" />
             </Grid>

@@ -3,6 +3,7 @@
     x:Class="Haiyu.Pages.WavesAnalysisRecordPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helper="using:Haiyu.Helpers"
     xmlns:ani="using:CommunityToolkit.WinUI.Animations"
     xmlns:cm="using:Haiyu.Models.Charts"
     xmlns:controls="using:Haiyu.Controls"
@@ -46,7 +47,7 @@
                 Grid.Row="1"
                 HorizontalAlignment="Center"
                 FontSize="18"
-                Text="刷新数据" />
+                Text="{x:Bind helper:LanguageService.GetString('Display_RefreshData')}" />
         </Grid>
         <Grid Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}">
             <!--    -->
@@ -67,13 +68,13 @@
                 TitleMode="Tall">
                 <controls:TitleBar.Header>
                     <MenuBar>
-                        <MenuBarItem Title="导入">
-                            <MenuFlyoutItem Command="{x:Bind ViewModel.ImportDefaultFolderCommand}" Text="旧版数据(默认)" />
-                            <MenuFlyoutItem Command="{x:Bind ViewModel.ImportFolderCommand}" Text="旧版数据(自定义文件夹)" />
+                        <MenuBarItem Title="{x:Bind helper:LanguageService.GetString('Display_Import')}">
+                            <MenuFlyoutItem Command="{x:Bind ViewModel.ImportDefaultFolderCommand}" Text="{x:Bind helper:LanguageService.GetString('Display_LegacyDataDefault')}" />
+                            <MenuFlyoutItem Command="{x:Bind ViewModel.ImportFolderCommand}" Text="{x:Bind helper:LanguageService.GetString('Display_LegacyDataCustomFolders')}" />
                         </MenuBarItem>
-                        <MenuBarItem Title="数据" Visibility="Collapsed">
-                            <MenuFlyoutItem Text="导出数据" />
-                            <MenuFlyoutItem Text="导出为图片（实验性）" />
+                        <MenuBarItem Title="{x:Bind helper:LanguageService.GetString('Display_Data')}" Visibility="Collapsed">
+                            <MenuFlyoutItem Text="{x:Bind helper:LanguageService.GetString('Display_DerivedData')}" />
+                            <MenuFlyoutItem Text="{x:Bind helper:LanguageService.GetString('Display_PictureExperimental')}" />
                         </MenuBarItem>
                     </MenuBar>
                 </controls:TitleBar.Header>
@@ -106,9 +107,9 @@
                                 </ComboBox.ItemTemplate>
                             </ComboBox>
                             <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center">
-                                <Run Text="平均出货" />
+                                <Run Text="{x:Bind helper:LanguageService.GetString('Display_AvgShipment')}" />
                                 <Run Text="{x:Bind ViewModel.StarAvgValue, Mode=OneWay}" />
-                                <Run Text="抽" />
+                                <Run Text="{x:Bind helper:LanguageService.GetString('Display_Tic')}" />
                             </TextBlock>
                             <ScrollViewer
                                 Grid.Row="1"
@@ -232,7 +233,7 @@
                                 HorizontalAlignment="Center"
                                 FontSize="15"
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Text="抽卡总数" />
+                                Text="{x:Bind helper:LanguageService.GetString('Display_TotalNumberOfDrawCards2')}" />
                             <TextBlock
                                 HorizontalAlignment="Center"
                                 FontSize="20"
@@ -247,7 +248,7 @@
                                 HorizontalAlignment="Center"
                                 FontSize="15"
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Text="称号" />
+                                Text="{x:Bind helper:LanguageService.GetString('Display_Title')}" />
                             <Viewbox MaxWidth="60" HorizontalAlignment="Center">
 
                                 <TextBlock
@@ -264,7 +265,7 @@
                                 HorizontalAlignment="Center"
                                 FontSize="15"
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Text="双金次数" />
+                                Text="{x:Bind helper:LanguageService.GetString('Display_DoubleGoldChance')}" />
                             <TextBlock
                                 HorizontalAlignment="Center"
                                 FontSize="20"
@@ -279,7 +280,7 @@
                                 HorizontalAlignment="Center"
                                 FontSize="15"
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Text="歪的次数" />
+                                Text="{x:Bind helper:LanguageService.GetString('Display_NumberOfSkews')}" />
                             <TextBlock
                                 HorizontalAlignment="Center"
                                 FontSize="20"
@@ -294,7 +295,7 @@
                                 HorizontalAlignment="Center"
                                 FontSize="15"
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Text="综合评分" />
+                                Text="{x:Bind helper:LanguageService.GetString('Display_ComprehensiveRating')}" />
                             <TextBlock
                                 HorizontalAlignment="Center"
                                 FontSize="20"
@@ -309,13 +310,13 @@
                                 HorizontalAlignment="Center"
                                 FontSize="15"
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Text="平均出金" />
+                                Text="{x:Bind helper:LanguageService.GetString('Display_AverageWithdrawal')}" />
                             <TextBlock
                                 HorizontalAlignment="Center"
                                 FontSize="20"
                                 FontWeight="Bold">
                                 <Run Text="{x:Bind ViewModel.Header.AvgPulls, Mode=OneWay}" />
-                                <Run Text="抽" />
+                                <Run Text="{x:Bind helper:LanguageService.GetString('Display_Tic')}" />
                             </TextBlock>
                         </StackPanel>
                         <StackPanel
@@ -326,7 +327,7 @@
                                 HorizontalAlignment="Center"
                                 FontSize="15"
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Text="出金率" />
+                                Text="{x:Bind helper:LanguageService.GetString('Display_WithdrawalRate')}" />
                             <TextBlock
                                 HorizontalAlignment="Center"
                                 FontSize="20"
@@ -343,13 +344,13 @@
                                 HorizontalAlignment="Center"
                                 FontSize="15"
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Text="记录天数" />
+                                Text="{x:Bind helper:LanguageService.GetString('Display_StrongDaysRecordedStrong')}" />
                             <TextBlock
                                 HorizontalAlignment="Center"
                                 FontSize="20"
                                 FontWeight="Bold">
                                 <Run Text="{x:Bind ViewModel.Header.Days, Mode=OneWay}" />
-                                <Run Text="天" />
+                                <Run Text="{x:Bind helper:LanguageService.GetString('Display_Day')}" />
                             </TextBlock>
                         </StackPanel>
                     </Grid>
@@ -398,7 +399,7 @@
                         </Grid.RowDefinitions>
                         <TextBlock
                             HorizontalAlignment="Center"
-                            Text="出货占比"
+                            Text="{x:Bind helper:LanguageService.GetString('Display_PercentageOfShipments')}"
                             TextAlignment="Left" />
                         <charts:PieChart
                             Grid.Row="1"
@@ -417,7 +418,7 @@
                             <RowDefinition Height="auto" />
                             <RowDefinition />
                         </Grid.RowDefinitions>
-                        <TextBlock Text="各卡池抽数" TextAlignment="Left" />
+                        <TextBlock Text="{x:Bind helper:LanguageService.GetString('Display_DrawsPerCardPool')}" TextAlignment="Left" />
                         <charts:PieChart
                             Grid.Row="1"
                             Background="Transparent"
@@ -435,7 +436,7 @@
                             <RowDefinition Height="auto" />
                             <RowDefinition />
                         </Grid.RowDefinitions>
-                        <TextBlock Text="每日抽数" TextAlignment="Left" />
+                        <TextBlock Text="{x:Bind helper:LanguageService.GetString('Display_DrawsPerDay')}" TextAlignment="Left" />
                         <charts:CartesianChart
                             Grid.Row="1"
                             Background="Transparent"

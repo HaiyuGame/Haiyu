@@ -1,0 +1,2424 @@
+﻿[
+    {
+        "keys":  "Display_1",
+        "zh-Hans":  "等级",
+        "zh-Hant":  "等級",
+        "en-us":  "等级",
+        "ja-Jp":  "等级"
+    },
+    {
+        "keys":  "Display_1315SSD",
+        "zh-Hans":  "   - 机械硬盘校验效率约为SSD的1/3～1/5",
+        "zh-Hant":  "   - 機械硬盤校驗效率約為SSD的1/3～1/5",
+        "en-us":  "   - 机械硬盘校验效率约为SSD的1/3～1/5",
+        "ja-Jp":  "   - 机械硬盘校验效率约为SSD的1/3～1/5"
+    },
+    {
+        "keys":  "Display_AboutEnd",
+        "zh-Hans":  "程序退出后，一切后台线即将结束",
+        "zh-Hant":  "程序退出后，一切后臺線即將結束",
+        "en-us":  "程序退出后，一切后台线即将结束",
+        "ja-Jp":  "程序退出后，一切后台线即将结束"
+    },
+    {
+        "keys":  "Display_AccountData",
+        "zh-Hans":  "云工具为云鸣潮账户数据",
+        "zh-Hant":  "云工具為云鳴潮賬戶數據",
+        "en-us":  "Cloud tool for Yunmingchao account data",
+        "ja-Jp":  "Yunmingchao アカウント データのクラウド ツール"
+    },
+    {
+        "keys":  "Display_AccountIcon",
+        "zh-Hans":  "无登陆会话，请点击右侧添加账号图标",
+        "zh-Hant":  "無登陸會話，請點擊右側添加賬號圖標",
+        "en-us":  "No login session, please click the add account icon on the right",
+        "ja-Jp":  "ログインセッションがありません。右側のアカウント追加アイコンをクリックしてください"
+    },
+    {
+        "keys":  "Display_AccountSwitching",
+        "zh-Hans":  "本地游戏账号切换",
+        "zh-Hant":  "本地游戲賬號切換",
+        "en-us":  "本地游戏账号切换",
+        "ja-Jp":  "本地游戏账号切换"
+    },
+    {
+        "keys":  "Display_AccountUid",
+        "zh-Hans":  "账号Uid",
+        "zh-Hant":  "賬號Uid",
+        "en-us":  "账号Uid",
+        "ja-Jp":  "账号Uid"
+    },
+    {
+        "keys":  "Display_ActivateTheLCC",
+        "zh-Hans":  "启用",
+        "zh-Hant":  "啟用",
+        "en-us":  "启用",
+        "ja-Jp":  "启用"
+    },
+    {
+        "keys":  "Display_ActiveWeapon",
+        "zh-Hans":  "活动武器",
+        "zh-Hant":  "活動武器",
+        "en-us":  "活动武器",
+        "ja-Jp":  "活动武器"
+    },
+    {
+        "keys":  "Display_Activities",
+        "zh-Hans":  "活动  ",
+        "zh-Hant":  "活動  ",
+        "en-us":  "活动  ",
+        "ja-Jp":  "活动  "
+    },
+    {
+        "keys":  "Display_ActivityFile",
+        "zh-Hans":  "活动文件",
+        "zh-Hant":  "活動文件",
+        "en-us":  "活动文件",
+        "ja-Jp":  "活动文件"
+    },
+    {
+        "keys":  "Display_ActivityRole",
+        "zh-Hans":  "活动角色",
+        "zh-Hant":  "活動角色",
+        "en-us":  "活动角色",
+        "ja-Jp":  "活动角色"
+    },
+    {
+        "keys":  "Display_ADBPath",
+        "zh-Hans":  "ADB 路径",
+        "zh-Hant":  "ADB 路徑",
+        "en-us":  "ADB 路径",
+        "ja-Jp":  "ADB 路径"
+    },
+    {
+        "keys":  "Display_AddAccount",
+        "zh-Hans":  "添加账号",
+        "zh-Hant":  "添加賬號",
+        "en-us":  "Add account",
+        "ja-Jp":  "アカウントを追加"
+    },
+    {
+        "keys":  "Display_AdministratorPrivileges",
+        "zh-Hans":  "以下功能需要使用管理员权限启动",
+        "zh-Hant":  "以下功能需要使用管理員權限啟動",
+        "en-us":  "以下功能需要使用管理员权限启动",
+        "ja-Jp":  "以下功能需要使用管理员权限启动"
+    },
+    {
+        "keys":  "Display_AkumulasiCheckIn",
+        "zh-Hans":  "累计签到",
+        "zh-Hant":  "累計簽到",
+        "en-us":  "累计签到",
+        "ja-Jp":  "累计签到"
+    },
+    {
+        "keys":  "Display_AlreadyMatted",
+        "zh-Hans":  "已经垫了",
+        "zh-Hant":  "已經墊了",
+        "en-us":  "已经垫了",
+        "ja-Jp":  "已经垫了"
+    },
+    {
+        "keys":  "Display_AnalyticsDashboard",
+        "zh-Hans":  "分析面板",
+        "zh-Hant":  "分析面板",
+        "en-us":  "Analysis panel",
+        "ja-Jp":  "分析パネル"
+    },
+    {
+        "keys":  "Display_AnalyzeSum",
+        "zh-Hans":  "分析总和",
+        "zh-Hant":  "分析總和",
+        "en-us":  "分析总和",
+        "ja-Jp":  "分析总和"
+    },
+    {
+        "keys":  "Display_AnAppUpdateIsAvailable",
+        "zh-Hans":  "应用程序有更新",
+        "zh-Hant":  "應用程序有更新",
+        "en-us":  "应用程序有更新",
+        "ja-Jp":  "应用程序有更新"
+    },
+    {
+        "keys":  "Display_AndroidOSDevices",
+        "zh-Hans":  "安卓设备",
+        "zh-Hant":  "安卓設備",
+        "en-us":  "安卓设备",
+        "ja-Jp":  "安卓设备"
+    },
+    {
+        "keys":  "Display_AppUpdate",
+        "zh-Hans":  "应用更新",
+        "zh-Hant":  "應用更新",
+        "en-us":  "应用更新",
+        "ja-Jp":  "应用更新"
+    },
+    {
+        "keys":  "Display_AuthorizationManagement",
+        "zh-Hans":  "授权管理",
+        "zh-Hant":  "授權管理",
+        "en-us":  "授权管理",
+        "ja-Jp":  "授权管理"
+    },
+    {
+        "keys":  "Display_AuthorizedCode",
+        "zh-Hans":  "授权码",
+        "zh-Hant":  "授權碼",
+        "en-us":  "授权码",
+        "ja-Jp":  "授权码"
+    },
+    {
+        "keys":  "Display_AutoLogin",
+        "zh-Hans":  "自动登陆",
+        "zh-Hant":  "自動登陸",
+        "en-us":  "自动登陆",
+        "ja-Jp":  "自动登陆"
+    },
+    {
+        "keys":  "Display_AutomaticCheckIn",
+        "zh-Hans":  "自动签到",
+        "zh-Hant":  "自動簽到",
+        "en-us":  "自动签到",
+        "ja-Jp":  "自动签到"
+    },
+    {
+        "keys":  "Display_Average5Stars",
+        "zh-Hans":  "平均5星",
+        "zh-Hant":  "平均5星",
+        "en-us":  "平均5星",
+        "ja-Jp":  "平均5星"
+    },
+    {
+        "keys":  "Display_AverageActivity",
+        "zh-Hans":  "平均活动:",
+        "zh-Hant":  "平均活動:",
+        "en-us":  "平均活动:",
+        "ja-Jp":  "平均活动:"
+    },
+    {
+        "keys":  "Display_AverageResidency",
+        "zh-Hans":  "平均常驻：",
+        "zh-Hant":  "平均常駐：",
+        "en-us":  "平均常驻：",
+        "ja-Jp":  "平均常驻："
+    },
+    {
+        "keys":  "Display_AverageWithdrawal",
+        "zh-Hans":  "平均出金",
+        "zh-Hant":  "平均出金",
+        "en-us":  "平均出金",
+        "ja-Jp":  "平均出金"
+    },
+    {
+        "keys":  "Display_AvgShipment",
+        "zh-Hans":  "平均出货",
+        "zh-Hant":  "平均出貨",
+        "en-us":  "平均出货",
+        "ja-Jp":  "平均出货"
+    },
+    {
+        "keys":  "Display_BackgroundType",
+        "zh-Hans":  "背景类型",
+        "zh-Hant":  "背景類型",
+        "en-us":  "背景类型",
+        "ja-Jp":  "背景类型"
+    },
+    {
+        "keys":  "Display_BalanceOverview",
+        "zh-Hans":  "余额概况",
+        "zh-Hant":  "余額概況",
+        "en-us":  "余额概况",
+        "ja-Jp":  "バランスの概要"
+    },
+    {
+        "keys":  "Display_BasicInformation",
+        "zh-Hans":  "基础信息",
+        "zh-Hant":  "基礎信息",
+        "en-us":  "基础信息",
+        "ja-Jp":  "基础信息"
+    },
+    {
+        "keys":  "Display_BattleMapping",
+        "zh-Hans":  "历战映射",
+        "zh-Hant":  "歷戰映射",
+        "en-us":  "历战映射",
+        "ja-Jp":  "历战映射"
+    },
+    {
+        "keys":  "Display_BeforeContinuing",
+        "zh-Hans":  "确认要登录的账号角色后继续。",
+        "zh-Hant":  "確認要登錄的賬號角色后繼續。",
+        "en-us":  "确认要登录的账号角色后继续。",
+        "ja-Jp":  "确认要登录的账号角色后继续。"
+    },
+    {
+        "keys":  "Display_BigMap",
+        "zh-Hans":  "大地图",
+        "zh-Hant":  "大地圖",
+        "en-us":  "大地图",
+        "ja-Jp":  "大地图"
+    },
+    {
+        "keys":  "Display_BindGameHomeStamina",
+        "zh-Hans":  "绑定游戏首页体力",
+        "zh-Hant":  "綁定游戲首頁體力",
+        "en-us":  "绑定游戏首页体力",
+        "ja-Jp":  "绑定游戏首页体力"
+    },
+    {
+        "keys":  "Display_BindRole",
+        "zh-Hans":  "绑定角色",
+        "zh-Hant":  "綁定角色",
+        "en-us":  "绑定角色",
+        "ja-Jp":  "绑定角色"
+    },
+    {
+        "keys":  "Display_Bit",
+        "zh-Hans":  "位",
+        "zh-Hant":  "位",
+        "en-us":  "位",
+        "ja-Jp":  "位"
+    },
+    {
+        "keys":  "Display_Bit2",
+        "zh-Hans":  "位，",
+        "zh-Hant":  "位，",
+        "en-us":  "位，",
+        "ja-Jp":  "位，"
+    },
+    {
+        "keys":  "Display_Browse",
+        "zh-Hans":  "浏览",
+        "zh-Hant":  "瀏覽",
+        "en-us":  "浏览",
+        "ja-Jp":  "浏览"
+    },
+    {
+        "keys":  "Display_Buat",
+        "zh-Hans":  "生成",
+        "zh-Hant":  "生成",
+        "en-us":  "生成",
+        "ja-Jp":  "生成"
+    },
+    {
+        "keys":  "Display_BuildCalculator",
+        "zh-Hans":  "养成计算器",
+        "zh-Hant":  "養成計算器",
+        "en-us":  "养成计算器",
+        "ja-Jp":  "养成计算器"
+    },
+    {
+        "keys":  "Display_CallProtocol",
+        "zh-Hans":  "本工具通过ADB Port调试端口，链接安卓系统的WebView，并通过CDP调用协议抓取Token信息",
+        "zh-Hant":  "本工具通過ADB Port調試端口，鏈接安卓系統的WebView，并通過CDP調用協議抓取Token信息",
+        "en-us":  "本工具通过ADB Port调试端口，链接安卓系统的WebView，并通过CDP调用协议抓取Token信息",
+        "ja-Jp":  "本工具通过ADB Port调试端口，链接安卓系统的WebView，并通过CDP调用协议抓取Token信息"
+    },
+    {
+        "keys":  "Display_CancelThisOperation",
+        "zh-Hans":  "取消当前操作",
+        "zh-Hant":  "取消當前操作",
+        "en-us":  "取消当前操作",
+        "ja-Jp":  "取消当前操作"
+    },
+    {
+        "keys":  "Display_CaptureQRCode",
+        "zh-Hans":  "捕获二维码",
+        "zh-Hant":  "捕獲二維碼",
+        "en-us":  "捕获二维码",
+        "ja-Jp":  "捕获二维码"
+    },
+    {
+        "keys":  "Display_CardTime",
+        "zh-Hans":  "体验卡时间",
+        "zh-Hant":  "體驗卡時間",
+        "en-us":  "体验卡时间",
+        "ja-Jp":  "体验卡时间"
+    },
+    {
+        "keys":  "Display_CDPClient",
+        "zh-Hans":  "浏览器调试连接与 CDP 客户端状态。",
+        "zh-Hant":  "瀏覽器調試連接與 CDP 客戶端狀態。",
+        "en-us":  "浏览器调试连接与 CDP 客户端状态。",
+        "ja-Jp":  "浏览器调试连接与 CDP 客户端状态。"
+    },
+    {
+        "keys":  "Display_Choose",
+        "zh-Hans":  "选择",
+        "zh-Hant":  "選擇",
+        "en-us":  "选择",
+        "ja-Jp":  "选择"
+    },
+    {
+        "keys":  "Display_ClaritySelection",
+        "zh-Hans":  "清晰度选择",
+        "zh-Hant":  "清晰度選擇",
+        "en-us":  "清晰度选择",
+        "ja-Jp":  "清晰度选择"
+    },
+    {
+        "keys":  "Display_ClientState",
+        "zh-Hans":  "Chrome DevTools Protocol 客户端状态。",
+        "zh-Hant":  "Chrome DevTools Protocol 客戶端狀態。",
+        "en-us":  "Chrome DevTools Protocol 客户端状态。",
+        "ja-Jp":  "Chrome DevTools Protocol 客户端状态。"
+    },
+    {
+        "keys":  "Display_CloseButton",
+        "zh-Hans":  "关闭按钮",
+        "zh-Hant":  "關閉按鈕",
+        "en-us":  "关闭按钮",
+        "ja-Jp":  "关闭按钮"
+    },
+    {
+        "keys":  "Display_Code",
+        "zh-Hans":  "验证码",
+        "zh-Hant":  "驗證碼",
+        "en-us":  "验证码",
+        "ja-Jp":  "验证码"
+    },
+    {
+        "keys":  "Display_ComingSoon",
+        "zh-Hans":  "敬请期待",
+        "zh-Hant":  "敬請期待",
+        "en-us":  "敬请期待",
+        "ja-Jp":  "乞うご期待"
+    },
+    {
+        "keys":  "Display_Complete",
+        "zh-Hans":  "完成",
+        "zh-Hant":  "完成",
+        "en-us":  "完成",
+        "ja-Jp":  "完成"
+    },
+    {
+        "keys":  "Display_ComprehensiveRating",
+        "zh-Hans":  "综合评分",
+        "zh-Hant":  "綜合評分",
+        "en-us":  "综合评分",
+        "ja-Jp":  "综合评分"
+    },
+    {
+        "keys":  "Display_ConfigureFolders",
+        "zh-Hans":  "配置文件夹",
+        "zh-Hant":  "配置文件夾",
+        "en-us":  "配置文件夹",
+        "ja-Jp":  "配置文件夹"
+    },
+    {
+        "keys":  "Display_Confirm",
+        "zh-Hans":  "确定",
+        "zh-Hant":  "確定",
+        "en-us":  "确定",
+        "ja-Jp":  "确定"
+    },
+    {
+        "keys":  "Display_ConfirmLogin",
+        "zh-Hans":  "确认登录",
+        "zh-Hant":  "確認登錄",
+        "en-us":  "确认登录",
+        "ja-Jp":  "确认登录"
+    },
+    {
+        "keys":  "Display_ConfirmLogin2",
+        "zh-Hans":  "确认登陆",
+        "zh-Hant":  "確認登陸",
+        "en-us":  "确认登陆",
+        "ja-Jp":  "确认登陆"
+    },
+    {
+        "keys":  "Display_CONNECTION",
+        "zh-Hans":  "连接",
+        "zh-Hant":  "連接",
+        "en-us":  "连接",
+        "ja-Jp":  "连接"
+    },
+    {
+        "keys":  "Display_ConnectStatus",
+        "zh-Hans":  "连接状态",
+        "zh-Hant":  "連接狀態",
+        "en-us":  "连接状态",
+        "ja-Jp":  "连接状态"
+    },
+    {
+        "keys":  "Display_ContinueLogging",
+        "zh-Hans":  "输入手机收到的验证码后继续登录。",
+        "zh-Hant":  "輸入手機收到的驗證碼后繼續登錄。",
+        "en-us":  "输入手机收到的验证码后继续登录。",
+        "ja-Jp":  "输入手机收到的验证码后继续登录。"
+    },
+    {
+        "keys":  "Display_Copy",
+        "zh-Hans":  "复制",
+        "zh-Hant":  "復制",
+        "en-us":  "复制",
+        "ja-Jp":  "复制"
+    },
+    {
+        "keys":  "Display_CopyGameLandingCode",
+        "zh-Hans":  "复制游戏登陆码",
+        "zh-Hant":  "復制游戲登陸碼",
+        "en-us":  "复制游戏登陆码",
+        "ja-Jp":  "复制游戏登陆码"
+    },
+    {
+        "keys":  "Display_CopyToken",
+        "zh-Hans":  "复制Token",
+        "zh-Hant":  "復制Token",
+        "en-us":  "复制Token",
+        "ja-Jp":  "复制Token"
+    },
+    {
+        "keys":  "Display_CreateAnAccount",
+        "zh-Hans":  "创建账号",
+        "zh-Hant":  "創建賬號",
+        "en-us":  "创建账号",
+        "ja-Jp":  "アカウントを作成する"
+    },
+    {
+        "keys":  "Display_CreateShortcut",
+        "zh-Hans":  "创建快捷方式",
+        "zh-Hant":  "創建快捷方式",
+        "en-us":  "创建快捷方式",
+        "ja-Jp":  "创建快捷方式"
+    },
+    {
+        "keys":  "Display_CurrentActivity",
+        "zh-Hans":  "当前活动",
+        "zh-Hant":  "當前活動",
+        "en-us":  "当前活动",
+        "ja-Jp":  "現在の活動"
+    },
+    {
+        "keys":  "Display_Data",
+        "zh-Hans":  "数据",
+        "zh-Hant":  "數據",
+        "en-us":  "数据",
+        "ja-Jp":  "数据"
+    },
+    {
+        "keys":  "Display_DataCapacity",
+        "zh-Hans":  "数据容量",
+        "zh-Hant":  "數據容量",
+        "en-us":  "数据容量",
+        "ja-Jp":  "数据容量"
+    },
+    {
+        "keys":  "Display_DataPlane",
+        "zh-Hans":  "数据面板",
+        "zh-Hant":  "數據面板",
+        "en-us":  "数据面板",
+        "ja-Jp":  "数据面板"
+    },
+    {
+        "keys":  "Display_Date",
+        "zh-Hans":  "日期",
+        "zh-Hant":  "日期",
+        "en-us":  "date",
+        "ja-Jp":  "日付"
+    },
+    {
+        "keys":  "Display_Day",
+        "zh-Hans":  "天",
+        "zh-Hant":  "天",
+        "en-us":  "天",
+        "ja-Jp":  "天"
+    },
+    {
+        "keys":  "Display_DebugConnection",
+        "zh-Hans":  "浏览器调试连接的底层状态。",
+        "zh-Hant":  "瀏覽器調試連接的底層狀態。",
+        "en-us":  "浏览器调试连接的底层状态。",
+        "ja-Jp":  "浏览器调试连接的底层状态。"
+    },
+    {
+        "keys":  "Display_DebugPort",
+        "zh-Hans":  "调试端口",
+        "zh-Hant":  "調試端口",
+        "en-us":  "调试端口",
+        "ja-Jp":  "调试端口"
+    },
+    {
+        "keys":  "Display_DeleteWebCache",
+        "zh-Hans":  "删除Web缓存",
+        "zh-Hant":  "刪除Web緩存",
+        "en-us":  "删除Web缓存",
+        "ja-Jp":  "删除Web缓存"
+    },
+    {
+        "keys":  "Display_DerivedData",
+        "zh-Hans":  "导出数据",
+        "zh-Hant":  "導出數據",
+        "en-us":  "导出数据",
+        "ja-Jp":  "导出数据"
+    },
+    {
+        "keys":  "Display_Development",
+        "zh-Hans":  "发",
+        "zh-Hant":  "發",
+        "en-us":  "发",
+        "ja-Jp":  "发"
+    },
+    {
+        "keys":  "Display_DeviceAuthorization",
+        "zh-Hans":  "设备授权",
+        "zh-Hant":  "設備授權",
+        "en-us":  "设备授权",
+        "ja-Jp":  "设备授权"
+    },
+    {
+        "keys":  "Display_DeviceDid",
+        "zh-Hans":  "设备Did",
+        "zh-Hant":  "設備Did",
+        "en-us":  "设备Did",
+        "ja-Jp":  "设备Did"
+    },
+    {
+        "keys":  "Display_DiagnosticEnvironment",
+        "zh-Hans":  "诊断环境",
+        "zh-Hant":  "診斷環境",
+        "en-us":  "诊断环境",
+        "ja-Jp":  "诊断环境"
+    },
+    {
+        "keys":  "Display_DisableDlss",
+        "zh-Hans":  "禁用 Dlss",
+        "zh-Hant":  "禁用 Dlss",
+        "en-us":  "禁用 Dlss",
+        "ja-Jp":  "禁用 Dlss"
+    },
+    {
+        "keys":  "Display_DiskFreeSpaceSize",
+        "zh-Hans":  "磁盘可用空间大小：",
+        "zh-Hant":  "磁盤可用空間大小：",
+        "en-us":  "磁盘可用空间大小：",
+        "ja-Jp":  "磁盘可用空间大小："
+    },
+    {
+        "keys":  "Display_Distance",
+        "zh-Hans":  "距离  ",
+        "zh-Hant":  "距離  ",
+        "en-us":  "距离  ",
+        "ja-Jp":  "距离  "
+    },
+    {
+        "keys":  "Display_Distancing",
+        "zh-Hans":  "距离",
+        "zh-Hant":  "距離",
+        "en-us":  "距离",
+        "ja-Jp":  "距离"
+    },
+    {
+        "keys":  "Display_DistortionRate",
+        "zh-Hans":  "(小保底歪率：",
+        "zh-Hant":  "(小保底歪率：",
+        "en-us":  "(小保底歪率：",
+        "ja-Jp":  "(小保底歪率："
+    },
+    {
+        "keys":  "Display_DomainPreconfiguration",
+        "zh-Hans":  "Github域前置配置",
+        "zh-Hant":  "Github域前置配置",
+        "en-us":  "Github域前置配置",
+        "ja-Jp":  "Github域前置配置"
+    },
+    {
+        "keys":  "Display_DonTAskMeAgain",
+        "zh-Hans":  "不要再询问我",
+        "zh-Hant":  "不要再詢問我",
+        "en-us":  "不要再询问我",
+        "ja-Jp":  "不要再询问我"
+    },
+    {
+        "keys":  "Display_DottedMode",
+        "zh-Hans":  "点染模式",
+        "zh-Hant":  "點染模式",
+        "en-us":  "点染模式",
+        "ja-Jp":  "点染模式"
+    },
+    {
+        "keys":  "Display_DoubleGoldChance",
+        "zh-Hans":  "双金次数",
+        "zh-Hant":  "雙金次數",
+        "en-us":  "双金次数",
+        "ja-Jp":  "双金次数"
+    },
+    {
+        "keys":  "Display_DOUBLETAPToSet",
+        "zh-Hans":  "双击设置",
+        "zh-Hant":  "雙擊設置",
+        "en-us":  "双击设置",
+        "ja-Jp":  "双击设置"
+    },
+    {
+        "keys":  "Display_DownloadedAdvance",
+        "zh-Hans":  "提前安装预下载内容",
+        "zh-Hant":  "提前安裝預下載內容",
+        "en-us":  "提前安装预下载内容",
+        "ja-Jp":  "提前安装预下载内容"
+    },
+    {
+        "keys":  "Display_DownloadGames",
+        "zh-Hans":  "下载游戏",
+        "zh-Hant":  "下載游戲",
+        "en-us":  "下载游戏",
+        "ja-Jp":  "下载游戏"
+    },
+    {
+        "keys":  "Display_DownloadLocation",
+        "zh-Hans":  "点击此处修改补丁文件下载位置",
+        "zh-Hant":  "點擊此處修改補丁文件下載位置",
+        "en-us":  "点击此处修改补丁文件下载位置",
+        "ja-Jp":  "点击此处修改补丁文件下载位置"
+    },
+    {
+        "keys":  "Display_Downloads",
+        "zh-Hans":  "下载",
+        "zh-Hant":  "下載",
+        "en-us":  "下载",
+        "ja-Jp":  "下载"
+    },
+    {
+        "keys":  "Display_DownloadSpeedLimit",
+        "zh-Hans":  "下载速度限制",
+        "zh-Hant":  "下載速度限制",
+        "en-us":  "下载速度限制",
+        "ja-Jp":  "下载速度限制"
+    },
+    {
+        "keys":  "Display_DownloadSpeedLimitMbS",
+        "zh-Hans":  "下载限速(mb/s)",
+        "zh-Hant":  "下載限速(mb/s)",
+        "en-us":  "下载限速(mb/s)",
+        "ja-Jp":  "下载限速(mb/s)"
+    },
+    {
+        "keys":  "Display_DownloadState",
+        "zh-Hans":  "   - 暂停期间断网将会退出下载状态",
+        "zh-Hant":  "   - 暫停期間斷網將會退出下載狀態",
+        "en-us":  "   - 暂停期间断网将会退出下载状态",
+        "ja-Jp":  "   - 暂停期间断网将会退出下载状态"
+    },
+    {
+        "keys":  "Display_DownloadTheLatestVersion",
+        "zh-Hans":  "下载最新版",
+        "zh-Hant":  "下載最新版",
+        "en-us":  "下载最新版",
+        "ja-Jp":  "下载最新版"
+    },
+    {
+        "keys":  "Display_DragTheCodeToVerify",
+        "zh-Hans":  "拖动验证码进行验证",
+        "zh-Hant":  "拖動驗證碼進行驗證",
+        "en-us":  "拖动验证码进行验证",
+        "ja-Jp":  "拖动验证码进行验证"
+    },
+    {
+        "keys":  "Display_DrawAnalysis",
+        "zh-Hans":  "抽卡分析",
+        "zh-Hant":  "抽卡分析",
+        "en-us":  "抽卡分析",
+        "ja-Jp":  "抽卡分析"
+    },
+    {
+        "keys":  "Display_DrawingRecord",
+        "zh-Hans":  "请输入一个抽卡记录",
+        "zh-Hant":  "請輸入一個抽卡記錄",
+        "en-us":  "请输入一个抽卡记录",
+        "ja-Jp":  "请输入一个抽卡记录"
+    },
+    {
+        "keys":  "Display_DrawsPerCardPool",
+        "zh-Hans":  "各卡池抽数",
+        "zh-Hant":  "各卡池抽數",
+        "en-us":  "各卡池抽数",
+        "ja-Jp":  "各卡池抽数"
+    },
+    {
+        "keys":  "Display_DrawsPerDay",
+        "zh-Hans":  "每日抽数",
+        "zh-Hant":  "每日抽數",
+        "en-us":  "每日抽数",
+        "ja-Jp":  "每日抽数"
+    },
+    {
+        "keys":  "Display_DuplicateAccountId",
+        "zh-Hans":  "复制账号Id",
+        "zh-Hant":  "復制賬號Id",
+        "en-us":  "复制账号Id",
+        "ja-Jp":  "复制账号Id"
+    },
+    {
+        "keys":  "Display_DuplicateDid",
+        "zh-Hans":  "复制Did",
+        "zh-Hant":  "復制Did",
+        "en-us":  "复制Did",
+        "ja-Jp":  "复制Did"
+    },
+    {
+        "keys":  "Display_DX11Startup",
+        "zh-Hans":  "DX 11 启动",
+        "zh-Hant":  "DX 11 啟動",
+        "en-us":  "DX 11 启动",
+        "ja-Jp":  "DX11の発売"
+    },
+    {
+        "keys":  "Display_EmptyDrawingBoard",
+        "zh-Hans":  "清空画板",
+        "zh-Hant":  "清空畫板",
+        "en-us":  "清空画板",
+        "ja-Jp":  "清空画板"
+    },
+    {
+        "keys":  "Display_EnableDisable",
+        "zh-Hans":  "启用/关闭",
+        "zh-Hant":  "啟用/關閉",
+        "en-us":  "启用/关闭",
+        "ja-Jp":  "启用/关闭"
+    },
+    {
+        "keys":  "Display_EnableXboxEnhancements",
+        "zh-Hans":  "启用Xbox增强",
+        "zh-Hant":  "啟用Xbox增強",
+        "en-us":  "启用Xbox增强",
+        "ja-Jp":  "启用Xbox增强"
+    },
+    {
+        "keys":  "Display_EnjoyYourCard",
+        "zh-Hans":  "畅享卡",
+        "zh-Hant":  "暢享卡",
+        "en-us":  "畅享卡",
+        "ja-Jp":  "畅享卡"
+    },
+    {
+        "keys":  "Display_EnterDrawCardLink",
+        "zh-Hans":  "输入抽卡链接",
+        "zh-Hant":  "輸入抽卡鏈接",
+        "en-us":  "输入抽卡链接",
+        "ja-Jp":  "输入抽卡链接"
+    },
+    {
+        "keys":  "Display_EnterGameUID",
+        "zh-Hans":  "输入游戏UID",
+        "zh-Hant":  "輸入游戲UID",
+        "en-us":  "输入游戏UID",
+        "ja-Jp":  "输入游戏UID"
+    },
+    {
+        "keys":  "Display_EnterToken",
+        "zh-Hans":  "输入Token",
+        "zh-Hant":  "輸入Token",
+        "en-us":  "输入Token",
+        "ja-Jp":  "输入Token"
+    },
+    {
+        "keys":  "Display_EnterVerification",
+        "zh-Hans":  "进入校验",
+        "zh-Hant":  "進入校驗",
+        "en-us":  "进入校验",
+        "ja-Jp":  "进入校验"
+    },
+    {
+        "keys":  "Display_ENTRYINTOFORCE",
+        "zh-Hans":  "生效",
+        "zh-Hant":  "生效",
+        "en-us":  "生效",
+        "ja-Jp":  "生效"
+    },
+    {
+        "keys":  "Display_ExitOrNot",
+        "zh-Hans":  "是否退出？",
+        "zh-Hant":  "是否退出？",
+        "en-us":  "是否退出？",
+        "ja-Jp":  "是否退出？"
+    },
+    {
+        "keys":  "Display_File",
+        "zh-Hans":  "文件",
+        "zh-Hant":  "文件",
+        "en-us":  "文件",
+        "ja-Jp":  "書類"
+    },
+    {
+        "keys":  "Display_FillInTheBlanks",
+        "zh-Hans":  "填充空白",
+        "zh-Hant":  "填充空白",
+        "en-us":  "填充空白",
+        "ja-Jp":  "填充空白"
+    },
+    {
+        "keys":  "Display_FilterResults",
+        "zh-Hans":  "过滤结果",
+        "zh-Hant":  "過濾結果",
+        "en-us":  "过滤结果",
+        "ja-Jp":  "过滤结果"
+    },
+    {
+        "keys":  "Display_FixTheGame",
+        "zh-Hans":  "修复游戏",
+        "zh-Hant":  "修復游戲",
+        "en-us":  "修复游戏",
+        "ja-Jp":  "修复游戏"
+    },
+    {
+        "keys":  "Display_FolderDirectly",
+        "zh-Hans":  "此选项将直接删除游戏文件夹",
+        "zh-Hant":  "此選項將直接刪除游戲文件夾",
+        "en-us":  "此选项将直接删除游戏文件夹",
+        "ja-Jp":  "此选项将直接删除游戏文件夹"
+    },
+    {
+        "keys":  "Display_FontFile",
+        "zh-Hans":  "字体文件",
+        "zh-Hant":  "字體文件",
+        "en-us":  "字体文件",
+        "ja-Jp":  "字体文件"
+    },
+    {
+        "keys":  "Display_FrameRate",
+        "zh-Hans":  "帧率",
+        "zh-Hant":  "幀率",
+        "en-us":  "帧率",
+        "ja-Jp":  "帧率"
+    },
+    {
+        "keys":  "Display_FrameworkVersion",
+        "zh-Hans":  "框架版本",
+        "zh-Hant":  "框架版本",
+        "en-us":  "框架版本",
+        "ja-Jp":  "框架版本"
+    },
+    {
+        "keys":  "Display_GameCheckIn",
+        "zh-Hans":  "游戏签到",
+        "zh-Hant":  "游戲簽到",
+        "en-us":  "游戏签到",
+        "ja-Jp":  "游戏签到"
+    },
+    {
+        "keys":  "Display_GameMonitor",
+        "zh-Hans":  "游戏监控工具",
+        "zh-Hant":  "游戲監控工具",
+        "en-us":  "游戏监控工具",
+        "ja-Jp":  "游戏监控工具"
+    },
+    {
+        "keys":  "Display_GameResourceManagement",
+        "zh-Hans":  "游戏资源管理",
+        "zh-Hant":  "游戲資源管理",
+        "en-us":  "游戏资源管理",
+        "ja-Jp":  "游戏资源管理"
+    },
+    {
+        "keys":  "Display_GameResources",
+        "zh-Hans":  "游戏资源",
+        "zh-Hant":  "游戲資源",
+        "en-us":  "游戏资源",
+        "ja-Jp":  "游戏资源"
+    },
+    {
+        "keys":  "Display_GameResourceSize",
+        "zh-Hans":  "游戏资源大小",
+        "zh-Hant":  "游戲資源大小",
+        "en-us":  "游戏资源大小",
+        "ja-Jp":  "游戏资源大小"
+    },
+    {
+        "keys":  "Display_GameSettings",
+        "zh-Hans":  "游戏设置",
+        "zh-Hant":  "游戲設置",
+        "en-us":  "游戏设置",
+        "ja-Jp":  "游戏设置"
+    },
+    {
+        "keys":  "Display_General",
+        "zh-Hans":  "通用",
+        "zh-Hant":  "通用",
+        "en-us":  "通用",
+        "ja-Jp":  "通用"
+    },
+    {
+        "keys":  "Display_GenerateCheckerboard",
+        "zh-Hans":  "生成棋盘",
+        "zh-Hant":  "生成棋盤",
+        "en-us":  "生成棋盘",
+        "ja-Jp":  "生成棋盘"
+    },
+    {
+        "keys":  "Display_Genre",
+        "zh-Hans":  "类型",
+        "zh-Hant":  "類型",
+        "en-us":  "type",
+        "ja-Jp":  "タイプ"
+    },
+    {
+        "keys":  "Display_GettingStarted",
+        "zh-Hans":  "开始",
+        "zh-Hant":  "開始",
+        "en-us":  "开始",
+        "ja-Jp":  "开始"
+    },
+    {
+        "keys":  "Display_GithubTriageAcceleration",
+        "zh-Hans":  "Github分流加速",
+        "zh-Hant":  "Github分流加速",
+        "en-us":  "Github分流加速",
+        "ja-Jp":  "Github分流加速"
+    },
+    {
+        "keys":  "Display_Go",
+        "zh-Hans":  "前往",
+        "zh-Hant":  "前往",
+        "en-us":  "前往",
+        "ja-Jp":  "に行く"
+    },
+    {
+        "keys":  "Display_GuaranteeAnalysis",
+        "zh-Hans":  "保底分析",
+        "zh-Hant":  "保底分析",
+        "en-us":  "保底分析",
+        "ja-Jp":  "保底分析"
+    },
+    {
+        "keys":  "Display_HardwareCompatibility",
+        "zh-Hans":  "• 硬件兼容性",
+        "zh-Hant":  "? 硬件兼容性",
+        "en-us":  "• 硬件兼容性",
+        "ja-Jp":  "• 硬件兼容性"
+    },
+    {
+        "keys":  "Display_HideTitlebar",
+        "zh-Hans":  "隐藏标题栏",
+        "zh-Hant":  "隱藏標題欄",
+        "en-us":  "隐藏标题栏",
+        "ja-Jp":  "隐藏标题栏"
+    },
+    {
+        "keys":  "Display_HighLevelArea",
+        "zh-Hans":  "高级区",
+        "zh-Hant":  "高級區",
+        "en-us":  "高级区",
+        "ja-Jp":  "高级区"
+    },
+    {
+        "keys":  "Display_IconCheck",
+        "zh-Hans":  "观察右侧内容是否为图标，来确定图标是否正常",
+        "zh-Hant":  "觀察右側內容是否為圖標，來確定圖標是否正常",
+        "en-us":  "观察右侧内容是否为图标，来确定图标是否正常",
+        "ja-Jp":  "观察右侧内容是否为图标，来确定图标是否正常"
+    },
+    {
+        "keys":  "Display_IdentificationCode",
+        "zh-Hans":  "识别码:",
+        "zh-Hant":  "識別碼:",
+        "en-us":  "识别码:",
+        "ja-Jp":  "识别码:"
+    },
+    {
+        "keys":  "Display_ImageQualityEnhancement",
+        "zh-Hans":  "画质增强",
+        "zh-Hant":  "畫質增強",
+        "en-us":  "画质增强",
+        "ja-Jp":  "画质增强"
+    },
+    {
+        "keys":  "Display_Import",
+        "zh-Hans":  "导入",
+        "zh-Hant":  "導入",
+        "en-us":  "导入",
+        "ja-Jp":  "导入"
+    },
+    {
+        "keys":  "Display_Inactive",
+        "zh-Hans":  "不生效",
+        "zh-Hant":  "不生效",
+        "en-us":  "不生效",
+        "ja-Jp":  "不生效"
+    },
+    {
+        "keys":  "Display_InProgress",
+        "zh-Hans":  "进行中：",
+        "zh-Hant":  "進行中：",
+        "en-us":  "进行中：",
+        "ja-Jp":  "進行中："
+    },
+    {
+        "keys":  "Display_IntoGame",
+        "zh-Hans":  "扫描屏幕登录游戏",
+        "zh-Hant":  "掃描屏幕登錄游戲",
+        "en-us":  "扫描屏幕登录游戏",
+        "ja-Jp":  "扫描屏幕登录游戏"
+    },
+    {
+        "keys":  "Display_Item",
+        "zh-Hans":  "选项为“视频”时会导致启动器内存占用极具上升",
+        "zh-Hant":  "選項為“視頻”時會導致啟動器內存占用極具上升",
+        "en-us":  "选项为“视频”时会导致启动器内存占用极具上升",
+        "ja-Jp":  "选项为“视频”时会导致启动器内存占用极具上升"
+    },
+    {
+        "keys":  "Display_Item2",
+        "zh-Hans":  "本地账号管理",
+        "zh-Hant":  "本地賬號管理",
+        "en-us":  "本地账号管理",
+        "ja-Jp":  "本地账号管理"
+    },
+    {
+        "keys":  "Display_Item3",
+        "zh-Hans":  "节点名称",
+        "zh-Hant":  "節點名稱",
+        "en-us":  "节点名称",
+        "ja-Jp":  "节点名称"
+    },
+    {
+        "keys":  "Display_Item4",
+        "zh-Hans":  "获得验证码",
+        "zh-Hant":  "獲得驗證碼",
+        "en-us":  "获得验证码",
+        "ja-Jp":  "获得验证码"
+    },
+    {
+        "keys":  "Display_Item5",
+        "zh-Hans":  "免费额度",
+        "zh-Hant":  "免費額度",
+        "en-us":  "免费额度",
+        "ja-Jp":  "無料割り当て"
+    },
+    {
+        "keys":  "Display_Item6",
+        "zh-Hans":  "联觉等级",
+        "zh-Hant":  "聯覺等級",
+        "en-us":  "联觉等级",
+        "ja-Jp":  "共感覚レベル"
+    },
+    {
+        "keys":  "Display_Item7",
+        "zh-Hans":  "幻痛囚笼",
+        "zh-Hant":  "幻痛囚籠",
+        "en-us":  "幻痛囚笼",
+        "ja-Jp":  "ファントムペインケージ"
+    },
+    {
+        "keys":  "Display_JoinTheDeveloperSNest",
+        "zh-Hans":  "加入开发者的小窝",
+        "zh-Hant":  "加入開發者的小窩",
+        "en-us":  "加入开发者的小窝",
+        "ja-Jp":  "加入开发者的小窝"
+    },
+    {
+        "keys":  "Display_JustLeave",
+        "zh-Hans":  "直接退出",
+        "zh-Hant":  "直接退出",
+        "en-us":  "直接退出",
+        "ja-Jp":  "直接退出"
+    },
+    {
+        "keys":  "Display_LastModification",
+        "zh-Hans":  "距离上一次修改:",
+        "zh-Hant":  "距離上一次修改:",
+        "en-us":  "距离上一次修改:",
+        "ja-Jp":  "距离上一次修改:"
+    },
+    {
+        "keys":  "Display_LatchingPowerDown",
+        "zh-Hans":  "关",
+        "zh-Hant":  "關",
+        "en-us":  "关",
+        "ja-Jp":  "关"
+    },
+    {
+        "keys":  "Display_LauncherTheme",
+        "zh-Hans":  "启动器主题",
+        "zh-Hant":  "啟動器主題",
+        "en-us":  "启动器主题",
+        "ja-Jp":  "启动器主题"
+    },
+    {
+        "keys":  "Display_LaunchHome",
+        "zh-Hans":  "启动首页",
+        "zh-Hant":  "啟動首頁",
+        "en-us":  "启动首页",
+        "ja-Jp":  "启动首页"
+    },
+    {
+        "keys":  "Display_LaunchingGame",
+        "zh-Hans":  "启动游戏后隐藏启动器",
+        "zh-Hant":  "啟動游戲后隱藏啟動器",
+        "en-us":  "启动游戏后隐藏启动器",
+        "ja-Jp":  "启动游戏后隐藏启动器"
+    },
+    {
+        "keys":  "Display_Lazy",
+        "zh-Hans":  "延迟",
+        "zh-Hant":  "延遲",
+        "en-us":  "延迟",
+        "ja-Jp":  "延迟"
+    },
+    {
+        "keys":  "Display_LeftMouse",
+        "zh-Hans":  "鼠标左键",
+        "zh-Hant":  "鼠標左鍵",
+        "en-us":  "鼠标左键",
+        "ja-Jp":  "鼠标左键"
+    },
+    {
+        "keys":  "Display_LegacyDataCustomFolders",
+        "zh-Hans":  "旧版数据(自定义文件夹)",
+        "zh-Hant":  "舊版數據(自定義文件夾)",
+        "en-us":  "旧版数据(自定义文件夹)",
+        "ja-Jp":  "旧版数据(自定义文件夹)"
+    },
+    {
+        "keys":  "Display_LegacyDataDefault",
+        "zh-Hans":  "旧版数据(默认)",
+        "zh-Hant":  "舊版數據(默認)",
+        "en-us":  "旧版数据(默认)",
+        "ja-Jp":  "旧版数据(默认)"
+    },
+    {
+        "keys":  "Display_LibraryNeighborhood",
+        "zh-Hans":  "库街区",
+        "zh-Hant":  "庫街區",
+        "en-us":  "库街区",
+        "ja-Jp":  "库街区"
+    },
+    {
+        "keys":  "Display_LocalGameHistory",
+        "zh-Hans":  "本地游戏记录",
+        "zh-Hant":  "本地游戲記錄",
+        "en-us":  "本地游戏记录",
+        "ja-Jp":  "本地游戏记录"
+    },
+    {
+        "keys":  "Display_LocateGameLocation",
+        "zh-Hans":  "定位游戏位置",
+        "zh-Hant":  "定位游戲位置",
+        "en-us":  "定位游戏位置",
+        "ja-Jp":  "定位游戏位置"
+    },
+    {
+        "keys":  "Display_Log",
+        "zh-Hans":  "日志",
+        "zh-Hant":  "日志",
+        "en-us":  "日志",
+        "ja-Jp":  "日志"
+    },
+    {
+        "keys":  "Display_Login",
+        "zh-Hans":  "登录",
+        "zh-Hant":  "登錄",
+        "en-us":  "登录",
+        "ja-Jp":  "登录"
+    },
+    {
+        "keys":  "Display_LoginType",
+        "zh-Hans":  "登录类型：",
+        "zh-Hant":  "登錄類型：",
+        "en-us":  "登录类型：",
+        "ja-Jp":  "登录类型："
+    },
+    {
+        "keys":  "Display_LogOut",
+        "zh-Hans":  "退出登录",
+        "zh-Hant":  "退出登錄",
+        "en-us":  "退出登录",
+        "ja-Jp":  "退出登录"
+    },
+    {
+        "keys":  "Display_MaintenanceLightweighting",
+        "zh-Hans":  "Haiyu是一款针对于鸣潮、战双帕弥什两款游戏的启动器，其中包含了社区工具的一些功能，集抽卡记录、记录分析、鸣潮数据面板、游戏资源维护、轻量化等功能。",
+        "zh-Hant":  "Haiyu是一款針對于鳴潮、戰雙帕彌什兩款游戲的啟動器，其中包含了社區工具的一些功能，集抽卡記錄、記錄分析、鳴潮數據面板、游戲資源維護、輕量化等功能。",
+        "en-us":  "Haiyu是一款针对于鸣潮、战双帕弥什两款游戏的启动器，其中包含了社区工具的一些功能，集抽卡记录、记录分析、鸣潮数据面板、游戏资源维护、轻量化等功能。",
+        "ja-Jp":  "Haiyu是一款针对于鸣潮、战双帕弥什两款游戏的启动器，其中包含了社区工具的一些功能，集抽卡记录、记录分析、鸣潮数据面板、游戏资源维护、轻量化等功能。"
+    },
+    {
+        "keys":  "Display_ManageGameLogin",
+        "zh-Hans":  "管理游戏登录",
+        "zh-Hant":  "管理游戲登錄",
+        "en-us":  "管理游戏登录",
+        "ja-Jp":  "管理游戏登录"
+    },
+    {
+        "keys":  "Display_ManualCall",
+        "zh-Hans":  "手动",
+        "zh-Hant":  "手動",
+        "en-us":  "手动",
+        "ja-Jp":  "手动"
+    },
+    {
+        "keys":  "Display_ManuallyReconnect",
+        "zh-Hans":  "手动重连",
+        "zh-Hant":  "手動重連",
+        "en-us":  "手动重连",
+        "ja-Jp":  "手动重连"
+    },
+    {
+        "keys":  "Display_MasukKeGame",
+        "zh-Hans":  "进入游戏",
+        "zh-Hant":  "進入游戲",
+        "en-us":  "进入游戏",
+        "ja-Jp":  "进入游戏"
+    },
+    {
+        "keys":  "Display_MingchaoOfficialSite",
+        "zh-Hans":  "鸣潮官网",
+        "zh-Hant":  "鳴潮官網",
+        "en-us":  "鸣潮官网",
+        "ja-Jp":  "鸣潮官网"
+    },
+    {
+        "keys":  "Display_Minimize",
+        "zh-Hans":  "最小化",
+        "zh-Hant":  "最小化",
+        "en-us":  "最小化",
+        "ja-Jp":  "最小化"
+    },
+    {
+        "keys":  "Display_MinimizeToPallet",
+        "zh-Hans":  "最小化到托盘",
+        "zh-Hant":  "最小化到托盤",
+        "en-us":  "最小化到托盘",
+        "ja-Jp":  "最小化到托盘"
+    },
+    {
+        "keys":  "Display_ModResources",
+        "zh-Hans":  "此选项等同于下载，启动器会下载服务器资源进行自动覆盖（包含Mod资源）",
+        "zh-Hant":  "此選項等同于下載，啟動器會下載服務器資源進行自動覆蓋（包含Mod資源）",
+        "en-us":  "此选项等同于下载，启动器会下载服务器资源进行自动覆盖（包含Mod资源）",
+        "ja-Jp":  "此选项等同于下载，启动器会下载服务器资源进行自动覆盖（包含Mod资源）"
+    },
+    {
+        "keys":  "Display_MonitorTraffic",
+        "zh-Hans":  "监控流量",
+        "zh-Hant":  "監控流量",
+        "en-us":  "监控流量",
+        "ja-Jp":  "监控流量"
+    },
+    {
+        "keys":  "Display_MouseHover",
+        "zh-Hans":  "鼠标移动",
+        "zh-Hant":  "鼠標移動",
+        "en-us":  "鼠标移动",
+        "ja-Jp":  "鼠标移动"
+    },
+    {
+        "keys":  "Display_Name",
+        "zh-Hans":  "名称",
+        "zh-Hant":  "名稱",
+        "en-us":  "name",
+        "ja-Jp":  "名前"
+    },
+    {
+        "keys":  "Display_NetworkRecovery",
+        "zh-Hans":  "• 暂停与网络恢复",
+        "zh-Hant":  "? 暫停與網絡恢復",
+        "en-us":  "• 暂停与网络恢复",
+        "ja-Jp":  "• 暂停与网络恢复"
+    },
+    {
+        "keys":  "Display_NetworkStatus",
+        "zh-Hans":  "是否显示网络状态",
+        "zh-Hant":  "是否顯示網絡狀態",
+        "en-us":  "是否显示网络状态",
+        "ja-Jp":  "是否显示网络状态"
+    },
+    {
+        "keys":  "Display_NewDocument",
+        "zh-Hans":  "新文件",
+        "zh-Hant":  "新文件",
+        "en-us":  "新文件",
+        "ja-Jp":  "新文件"
+    },
+    {
+        "keys":  "Display_NewVersion",
+        "zh-Hans":  "新版本：",
+        "zh-Hant":  "新版本：",
+        "en-us":  "新版本：",
+        "ja-Jp":  "新版本："
+    },
+    {
+        "keys":  "Display_NoDevice",
+        "zh-Hans":  "暂无设备",
+        "zh-Hant":  "暫無設備",
+        "en-us":  "暂无设备",
+        "ja-Jp":  "暂无设备"
+    },
+    {
+        "keys":  "Display_NormanRevival",
+        "zh-Hans":  "诺曼复兴战",
+        "zh-Hant":  "諾曼復興戰",
+        "en-us":  "诺曼复兴战",
+        "ja-Jp":  "诺曼复兴战"
+    },
+    {
+        "keys":  "Display_NoSpeed",
+        "zh-Hans":  "默认为0，意为不限速",
+        "zh-Hant":  "默認為0，意為不限速",
+        "en-us":  "默认为0，意为不限速",
+        "ja-Jp":  "默认为0，意为不限速"
+    },
+    {
+        "keys":  "Display_Notification",
+        "zh-Hans":  "消息通知",
+        "zh-Hant":  "消息通知",
+        "en-us":  "消息通知",
+        "ja-Jp":  "消息通知"
+    },
+    {
+        "keys":  "Display_NotLoggedInOrExpired",
+        "zh-Hans":  "未登录或登陆过期",
+        "zh-Hant":  "未登錄或登陸過期",
+        "en-us":  "未登录或登陆过期",
+        "ja-Jp":  "未登录或登陆过期"
+    },
+    {
+        "keys":  "Display_NumberOfRoles",
+        "zh-Hans":  "角色数量：",
+        "zh-Hant":  "角色數量：",
+        "en-us":  "角色数量：",
+        "ja-Jp":  "キャラクター数:"
+    },
+    {
+        "keys":  "Display_NumberOfSkews",
+        "zh-Hans":  "歪的次数",
+        "zh-Hant":  "歪的次數",
+        "en-us":  "歪的次数",
+        "ja-Jp":  "歪的次数"
+    },
+    {
+        "keys":  "Display_NumberOfTimesPerWeek",
+        "zh-Hans":  "周本次数：",
+        "zh-Hant":  "周本次數：",
+        "en-us":  "周本次数：",
+        "ja-Jp":  "ウィークリーボス回数:"
+    },
+    {
+        "keys":  "Display_Off",
+        "zh-Hans":  "关闭",
+        "zh-Hant":  "關閉",
+        "en-us":  "关闭",
+        "ja-Jp":  "关闭"
+    },
+    {
+        "keys":  "Display_OfficialSite",
+        "zh-Hans":  "战双帕弥什官网",
+        "zh-Hant":  "戰雙帕彌什官網",
+        "en-us":  "战双帕弥什官网",
+        "ja-Jp":  "战双帕弥什官网"
+    },
+    {
+        "keys":  "Display_OK",
+        "zh-Hans":  "确认",
+        "zh-Hant":  "確認",
+        "en-us":  "确认",
+        "ja-Jp":  "确认"
+    },
+    {
+        "keys":  "Display_OldVersionTargetSize",
+        "zh-Hans":  "旧版本目标大小：",
+        "zh-Hant":  "舊版本目標大小：",
+        "en-us":  "旧版本目标大小：",
+        "ja-Jp":  "旧版本目标大小："
+    },
+    {
+        "keys":  "Display_On",
+        "zh-Hans":  "开",
+        "zh-Hant":  "開",
+        "en-us":  "开",
+        "ja-Jp":  "开"
+    },
+    {
+        "keys":  "Display_Ongoing",
+        "zh-Hans":  "进行中: ",
+        "zh-Hant":  "進行中: ",
+        "en-us":  "进行中: ",
+        "ja-Jp":  "進行中："
+    },
+    {
+        "keys":  "Display_Open",
+        "zh-Hans":  "打开",
+        "zh-Hant":  "打開",
+        "en-us":  "打开",
+        "ja-Jp":  "打开"
+    },
+    {
+        "keys":  "Display_OPERATIONS",
+        "zh-Hans":  "操作",
+        "zh-Hant":  "操作",
+        "en-us":  "操作",
+        "ja-Jp":  "操作"
+    },
+    {
+        "keys":  "Display_OtherStartupParameters",
+        "zh-Hans":  "其他启动参数",
+        "zh-Hant":  "其他啟動參數",
+        "en-us":  "其他启动参数",
+        "ja-Jp":  "其他启动参数"
+    },
+    {
+        "keys":  "Display_OverflowingPaintingGame",
+        "zh-Hans":  "溢彩画游戏",
+        "zh-Hant":  "溢彩畫游戲",
+        "en-us":  "溢彩画游戏",
+        "ja-Jp":  "溢彩画游戏"
+    },
+    {
+        "keys":  "Display_OverflowPaintingEditor",
+        "zh-Hans":  "溢彩画编辑器",
+        "zh-Hant":  "溢彩畫編輯器",
+        "en-us":  "Yicaihua Editor",
+        "ja-Jp":  "一才華編集者"
+    },
+    {
+        "keys":  "Display_PaidTime",
+        "zh-Hans":  "付费时间",
+        "zh-Hant":  "付費時間",
+        "en-us":  "付费时间",
+        "ja-Jp":  "付费时间"
+    },
+    {
+        "keys":  "Display_Parade",
+        "zh-Hans":  "行",
+        "zh-Hant":  "行",
+        "en-us":  "行",
+        "ja-Jp":  "行"
+    },
+    {
+        "keys":  "Display_PauseCurrentAction",
+        "zh-Hans":  "暂停当前操作",
+        "zh-Hant":  "暫停當前操作",
+        "en-us":  "暂停当前操作",
+        "ja-Jp":  "暂停当前操作"
+    },
+    {
+        "keys":  "Display_Pcs",
+        "zh-Hans":  "个",
+        "zh-Hant":  "個",
+        "en-us":  "个",
+        "ja-Jp":  "个"
+    },
+    {
+        "keys":  "Display_PercentageOfShipments",
+        "zh-Hans":  "出货占比",
+        "zh-Hant":  "出貨占比",
+        "en-us":  "出货占比",
+        "ja-Jp":  "出货占比"
+    },
+    {
+        "keys":  "Display_Permanent",
+        "zh-Hans":  "常驻  ",
+        "zh-Hant":  "常駐  ",
+        "en-us":  "常驻  ",
+        "ja-Jp":  "常驻  "
+    },
+    {
+        "keys":  "Display_Permanent2",
+        "zh-Hans":  "常驻",
+        "zh-Hant":  "常駐",
+        "en-us":  "常驻",
+        "ja-Jp":  "常驻"
+    },
+    {
+        "keys":  "Display_PersistentProgress",
+        "zh-Hans":  "• 进度持久化",
+        "zh-Hant":  "? 進度持久化",
+        "en-us":  "• 进度持久化",
+        "ja-Jp":  "• 进度持久化"
+    },
+    {
+        "keys":  "Display_PhoneNo",
+        "zh-Hans":  "手机号码",
+        "zh-Hant":  "手機號碼",
+        "en-us":  "手机号码",
+        "ja-Jp":  "手机号码"
+    },
+    {
+        "keys":  "Display_PhX1DaySPhX2Left",
+        "zh-Hans":  "天,剩余",
+        "zh-Hant":  "天,剩余",
+        "en-us":  "天,剩余",
+        "ja-Jp":  "天,剩余"
+    },
+    {
+        "keys":  "Display_PictureExperimental",
+        "zh-Hans":  "导出为图片（实验性）",
+        "zh-Hant":  "導出為圖片（實驗性）",
+        "en-us":  "导出为图片（实验性）",
+        "ja-Jp":  "导出为图片（实验性）"
+    },
+    {
+        "keys":  "Display_PleaseSelectAdbExe",
+        "zh-Hans":  "请选择 adb.exe",
+        "zh-Hant":  "請選擇 adb.exe",
+        "en-us":  "请选择 adb.exe",
+        "ja-Jp":  "请选择 adb.exe"
+    },
+    {
+        "keys":  "Display_PleaseSelectAPlayer",
+        "zh-Hans":  "请选择游戏角色",
+        "zh-Hant":  "請選擇游戲角色",
+        "en-us":  "请选择游戏角色",
+        "ja-Jp":  "请选择游戏角色"
+    },
+    {
+        "keys":  "Display_PrecautionsApplication",
+        "zh-Hans":  "使用注意事项",
+        "zh-Hant":  "使用注意事項",
+        "en-us":  "使用注意事项",
+        "ja-Jp":  "使用注意事项"
+    },
+    {
+        "keys":  "Display_PREPARATION",
+        "zh-Hans":  "准备工作",
+        "zh-Hant":  "準備工作",
+        "en-us":  "准备工作",
+        "ja-Jp":  "准备工作"
+    },
+    {
+        "keys":  "Display_ProgramStartup",
+        "zh-Hans":  "程序启动时自动进行签到",
+        "zh-Hant":  "程序啟動時自動進行簽到",
+        "en-us":  "程序启动时自动进行签到",
+        "ja-Jp":  "程序启动时自动进行签到"
+    },
+    {
+        "keys":  "Display_QRCodeLogin",
+        "zh-Hans":  "扫码登陆",
+        "zh-Hant":  "掃碼登陸",
+        "en-us":  "扫码登陆",
+        "ja-Jp":  "扫码登陆"
+    },
+    {
+        "keys":  "Display_QuestionName",
+        "zh-Hans":  "题目名称",
+        "zh-Hant":  "題目名稱",
+        "en-us":  "题目名称",
+        "ja-Jp":  "题目名称"
+    },
+    {
+        "keys":  "Display_QuestionSteps",
+        "zh-Hans":  "题目步数",
+        "zh-Hant":  "題目步數",
+        "en-us":  "题目步数",
+        "ja-Jp":  "题目步数"
+    },
+    {
+        "keys":  "Display_Quit",
+        "zh-Hans":  "退出",
+        "zh-Hant":  "退出",
+        "en-us":  "退出",
+        "ja-Jp":  "退出"
+    },
+    {
+        "keys":  "Display_Rate2",
+        "zh-Hans":  "小保底歪率",
+        "zh-Hant":  "小保底歪率",
+        "en-us":  "小保底歪率",
+        "ja-Jp":  "小保底歪率"
+    },
+    {
+        "keys":  "Display_RDPool",
+        "zh-Hans":  "研发池",
+        "zh-Hant":  "研發池",
+        "en-us":  "研发池",
+        "ja-Jp":  "研究開発プール"
+    },
+    {
+        "keys":  "Display_Read2",
+        "zh-Hans":  "库街区 Token 读取",
+        "zh-Hant":  "庫街區 Token 讀取",
+        "en-us":  "库街区 Token 读取",
+        "ja-Jp":  "库街区 Token 读取"
+    },
+    {
+        "keys":  "Display_RecognizedAutomatically",
+        "zh-Hans":  "保持游戏二维码可见，选择对应屏幕后会自动识别。",
+        "zh-Hant":  "保持游戲二維碼可見，選擇對應屏幕后會自動識別。",
+        "en-us":  "保持游戏二维码可见，选择对应屏幕后会自动识别。",
+        "ja-Jp":  "保持游戏二维码可见，选择对应屏幕后会自动识别。"
+    },
+    {
+        "keys":  "Display_ReferenceOnly",
+        "zh-Hans":  "   - 剩余时间计算排除合并操作耗时，仅供参考",
+        "zh-Hant":  "   - 剩余時間計算排除合并操作耗時，僅供參考",
+        "en-us":  "   - 剩余时间计算排除合并操作耗时，仅供参考",
+        "ja-Jp":  "   - 剩余时间计算排除合并操作耗时，仅供参考"
+    },
+    {
+        "keys":  "Display_Refresh",
+        "zh-Hans":  "刷新",
+        "zh-Hant":  "刷新",
+        "en-us":  "刷新",
+        "ja-Jp":  "刷新"
+    },
+    {
+        "keys":  "Display_RefreshAccountDataCache",
+        "zh-Hans":  "刷新账号数据缓存",
+        "zh-Hant":  "刷新賬號數據緩存",
+        "en-us":  "刷新账号数据缓存",
+        "ja-Jp":  "刷新账号数据缓存"
+    },
+    {
+        "keys":  "Display_RefreshCurrentPage",
+        "zh-Hans":  "刷新当前页面",
+        "zh-Hant":  "刷新當前頁面",
+        "en-us":  "刷新当前页面",
+        "ja-Jp":  "刷新当前页面"
+    },
+    {
+        "keys":  "Display_RefreshData",
+        "zh-Hans":  "刷新数据",
+        "zh-Hant":  "刷新數據",
+        "en-us":  "刷新数据",
+        "ja-Jp":  "刷新数据"
+    },
+    {
+        "keys":  "Display_RefreshDevice",
+        "zh-Hans":  "刷新设备",
+        "zh-Hant":  "刷新設備",
+        "en-us":  "刷新设备",
+        "ja-Jp":  "刷新设备"
+    },
+    {
+        "keys":  "Display_RefreshSession",
+        "zh-Hans":  "刷新会话",
+        "zh-Hant":  "刷新會話",
+        "en-us":  "refresh session",
+        "ja-Jp":  "リフレッシュセッション"
+    },
+    {
+        "keys":  "Display_ReserveDiskStorage",
+        "zh-Hans":  "磁盘预留存储：",
+        "zh-Hant":  "磁盤預留存儲：",
+        "en-us":  "磁盘预留存储：",
+        "ja-Jp":  "磁盘预留存储："
+    },
+    {
+        "keys":  "Display_ResetColorTiles",
+        "zh-Hans":  "重置色块",
+        "zh-Hant":  "重置色塊",
+        "en-us":  "重置色块",
+        "ja-Jp":  "重置色块"
+    },
+    {
+        "keys":  "Display_ResolutionTechnology",
+        "zh-Hans":  "超级分辨率技术",
+        "zh-Hant":  "超級分辨率技術",
+        "en-us":  "超级分辨率技术",
+        "ja-Jp":  "超级分辨率技术"
+    },
+    {
+        "keys":  "Display_ResourceBrief",
+        "zh-Hans":  "资源简报",
+        "zh-Hant":  "資源簡報",
+        "en-us":  "资源简报",
+        "ja-Jp":  "资源简报"
+    },
+    {
+        "keys":  "Display_RightButton",
+        "zh-Hans":  "鼠标右键",
+        "zh-Hant":  "鼠標右鍵",
+        "en-us":  "鼠标右键",
+        "ja-Jp":  "鼠标右键"
+    },
+    {
+        "keys":  "Display_RoleExpectations",
+        "zh-Hans":  "角色预计",
+        "zh-Hant":  "角色預計",
+        "en-us":  "角色预计",
+        "ja-Jp":  "角色预计"
+    },
+    {
+        "keys":  "Display_RpcKey",
+        "zh-Hans":  "Rpc密钥",
+        "zh-Hant":  "Rpc密鑰",
+        "en-us":  "Rpc密钥",
+        "ja-Jp":  "Rpc密钥"
+    },
+    {
+        "keys":  "Display_RunningForeground",
+        "zh-Hans":  "   - 意外退出需重新校验，建议保持程序前台运行",
+        "zh-Hant":  "   - 意外退出需重新校驗，建議保持程序前臺運行",
+        "en-us":  "   - 意外退出需重新校验，建议保持程序前台运行",
+        "ja-Jp":  "   - 意外退出需重新校验，建议保持程序前台运行"
+    },
+    {
+        "keys":  "Display_RunType",
+        "zh-Hans":  "运行类型",
+        "zh-Hant":  "運行類型",
+        "en-us":  "运行类型",
+        "ja-Jp":  "运行类型"
+    },
+    {
+        "keys":  "Display_SafetyCheck",
+        "zh-Hans":  "安全校验",
+        "zh-Hant":  "安全校驗",
+        "en-us":  "安全校验",
+        "ja-Jp":  "安全校验"
+    },
+    {
+        "keys":  "Display_SampleScore",
+        "zh-Hans":  "样本分数",
+        "zh-Hant":  "樣本分數",
+        "en-us":  "样本分数",
+        "ja-Jp":  "样本分数"
+    },
+    {
+        "keys":  "Display_SaveAs",
+        "zh-Hans":  "另存为",
+        "zh-Hant":  "另存為",
+        "en-us":  "另存为",
+        "ja-Jp":  "另存为"
+    },
+    {
+        "keys":  "Display_SaveDrawRecordAs",
+        "zh-Hans":  "另存抽卡记录",
+        "zh-Hant":  "另存抽卡記錄",
+        "en-us":  "Save card draw record separately",
+        "ja-Jp":  "カードのドロー記録を個別に保存する"
+    },
+    {
+        "keys":  "Display_SAVING",
+        "zh-Hans":  "保存",
+        "zh-Hant":  "保存",
+        "en-us":  "保存",
+        "ja-Jp":  "保存"
+    },
+    {
+        "keys":  "Display_ScanScreen",
+        "zh-Hans":  "等待选择扫码画面",
+        "zh-Hant":  "等待選擇掃碼畫面",
+        "en-us":  "等待选择扫码画面",
+        "ja-Jp":  "等待选择扫码画面"
+    },
+    {
+        "keys":  "Display_ScanToLogin",
+        "zh-Hans":  "扫码登录",
+        "zh-Hant":  "掃碼登錄",
+        "en-us":  "扫码登录",
+        "ja-Jp":  "扫码登录"
+    },
+    {
+        "keys":  "Display_Screenshot",
+        "zh-Hans":  "截图",
+        "zh-Hant":  "截圖",
+        "en-us":  "截图",
+        "ja-Jp":  "截图"
+    },
+    {
+        "keys":  "Display_ScreenshotSaveFolder",
+        "zh-Hans":  "截图保存文件夹",
+        "zh-Hant":  "截圖保存文件夾",
+        "en-us":  "截图保存文件夹",
+        "ja-Jp":  "截图保存文件夹"
+    },
+    {
+        "keys":  "Display_ScreenshotShortcuts",
+        "zh-Hans":  "截图快捷键",
+        "zh-Hant":  "截圖快捷鍵",
+        "en-us":  "截图快捷键",
+        "ja-Jp":  "截图快捷键"
+    },
+    {
+        "keys":  "Display_ScrollWheel",
+        "zh-Hans":  "鼠标滚轮",
+        "zh-Hant":  "鼠標滾輪",
+        "en-us":  "鼠标滚轮",
+        "ja-Jp":  "鼠标滚轮"
+    },
+    {
+        "keys":  "Display_SDecline",
+        "zh-Hans":  "取消",
+        "zh-Hant":  "取消",
+        "en-us":  "取消",
+        "ja-Jp":  "取消"
+    },
+    {
+        "keys":  "Display_SecurityCaptcha",
+        "zh-Hans":  "安全验证码",
+        "zh-Hant":  "安全驗證碼",
+        "en-us":  "安全验证码",
+        "ja-Jp":  "安全验证码"
+    },
+    {
+        "keys":  "Display_SelectAGameCharacter",
+        "zh-Hans":  "选择游戏角色",
+        "zh-Hant":  "選擇游戲角色",
+        "en-us":  "选择游戏角色",
+        "ja-Jp":  "选择游戏角色"
+    },
+    {
+        "keys":  "Display_SelectDownloadPath",
+        "zh-Hans":  "选择下载路径",
+        "zh-Hant":  "選擇下載路徑",
+        "en-us":  "选择下载路径",
+        "ja-Jp":  "选择下载路径"
+    },
+    {
+        "keys":  "Display_SelectingPicture",
+        "zh-Hans":  "选择为“图片”时能看到更加完整的亚力克材质效果",
+        "zh-Hant":  "選擇為“圖片”時能看到更加完整的亞力克材質效果",
+        "en-us":  "选择为“图片”时能看到更加完整的亚力克材质效果",
+        "ja-Jp":  "选择为“图片”时能看到更加完整的亚力克材质效果"
+    },
+    {
+        "keys":  "Display_SelectMainProgram",
+        "zh-Hans":  "选择主程序",
+        "zh-Hant":  "選擇主程序",
+        "en-us":  "选择主程序",
+        "ja-Jp":  "选择主程序"
+    },
+    {
+        "keys":  "Display_SelectVersion",
+        "zh-Hans":  "选择版本：",
+        "zh-Hant":  "選擇版本：",
+        "en-us":  "选择版本：",
+        "ja-Jp":  "选择版本："
+    },
+    {
+        "keys":  "Display_SelfLaunch",
+        "zh-Hans":  "自启",
+        "zh-Hant":  "自啟",
+        "en-us":  "自启",
+        "ja-Jp":  "自启"
+    },
+    {
+        "keys":  "Display_SEm",
+        "zh-Hans":  "下载大小：",
+        "zh-Hant":  "下載大小：",
+        "en-us":  "下载大小：",
+        "ja-Jp":  "下载大小："
+    },
+    {
+        "keys":  "Display_SendVerificationCode",
+        "zh-Hans":  "发送验证码",
+        "zh-Hant":  "發送驗證碼",
+        "en-us":  "发送验证码",
+        "ja-Jp":  "发送验证码"
+    },
+    {
+        "keys":  "Display_Service",
+        "zh-Hans":  "服务",
+        "zh-Hant":  "服務",
+        "en-us":  "服务",
+        "ja-Jp":  "服务"
+    },
+    {
+        "keys":  "Display_ServiceToStart",
+        "zh-Hans":  "开始服务",
+        "zh-Hant":  "開始服務",
+        "en-us":  "开始服务",
+        "ja-Jp":  "开始服务"
+    },
+    {
+        "keys":  "Display_SetGoalsAndExport",
+        "zh-Hans":  "设置目标并导出",
+        "zh-Hant":  "設置目標并導出",
+        "en-us":  "设置目标并导出",
+        "ja-Jp":  "设置目标并导出"
+    },
+    {
+        "keys":  "Display_Shipments",
+        "zh-Hans":  "发出货",
+        "zh-Hant":  "發出貨",
+        "en-us":  "发出货",
+        "ja-Jp":  "发出货"
+    },
+    {
+        "keys":  "Display_ShowMoreFiles",
+        "zh-Hans":  "显示更多文件",
+        "zh-Hant":  "顯示更多文件",
+        "en-us":  "显示更多文件",
+        "ja-Jp":  "显示更多文件"
+    },
+    {
+        "keys":  "Display_ShowTitlebar",
+        "zh-Hans":  "显示标题栏",
+        "zh-Hant":  "顯示標題欄",
+        "en-us":  "显示标题栏",
+        "ja-Jp":  "显示标题栏"
+    },
+    {
+        "keys":  "Display_SignatureCode",
+        "zh-Hans":  "特征码：",
+        "zh-Hant":  "特征碼：",
+        "en-us":  "特征码：",
+        "ja-Jp":  "特征码："
+    },
+    {
+        "keys":  "Display_SignIn",
+        "zh-Hans":  "签到-",
+        "zh-Hant":  "簽到-",
+        "en-us":  "签到-",
+        "ja-Jp":  "签到-"
+    },
+    {
+        "keys":  "Display_SingleExecution",
+        "zh-Hans":  "单次执行",
+        "zh-Hant":  "單次執行",
+        "en-us":  "单次执行",
+        "ja-Jp":  "单次执行"
+    },
+    {
+        "keys":  "Display_SkipChecksum",
+        "zh-Hans":  "可选择本地版本跳过校验",
+        "zh-Hant":  "可選擇本地版本跳過校驗",
+        "en-us":  "可选择本地版本跳过校验",
+        "ja-Jp":  "可选择本地版本跳过校验"
+    },
+    {
+        "keys":  "Display_SkipChecksum2",
+        "zh-Hans":  "选定版本(跳过校验)",
+        "zh-Hant":  "選定版本(跳過校驗)",
+        "en-us":  "选定版本(跳过校验)",
+        "ja-Jp":  "选定版本(跳过校验)"
+    },
+    {
+        "keys":  "Display_SkipThisVersion",
+        "zh-Hans":  "跳过此版本",
+        "zh-Hant":  "跳過此版本",
+        "en-us":  "跳过此版本",
+        "ja-Jp":  "跳过此版本"
+    },
+    {
+        "keys":  "Display_SpeedOfResolution",
+        "zh-Hans":  "处理速度",
+        "zh-Hant":  "處理速度",
+        "en-us":  "处理速度",
+        "ja-Jp":  "处理速度"
+    },
+    {
+        "keys":  "Display_SQRCode",
+        "zh-Hans":  "选择包含游戏二维码的屏幕或窗口",
+        "zh-Hant":  "選擇包含游戲二維碼的屏幕或窗口",
+        "en-us":  "选择包含游戏二维码的屏幕或窗口",
+        "ja-Jp":  "选择包含游戏二维码的屏幕或窗口"
+    },
+    {
+        "keys":  "Display_StainMode",
+        "zh-Hans":  "染色模式",
+        "zh-Hant":  "染色模式",
+        "en-us":  "染色模式",
+        "ja-Jp":  "染色模式"
+    },
+    {
+        "keys":  "Display_StainToggle",
+        "zh-Hans":  "染色切换",
+        "zh-Hant":  "染色切換",
+        "en-us":  "染色切换",
+        "ja-Jp":  "染色切换"
+    },
+    {
+        "keys":  "Display_StartupObject",
+        "zh-Hans":  "启动对象",
+        "zh-Hant":  "啟動對象",
+        "en-us":  "启动对象",
+        "ja-Jp":  "启动对象"
+    },
+    {
+        "keys":  "Display_StepProgress",
+        "zh-Hans":  "步骤进度",
+        "zh-Hant":  "步驟進度",
+        "en-us":  "步骤进度",
+        "ja-Jp":  "步骤进度"
+    },
+    {
+        "keys":  "Display_StepsForTask",
+        "zh-Hans":  "任务步骤(",
+        "zh-Hant":  "任務步驟(",
+        "en-us":  "任务步骤(",
+        "ja-Jp":  "任务步骤("
+    },
+    {
+        "keys":  "Display_StickyWindow",
+        "zh-Hans":  "窗口置顶",
+        "zh-Hant":  "窗口置頂",
+        "en-us":  "窗口置顶",
+        "ja-Jp":  "窗口置顶"
+    },
+    {
+        "keys":  "Display_StockieColumns",
+        "zh-Hans":  "列",
+        "zh-Hant":  "列",
+        "en-us":  "列",
+        "ja-Jp":  "列"
+    },
+    {
+        "keys":  "Display_StorageOther",
+        "zh-Hans":  "存储与其他",
+        "zh-Hant":  "存儲與其他",
+        "en-us":  "存储与其他",
+        "ja-Jp":  "存储与其他"
+    },
+    {
+        "keys":  "Display_StrongDaysRecordedStrong",
+        "zh-Hans":  "记录天数",
+        "zh-Hant":  "記錄天數",
+        "en-us":  "记录天数",
+        "ja-Jp":  "记录天数"
+    },
+    {
+        "keys":  "Display_SummonRecording",
+        "zh-Hans":  "唤取记录",
+        "zh-Hant":  "喚取記錄",
+        "en-us":  "Retrieve records",
+        "ja-Jp":  "レコードの取得"
+    },
+    {
+        "keys":  "Display_SummonType",
+        "zh-Hans":  "唤取类型：",
+        "zh-Hant":  "喚取類型：",
+        "en-us":  "Call type:",
+        "ja-Jp":  "通話タイプ:"
+    },
+    {
+        "keys":  "Display_SwitchAccount",
+        "zh-Hans":  "如果账号已被绑定则换绑到当前账号上",
+        "zh-Hant":  "如果賬號已被綁定則換綁到當前賬號上",
+        "en-us":  "如果账号已被绑定则换绑到当前账号上",
+        "ja-Jp":  "如果账号已被绑定则换绑到当前账号上"
+    },
+    {
+        "keys":  "Display_SystemMessages",
+        "zh-Hans":  "系统消息",
+        "zh-Hant":  "系統消息",
+        "en-us":  "系统消息",
+        "ja-Jp":  "系统消息"
+    },
+    {
+        "keys":  "Display_TargetVersionSize",
+        "zh-Hans":  "目标版本大小：",
+        "zh-Hant":  "目標版本大小：",
+        "en-us":  "目标版本大小：",
+        "ja-Jp":  "目标版本大小："
+    },
+    {
+        "keys":  "Display_TerminationOfService",
+        "zh-Hans":  "终止服务",
+        "zh-Hant":  "終止服務",
+        "en-us":  "终止服务",
+        "ja-Jp":  "终止服务"
+    },
+    {
+        "keys":  "Display_TheEventsCalendar",
+        "zh-Hans":  "活动日历",
+        "zh-Hant":  "活動日歷",
+        "en-us":  "活动日历",
+        "ja-Jp":  "活动日历"
+    },
+    {
+        "keys":  "Display_Tic",
+        "zh-Hans":  "抽",
+        "zh-Hant":  "抽",
+        "en-us":  "抽",
+        "ja-Jp":  "抽"
+    },
+    {
+        "keys":  "Display_TidalCloudGame",
+        "zh-Hans":  "鸣潮云游戏",
+        "zh-Hant":  "鳴潮云游戲",
+        "en-us":  "鸣潮云游戏",
+        "ja-Jp":  "鸣潮云游戏"
+    },
+    {
+        "keys":  "Display_Title",
+        "zh-Hans":  "称号",
+        "zh-Hant":  "稱號",
+        "en-us":  "称号",
+        "ja-Jp":  "称号"
+    },
+    {
+        "keys":  "Display_ToggleCard",
+        "zh-Hans":  "切换卡片",
+        "zh-Hant":  "切換卡片",
+        "en-us":  "切换卡片",
+        "ja-Jp":  "切换卡片"
+    },
+    {
+        "keys":  "Display_ToggleStartupMode",
+        "zh-Hans":  "切换启动模式",
+        "zh-Hant":  "切換啟動模式",
+        "en-us":  "切换启动模式",
+        "ja-Jp":  "ブートモードを切り替える"
+    },
+    {
+        "keys":  "Display_TokenRead",
+        "zh-Hans":  "库街区Token读取",
+        "zh-Hant":  "庫街區Token讀取",
+        "en-us":  "库街区Token读取",
+        "ja-Jp":  "库街区Token读取"
+    },
+    {
+        "keys":  "Display_TokenReader",
+        "zh-Hans":  "库街区Token读取工具",
+        "zh-Hant":  "庫街區Token讀取工具",
+        "en-us":  "库街区Token读取工具",
+        "ja-Jp":  "库街区Token读取工具"
+    },
+    {
+        "keys":  "Display_Tools",
+        "zh-Hans":  "工具",
+        "zh-Hant":  "工具",
+        "en-us":  "工具",
+        "ja-Jp":  "工具"
+    },
+    {
+        "keys":  "Display_TotalNumberOfDrawCards",
+        "zh-Hans":  "总抽卡数量:",
+        "zh-Hant":  "總抽卡數量:",
+        "en-us":  "总抽卡数量:",
+        "ja-Jp":  "总抽卡数量:"
+    },
+    {
+        "keys":  "Display_TotalNumberOfDrawCards2",
+        "zh-Hans":  "抽卡总数",
+        "zh-Hant":  "抽卡總數",
+        "en-us":  "抽卡总数",
+        "ja-Jp":  "抽卡总数"
+    },
+    {
+        "keys":  "Display_Tray",
+        "zh-Hans":  "托盘",
+        "zh-Hant":  "托盤",
+        "en-us":  "托盘",
+        "ja-Jp":  "托盘"
+    },
+    {
+        "keys":  "Display_TrySolve",
+        "zh-Hans":  "在某些操作系统中，可能会出现鼠标乱跳问题，取消勾选次选项可尝试解决",
+        "zh-Hant":  "在某些操作系統中，可能會出現鼠標亂跳問題，取消勾選次選項可嘗試解決",
+        "en-us":  "在某些操作系统中，可能会出现鼠标乱跳问题，取消勾选次选项可尝试解决",
+        "ja-Jp":  "在某些操作系统中，可能会出现鼠标乱跳问题，取消勾选次选项可尝试解决"
+    },
+    {
+        "keys":  "Display_UltimateZone",
+        "zh-Hans":  "终极区",
+        "zh-Hant":  "終極區",
+        "en-us":  "终极区",
+        "ja-Jp":  "终极区"
+    },
+    {
+        "keys":  "Display_UninstalledSoon",
+        "zh-Hans":  "即将卸载游戏",
+        "zh-Hant":  "即將卸載游戲",
+        "en-us":  "即将卸载游戏",
+        "ja-Jp":  "即将卸载游戏"
+    },
+    {
+        "keys":  "Display_UninstallGame",
+        "zh-Hans":  "卸载游戏",
+        "zh-Hant":  "卸載游戲",
+        "en-us":  "卸载游戏",
+        "ja-Jp":  "卸载游戏"
+    },
+    {
+        "keys":  "Display_UnlimitedSpeed",
+        "zh-Hans":  "下载速度（0为不限速）",
+        "zh-Hant":  "下載速度（0為不限速）",
+        "en-us":  "下载速度（0为不限速）",
+        "ja-Jp":  "下载速度（0为不限速）"
+    },
+    {
+        "keys":  "Display_Update",
+        "zh-Hans":  "检查更新",
+        "zh-Hant":  "檢查更新",
+        "en-us":  "检查更新",
+        "ja-Jp":  "检查更新"
+    },
+    {
+        "keys":  "Display_UpdateFeeds",
+        "zh-Hans":  "更新源",
+        "zh-Hant":  "更新源",
+        "en-us":  "更新源",
+        "ja-Jp":  "更新源"
+    },
+    {
+        "keys":  "Display_UpdateMechanism",
+        "zh-Hans":  "• 增量更新机制",
+        "zh-Hant":  "? 增量更新機制",
+        "en-us":  "• 增量更新机制",
+        "ja-Jp":  "• 增量更新机制"
+    },
+    {
+        "keys":  "Display_UpdatesInstall",
+        "zh-Hans":  "下载更新并安装",
+        "zh-Hant":  "下載更新并安裝",
+        "en-us":  "下载更新并安装",
+        "ja-Jp":  "下载更新并安装"
+    },
+    {
+        "keys":  "Display_ValidationConfiguration",
+        "zh-Hans":  "保存校验配置",
+        "zh-Hant":  "保存校驗配置",
+        "en-us":  "保存校验配置",
+        "ja-Jp":  "保存校验配置"
+    },
+    {
+        "keys":  "Display_Version",
+        "zh-Hans":  "版本",
+        "zh-Hant":  "版本",
+        "en-us":  "版本",
+        "ja-Jp":  "版本"
+    },
+    {
+        "keys":  "Display_ViewInformation",
+        "zh-Hans":  "选择驱动器以查看信息",
+        "zh-Hant":  "選擇驅動器以查看信息",
+        "en-us":  "选择驱动器以查看信息",
+        "ja-Jp":  "选择驱动器以查看信息"
+    },
+    {
+        "keys":  "Display_ViewInGameMail",
+        "zh-Hans":  "游戏邮件内查看",
+        "zh-Hant":  "游戲郵件內查看",
+        "en-us":  "游戏邮件内查看",
+        "ja-Jp":  "游戏邮件内查看"
+    },
+    {
+        "keys":  "Display_Volume",
+        "zh-Hans":  "音量",
+        "zh-Hant":  "音量",
+        "en-us":  "音量",
+        "ja-Jp":  "音量"
+    },
+    {
+        "keys":  "Display_WarZones",
+        "zh-Hans":  "纷争战区",
+        "zh-Hant":  "紛爭戰區",
+        "en-us":  "纷争战区",
+        "ja-Jp":  "纷争战区"
+    },
+    {
+        "keys":  "Display_WeaponEstimates",
+        "zh-Hans":  "武器预计",
+        "zh-Hant":  "武器預計",
+        "en-us":  "武器预计",
+        "ja-Jp":  "武器预计"
+    },
+    {
+        "keys":  "Display_WebKernelVersion",
+        "zh-Hans":  "Web内核版本",
+        "zh-Hant":  "Web內核版本",
+        "en-us":  "Web内核版本",
+        "ja-Jp":  "Web内核版本"
+    },
+    {
+        "keys":  "Display_WeeklyActivities",
+        "zh-Hans":  "周常活动",
+        "zh-Hant":  "周常活動",
+        "en-us":  "周常活动",
+        "ja-Jp":  "毎週のアクティビティ"
+    },
+    {
+        "keys":  "Display_WithdrawalRate",
+        "zh-Hans":  "出金率",
+        "zh-Hant":  "出金率",
+        "en-us":  "出金率",
+        "ja-Jp":  "出金率"
+    },
+    {
+        "keys":  "Display_WorldLevel",
+        "zh-Hans":  "世界等级：",
+        "zh-Hant":  "世界等級：",
+        "en-us":  "世界等级：",
+        "ja-Jp":  "世界レベル:"
+    },
+    {
+        "keys":  "Display_YourPhone",
+        "zh-Hans":  "输入手机收到的验证码",
+        "zh-Hant":  "輸入手機收到的驗證碼",
+        "en-us":  "输入手机收到的验证码",
+        "ja-Jp":  "输入手机收到的验证码"
+    },
+    {
+        "keys":  "Display_ZhanShuang",
+        "zh-Hans":  "战双",
+        "zh-Hant":  "戰雙",
+        "en-us":  "战双",
+        "ja-Jp":  "战双"
+    },
+    {
+        "keys":  "OOBE_Back",
+        "zh-Hans":  "回退",
+        "zh-Hant":  "回退",
+        "en-us":  "Back",
+        "ja-Jp":  "引き返します"
+    },
+    {
+        "keys":  "OOBE_Exit",
+        "zh-Hans":  "退出",
+        "zh-Hant":  "退出",
+        "en-us":  "Exit",
+        "ja-Jp":  "终了"
+    },
+    {
+        "keys":  "OOBE_Next",
+        "zh-Hans":  "继续",
+        "zh-Hant":  "繼續",
+        "en-us":  "Next",
+        "ja-Jp":  "続きます"
+    },
+    {
+        "keys":  "PunishName",
+        "zh-Hans":  "战双帕弥什",
+        "zh-Hant":  "戰雙帕彌什",
+        "en-us":  "Punishing Gray Raven",
+        "ja-Jp":  "パニシング グレイレイヴン"
+    },
+    {
+        "keys":  "SelectLanguage",
+        "zh-Hans":  "语言",
+        "zh-Hant":  "語言",
+        "en-us":  "Language",
+        "ja-Jp":  "言語です"
+    },
+    {
+        "keys":  "Shell_NavigationCloudWaves",
+        "zh-Hans":  "云鸣潮",
+        "zh-Hant":  "云鳴潮",
+        "en-us":  "云鸣潮",
+        "ja-Jp":  "云鸣潮"
+    },
+    {
+        "keys":  "Shell_NavigationHome",
+        "zh-Hans":  "首页",
+        "zh-Hant":  "首頁",
+        "en-us":  "首页",
+        "ja-Jp":  "ホーム"
+    },
+    {
+        "keys":  "Shell_NavigationPunish",
+        "zh-Hans":  "战双V2",
+        "zh-Hant":  "戰雙V2",
+        "en-us":  "战双V2",
+        "ja-Jp":  "战双V2"
+    },
+    {
+        "keys":  "Shell_NavigationSettings",
+        "zh-Hans":  "设置",
+        "zh-Hant":  "設置",
+        "en-us":  "设置",
+        "ja-Jp":  "設定"
+    },
+    {
+        "keys":  "Shell_NavigationToolkit",
+        "zh-Hans":  "工具箱",
+        "zh-Hant":  "工具箱",
+        "en-us":  "工具箱",
+        "ja-Jp":  "ツールボックス"
+    },
+    {
+        "keys":  "Shell_NavigationWaves",
+        "zh-Hans":  "鸣潮V2",
+        "zh-Hant":  "鳴潮V2",
+        "en-us":  "鸣潮V2",
+        "ja-Jp":  "鸣潮V2"
+    },
+    {
+        "keys":  "WutheringName",
+        "zh-Hans":  "鸣潮",
+        "zh-Hant":  "鳴潮",
+        "en-us":  "WutheringWaves",
+        "ja-Jp":  "鳴潮です"
+    }
+]

@@ -3,6 +3,7 @@
     x:Class="Haiyu.Pages.Dialogs.QRLoginDialog"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helper="using:Haiyu.Helpers"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:Haiyu.Pages.Dialogs"
     xmlns:loginModel="using:Waves.Api.Models.QRLogin"
@@ -43,11 +44,11 @@
                     FontFamily="{ThemeResource DefaultFont}"
                     FontSize="22"
                     FontWeight="SemiBold"
-                    Text="扫码登录" />
+                    Text="{x:Bind helper:LanguageService.GetString('Display_ScanToLogin')}" />
                 <TextBlock
                     Margin="0,4,0,0"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    Text="选择包含游戏二维码的屏幕或窗口" />
+                    Text="{x:Bind helper:LanguageService.GetString('Display_SQRCode')}" />
             </StackPanel>
 
             <Button
@@ -59,7 +60,7 @@
                 Command="{x:Bind ViewModel.CloseCommand}"
                 CornerRadius="18"
                 Style="{ThemeResource TransparentButtonStyle}"
-                ToolTipService.ToolTip="关闭">
+                ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_Off')}">
                 <FontIcon
                     FontFamily="Segoe Fluent Icons"
                     FontSize="14"
@@ -81,7 +82,7 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel VerticalAlignment="Center" Spacing="4">
-                    <TextBlock FontWeight="SemiBold" Text="捕获二维码" />
+                    <TextBlock FontWeight="SemiBold" Text="{x:Bind helper:LanguageService.GetString('Display_CaptureQRCode')}" />
                     <TextBlock
                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                         Text="{x:Bind ViewModel.QRResult, Mode=OneWay}"
@@ -123,8 +124,8 @@
                         <TextBlock
                             FontSize="17"
                             FontWeight="SemiBold"
-                            Text="选择游戏角色" />
-                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="确认要登录的账号角色后继续。" />
+                            Text="{x:Bind helper:LanguageService.GetString('Display_SelectAGameCharacter')}" />
+                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind helper:LanguageService.GetString('Display_BeforeContinuing')}" />
                     </StackPanel>
 
                     <ListView
@@ -171,12 +172,12 @@
                         HorizontalAlignment="Center"
                         FontSize="16"
                         FontWeight="SemiBold"
-                        Text="等待选择扫码画面" />
+                        Text="{x:Bind helper:LanguageService.GetString('Display_ScanScreen')}" />
                     <TextBlock
                         MaxWidth="300"
                         HorizontalAlignment="Center"
                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        Text="保持游戏二维码可见，选择对应屏幕后会自动识别。"
+                        Text="{x:Bind helper:LanguageService.GetString('Display_RecognizedAutomatically')}"
                         TextAlignment="Center"
                         TextWrapping="WrapWholeWords" />
                 </StackPanel>
@@ -196,14 +197,14 @@
                     <TextBlock
                         FontSize="17"
                         FontWeight="SemiBold"
-                        Text="安全校验" />
+                        Text="{x:Bind helper:LanguageService.GetString('Display_SafetyCheck')}" />
                     <TextBlock
                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        Text="输入手机收到的验证码后继续登录。"
+                        Text="{x:Bind helper:LanguageService.GetString('Display_ContinueLogging')}"
                         TextWrapping="WrapWholeWords" />
                     <TextBox
-                        Header="安全验证码"
-                        PlaceholderText="输入手机收到的验证码"
+                        Header="{x:Bind helper:LanguageService.GetString('Display_SecurityCaptcha')}"
+                        PlaceholderText="{x:Bind helper:LanguageService.GetString('Display_YourPhone')}"
                         Text="{x:Bind ViewModel.VerifyCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
             </Border>
@@ -230,7 +231,7 @@
                         FontFamily="Segoe Fluent Icons"
                         FontSize="16"
                         Glyph="&#xE73E;" />
-                    <TextBlock Text="确认登录" />
+                    <TextBlock Text="{x:Bind helper:LanguageService.GetString('Display_ConfirmLogin')}" />
                 </StackPanel>
             </Button>
 

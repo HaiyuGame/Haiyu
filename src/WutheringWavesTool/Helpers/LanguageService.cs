@@ -62,7 +62,10 @@ public static class LanguageService
         {
             return result;
         }
-        return default;
+        // Keep newly added UI resources readable while a locale is being completed in
+        // LanguageEditer.  A missing translated entry should never render as an empty
+        // control in the application.
+        return Zh_Hans.TryGetValue(key, out result) ? result : key;
     }
 
     public static bool SetLanguage(string language)

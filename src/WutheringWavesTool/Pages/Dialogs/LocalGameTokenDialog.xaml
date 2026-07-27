@@ -3,6 +3,7 @@
     x:Class="Haiyu.Pages.Dialogs.LocalGameTokenDialog"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helper="using:Haiyu.Helpers"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="using:Haiyu.Controls"
@@ -19,7 +20,7 @@
             VerticalAlignment="Center"
             FontFamily="{ThemeResource DefaultFont}"
             FontSize="19"
-            Text="本地游戏账号切换" />
+            Text="{x:Bind helper:LanguageService.GetString('Display_AccountSwitching')}" />
         <Button
             HorizontalAlignment="Right"
             Command="{x:Bind ViewModel.CloseCommand}"
@@ -38,7 +39,7 @@
                             BorderThickness="1">
                             <TextBlock VerticalAlignment="Center" Text="{x:Bind Cache.Phone, Mode=OneWay}" />
                             <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center">
-                                <Run Text="登录类型：" />
+                                <Run Text="{x:Bind helper:LanguageService.GetString('Display_LoginType')}" />
                                 <Run Text="{x:Bind Cache.LoginType, Mode=OneWay}" />
                             </TextBlock>
                         </Grid>
@@ -58,7 +59,7 @@
             <Button
                 Padding="10,8"
                 Command="{x:Bind ViewModel.SaveAndCloseCommand}"
-                Content="保存"
+                Content="{x:Bind helper:LanguageService.GetString('Display_SAVING')}"
                 CornerRadius="10"
                 FontSize="14"
                 Style="{ThemeResource AccentButtonStyle}" />
