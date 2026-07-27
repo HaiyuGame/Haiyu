@@ -93,7 +93,7 @@ partial class KuroGameContextViewModelV2
         {
             await DialogManager.ShowMessageDialog(new ShowDialogOption()
             {
-                Context = "不支持的游戏类型"
+                Context = LanguageService.GetStringByText("不支持的游戏类型")
             });
             return;
         }

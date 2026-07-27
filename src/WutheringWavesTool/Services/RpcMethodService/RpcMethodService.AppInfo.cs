@@ -17,7 +17,7 @@ public partial class RpcMethodService
         info.AppVersion = App.AppVersion;
         info.FrameworkVersion = RuntimeInformation.FrameworkDescription;
         info.SdkVersion = $"1.8.251106002";
-        info.WebVersion = CoreWebView2Environment.GetAvailableBrowserVersionString() ?? "未安装";
+        info.WebVersion = CoreWebView2Environment.GetAvailableBrowserVersionString() ?? LanguageService.GetStringByText("未安装");
         return Task.FromResult(JsonSerializer.Serialize(info,RpcContext.Default.AppInfo));
     }
 

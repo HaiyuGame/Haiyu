@@ -74,7 +74,7 @@ public sealed partial class WebGameViewModel : DialogViewModelBase
             );
             if (sendSMS.Item1 == null)
             {
-                TipMessage = "发生验证码失败！";
+                TipMessage = LanguageService.GetStringByText("发生验证码失败！");
                 return;
             }
             TipMessage = sendSMS.Item1.ErrorDescription;

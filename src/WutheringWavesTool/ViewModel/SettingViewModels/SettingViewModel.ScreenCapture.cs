@@ -64,7 +64,7 @@ partial class SettingViewModel
         }
         catch (Exception ex)
         {
-            TipShow.ShowMessage($"注册失败{ex.Message}", Symbol.Clear);
+            TipShow.ShowMessage(LanguageService.FormatByText(LanguageService.GetStringByText("注册失败{0}"), ex.Message), Symbol.Clear);
         }
     }
 }

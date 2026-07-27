@@ -45,8 +45,8 @@ public sealed partial class ShellViewModel : ViewModelBase
         {
             Items = new List<NotifyIconMenuItem>()
             {
-                new() { Header = "显示主界面", Command = this.ShowWindowCommand },
-                new() { Header = "退出启动器", Command = this.ExitWindowCommand },
+                new() { Header = LanguageService.GetStringByText("显示主界面"), Command = this.ShowWindowCommand },
+                new() { Header = LanguageService.GetStringByText("退出启动器"), Command = this.ExitWindowCommand },
             },
         };
     }
@@ -133,11 +133,11 @@ public sealed partial class ShellViewModel : ViewModelBase
     private async void CopyTokenMethod(object recipient, CopyTokenAccount message)
     {
         var result = await UserConsentVerifier.RequestVerificationAsync(
-            "复制授权码需要系统用户密码"
+            LanguageService.GetStringByText("复制授权码需要系统用户密码")
         );
         if (result != UserConsentVerificationResult.Verified)
         {
-            TipShow.ShowMessage("系统用户验证失败！", Symbol.Clear);
+            TipShow.ShowMessage(LanguageService.GetStringByText("系统用户验证失败！"), Symbol.Clear);
             return;
         }
 
@@ -296,7 +296,7 @@ public sealed partial class ShellViewModel : ViewModelBase
             );
             if (result == null)
             {
-                TipShow.ShowMessage("检查一下你的网络", Symbol.Clear);
+                TipShow.ShowMessage(LanguageService.GetStringByText("检查一下你的网络"), Symbol.Clear);
                 return;
             }
             if (!result.Success)

@@ -73,8 +73,8 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
                 return;
             if (obj.CoreType == CloudCoreType.OpeningWeb && obj.QueueResult != null)
             {
-                BottomText = $"正在游戏";
-                StartGameText = "停止游戏";
+                BottomText = LanguageService.FormatByText(LanguageService.GetStringByText("正在游戏"));
+                StartGameText = LanguageService.GetStringByText("停止游戏");
                 if ((state.WindowHandle!=null && state.WindowHandle!= nint.MinValue) || !string.IsNullOrWhiteSpace(state.WindowTitleKey))
                 {
                     //防止重复启动
@@ -90,8 +90,8 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
             }
             else if (obj.CoreType == CloudCoreType.QueueUp)
             {
-                BottomText = $"排队：{obj.QueueQty}，{obj.QueueWaitSecond}秒内";
-                StartGameText = "停止排队";
+                BottomText = LanguageService.FormatByText(LanguageService.GetStringByText("排队：{0}，{1}秒内"), obj.QueueQty, obj.QueueWaitSecond);
+                StartGameText = LanguageService.GetStringByText("停止排队");
                 this._startBthActive = CloudGameUIActive.QueueUp;
             }
             else
@@ -99,16 +99,16 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
                 if (!(state.WindowHandle != null && state.WindowHandle != nint.MinValue) || !string.IsNullOrWhiteSpace(state.WindowTitleKey))
                 {
                     this._startBthActive = CloudGameUIActive.StartGame;
-                    StartGameText = "进入游戏";
-                    BottomText = "准备就绪";
+                    StartGameText = LanguageService.GetStringByText("进入游戏");
+                    BottomText = LanguageService.GetStringByText("准备就绪");
                 }
                 else
                 {
                     Span<char> buffer = new char[512];
                     var len = Windows.Win32.PInvoke.GetWindowText(new HWND((IntPtr)state.WindowHandle), buffer);
                     var text = new string(buffer[..len]) ?? "";
-                    StartGameText = "终止游戏";
-                    BottomText = "游戏中";
+                    StartGameText = LanguageService.GetStringByText("终止游戏");
+                    BottomText = LanguageService.GetStringByText("游戏中");
                     this._startBthActive = CloudGameUIActive.StopGame;
                 }
             }
@@ -188,7 +188,7 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
         {
             if(this.SelectLogin == null)
             {
-                await TipShow.ShowMessageAsync("请在左侧卡片登录一个账号", Symbol.Clear);
+                await TipShow.ShowMessageAsync(LanguageService.GetStringByText("请在左侧卡片登录一个账号"), Symbol.Clear);
                 return;
             }
             var wallData =
@@ -199,7 +199,7 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
 
             if (wallData == null || wallData.Data == null)
             {
-                await TipShow.ShowMessageAsync(wallData.Msg ?? "获取余额失败！", Symbol.Clear);
+                await TipShow.ShowMessageAsync(wallData.Msg ?? LanguageService.GetStringByText("获取余额失败！"), Symbol.Clear);
                 return;
             }
             var result = await DialogManager.ShowSelectGameNodeAsync(
@@ -208,13 +208,13 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
 
             if (result == null || result.SelectNode == null)
             {
-                await TipShow.ShowMessageAsync("请选择节点或节点失效", Symbol.Clear);
+                await TipShow.ShowMessageAsync(LanguageService.GetStringByText("请选择节点或节点失效"), Symbol.Clear);
                 return;
             }
             var qualityOpt = await this.GetOptionsAsync();
             if (qualityOpt == null)
             {
-                await TipShow.ShowMessageAsync("构建清晰度失败，日志已记录", Symbol.Clear);
+                await TipShow.ShowMessageAsync(LanguageService.GetStringByText("构建清晰度失败，日志已记录"), Symbol.Clear);
                 return;
             }
             _ = Task.Run(async () =>
@@ -299,7 +299,7 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
         {
             SystemEventMessager.Publish(new()
             {
-                Message = "请登录并选中一个鸣潮账号"
+                Message = LanguageService.GetStringByText("请登录并选中一个鸣潮账号")
             });
             return;
         }

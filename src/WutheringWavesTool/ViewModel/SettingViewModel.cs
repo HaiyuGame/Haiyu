@@ -158,11 +158,11 @@ public sealed partial class SettingViewModel : ViewModelBase
     async Task CopyToken()
     {
         var result = await UserConsentVerifier.RequestVerificationAsync(
-            "复制授权码需要系统用户密码"
+            LanguageService.GetStringByText("复制授权码需要系统用户密码")
         );
         if (result != UserConsentVerificationResult.Verified)
         {
-            TipShow.ShowMessage("系统用户验证失败！", Symbol.Clear);
+            TipShow.ShowMessage(LanguageService.GetStringByText("系统用户验证失败！"), Symbol.Clear);
             return;
         }
         var account = AccountService.CurrentAccount;

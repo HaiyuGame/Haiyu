@@ -14,6 +14,7 @@ public static class LanguageService
     private static Dictionary<string, string> Zh_Hant = [];
     private static Dictionary<string, string> En_Us = [];
     private static Dictionary<string, string> Ja_Jp = [];
+    private static Dictionary<string, string> DefaultTextKeys = [];
     
     static LanguageService()
     {
@@ -33,6 +34,9 @@ public static class LanguageService
             Zh_Hant = JsonSerializer.Deserialize(await File.ReadAllTextAsync(AppDomain.CurrentDomain.BaseDirectory+ "\\Assets\\Languages\\zh-Hant.json"), ProjectLanguageModelContext.Default.ListLanguageItem)?.ToDictionary(x => x.Key, x => x.Value) ?? [];
             En_Us = JsonSerializer.Deserialize(await File.ReadAllTextAsync(AppDomain.CurrentDomain.BaseDirectory+ "\\Assets\\Languages\\en-US.json"), ProjectLanguageModelContext.Default.ListLanguageItem)?.ToDictionary(x => x.Key, x => x.Value) ?? [];
             Ja_Jp = JsonSerializer.Deserialize(await File.ReadAllTextAsync(AppDomain.CurrentDomain.BaseDirectory+ "\\Assets\\Languages\\ja-JP.json"), ProjectLanguageModelContext.Default.ListLanguageItem)?.ToDictionary(x => x.Key, x => x.Value) ?? [];
+            DefaultTextKeys = Zh_Hans
+                .GroupBy(x => x.Value)
+                .ToDictionary(x => x.Key, x => x.First().Key);
         }
         catch (Exception)
         {
@@ -66,6 +70,23 @@ public static class LanguageService
         // LanguageEditer.  A missing translated entry should never render as an empty
         // control in the application.
         return Zh_Hans.TryGetValue(key, out result) ? result : key;
+    }
+
+    /// <summary>
+    /// Localizes text assigned from C# code. The Simplified Chinese text remains the
+    /// readable lookup identity while the actual value still comes from the same
+    /// language dictionaries used by XAML.
+    /// </summary>
+    public static string GetStringByText(string defaultText)
+    {
+        return DefaultTextKeys.TryGetValue(defaultText, out var key)
+            ? GetString(key) ?? defaultText
+            : defaultText;
+    }
+
+    public static string FormatByText(string defaultFormat, params object?[] args)
+    {
+        return string.Format(GetStringByText(defaultFormat), args);
     }
 
     public static bool SetLanguage(string language)

@@ -90,14 +90,14 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
     {
         if (SelectDevice is null)
         {
-            AppendLog("请先选择一个安卓设备。");
+            AppendLog(LanguageService.GetStringByText("请先选择一个安卓设备。"));
             return;
         }
 
         var sockets = await _adbClient.GetWebViewSocketsAsync(SelectDevice.Serial);
         if (sockets.Count == 0)
         {
-            AppendLog("未找到 WebView 调试 Socket。");
+            AppendLog(LanguageService.GetStringByText("未找到 WebView 调试 Socket。"));
             return;
         }
 
@@ -116,13 +116,13 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
             }
             catch (Exception ex)
             {
-                AppendLog($"跳过 Socket {socket.SocketName}: {ex.Message}");
+                AppendLog(LanguageService.FormatByText(LanguageService.GetStringByText("跳过 Socket {0}: {1}"), socket.SocketName, ex.Message));
                 continue;
             }
 
             foreach (var target in targets.Where(static target => target.IsPageLike))
             {
-                AppendLog($"发现页面: [{socket.SocketName}] {target.Title} {target.Url}");
+                AppendLog(LanguageService.FormatByText(LanguageService.GetStringByText("发现页面: [{0}] {1} {2}"), socket.SocketName, target.Title, target.Url));
             }
 
             var candidate = targets
@@ -138,11 +138,11 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
 
         if (selectedTarget is null)
         {
-            AppendLog("未找到可监控的非空白 WebView 页面。");
+            AppendLog(LanguageService.GetStringByText("未找到可监控的非空白 WebView 页面。"));
             return;
         }
 
-        AppendLog($"选中页面: {selectedTarget.Value.Target.Title} {selectedTarget.Value.Target.Url}");
+        AppendLog(LanguageService.FormatByText(LanguageService.GetStringByText("选中页面: {0} {1}"), selectedTarget.Value.Target.Title, selectedTarget.Value.Target.Url));
         _webSocketDebuggerUrl = selectedTarget.Value.Target.WebSocketDebuggerUrl;
         await ConnectCdpClientAsync(_webSocketDebuggerUrl);
     }
@@ -154,7 +154,7 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
         {
             if (string.IsNullOrWhiteSpace(_webSocketDebuggerUrl))
             {
-                AppendLog("请先连接一次 CDP。");
+                AppendLog(LanguageService.GetStringByText("请先连接一次 CDP。"));
                 return;
             }
 
@@ -162,10 +162,10 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
             return;
         }
 
-        AppendLog("正在重连 CDP...");
+        AppendLog(LanguageService.GetStringByText("正在重连 CDP..."));
         await _cdpClient.ReconnectAsync(CTS.Token);
         ResetTrackedRequests();
-        AppendLog("CDP 已重连。");
+        AppendLog(LanguageService.GetStringByText("CDP 已重连。"));
         await StartTrafficMonitorAsync();
     }
 
@@ -174,7 +174,7 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
     {
         if (!IsCdpConnected())
         {
-            AppendLog("CDP 未连接，请先连接或手动重连。");
+            AppendLog(LanguageService.GetStringByText("CDP 未连接，请先连接或手动重连。"));
             return;
         }
 
@@ -204,7 +204,7 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
                                 this.Token = token?.ToString();
                             });
                         }
-                        AppendLog($"捕获请求: {e.Request.Method} {e.Request.Url}");
+                        AppendLog(LanguageService.FormatByText(LanguageService.GetStringByText("捕获请求: {0} {1}"), e.Request.Method, e.Request.Url));
                     }
 
                     return ValueTask.CompletedTask;
@@ -224,7 +224,7 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
                             _trackedRequestIds.Add(e.RequestId);
                         }
 
-                        AppendLog($"响应头已到达: {e.Response.Status} {e.Response.Url}");
+                        AppendLog(LanguageService.FormatByText(LanguageService.GetStringByText("响应头已到达: {0} {1}"), e.Response.Status, e.Response.Url));
                     }
 
                     return ValueTask.CompletedTask;
@@ -255,11 +255,11 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
                             {
                                 this.PlayerId = playerId?.ToString();
                             });
-                            AppendLog($"已读取目标响应 Body: {e.RequestId}");
+                            AppendLog(LanguageService.FormatByText(LanguageService.GetStringByText("已读取目标响应 Body: {0}"), e.RequestId));
                         }
                         catch (Exception ex)
                         {
-                            AppendLog($"读取响应 Body 失败: {ex.Message}");
+                            AppendLog(LanguageService.FormatByText(LanguageService.GetStringByText("读取响应 Body 失败: {0}"), ex.Message));
                         }
                     }
                 }
@@ -273,7 +273,7 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
                 {
                     if (RemoveTrackedRequest(e.RequestId))
                     {
-                        AppendLog($"响应失败，无法读取 Body: {e.ErrorText}");
+                        AppendLog(LanguageService.FormatByText(LanguageService.GetStringByText("响应失败，无法读取 Body: {0}"), e.ErrorText));
                     }
 
                     return ValueTask.CompletedTask;
@@ -292,7 +292,7 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
             CTS.Token
         );
 
-        AppendLog("已开始监控 Network 流量。");
+        AppendLog(LanguageService.GetStringByText("已开始监控 Network 流量。"));
     }
 
     [RelayCommand]
@@ -300,13 +300,13 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
     {
         if (!IsCdpConnected())
         {
-            AppendLog("CDP 未连接，请先连接或手动重连。");
+            AppendLog(LanguageService.GetStringByText("CDP 未连接，请先连接或手动重连。"));
             return;
         }
 
         if (string.IsNullOrWhiteSpace(_lastReadableResponseRequestId))
         {
-            AppendLog("还没有已完成的响应体，请先触发目标请求并等待 loadingFinished。");
+            AppendLog(LanguageService.GetStringByText("还没有已完成的响应体，请先触发目标请求并等待 loadingFinished。"));
             return;
         }
 
@@ -337,7 +337,7 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
         _cdpClient.ConnectionStateChanged += OnCdpClientConnectionStateChanged;
         _cdpClient.EventHandlerException += OnCdpClientEventHandlerException;
         await _cdpClient.ConnectAsync(CTS.Token);
-        AppendLog($"CDP 已连接: {webSocketDebuggerUrl}");
+        AppendLog(LanguageService.FormatByText(LanguageService.GetStringByText("CDP 已连接: {0}"), webSocketDebuggerUrl));
         await StartTrafficMonitorAsync();
     }
 
@@ -355,7 +355,7 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
 
     private void OnCdpClientEventHandlerException(object? sender, Exception e)
     {
-        AppendLog($"CDP 事件处理异常: {e.Message}");
+        AppendLog(LanguageService.FormatByText(LanguageService.GetStringByText("CDP 事件处理异常: {0}"), e.Message));
     }
 
     private static bool IsTargetUrl(string url)
@@ -434,7 +434,7 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
     async Task CopySession()
     {
         var result = await UserConsentVerifier.RequestVerificationAsync(
-            "复制这些信息需要你进行二次确认"
+            LanguageService.GetStringByText("复制这些信息需要你进行二次确认")
         );
         if (result == UserConsentVerificationResult.Verified)
         {

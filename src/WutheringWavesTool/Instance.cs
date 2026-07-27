@@ -55,7 +55,7 @@ public static class Instance
     {
         if (Host.Services.GetRequiredService<T>() is not T v)
         {
-            throw new ArgumentException("服务未注入");
+            throw new ArgumentException(LanguageService.GetStringByText("服务未注入"));
             ;
         }
         return v;

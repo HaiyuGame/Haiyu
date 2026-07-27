@@ -94,7 +94,7 @@ public class AppContext<T> : IAppContext<T>
             LoggerService.WriteError(ex.Message);
             WindowExtension.MessageBox(
                 IntPtr.Zero,
-                "出现故障性错误，请检查网络连接和日志！关闭当前消息自动打开日志文件夹",
+                LanguageService.GetStringByText("出现故障性错误，请检查网络连接和日志！关闭当前消息自动打开日志文件夹"),
                 "Haiyu",
                 0
             );
@@ -279,7 +279,7 @@ public class AppContext<T> : IAppContext<T>
                     Instance
                         .Host.Services.GetRequiredService<SystemEventPublisher>()
                         .Publish(
-                            new SystemMessagerModel() { Message = "获取更新信息失败", Delay = 5 }
+                            new SystemMessagerModel() { Message = LanguageService.GetStringByText("获取更新信息失败"), Delay = 5 }
                         );
                 }
             }
@@ -287,7 +287,7 @@ public class AppContext<T> : IAppContext<T>
             {
                 Instance
                     .Host.Services.GetRequiredService<SystemEventPublisher>()
-                    .Publish(new SystemMessagerModel() { Message = "当前已是最新版本", Delay = 5 });
+                    .Publish(new SystemMessagerModel() { Message = LanguageService.GetStringByText("当前已是最新版本"), Delay = 5 });
             }
         }
         catch (Exception)

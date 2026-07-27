@@ -125,10 +125,10 @@ partial class KuroGameContextViewModelV2
     {
         var result = await DialogManager.ShowMessageDialog(new ShowDialogOption()
         {
-            CloseText = "取消",
-            Context = "提前安装游戏文件之后，在最新版本开服之前无法正常启动游戏，请确认是否安装",
+            CloseText = LanguageService.GetStringByText("取消"),
+            Context = LanguageService.GetStringByText("提前安装游戏文件之后，在最新版本开服之前无法正常启动游戏，请确认是否安装"),
             ShowPrimaryButton = true,
-            PrimaryText = "确定安装"
+            PrimaryText = LanguageService.GetStringByText("确定安装")
         });
         if(result == ContentDialogResult.None)
         {

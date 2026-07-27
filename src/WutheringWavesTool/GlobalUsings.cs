@@ -6,6 +6,7 @@ global using Haiyu.Common.Bases;
 global using Haiyu.Controls;
 global using Haiyu.Charts.WinUI;
 global using Haiyu.Controls.Propertys;
+global using Haiyu.Helpers;
 global using Haiyu.Models;
 global using Haiyu.Models.Args;
 global using Haiyu.Models.Messanger;

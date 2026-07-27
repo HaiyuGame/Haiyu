@@ -38,12 +38,12 @@ public partial class ViewModelBase : ObservableRecipient, IDisposable
         }
         catch (OperationCanceledException)
         {
-            return (-1, default(T), "用户取消操作");
+            return (-1, default(T), LanguageService.GetStringByText("用户取消操作"));
         }
         catch (Exception ex)
             when (ex is not StackOverflowException && ex is not OutOfMemoryException)
         {
-            return (-2, default(T), ex.Message ?? "操作失败");
+            return (-2, default(T), ex.Message ?? LanguageService.GetStringByText("操作失败"));
         }
     }
 

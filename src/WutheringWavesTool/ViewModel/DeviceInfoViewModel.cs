@@ -1,5 +1,7 @@
 ﻿using Waves.Api.Models.QRLogin;
 
+using Haiyu.Helpers;
+
 namespace Haiyu.ViewModel;
 
 public class DeviceInfoDisplayHeader
@@ -23,8 +25,8 @@ public class GamerId
     public static ObservableCollection<GamerId> Gamers() =>
         new ObservableCollection<GamerId>()
         {
-            new() { DisplayName = "鸣潮", Id = 3 },
-            new() { DisplayName = "战双：帕弥什", Id = 2 },
+            new() { DisplayName = LanguageService.GetString("WutheringName")!, Id = 3 },
+            new() { DisplayName = LanguageService.GetString("PunishName")!, Id = 2 },
         };
 }
 
@@ -42,8 +44,8 @@ public partial class DeviceInfoViewModel : WindowViewModelBase, IDisposable
     public partial ObservableCollection<DeviceInfoDisplayHeader> Displays { get; set; } =
         new()
         {
-            new DeviceInfoDisplayHeader("PC授权", "PC"),
-            new DeviceInfoDisplayHeader("账号授权", "User"),
+            new DeviceInfoDisplayHeader(LanguageService.GetString("ViewModel_PCAuthorization"), "PC"),
+            new DeviceInfoDisplayHeader(LanguageService.GetString("ViewModel_AccountAuthorization"), "User"),
         };
 
     [ObservableProperty]
@@ -136,7 +138,7 @@ public partial class DeviceInfoViewModel : WindowViewModelBase, IDisposable
         if (SelectUserServer == null || SelectGamer == null)
             return;
         var result = await WavesClient.SendVerifyGameCode(
-            AccountService.CurrentAccount ?? throw new InvalidOperationException("当前未选择账号。"),
+            AccountService.CurrentAccount ?? throw new InvalidOperationException(LanguageService.GetStringByText("当前未选择账号。")),
             SelectGamer.Id.ToString(),
             SelectUserServer.ServerId,
             this.BindRoleId,
@@ -144,12 +146,12 @@ public partial class DeviceInfoViewModel : WindowViewModelBase, IDisposable
         );
         if (result == null)
         {
-            TipMessage = "验证失败!，库洛拒绝回答";
+            TipMessage = LanguageService.GetString("ViewModel_VerificationRejected")!;
             return;
         }
         if (result.Code == 200)
         {
-            TipMessage = "验证码发送成功";
+            TipMessage = LanguageService.GetString("ViewModel_VerificationCodeSent")!;
         }
         if (result.Code != 200)
         {
@@ -167,7 +169,7 @@ public partial class DeviceInfoViewModel : WindowViewModelBase, IDisposable
         )
             return;
         var result = await WavesClient.BindGamer(
-            AccountService.CurrentAccount ?? throw new InvalidOperationException("当前未选择账号。"),
+            AccountService.CurrentAccount ?? throw new InvalidOperationException(LanguageService.GetStringByText("当前未选择账号。")),
             SelectGamer.Id.ToString(),
             SelectUserServer.ServerId,
             this.BindRoleId,
@@ -176,19 +178,18 @@ public partial class DeviceInfoViewModel : WindowViewModelBase, IDisposable
         );
         if (result == null)
         {
-            TipMessage = "验证失败!，库洛拒绝回答";
+            TipMessage = LanguageService.GetStringByText("验证失败!，库洛拒绝回答");
             return;
         }
         if (result.Code == 200)
         {
             if (result.Data != null && !string.IsNullOrWhiteSpace(result.Data.Token))
             {
-                TipMessage =
-                    "当前游戏账号已经被绑定到其他库街区上，如果需要换绑请选择官方库街区进行换绑";
+                TipMessage = LanguageService.GetString("ViewModel_AccountAlreadyBound")!;
                 this.VerifyCode = "";
                 return;
             }
-            TipMessage = "绑定成功";
+            TipMessage = LanguageService.GetString("ViewModel_BindingSuccessful")!;
             this.VerifyCode = "";
         }
         if (result.Code != 200)

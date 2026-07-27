@@ -29,9 +29,9 @@ public sealed class AutoKuroClientSignService : TimedTaskServiceBase, ITaskName
     public IKuroAccountService KuroAccountService { get; }
     public IKuroClient KuroClient { get; }
 
-    public string DisplayName => "库街区每日任务";
+    public string DisplayName => LanguageService.GetStringByText("库街区每日任务");
 
-    public string Description => "为 Haiyu 中保存的库街区账号执行签到、浏览、点赞和分享任务";
+    public string Description => LanguageService.GetStringByText("为 Haiyu 中保存的库街区账号执行签到、浏览、点赞和分享任务");
 
     public string Guid => "6096E7CF-84CF-4CFD-9876-800104A7C566";
 
@@ -39,12 +39,12 @@ public sealed class AutoKuroClientSignService : TimedTaskServiceBase, ITaskName
 
     public override async Task InvokeAsync(CancellationToken token = default)
     {
-        Publisher.Publish(new() { Message = "开始执行库街区每日任务", Delay = 3 });
+        Publisher.Publish(new() { Message = LanguageService.GetStringByText("开始执行库街区每日任务"), Delay = 3 });
 
         var accounts = await KuroAccountService.GetUsersAsync();
         if (accounts is null || accounts.Count == 0)
         {
-            Publisher.Publish(new() { Message = "未找到可执行每日任务的库街区账号", Delay = 4 });
+            Publisher.Publish(new() { Message = LanguageService.GetStringByText("未找到可执行每日任务的库街区账号"), Delay = 4 });
             return;
         }
 
@@ -75,7 +75,7 @@ public sealed class AutoKuroClientSignService : TimedTaskServiceBase, ITaskName
             {
                 failedAccounts++;
                 Logger.WriteError(
-                    $"库街区账号 {localAccount.TokenId} 的每日任务执行失败：{exception}"
+                    LanguageService.FormatByText(LanguageService.GetStringByText("库街区账号 {0} 的每日任务执行失败：{1}"), localAccount.TokenId, exception)
                 );
             }
         }
@@ -84,7 +84,7 @@ public sealed class AutoKuroClientSignService : TimedTaskServiceBase, ITaskName
             new()
             {
                 Message =
-                    $"库街区每日任务完成：成功 {completedAccounts} 个，失败 {failedAccounts} 个",
+                    LanguageService.FormatByText(LanguageService.GetStringByText("库街区每日任务完成：成功 {0} 个，失败 {1} 个"), completedAccounts, failedAccounts),
                 Delay = 5,
             }
         );
@@ -97,7 +97,7 @@ public sealed class AutoKuroClientSignService : TimedTaskServiceBase, ITaskName
     {
         // 1. 每日签到
         var signResult = await ExecuteWithRetryAsync(
-            "签到",
+            LanguageService.GetStringByText("签到"),
             () => KuroClient.SignInClientAsync(account, token),
             token
         );
@@ -109,7 +109,7 @@ public sealed class AutoKuroClientSignService : TimedTaskServiceBase, ITaskName
         // 2. 随机获取一页帖子，并浏览其中 3 篇。
         var pageIndex = Random.Shared.Next(1, 11);
         var feedResult = await ExecuteWithRetryAsync(
-            "获取帖子",
+            LanguageService.GetStringByText("获取帖子"),
             () =>
                 KuroClient.FeedHomeListsAsync(
                     account,
@@ -126,7 +126,7 @@ public sealed class AutoKuroClientSignService : TimedTaskServiceBase, ITaskName
         if (posts is null || posts.Count < BrowseTarget)
         {
             Logger.WriteError(
-                $"库街区每日任务获取的有效帖子不足：pageIndex={pageIndex}, count={posts?.Count ?? 0}"
+                LanguageService.FormatByText(LanguageService.GetStringByText("库街区每日任务获取的有效帖子不足：pageIndex={0}, count={1}"), pageIndex, posts?.Count ?? 0)
             );
             return false;
         }
@@ -135,7 +135,7 @@ public sealed class AutoKuroClientSignService : TimedTaskServiceBase, ITaskName
         foreach (var post in posts.Take(BrowseTarget))
         {
             var detailResult = await ExecuteWithRetryAsync(
-                $"浏览帖子 {post.PostId}",
+                LanguageService.FormatByText(LanguageService.GetStringByText("浏览帖子 {0}"), post.PostId),
                 () =>
                     KuroClient.GetFeedPageDetailAsync(
                         account,
@@ -176,7 +176,7 @@ public sealed class AutoKuroClientSignService : TimedTaskServiceBase, ITaskName
                 post.UserId
             );
             var likeResult = await ExecuteWithRetryAsync(
-                $"点赞帖子 {post.PostId}",
+                LanguageService.FormatByText(LanguageService.GetStringByText("点赞帖子 {0}"), post.PostId),
                 () => KuroClient.PostIdLikeAsync(account, likeOption, token),
                 token
             );
@@ -193,7 +193,7 @@ public sealed class AutoKuroClientSignService : TimedTaskServiceBase, ITaskName
         // 4. 分享 1 篇帖子。使用帖子自身的 gameId，避免跨游戏分区。
         var sharePost = posts[0];
         var shareResult = await ExecuteWithRetryAsync(
-            $"分享帖子 {sharePost.PostId}",
+            LanguageService.FormatByText(LanguageService.GetStringByText("分享帖子 {0}"), sharePost.PostId),
             () =>
                 KuroClient.SharedPostIdAsync(
                     account,
@@ -236,7 +236,7 @@ public sealed class AutoKuroClientSignService : TimedTaskServiceBase, ITaskName
             catch (Exception exception)
             {
                 Logger.WriteError(
-                    $"库街区每日任务“{operation}”\r\n第 {attempt}/{MaxAttempts} 次执行异常：{exception.Message}"
+                    LanguageService.FormatByText(LanguageService.GetStringByText("库街区每日任务“{0}”\r\n第 {1}/{2} 次执行异常：{3}"), operation, attempt, MaxAttempts, exception.Message)
                 );
             }
 

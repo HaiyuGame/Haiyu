@@ -52,11 +52,11 @@ public sealed partial class PageService : IPageService
         var key = typeof(ViewModel).FullName;
         if (_pages.ContainsKey(key))
         {
-            throw new ArgumentException("已注册ViewModel");
+            throw new ArgumentException(LanguageService.GetStringByText("已注册ViewModel"));
         }
         if (_pages.ContainsValue(typeof(View)))
         {
-            throw new ArgumentException("已注册View");
+            throw new ArgumentException(LanguageService.GetStringByText("已注册View"));
         }
         _pages.Add(key: typeof(ViewModel).FullName, typeof(View));
     }

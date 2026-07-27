@@ -12,9 +12,9 @@ namespace Haiyu.Services.Tasks;
 public sealed class AutoKuroGameSignService : TimedTaskServiceBase,ITaskName
 {
 
-    public string DisplayName => "库街区自动签到服务";
+    public string DisplayName => LanguageService.GetStringByText("库街区自动签到服务");
 
-    public string Description => "根据已登录的所有账号进行自动签到，包括战双、鸣潮";
+    public string Description => LanguageService.GetStringByText("根据已登录的所有账号进行自动签到，包括战双、鸣潮");
 
     public string Guid => "17A23862-4CEE-48F0-BF95-8B1CEF119158";
 
@@ -77,7 +77,7 @@ public sealed class AutoKuroGameSignService : TimedTaskServiceBase,ITaskName
         Publisher.Publish(
             new()
             {
-                Message = $"签到结果{successCount}个成功，总数{successCount + errorCount}",
+                Message = LanguageService.FormatByText(LanguageService.GetStringByText("签到结果{0}个成功，总数{1}"), successCount, successCount + errorCount),
                 Delay = 5,
             }
         );

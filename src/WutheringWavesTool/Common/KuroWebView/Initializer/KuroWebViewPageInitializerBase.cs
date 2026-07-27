@@ -40,7 +40,7 @@ namespace Haiyu.Common.KuroWebView.Initializer
 
             if (webView.CoreWebView2 is null)
             {
-                throw new InvalidOperationException("WebView2 尚未初始化。");
+                throw new InvalidOperationException(LanguageService.GetStringByText("WebView2 尚未初始化。"));
             }
 
             ApplyCookieSession(webView, session);
@@ -112,7 +112,7 @@ namespace Haiyu.Common.KuroWebView.Initializer
         {
             if (webView.CoreWebView2 is null)
             {
-                throw new InvalidOperationException("WebView2 尚未初始化。");
+                throw new InvalidOperationException(LanguageService.GetStringByText("WebView2 尚未初始化。"));
             }
 
             if (!string.IsNullOrWhiteSpace(_documentScriptId))

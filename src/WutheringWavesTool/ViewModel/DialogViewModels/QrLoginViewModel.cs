@@ -64,7 +64,7 @@ public partial class QrLoginViewModel : DialogViewModelBase
     }
 
     [ObservableProperty]
-    public partial string ScreenMessage { get; set; } = "选择显示器";
+    public partial string ScreenMessage { get; set; } = LanguageService.GetStringByText("选择显示器");
 
     [ObservableProperty]
     public partial ObservableCollection<Datum> Datums { get; set; }
@@ -127,8 +127,8 @@ public partial class QrLoginViewModel : DialogViewModelBase
                 if (result == null) return;
                 if (result.Code == 200 && result.Success == true)
                 {
-                    TipMessage = "获取登陆信息成功";
-                    this.ScreenMessage = "重新选择显示器扫码";
+                    TipMessage = LanguageService.GetStringByText("获取登陆信息成功");
+                    this.ScreenMessage = LanguageService.GetStringByText("重新选择显示器扫码");
                     _framePool?.FrameArrived -= _framePool_FrameArrived;
                     _session?.Dispose();
                     _framePool?.Dispose();
@@ -167,7 +167,7 @@ public partial class QrLoginViewModel : DialogViewModelBase
     public partial string TipMessage { get; set; }
 
     [ObservableProperty]
-    public partial string QRResult { get; set; } = "选择游戏窗口（需要露出游戏二维码）";
+    public partial string QRResult { get; set; } = LanguageService.GetStringByText("选择游戏窗口（需要露出游戏二维码）");
 
     [ObservableProperty]
     public partial string VerifyCode { get; set; } = "";
@@ -223,19 +223,19 @@ public partial class QrLoginViewModel : DialogViewModelBase
         var result = await WavesClient.QRLoginAsync(account, QRResult, VerifyCode, this.SelectDatum.Id, CTS.Token);
         if (result == null)
         {
-            TipMessage = "登陆失败，请及时联系开发者";
+            TipMessage = LanguageService.GetStringByText("登陆失败，请及时联系开发者");
             return;
         }
         if (result.Code == 2240)
         {
-            TipMessage = "该设备不安全，安全验证已经发送至手机";
+            TipMessage = LanguageService.GetStringByText("该设备不安全，安全验证已经发送至手机");
             var result2 = await WavesClient.GetQrCodeAsync(account, QRResult);
             ShowVerifyState();
             return;
         }
         else if (result.Code == 200)
         {
-            TipMessage = "登陆成功";
+            TipMessage = LanguageService.GetStringByText("登陆成功");
 
             Logger.WriteInfo($"扫码登陆成功，结果{result.Data}");
         }

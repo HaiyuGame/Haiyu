@@ -56,7 +56,7 @@ public partial class PunishV2GameContextViewModel : KuroGameContextViewModelV2
         );
         if (lastSelect == null)
         {
-            LocalUserTitle = "请选择账号";
+            LocalUserTitle = LanguageService.GetStringByText("请选择账号");
             IsLocalUserRefresh = false;
             SwatchIndex = 2;
             return;
@@ -71,7 +71,7 @@ public partial class PunishV2GameContextViewModel : KuroGameContextViewModelV2
             var localUsers = await this.GameContext.GetLocalGameOAuthAsync(this.CTS.Token);
             if (localUsers == null || localUsers.Count == 0)
             {
-                LocalUserTitle = "请选择账号";
+                LocalUserTitle = LanguageService.GetStringByText("请选择账号");
                 IsLocalUserRefresh = false;
                 return;
             }
@@ -103,7 +103,7 @@ public partial class PunishV2GameContextViewModel : KuroGameContextViewModelV2
         }
         if (selectItem == null)
         {
-            LocalUserTitle = "请选择账号";
+            LocalUserTitle = LanguageService.GetStringByText("请选择账号");
             IsLocalUserRefresh = false;
             return;
         }
@@ -120,8 +120,8 @@ public partial class PunishV2GameContextViewModel : KuroGameContextViewModelV2
         );
         if (result == null || result.Items == null || result.Items.Count == 0)
         {
-            LocalUserTitle = "获取账号信息失败";
-            await TipShow.ShowMessageAsync("请重新进入游戏获取信息", Symbol.Clear);
+            LocalUserTitle = LanguageService.GetStringByText("获取账号信息失败");
+            await TipShow.ShowMessageAsync(LanguageService.GetStringByText("请重新进入游戏获取信息"), Symbol.Clear);
             IsLocalUserRefresh = false;
             return;
         }
@@ -181,7 +181,7 @@ public partial class PunishV2GameContextViewModel : KuroGameContextViewModelV2
 
     [ObservableProperty]
     public partial ObservableCollection<string> Tabs { get; set; } =
-        new ObservableCollection<string>() { "活动", "公告", "新闻" };
+        new ObservableCollection<string>() { LanguageService.GetStringByText("活动"), LanguageService.GetStringByText("公告"), LanguageService.GetStringByText("新闻") };
 
     [ObservableProperty]
     public partial string SelectTab { get; set; }

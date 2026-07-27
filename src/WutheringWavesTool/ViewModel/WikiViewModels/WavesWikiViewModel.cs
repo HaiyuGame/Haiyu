@@ -102,13 +102,13 @@ public partial class WavesWikiViewModel : WikiViewModelBase
             }
             else
             {
-                TipShow.ShowMessage("获取卡池信息出现了不可预料的情况，请确认官方Wiki显示是否正常", Symbol.Clear);
+                TipShow.ShowMessage(LanguageService.GetStringByText("获取卡池信息出现了不可预料的情况，请确认官方Wiki显示是否正常"), Symbol.Clear);
             }
 
         }
         else
         {
-            TipShow.ShowMessage($"获取数据失败，请检查网络或重启应用", Symbol.Clear);
+            TipShow.ShowMessage(LanguageService.FormatByText(LanguageService.GetStringByText("获取数据失败，请检查网络或重启应用")), Symbol.Clear);
         }
         Loading = false;
     }
@@ -212,7 +212,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase
                 );
                 if (roles.Code != 0)
                 {
-                    TipShow.ShowMessage($"获取数据失败，请检查网络或重启应用", Symbol.Clear);
+                    TipShow.ShowMessage(LanguageService.FormatByText(LanguageService.GetStringByText("获取数据失败，请检查网络或重启应用")), Symbol.Clear);
                     return;
                 }
                 this.Gamers = roles.Result.Data.ToObservableCollection();
@@ -223,7 +223,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase
         catch (Exception ex)
         {
 
-            TipShow.ShowMessage($"刷新失败:{ex.Message}", Symbol.Accept);
+            TipShow.ShowMessage(LanguageService.FormatByText(LanguageService.GetStringByText("刷新失败:{0}"), ex.Message), Symbol.Accept);
         }
     }
 
@@ -301,7 +301,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase
         {
             SystemEventMessager.Publish(new()
             {
-                Message = "请选择一个账号",
+                Message = LanguageService.GetStringByText("请选择一个账号"),
                 Delay = TimeSpan.FromSeconds(10).TotalSeconds
             });
             return null;
@@ -311,7 +311,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase
         {
             SystemEventMessager.Publish(new()
             {
-                Message = "当前账号异常，请重新登录",
+                Message = LanguageService.GetStringByText("当前账号异常，请重新登录"),
                 Delay = TimeSpan.FromSeconds(10).TotalSeconds
             });
             return null;

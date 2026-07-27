@@ -43,7 +43,7 @@ partial class SettingViewModel
     public partial WallpaperType SelectWallpaperName { get; set; }
 
     [ObservableProperty]
-    public partial List<WallpaperType> WallpaperTypes { get; set; } = [new("视频"), new("图片")];
+    public partial List<WallpaperType> WallpaperTypes { get; set; } = [new(LanguageService.GetStringByText("视频")), new(LanguageService.GetStringByText("图片"))];
 
     partial void OnSelectWallpaperNameChanged(WallpaperType value)
     {
@@ -54,7 +54,7 @@ partial class SettingViewModel
     {
         if (value == null)
             return;
-        if (value.Name == "视频")
+        if (value.Name == LanguageService.GetStringByText("视频"))
         {
             await AppSettings.SetWallpaperTypeAsync("Video");
         }

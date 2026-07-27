@@ -1,7 +1,12 @@
-﻿namespace Haiyu.Common.KuroWebView;
+namespace Haiyu.Common.KuroWebView;
 
 public static class CloudGameBuilder
 {
+    private static string ToJavaScriptString(string value)
+    {
+        return $"\"{value.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\r", "\\r").Replace("\n", "\\n")}\"";
+    }
+
     /// <summary>
     /// 生成串流页面
     /// </summary>
@@ -436,14 +441,14 @@ public static class CloudGameBuilder
         <div id="bridge-card">
             <div id="bridge-header">
                 <div id="bridge-tag">Native Stream Bridge</div>
-                <div id="bridge-status">正在建立安全连接</div>
+                <div id="bridge-status">{{LanguageService.GetStringByText("正在建立安全连接")}}</div>
             </div>
-            <div id="bridge-title">正在接入云端实例</div>
-            <p id="bridge-message">原生业务层已完成开始游戏，正在初始化 Welink 串流 SDK。</p>
-            <div id="bridge-region">节点：测试 | 会话：测试1</div>
+            <div id="bridge-title">{{LanguageService.GetStringByText("正在接入云端实例")}}</div>
+            <p id="bridge-message">{{LanguageService.GetStringByText("原生业务层已完成开始游戏，正在初始化 Welink 串流 SDK。")}}</p>
+            <div id="bridge-region">{{LanguageService.GetStringByText("节点：测试 | 会话：测试1")}}</div>
             <div id="bridge-progress"></div>
             <div id="bridge-footer">
-                <div id="bridge-footer-hint">正在同步画面、输入与音频通道</div>
+                <div id="bridge-footer-hint">{{LanguageService.GetStringByText("正在同步画面、输入与音频通道")}}</div>
                 <div id="bridge-loading-dots" aria-hidden="true">
                     <span></span>
                     <span></span>
@@ -574,7 +579,7 @@ public static class CloudGameBuilder
 
                 if (!officialMethod) {
                     post("warning", {
-                        message: "Welink SDK 未暴露官网使用的画质增强方法。",
+                        message: {{ToJavaScriptString(LanguageService.GetStringByText("Welink SDK 未暴露官网使用的画质增强方法。"))}},
                         enabled: enhancementState.enabled
                     });
                     return { enabled: enhancementState.enabled, applied: false };
@@ -583,14 +588,16 @@ public static class CloudGameBuilder
                 try {
                     sdk[officialMethod.name](...officialMethod.args);
                     post("image-enhancement", {
-                        message: enhancementState.enabled ? "画质增强已开启" : "画质增强已关闭",
+                        message: enhancementState.enabled
+                            ? {{ToJavaScriptString(LanguageService.GetStringByText("画质增强已开启"))}}
+                            : {{ToJavaScriptString(LanguageService.GetStringByText("画质增强已关闭"))}},
                         enabled: enhancementState.enabled,
                         method: officialMethod.name
                     });
                     return { enabled: enhancementState.enabled, applied: true, method: officialMethod.name };
                 } catch (error) {
                     post("warning", {
-                        message: `调用 ${officialMethod.name} 切换画质增强失败。`,
+                        message: {{ToJavaScriptString(LanguageService.GetStringByText("调用画质增强方法失败："))}} + officialMethod.name,
                         enabled: enhancementState.enabled,
                         detail: error?.message || String(error)
                     });
@@ -679,17 +686,17 @@ public static class CloudGameBuilder
 
                     try {
                         sdk[candidateName]();
-                        post("status", { message: `已调用 ${candidateName}，准备退出当前会话。` });
+                        post("status", { message: {{ToJavaScriptString(LanguageService.GetStringByText("已调用退出方法，准备退出当前会话："))}} + candidateName });
                         return { invoked: true, method: candidateName };
                     } catch (error) {
                         post("warning", {
-                            message: `调用 ${candidateName} 退出会话失败。`,
+                            message: {{ToJavaScriptString(LanguageService.GetStringByText("调用退出方法失败："))}} + candidateName,
                             detail: error?.message || String(error)
                         });
                     }
                 }
 
-                post("warning", { message: "Welink 未暴露可用的退出方法，将由宿主直接关闭窗口。" });
+                post("warning", { message: {{ToJavaScriptString(LanguageService.GetStringByText("Welink 未暴露可用的退出方法，将由宿主直接关闭窗口。"))}} });
                 return { invoked: false };
             };
 
@@ -861,7 +868,7 @@ public static class CloudGameBuilder
 
                 if (!sdkLoginInfo?.cuid || !sdkLoginInfo?.token || !sdkLoginInfo?.username || !traceId) {
                     post("warning", {
-                        message: "桥页登录态不完整，无法生成登录信息。",
+                        message: {{ToJavaScriptString(LanguageService.GetStringByText("桥页登录态不完整，无法生成登录信息。"))}},
                         detail: {
                             hasSdkLoginInfo: Boolean(sdkLoginInfo),
                             hasUid: Boolean(sdkLoginInfo?.cuid),
@@ -884,7 +891,7 @@ public static class CloudGameBuilder
 
             const sendMessageWithKey = (key, data) => {
                 if (!sdk || typeof sdk.sendDataToGameWithKey !== "function") {
-                    post("warning", { message: `Welink 缺少 sendDataToGameWithKey，无法回传 ${key}` });
+                    post("warning", { message: {{ToJavaScriptString(LanguageService.GetStringByText("Welink 缺少回传方法，无法回传："))}} + key });
                     return false;
                 }
 
@@ -897,7 +904,7 @@ public static class CloudGameBuilder
                     return true;
                 } catch (error) {
                     post("warning", {
-                        message: `向游戏回传 ${key} 失败`,
+                        message: {{ToJavaScriptString(LanguageService.GetStringByText("向游戏回传失败："))}} + key,
                         key,
                         detail: error?.message || String(error)
                     });
@@ -912,7 +919,7 @@ public static class CloudGameBuilder
 
                 const loginInfo = getUserLoginInfo();
                 if (!loginInfo) {
-                    post("warning", { message: "缺少登录态，无法响应 RequestLogin。" });
+                    post("warning", { message: {{ToJavaScriptString(LanguageService.GetStringByText("缺少登录态，无法响应登录请求。"))}} });
                     return false;
                 }
 
@@ -951,7 +958,7 @@ public static class CloudGameBuilder
                     return true;
                 } catch (error) {
                     post("warning", {
-                        message: `设置游戏分辨率失败: ${targetWidth}x${targetHeight}`,
+                        message: {{ToJavaScriptString(LanguageService.GetStringByText("设置游戏分辨率失败："))}} + `${targetWidth}x${targetHeight}`,
                         detail: error?.message || String(error)
                     });
                     return false;
@@ -972,7 +979,7 @@ public static class CloudGameBuilder
 
                 const loginInfo = getUserLoginInfo();
                 if (!loginInfo) {
-                    post("warning", { message: "缺少预开模式登录态，无法回传 OnCloudGameLoginPreLaunch。" });
+                    post("warning", { message: {{ToJavaScriptString(LanguageService.GetStringByText("缺少预开模式登录态，无法回传预启动信息。"))}} });
                     return false;
                 }
 
@@ -1052,7 +1059,7 @@ public static class CloudGameBuilder
 
                 window.clearInterval(keepAliveTimer);
                 keepAliveTimer = null;
-                post("keepalive-stop", { message: "桥页保活已停止。" });
+                post("keepalive-stop", { message: {{ToJavaScriptString(LanguageService.GetStringByText("桥页保活已停止。"))}} });
             };
 
             const handleGameMessage = (message) => {
@@ -1067,11 +1074,11 @@ public static class CloudGameBuilder
                         setGameResolution();
                         break;
                     case "HotPatchEnterGame":
-                        setMessage("游戏热更已完成，正在进入游戏场景...");
+                        setMessage({{ToJavaScriptString(LanguageService.GetStringByText("游戏热更已完成，正在进入游戏场景……"))}});
                         setGameResolution();
                         break;
                     case "HotPatchExitGame":
-                        setMessage("游戏仍在加载资源，等待进入游戏场景...");
+                        setMessage({{ToJavaScriptString(LanguageService.GetStringByText("游戏仍在加载资源，等待进入游戏场景……"))}});
                         break;
                 }
             };
@@ -1084,7 +1091,7 @@ public static class CloudGameBuilder
                         setGameResolution();
                         break;
                     case "ExitGame":
-                        setMessage("云端游戏要求退出当前会话。", "error");
+                        setMessage({{ToJavaScriptString(LanguageService.GetStringByText("云端游戏要求退出当前会话。"))}}, "error");
                         break;
                 }
             };
@@ -1149,7 +1156,7 @@ public static class CloudGameBuilder
                 try {
                     isForeground = true;
                     sdk.onResume();
-                    post("status", { message: `Welink 已切回前台状态: ${reason}` });
+                    post("status", { message: {{ToJavaScriptString(LanguageService.GetStringByText("Welink 已切回前台状态："))}} + reason });
                 } catch {
                     isForeground = false;
                 }
@@ -1171,7 +1178,7 @@ public static class CloudGameBuilder
                 try {
                     isForeground = false;
                     sdk.onPause();
-                    post("status", { message: `Welink 已切到后台状态: ${reason}` });
+                    post("status", { message: {{ToJavaScriptString(LanguageService.GetStringByText("Welink 已切到后台状态："))}} + reason });
                 } catch {
                     isForeground = true;
                 }
@@ -1388,7 +1395,7 @@ public static class CloudGameBuilder
                 element.src = source;
                 element.async = true;
                 element.onload = () => resolve();
-                element.onerror = () => reject(new Error("WelinkCloudGame SDK 加载失败。"));
+                element.onerror = () => reject(new Error({{ToJavaScriptString(LanguageService.GetStringByText("WelinkCloudGame SDK 加载失败。"))}}));
                 document.head.appendChild(element);
             });
 
@@ -1410,7 +1417,7 @@ public static class CloudGameBuilder
             };
 
             window.addEventListener("error", (event) => {
-                const message = event?.message || "桥页脚本执行失败。";
+                const message = event?.message || {{ToJavaScriptString(LanguageService.GetStringByText("桥页脚本执行失败。"))}};
                 post("warning", {
                     message,
                     source: event?.filename || "",
@@ -1420,17 +1427,17 @@ public static class CloudGameBuilder
             });
 
             window.addEventListener("unhandledrejection", (event) => {
-                const message = event?.reason?.message || String(event?.reason || "桥页出现未处理异常。");
+                const message = event?.reason?.message || String(event?.reason || {{ToJavaScriptString(LanguageService.GetStringByText("桥页出现未处理异常。"))}});
                 post("warning", { message });
             });
 
             (async () => {
-                setMessage("正在加载 WelinkCloudGame SDK...");
+                setMessage({{ToJavaScriptString(LanguageService.GetStringByText("正在加载 WelinkCloudGame SDK……"))}});
                 installWebViewPointerFilter();
                 await loadScript(payload.scriptUrl);
 
                 if (typeof window.WelinkCloudGame !== "function") {
-                    throw new Error("WelinkCloudGame 不可用，无法启动串流。 ");
+                    throw new Error({{ToJavaScriptString(LanguageService.GetStringByText("WelinkCloudGame 不可用，无法启动串流。"))}});
                 }
 
                 const q = payload.bridgeConfig;
@@ -1508,7 +1515,7 @@ public static class CloudGameBuilder
 
                 wrapMethod(sdk, "handleStartGameError", (code, detail, notThrow) => {
                     const suffix = detail ? ` | ${typeof detail === "string" ? detail : JSON.stringify(detail)}` : "";
-                    const message = `Welink 协商中出现可恢复告警: code=${code}${suffix}`;
+                    const message = {{ToJavaScriptString(LanguageService.GetStringByText("Welink 协商中出现可恢复告警，代码："))}} + code + suffix;
                     post("warning", { message, code, detail, notThrow: Boolean(notThrow) });
                 });
 
@@ -1516,7 +1523,7 @@ public static class CloudGameBuilder
                     post("pivotal", { name, info });
                 });
 
-                setMessage("SDK 已加载，正在初始化 Welink 实例...");
+                setMessage({{ToJavaScriptString(LanguageService.GetStringByText("SDK 已加载，正在初始化 Welink 实例……"))}});
                 await sdk.init();
                 focusSurface();
                 syncForegroundFlag();
@@ -1539,7 +1546,7 @@ public static class CloudGameBuilder
 
                 setGameResolution();
 
-                setMessage("Welink 已初始化，正在连接云端实例...");
+                setMessage({{ToJavaScriptString(LanguageService.GetStringByText("Welink 已初始化，正在连接云端实例……"))}});
                 await sdk.startGame(payload.dispatchMessage);
                 focusSurface();
                 syncForegroundFlag();
@@ -1547,10 +1554,10 @@ public static class CloudGameBuilder
                 setGameResolution();
                 startKeepAliveLoop();
 
-                setMessage("串流启动请求已发送，等待首帧到达...");
+                setMessage({{ToJavaScriptString(LanguageService.GetStringByText("串流启动请求已发送，等待首帧到达……"))}});
                 post("launch-dispatched");
             })().catch((error) => {
-                const message = error?.message || String(error || "串流桥页启动失败。");
+                const message = error?.message || String(error || {{ToJavaScriptString(LanguageService.GetStringByText("串流桥页启动失败。"))}});
                 setMessage(message, "error");
                 post("error", { message });
             });

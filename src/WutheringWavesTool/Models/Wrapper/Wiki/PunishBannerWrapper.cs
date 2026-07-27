@@ -19,7 +19,7 @@ namespace Haiyu.Models.Wrapper.Wiki
                 if (value != null && value.Title != null)
                 {
 
-                    if (value.Title.Contains("池"))
+                    if (value.Title.Contains(LanguageService.GetStringByText("池")))
                         bannerList.Add(value);
                 }
 
@@ -120,16 +120,16 @@ namespace Haiyu.Models.Wrapper.Wiki
                         if (elapsed <= 0)
                         {
                             currVal = maxVal;
-                            msg = "已结束";
+                            msg = LanguageService.GetStringByText("已结束");
                             return (currVal, maxVal, msg);
                         }
 
 
 
                         currVal = _overCountdownTimeSpace.TotalSeconds;
-                        msg = $"剩余{_endCountdownTimeSpan.Days}天" +
-                                    $"{_endCountdownTimeSpan.Hours}小时" +
-                                    $"{_endCountdownTimeSpan.Minutes}分";
+                        msg = LanguageService.FormatByText(LanguageService.GetStringByText("剩余{0}天"), _endCountdownTimeSpan.Days) +
+                                    LanguageService.FormatByText(LanguageService.GetStringByText("{0}小时"), _endCountdownTimeSpan.Hours) +
+                                    LanguageService.FormatByText(LanguageService.GetStringByText("{0}分"), _endCountdownTimeSpan.Minutes);
                         return (currVal, maxVal, msg);
                     }
                     return (0, 0, string.Empty);
@@ -143,7 +143,7 @@ namespace Haiyu.Models.Wrapper.Wiki
 
     public class PunishBannerWrapperItem
     {
-        public string Title { get; set; } = "标题";
+        public string Title { get; set; } = LanguageService.GetStringByText("标题");
         public double CurrentProgress { get; set; } = 10;
         public double MaxProgress { get; set; } = 100;
         public string? RemianTime { get; set; } = "L";

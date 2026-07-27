@@ -8,7 +8,7 @@ public static class Md5Helper
     public static string ComputeMd532(string input, Encoding encoding = null, bool isUpper = false)
     {
         if (string.IsNullOrEmpty(input))
-            throw new ArgumentNullException(nameof(input), "输入字符串不能为空");
+            throw new ArgumentNullException(nameof(input), LanguageService.GetStringByText("输入字符串不能为空"));
         encoding ??= Encoding.UTF8;
         byte[] inputBytes = encoding.GetBytes(input);
         using (MD5 md5 = MD5.Create())

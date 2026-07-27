@@ -11,10 +11,10 @@ public partial class RecordStarConverter : IValueConverter
         if (value is bool item)
         {
             if (!item)
-                return "中";
+                return LanguageService.GetStringByText("中");
             else
             {
-                return "歪";
+                return LanguageService.GetStringByText("歪");
             }
         }
         return "";

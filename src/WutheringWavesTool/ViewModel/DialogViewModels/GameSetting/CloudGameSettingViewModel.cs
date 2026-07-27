@@ -175,7 +175,7 @@ public class QualityWrapper
 
     public static ObservableCollection<QualityWrapper> Create() =>
         [
-            new QualityWrapper() { Type = CloudQualityType.Smooth, DisplayName = "流畅" },
-            new QualityWrapper() { Type = CloudQualityType.Clarity, DisplayName = "原生" },
+            new QualityWrapper() { Type = CloudQualityType.Smooth, DisplayName = LanguageService.GetStringByText("流畅") },
+            new QualityWrapper() { Type = CloudQualityType.Clarity, DisplayName = LanguageService.GetStringByText("原生") },
         ];
 }

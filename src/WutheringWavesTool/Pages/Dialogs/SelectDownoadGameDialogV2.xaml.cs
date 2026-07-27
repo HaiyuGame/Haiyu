@@ -99,7 +99,7 @@ public sealed partial class SelectDownoadGameDialogV2
         {
             layeredGrid.Visibility = Visibility.Visible;
             layerText.Visibility = Visibility.Collapsed;
-            TipMessage.Text = "请选择一个文件夹，而并非一个磁盘";
+            TipMessage.Text = LanguageService.GetStringByText("请选择一个文件夹，而并非一个磁盘");
             download.Fill = new SolidColorBrush(Colors.Red);
             downloadBth.IsEnabled = false;
             return;
@@ -115,7 +115,7 @@ public sealed partial class SelectDownoadGameDialogV2
         Launcher = await this.GameContext.GetGameLauncherSourceAsync();
         if (Launcher == null)
         {
-            TipMessage.Text = "数据拉取失败";
+            TipMessage.Text = LanguageService.GetStringByText("数据拉取失败");
             return;
         }
         var updateSize = usedSpaceMB + Launcher.ResourceDefault.Config.Size / 1024 / 1024 / 1024;
@@ -123,26 +123,26 @@ public sealed partial class SelectDownoadGameDialogV2
         {
             new LayerData()
             {
-                Label = "总容量",
+                Label = LanguageService.GetStringByText("总容量"),
                 Color = new SolidColorBrush(Colors.LightGreen),
                 Value = totalSizeMB,
             },
             new LayerData()
             {
-                Label = "已用容量",
+                Label = LanguageService.GetStringByText("已用容量"),
                 Color = new SolidColorBrush(Colors.Purple),
                 Value = usedSpaceMB,
             },
             new LayerData()
             {
-                Label = "下载后增量",
+                Label = LanguageService.GetStringByText("下载后增量"),
                 Color = new SolidColorBrush(Colors.Red),
                 Value = updateSize,
             },
         };
         if (updateSize > totalSizeMB)
         {
-            TipMessage.Text = "空间不足，请清理一些文件进行下载";
+            TipMessage.Text = LanguageService.GetStringByText("空间不足，请清理一些文件进行下载");
             download.Fill = new SolidColorBrush(Colors.Red);
             downloadBth.IsEnabled = false;
             return;
@@ -150,7 +150,7 @@ public sealed partial class SelectDownoadGameDialogV2
         else
         {
             TipMessage.Text =
-                $"本次更新大小约为{Launcher.ResourceDefault.Config.Size / 1024 / 1024 / 1024}GB";
+                LanguageService.FormatByText(LanguageService.GetStringByText("本次更新大小约为{0}GB"), Launcher.ResourceDefault.Config.Size / 1024 / 1024 / 1024);
             downloadBth.IsEnabled = true;
             download.Fill = new SolidColorBrush(Colors.Green);
         }

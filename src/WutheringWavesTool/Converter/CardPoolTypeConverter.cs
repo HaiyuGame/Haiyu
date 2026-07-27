@@ -9,19 +9,19 @@ public partial class CardPoolTypeConverter : IValueConverter
             switch (type)
             {
                 case CardPoolType.RoleActivity:
-                    return "角色活动换取";
+                    return LanguageService.GetStringByText("角色活动换取");
                 case CardPoolType.WeaponsActivity:
-                    return "武器活动换取";
+                    return LanguageService.GetStringByText("武器活动换取");
                 case CardPoolType.RoleResident:
-                    return "角色常驻换取";
+                    return LanguageService.GetStringByText("角色常驻换取");
                 case CardPoolType.WeaponsResident:
-                    return "武器常驻换取";
+                    return LanguageService.GetStringByText("武器常驻换取");
                 case CardPoolType.Beginner:
-                    return "新手换取";
+                    return LanguageService.GetStringByText("新手换取");
                 case CardPoolType.BeginnerChoice:
-                    return "新手自选";
+                    return LanguageService.GetStringByText("新手自选");
                 case CardPoolType.GratitudeOrientation:
-                    return "感恩定向";
+                    return LanguageService.GetStringByText("感恩定向");
                 default:
                     break;
             }

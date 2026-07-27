@@ -70,7 +70,7 @@ public sealed partial class UpdateAppViewModel : DialogViewModelBase
         var path =  await UpdateService.DownloadProgramInfoAsync(progress, this.CTS.Token);
         if(path == null)
         {
-            LegacyMessageBox.ShowError("下载失败！请检查网络，如果是Mirror模式下载，请检查Key是否可用");
+            LegacyMessageBox.ShowError(LanguageService.GetStringByText("下载失败！请检查网络，如果是Mirror模式下载，请检查Key是否可用"));
             return;
         }
         ProcessStartInfo info = new ProcessStartInfo(path);

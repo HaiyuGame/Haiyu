@@ -25,19 +25,19 @@ public static class ScreenCapture
             hScreenDC = NativeMethods.CreateDC("DISPLAY", null, null, IntPtr.Zero);
             if (hScreenDC == IntPtr.Zero)
             {
-                throw new Exception("无法获取屏幕设备上下文！");
+                throw new Exception(LanguageService.GetStringByText("无法获取屏幕设备上下文！"));
             }
             screenWidth = NativeMethods.GetDeviceCaps(hScreenDC, NativeMethods.HORZRES);
             screenHeight = NativeMethods.GetDeviceCaps(hScreenDC, NativeMethods.VERTRES);
             hMemoryDC = NativeMethods.CreateCompatibleDC(hScreenDC);
             if (hMemoryDC == IntPtr.Zero)
             {
-                throw new Exception("无法创建内存设备上下文！");
+                throw new Exception(LanguageService.GetStringByText("无法创建内存设备上下文！"));
             }
             hBitmap = NativeMethods.CreateCompatibleBitmap(hScreenDC, screenWidth, screenHeight);
             if (hBitmap == IntPtr.Zero)
             {
-                throw new Exception("无法创建位图！");
+                throw new Exception(LanguageService.GetStringByText("无法创建位图！"));
             }
             hOldBitmap = NativeMethods.SelectObject(hMemoryDC, hBitmap);
 
@@ -55,7 +55,7 @@ public static class ScreenCapture
                 )
             )
             {
-                throw new Exception("拷贝屏幕内容失败！");
+                throw new Exception(LanguageService.GetStringByText("拷贝屏幕内容失败！"));
             }
 
             NativeMethods.SelectObject(hMemoryDC, hOldBitmap);
@@ -88,14 +88,14 @@ public static class ScreenCapture
 
             if (linesCopied == 0)
             {
-                throw new Exception($"GetDIBits 调用失败! 错误码: {Marshal.GetLastWin32Error()}");
+                throw new Exception(LanguageService.FormatByText(LanguageService.GetStringByText("GetDIBits 调用失败! 错误码: {0}"), Marshal.GetLastWin32Error()));
             }
 
             return pixelData;
         }
         catch (Exception ex)
         {
-            NativeMethods.MessageBox(IntPtr.Zero, ex.Message, "错误", 0);
+            NativeMethods.MessageBox(IntPtr.Zero, ex.Message, LanguageService.GetStringByText("错误"), 0);
             return null;
         }
         finally
@@ -133,7 +133,7 @@ public static class ScreenCapture
         }
         if (string.IsNullOrEmpty(file))
         {
-            throw new ArgumentException("文件路径不能为空。", nameof(file));
+            throw new ArgumentException(LanguageService.GetStringByText("文件路径不能为空。"), nameof(file));
         }
         using (var encodedStream = new InMemoryRandomAccessStream())
         {
