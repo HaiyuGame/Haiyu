@@ -66,9 +66,20 @@ public class AppContext<T> : IAppContext<T>
             #endregion
             try
             {
-                var page = Instance.Host.Services!.GetRequiredService<ShellPage>();
-                page.titlebar.Window = win;
-                win.Content = page;
+                if (await AppSettings.GetAutoOOBEAsync() == true)
+                {
+                    var page = Instance.Host.Services.GetRequiredService<OOBEPage>();
+                    page.titlebar.Window = win;
+                    win.Content = page;
+                    win.ApplyWindowsOption(MainWindow.OOBEWindowOption);
+                }
+                else
+                {
+                    var page = Instance.Host.Services!.GetRequiredService<ShellPage>();
+                    page.titlebar.Window = win;
+                    win.Content = page;
+                    win.ApplyWindowsOption(MainWindow.DefaultWindowsOption);
+                }
             }
             catch (Exception ex) { }
             this.App.MainWindow = win;
@@ -108,7 +119,9 @@ public class AppContext<T> : IAppContext<T>
         }
         foreach (var item in GameContextFactory.GetAllCloudContextName())
         {
-            var context = Instance.Host.Services.GetRequiredKeyedService<IKuroCloudGameContext>(item);
+            var context = Instance.Host.Services.GetRequiredKeyedService<IKuroCloudGameContext>(
+                item
+            );
             await context.InitAsync();
         }
         await KuroClient.InitAsync();
@@ -123,7 +136,7 @@ public class AppContext<T> : IAppContext<T>
         {
             var context = Instance.Host.Services.GetRequiredKeyedService<IGameContextV2>(item);
             var jumpItem = await AppActivation.CreateJumpListsAndInitCoreAsync(context);
-            if(jumpItem != null)
+            if (jumpItem != null)
             {
                 jumpList.Items.Add(jumpItem);
             }
@@ -131,7 +144,6 @@ public class AppContext<T> : IAppContext<T>
         #endregion
         await jumpList.SaveAsync();
     }
-
 
     private void AppWindow_Closing(
         Microsoft.UI.Windowing.AppWindow sender,
@@ -265,23 +277,17 @@ public class AppContext<T> : IAppContext<T>
                 else
                 {
                     Instance
-                    .Host.Services.GetRequiredService<SystemEventPublisher>()
-                    .Publish(new SystemMessagerModel()
-                    {
-                        Message = "获取更新信息失败",
-                        Delay = 5
-                    });
+                        .Host.Services.GetRequiredService<SystemEventPublisher>()
+                        .Publish(
+                            new SystemMessagerModel() { Message = "获取更新信息失败", Delay = 5 }
+                        );
                 }
             }
             else
             {
-                 Instance
+                Instance
                     .Host.Services.GetRequiredService<SystemEventPublisher>()
-                    .Publish(new SystemMessagerModel()
-                    {
-                        Message= "当前已是最新版本",
-                        Delay = 5
-                    });
+                    .Publish(new SystemMessagerModel() { Message = "当前已是最新版本", Delay = 5 });
             }
         }
         catch (Exception)

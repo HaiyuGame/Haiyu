@@ -14,7 +14,7 @@ namespace Waves.Core.Settings;
 [SettingsAttribute<string>(Name = "CaptureKey", Nullable = true)]
 [SettingsAttribute<string>(Name = "IsCapture", Nullable = true)]
 [SettingsAttribute<string>(Name = "Language", Nullable = true)]
-[SettingsAttribute<string>(Name = "AutoOOBE", Nullable = true)]
+[SettingsAttribute<bool>(Name = "AutoOOBE", Nullable = true,DefaultValue ="True")]
 [SettingsAttribute<string>(Name = "ElementTheme")]
 [SettingsAttribute<string>(Name = "RpcToken", Nullable = true)]
 [SettingsAttribute<string>(Name = "WavesAutoOpenContext", Nullable = true)]
@@ -66,6 +66,7 @@ public partial class AppSettings : SettingBase
 
     public async Task SetMaxIoConcurrentAsync(int value, CancellationToken ct = default)
     {
-        await WriteAsync(Math.Clamp(value, 1, 4).ToString(), "MaxIoConcurrent", ct).ConfigureAwait(false);
+        await WriteAsync(Math.Clamp(value, 1, 4).ToString(), "MaxIoConcurrent", ct)
+            .ConfigureAwait(false);
     }
 }

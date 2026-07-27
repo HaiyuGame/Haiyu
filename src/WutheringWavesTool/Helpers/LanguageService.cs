@@ -1,4 +1,4 @@
-﻿using LanguageEditer.Model;
+using LanguageEditer.Model;
 using Microsoft.Windows.Globalization;
 using Waves.Core.Settings;
 
@@ -14,10 +14,14 @@ public static class LanguageService
     private static Dictionary<string, string> Zh_Hant = [];
     private static Dictionary<string, string> En_Us = [];
     private static Dictionary<string, string> Ja_Jp = [];
+    
+    static LanguageService()
+    {
+        AppSettings = Instance.Host.Services.GetRequiredService<AppSettings>();
+    }
 
     public static string GetLanguage()
     {
-        AppSettings = Instance.Host.Services.GetRequiredService<AppSettings>();
         return AppSettings.GetLanguageAsync().GetAwaiter().GetResult() ?? "";
     }
 
