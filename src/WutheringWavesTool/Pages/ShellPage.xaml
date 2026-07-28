@@ -3,7 +3,7 @@
     x:Class="Haiyu.Pages.ShellPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:helper="using:Haiyu.Helpers"
+    xmlns:am="using:Waves.Api.Models.KuroClient"
     xmlns:ani="using:CommunityToolkit.WinUI.Animations"
     xmlns:animatedvisuals="using:Microsoft.UI.Xaml.Controls.AnimatedVisuals"
     xmlns:b="using:CommunityToolkit.WinUI.Behaviors"
@@ -11,6 +11,7 @@
     xmlns:control="using:Haiyu.Controls"
     xmlns:cui="using:CommunityToolkit.WinUI"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:helper="using:Haiyu.Helpers"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:local="using:Haiyu.Pages"
     xmlns:m="using:Waves.Api.Models"
@@ -106,6 +107,7 @@
                             Padding="5"
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Center"
+                            Command="{x:Bind ViewModel.EncourageDataCommand}"
                             CornerRadius="48"
                             Style="{ThemeResource TransparentButtonStyle}">
                             <ui:ImageEx CornerRadius="40">
@@ -113,7 +115,57 @@
                                     <BitmapImage UriSource="{x:Bind ViewModel.HeaderCover, Mode=OneWay}" />
                                 </ui:ImageEx.Source>
                             </ui:ImageEx>
-
+                            <Button.Flyout>
+                                <Flyout Placement="BottomEdgeAlignedRight">
+                                    <Grid Width="300" Padding="5">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="auto" />
+                                            <RowDefinition Height="auto" />
+                                            <RowDefinition />
+                                        </Grid.RowDefinitions>
+                                        <TextBlock
+                                            Margin="10,0,0,0"
+                                            VerticalAlignment="Center"
+                                            FontFamily="{ThemeResource DefaultFont}"
+                                            FontSize="15">
+                                            <Run Text="{x:Bind helper:LanguageService.GetString('Display_KuroCoin')}" />
+                                            <Run Text="{x:Bind ViewModel.EncourageTotalGold, Mode=OneWay}" />
+                                        </TextBlock>
+                                        <Button
+                                            Margin="0,0,10,0"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Top"
+                                            Style="{ThemeResource TransparentButtonStyle}">
+                                            <FontIcon
+                                                FontFamily="Segoe Fluent Icons"
+                                                FontSize="15"
+                                                Glyph="&#xE72C;" />
+                                        </Button>
+                                        <NavigationViewItemSeparator Grid.Row="1" />
+                                        <ItemsView
+                                            Grid.Row="2"
+                                            ItemsSource="{x:Bind ViewModel.EncourageDailys, Mode=OneWay}"
+                                            SelectionMode="None">
+                                            <ItemsView.ItemTemplate>
+                                                <DataTemplate x:DataType="am:EncourageDailyTask">
+                                                    <ItemContainer>
+                                                        <Grid Padding="15,10" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                                                            <TextBlock FontSize="13" Text="{x:Bind Remark}" />
+                                                            <TextBlock
+                                                                HorizontalAlignment="Right"
+                                                                FontSize="13"
+                                                                Text="{x:Bind Process, Mode=OneWay, Converter={StaticResource KuroBBSCoinCompletedConverter}}" />
+                                                        </Grid>
+                                                    </ItemContainer>
+                                                </DataTemplate>
+                                            </ItemsView.ItemTemplate>
+                                            <ItemsView.Layout>
+                                                <StackLayout Orientation="Vertical" Spacing="5" />
+                                            </ItemsView.Layout>
+                                        </ItemsView>
+                                    </Grid>
+                                </Flyout>
+                            </Button.Flyout>
                         </Button>
                         <Button
                             Grid.Column="1"
@@ -162,16 +214,6 @@
                                     <MenuFlyoutItem Command="{x:Bind ViewModel.ShowDeviceInfoCommand}" Text="{x:Bind helper:LanguageService.GetString('Display_AuthorizationManagement')}">
                                         <MenuFlyoutItem.Icon>
                                             <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8CC;" />
-                                        </MenuFlyoutItem.Icon>
-                                    </MenuFlyoutItem>
-
-                                    <MenuFlyoutItem
-                                        Command="{x:Bind ViewModel.UnLoginCommand}"
-                                        Foreground="{ThemeResource SystemFillColorCriticalBrush}"
-                                        Text="{x:Bind helper:LanguageService.GetString('Display_LogOut')}"
-                                        Visibility="Collapsed">
-                                        <MenuFlyoutItem.Icon>
-                                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xF3B1;" />
                                         </MenuFlyoutItem.Icon>
                                     </MenuFlyoutItem>
                                 </MenuFlyout>

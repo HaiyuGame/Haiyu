@@ -2,6 +2,8 @@ using Haiyu.Pages.GamePages;
 using Haiyu.Services.DialogServices;
 using Haiyu.ViewModel.GameViewModels;
 using Haiyu.ViewModel.GameViewModels.GameContexts;
+using Waves.Api.Models.KuroClient;
+using Waves.Api.Models.KuroClient.Options;
 using Waves.Core.Models.Enums;
 using Waves.Core.Services;
 using Windows.ApplicationModel.DataTransfer;
@@ -45,8 +47,16 @@ public sealed partial class ShellViewModel : ViewModelBase
         {
             Items = new List<NotifyIconMenuItem>()
             {
-                new() { Header = LanguageService.GetStringByText("显示主界面"), Command = this.ShowWindowCommand },
-                new() { Header = LanguageService.GetStringByText("退出启动器"), Command = this.ExitWindowCommand },
+                new()
+                {
+                    Header = LanguageService.GetStringByText("显示主界面"),
+                    Command = this.ShowWindowCommand,
+                },
+                new()
+                {
+                    Header = LanguageService.GetStringByText("退出启动器"),
+                    Command = this.ExitWindowCommand,
+                },
             },
         };
     }
@@ -65,6 +75,7 @@ public sealed partial class ShellViewModel : ViewModelBase
     public IKuroAccountService KuroAccountService { get; }
     public SystemEventPublisher SystemEventPublisher { get; }
     public ITaskManager TaskManager { get; }
+
     [ObservableProperty]
     public partial string ServerName { get; set; }
 
@@ -137,7 +148,10 @@ public sealed partial class ShellViewModel : ViewModelBase
         );
         if (result != UserConsentVerificationResult.Verified)
         {
-            TipShow.ShowMessage(LanguageService.GetStringByText("系统用户验证失败！"), Symbol.Clear);
+            TipShow.ShowMessage(
+                LanguageService.GetStringByText("系统用户验证失败！"),
+                Symbol.Clear
+            );
             return;
         }
 
@@ -283,20 +297,18 @@ public sealed partial class ShellViewModel : ViewModelBase
     [RelayCommand]
     public async Task RefreshHeaderUser()
     {
-        if (KuroAccountService.Current is null)
+        if (KuroAccountService.CurrentAccount is null)
             return;
-        var current = KuroAccountService.Current;
-        var account = KuroAccount.From(current);
-        if (long.TryParse(current.TokenId, out var _id))
+        var account = KuroAccountService.CurrentAccount;
+        if (long.TryParse(account.UserId, out var _id))
         {
-            var result = await KuroClient.GetWavesMineAsync(
-                account,
-                _id,
-                this.CTS.Token
-            );
+            var result = await KuroClient.GetWavesMineAsync(account, _id, this.CTS.Token);
             if (result == null)
             {
-                TipShow.ShowMessage(LanguageService.GetStringByText("检查一下你的网络"), Symbol.Clear);
+                TipShow.ShowMessage(
+                    LanguageService.GetStringByText("检查一下你的网络"),
+                    Symbol.Clear
+                );
                 return;
             }
             if (!result.Success)
@@ -335,7 +347,7 @@ public sealed partial class ShellViewModel : ViewModelBase
         await OpenMain();
         await AppContext.UpdateAppAsync();
         await SystemEventPublisher.SubscribeAsync(OnMessageChanged);
-        _ = Task.Run(async()=>await TaskManager.InitializeAutoLaunchTasksAsync());
+        _ = Task.Run(async () => await TaskManager.InitializeAutoLaunchTasksAsync());
     }
 
     private async ValueTask OnMessageChanged(SystemMessagerModel model)
@@ -376,18 +388,64 @@ public sealed partial class ShellViewModel : ViewModelBase
         window.Activate();
     }
 
-    [RelayCommand]
-    async Task UnLogin()
-    {
-        await Task.CompletedTask;
-    }
-
-    [RelayCommand]
-    void OpenCounter(RoutedEventArgs args) { }
-
     internal void SetSelectItem(Type sourcePageType)
     {
         var page = this.HomeNavigationViewService.GetSelectItem(sourcePageType);
         SelectItem = page;
+    }
+
+    [ObservableProperty]
+    public partial double EncourageTotalGold { get; set; }
+
+    [ObservableProperty]
+    public partial ObservableCollection<EncourageDailyTask> EncourageDailys { get; set; }
+
+    [RelayCommand]
+    public async Task EncourageDataAsync()
+    {
+        try
+        {
+            if (KuroAccountService.CurrentAccount == null)
+                return;
+
+            var encourageProcess = await this.TryInvokeAsync(async () =>
+                await this.KuroClient.GetEncourageProcessAsync(
+                    KuroAccountService.CurrentAccount,
+                    EncourageProcessOption.CreateDefault(KuroAccountService.CurrentAccount.UserId),
+                    this.CTS.Token
+                )
+            );
+            var encourageTotal = await this.TryInvokeAsync(async () =>
+                await this.KuroClient.GetEncourageTotalGoldAsync(
+                    KuroAccountService.CurrentAccount,
+                    this.CTS.Token
+                )
+            );
+            if (encourageProcess.Code != 0 || encourageTotal.Code != 0)
+            {
+                SystemEventMessager.Publish(
+                    new SystemMessagerModel()
+                    {
+                        Message = LanguageService.GetString("Code_KuroCoinFetchFailed")!,
+                        Delay = TimeSpan.FromSeconds(3).TotalSeconds,
+                    }
+                );
+                return;
+            }
+            this.EncourageTotalGold = encourageTotal.Result!.Data.GoldNum;
+            this.EncourageDailys = encourageProcess.Result!.Data.DailyTask.ToObservableCollection();
+        }
+        catch (Exception ex)
+        {
+            SystemEventMessager.Publish(
+                    new SystemMessagerModel()
+                    {
+                        Message = LanguageService.GetString("Code_KuroCoinFetchFailed")!,
+                        Delay = TimeSpan.FromSeconds(3).TotalSeconds,
+                    }
+                );
+            this.Logger.WriteError(ex.Message + ex.StackTrace);
+            return;
+        }
     }
 }

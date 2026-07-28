@@ -139,11 +139,7 @@ partial class KuroGameContextViewModelV2
 
     private static string Formatter(DateTime date)
     {
-        var secsAgo = (DateTime.Now - date).TotalSeconds;
-
-        return secsAgo < 1
-            ? LanguageService.GetStringByText("现在")
-            : LanguageService.FormatByText(LanguageService.GetStringByText("{0:N0}秒前"), secsAgo);
+        return DisplayTimeFormatter.FormatDuration(DateTime.Now - date);
     }
     #endregion
 

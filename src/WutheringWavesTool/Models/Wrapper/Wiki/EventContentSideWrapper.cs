@@ -55,6 +55,6 @@ public partial class EventContentSideWrapper : ObservableObject
             remainingTime = TimeSpan.Zero;
         this.MaxProgress = totalTime.TotalSeconds;
         this.CurrentProgress = remainingTime.TotalSeconds;
-        this.DisplayTime = LanguageService.FormatByText(LanguageService.GetStringByText("{0}天{1:D2}小时{2:D2}分{3:D2}秒"), remainingTime.Days, remainingTime.Hours, remainingTime.Minutes, remainingTime.Seconds);
+        this.DisplayTime = DisplayTimeFormatter.FormatDuration(remainingTime);
     }
 }

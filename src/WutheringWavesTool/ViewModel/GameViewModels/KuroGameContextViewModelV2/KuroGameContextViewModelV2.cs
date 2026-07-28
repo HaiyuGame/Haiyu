@@ -762,7 +762,10 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                 if (int.TryParse(totalTime, out var timeResult))
                 {
                     var tt = TimeSpan.FromSeconds(timeResult);
-                    BottomBarContent = LanguageService.GetStringByText("已游玩") + (LanguageService.FormatByText(LanguageService.GetStringByText("{0}天{1}小时{2}分钟"), tt.Days, tt.Hours, tt.Minutes));
+                    BottomBarContent =
+                        LanguageService.GetStringByText("已游玩")
+                        + " "
+                        + DisplayTimeFormatter.FormatDuration(tt);
                     ;
                 }
                 else

@@ -44,6 +44,7 @@
             <converter:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" Reversal="False" />
             <converter:BoolToSolidBrushColorConverter x:Key="BoolToSolidBrushColorConverter" />
             <converter:IntToSecondTimeConverter x:Key="IntToSecondTimeConverter" />
+            <converter:KuroBBSCoinCompletedConverter x:Key="KuroBBSCoinCompletedConverter" />
             <FontFamily x:Key="DefaultFont">ms-appx:///Assets/Font.ttf#文鼎方新书H7GBK</FontFamily>
             <FontFamily x:Key="RoilDetilyFont">ms-appx:///Assets/Fonts/gameIcon.ttf#wavesRole</FontFamily>
         </ResourceDictionary>

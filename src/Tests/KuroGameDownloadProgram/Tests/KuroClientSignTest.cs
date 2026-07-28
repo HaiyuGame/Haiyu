@@ -37,9 +37,9 @@ namespace KuroGameDownloadProgram.Tests
                 .Build();
             var accoutService = host.Services.GetRequiredService<IKuroAccountService>();
             await accoutService.SetAutoUser();
-            var currentAccount = accoutService.Current;
+            var currentAccount = accoutService.CurrentAccount;
             var kuroClient = host.Services.GetRequiredService<IKuroClient>();
-            await kuroClient.SignInClientAsync(KuroAccount.From(currentAccount));
+            await kuroClient.SignInClientAsync(currentAccount);
         }
     }
 }

@@ -387,8 +387,17 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
         {
             status.IsLauncher = true;
         }
-        var ping = (await NetworkCheck.PingAsync(KuroGameApiConfig.BaseAddress[0]));
-        if (!(ping != null && ping.Status == IPStatus.Success))
+        var ping = (
+            await NetworkCheck.PingHostsAsync(
+                [
+                    KuroGameApiConfig.BaseAddress[0],
+                    "https://pc-launcher-sdk-api.kurogame.com",
+                    "https://baidu.com",
+                ],
+                token
+            )
+        );
+        if (!ping)
         {
             SystemEventPublisher.Publish(new() { Message = "网络未连接" });
             return status;
@@ -964,12 +973,12 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
         catch (Exception ex)
         {
             this.SystemEventPublisher.Publish(
-                    new SystemMessagerModel()
-                    {
-                        Message = $"选择账号保存异常",
-                        Delay = TimeSpan.FromSeconds(10).TotalSeconds,
-                    }
-                );
+                new SystemMessagerModel()
+                {
+                    Message = $"选择账号保存异常",
+                    Delay = TimeSpan.FromSeconds(10).TotalSeconds,
+                }
+            );
             Logger.WriteError($"选择账号保存异常:{ex.Message},{ex.StackTrace}");
             return false;
         }

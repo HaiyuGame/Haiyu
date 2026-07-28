@@ -146,9 +146,7 @@ namespace Haiyu.Models.Wrapper.Wiki
 
 
                         currVal = _overCountdownTimeSpace.TotalSeconds;
-                        msg = LanguageService.FormatByText(LanguageService.GetStringByText("剩余{0}天"), _endCountdownTimeSpan.Days) +
-                                    LanguageService.FormatByText(LanguageService.GetStringByText("{0}小时"), _endCountdownTimeSpan.Hours) +
-                                    LanguageService.FormatByText(LanguageService.GetStringByText("{0}分"), _endCountdownTimeSpan.Minutes);
+                        msg = DisplayTimeFormatter.FormatDuration(_endCountdownTimeSpan);
                         return (currVal, maxVal, msg);
                     }
                     return (0, 0, string.Empty);
@@ -273,9 +271,10 @@ namespace Haiyu.Models.Wrapper.Wiki
                                                 }
 
                                                 disputeItem.CurrentProgress = _overCountdownTimeSpace.TotalSeconds;
-                                                disputeItem.RemainingTime = LanguageService.FormatByText(LanguageService.GetStringByText("剩余{0}天"), _endCountdownTimeSpan.Days) +
-                                                            LanguageService.FormatByText(LanguageService.GetStringByText("{0}小时"), _endCountdownTimeSpan.Hours) +
-                                                            LanguageService.FormatByText(LanguageService.GetStringByText("{0}分"), _endCountdownTimeSpan.Minutes);
+                                                disputeItem.RemainingTime =
+                                                    DisplayTimeFormatter.FormatDuration(
+                                                        _endCountdownTimeSpan
+                                                    );
                                                 disputeItem.ColorVal = "#66CCFF";
 
 

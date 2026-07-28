@@ -90,9 +90,7 @@ namespace Haiyu.Models.Wrapper.Wiki
             Message = LanguageService.GetStringByText("进行中");
             this.CurrentProgress = _overCountdownTimeSpace.TotalSeconds;
             this.Color = "#3399FF";
-            TotalSpan = LanguageService.FormatByText(LanguageService.GetStringByText("剩余{0}天"), _endCountdownTimeSpan.Days) +
-                        LanguageService.FormatByText(LanguageService.GetStringByText("{0}小时"), _endCountdownTimeSpan.Hours) +
-                        LanguageService.FormatByText(LanguageService.GetStringByText("{0}分"), _endCountdownTimeSpan.Minutes);
+            TotalSpan = DisplayTimeFormatter.FormatDuration(_endCountdownTimeSpan);
         }
     }
 }

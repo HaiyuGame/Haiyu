@@ -144,7 +144,7 @@ public class Base
             {
                 var dateTimeOffset = time - DateTime.Now;
                 this.StoreEnergyRecoverEndTime =
-                    $"{dateTimeOffset.Hours}小时{dateTimeOffset.Minutes}分{dateTimeOffset.Seconds}秒";
+                    DisplayTimeFormatter.FormatDuration(dateTimeOffset);
                 field = value;
                 return;
             }
@@ -177,7 +177,7 @@ public class Base
             {
                 var dateTimeOffset = time - DateTime.Now;
                 this.EnergyRecoverEndTime =
-                    $"{dateTimeOffset.Hours}小时{dateTimeOffset.Minutes}分{dateTimeOffset.Seconds}秒";
+                    DisplayTimeFormatter.FormatDuration(dateTimeOffset);
                 field = value;
                 return;
             }

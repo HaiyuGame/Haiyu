@@ -185,7 +185,7 @@ public partial class PunishLocalGameRoleItem : ObservableObject, ILocalGameRole
             {
                 var dateTimeOffset = time - DateTime.Now;
                 this.ActionPointNextExpiredEndTime =
-                    $"{dateTimeOffset.Hours}:{dateTimeOffset.Minutes}:{dateTimeOffset.Seconds}";
+                    DisplayTimeFormatter.FormatDuration(dateTimeOffset);
                 return;
             }
             this.ActionPointNextExpiredEndTime = "已充满";
@@ -205,7 +205,7 @@ public partial class PunishLocalGameRoleItem : ObservableObject, ILocalGameRole
             {
                 var dateTimeOffset = time - DateTime.Now;
                 this.BossSingleEndtimeText =
-                    $"{dateTimeOffset.Hours:D2}:{dateTimeOffset.Minutes:D2}:{dateTimeOffset.Seconds:D2}";
+                    DisplayTimeFormatter.FormatDuration(dateTimeOffset);
                 return;
             }
             this.BossSingleEndtimeText = "已充满";
@@ -232,8 +232,7 @@ public partial class PunishLocalGameRoleItem : ObservableObject, ILocalGameRole
         var starTime = DateTimeOffset.FromUnixTimeMilliseconds(ArenaFightStartTime).ToLocalTime().DateTime;
         var endTime = DateTimeOffset.FromUnixTimeMilliseconds(ArenaEndTime).ToLocalTime().DateTime;
         var dateTimeOffset = endTime - starTime;
-        this.ArenaEndTimeText =
-            $"{dateTimeOffset.Hours}:{dateTimeOffset.Minutes}:{dateTimeOffset.Seconds}";
+        this.ArenaEndTimeText = DisplayTimeFormatter.FormatDuration(dateTimeOffset);
         return;
     }
 }

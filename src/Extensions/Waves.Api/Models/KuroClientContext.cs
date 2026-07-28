@@ -11,6 +11,8 @@ namespace Waves.Api.Models
     [JsonSerializable(typeof(KuroClientReturnCode<KuroClientHomeFeedModel>))]
     [JsonSerializable(typeof(KuroClientReturnCode<bool>))]
     [JsonSerializable(typeof(KuroClientReturnCode<KuroClientPostPageDetail>))]
+    [JsonSerializable(typeof(KuroClientReturnCode<KuroEncourageProcessModel>))]
+    [JsonSerializable(typeof(KuroClientReturnCode<EncourageTotalGoldModel>))]
     public partial class KuroClientContext:JsonSerializerContext
     {
     }

@@ -201,4 +201,14 @@ public interface IKuroClient
         HomeFeedPostDetailOption option,
         CancellationToken token = default
     );
+
+    Task<KuroClientReturnCode<KuroEncourageProcessModel>?> GetEncourageProcessAsync(
+        KuroAccount account,
+        EncourageProcessOption option,
+        CancellationToken token = default
+    );
+    Task<KuroClientReturnCode<EncourageTotalGoldModel>?> GetEncourageTotalGoldAsync(
+        KuroAccount account,
+        CancellationToken token = default
+    );
 }

@@ -326,7 +326,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase
 
     private KuroLoginSnapshot? CreateLoginSnapshot()
     {
-        var session = AccountService.Current;
+        var session = AccountService.CurrentAccount;
         if (session is null)
         {
             return null;
@@ -335,8 +335,8 @@ public partial class WavesWikiViewModel : WikiViewModelBase
         return new KuroLoginSnapshot
         {
             Token = session.Token ?? string.Empty,
-            Did = session.TokenDid ?? string.Empty,
-            UserId = session.TokenId ?? string.Empty,
+            Did = session.DeviceId ?? string.Empty,
+            UserId = session.UserId ?? string.Empty,
             AppVersion = App.AppVersion,
             ChannelId = "8",
             EnterSource = "12",

@@ -38,21 +38,13 @@ namespace KuroGameDownloadProgram.Tests
                 .Build();
             var accoutService = host.Services.GetRequiredService<IKuroAccountService>();
             await accoutService.SetAutoUser();
-            var currentAccount = accoutService.Current;
+            var currentAccount = accoutService.CurrentAccount;
             var kuroClient = host.Services.GetRequiredService<IKuroClient>();
-            var result = await kuroClient.FeedHomeListsAsync(
-                KuroAccount.From(currentAccount),
-                HomeFeedOption.CreateHomeWaves(Random.Shared.Next(20), 20)
+            var en = await kuroClient.GetEncourageProcessAsync(
+                currentAccount,
+                EncourageProcessOption.CreateDefault(currentAccount.UserId)
             );
-            var postItem = result.Data.PostList[0];
-            var sharedResult = await kuroClient.SharedPostIdAsync(
-                KuroAccount.From(currentAccount),
-                HomeFeedSharedOption.CreateWaves(postItem.PostId)
-            );
-            var detail = await kuroClient.GetFeedPageDetailAsync(
-                KuroAccount.From(currentAccount),
-                HomeFeedPostDetailOption.Create(postItem.PostId)
-            );
+            var total = await kuroClient.GetEncourageTotalGoldAsync(currentAccount);
         }
     }
 }

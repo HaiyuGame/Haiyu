@@ -116,7 +116,7 @@
                         Grid.Column="1"
                         Margin="15,0,0,30"
                         Orientation="Horizontal">
-                        <HyperlinkButton Content="Github" NavigateUri="https://github.com/BlameTwo/Haiyu" />
+                        <HyperlinkButton Content="GitHub" NavigateUri="https://github.com/BlameTwo/Haiyu" />
                         <HyperlinkButton Content="{x:Bind helper:LanguageService.GetString('Display_MingchaoOfficialSite')}" NavigateUri="https://mc.kurogames.com/" />
                         <HyperlinkButton Content="{x:Bind helper:LanguageService.GetString('Display_OfficialSite')}" NavigateUri="https://pns.kurogames.com/" />
                         <HyperlinkButton Content="{x:Bind helper:LanguageService.GetString('Display_DownloadTheLatestVersion')}" NavigateUri="https://github.com/BlameTwo/Haiyu/releases/latest" />

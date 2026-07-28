@@ -50,9 +50,9 @@
                                         Command="{x:Bind SetCurrentAccountCommand}"
                                         Text="{x:Bind helper:LanguageService.GetString('Display_Choose')}"
                                         Visibility="{x:Bind IsSelect, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}" />
-                                    <MenuFlyoutItem Command="{x:Bind CopyTokenCommand}" Text="{x:Bind helper:LanguageService.GetString('Display_CopyToken')}" />
-                                    <MenuFlyoutItem Command="{x:Bind CopyDeviceDidCommand}" Text="{x:Bind helper:LanguageService.GetString('Display_DuplicateDid')}" />
-                                    <MenuFlyoutItem Command="{x:Bind CopyUserIdCommand}" Text="{x:Bind helper:LanguageService.GetString('Display_DuplicateAccountId')}" />
+                                    <MenuFlyoutItem Command="{x:Bind CopyTokenCommand}" Text="{x:Bind CopyTokenText}" />
+                                    <MenuFlyoutItem Command="{x:Bind CopyDeviceDidCommand}" Text="{x:Bind CopyDeviceDidText}" />
+                                    <MenuFlyoutItem Command="{x:Bind CopyUserIdCommand}" Text="{x:Bind CopyUserIdText}" />
                                 </MenuFlyout>
                             </Border.ContextFlyout>
                             <Grid Padding="20">

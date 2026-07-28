@@ -61,6 +61,7 @@ global using Waves.Api.Models.Wrappers;
 global using Waves.Core;
 global using Waves.Core.Contracts;
 global using Waves.Core.GameContext;
+global using Waves.Core.Helpers;
 global using Waves.Core.Models;
 global using WavesLauncher.Core.Contracts;
 global using Windows.Foundation;

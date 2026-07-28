@@ -2,7 +2,7 @@ namespace Waves.Core.Common;
 
 public static class NetworkCheck
 {
-    public static async Task<PingReply?> PingAsync(string host)
+    public static async Task<PingReply?> PingAsync(string host, CancellationToken token)
     {
         try
         {
@@ -14,5 +14,26 @@ public static class NetworkCheck
         {
             return null;
         }
+    }
+
+    public static async Task<bool> PingHostsAsync(IEnumerable<string> host,CancellationToken token = default)
+    {
+        foreach (var item in host)
+        {
+            try
+            {
+                var state = await PingAsync(item,token);
+                if(state == null || state.Status != IPStatus.Success)
+                {
+                    continue;
+                }
+                return true;
+            }
+            catch (Exception)
+            {
+                continue;
+            }
+        }
+        return true;
     }
 }

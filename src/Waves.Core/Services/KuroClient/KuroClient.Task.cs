@@ -100,6 +100,21 @@ partial class KuroClient
         );
     }
 
+    public async Task<KuroClientReturnCode<KuroEncourageProcessModel>?> GetEncourageProcessAsync(
+        KuroAccount account,
+        EncourageProcessOption option,
+        CancellationToken token = default
+    )
+    {
+        return await SendTaskRequestAsync(
+            account,
+            "https://api.kurobbs.com/encourage/level/getTaskProcess",
+            option.ConvertParam(),
+            KuroClientContext.Default.KuroClientReturnCodeKuroEncourageProcessModel,
+            token
+        );
+    }
+
     private async Task<KuroClientReturnCode<T>?> SendTaskRequestAsync<T>(
         KuroAccount account,
         string url,
@@ -126,5 +141,19 @@ partial class KuroClient
             return null;
         }
         return taskResult;
+    }
+
+    public async  Task<KuroClientReturnCode<EncourageTotalGoldModel>?> GetEncourageTotalGoldAsync(
+        KuroAccount account,
+        CancellationToken token = default
+    )
+    {
+        return await SendTaskRequestAsync(
+            account,
+            "https://api.kurobbs.com/encourage/gold/getTotalGold",
+            [],
+            KuroClientContext.Default.KuroClientReturnCodeEncourageTotalGoldModel,
+            token
+        );
     }
 }

@@ -17,6 +17,7 @@ namespace Haiyu.Services
         }
 
         public SystemEventPublisher SystemEventPublisher { get; }
+        public IAppContext<App> AppContext { get; }
 
         public async Task<JumpListItem?> CreateJumpListsAndInitCoreAsync(IGameContextV2 context)
         {
@@ -56,6 +57,10 @@ namespace Haiyu.Services
                             return;
                         }
                         await context.StartGameAsync();
+                    }
+                    else
+                    {
+                        Instance.Host.Services.GetRequiredService<IAppContext<App>>().App.MainWindow.Show();
                     }
                 }
             }
