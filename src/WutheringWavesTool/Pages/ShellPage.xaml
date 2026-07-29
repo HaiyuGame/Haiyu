@@ -116,7 +116,7 @@
                                 </ui:ImageEx.Source>
                             </ui:ImageEx>
                             <Button.Flyout>
-                                <Flyout Placement="BottomEdgeAlignedRight">
+                                <Flyout ShouldConstrainToRootBounds="False">
                                     <Grid Width="300" Padding="5">
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="auto" />

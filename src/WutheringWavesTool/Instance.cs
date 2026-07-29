@@ -76,18 +76,18 @@ public static class InstanceBuilderExtensions
             {
                 #region View and ViewModel
                 Service
-                    .AddHostedService<RpcService>(
-                        (s) =>
-                        {
-                            RpcService service = new RpcService(
-                                s.GetRequiredService<ILogger<RpcService>>()
-                            );
-                            service.RegisterMethod(
-                                s.GetRequiredService<IRpcMethodService>().Method
-                            );
-                            return service;
-                        }
-                    )
+                    //.AddHostedService<RpcService>(
+                    //    (s) =>
+                    //    {
+                    //        RpcService service = new RpcService(
+                    //            s.GetRequiredService<ILogger<RpcService>>()
+                    //        );
+                    //        service.RegisterMethod(
+                    //            s.GetRequiredService<IRpcMethodService>().Method
+                    //        );
+                    //        return service;
+                    //    }
+                    //)
                     .AddSingleton<AppSettings>()
                     .AddSingleton<GithubIpSettings>()
                     .AddSingleton<IIoCircuitBreaker, IoCircuitBreaker>()
