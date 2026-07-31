@@ -459,7 +459,8 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
         {
             _cdpClient.ConnectionStateChanged -= OnCdpClientConnectionStateChanged;
             _cdpClient.EventHandlerException -= OnCdpClientEventHandlerException;
-            _ = _cdpClient.DisposeAsync();
+            _cdpClient.DisposeAsync().AsTask().GetAwaiter().GetResult();
+            _cdpClient = null;
         }
 
         _adbClient.Dispose();

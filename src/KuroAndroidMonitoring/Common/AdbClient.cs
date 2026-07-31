@@ -398,7 +398,7 @@ public sealed class AdbClient : IDisposable
     {
         try
         {
-            RemoveTrackedForwardsAsync().GetAwaiter().GetResult();
+            _= RemoveTrackedForwardsAsync();
         }
         catch (InvalidOperationException)
         {
