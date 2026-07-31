@@ -66,17 +66,9 @@ public static class LanguageService
         {
             return result;
         }
-        // Keep newly added UI resources readable while a locale is being completed in
-        // LanguageEditer.  A missing translated entry should never render as an empty
-        // control in the application.
         return Zh_Hans.TryGetValue(key, out result) ? result : key;
     }
 
-    /// <summary>
-    /// Localizes text assigned from C# code. The Simplified Chinese text remains the
-    /// readable lookup identity while the actual value still comes from the same
-    /// language dictionaries used by XAML.
-    /// </summary>
     public static string GetStringByText(string defaultText)
     {
         return DefaultTextKeys.TryGetValue(defaultText, out var key)
