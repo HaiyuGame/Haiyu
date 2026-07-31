@@ -241,7 +241,7 @@ public sealed class AdbClient : IDisposable
         EnsureSuccess(result, message);
     }
 
-    private async Task<IReadOnlyList<DevToolsTargetInfo>> GetDevToolsTargetsFromForwardedPortAsync(int port, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<DevToolsTargetInfo>> GetDevToolsTargetsFromForwardedPortAsync(int port, CancellationToken cancellationToken)
     {
         Uri[] endpoints =
         [

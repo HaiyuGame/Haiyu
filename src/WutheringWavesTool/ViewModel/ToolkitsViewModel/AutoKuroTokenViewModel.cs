@@ -1,3 +1,4 @@
+using System.Net.Sockets;
 using System.Net.WebSockets;
 using ChromeCDPSharp.Common;
 using ChromeCDPSharp.Models;
@@ -8,6 +9,8 @@ using Windows.Security.Credentials.UI;
 using ZXing.Aztec.Internal;
 
 namespace Haiyu.ViewModel.ToolkitsViewModel;
+
+
 
 public partial class AutoKuroTokenViewModel : ViewModelBase
 {
@@ -62,7 +65,6 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
 
     [ObservableProperty]
     public partial string PlayerId { get; set; }
-    public ObservableCollection<WebViewSocketInfo> WebSockets { get; private set; }
 
     [RelayCommand]
     public async Task SelectAdbPathAsync()
@@ -95,15 +97,15 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
             return;
         }
 
-        this.WebSockets = (await _adbClient.GetWebViewSocketsAsync(SelectDevice.Serial)).ToObservableCollection();
-        if (WebSockets.Count == 0)
+        var sockets = await _adbClient.GetWebViewSocketsAsync(SelectDevice.Serial);
+        if (sockets.Count == 0)
         {
             AppendLog(LanguageService.GetStringByText("未找到 WebView 调试 Socket。"));
             return;
         }
 
         (WebViewSocketInfo Socket, DevToolsTargetInfo Target)? selectedTarget = null;
-        foreach (var socket in WebSockets)
+        foreach (var socket in sockets)
         {
             IReadOnlyList<DevToolsTargetInfo> targets;
             try
@@ -447,7 +449,7 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
             """);
             Clipboard.SetContent(package);
         }
-        
+
     }
 
     public override void Dispose()
