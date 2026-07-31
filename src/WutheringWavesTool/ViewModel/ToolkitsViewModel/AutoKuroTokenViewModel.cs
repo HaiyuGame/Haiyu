@@ -62,6 +62,7 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
 
     [ObservableProperty]
     public partial string PlayerId { get; set; }
+    public ObservableCollection<WebViewSocketInfo> WebSockets { get; private set; }
 
     [RelayCommand]
     public async Task SelectAdbPathAsync()
@@ -94,15 +95,15 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
             return;
         }
 
-        var sockets = await _adbClient.GetWebViewSocketsAsync(SelectDevice.Serial);
-        if (sockets.Count == 0)
+        this.WebSockets = (await _adbClient.GetWebViewSocketsAsync(SelectDevice.Serial)).ToObservableCollection();
+        if (WebSockets.Count == 0)
         {
             AppendLog(LanguageService.GetStringByText("未找到 WebView 调试 Socket。"));
             return;
         }
 
         (WebViewSocketInfo Socket, DevToolsTargetInfo Target)? selectedTarget = null;
-        foreach (var socket in sockets)
+        foreach (var socket in WebSockets)
         {
             IReadOnlyList<DevToolsTargetInfo> targets;
             try
