@@ -5,6 +5,7 @@ using Project.WPFSetup.Common.Setups;
 using Project.WPFSetup.Resources;
 using Project.WPFSetup.Services;
 using System.Diagnostics;
+using System.IO;
 using System.Windows;
 
 namespace Project.WPFSetup.ViewModels.UserViewModels;
@@ -88,7 +89,7 @@ public partial class UpdateViewModel : ObservableObject
     [RelayCommand]
     void RunAndClose()
     {
-        Process.Start(this._curentLocation.Item2);
+        Process.Start(Path.Combine(this._curentLocation.Item2, SetupProperty.InstallExeName));
         Environment.Exit(0);
     }
 
