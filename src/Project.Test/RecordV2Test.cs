@@ -8,7 +8,7 @@ using Waves.Core.Contracts;
 using Waves.Core.Contracts.CloudGame;
 using Waves.Core.Services;
 using Waves.Core.Services.CloudGameServices;
-using Waves.Core.Settings;
+using Waves.Settings;
 
 namespace Project.Test;
 

@@ -1,4 +1,4 @@
-using Waves.Core.Settings;
+using Waves.Settings;
 
 namespace Haiyu.Services;
 

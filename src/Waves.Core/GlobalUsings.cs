@@ -85,8 +85,8 @@ global using Waves.Core.Models.Enums;
 global using Waves.Core.Models.Handlers;
 global using Waves.Core.Services;
 global using Waves.Core.Services.CloudGameServices;
-global using Waves.Core.Settings;
 global using Waves.Core.Socket;
+global using Waves.Settings;
 
 global using WavesLauncher.Core.Contracts;
 

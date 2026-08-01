@@ -8,7 +8,7 @@ using Waves.Core;
 using Waves.Core.Contracts;
 using Waves.Core.Models;
 using Waves.Core.Services;
-using Waves.Core.Settings;
+using Waves.Settings;
 using WavesLauncher.Core.Contracts;
 
 namespace KuroGameDownloadProgram.Tests

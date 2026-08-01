@@ -21,6 +21,11 @@
       <BuildType Solution="All|x64" Project="Debug" />
       <BuildType Solution="All|x86" Project="Debug" />
     </Project>
+    <Project Path="D:/WorkSpace/Haiyu/src/Waves.Settings/Waves.Settings.csproj" Id="b8c4e2a1-5f3d-4c9e-9a12-7d6e8f0a1b2c">
+      <BuildType Solution="All|Any CPU" Project="Release" />
+      <BuildType Solution="All|x64" Project="Debug" />
+      <BuildType Solution="All|x86" Project="Debug" />
+    </Project>
     <Project Path="Haiyu.Analyzers/Haiyu.Analyzers.csproj">
       <BuildType Solution="All|*" Project="Debug" />
     </Project>

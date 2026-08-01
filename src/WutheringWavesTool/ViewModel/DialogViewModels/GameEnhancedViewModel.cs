@@ -3,7 +3,7 @@ using Haiyu.ServiceHost;
 using Haiyu.ServiceHost.XBox.Commons;
 using Haiyu.Services;
 using Haiyu.Services.DialogServices;
-using Waves.Core.Settings;
+using Waves.Settings;
 
 namespace Haiyu.ViewModel.DialogViewModels;
 

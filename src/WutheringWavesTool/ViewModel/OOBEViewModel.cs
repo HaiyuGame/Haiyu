@@ -1,6 +1,6 @@
 using Haiyu.ViewModel.OOBEViewModels;
 using Microsoft.Windows.AppLifecycle;
-using Waves.Core.Settings;
+using Waves.Settings;
 
 namespace Haiyu.ViewModel;
 

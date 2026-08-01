@@ -18,8 +18,10 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <!-- GithubIpSettings 仍在本项目，需要源生成器 -->
     <ProjectReference Include="..\..\Haiyu.Analyzers\Haiyu.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\..\Waves.Core\Waves.Core.csproj" />
+    <ProjectReference Include="..\..\Waves.Settings\Waves.Settings.csproj" />
     <ProjectReference Include="..\ProxyExtensions\ProxyExtensions.csproj" />
   </ItemGroup>
   

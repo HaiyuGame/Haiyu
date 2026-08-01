@@ -1,8 +1,8 @@
-﻿using MemoryPack;
+using MemoryPack;
 using System.IO;
 using Waves.Api.Models.Rpc;
 using Waves.Api.Models.Rpc.CloudGame;
-using Waves.Core.Settings;
+using Waves.Settings;
 
 namespace Haiyu.Services;
 

@@ -1,5 +1,5 @@
-﻿using Haiyu.Plugin.Extensions;
-using Waves.Core.Settings;
+using Haiyu.Plugin.Extensions;
+using Waves.Settings;
 using Windows.Graphics.Imaging;
 using WinUIEx.Messaging;
 

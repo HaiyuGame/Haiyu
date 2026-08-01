@@ -25,7 +25,7 @@ using Waves.Core.Contracts.CloudGame;
 using Waves.Core.Models;
 using Waves.Core.Services;
 using Waves.Core.Services.CloudGameServices;
-using Waves.Core.Settings;
+using Waves.Settings;
 
 namespace Haiyu;
 
@@ -76,20 +76,22 @@ public static class InstanceBuilderExtensions
             {
                 #region View and ViewModel
                 Service
-                    //.AddHostedService<RpcService>(
-                    //    (s) =>
-                    //    {
-                    //        RpcService service = new RpcService(
-                    //            s.GetRequiredService<ILogger<RpcService>>()
-                    //        );
-                    //        service.RegisterMethod(
-                    //            s.GetRequiredService<IRpcMethodService>().Method
-                    //        );
-                    //        return service;
-                    //    }
-                    //)
+                    .AddHostedService<RpcService>(
+                        (s) =>
+                        {
+                            RpcService service = new RpcService(
+                                s.GetRequiredService<ILogger<RpcService>>(),
+                                s.GetRequiredService<RpcSettings>()
+                            );
+                            service.RegisterMethod(
+                                s.GetRequiredService<IRpcMethodService>().Method
+                            );
+                            return service;
+                        }
+                    )
                     .AddSingleton<AppSettings>()
                     .AddSingleton<GithubIpSettings>()
+                    .AddSingleton<RpcSettings>()
                     .AddSingleton<IIoCircuitBreaker, IoCircuitBreaker>()
                     .AddTransient<IAppActivation, AppActivation>()
                     #region XBox

@@ -1,3 +1,5 @@
+using Waves.Settings;
+
 namespace Waves.Core.Models;
 
 public class GameLocalSettingName
@@ -294,18 +296,3 @@ public class GameLocalConfig
     }
 }
 
-public class LocalSettings
-{
-    [JsonPropertyName("key")]
-    public string Key { get; set; }
-
-    [JsonPropertyName("value")]
-    public string Value { get; set; }
-}
-
-
-
-[JsonSerializable(typeof(LocalSettings))]
-[JsonSerializable(typeof(List<LocalSettings>))]
-[JsonSerializable(typeof(Dictionary<string, string>))]
-public partial class LocalSettingsJsonContext : JsonSerializerContext { };

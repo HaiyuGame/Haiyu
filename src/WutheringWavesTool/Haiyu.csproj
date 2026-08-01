@@ -121,6 +121,7 @@
 		<ProjectReference Include="..\Extensions\Waves.Api\Waves.Api.csproj" />
 		<ProjectReference Include="..\KuroAndroidMonitoring\ChromeCDPSharp.csproj" />
 		<ProjectReference Include="..\Waves.Core\Waves.Core.csproj" />
+		<ProjectReference Include="..\Waves.Settings\Waves.Settings.csproj" />
 		<ProjectReference Include="..\Haiyu.Controls\Haiyu.Controls.csproj" />
 		<ProjectReference Include="..\Haiyu.Charts.WinUI\Haiyu.Charts.WinUI.csproj" />
 		<ProjectReference Include="..\Haiyu.Pickers\Haiyu.Pickers.csproj" />

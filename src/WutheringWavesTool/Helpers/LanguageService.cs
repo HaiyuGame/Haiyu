@@ -1,6 +1,6 @@
 using LanguageEditer.Model;
 using Microsoft.Windows.Globalization;
-using Waves.Core.Settings;
+using Waves.Settings;
 
 namespace Haiyu.Helpers;
 

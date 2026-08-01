@@ -6,7 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Waves.Core.Contracts.Tasks;
 using Waves.Core.Services;
 using Waves.Core.Services.Tasks;
-using Waves.Core.Settings;
+using Waves.Settings;
 namespace Haiyu.Services.Tasks;
 
 public sealed class AutoKuroGameSignService : TimedTaskServiceBase,ITaskName

@@ -1,7 +1,7 @@
 using System.Security.Principal;
 using Haiyu.Plugin.Extensions;
 using Microsoft.WindowsAppSDK;
-using Waves.Core.Settings;
+using Waves.Settings;
 using Windows.Management.Deployment;
 
 namespace Haiyu.ViewModel;
@@ -39,7 +39,7 @@ partial class SettingViewModel
             TipShow.ShowMessage(LanguageService.GetStringByText("密钥不能为空"), Symbol.Clear);
             return;
         }
-        await AppSettings.SetRpcTokenAsync(Md5Helper.ComputeMd532(RpcToken));
+        await RpcSettings.SetAuthTokenAsync(Md5Helper.ComputeMd532(RpcToken));
         TipShow.ShowMessage(LanguageService.GetStringByText("密钥已经更新"), Symbol.Accept);
     }
 

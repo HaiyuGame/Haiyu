@@ -1,5 +1,5 @@
 using Waves.Core.Services;
-using Waves.Core.Settings;
+using Waves.Settings;
 
 namespace Haiyu.Common;
 

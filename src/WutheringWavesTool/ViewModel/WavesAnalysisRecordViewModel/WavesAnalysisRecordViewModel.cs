@@ -137,7 +137,7 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
     {
         if (folderPath == null)
         {
-            folderPath = Waves.Core.Settings.AppSettings.RecordFolder;
+            folderPath = Waves.Settings.AppSettings.RecordFolder;
         }
         var jsonFiles = Directory.GetFiles(folderPath, "*.json").ToList();
         if (jsonFiles.Count == 0)

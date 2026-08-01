@@ -7,7 +7,7 @@ using Waves.Core.GameContext.ContextsV2;
 using Waves.Core.GameContext.ContextsV2.Punish;
 using Waves.Core.GameContext.ContextsV2.Waves;
 using Waves.Core.Services;
-using Waves.Core.Settings;
+using Waves.Settings;
 using Windows.UI.StartScreen;
 using TitleBar = Haiyu.Controls.TitleBar;
 

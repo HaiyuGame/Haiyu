@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Waves.Api.Models;
 using Waves.Api.Models.Rpc;
+using Waves.Settings;
 
 namespace Haiyu.ServiceHost;
 
@@ -71,24 +72,26 @@ public static class TaskExtensions
 public class RpcService : IHostedService
 {
     private readonly ILogger<RpcService> _logger;
+    private readonly RpcSettings _rpcSettings;
     private readonly SemaphoreSlim _connectionLimiter;
     private string _listenPrefix;
     private Task _listenLoopTask;
     private ArrayPool<byte> _arrayPool = ArrayPool<byte>.Shared;
     private CancellationTokenSource _serviceCts;
 
-    // 简化配置：保留核心优化，移除过度的超时限制
     private const int MaxReceiveBufferSize = 1024 * 1024;
-    private const int ConnectionIdleTimeoutMs = 300000; // 延长空闲超时为5分钟，避免误关闭
+
+    private const int ConnectionIdleTimeoutMs = 300000;
 
     public HttpListener SocketServer { get; private set; }
     public Dictionary<string, Func<string, List<RpcParams>, Task<string>>> Method { get; private set; }
 
-    public int Port => 10010;
+    public int Port { get; private set; } = 10010;
 
-    public RpcService(ILogger<RpcService> logger)
+    public RpcService(ILogger<RpcService> logger,RpcSettings rpcSettings)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _rpcSettings = rpcSettings;
         _listenPrefix = $"http://localhost:{Port}/rpc/";
         int maxConnections = 100;
         _connectionLimiter = new SemaphoreSlim(maxConnections, maxConnections);
@@ -103,6 +106,7 @@ public class RpcService : IHostedService
     #region IHostedService 实现
     public async Task StartAsync(CancellationToken cancellationToken)
     {
+        this.Port = await _rpcSettings.GetRpcLocalPortAsync(cancellationToken);
         _logger.LogInformation("Starting Rpc WebSocket service...");
         // 修复：不链接_serviceCts，避免启动时取消令牌冲突
         await InitRpcAsync(cancellationToken).ConfigureAwait(false);
@@ -121,7 +125,7 @@ public class RpcService : IHostedService
     {
         if (SocketServer != null)
         {
-            _logger.LogWarning("Rpc service is already running, restarting...");
+            _logger.LogWarning("RPC 服务终端，开始重新监听");
             await CloseRpcAsync(token).ConfigureAwait(false);
         }
 
@@ -136,7 +140,7 @@ public class RpcService : IHostedService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to initialize Rpc WebSocket service");
+            _logger.LogError(ex, $"RPC服务错误：{ex.Message}+{ex.StackTrace}");
             await CloseRpcAsync(token).ConfigureAwait(false);
             throw;
         }
@@ -180,9 +184,6 @@ public class RpcService : IHostedService
         }
     }
     #endregion
-
-    public Task<bool> GetOpenConnectAsync() => throw new NotImplementedException();
-    public Task SetOpenConnect(bool value) => throw new NotImplementedException();
 
     private async Task ListenForConnectionsAsync(CancellationToken token)
     {
@@ -283,7 +284,6 @@ public class RpcService : IHostedService
                 remoteEndPoint.GetType().Name);
             return false;
         }
-
         IPAddress clientIp = ipEndPoint.Address;
         bool isLocal = IPAddress.IsLoopback(clientIp);
 

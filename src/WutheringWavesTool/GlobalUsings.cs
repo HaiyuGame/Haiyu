@@ -63,6 +63,7 @@ global using Waves.Core.Contracts;
 global using Waves.Core.GameContext;
 global using Waves.Core.Helpers;
 global using Waves.Core.Models;
+global using Waves.Settings;
 global using WavesLauncher.Core.Contracts;
 global using Windows.Foundation;
 global using Windows.Media.Casting;

@@ -1,6 +1,4 @@
-using Haiyu.Analyzers;
-
-namespace Waves.Core.Settings;
+namespace Waves.Settings;
 
 [SettingsAttribute<string>(Name = "WallpaperType", Nullable = true)]
 [SettingsAttribute<string>(Name = "AreaCounterPostion", Nullable = true)]
@@ -14,7 +12,7 @@ namespace Waves.Core.Settings;
 [SettingsAttribute<string>(Name = "CaptureKey", Nullable = true)]
 [SettingsAttribute<string>(Name = "IsCapture", Nullable = true)]
 [SettingsAttribute<string>(Name = "Language", Nullable = true)]
-[SettingsAttribute<bool>(Name = "AutoOOBE", Nullable = true,DefaultValue ="True")]
+[SettingsAttribute<bool>(Name = "AutoOOBE", Nullable = true, DefaultValue = "True")]
 [SettingsAttribute<string>(Name = "ElementTheme")]
 [SettingsAttribute<string>(Name = "RpcToken", Nullable = true)]
 [SettingsAttribute<string>(Name = "WavesAutoOpenContext", Nullable = true)]
@@ -46,6 +44,7 @@ public partial class AppSettings : SettingBase
     public string ToolsPosionFilePath => BassFolder + "\\ToolsPostion.json";
 
     private static readonly string SettingsFilePath = Path.Combine(BassFolder, "System.json");
+
     public static readonly string LogPath = BassFolder + "\\appLogs\\appLog.log";
 
     public static readonly string CloudFolderPath = BassFolder + "\\Cloud";

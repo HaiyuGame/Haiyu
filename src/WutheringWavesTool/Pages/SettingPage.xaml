@@ -428,7 +428,7 @@
                 <ui:SettingsCard
                     Margin="0,5,0,0"
                     Header="{x:Bind helper:LanguageService.GetString('Display_RpcKey')}"
-                    IsEnabled="False">
+                    IsEnabled="True">
                     <ui:SettingsCard.Content>
                         <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
                             <PasswordBox

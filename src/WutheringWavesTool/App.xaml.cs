@@ -4,7 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Windows.ApplicationModel.Resources;
 using Microsoft.Windows.AppLifecycle;
 using Waves.Core.Services;
-using Waves.Core.Settings;
+using Waves.Settings;
 using Windows.ApplicationModel.Activation;
 using Windows.ApplicationModel.Background;
 using Windows.Globalization;

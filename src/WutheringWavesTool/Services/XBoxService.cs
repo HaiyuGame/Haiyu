@@ -6,7 +6,7 @@ using Haiyu.ServiceHost.XBox.Commons;
 using Haiyu.ServiceHost.XBox.helpers;
 using Microsoft.Extensions.Hosting;
 using Waves.Api.Models;
-using Waves.Core.Settings;
+using Waves.Settings;
 
 namespace Haiyu.Services;
 

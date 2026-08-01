@@ -1,7 +1,11 @@
+using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 
-namespace Waves.Core.Common;
+namespace Waves.Settings;
 
+/// <summary>
+/// 设置基类：基于本地 JSON 文件的 key-value 读写（带缓存与文件戳校验）。
+/// </summary>
 public abstract class SettingBase
 {
     private readonly string _configPath;
@@ -177,8 +181,15 @@ public abstract class SettingBase
         }
         finally
         {
-            try { if (File.Exists(tempPath)) File.Delete(tempPath); }
-            catch { }
+            try
+            {
+                if (File.Exists(tempPath))
+                    File.Delete(tempPath);
+            }
+            catch
+            {
+                // ignore cleanup failures
+            }
         }
     }
 }
