@@ -21,4 +21,6 @@ using Waves.Core.Models.Enums;
 using Waves.Core.Services;
 using Waves.Settings;
 
-await KuroClientHomeFeedTest.StartTask();
+//await KuroClientHomeFeedTest.StartTask();
+
+await RpcServiceTest.BuildService();

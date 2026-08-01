@@ -1,11 +1,13 @@
-﻿
+
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
 using Waves.Api.Models.Rpc;
 using Waves.Api.Models.Rpc.Launcher;
 
-namespace Haiyu.Services;
+namespace Haiyu.ServiceHost.Services;
 
 public partial class RpcMethodService
 {
@@ -14,10 +16,10 @@ public partial class RpcMethodService
         VerifyToken(_param);
         AppInfo info = new AppInfo();
         info.RpcVersion = "1.0.0";
-        info.AppVersion = App.AppVersion;
+        info.AppVersion = "1.3.5";
         info.FrameworkVersion = RuntimeInformation.FrameworkDescription;
         info.SdkVersion = $"1.8.251106002";
-        info.WebVersion = CoreWebView2Environment.GetAvailableBrowserVersionString() ?? LanguageService.GetStringByText("未安装");
+        info.WebVersion = "";
         return Task.FromResult(JsonSerializer.Serialize(info,RpcContext.Default.AppInfo));
     }
 

@@ -1,8 +1,12 @@
 using System.Security.Cryptography;
+using Haiyu.ServiceHost.Contracts;
 using Waves.Api.Models.Rpc;
+using Waves.Core.Common;
+using Waves.Core.Contracts;
 using Waves.Settings;
+using WavesLauncher.Core.Contracts;
 
-namespace Haiyu.Services;
+namespace Haiyu.ServiceHost.Services;
 
 public enum RpcMethodKey:int
 {

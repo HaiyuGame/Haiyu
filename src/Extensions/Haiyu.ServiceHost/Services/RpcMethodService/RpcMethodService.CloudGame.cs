@@ -1,10 +1,14 @@
 using MemoryPack;
 using System.IO;
+using System.Text.Json;
+using Waves.Api.Helper;
+using Waves.Api.Models.Record;
 using Waves.Api.Models.Rpc;
 using Waves.Api.Models.Rpc.CloudGame;
+using Waves.Api.Models.Wrappers;
 using Waves.Settings;
 
-namespace Haiyu.Services;
+namespace Haiyu.ServiceHost.Services;
 
 public partial class RpcMethodService
 {
@@ -78,7 +82,7 @@ public partial class RpcMethodService
                 var isLogin = await CloudGameService.OpenUserAsync(user).ConfigureAwait(false);
                 if (!isLogin.Item1)
                 {
-                    throw new RpcException(401, false, LanguageService.GetStringByText("登陆过期，请在客户端重新添加账号"));
+                    throw new RpcException(401, false, "登陆过期，请在客户端重新添加账号");
                 }
                 var FiveGroup = await RecordHelper.GetFiveGroupAsync().ConfigureAwait(false);
                 var AllRole = await RecordHelper.GetAllRoleAsync().ConfigureAwait(false);
@@ -89,7 +93,7 @@ public partial class RpcMethodService
                 var url = await CloudGameService.GetRecordAsync();
                 if(url.Code != 0)
                 {
-                    throw new RpcException(401, false, LanguageService.GetStringByText("请求频繁"));
+                    throw new RpcException(401, false, "请求频繁");
                 }
                 for (int i = 1; i < 10; i++)
                 {
@@ -145,12 +149,12 @@ public partial class RpcMethodService
                 }
                 else
                 {
-                    throw new RpcException(401, false, LanguageService.GetStringByText("抽卡合并完成，无另存文件信息"));
+                    throw new RpcException(401, false, "抽卡合并完成，无另存文件信息");
                 }
             }
             else
             {
-                throw new RpcException(401,false,LanguageService.GetStringByText("无查询用户"));
+                throw new RpcException(401,false,"无查询用户");
             }
         }
         catch (RpcException ex)

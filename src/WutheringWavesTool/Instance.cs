@@ -5,6 +5,8 @@ using Haiyu.Plugin.Common;
 using Haiyu.Plugin.Contracts;
 using Haiyu.Plugin.Services;
 using Haiyu.ServiceHost;
+using Haiyu.ServiceHost.Contracts;
+using Haiyu.ServiceHost.Services;
 using Haiyu.ServiceHost.XBox.Commons;
 using Haiyu.Services.DialogServices;
 using Haiyu.Services.Navigations.NavigationViewServices;
@@ -37,7 +39,7 @@ public static class Instance
     {
         EnsureMemoryPackFormatters();
         Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder().AppBuilder().Build();
-        _ = Task.Run(async()=> await Host.StartAsync());
+        _ = Task.Run(async () => await Host.StartAsync());
     }
 
     static void EnsureMemoryPackFormatters()
@@ -80,7 +82,7 @@ public static class InstanceBuilderExtensions
                         (s) =>
                         {
                             RpcService service = new RpcService(
-                                s.GetRequiredService<ILogger<RpcService>>(),
+                                s.GetRequiredKeyedService<LoggerService>("AppLog"),
                                 s.GetRequiredService<RpcSettings>()
                             );
                             service.RegisterMethod(
@@ -162,17 +164,11 @@ public static class InstanceBuilderExtensions
                 #endregion
                     #region More
                     .AddTransient<IPageService, PageService>()
-                    .AddTransient<IPickersService>(
-                        serviceProvider =>
-                            new NativePickersService(
-                                () =>
-                                    WinRT.Interop.WindowNative.GetWindowHandle(
-                                        serviceProvider
-                                            .GetRequiredService<IAppContext<App>>()
-                                            .App.MainWindow
-                                    )
-                            )
-                    )
+                    .AddTransient<IPickersService>(serviceProvider => new NativePickersService(() =>
+                        WinRT.Interop.WindowNative.GetWindowHandle(
+                            serviceProvider.GetRequiredService<IAppContext<App>>().App.MainWindow
+                        )
+                    ))
                     .AddSingleton<ITipShow, TipShow>()
                     .AddKeyedTransient<ITipShow, PageTipShow>("Cache")
                     .AddKeyedTransient<IDialogManager, MainDialogService>("Cache")

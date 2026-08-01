@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Buffers;
 using System.Net;
@@ -8,8 +6,11 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Waves.Api.Models;
 using Waves.Api.Models.Rpc;
+using Waves.Core.Services;
 using Waves.Settings;
 
 namespace Haiyu.ServiceHost;
@@ -24,7 +25,10 @@ public static class TaskExtensions
         using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         try
         {
-            var completedTask = await Task.WhenAny(task, Task.Delay(Timeout.Infinite, linkedCts.Token))
+            var completedTask = await Task.WhenAny(
+                    task,
+                    Task.Delay(Timeout.Infinite, linkedCts.Token)
+                )
                 .ConfigureAwait(false);
 
             if (completedTask == task)
@@ -41,15 +45,15 @@ public static class TaskExtensions
         }
     }
 
-    public static async Task WithCancellation(
-        this Task task,
-        CancellationToken cancellationToken
-    )
+    public static async Task WithCancellation(this Task task, CancellationToken cancellationToken)
     {
         using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         try
         {
-            var completedTask = await Task.WhenAny(task, Task.Delay(Timeout.Infinite, linkedCts.Token))
+            var completedTask = await Task.WhenAny(
+                    task,
+                    Task.Delay(Timeout.Infinite, linkedCts.Token)
+                )
                 .ConfigureAwait(false);
 
             if (completedTask == task)
@@ -71,7 +75,7 @@ public static class TaskExtensions
 
 public class RpcService : IHostedService
 {
-    private readonly ILogger<RpcService> _logger;
+    private readonly LoggerService _logger;
     private readonly RpcSettings _rpcSettings;
     private readonly SemaphoreSlim _connectionLimiter;
     private string _listenPrefix;
@@ -84,21 +88,26 @@ public class RpcService : IHostedService
     private const int ConnectionIdleTimeoutMs = 300000;
 
     public HttpListener SocketServer { get; private set; }
-    public Dictionary<string, Func<string, List<RpcParams>, Task<string>>> Method { get; private set; }
+    public Dictionary<string, Func<string, List<RpcParams>, Task<string>>> Method
+    {
+        get;
+        private set;
+    }
 
     public int Port { get; private set; } = 10010;
 
-    public RpcService(ILogger<RpcService> logger,RpcSettings rpcSettings)
+    public RpcService(LoggerService logger, RpcSettings rpcSettings)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _rpcSettings = rpcSettings;
-        _listenPrefix = $"http://localhost:{Port}/rpc/";
         int maxConnections = 100;
         _connectionLimiter = new SemaphoreSlim(maxConnections, maxConnections);
         _serviceCts = new CancellationTokenSource();
     }
 
-    public void RegisterMethod(Dictionary<string, Func<string, List<RpcParams>, Task<string>>> Methods)
+    public void RegisterMethod(
+        Dictionary<string, Func<string, List<RpcParams>, Task<string>>> Methods
+    )
     {
         Method = Methods;
     }
@@ -107,14 +116,14 @@ public class RpcService : IHostedService
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         this.Port = await _rpcSettings.GetRpcLocalPortAsync(cancellationToken);
-        _logger.LogInformation("Starting Rpc WebSocket service...");
-        // 修复：不链接_serviceCts，避免启动时取消令牌冲突
+        _listenPrefix = $"http://localhost:{Port}/rpc/";
+        _logger.WriteInfo("Starting Rpc WebSocket service...");
         await InitRpcAsync(cancellationToken).ConfigureAwait(false);
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Stopping Rpc WebSocket service...");
+        _logger.WriteInfo("Stopping Rpc WebSocket service...");
         _serviceCts.Cancel();
         await CloseRpcAsync(cancellationToken).ConfigureAwait(false);
     }
@@ -125,7 +134,7 @@ public class RpcService : IHostedService
     {
         if (SocketServer != null)
         {
-            _logger.LogWarning("RPC 服务终端，开始重新监听");
+            _logger.WriteWarning("RPC 服务终端，开始重新监听");
             await CloseRpcAsync(token).ConfigureAwait(false);
         }
 
@@ -135,12 +144,12 @@ public class RpcService : IHostedService
             SocketServer.Prefixes.Add(_listenPrefix);
             SocketServer.Start();
             _listenLoopTask = Task.Run(() => ListenForConnectionsAsync(token), token);
-            _logger.LogInformation($"Rpc WebSocket 开始监听端口:{this.Port}", _listenPrefix);
-            _logger.LogInformation($"Rpc WebSocket 地址:{_listenPrefix}", _listenPrefix);
+            _logger.WriteInfo($"Rpc WebSocket 开始监听端口:{this.Port}");
+            _logger.WriteInfo($"Rpc WebSocket 地址:{_listenPrefix}");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"RPC服务错误：{ex.Message}+{ex.StackTrace}");
+            _logger.WriteError($"RPC服务错误：{ex.Message}+{ex.StackTrace}");
             await CloseRpcAsync(token).ConfigureAwait(false);
             throw;
         }
@@ -153,7 +162,7 @@ public class RpcService : IHostedService
             if (SocketServer != null)
             {
                 SocketServer.Stop();
-                _logger.LogInformation("Stopping Rpc listener...");
+                _logger.WriteInfo("Stopping Rpc listener...");
 
                 if (_listenLoopTask != null && !_listenLoopTask.IsCompleted)
                 {
@@ -163,19 +172,19 @@ public class RpcService : IHostedService
                     }
                     catch (OperationCanceledException)
                     {
-                        _logger.LogInformation("Listen loop canceled gracefully");
+                        _logger.WriteInfo("Listen loop canceled gracefully");
                     }
                 }
 
                 SocketServer.Close();
                 SocketServer = null;
                 _listenLoopTask = null;
-                _logger.LogInformation("Rpc service stopped successfully");
+                _logger.WriteInfo("Rpc service stopped successfully");
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error closing Rpc WebSocket service");
+            _logger.WriteInfo($"Error closing Rpc WebSocket service,{ex.Message},{ex.StackTrace}");
             throw;
         }
         finally
@@ -195,14 +204,16 @@ public class RpcService : IHostedService
                 try
                 {
                     // 修复：移除GetContextAsync的超时，恢复原有的无限等待（核心连接逻辑）
-                    context = await SocketServer.GetContextAsync()
+                    context = await SocketServer
+                        .GetContextAsync()
                         .WithCancellation(token)
                         .ConfigureAwait(false);
 
                     if (!IsLocalClient(context.Request.RemoteEndPoint))
                     {
-                        _logger.LogWarning("Rejected non-local connection from {RemoteEndPoint}",
-                            context.Request.RemoteEndPoint);
+                        _logger.WriteWarning(
+                            $"Rejected non-local connection from {context.Request.RemoteEndPoint}"
+                        );
                         context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                         context.Response.Close();
                         continue;
@@ -210,22 +221,25 @@ public class RpcService : IHostedService
                 }
                 catch (OperationCanceledException)
                 {
-                    _logger.LogInformation("Listen loop canceled");
+                    _logger.WriteInfo("Listen loop canceled");
                     break;
                 }
                 catch (Exception ex)
                 {
                     if (!token.IsCancellationRequested)
                     {
-                        _logger.LogError(ex, "Error waiting for client connections");
+                        _logger.WriteError(
+                            $"Error waiting for client connections,{ex.Message},{ex.StackTrace}"
+                        );
                     }
                     continue;
                 }
 
                 if (!context.Request.IsWebSocketRequest)
                 {
-                    _logger.LogWarning("Non-WebSocket request from {RemoteEndPoint}",
-                        context.Request.RemoteEndPoint);
+                    _logger.WriteWarning(
+                        $"Non-WebSocket request from {context.Request.RemoteEndPoint}"
+                    );
                     context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
                     context.Response.Close();
                     continue;
@@ -233,8 +247,9 @@ public class RpcService : IHostedService
 
                 if (!await _connectionLimiter.WaitAsync(1000, token).ConfigureAwait(false))
                 {
-                    _logger.LogWarning("Max connections reached, reject {RemoteEndPoint}",
-                        context.Request.RemoteEndPoint);
+                    _logger.WriteWarning(
+                        $"Max connections reached, reject {context.Request.RemoteEndPoint}"
+                    );
                     context.Response.StatusCode = (int)HttpStatusCode.TooManyRequests;
                     context.Response.Close();
                     continue;
@@ -243,13 +258,15 @@ public class RpcService : IHostedService
                 WebSocketContext webSocketContext;
                 try
                 {
-                    webSocketContext = await context.AcceptWebSocketAsync(subProtocol: null)
+                    webSocketContext = await context
+                        .AcceptWebSocketAsync(subProtocol: null)
                         .ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Failed to accept WebSocket from {RemoteEndPoint}",
-                        context.Request.RemoteEndPoint);
+                    _logger.WriteError(
+                        $"Failed to accept WebSocket from {context.Request.RemoteEndPoint}"
+                    );
                     _connectionLimiter.Release();
                     context.Response.Close();
                     continue;
@@ -258,9 +275,9 @@ public class RpcService : IHostedService
                 WebSocket webSocket = webSocketContext.WebSocket;
                 EndPoint remoteEndPoint = context.Request.RemoteEndPoint;
 
-                _logger.LogInformation(
-                    "New connection accepted: {RemoteEndPoint} (Active: {Count})",
-                    remoteEndPoint, _connectionLimiter.CurrentCount);
+                _logger.WriteInfo(
+                    $"New connection accepted: {remoteEndPoint} (Active: {_connectionLimiter.CurrentCount})"
+                );
 
                 // 核心：保留ConfigureAwait(false)解决UI卡顿，移除过度的ContinueWith
                 _ = HandleSingleConnectionAsync(webSocket, remoteEndPoint, _serviceCts.Token)
@@ -271,7 +288,7 @@ public class RpcService : IHostedService
         {
             if (!token.IsCancellationRequested)
             {
-                _logger.LogCritical(ex, "Critical error in listen loop");
+                _logger.WriteError("Critical error in listen loop");
             }
         }
     }
@@ -280,21 +297,21 @@ public class RpcService : IHostedService
     {
         if (remoteEndPoint is not IPEndPoint ipEndPoint)
         {
-            _logger.LogWarning("Unsupported endpoint type: {EndpointType}",
-                remoteEndPoint.GetType().Name);
+            _logger.WriteWarning($"Unsupported endpoint type: {remoteEndPoint.GetType().Name}");
             return false;
         }
         IPAddress clientIp = ipEndPoint.Address;
         bool isLocal = IPAddress.IsLoopback(clientIp);
 
-        _logger.LogDebug("Client IP: {ClientIp} (Local: {IsLocal})", clientIp, isLocal);
+        _logger.WriteInfo($"Client IP: {clientIp} (Local: {isLocal})");
         return isLocal;
     }
 
     private async Task HandleSingleConnectionAsync(
         WebSocket webSocket,
         EndPoint remoteEndPoint,
-        CancellationToken token)
+        CancellationToken token
+    )
     {
         byte[] buffer = null;
         bool bufferRented = false;
@@ -303,7 +320,8 @@ public class RpcService : IHostedService
             buffer = _arrayPool.Rent(MaxReceiveBufferSize);
             bufferRented = true;
 
-            CancellationTokenSource idleTimeoutCts = CancellationTokenSource.CreateLinkedTokenSource(token);
+            CancellationTokenSource idleTimeoutCts =
+                CancellationTokenSource.CreateLinkedTokenSource(token);
             idleTimeoutCts.CancelAfter(ConnectionIdleTimeoutMs);
 
             while (webSocket.State == WebSocketState.Open && !token.IsCancellationRequested)
@@ -311,7 +329,8 @@ public class RpcService : IHostedService
                 WebSocketReceiveResult result;
                 try
                 {
-                    result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), idleTimeoutCts.Token)
+                    result = await webSocket
+                        .ReceiveAsync(new ArraySegment<byte>(buffer), idleTimeoutCts.Token)
                         .WithCancellation(token)
                         .ConfigureAwait(false);
                 }
@@ -319,40 +338,50 @@ public class RpcService : IHostedService
                 {
                     if (idleTimeoutCts.IsCancellationRequested && !token.IsCancellationRequested)
                     {
-                        _logger.LogInformation("Connection idle timeout: {RemoteEndPoint}", remoteEndPoint);
+                        _logger.WriteInfo($"Connection idle timeout: {remoteEndPoint}");
                     }
                     break;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error receiving message from {RemoteEndPoint}", remoteEndPoint);
+                    _logger.WriteInfo($"Error receiving message from {remoteEndPoint}");
                     break;
                 }
 
                 if (result.MessageType == WebSocketMessageType.Close)
                 {
-                    _logger.LogInformation("Client {RemoteEndPoint} requested close", remoteEndPoint);
-                    await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Client closed", token)
+                    _logger.WriteInfo($"Client {remoteEndPoint} requested close");
+                    await webSocket
+                        .CloseAsync(WebSocketCloseStatus.NormalClosure, "Client closed", token)
                         .ConfigureAwait(false);
                     break;
                 }
                 string requestMessage = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                _logger.LogDebug("Received from {RemoteEndPoint}: {Message}", remoteEndPoint, requestMessage);
+                _logger.WriteInfo($"Received from {remoteEndPoint}: {requestMessage}");
 
-                string responseMessage = await ProcessRpcRequestAsync(requestMessage, remoteEndPoint, token)
+                string responseMessage = await ProcessRpcRequestAsync(
+                        requestMessage,
+                        remoteEndPoint,
+                        token
+                    )
                     .ConfigureAwait(false);
 
-                if (!string.IsNullOrEmpty(responseMessage) && webSocket.State == WebSocketState.Open)
+                if (
+                    !string.IsNullOrEmpty(responseMessage)
+                    && webSocket.State == WebSocketState.Open
+                )
                 {
                     byte[] responseBuffer = Encoding.UTF8.GetBytes(responseMessage);
-                    await webSocket.SendAsync(
-                        new ArraySegment<byte>(responseBuffer),
-                        WebSocketMessageType.Text,
-                        endOfMessage: true,
-                        token)
+                    await webSocket
+                        .SendAsync(
+                            new ArraySegment<byte>(responseBuffer),
+                            WebSocketMessageType.Text,
+                            endOfMessage: true,
+                            token
+                        )
                         .ConfigureAwait(false);
 
-                    _logger.LogDebug("Sent to {RemoteEndPoint}: {Message}", remoteEndPoint, responseMessage);
+                    _logger.WriteInfo($"Sent to {remoteEndPoint}: {responseMessage}");
                 }
 
                 idleTimeoutCts.CancelAfter(ConnectionIdleTimeoutMs);
@@ -370,36 +399,40 @@ public class RpcService : IHostedService
             {
                 try
                 {
-                    await webSocket.CloseAsync(
-                        WebSocketCloseStatus.NormalClosure,
-                        "Service stopped",
-                        CancellationToken.None)
+                    await webSocket
+                        .CloseAsync(
+                            WebSocketCloseStatus.NormalClosure,
+                            "Service stopped",
+                            CancellationToken.None
+                        )
                         .ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error closing WebSocket for {RemoteEndPoint}", remoteEndPoint);
+                    _logger.WriteError($"Error closing WebSocket for {remoteEndPoint}");
                 }
             }
             webSocket.Dispose();
 
-            _logger.LogInformation(
-                "Connection closed: {RemoteEndPoint} (Active: {Count})",
-                remoteEndPoint, _connectionLimiter.CurrentCount);
+            _logger.WriteInfo(
+                $"Connection closed: {remoteEndPoint} (Active: {_connectionLimiter.CurrentCount})"
+            );
         }
     }
 
     private async Task<string> ProcessRpcRequestAsync(
         string requestMessage,
         EndPoint remoteEndPoint,
-        CancellationToken token)
+        CancellationToken token
+    )
     {
         long jsonId = 0;
         try
         {
             var jsonObj = JsonSerializer.Deserialize<RpcRequest>(
                 requestMessage,
-                RpcContext.Default.RpcRequest);
+                RpcContext.Default.RpcRequest
+            );
 
             if (jsonObj == null)
                 throw new ArgumentException("Invalid RPC request");
@@ -407,7 +440,8 @@ public class RpcService : IHostedService
             jsonId = jsonObj.RequestId;
             if (Method?.TryGetValue(jsonObj.Method, out var handler) == true)
             {
-                var result = await handler.Invoke(jsonObj.Method, jsonObj.Params)
+                var result = await handler
+                    .Invoke(jsonObj.Method, jsonObj.Params)
                     .ConfigureAwait(false);
 
                 return JsonSerializer.Serialize(
@@ -417,15 +451,16 @@ public class RpcService : IHostedService
                         Message = result,
                         Success = true,
                     },
-                    RpcContext.Default.RpcReponse);
+                    RpcContext.Default.RpcReponse
+                );
             }
 
-            _logger.LogWarning("Unsupported method: {Method} from {RemoteEndPoint}", jsonObj.Method, remoteEndPoint);
+            _logger.WriteWarning($"Unsupported method: {jsonObj.Method} from {remoteEndPoint}");
             return string.Empty;
         }
         catch (RpcException rpcException)
         {
-            _logger.LogWarning(rpcException, "RPC error for {RequestId} from {RemoteEndPoint}", jsonId, remoteEndPoint);
+            _logger.WriteWarning($"RPC error for {jsonId} from {remoteEndPoint}");
             return JsonSerializer.Serialize(
                 new RpcReponse
                 {
@@ -433,11 +468,12 @@ public class RpcService : IHostedService
                     Message = rpcException.Message,
                     Success = false,
                 },
-                RpcContext.Default.RpcReponse);
+                RpcContext.Default.RpcReponse
+            );
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Processing error for {RemoteEndPoint}", remoteEndPoint);
+            _logger.WriteError($"Processing error for {remoteEndPoint}");
             return JsonSerializer.Serialize(
                 new RpcReponse
                 {
@@ -445,7 +481,8 @@ public class RpcService : IHostedService
                     Message = ex.Message,
                     Success = false,
                 },
-                RpcContext.Default.RpcReponse);
+                RpcContext.Default.RpcReponse
+            );
         }
     }
 }

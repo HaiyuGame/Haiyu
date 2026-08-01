@@ -1,6 +1,7 @@
 using System.Security.Principal;
 using Haiyu.Plugin.Extensions;
 using Microsoft.WindowsAppSDK;
+using Waves.Core.Common;
 using Waves.Settings;
 using Windows.Management.Deployment;
 
