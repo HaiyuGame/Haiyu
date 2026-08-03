@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Setup\FluentWPF\FluentWPF.csproj" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.142" />
+  </ItemGroup>
+
+  <!--
+    Visual Studio can start WPF markup compilation before the multi-targeted
+    FluentWPF reference has produced its net10 assembly during Rebuild.  App.xaml
+    loads a dictionary from that assembly, so make the dependency explicit.
+  -->
+  <Target Name="BuildFluentWpfBeforeMarkupCompile"
+          BeforeTargets="MarkupCompilePass1"
+          Condition="'$(DesignTimeBuild)' != 'true'">
+    <MSBuild Projects="..\Setup\FluentWPF\FluentWPF.csproj"
+             Targets="Build"
+             BuildInParallel="false"
+             Properties="Configuration=$(Configuration);TargetFramework=net10.0-windows" />
+  </Target>
+
+</Project>

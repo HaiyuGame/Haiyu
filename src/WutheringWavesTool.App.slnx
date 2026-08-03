@@ -35,17 +35,23 @@
     <Project Path="Extensions/ProxyExtensions/ProxyExtensions.csproj">
       <BuildType Solution="All|*" Project="Debug" />
     </Project>
+    <Project Path="Haiyu.Publish/Haiyu.Publish.csproj" Id="1eddbd47-01d1-4d75-a690-e1bde349f240">
+      <BuildType Solution="All|*" Project="Debug" />
+    </Project>
   </Folder>
   <Project Path="Haiyu.Analyzers/Haiyu.Analyzers.csproj" Id="618a737f-7a77-436f-b5df-947c62ef3470">
     <BuildType Solution="All|*" Project="Debug" />
+  </Project>
+  <Project Path="Haiyu.Charts.WinUI/Haiyu.Charts.WinUI.csproj">
+    <BuildType Solution="All|*" Project="Debug" />
+    <Platform Project="x64" />
   </Project>
   <Project Path="Haiyu.Controls/Haiyu.Controls.csproj" Id="4da46af6-6a32-4670-a8ed-21fa40b0f8a4">
     <BuildType Solution="All|*" Project="Debug" />
     <Platform Project="x64" />
   </Project>
-  <Project Path="Haiyu.Charts.WinUI/Haiyu.Charts.WinUI.csproj">
+  <Project Path="Haiyu.Pickers/Haiyu.Pickers.csproj">
     <BuildType Solution="All|*" Project="Debug" />
-    <Platform Project="x64" />
   </Project>
   <Project Path="WutheringWavesTool/Haiyu.csproj" Id="ee4fdbd7-face-4eba-bf07-cd8fbdcf1997">
     <BuildType Solution="All|Any CPU" Project="Release" />
@@ -53,8 +59,5 @@
     <BuildType Solution="All|x86" Project="Debug" />
     <Platform Project="x64" />
     <Deploy />
-  </Project>
-  <Project Path="Haiyu.Pickers/Haiyu.Pickers.csproj">
-    <BuildType Solution="All|*" Project="Debug" />
   </Project>
 </Solution>

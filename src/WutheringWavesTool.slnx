@@ -80,6 +80,10 @@
   <Project Path="Haiyu.Pickers/Haiyu.Pickers.csproj">
     <BuildType Solution="All|*" Project="Debug" />
   </Project>
+  <Project Path="Haiyu.Publish/Haiyu.Publish.csproj">
+    <BuildType Solution="All|*" Project="Debug" />
+    <Platform Project="Any CPU" />
+  </Project>
   <Project Path="Project.Test/Project.Test.csproj">
     <BuildType Solution="All|Any CPU" Project="Release" />
     <BuildType Solution="All|x64" Project="Debug" />
