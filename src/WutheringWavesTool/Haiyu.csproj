@@ -395,7 +395,7 @@
 	  <None Remove="Pages\WavesAnalysisRecordPage.xaml" />
 	  <None Remove="WindowModels\CloudGameWindows.xaml" />
 	</ItemGroup>
-	<Target Name="CopyXamlResourcesForAot" AfterTargets="Publish" Condition="'$(PublishAot)' == 'true'">
+	<Target Name="CopyXamlResourcesForAot" AfterTargets="Publish" Condition="'$(PublishAot)' == 'true' and '$(WindowsPackageType)' != 'MSIX'">
 		<ItemGroup>
 			<_XamlResources Include="$(OutputPath)**\*.xbf" />
 			<_XamlResources Include="$(OutputPath)$(AssemblyName).pri" />

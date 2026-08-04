@@ -8,7 +8,7 @@
 - `Behaviors/AutoScrollTextBoxBehavior.cs`: log scrolling without view event handlers.
 - `MainWindow.xaml.cs`: composition only; it creates and assigns the view model.
 
-本工具把 EXE 渠道的手工发版流程合并为一次操作：
+本工具把发版流程合并为一次操作，可独立选择 EXE 安装包、去除 PDB 的 ZIP 免安装包和 Microsoft Store MSIX 捆绑包：
 
 1. 修改 `WutheringWavesTool/App.xaml.cs` 中的 `AppVersion`，再使用 `win-x64` 配置发布 `Haiyu.csproj`。
 2. 递归清理发布目录中的全部 `.pdb` 文件，再压缩到安装项目的 `Resources/program.zip`。

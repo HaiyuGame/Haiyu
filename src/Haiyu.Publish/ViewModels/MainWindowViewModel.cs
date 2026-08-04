@@ -23,6 +23,9 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private string status = "\u51c6\u5907\u5c31\u7eea";
     [ObservableProperty] private double progress;
     [ObservableProperty] private bool isBuilding;
+    [ObservableProperty] private bool buildExe = true;
+    [ObservableProperty] private bool buildZip = true;
+    [ObservableProperty] private bool buildMsix = true;
 
     public bool CanBuild => !IsBuilding;
 
@@ -52,6 +55,11 @@ public partial class MainWindowViewModel : ObservableObject
             Status = "\u7248\u672c\u53f7\u683c\u5f0f\u5e94\u4e3a 1.2.3 \u6216 1.2.3.4";
             return;
         }
+        if (!BuildExe && !BuildZip && !BuildMsix)
+        {
+            Status = "\u8bf7\u81f3\u5c11\u9009\u62e9\u4e00\u79cd\u8f93\u51fa\u683c\u5f0f";
+            return;
+        }
 
         IsBuilding = true;
         BuildCommand.NotifyCanExecuteChanged();
@@ -59,7 +67,10 @@ public partial class MainWindowViewModel : ObservableObject
         Progress = 0;
         try
         {
-            await Task.Run(() => _service.BuildExeAsync(Version.Trim(), Configuration, OutputPath.Trim()));
+            if (BuildMsix)
+                await Task.Run(() => _service.BuildMsixAsync(Version.Trim(), OutputPath.Trim()));
+            if (BuildExe || BuildZip)
+                await Task.Run(() => _service.BuildExeAsync(Version.Trim(), Configuration, OutputPath.Trim(), BuildExe, BuildZip));
             FlushPendingLogs();
             Progress = 100;
             Status = "\u6784\u5efa\u5b8c\u6210";

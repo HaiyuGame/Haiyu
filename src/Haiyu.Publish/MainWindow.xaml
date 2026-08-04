@@ -40,6 +40,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
@@ -76,7 +77,27 @@
                 <ComboBoxItem Content="Debug" />
             </ui:FluentComboBox>
         </Grid>
-        <Grid Grid.Row="2" Margin="0,0,0,10">
+        <StackPanel
+            Grid.Row="2"
+            Margin="110,0,0,10"
+            Orientation="Horizontal">
+            <ui:FluentToggleButton Padding="10" IsChecked="{Binding BuildExe}" />
+            <TextBlock
+                Margin="6,0,24,0"
+                VerticalAlignment="Center"
+                Text="EXE &#x5B89;&#x88C5;&#x5305;" />
+            <ui:FluentToggleButton Padding="10" IsChecked="{Binding BuildZip}" />
+            <TextBlock
+                Margin="6,0,24,0"
+                VerticalAlignment="Center"
+                Text="ZIP &#x514D;&#x5B89;&#x88C5;&#x5305;" />
+            <ui:FluentToggleButton Padding="10" IsChecked="{Binding BuildMsix}" />
+            <TextBlock
+                Margin="6,0,0,0"
+                VerticalAlignment="Center"
+                Text="Microsoft Store (MSIX)" />
+        </StackPanel>
+        <Grid Grid.Row="3" Margin="0,0,0,10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="110" />
                 <ColumnDefinition Width="*" />
@@ -87,7 +108,7 @@
                 IsReadOnly="True"
                 Text="{Binding RepositoryRoot}" />
         </Grid>
-        <Grid Grid.Row="3" Margin="0,0,0,14">
+        <Grid Grid.Row="4" Margin="0,0,0,14">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="110" />
                 <ColumnDefinition Width="*" />
@@ -101,29 +122,27 @@
                 Command="{Binding OpenOutputCommand}"
                 Content="&#x6253;&#x5F00;&#x76EE;&#x5F55;" />
         </Grid>
-        <Border
-            Grid.Row="4"
-            Background="#0B111B"
-            BorderBrush="#33445E"
-            BorderThickness="1"
-            CornerRadius="8">
-            <ui:FluentTextBox
-                Margin="10"
-                Background="Transparent"
-                ClearButtonVisibility="Collapsed"
-                FontFamily="Consolas"
-                FontSize="13"
-                Foreground="#E8E8E8"
-                IsReadOnly="True"
-                Text="{Binding Log, Mode=OneWay}"
-                TextWrapping="Wrap"
-                VerticalScrollBarVisibility="Auto">
-                <i:Interaction.Behaviors>
-                    <b:AutoScrollTextBoxBehavior />
-                </i:Interaction.Behaviors>
-            </ui:FluentTextBox>
-        </Border>
-        <Grid Grid.Row="5" Margin="0,16,0,0">
+
+        <ui:FluentTextBox
+            Grid.Row="5"
+            Margin="10"
+            HorizontalContentAlignment="Left"
+            VerticalContentAlignment="Top"
+            Background="Transparent"
+            ClearButtonVisibility="Collapsed"
+            FontFamily="Consolas"
+            FontSize="13"
+            Foreground="#E8E8E8"
+            IsReadOnly="True"
+            Text="{Binding Log, Mode=OneWay}"
+            TextAlignment="Left"
+            TextWrapping="Wrap"
+            VerticalScrollBarVisibility="Auto">
+            <i:Interaction.Behaviors>
+                <b:AutoScrollTextBoxBehavior />
+            </i:Interaction.Behaviors>
+        </ui:FluentTextBox>
+        <Grid Grid.Row="6" Margin="0,16,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
@@ -141,10 +160,8 @@
             <ui:FluentButton
                 Grid.Column="1"
                 MinWidth="150"
-                Background="#2563EB"
-                BorderBrush="#60A5FA"
                 Command="{Binding BuildCommand}"
-                Content="&#x751F;&#x6210; EXE &#x5B89;&#x88C5;&#x5305;"
+                Content="&#x5F00;&#x59CB;&#x81EA;&#x52A8;&#x53D1;&#x5E03;"
                 FontWeight="SemiBold" />
         </Grid>
     </Grid>

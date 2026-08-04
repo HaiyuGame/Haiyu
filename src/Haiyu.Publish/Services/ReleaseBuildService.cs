@@ -25,7 +25,47 @@ public sealed class ReleaseBuildService
         catch { return "1.0.0"; }
     }
 
-    public async Task BuildExeAsync(string version, string configuration, string output)
+    public async Task BuildMsixAsync(string version, string output)
+    {
+        string packageVersion = NormalizePackageVersion(version);
+        string project = Path.Combine(_repositoryRoot, "src", "WutheringWavesTool", "Haiyu.csproj");
+        string appCode = Path.Combine(_repositoryRoot, "src", "WutheringWavesTool", "App.xaml.cs");
+        string manifest = Path.Combine(_repositoryRoot, "src", "WutheringWavesTool", "Package.appxmanifest");
+        string packageOutput = Path.Combine(Path.GetFullPath(output), "msix");
+
+        Directory.CreateDirectory(packageOutput);
+        UpdateAppVersion(appCode, version);
+        UpdateManifestVersion(manifest, packageVersion);
+        SetStep("MSIX 1/2  更新商店版本号", 10);
+        AppendLog($"Package.appxmanifest 版本：{packageVersion}");
+
+        SetStep("MSIX 2/2  生成 Microsoft Store 上传包", 25);
+        string msbuild = ResolveMsBuildPath();
+        string outDir = Path.GetFullPath(packageOutput).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        string appxPackageDir = outDir.Replace('\\', '/') + "/";
+        await RunAsync(msbuild,
+            $"\"{project}\" /restore /t:Publish /v:minimal " +
+            "/p:Configuration=Release /p:Platform=x64 /p:RuntimeIdentifier=win-x64 " +
+            "/p:WindowsPackageType=MSIX /p:GenerateAppxPackageOnBuild=true " +
+            "/p:AppxBundle=Always /p:AppxBundlePlatforms=x64 " +
+            "/p:UapAppxPackageBuildMode=StoreUpload /p:AppxPackageSigningEnabled=true " +
+            $"/p:AppxPackageDir=\"{appxPackageDir}\"");
+
+        string? bundle = Directory.EnumerateFiles(packageOutput, "*.msixbundle", SearchOption.AllDirectories).FirstOrDefault();
+        if (bundle == null) throw new FileNotFoundException($"MSIX 构建结束，但输出目录中没有捆绑包：{packageOutput}");
+
+        string finalBundle = Path.Combine(packageOutput, $"Haiyu_{packageVersion}_x64.msixbundle");
+        if (!string.Equals(bundle, finalBundle, StringComparison.OrdinalIgnoreCase))
+            File.Copy(bundle, finalBundle, true);
+
+        string? storeUpload = Directory.EnumerateFiles(packageOutput, "*.msixupload", SearchOption.AllDirectories).FirstOrDefault();
+        CleanupMsixIntermediates(packageOutput);
+        SetStep("MSIX 捆绑包生成完成", 100);
+        AppendLog($"捆绑包：{finalBundle}");
+        if (storeUpload != null) AppendLog($"Microsoft Store 上传包：{storeUpload}");
+    }
+
+    public async Task BuildExeAsync(string version, string configuration, string output, bool buildInstaller, bool exportZip)
     {
         string appProject = Path.Combine(_repositoryRoot, "src", "WutheringWavesTool", "Haiyu.csproj");
         string appCode = Path.Combine(_repositoryRoot, "src", "WutheringWavesTool", "App.xaml.cs");
@@ -55,6 +95,19 @@ public sealed class ReleaseBuildService
         if (File.Exists(programZip)) File.Delete(programZip);
         await Task.Run(() => ZipFile.CreateFromDirectory(appPublish, programZip, CompressionLevel.Optimal, false));
         AppendLog($"已更新 Resources\\program.zip ({new FileInfo(programZip).Length / 1024d / 1024d:F1} MB)");
+
+        if (exportZip)
+        {
+            string zipOutput = Path.Combine(output, $"Haiyu_{version}_win-x64.zip");
+            File.Copy(programZip, zipOutput, true);
+            AppendLog($"ZIP 输出：{zipOutput}");
+        }
+
+        if (!buildInstaller)
+        {
+            SetStep("ZIP 免安装包生成完成", 100);
+            return;
+        }
 
         SetStep("3/5  写入版本号", 55);
         UpdateResxVersion(resx, version);
@@ -177,6 +230,30 @@ public sealed class ReleaseBuildService
         }
 
         File.WriteAllText(path, updated, new UTF8Encoding(false));
+    }
+
+    private static void UpdateManifestVersion(string path, string version)
+    {
+        var document = XDocument.Load(path, LoadOptions.PreserveWhitespace);
+        XNamespace ns = "http://schemas.microsoft.com/appx/manifest/foundation/windows10";
+        var identity = document.Root?.Element(ns + "Identity")
+            ?? throw new InvalidDataException("Package.appxmanifest 中缺少 Identity 节点。");
+        identity.SetAttributeValue("Version", version);
+        document.Save(path, SaveOptions.DisableFormatting);
+    }
+
+    private static string NormalizePackageVersion(string version)
+    {
+        string[] parts = version.Split('.');
+        if (parts.Length == 3) return version + ".0";
+        if (parts.Length == 4) return version;
+        throw new FormatException("MSIX 版本号必须是 3 段或 4 段数字。");
+    }
+
+    private static void CleanupMsixIntermediates(string packageOutput)
+    {
+        foreach (string directory in Directory.EnumerateDirectories(packageOutput, "*_Test", SearchOption.TopDirectoryOnly))
+            Directory.Delete(directory, true);
     }
 
     private static void EnsureFile(string path, string description)
