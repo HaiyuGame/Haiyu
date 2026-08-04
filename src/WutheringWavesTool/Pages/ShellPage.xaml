@@ -3,6 +3,7 @@
     x:Class="Haiyu.Pages.ShellPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:am="using:Waves.Api.Models.KuroClient"
     xmlns:ani="using:CommunityToolkit.WinUI.Animations"
     xmlns:animatedvisuals="using:Microsoft.UI.Xaml.Controls.AnimatedVisuals"
     xmlns:b="using:CommunityToolkit.WinUI.Behaviors"
@@ -10,6 +11,7 @@
     xmlns:control="using:Haiyu.Controls"
     xmlns:cui="using:CommunityToolkit.WinUI"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:helper="using:Haiyu.Helpers"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:local="using:Haiyu.Pages"
     xmlns:m="using:Waves.Api.Models"
@@ -105,6 +107,7 @@
                             Padding="5"
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Center"
+                            Command="{x:Bind ViewModel.EncourageDataCommand}"
                             CornerRadius="48"
                             Style="{ThemeResource TransparentButtonStyle}">
                             <ui:ImageEx CornerRadius="40">
@@ -112,7 +115,57 @@
                                     <BitmapImage UriSource="{x:Bind ViewModel.HeaderCover, Mode=OneWay}" />
                                 </ui:ImageEx.Source>
                             </ui:ImageEx>
-
+                            <Button.Flyout>
+                                <Flyout ShouldConstrainToRootBounds="False">
+                                    <Grid Width="300" Padding="5">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="auto" />
+                                            <RowDefinition Height="auto" />
+                                            <RowDefinition />
+                                        </Grid.RowDefinitions>
+                                        <TextBlock
+                                            Margin="10,0,0,0"
+                                            VerticalAlignment="Center"
+                                            FontFamily="{ThemeResource DefaultFont}"
+                                            FontSize="15">
+                                            <Run Text="{x:Bind helper:LanguageService.GetString('Display_KuroCoin')}" />
+                                            <Run Text="{x:Bind ViewModel.EncourageTotalGold, Mode=OneWay}" />
+                                        </TextBlock>
+                                        <Button
+                                            Margin="0,0,10,0"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Top"
+                                            Style="{ThemeResource TransparentButtonStyle}">
+                                            <FontIcon
+                                                FontFamily="Segoe Fluent Icons"
+                                                FontSize="15"
+                                                Glyph="&#xE72C;" />
+                                        </Button>
+                                        <NavigationViewItemSeparator Grid.Row="1" />
+                                        <ItemsView
+                                            Grid.Row="2"
+                                            ItemsSource="{x:Bind ViewModel.EncourageDailys, Mode=OneWay}"
+                                            SelectionMode="None">
+                                            <ItemsView.ItemTemplate>
+                                                <DataTemplate x:DataType="am:EncourageDailyTask">
+                                                    <ItemContainer>
+                                                        <Grid Padding="15,10" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                                                            <TextBlock FontSize="13" Text="{x:Bind Remark}" />
+                                                            <TextBlock
+                                                                HorizontalAlignment="Right"
+                                                                FontSize="13"
+                                                                Text="{x:Bind Process, Mode=OneWay, Converter={StaticResource KuroBBSCoinCompletedConverter}}" />
+                                                        </Grid>
+                                                    </ItemContainer>
+                                                </DataTemplate>
+                                            </ItemsView.ItemTemplate>
+                                            <ItemsView.Layout>
+                                                <StackLayout Orientation="Vertical" Spacing="5" />
+                                            </ItemsView.Layout>
+                                        </ItemsView>
+                                    </Grid>
+                                </Flyout>
+                            </Button.Flyout>
                         </Button>
                         <Button
                             Grid.Column="1"
@@ -121,7 +174,7 @@
                             Command="{x:Bind ViewModel.LoginCommand}"
                             CornerRadius="5"
                             Style="{ThemeResource TransparentButtonStyle}"
-                            ToolTipService.ToolTip="添加账号">
+                            ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_AddAccount')}">
 
                             <FontIcon
                                 FontFamily="Segoe Fluent Icons"
@@ -135,7 +188,7 @@
                             Command="{x:Bind ViewModel.ShowOpenLocalUserCommand}"
                             CornerRadius="5"
                             Style="{ThemeResource TransparentButtonStyle}"
-                            ToolTipService.ToolTip="本地账号管理">
+                            ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_Item2')}">
                             <FontIcon
                                 FontFamily="Segoe Fluent Icons"
                                 FontSize="14"
@@ -148,29 +201,19 @@
                             VerticalAlignment="Center"
                             CornerRadius="5"
                             Style="{ThemeResource TransparentButtonStyle}"
-                            ToolTipService.ToolTip="工具箱"
+                            ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Shell_NavigationToolkit')}"
                             Visibility="{x:Bind ViewModel.GamerRoleListsVisibility, Mode=OneWay}">
                             <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE712;" />
                             <Button.Flyout>
                                 <MenuFlyout Placement="Bottom">
-                                    <MenuFlyoutItem Command="{x:Bind ViewModel.OpenScreenCaptureCommand}" Text="扫描屏幕登录游戏">
+                                    <MenuFlyoutItem Command="{x:Bind ViewModel.OpenScreenCaptureCommand}" Text="{x:Bind helper:LanguageService.GetString('Display_IntoGame')}">
                                         <MenuFlyoutItem.Icon>
                                             <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xED14;" />
                                         </MenuFlyoutItem.Icon>
                                     </MenuFlyoutItem>
-                                    <MenuFlyoutItem Command="{x:Bind ViewModel.ShowDeviceInfoCommand}" Text="授权管理">
+                                    <MenuFlyoutItem Command="{x:Bind ViewModel.ShowDeviceInfoCommand}" Text="{x:Bind helper:LanguageService.GetString('Display_AuthorizationManagement')}">
                                         <MenuFlyoutItem.Icon>
                                             <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8CC;" />
-                                        </MenuFlyoutItem.Icon>
-                                    </MenuFlyoutItem>
-
-                                    <MenuFlyoutItem
-                                        Command="{x:Bind ViewModel.UnLoginCommand}"
-                                        Foreground="{ThemeResource SystemFillColorCriticalBrush}"
-                                        Text="退出登录"
-                                        Visibility="Collapsed">
-                                        <MenuFlyoutItem.Icon>
-                                            <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xF3B1;" />
                                         </MenuFlyoutItem.Icon>
                                     </MenuFlyoutItem>
                                 </MenuFlyout>
@@ -185,8 +228,6 @@
                     <Grid
                         Width="80"
                         Height="37"
-                        BorderBrush="{ThemeResource ApplicationPageBackgroundThemeBrush}"
-                        BorderThickness="1"
                         CornerRadius="20">
                         <SystemBackdropElement CornerRadius="20">
                             <SystemBackdropElement.SystemBackdrop>
@@ -198,8 +239,7 @@
                             Height="37"
                             Padding="0"
                             Click="OpenMessagePane"
-                            Style="{ThemeResource TransparentButtonStyle}"
-                            ToolTipService.ToolTip="系统消息">
+                            ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_SystemMessages')}">
                             <Grid Margin="0,-2,0,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition />
@@ -223,12 +263,11 @@
                     <Button
                         Width="37"
                         Height="37"
-                        BorderBrush="{ThemeResource ApplicationPageBackgroundThemeBrush}"
-                        BorderThickness="0.5"
+                        Padding="5"
                         Command="{x:Bind ViewModel.RefreshCurrentPageCommand}"
                         CornerRadius="40"
                         Style="{ThemeResource DefaultAcrylicButtonStyle}"
-                        ToolTipService.ToolTip="刷新当前页面">
+                        ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_RefreshCurrentPage')}">
                         <FontIcon
                             FontFamily="Segoe Fluent Icons"
                             FontSize="12"
@@ -237,12 +276,10 @@
                     <Button
                         Width="37"
                         Height="37"
-                        BorderBrush="{ThemeResource ApplicationPageBackgroundThemeBrush}"
-                        BorderThickness="0.5"
                         Command="{x:Bind ViewModel.MinCommand}"
                         CornerRadius="40"
                         Style="{ThemeResource DefaultAcrylicButtonStyle}"
-                        ToolTipService.ToolTip="最小化"
+                        ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_Minimize')}"
                         Visibility="Visible">
                         <FontIcon
                             FontFamily="Segoe Fluent Icons"
@@ -253,12 +290,10 @@
                         Width="37"
                         Height="37"
                         Margin="0,0,5,0"
-                        BorderBrush="{ThemeResource ApplicationPageBackgroundThemeBrush}"
-                        BorderThickness="0.5"
                         Command="{x:Bind ViewModel.CloseWindowCommand}"
                         CornerRadius="40"
                         Style="{ThemeResource DefaultAcrylicButtonStyle}"
-                        ToolTipService.ToolTip="关闭"
+                        ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_Off')}"
                         Visibility="Visible">
 
                         <FontIcon
@@ -304,13 +339,13 @@
                 <NavigationView.MenuItems>
                     <NavigationViewItem
                         property:NavigationItemClickHelper.NavigationKey="Haiyu.ViewModel.HomeViewModel"
-                        Content="首页"
-                        ToolTipService.ToolTip="首页">
+                        Content="{x:Bind helper:LanguageService.GetString('Shell_NavigationHome')}"
+                        ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Shell_NavigationHome')}">
                         <NavigationViewItem.Icon>
                             <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xEA8A;" />
                         </NavigationViewItem.Icon>
                     </NavigationViewItem>
-                    <NavigationViewItem property:NavigationItemClickHelper.NavigationKey="Haiyu.ViewModel.GameViewModels.GameContexts.WavesV2GameContextViewModel" Content="鸣潮V2">
+                    <NavigationViewItem property:NavigationItemClickHelper.NavigationKey="Haiyu.ViewModel.GameViewModels.GameContexts.WavesV2GameContextViewModel" Content="{x:Bind helper:LanguageService.GetString('Shell_NavigationWaves')}">
                         <NavigationViewItem.InfoBadge>
                             <InfoBadge Value="2" />
                         </NavigationViewItem.InfoBadge>
@@ -318,7 +353,7 @@
                             <ImageIcon Source="ms-appx:///Assets/GameIcons/global.ico" />
                         </NavigationViewItem.Icon>
                     </NavigationViewItem>
-                    <NavigationViewItem property:NavigationItemClickHelper.NavigationKey="Haiyu.ViewModel.GameViewModels.WavesCloudGameViewModel" Content="云鸣潮">
+                    <NavigationViewItem property:NavigationItemClickHelper.NavigationKey="Haiyu.ViewModel.GameViewModels.WavesCloudGameViewModel" Content="{x:Bind helper:LanguageService.GetString('Shell_NavigationCloudWaves')}">
                         <NavigationViewItem.InfoBadge>
                             <InfoBadge Value="2" />
                         </NavigationViewItem.InfoBadge>
@@ -328,14 +363,14 @@
                     </NavigationViewItem>
                     <NavigationViewItem
                         property:NavigationItemClickHelper.NavigationKey="Haiyu.ViewModel.GameViewModels.GameContexts.PunishGameContextViewModel"
-                        Content="战双"
+                        Content="{x:Bind helper:LanguageService.GetString('Display_ZhanShuang')}"
                         Visibility="Collapsed">
                         <NavigationViewItem.Icon>
                             <ImageIcon Source="ms-appx:///Assets/GameIcons/pgr.ico" />
                         </NavigationViewItem.Icon>
                     </NavigationViewItem>
 
-                    <NavigationViewItem property:NavigationItemClickHelper.NavigationKey="Haiyu.ViewModel.GameViewModels.GameContexts.PunishV2GameContextViewModel" Content="战双V2">
+                    <NavigationViewItem property:NavigationItemClickHelper.NavigationKey="Haiyu.ViewModel.GameViewModels.GameContexts.PunishV2GameContextViewModel" Content="{x:Bind helper:LanguageService.GetString('Shell_NavigationPunish')}">
                         <NavigationViewItem.InfoBadge>
                             <InfoBadge Value="2" />
                         </NavigationViewItem.InfoBadge>
@@ -343,7 +378,7 @@
                             <ImageIcon Source="ms-appx:///Assets/GameIcons/pgr.ico" />
                         </NavigationViewItem.Icon>
                     </NavigationViewItem>
-                    <NavigationViewItem property:NavigationItemClickHelper.NavigationKey="Haiyu.ViewModel.ToolkitViewModel" Content="工具箱">
+                    <NavigationViewItem property:NavigationItemClickHelper.NavigationKey="Haiyu.ViewModel.ToolkitViewModel" Content="{x:Bind helper:LanguageService.GetString('Shell_NavigationToolkit')}">
                         <NavigationViewItem.InfoBadge>
                             <InfoBadge Value="2" />
                         </NavigationViewItem.InfoBadge>
@@ -395,7 +430,7 @@
                             VerticalAlignment="Center"
                             FontFamily="{ThemeResource DefaultFont}"
                             FontSize="15"
-                            Text="消息通知" />
+                            Text="{x:Bind helper:LanguageService.GetString('Display_Notification')}" />
                         <Button
                             HorizontalAlignment="Right"
                             VerticalAlignment="Top"

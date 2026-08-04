@@ -5,6 +5,8 @@ using Haiyu.Plugin.Common;
 using Haiyu.Plugin.Contracts;
 using Haiyu.Plugin.Services;
 using Haiyu.ServiceHost;
+using Haiyu.ServiceHost.Contracts;
+using Haiyu.ServiceHost.Services;
 using Haiyu.ServiceHost.XBox.Commons;
 using Haiyu.Services.DialogServices;
 using Haiyu.Services.Navigations.NavigationViewServices;
@@ -25,7 +27,7 @@ using Waves.Core.Contracts.CloudGame;
 using Waves.Core.Models;
 using Waves.Core.Services;
 using Waves.Core.Services.CloudGameServices;
-using Waves.Core.Settings;
+using Waves.Settings;
 
 namespace Haiyu;
 
@@ -37,7 +39,7 @@ public static class Instance
     {
         EnsureMemoryPackFormatters();
         Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder().AppBuilder().Build();
-        _ = Task.Run(async()=> await Host.StartAsync());
+        _ = Task.Run(async () => await Host.StartAsync());
     }
 
     static void EnsureMemoryPackFormatters()
@@ -55,7 +57,7 @@ public static class Instance
     {
         if (Host.Services.GetRequiredService<T>() is not T v)
         {
-            throw new ArgumentException("服务未注入");
+            throw new ArgumentException(LanguageService.GetStringByText("服务未注入"));
             ;
         }
         return v;
@@ -80,7 +82,8 @@ public static class InstanceBuilderExtensions
                         (s) =>
                         {
                             RpcService service = new RpcService(
-                                s.GetRequiredService<ILogger<RpcService>>()
+                                s.GetRequiredKeyedService<LoggerService>("AppLog"),
+                                s.GetRequiredService<RpcSettings>()
                             );
                             service.RegisterMethod(
                                 s.GetRequiredService<IRpcMethodService>().Method
@@ -90,6 +93,7 @@ public static class InstanceBuilderExtensions
                     )
                     .AddSingleton<AppSettings>()
                     .AddSingleton<GithubIpSettings>()
+                    .AddSingleton<RpcSettings>()
                     .AddSingleton<IIoCircuitBreaker, IoCircuitBreaker>()
                     .AddTransient<IAppActivation, AppActivation>()
                     #region XBox
@@ -154,21 +158,17 @@ public static class InstanceBuilderExtensions
                     .AddTransient<CloudGameSettingDialog>()
                     .AddTransient<KuroGameSettingDialog>()
                     .AddTransient<KuroGameSettingViewModel>()
+                    .AddTransient<LocalGameTokenDialog>()
+                    .AddTransient<LocalGameTokenViewModel>()
                     #endregion
                 #endregion
                     #region More
                     .AddTransient<IPageService, PageService>()
-                    .AddTransient<IPickersService>(
-                        serviceProvider =>
-                            new NativePickersService(
-                                () =>
-                                    WinRT.Interop.WindowNative.GetWindowHandle(
-                                        serviceProvider
-                                            .GetRequiredService<IAppContext<App>>()
-                                            .App.MainWindow
-                                    )
-                            )
-                    )
+                    .AddTransient<IPickersService>(serviceProvider => new NativePickersService(() =>
+                        WinRT.Interop.WindowNative.GetWindowHandle(
+                            serviceProvider.GetRequiredService<IAppContext<App>>().App.MainWindow
+                        )
+                    ))
                     .AddSingleton<ITipShow, TipShow>()
                     .AddKeyedTransient<ITipShow, PageTipShow>("Cache")
                     .AddKeyedTransient<IDialogManager, MainDialogService>("Cache")
@@ -187,6 +187,7 @@ public static class InstanceBuilderExtensions
                     .AddSingleton<IThemeService, ThemeService>()
                     .AddSingleton<IKuroAccountService, KuroAccountService>()
                     .AddSingleton<AutoKuroGameSignService>()
+                    .AddSingleton<AutoKuroClientSignService>()
                     .AddSingleton<ITaskManager, TaskManager>(s => CreateTask(s))
                     .AddSingleton<CloudConfigManager>(
                         (s) =>
@@ -269,7 +270,9 @@ public static class InstanceBuilderExtensions
         TaskManager taskManager = new TaskManager(s.GetRequiredService<AppSettings>());
         #region 自动签到
         var autoSignTask = s.GetRequiredService<AutoKuroGameSignService>();
+        var kuroTask = s.GetRequiredService<AutoKuroClientSignService>();
         taskManager.RegsiterTask(autoSignTask);
+        taskManager.RegsiterTask(kuroTask);
         #endregion
         return taskManager;
     }

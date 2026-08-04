@@ -1,6 +1,4 @@
-using Haiyu.Analyzers;
-
-namespace Waves.Core.Settings;
+namespace Waves.Settings;
 
 [SettingsAttribute<bool>(Name = "IsEnable", Nullable = true)]
 [SettingsAttribute<string>(Name = "A", Nullable = true)]
@@ -14,11 +12,13 @@ namespace Waves.Core.Settings;
 [SettingsAttribute<bool>(Name = "FpsEnable", DefaultValue = "False")]
 public partial class XBoxConfig : SettingBase
 {
-    private static readonly string XboxConfigFilelPath = Path.Combine(
+    private static readonly string XboxConfigFilePath = Path.Combine(
         AppSettings.BassFolder,
         "xbox.json"
     );
 
     public XBoxConfig()
-        : base(XboxConfigFilelPath) {}
+        : base(XboxConfigFilePath)
+    {
+    }
 }

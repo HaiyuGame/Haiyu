@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Haiyu.Helpers;
 using Haiyu.Models.Wrapper.Wiki;
 using Waves.Api.Models.GameWikiiClient;
+using Waves.Core.Services;
 
 namespace Haiyu.ViewModel.WikiViewModels;
 
@@ -39,10 +40,14 @@ public partial class WavesWikiViewModel : WikiViewModelBase
         CenterOnScreen = false
     };
 
-    public WavesWikiViewModel(IAppContext<App> appContext)
+    public IKuroClient KuroClient { get; }
+    public IKuroAccountService KuroAccountService { get; }
+    public WavesWikiViewModel(IAppContext<App> appContext,IKuroClient  kuroClient,IKuroAccountService kuroAccountService)
     {
         this.Messenger.Register<SelectUserMessanger>(this, LoginMessangerMethod);
         AppContext = appContext;
+        this.KuroClient = kuroClient;
+        this.KuroAccountService = kuroAccountService;
     }
 
     private async void LoginMessangerMethod(object recipient, SelectUserMessanger message)
@@ -97,13 +102,13 @@ public partial class WavesWikiViewModel : WikiViewModelBase
             }
             else
             {
-                TipShow.ShowMessage("获取卡池信息出现了不可预料的情况，请确认官方Wiki显示是否正常", Symbol.Clear);
+                TipShow.ShowMessage(LanguageService.GetStringByText("获取卡池信息出现了不可预料的情况，请确认官方Wiki显示是否正常"), Symbol.Clear);
             }
 
         }
         else
         {
-            TipShow.ShowMessage($"获取数据失败，请检查网络或重启应用", Symbol.Clear);
+            TipShow.ShowMessage(LanguageService.FormatByText(LanguageService.GetStringByText("获取数据失败，请检查网络或重启应用")), Symbol.Clear);
         }
         Loading = false;
     }
@@ -140,37 +145,37 @@ public partial class WavesWikiViewModel : WikiViewModelBase
 
 
     [RelayCommand]
-    void OpenDataCenter()
+    async Task OpenDataCenter()
     {
-        OpenKuroCommunityWindow(CreateDataCenterSessionContext());
+        OpenKuroCommunityWindow(await CreateDataCenterSessionContext());
     }
 
     [RelayCommand]
-    void OpenGrowthCalculator()
+    async Task OpenGrowthCalculator()
     {
-        OpenKuroCommunityWindow(CreateGrowthCalculatorSessionContext());
+        OpenKuroCommunityWindow(await CreateGrowthCalculatorSessionContext());
     }
 
     [RelayCommand]
-    void OpenResourceBriefing()
+    async Task OpenResourceBriefing()
     {
-        OpenKuroCommunityWindow(CreateResourceBriefingSessionContext());
+        OpenKuroCommunityWindow(await CreateResourceBriefingSessionContext());
     }
 
     [RelayCommand]
-    void OpenCalendar()
+    async Task OpenCalendar()
     {
-        OpenKuroCommunityWindow(CreateCalendarSessionContext());
+        OpenKuroCommunityWindow(await CreateCalendarSessionContext());
     }
 
     [RelayCommand]
-    void OpenMap()
+    async Task OpenMap()
     {
         OpenKuroCommunityWindow(CreateMapSessionContext());
     }
 
     [RelayCommand]
-    void OpenGameSign()
+    async Task OpenGameSign()
     {
         var win = Instance.Host.Services.GetRequiredService<IViewFactorys>()!.ShowSignWindow(this.SelectGamer);
         win.ApplyWindowsOption(SignWindowOption);
@@ -207,7 +212,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase
                 );
                 if (roles.Code != 0)
                 {
-                    TipShow.ShowMessage($"获取数据失败，请检查网络或重启应用", Symbol.Clear);
+                    TipShow.ShowMessage(LanguageService.FormatByText(LanguageService.GetStringByText("获取数据失败，请检查网络或重启应用")), Symbol.Clear);
                     return;
                 }
                 this.Gamers = roles.Result.Data.ToObservableCollection();
@@ -218,7 +223,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase
         catch (Exception ex)
         {
 
-            TipShow.ShowMessage($"刷新失败:{ex.Message}", Symbol.Accept);
+            TipShow.ShowMessage(LanguageService.FormatByText(LanguageService.GetStringByText("刷新失败:{0}"), ex.Message), Symbol.Accept);
         }
     }
 
@@ -247,24 +252,24 @@ public partial class WavesWikiViewModel : WikiViewModelBase
         window.AppWindow.Show();
     }
 
-    private WebSessionContext? CreateDataCenterSessionContext()
+    private async Task<WebSessionContext?> CreateDataCenterSessionContext()
     {
-        return CreateCommunitySessionContext(WebSessionContext.CreateDataCenter);
+        return await CreateCommunitySessionContext(WebSessionContext.CreateDataCenter);
     }
 
-    private WebSessionContext? CreateGrowthCalculatorSessionContext()
+    private async Task<WebSessionContext?> CreateGrowthCalculatorSessionContext()
     {
-        return CreateCommunitySessionContext(WebSessionContext.CreateGrowthCalculator);
+        return await CreateCommunitySessionContext(WebSessionContext.CreateGrowthCalculator);
     }
 
-    private WebSessionContext? CreateResourceBriefingSessionContext()
+    private async Task<WebSessionContext?> CreateResourceBriefingSessionContext()
     {
-        return CreateCommunitySessionContext(WebSessionContext.CreateResourceBriefing);
+        return await CreateCommunitySessionContext(WebSessionContext.CreateResourceBriefing);
     }
 
-    private WebSessionContext? CreateCalendarSessionContext()
+    private async Task<WebSessionContext?> CreateCalendarSessionContext()
     {
-        return CreateCommunitySessionContext(WebSessionContext.CreateCalendar);
+        return await CreateCommunitySessionContext(WebSessionContext.CreateCalendar);
     }
 
     private WebSessionContext? CreateMapSessionContext()
@@ -283,7 +288,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase
             SelectGamer.RoleName);
     }
 
-    private WebSessionContext? CreateCommunitySessionContext(
+    private async Task<WebSessionContext?> CreateCommunitySessionContext(
         Func<KuroLoginSnapshot, string, string, string?, string?, WebSessionContext> factory)
     {
         var snapshot = CreateLoginSnapshot();
@@ -291,7 +296,26 @@ public partial class WavesWikiViewModel : WikiViewModelBase
         {
             return null;
         }
-
+        var current = this.KuroAccountService.CurrentAccount;
+        if(current == null)
+        {
+            SystemEventMessager.Publish(new()
+            {
+                Message = LanguageService.GetStringByText("请选择一个账号"),
+                Delay = TimeSpan.FromSeconds(10).TotalSeconds
+            });
+            return null;
+        }
+        var refreshData = await this.KuroClient.RefreshGamerDataAsync(current, SelectGamer, this.CTS.Token);
+        if (refreshData == null || !refreshData.Success)
+        {
+            SystemEventMessager.Publish(new()
+            {
+                Message = LanguageService.GetStringByText("当前账号异常，请重新登录"),
+                Delay = TimeSpan.FromSeconds(10).TotalSeconds
+            });
+            return null;
+        }
         return factory(
             snapshot,
             SelectGamer.ServerId,
@@ -302,7 +326,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase
 
     private KuroLoginSnapshot? CreateLoginSnapshot()
     {
-        var session = AccountService.Current;
+        var session = AccountService.CurrentAccount;
         if (session is null)
         {
             return null;
@@ -311,8 +335,8 @@ public partial class WavesWikiViewModel : WikiViewModelBase
         return new KuroLoginSnapshot
         {
             Token = session.Token ?? string.Empty,
-            Did = session.TokenDid ?? string.Empty,
-            UserId = session.TokenId ?? string.Empty,
+            Did = session.DeviceId ?? string.Empty,
+            UserId = session.UserId ?? string.Empty,
             AppVersion = App.AppVersion,
             ChannelId = "8",
             EnterSource = "12",

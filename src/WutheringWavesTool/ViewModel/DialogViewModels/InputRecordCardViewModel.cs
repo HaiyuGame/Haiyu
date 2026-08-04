@@ -34,7 +34,7 @@ public partial class InputRecordCardViewModel : ObservableObject
     public void Close()
     {
         this.Args = null;
-        TipShow.ShowMessage("抽卡链接为空", Microsoft.UI.Xaml.Controls.Symbol.Clear);
+        TipShow.ShowMessage(LanguageService.GetStringByText("抽卡链接为空"), Microsoft.UI.Xaml.Controls.Symbol.Clear);
         this.DialogManager.CloseDialog();
     }
 

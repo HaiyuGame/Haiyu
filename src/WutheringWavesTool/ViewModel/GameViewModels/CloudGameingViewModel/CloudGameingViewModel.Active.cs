@@ -32,10 +32,10 @@ partial class CloudGameingViewModel
     {
         this.Window.DispatcherQueue.TryEnqueue(() =>
         {
-            this.DelayTime = $"延迟：{message.Detail.NetWorkDelay} ms";
-            this.Fps = $"客户端：{message.Detail.Fps}帧";
-            this.Network = $"带宽：{message.Detail.Bitrate / 8 / 1024.0:0.#} MB/s";
-            this.PacketLossRate = $"丢包率：{message.Detail.PacketLossRate}%";
+            this.DelayTime = LanguageService.FormatByText(LanguageService.GetStringByText("延迟：{0} ms"), message.Detail.NetWorkDelay);
+            this.Fps = LanguageService.FormatByText(LanguageService.GetStringByText("客户端：{0}帧"), message.Detail.Fps);
+            this.Network = LanguageService.FormatByText(LanguageService.GetStringByText("带宽：{0:0.#} MB/s"), message.Detail.Bitrate / 8 / 1024.0);
+            this.PacketLossRate = LanguageService.FormatByText(LanguageService.GetStringByText("丢包率：{0}%"), message.Detail.PacketLossRate);
         });
     }
 
@@ -89,10 +89,16 @@ partial class CloudGameingViewModel
 
     public override void Dispose()
     {
-        WebView2.Close();
-        this._cursorTimer.Stop();
-        this._hotkeyTimer.Stop();
+        ShowSystemCursor();
+        ReleaseWebViewCursorSubclass();
+        if (Window is not null)
+        {
+            Window.Activated -= Window_Activated;
+        }
+        WebView2?.Close();
+        this._cursorTimer?.Stop();
         this._cursorTimer = null;
+        this._hotkeyTimer?.Stop();
         this._hotkeyTimer = null;
     }
 }

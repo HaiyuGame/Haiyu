@@ -16,22 +16,30 @@ public sealed partial class KuroClient : IKuroClient
         HttpClientService.BuildClient();
     }
 
-    private static Dictionary<string, string> GetDeviceHeader(
+    private Dictionary<string, string> GetDeviceHeader(
         KuroAccount? account = null,
         string? accessToken = null
     )
     {
         var dict = new Dictionary<string, string>()
         {
+            {"ip",this.Ip },
             { "Accept", "application/json, text/plain, */*" },
             { "Accept-Encoding", "gzip, deflate" },
             { "Accept-Language", "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7" },
             { "source", "android" },
             { "devCode", account?.DeviceId ?? "" },
             //{ "model","23117RK66C"},
-            { "version", "2.5.3" },
+            { "version", "3.1.2" },
+            { "versionCode", "30102" },
             { "lang", "zh-Hans" },
             { "countryCode", "CN" },
+            { "channelId", "8" },
+            { "User-Agent", "okhttp/3.11.0" },
+            {
+                "Cookie",
+                "user_token=eyJhbGciOiJIUzI1NiJ9.eyJjcmVhdGVkIjoxNzg0NjQ5OTczOTI1LCJ1c2VySWQiOjE3MzAxNDg0fQ.wm9nBDf92iHarfezDcPYJml3wt3-kEptS1fiurFyBtI; acw_tc=69285024-8dc9-4b1f-b0ae-067472c01ef259f5bb25288cea29f688b42560d2ea06"
+            },
         };
         if (!string.IsNullOrWhiteSpace(accessToken))
         {
@@ -49,29 +57,25 @@ public sealed partial class KuroClient : IKuroClient
         string? accessToken = null
     )
     {
+        const string userAgent =
+            "Mozilla/5.0 (Linux; Android 9; 2509FPN0BC Build/PQ3B.190801.07131748; wv) "
+            + "AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 "
+            + "Chrome/91.0.4472.114 Safari/537.36 Kuro/3.1.2 KuroGameBox/3.1.2";
         var dict = new Dictionary<string, string>()
         {
             { "Accept", "application/json, text/plain, */*" },
             { "Accept-Encoding", "gzip, deflate" },
             { "Accept-Language", "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7" },
-            {
-                "User-Agent",
-                "Mozilla/5.0 (Linux; Android 12; 23117RK66C Build/V417IR; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/101.0.4951.61 Safari/537.36 Kuro/2.5.3 KuroGameBox/2.5.3"
-            },
+            { "User-Agent", userAgent },
             { "did", account?.DeviceId ?? "" },
             { "source", "android" },
-            {
-                "devCode",
-                $"{this.Ip}, Mozilla/5.0 (Linux; Android 12; 23117RK66C Build/V417IR; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/101.0.4951.61 Safari/537.36 Kuro/2.5.3 KuroGameBox/2.5.3"
-            },
+            { "devCode", $"{this.Ip}, {userAgent}" },
+            { "Origin", "https://web-static.kurobbs.com" },
+            { "X-Requested-With", "com.kurogame.kjq" },
         };
         if (!string.IsNullOrWhiteSpace(accessToken))
         {
             dict.Add("b-at", accessToken);
-        }
-        if (account is not null)
-        {
-            dict.Add("token", account.Token);
         }
         return dict;
     }
@@ -114,6 +118,7 @@ public sealed partial class KuroClient : IKuroClient
         {
             request.Headers.Add(item.Key, item.Value);
         }
+
         request.RequestUri = new Uri(url);
         var endcod = new FormUrlEncodedContent(queryValues);
         var query = await endcod.ReadAsStringAsync(token);
@@ -251,7 +256,7 @@ public sealed partial class KuroClient : IKuroClient
             { "Accept-Language", "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7" },
             {
                 "devCode",
-                "Mozilla/5.0 (Linux; Android 12; 23117RK66C Build/V417IR; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/101.0.4951.61 Safari/537.36 Kuro/2.5.3 KuroGameBox/2.5.3"
+                "Mozilla/5.0 (Linux; Android 12; 23117RK66C Build/V417IR; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/101.0.4951.61 Safari/537.36 Kuro/3.1.2 KuroGameBox/3.1.2"
             },
             { "did", account.DeviceId },
             { "source", "android" },
@@ -360,7 +365,10 @@ public sealed partial class KuroClient : IKuroClient
         return (SMSModel?)JsonSerializer.Deserialize(jsonStr, QRContext.Default.SMSModel);
     }
 
-    public async Task<DeviceInfo?> GetDeviceInfosAsync(KuroAccount account, CancellationToken token = default)
+    public async Task<DeviceInfo?> GetDeviceInfosAsync(
+        KuroAccount account,
+        CancellationToken token = default
+    )
     {
         var url = "https://api.kurobbs.com/user/auth/device/list";
         var request = await BuildLoginRequest(

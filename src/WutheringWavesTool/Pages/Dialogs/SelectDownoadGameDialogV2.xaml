@@ -3,6 +3,7 @@
     x:Class="Haiyu.Pages.Dialogs.SelectDownoadGameDialogV2"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helper="using:Haiyu.Helpers"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:Haiyu.Pages.Dialogs"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -20,7 +21,7 @@
         <TextBlock
             FontFamily="{ThemeResource DefaultFont}"
             FontSize="18"
-            Text="下载游戏"
+            Text="{x:Bind helper:LanguageService.GetString('Display_DownloadGames')}"
             Visibility="Visible" />
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
@@ -107,7 +108,7 @@
             VerticalAlignment="Center"
             FontFamily="{ThemeResource DefaultFont}"
             FontSize="18"
-            Text="选择驱动器以查看信息"
+            Text="{x:Bind helper:LanguageService.GetString('Display_ViewInformation')}"
             Visibility="Visible" />
         <Grid Grid.Row="3">
             <Grid.ColumnDefinitions>
@@ -120,7 +121,7 @@
                 Margin="0,0,2.5,0"
                 HorizontalAlignment="Stretch"
                 Click="Download_Click"
-                Content="下载"
+                Content="{x:Bind helper:LanguageService.GetString('Display_Downloads')}"
                 IsEnabled="False"
                 Style="{ThemeResource AccentButtonStyle}" />
             <Button
@@ -128,7 +129,7 @@
                 Margin="2.5,0,0,0"
                 HorizontalAlignment="Stretch"
                 Click="Close_Click"
-                Content="取消" />
+                Content="{x:Bind helper:LanguageService.GetString('Display_SDecline')}" />
         </Grid>
     </Grid>
 </ContentDialog>

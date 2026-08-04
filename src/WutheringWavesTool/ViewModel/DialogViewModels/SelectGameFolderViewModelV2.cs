@@ -21,7 +21,7 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
     public partial string ExePath { get; set; }
 
     [ObservableProperty]
-    public partial string TipMessage { get; set; } = "选择目标程序，以查看驱动器详情";
+    public partial string TipMessage { get; set; } = LanguageService.GetStringByText("选择目标程序，以查看驱动器详情");
 
     [ObservableProperty]
     public partial bool IsVerify { get; set; }
@@ -50,7 +50,7 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
             return;
         if (System.IO.Path.GetFileName(exe.Path) != GameContext.Config.GameExeName)
         {
-            TipMessage = "无效地址";
+            TipMessage = LanguageService.GetStringByText("无效地址");
             return;
         }
         this.ExePath = exe.Path;
@@ -71,14 +71,14 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
 
         if (driveInfo == null)
         {
-            TipMessage = $"无法找到对应驱动器: {rootPath}";
+            TipMessage = LanguageService.FormatByText(LanguageService.GetStringByText("无法找到对应驱动器: {0}"), rootPath);
             return;
         }
 
         Launcher = await this.GameContext.GetGameLauncherSourceAsync(null, this.CTS.Token);
         if (Launcher == null)
         {
-            TipMessage = $"游戏数据拉取失败";
+            TipMessage = LanguageService.FormatByText(LanguageService.GetStringByText("游戏数据拉取失败"));
             return;
         }
 
@@ -88,19 +88,19 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
         this.BarValues = new ObservableCollection<LayerData>([
             new LayerData()
             {
-                Label = "总容量",
+                Label = LanguageService.GetStringByText("总容量"),
                 Color = new SolidColorBrush(Colors.LightGreen),
                 Value = totalSpaceGB,
             },
             new LayerData()
             {
-                Label = "当前游戏文件夹容量",
+                Label = LanguageService.GetStringByText("当前游戏文件夹容量"),
                 Color = new SolidColorBrush(Colors.Purple),
                 Value = totalSpaceGB - freeSpaceGB,
             },
             new LayerData()
             {
-                Label = "占用容量",
+                Label = LanguageService.GetStringByText("占用容量"),
                 Color = new SolidColorBrush(Colors.MediumPurple),
                 Value = totalSpaceGB - freeSpaceGB - folderSizeGB,
             },

@@ -64,7 +64,7 @@ namespace Haiyu.Models.Wrapper.Wiki
 
             if (elapsed <= 0)
             {
-                Message = "已结束";
+                Message = LanguageService.GetStringByText("已结束");
                 this.Color = "Red";
                 this.CurrentProgress = this.MaxProgress;
                 return;
@@ -72,7 +72,7 @@ namespace Haiyu.Models.Wrapper.Wiki
 
             if (elapsed > this.MaxProgress)
             {
-                Message = "未开始";
+                Message = LanguageService.GetStringByText("未开始");
                 this.CurrentProgress = 0;
                 this.Color = "Gray";
                 return;
@@ -81,18 +81,16 @@ namespace Haiyu.Models.Wrapper.Wiki
             if (_totalDurationTimeSpan.TotalDays >= LONG_CONTENT_TIME)
             {
                 TimeVisibility = Visibility.Collapsed;
-                Message = "长期活动";
+                Message = LanguageService.GetStringByText("长期活动");
                 this.CurrentProgress = this.MaxProgress;
                 this.Color = "Black";
                 return;
             }
 
-            Message = "进行中";
+            Message = LanguageService.GetStringByText("进行中");
             this.CurrentProgress = _overCountdownTimeSpace.TotalSeconds;
             this.Color = "#3399FF";
-            TotalSpan = $"剩余{_endCountdownTimeSpan.Days}天" +
-                        $"{_endCountdownTimeSpan.Hours}小时" +
-                        $"{_endCountdownTimeSpan.Minutes}分";
+            TotalSpan = DisplayTimeFormatter.FormatDuration(_endCountdownTimeSpan);
         }
     }
 }

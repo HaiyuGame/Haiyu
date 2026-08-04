@@ -1,5 +1,5 @@
-﻿using Haiyu.Plugin.Extensions;
-using Waves.Core.Settings;
+using Haiyu.Plugin.Extensions;
+using Waves.Settings;
 using Windows.Graphics.Imaging;
 using WinUIEx.Messaging;
 
@@ -40,7 +40,7 @@ public class ScreenCaptureService : IScreenCaptureService
         }
         if (modifier == null || key == null)
         {
-            return (false, "热键失效！");
+            return (false, LanguageService.GetStringByText("热键失效！"));
         }
         bool success = Haiyu.Plugin.Extensions.NativeMethods.RegisterHotKey(
                AppContext.App.MainWindow.GetWindowHandle(),
@@ -48,7 +48,7 @@ public class ScreenCaptureService : IScreenCaptureService
                modifier.Value,
                key.Value
            );
-        return (false, $"快捷键注册" + (success ? "成功" : "失败"));
+        return (false, LanguageService.FormatByText(LanguageService.GetStringByText("快捷键注册")) + (success ? LanguageService.GetStringByText("成功") : LanguageService.GetStringByText("失败")));
     }
 
     private void Monitor_WindowMessageReceived(object sender, WindowMessageEventArgs e)

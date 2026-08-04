@@ -1,8 +1,9 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentDialog
     x:Class="Haiyu.Pages.Dialogs.UpdateGameDialogV2"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helper="using:Haiyu.Helpers"
     xmlns:charts="using:Haiyu.Charts.WinUI"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
@@ -51,22 +52,22 @@
                 </Button>
             </StackPanel>
             <TextBlock Margin="0,30,0,0" FontSize="15">
-                <Run Text="目标版本大小：" />
+                <Run Text="{x:Bind helper:LanguageService.GetString('Display_TargetVersionSize')}" />
                 <Run Text="{x:Bind ViewModel.NewFileSize, Mode=OneWay}" />
                 <Run Text="GB" />
             </TextBlock>
             <TextBlock Margin="0,10,0,0" FontSize="15">
-                <Run Text="旧版本目标大小：" />
+                <Run Text="{x:Bind helper:LanguageService.GetString('Display_OldVersionTargetSize')}" />
                 <Run Text="{x:Bind ViewModel.LocalFileSize, Mode=OneWay}" />
                 <Run Text="GB" />
             </TextBlock>
             <TextBlock Margin="0,10,0,0" FontSize="15">
-                <Run Text="磁盘预留存储：" />
+                <Run Text="{x:Bind helper:LanguageService.GetString('Display_ReserveDiskStorage')}" />
                 <Run Text="{x:Bind ViewModel.PatcherFileSize, Mode=OneWay}" />
                 <Run Text="GB" />
             </TextBlock>
             <TextBlock Margin="0,10,0,0" FontSize="15">
-                <Run Text="磁盘可用空间大小：" />
+                <Run Text="{x:Bind helper:LanguageService.GetString('Display_DiskFreeSpaceSize')}" />
                 <Run Text="{x:Bind ViewModel.FreeDiskSpace, Mode=OneWay}" />
                 <Run Text="GB" />
             </TextBlock>
@@ -84,7 +85,7 @@
             Command="{x:Bind ViewModel.SelectDiffPathCommand}"
             Content="{x:Bind ViewModel.DiffSavePath, Mode=OneWay}"
             IsEnabled="False"
-            ToolTipService.ToolTip="点击此处修改补丁文件下载位置" />
+            ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_DownloadLocation')}" />
         <Grid
             Grid.Row="2"
             Grid.ColumnSpan="2"
@@ -97,7 +98,7 @@
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
                 Command="{x:Bind ViewModel.CloseCommand}"
-                Content="取消" />
+                Content="{x:Bind helper:LanguageService.GetString('Display_SDecline')}" />
             <Button
                 Grid.Column="1"
                 Margin="5,0,0,0"

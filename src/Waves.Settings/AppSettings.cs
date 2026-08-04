@@ -1,10 +1,9 @@
-using Haiyu.Analyzers;
-
-namespace Waves.Core.Settings;
+namespace Waves.Settings;
 
 [SettingsAttribute<string>(Name = "WallpaperType", Nullable = true)]
 [SettingsAttribute<string>(Name = "AreaCounterPostion", Nullable = true)]
 [SettingsAttribute<bool>(Name = "AutoSignCommunity", Nullable = true, DefaultValue = "False")]
+[SettingsAttribute<bool>(Name = "AutoKuroTaskEnable", Nullable = true, DefaultValue = "False")]
 [SettingsAttribute<string>(Name = "LastSelectUser", Nullable = true)]
 [SettingsAttribute<string>(Name = "WallpaperPath", Nullable = true)]
 [SettingsAttribute<string>(Name = "CloseWindow", Nullable = true)]
@@ -13,7 +12,7 @@ namespace Waves.Core.Settings;
 [SettingsAttribute<string>(Name = "CaptureKey", Nullable = true)]
 [SettingsAttribute<string>(Name = "IsCapture", Nullable = true)]
 [SettingsAttribute<string>(Name = "Language", Nullable = true)]
-[SettingsAttribute<string>(Name = "AutoOOBE", Nullable = true)]
+[SettingsAttribute<bool>(Name = "AutoOOBE", Nullable = true, DefaultValue = "True")]
 [SettingsAttribute<string>(Name = "ElementTheme")]
 [SettingsAttribute<string>(Name = "RpcToken", Nullable = true)]
 [SettingsAttribute<string>(Name = "WavesAutoOpenContext", Nullable = true)]
@@ -36,6 +35,8 @@ public partial class AppSettings : SettingBase
 
     public static string ScreenCaptures => BassFolder + "\\ScreenCaptures";
 
+    public static string WebCacheFolder => BassFolder + "\\WebCache";
+
     public static string ColorGameFolder => BassFolder + "\\ColorGameFolder";
 
     public static string LocalUserFolder => BassFolder + "\\LocalUser";
@@ -43,6 +44,7 @@ public partial class AppSettings : SettingBase
     public string ToolsPosionFilePath => BassFolder + "\\ToolsPostion.json";
 
     private static readonly string SettingsFilePath = Path.Combine(BassFolder, "System.json");
+
     public static readonly string LogPath = BassFolder + "\\appLogs\\appLog.log";
 
     public static readonly string CloudFolderPath = BassFolder + "\\Cloud";
@@ -63,6 +65,7 @@ public partial class AppSettings : SettingBase
 
     public async Task SetMaxIoConcurrentAsync(int value, CancellationToken ct = default)
     {
-        await WriteAsync(Math.Clamp(value, 1, 4).ToString(), "MaxIoConcurrent", ct).ConfigureAwait(false);
+        await WriteAsync(Math.Clamp(value, 1, 4).ToString(), "MaxIoConcurrent", ct)
+            .ConfigureAwait(false);
     }
 }

@@ -54,7 +54,7 @@ public sealed partial class GameLauncherCacheViewModel : DialogViewModelBase
     async Task VerifySystem(string oauthCode)
     {
         var result = await UserConsentVerifier.RequestVerificationAsync(
-            "复制游戏登陆码需要系统用户进行验证"
+            LanguageService.GetStringByText("复制游戏登陆码需要系统用户进行验证")
         );
         if (result == UserConsentVerificationResult.Verified)
         {

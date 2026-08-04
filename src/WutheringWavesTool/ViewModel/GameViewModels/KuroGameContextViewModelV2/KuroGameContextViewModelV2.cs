@@ -31,17 +31,19 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
     public ITipShow TipShow { get; }
     public IIoCircuitBreaker IoCircuitBreaker { get; }
     public IWallpaperService WallpaperService { get; }
+    public IViewFactorys ViewFactory { get; }
 
     protected KuroGameContextViewModelV2(IAppContext<App> appContext, ITipShow tipShow)
     {
-        this.Logger = Instance.Host.Services.GetKeyedService<LoggerService>("AppLog");
+        this.Logger = Instance.Host.Services.GetRequiredKeyedService<LoggerService>("AppLog");
         DialogManager = Instance.Host.Services.GetRequiredKeyedService<IDialogManager>(
             nameof(MainDialogService)
         );
         AppContext = appContext;
         TipShow = tipShow;
         IoCircuitBreaker = Instance.Host.Services.GetRequiredService<IIoCircuitBreaker>();
-        WallpaperService = Instance.GetService<IWallpaperService>();
+        WallpaperService = Instance.Host.Services.GetRequiredService<IWallpaperService>();
+        this.ViewFactory = Instance.Host.Services.GetRequiredService<IViewFactorys>();
         InitializeTransferChart();
         RegisterMessager();
     }
@@ -319,7 +321,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                     new ShowDialogOption()
                     {
                         Context = args.TipMessage,
-                        CloseText = "确定",
+                        CloseText = LanguageService.GetStringByText("确定"),
                         ShowPrimaryButton = false,
                     }
                 );
@@ -553,7 +555,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
             {
                 if (status.IsAction && status.IsPause)
                 {
-                    this.BottomBarContent = "下载已经暂停";
+                    this.BottomBarContent = LanguageService.GetStringByText("下载已经暂停");
                     this.PauseIcon = "\uE896";
                 }
                 else
@@ -592,7 +594,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                     PredDownloadDoneVisibility = Visibility.Collapsed;
                     PreAdvanceVisiblity = Visibility.Collapsed;
                     PreDownloadIcon = "\uE769";
-                    PreSetupHeaderText = "预下载暂停";
+                    PreSetupHeaderText = LanguageService.GetStringByText("预下载暂停");
                 }
                 else if (status.PredownloaAcion && !status.PredownloadedDone && !status.IsPause)
                 {
@@ -612,7 +614,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                     PreAdvanceVisiblity = Visibility.Collapsed;
                     PreDownloadIcon = "\uE74B";
                     PreProgress = 0;
-                    PreSetupHeaderText = "等待预下载";
+                    PreSetupHeaderText = LanguageService.GetStringByText("等待预下载");
                 }
                 else
                 {
@@ -623,7 +625,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                     this.PreProgress = 100;
                     this.PredDownloadingVisibility = Visibility.Collapsed;
                     PreAdvanceVisiblity = Visibility.Visible;
-                    PreSetupHeaderText = "预下载完成，按下可以开始校验预下载内容";
+                    PreSetupHeaderText = LanguageService.GetStringByText("预下载完成，按下可以开始校验预下载内容");
                     ShowAdvanceInstallBth(status);
                 }
             }
@@ -707,9 +709,9 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
             {
                 if (bool.TryParse(doneDownload, out var done))
                 {
-                    BottomBarContent = "安装准备就绪";
+                    BottomBarContent = LanguageService.GetStringByText("安装准备就绪");
                     _buttonAction = ButtonActionType.InstallPreDownload;
-                    LauncheContent = "安装更新";
+                    LauncheContent = LanguageService.GetStringByText("安装更新");
                     DisplayVersion = localPredVersion;
                     EnableStartGameBth = true;
                     LauncherIcon = "\uE896";
@@ -718,8 +720,8 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
             else
             {
                 _buttonAction = ButtonActionType.PrepareUpdate;
-                LauncheContent = "更新游戏";
-                BottomBarContent = "游戏有更新";
+                LauncheContent = LanguageService.GetStringByText("更新游戏");
+                BottomBarContent = LanguageService.GetStringByText("游戏有更新");
                 DisplayVersion = version;
                 EnableStartGameBth = true;
                 LauncherIcon = "\uE898";
@@ -732,7 +734,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                 _buttonAction = ButtonActionType.InGame;
                 this.CurrentProgressValue = 0;
                 this.MaxProgressValue = 0;
-                LauncheContent = "正在运行";
+                LauncheContent = LanguageService.GetStringByText("正在运行");
                 EnableStartGameBth = false;
                 DisplayVersion = version;
                 LauncherIcon = "\uE71A";
@@ -743,7 +745,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                 this.CurrentProgressValue = 0;
                 this.MaxProgressValue = 0;
 
-                LauncheContent = "进入游戏";
+                LauncheContent = LanguageService.GetStringByText("进入游戏");
                 EnableStartGameBth = true;
                 DisplayVersion = version;
                 LauncherIcon = "\uE7FC";
@@ -753,19 +755,22 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
             );
             if (totalTime == null)
             {
-                BottomBarContent = "游戏准备就绪";
+                BottomBarContent = LanguageService.GetStringByText("游戏准备就绪");
             }
             else
             {
                 if (int.TryParse(totalTime, out var timeResult))
                 {
                     var tt = TimeSpan.FromSeconds(timeResult);
-                    BottomBarContent = "已游玩" + ($"{tt.Days}天{tt.Hours}小时{tt.Minutes}分钟");
+                    BottomBarContent =
+                        LanguageService.GetStringByText("已游玩")
+                        + " "
+                        + DisplayTimeFormatter.FormatDuration(tt);
                     ;
                 }
                 else
                 {
-                    BottomBarContent = "游戏准备就绪";
+                    BottomBarContent = LanguageService.GetStringByText("游戏准备就绪");
                 }
             }
         }
@@ -820,7 +825,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
             }
             else
             {
-                TipShow.ShowMessage("选择文件路径不合法，请重新选择", Symbol.Clear);
+                TipShow.ShowMessage(LanguageService.GetStringByText("选择文件路径不合法，请重新选择"), Symbol.Clear);
             }
         }
         else
@@ -910,8 +915,8 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
             await DialogManager.ShowMessageDialog(
                 new ShowDialogOption()
                 {
-                    Context = "预下载期间，禁止修复游戏",
-                    CloseText = "确定",
+                    Context = LanguageService.GetStringByText("预下载期间，禁止修复游戏"),
+                    CloseText = LanguageService.GetStringByText("确定"),
                     ShowPrimaryButton = false,
                 }
             );
@@ -923,9 +928,9 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                     new ShowDialogOption()
                     {
                         Context =
-                            "修复游戏会将游戏缓存全部删除，保持与服务器最新文件保持一致\r\n（包含画面设置、滤镜设置、预下载等内容)",
-                        CloseText = "取消",
-                        PrimaryText = "确认修复",
+                            LanguageService.GetStringByText("修复游戏会将游戏缓存全部删除，保持与服务器最新文件保持一致\r\n（包含画面设置、滤镜设置、预下载等内容)"),
+                        CloseText = LanguageService.GetStringByText("取消"),
+                        PrimaryText = LanguageService.GetStringByText("确认修复"),
                         ShowPrimaryButton = true,
                     }
                 )
@@ -968,7 +973,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         var data = await this.GameContext.GetLocalGameOAuthAsync(this.CTS.Token);
         if (data == null)
         {
-            TipShow.ShowMessage("不存在任何登陆信息，请登陆游戏后再次查看", Symbol.Clear);
+            TipShow.ShowMessage(LanguageService.GetStringByText("不存在任何登陆信息，请登陆游戏后再次查看"), Symbol.Clear);
             return;
         }
         await DialogManager.ShowGameLauncherChacheDialogAsync(

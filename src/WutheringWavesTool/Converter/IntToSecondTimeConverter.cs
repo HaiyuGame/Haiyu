@@ -6,7 +6,7 @@ public partial class IntToSecondTimeConverter : IValueConverter
     {
         if (value is int v)
         {
-            return TimeSpan.FromSeconds(v).ToString("hh\\:mm\\:ss");
+            return DisplayTimeFormatter.FormatDuration(TimeSpan.FromSeconds(v));
         }
         return value;
     }

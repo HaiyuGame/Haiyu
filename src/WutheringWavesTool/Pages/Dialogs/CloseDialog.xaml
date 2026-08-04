@@ -1,8 +1,9 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentDialog
     x:Class="Haiyu.Pages.Dialogs.CloseDialog"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helper="using:Haiyu.Helpers"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:Haiyu.Pages.Dialogs"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -18,16 +19,16 @@
         <TextBlock
             FontFamily="{ThemeResource DefaultFont}"
             FontSize="19"
-            Text="是否退出？" />
+            Text="{x:Bind helper:LanguageService.GetString('Display_ExitOrNot')}" />
         <TextBlock
             Grid.Row="1"
             Margin="0,5,0,0"
             Foreground="{ThemeResource SystemChromeGrayColor}"
-            Text="程序退出后，一切后台线即将结束" />
+            Text="{x:Bind helper:LanguageService.GetString('Display_AboutEnd')}" />
         <CheckBox
             x:Name="isClose"
             Grid.Row="2"
-            Content="不要再询问我" />
+            Content="{x:Bind helper:LanguageService.GetString('Display_DonTAskMeAgain')}" />
         <Grid Grid.Row="3" Margin="0,10,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
@@ -37,14 +38,14 @@
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
                 Click="Min_Win"
-                Content="最小化到托盘" />
+                Content="{x:Bind helper:LanguageService.GetString('Display_MinimizeToPallet')}" />
             <Button
                 Grid.Column="1"
                 Margin="5,0,0,0"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
                 Click="Close_Win"
-                Content="直接退出"
+                Content="{x:Bind helper:LanguageService.GetString('Display_JustLeave')}"
                 Style="{ThemeResource AccentButtonStyle}" />
         </Grid>
     </Grid>

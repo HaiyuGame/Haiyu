@@ -17,8 +17,7 @@ public class KuroAccountService : IKuroAccountService
 
     public LoggerService LoggerService { get; }
     public AppSettings AppSettings { get; }
-    public LocalAccount? Current { get; private set; }
-    public KuroAccount? CurrentAccount => Current is null ? null : KuroAccount.From(Current);
+    public KuroAccount? CurrentAccount { get; private set; }
 
     public async Task<LocalAccount?> GetUserAsync(string userId)
     {
@@ -69,7 +68,7 @@ public class KuroAccountService : IKuroAccountService
                     {
                         continue;
                     }
-                    if (Current != null && model.TokenId == Current.TokenId)
+                    if (CurrentAccount != null && model.TokenId == CurrentAccount.UserId)
                     {
                         model.IsSelect = true;
                     }
@@ -155,7 +154,7 @@ public class KuroAccountService : IKuroAccountService
         if (this._cache.TryGetValue(userId, out var value))
         {
             _ = AppSettings.SetLastSelectUserAsync(value.Item2.TokenId).ConfigureAwait(false);
-            this.Current = value.Item2;
+            this.CurrentAccount = KuroAccount.From(value.Item2);
 
             WeakReferenceMessenger.Default.Send(new SelectUserMessanger(true));
         }
@@ -163,7 +162,7 @@ public class KuroAccountService : IKuroAccountService
 
     public void SetCurrentUser(LocalAccount localAccount, bool isWrite = true)
     {
-        this.Current = localAccount;
+        this.CurrentAccount = KuroAccount.From(localAccount);
         if (isWrite)
             _ = AppSettings.SetLastSelectUserAsync(localAccount.TokenId).ConfigureAwait(false);
     }

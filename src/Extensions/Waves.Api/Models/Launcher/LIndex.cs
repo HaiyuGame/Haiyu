@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,6 +19,8 @@ namespace Waves.Api.Models.Launcher;
 [JsonSerializable(typeof(LauncherBackgroundData))]
 [JsonSerializable(typeof(KRSDKLauncherCache))]
 [JsonSerializable(typeof(List<KRSDKLauncherCache>))]
+[JsonSerializable(typeof(List<KRSDKGameTokenCache>))]
+[JsonSerializable(typeof(KRSDKGameTokenModel))]
 public partial class LauncherConfig:JsonSerializerContext
 {
 

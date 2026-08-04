@@ -128,7 +128,7 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
         }
         catch (Exception ex)
         {
-            LegacyMessageBox.ShowError($"导入失败：{ex.Message}");
+            LegacyMessageBox.ShowError(LanguageService.FormatByText(LanguageService.GetStringByText("导入失败：{0}"), ex.Message));
         }
     }
 
@@ -137,12 +137,12 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
     {
         if (folderPath == null)
         {
-            folderPath = Waves.Core.Settings.AppSettings.RecordFolder;
+            folderPath = Waves.Settings.AppSettings.RecordFolder;
         }
         var jsonFiles = Directory.GetFiles(folderPath, "*.json").ToList();
         if (jsonFiles.Count == 0)
         {
-            LegacyMessageBox.ShowError("导入失败：文件夹中没有找到.json文件");
+            LegacyMessageBox.ShowError(LanguageService.GetStringByText("导入失败：文件夹中没有找到.json文件"));
             return;
         }
 
@@ -204,13 +204,13 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
 
         if (loadedNames.Count == 0)
         {
-            LegacyMessageBox.ShowError("导入失败：未读取到有效的抽卡记录");
+            LegacyMessageBox.ShowError(LanguageService.GetStringByText("导入失败：未读取到有效的抽卡记录"));
             return;
         }
 
         this.Cards = await Cache.SaveAsync(mergedCard);
         var names = string.Join("、", loadedNames);
-        LegacyMessageBox.ShowInformation($"成功导入 {loadedNames.Count} 个账号的数据：{names}");
+        LegacyMessageBox.ShowInformation(LanguageService.FormatByText(LanguageService.GetStringByText("成功导入 {0} 个账号的数据：{1}"), loadedNames.Count, names));
         IsLoading = true;
         await InitAnalysis();
         await AnalysisStarAsync();
@@ -224,7 +224,7 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
         );
         if (result == null)
         {
-            LegacyMessageBox.ShowError("账号异常……");
+            LegacyMessageBox.ShowError(LanguageService.GetStringByText("账号异常……"));
             this.Window.Close();
         }
         this.Session = session;

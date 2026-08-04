@@ -8,6 +8,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:ext="using:Haiyu.Plugin.Extensions"
     xmlns:gamer="using:Waves.Api.Models.Communitys"
+    xmlns:helper="using:Haiyu.Helpers"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:item="using:Haiyu.Models"
     xmlns:local="using:Haiyu.Pages"
@@ -108,30 +109,30 @@
                         Grid.Column="1"
                         Margin="15,0,15,0"
                         FontFamily="{ThemeResource DefaultFont}"
-                        Text="Haiyu是一款针对于鸣潮、战双帕弥什两款游戏的启动器，其中包含了社区工具的一些功能，集抽卡记录、记录分析、鸣潮数据面板、游戏资源维护、轻量化等功能。"
+                        Text="{x:Bind helper:LanguageService.GetString('Display_MaintenanceLightweighting')}"
                         TextWrapping="WrapWholeWords" />
                     <StackPanel
                         Grid.Row="2"
                         Grid.Column="1"
                         Margin="15,0,0,30"
                         Orientation="Horizontal">
-                        <HyperlinkButton Content="Github" NavigateUri="https://github.com/BlameTwo/Haiyu" />
-                        <HyperlinkButton Content="鸣潮官网" NavigateUri="https://mc.kurogames.com/" />
-                        <HyperlinkButton Content="战双帕弥什官网" NavigateUri="https://pns.kurogames.com/" />
-                        <HyperlinkButton Content="下载最新版" NavigateUri="https://github.com/BlameTwo/Haiyu/releases/latest" />
-                        <HyperlinkButton Content="加入开发者的小窝" NavigateUri="https://qm.qq.com/q/4raTeh9MWI" />
+                        <HyperlinkButton Content="GitHub" NavigateUri="https://github.com/BlameTwo/Haiyu" />
+                        <HyperlinkButton Content="{x:Bind helper:LanguageService.GetString('Display_MingchaoOfficialSite')}" NavigateUri="https://mc.kurogames.com/" />
+                        <HyperlinkButton Content="{x:Bind helper:LanguageService.GetString('Display_OfficialSite')}" NavigateUri="https://pns.kurogames.com/" />
+                        <HyperlinkButton Content="{x:Bind helper:LanguageService.GetString('Display_DownloadTheLatestVersion')}" NavigateUri="https://github.com/BlameTwo/Haiyu/releases/latest" />
+                        <HyperlinkButton Content="{x:Bind helper:LanguageService.GetString('Display_JoinTheDeveloperSNest')}" NavigateUri="https://qm.qq.com/q/4raTeh9MWI" />
                     </StackPanel>
                 </Grid>
                 <TextBlock
                     Margin="0,15,0,0"
                     FontFamily="{StaticResource DefaultFont}"
                     FontSize="15"
-                    Text="通用" />
+                    Text="{x:Bind helper:LanguageService.GetString('Display_General')}" />
                 <ui:SettingsCard
                     Margin="0,5,0,0"
                     HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Stretch"
-                    Header="启动器主题">
+                    Header="{x:Bind helper:LanguageService.GetString('Display_LauncherTheme')}">
                     <ui:SettingsCard.HeaderIcon>
                         <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE790;" />
                     </ui:SettingsCard.HeaderIcon>
@@ -141,7 +142,7 @@
                     Margin="0,5,0,0"
                     HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Stretch"
-                    Header="启动首页">
+                    Header="{x:Bind helper:LanguageService.GetString('Display_LaunchHome')}">
                     <ui:SettingsCard.HeaderIcon>
                         <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE768;" />
                     </ui:SettingsCard.HeaderIcon>
@@ -157,10 +158,24 @@
                     Margin="0,5,0,0"
                     HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Stretch"
+                    Header="{x:Bind helper:LanguageService.GetString('SelectLanguage')}">
+                    <ui:SettingsCard.HeaderIcon>
+                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xF2B7;" />
+                    </ui:SettingsCard.HeaderIcon>
+                    <ComboBox
+                        Grid.Column="1"
+                        Margin="10,0,0,0"
+                        ItemsSource="{x:Bind ViewModel.LanguageSelectViewModel.Languages, Mode=OneWay}"
+                        SelectedItem="{x:Bind ViewModel.LanguageSelectViewModel.SelectLanguage, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </ui:SettingsCard>
+                <ui:SettingsCard
+                    Margin="0,5,0,0"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
                     Style="{x:Null}">
                     <ui:SettingsCard.Header>
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock VerticalAlignment="Center" Text="背景类型" />
+                            <TextBlock VerticalAlignment="Center" Text="{x:Bind helper:LanguageService.GetString('Display_BackgroundType')}" />
                             <Button
                                 Margin="10,0,0,0"
                                 Padding="0"
@@ -173,9 +188,9 @@
                                 <Button.Flyout>
                                     <Flyout>
                                         <TextBlock TextAlignment="Center">
-                                            <Run Text="选项为“视频”时会导致启动器内存占用极具上升" />
+                                            <Run Text="{x:Bind helper:LanguageService.GetString('Display_Item')}" />
                                             <LineBreak />
-                                            <Run Text="选择为“图片”时能看到更加完整的亚力克材质效果" />
+                                            <Run Text="{x:Bind helper:LanguageService.GetString('Display_SelectingPicture')}" />
                                         </TextBlock>
                                     </Flyout>
                                 </Button.Flyout>
@@ -196,7 +211,7 @@
                     </ui:SettingsCard.Content>
                 </ui:SettingsCard>
 
-                <ui:SettingsExpander Margin="0,5,0,0" Header="截图">
+                <ui:SettingsExpander Margin="0,5,0,0" Header="{x:Bind helper:LanguageService.GetString('Display_Screenshot')}">
                     <ToggleSwitch
                         x:Name="captureSwitch"
                         IsOn="{x:Bind ViewModel.IsOn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -207,7 +222,7 @@
                     </ui:SettingsExpander.HeaderIcon>
                     <ui:SettingsExpander.Items>
                         <ui:SettingsCard
-                            Header="截图快捷键"
+                            Header="{x:Bind helper:LanguageService.GetString('Display_ScreenshotShortcuts')}"
                             IsClickEnabled="False"
                             IsEnabled="{x:Bind captureSwitch.IsOn, Mode=TwoWay}">
                             <StackPanel Orientation="Horizontal">
@@ -239,7 +254,7 @@
                         </ui:SettingsCard>
                         <ui:SettingsCard
                             Command="{x:Bind ViewModel.OpenCaptureFolderCommand}"
-                            Header="截图保存文件夹"
+                            Header="{x:Bind helper:LanguageService.GetString('Display_ScreenshotSaveFolder')}"
                             IsClickEnabled="True"
                             IsEnabled="{x:Bind captureSwitch.IsOn, Mode=TwoWay}" />
                     </ui:SettingsExpander.Items>
@@ -248,22 +263,22 @@
                     Margin="0,5,0,0"
                     HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Stretch"
-                    Header="关闭按钮"
+                    Header="{x:Bind helper:LanguageService.GetString('Display_CloseButton')}"
                     IsClickEnabled="False">
                     <ui:SettingsCard.HeaderIcon>
                         <FontIcon FontFamily="Segoe UI Emoji" Glyph="&#x1F615;" />
                     </ui:SettingsCard.HeaderIcon>
                     <ui:SettingsCard.Content>
                         <ComboBox SelectedIndex="{x:Bind ViewModel.SelectCloseIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                            <ComboBoxItem Content="托盘" />
-                            <ComboBoxItem Content="退出" />
+                            <ComboBoxItem Content="{x:Bind helper:LanguageService.GetString('Display_Tray')}" />
+                            <ComboBoxItem Content="{x:Bind helper:LanguageService.GetString('Display_Quit')}" />
                         </ComboBox>
                     </ui:SettingsCard.Content>
                 </ui:SettingsCard>
                 <ui:SettingsCard
                     Margin="0,5,0,0"
-                    Description="在某些操作系统中，可能会出现鼠标乱跳问题，取消勾选次选项可尝试解决"
-                    Header="启动游戏后隐藏启动器">
+                    Description="{x:Bind helper:LanguageService.GetString('Display_TrySolve')}"
+                    Header="{x:Bind helper:LanguageService.GetString('Display_LaunchingGame')}">
                     <ui:SettingsCard.HeaderIcon>
                         <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xF45E;" />
                     </ui:SettingsCard.HeaderIcon>
@@ -274,7 +289,7 @@
                 <ui:SettingsCard
                     Margin="0,5,0,0"
                     Command="{x:Bind ViewModel.ShowGameEnhancedDialogCommand}"
-                    Header="游戏监控工具"
+                    Header="{x:Bind helper:LanguageService.GetString('Display_GameMonitor')}"
                     IsClickEnabled="True">
                     <ui:SettingsCard.HeaderIcon>
                         <SymbolIcon Symbol="Find" />
@@ -284,32 +299,32 @@
                     Margin="0,15,0,0"
                     FontFamily="{StaticResource DefaultFont}"
                     FontSize="15"
-                    Text="应用更新" />
+                    Text="{x:Bind helper:LanguageService.GetString('Display_AppUpdate')}" />
                 <ui:SettingsCard
                     Margin="0,5,0,0"
-                    Header="Github分流加速"
+                    Header="{x:Bind helper:LanguageService.GetString('Display_GithubTriageAcceleration')}"
                     Visibility="{x:Bind ViewModel.CheckUpdateVisibility, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <ui:SettingsCard.Content>
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <ToggleSwitch
                                 x:Name="githubCdnEnable"
                                 IsOn="{x:Bind ViewModel.GithubCdnEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                OffContent="不生效"
-                                OnContent="生效" />
+                                OffContent="{x:Bind helper:LanguageService.GetString('Display_Inactive')}"
+                                OnContent="{x:Bind helper:LanguageService.GetString('Display_ENTRYINTOFORCE')}" />
                             <TextBox
                                 Width="400"
                                 IsEnabled="{x:Bind githubCdnEnable.IsOn, Mode=OneWay}"
                                 Text="{x:Bind ViewModel.GithubCdn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                             <Button
                                 Command="{x:Bind ViewModel.SaveeGithubCdnCommand}"
-                                Content="保存"
+                                Content="{x:Bind helper:LanguageService.GetString('Display_SAVING')}"
                                 IsEnabled="{x:Bind githubCdnEnable.IsOn, Mode=OneWay}" />
                         </StackPanel>
                     </ui:SettingsCard.Content>
                 </ui:SettingsCard>
                 <ui:SettingsExpander
                     Margin="0,5,0,0"
-                    Header="Github域前置配置"
+                    Header="{x:Bind helper:LanguageService.GetString('Display_DomainPreconfiguration')}"
                     ItemsSource="{x:Bind ViewModel.GithubIpGroups, Mode=OneWay}"
                     Visibility="{x:Bind ViewModel.CheckUpdateVisibility, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <ui:SettingsExpander.Content>
@@ -317,11 +332,11 @@
                             <ToggleSwitch
                                 x:Name="githubFrontEnable"
                                 IsOn="{x:Bind ViewModel.GithubFrontingEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                OffContent="不生效"
-                                OnContent="生效" />
+                                OffContent="{x:Bind helper:LanguageService.GetString('Display_Inactive')}"
+                                OnContent="{x:Bind helper:LanguageService.GetString('Display_ENTRYINTOFORCE')}" />
                             <Button
                                 Command="{x:Bind ViewModel.SaveGithubIpConfigCommand}"
-                                Content="保存校验配置"
+                                Content="{x:Bind helper:LanguageService.GetString('Display_ValidationConfiguration')}"
                                 IsEnabled="{x:Bind githubFrontEnable.IsOn, Mode=OneWay}" />
                         </StackPanel>
                     </ui:SettingsExpander.Content>
@@ -338,17 +353,17 @@
                 <ui:SettingsExpander
                     Margin="0,5,0,0"
                     Description="{x:Bind a:App.AppVersion}"
-                    Header="版本"
+                    Header="{x:Bind helper:LanguageService.GetString('Display_Version')}"
                     Visibility="{x:Bind ViewModel.CheckUpdateVisibility, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <ui:SettingsExpander.HeaderIcon>
                         <FontIcon FontFamily="Segoe UI Emoji" Glyph="&#x1F5DD;" />
                     </ui:SettingsExpander.HeaderIcon>
                     <ui:SettingsExpander.Content>
-                        <Button Command="{x:Bind ViewModel.UpdateVersionCommand}" Content="检查更新" />
+                        <Button Command="{x:Bind ViewModel.UpdateVersionCommand}" Content="{x:Bind helper:LanguageService.GetString('Display_Update')}" />
                     </ui:SettingsExpander.Content>
 
                     <ui:SettingsExpander.Items>
-                        <ui:SettingsCard Header="更新源">
+                        <ui:SettingsCard Header="{x:Bind helper:LanguageService.GetString('Display_UpdateFeeds')}">
                             <ui:SettingsCard.Content>
                                 <Grid ColumnSpacing="10">
                                     <Grid.ColumnDefinitions>
@@ -367,7 +382,7 @@
                                     <Button
                                         Margin="5,0,0,0"
                                         Command="{x:Bind ViewModel.SetMirrorKeyCommand}"
-                                        Content="确认" />
+                                        Content="{x:Bind helper:LanguageService.GetString('Display_OK')}" />
                                     <Button Margin="5,0,0,0" Click="Button_Click">
                                         <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE897;" />
                                     </Button>
@@ -379,7 +394,7 @@
                 <ui:SettingsCard
                     Margin="0,5,0,0"
                     Description="{x:Bind a:App.AppVersion}"
-                    Header="版本"
+                    Header="{x:Bind helper:LanguageService.GetString('Display_Version')}"
                     Visibility="{x:Bind ViewModel.CheckUpdateVisibility, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}">
                     <ui:SettingsCard.HeaderIcon>
                         <FontIcon FontFamily="Segoe UI Emoji" Glyph="&#x1F5DD;" />
@@ -389,10 +404,10 @@
                     Margin="0,5,0,0"
                     FontFamily="{StaticResource DefaultFont}"
                     FontSize="15"
-                    Text="存储与其他" />
+                    Text="{x:Bind helper:LanguageService.GetString('Display_StorageOther')}" />
                 <ui:SettingsCard
                     Command="{x:Bind ViewModel.DeleteWebCacheCommandCommand}"
-                    Header="删除Web缓存"
+                    Header="{x:Bind helper:LanguageService.GetString('Display_DeleteWebCache')}"
                     IsClickEnabled="True">
                     <ui:SettingsCard.HeaderIcon>
                         <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE74D;" />
@@ -401,7 +416,7 @@
                 <ui:SettingsCard
                     Margin="0,5,0,0"
                     Command="{x:Bind ViewModel.OpenConfigFolderCommand}"
-                    Header="配置文件夹"
+                    Header="{x:Bind helper:LanguageService.GetString('Display_ConfigureFolders')}"
                     IsClickEnabled="True">
                     <ui:SettingsCard.HeaderIcon>
                         <FontIcon FontFamily="Segoe UI Emoji" Glyph="&#x1F4DA;" />
@@ -412,8 +427,8 @@
                 </ui:SettingsCard>
                 <ui:SettingsCard
                     Margin="0,5,0,0"
-                    Header="Rpc密钥"
-                    IsEnabled="False">
+                    Header="{x:Bind helper:LanguageService.GetString('Display_RpcKey')}"
+                    IsEnabled="True">
                     <ui:SettingsCard.Content>
                         <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
                             <PasswordBox
@@ -427,7 +442,7 @@
                             <Button
                                 Margin="4,0,0,0"
                                 Command="{x:Bind ViewModel.SetRpcTokenCommand}"
-                                Content="确认"
+                                Content="{x:Bind helper:LanguageService.GetString('Display_OK')}"
                                 Style="{ThemeResource TransparentButtonStyle}" />
                         </StackPanel>
                     </ui:SettingsCard.Content>
@@ -438,8 +453,9 @@
                 <ui:SettingsCard
                     Margin="0,5,0,0"
                     Command="{x:Bind ViewModel.CreateLinkCommand}"
-                    Header="创建快捷方式"
-                    IsClickEnabled="True">
+                    Header="{x:Bind helper:LanguageService.GetString('Display_CreateShortcut')}"
+                    IsClickEnabled="True"
+                    Visibility="Collapsed">
                     <ui:SettingsCard.HeaderIcon>
                         <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE71B;" />
                     </ui:SettingsCard.HeaderIcon>
@@ -447,9 +463,9 @@
                         <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xF466;" />
                     </ui:SettingsCard.ActionIcon>
                 </ui:SettingsCard>
-                <ui:SettingsExpander Margin="0,5,0,0" Header="诊断环境">
+                <ui:SettingsExpander Margin="0,5,0,0" Header="{x:Bind helper:LanguageService.GetString('Display_DiagnosticEnvironment')}">
                     <ui:SettingsExpander.Items>
-                        <ui:SettingsCard Description="观察右侧内容是否为图标，来确定图标是否正常" Header="字体文件">
+                        <ui:SettingsCard Description="{x:Bind helper:LanguageService.GetString('Display_IconCheck')}" Header="{x:Bind helper:LanguageService.GetString('Display_FontFile')}">
                             <ui:SettingsCard.Content>
                                 <StackPanel Orientation="Horizontal">
                                     <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xEA8C;" />
@@ -458,16 +474,16 @@
                                 </StackPanel>
                             </ui:SettingsCard.Content>
                         </ui:SettingsCard>
-                        <ui:SettingsCard Header="Web内核版本">
+                        <ui:SettingsCard Header="{x:Bind helper:LanguageService.GetString('Display_WebKernelVersion')}">
                             <TextBlock IsTextSelectionEnabled="True" Text="{x:Bind ViewModel.WebViewVersion, Mode=OneWay}" />
                         </ui:SettingsCard>
                         <ui:SettingsCard Header="WindowsApp Sdk">
                             <TextBlock IsTextSelectionEnabled="True" Text="{x:Bind ViewModel.WindowsAppSdkVersion, Mode=OneWay}" />
                         </ui:SettingsCard>
-                        <ui:SettingsCard Header="运行类型">
+                        <ui:SettingsCard Header="{x:Bind helper:LanguageService.GetString('Display_RunType')}">
                             <TextBlock IsTextSelectionEnabled="True" Text="{x:Bind ViewModel.RunType, Mode=OneWay}" />
                         </ui:SettingsCard>
-                        <ui:SettingsCard Header="框架版本">
+                        <ui:SettingsCard Header="{x:Bind helper:LanguageService.GetString('Display_FrameworkVersion')}">
                             <TextBlock IsTextSelectionEnabled="True" Text="{x:Bind ViewModel.FrameworkType, Mode=OneWay}" />
                         </ui:SettingsCard>
                     </ui:SettingsExpander.Items>

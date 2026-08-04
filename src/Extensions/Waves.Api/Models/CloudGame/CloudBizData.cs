@@ -14,7 +14,7 @@ public sealed partial class CloudBizData
     public string Btype { get; set; } = string.Empty;
 
     [JsonPropertyName("os")]
-    public string WINDOWS { get; set; } = string.Empty;
+    public string WINDOWS { get; set; } = "WINDOWS";
 
     [JsonPropertyName("osVer")]
     public string OsVer { get; set; } = string.Empty;

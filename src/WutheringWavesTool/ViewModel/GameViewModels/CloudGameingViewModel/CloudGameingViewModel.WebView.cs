@@ -63,7 +63,7 @@ namespace Haiyu.ViewModel.GameViewModels
                 "setMuted" => JsonSerializer.Serialize(args.ElementAtOrDefault(0), CloudGameContext.Default.Boolean),
                 "setImageEnhancement" => JsonSerializer.Serialize(args.ElementAtOrDefault(0), CloudGameContext.Default.Boolean),
                 "applyQualityProfile" => JsonSerializer.Serialize((ApplyQualityProfilePayload)args.ElementAtOrDefault(0)!, CloudGameContext.Default.ApplyQualityProfilePayload),
-                _ => throw new NotSupportedException($"不支持的串流控制方法: {methodName}")
+                _ => throw new NotSupportedException(LanguageService.FormatByText(LanguageService.GetStringByText("不支持的串流控制方法: {0}"), methodName))
             };
 
             var script = methodName switch

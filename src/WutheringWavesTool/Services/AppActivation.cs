@@ -17,6 +17,7 @@ namespace Haiyu.Services
         }
 
         public SystemEventPublisher SystemEventPublisher { get; }
+        public IAppContext<App> AppContext { get; }
 
         public async Task<JumpListItem?> CreateJumpListsAndInitCoreAsync(IGameContextV2 context)
         {
@@ -25,9 +26,9 @@ namespace Haiyu.Services
             if (status.IsGameExists && status.IsLauncher)
             {
                 var jumpItem = JumpListItem.CreateWithArguments($"{context.ContextName}/startGame", "startGame");
-                jumpItem.GroupName = "快捷启动";
-                jumpItem.Description = $"启动{displayName}";
-                jumpItem.DisplayName = $"启动{displayName}";
+                jumpItem.GroupName = LanguageService.GetStringByText("快捷启动");
+                jumpItem.Description = LanguageService.FormatByText(LanguageService.GetStringByText("启动{0}"), displayName);
+                jumpItem.DisplayName = LanguageService.FormatByText(LanguageService.GetStringByText("启动{0}"), displayName);
                 return jumpItem;
             }
             return null;
@@ -50,12 +51,16 @@ namespace Haiyu.Services
                         {
                             SystemEventPublisher.Publish(new SystemMessagerModel()
                             {
-                                Message = "游戏有更新，无法启动",
+                                Message = LanguageService.GetStringByText("游戏有更新，无法启动"),
                                 Delay = TimeSpan.FromSeconds(30).TotalSeconds
                             });
                             return;
                         }
                         await context.StartGameAsync();
+                    }
+                    else
+                    {
+                        Instance.Host.Services.GetRequiredService<IAppContext<App>>().App.MainWindow.Show();
                     }
                 }
             }

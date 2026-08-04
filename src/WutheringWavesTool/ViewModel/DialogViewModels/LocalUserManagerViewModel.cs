@@ -48,7 +48,15 @@ public sealed partial class LocalUserManagerViewModel : DialogViewModelBase
 
     async Task RefreshAsync()
     {
-        Accounts = (await KuroAccountService.GetUsersAsync()).ToObservableCollection();
+        var accounts = await KuroAccountService.GetUsersAsync();
+        foreach (var account in accounts)
+        {
+            account.CopyTokenText = LanguageService.GetString("Display_CopyToken")!;
+            account.CopyDeviceDidText = LanguageService.GetString("Display_DuplicateDid")!;
+            account.CopyUserIdText = LanguageService.GetString("Display_DuplicateAccountId")!;
+        }
+
+        Accounts = accounts.ToObservableCollection();
         foreach (var item in Accounts)
         {
             if (long.TryParse(item.TokenId, out var id))

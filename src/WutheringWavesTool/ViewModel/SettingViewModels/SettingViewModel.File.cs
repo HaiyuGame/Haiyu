@@ -1,7 +1,8 @@
 using System.Security.Principal;
 using Haiyu.Plugin.Extensions;
 using Microsoft.WindowsAppSDK;
-using Waves.Core.Settings;
+using Waves.Core.Common;
+using Waves.Settings;
 using Windows.Management.Deployment;
 
 namespace Haiyu.ViewModel;
@@ -25,7 +26,7 @@ partial class SettingViewModel
 
     void GetAllVersion()
     {
-        WebViewVersion = CoreWebView2Environment.GetAvailableBrowserVersionString() ?? "未安装";
+        WebViewVersion = CoreWebView2Environment.GetAvailableBrowserVersionString() ?? LanguageService.GetStringByText("未安装");
         this.WindowsAppSdkVersion = Microsoft.WindowsAppSDK.Runtime.Version.DotQuadString;
         this.RunType = RuntimeFeature.IsDynamicCodeCompiled ? "JIT" : "AOT";
         this.FrameworkType = RuntimeInformation.FrameworkDescription;
@@ -36,11 +37,11 @@ partial class SettingViewModel
     {
         if (string.IsNullOrWhiteSpace(this.RpcToken))
         {
-            TipShow.ShowMessage("密钥不能为空", Symbol.Clear);
+            TipShow.ShowMessage(LanguageService.GetStringByText("密钥不能为空"), Symbol.Clear);
             return;
         }
-        await AppSettings.SetRpcTokenAsync(Md5Helper.ComputeMd532(RpcToken));
-        TipShow.ShowMessage("密钥已经更新", Symbol.Accept);
+        await RpcSettings.SetAuthTokenAsync(Md5Helper.ComputeMd532(RpcToken));
+        TipShow.ShowMessage(LanguageService.GetStringByText("密钥已经更新"), Symbol.Accept);
     }
 
     [RelayCommand]
@@ -59,18 +60,11 @@ partial class SettingViewModel
     [RelayCommand]
     async Task DeleteWebCacheCommand()
     {
-        if (
-            Directory.Exists(
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Haiyu.exe.WebView2")
-            )
-        )
+        if (Directory.Exists(AppSettings.WebCacheFolder))
         {
             await Task.Run(() =>
             {
-                Directory.Delete(
-                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Haiyu.exe.WebView2"),
-                    true
-                );
+                Directory.Delete(AppSettings.WebCacheFolder, true);
             });
         }
     }
@@ -110,16 +104,16 @@ partial class SettingViewModel
                 var haiyu = packages.Where(x => x.DisplayName.Contains("Haiyu")).FirstOrDefault();
                 if(haiyu == null)
                 {
-                    await TipShow.ShowMessageAsync("当前应用程序为独立模式，无法创建桌面图标", Symbol.Accept);
+                    await TipShow.ShowMessageAsync(LanguageService.GetStringByText("当前应用程序为独立模式，无法创建桌面图标"), Symbol.Accept);
                     return;
                 }
                 CreateUwpShortcut(saveDialog.Path, $"shell:AppsFolder\\{haiyu.Id.FamilyName}!App");
-                await TipShow.ShowMessageAsync("桌面图标创建成功", Symbol.Accept);
+                await TipShow.ShowMessageAsync(LanguageService.GetStringByText("桌面图标创建成功"), Symbol.Accept);
             }
         }
         catch (Exception ex)
         {
-            await TipShow.ShowMessageAsync($"桌面图标创建异常:{ex.Message}", Symbol.Clear);
+            await TipShow.ShowMessageAsync(LanguageService.FormatByText(LanguageService.GetStringByText("桌面图标创建异常:{0}"), ex.Message), Symbol.Clear);
         }
     }
 
@@ -154,7 +148,7 @@ partial class SettingViewModel
 
             // 3. 检查执行结果
             if (process.ExitCode != 0)
-                throw new Exception($"PowerShell执行失败: {error}");
+                throw new Exception(LanguageService.FormatByText(LanguageService.GetStringByText("PowerShell执行失败: {0}"), error));
 
             return output.Trim();
         }

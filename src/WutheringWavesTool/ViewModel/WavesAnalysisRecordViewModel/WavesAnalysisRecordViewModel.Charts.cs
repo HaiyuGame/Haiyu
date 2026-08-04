@@ -34,7 +34,7 @@ partial class WavesAnalysisRecordViewModel
     private void InitializeCharts()
     {
         TimeLineChart ??= [];
-        TimeLineSeries = [new ColumnSeries { Name = "每日抽数", Values = TimeLineChart }];
+        TimeLineSeries = [new ColumnSeries { Name = LanguageService.GetStringByText("每日抽数"), Values = TimeLineChart }];
         TimeLineXAxes = [new DateTimeAxis { DateFormatter = Formatter }];
     }
 

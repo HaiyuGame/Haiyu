@@ -1,18 +1,23 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Project.WPFSetup.Common;
 using Project.WPFSetup.Common.Setups;
 using Project.WPFSetup.Resources;
 using Project.WPFSetup.Services;
 using System.Diagnostics;
+using System.IO;
 using System.Windows;
 
 namespace Project.WPFSetup.ViewModels.UserViewModels;
 
 public partial class UpdateViewModel : ObservableObject
 {
+    private (bool, string?) _curentLocation;
+
     public PackageService PackageService { get; }
     public SetupProperty SetupProperty { get; }
+
+    private (bool, string?) _currentVersion;
 
     [ObservableProperty]
     public partial string CurrentVersion { get; set; }
@@ -45,19 +50,19 @@ public partial class UpdateViewModel : ObservableObject
     {
         PackageService = packageService;
         this.SetupProperty = SetupPropertyFactory.CreateInstall();
-        var currentVersion = PackageService.GetInstallVersion(SetupProperty);
-        var curentLocation = PackageService.GetInstallLocation(SetupProperty);
-        if (currentVersion.Item1)
+        _currentVersion = PackageService.GetInstallVersion(SetupProperty);
+        _curentLocation = PackageService.GetInstallLocation(SetupProperty);
+        if (_currentVersion.Item1)
         {
-            this.CurrentVersion = currentVersion.Item2!;
+            this.CurrentVersion = _currentVersion.Item2!;
         }
         else
         {
             this.CurrentVersion = "NAN";
         }
-        if (curentLocation.Item1)
+        if (_curentLocation.Item1)
         {
-            this.CurrentInstallPath = curentLocation.Item2!;
+            this.CurrentInstallPath = _curentLocation.Item2!;
             InstallingVisibility = Visibility.Collapsed;
             UpdateVisibility = Visibility.Visible;
             UpdatedVisibility = Visibility.Collapsed;
@@ -79,6 +84,13 @@ public partial class UpdateViewModel : ObservableObject
             UpdateBthString = "升级";
             UpdateTipString = "全新安装包准备完毕";
         }
+    }
+
+    [RelayCommand]
+    void RunAndClose()
+    {
+        Process.Start(Path.Combine(this._curentLocation.Item2, SetupProperty.InstallExeName));
+        Environment.Exit(0);
     }
 
     [RelayCommand]

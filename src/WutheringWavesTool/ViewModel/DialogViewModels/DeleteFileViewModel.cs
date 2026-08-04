@@ -51,7 +51,7 @@ public sealed partial class DeleteFileViewModel : DialogViewModelBase
         var state = await this._gameContext.GetGameContextStatusAsync(this.CTS.Token);
         if (state.IsPredownloaded && state.PredownloaAcion)
         {
-            await TipShow.ShowMessageAsync("预下载期间禁止修复游戏！", Symbol.Clear);
+            await TipShow.ShowMessageAsync(LanguageService.GetStringByText("预下载期间禁止修复游戏！"), Symbol.Clear);
             return;
         }
         if (this.ContextName is null)

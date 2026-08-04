@@ -12,7 +12,7 @@ using Haiyu.Plugin.Common;
 using Haiyu.Plugin.Contracts;
 using Haiyu.Plugin.Models;
 using ProxyExtensions.Common;
-using Waves.Core.Settings;
+using Waves.Settings;
 
 namespace Haiyu.Plugin.Services;
 

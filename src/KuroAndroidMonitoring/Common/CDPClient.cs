@@ -214,8 +214,11 @@ public sealed class CDPClient : IAsyncDisposable
             return;
         }
 
-        await DisconnectAsync();
         _disposed = true;
+        _connectionCancellationSource.Cancel();
+        FailAllPending(new OperationCanceledException("CDP session has been disposed."));
+        FailAllWaiters(new OperationCanceledException("CDP session has been disposed."));
+        ClearEventRegistrations();
         _webSocket.Dispose();
         _connectionCancellationSource.Dispose();
         SetConnectionState(CdpConnectionState.Disposed, message: "CDP session has been disposed.");
@@ -225,8 +228,10 @@ public sealed class CDPClient : IAsyncDisposable
     {
         try
         {
-            while (!cancellationToken.IsCancellationRequested)
+            while (true)
             {
+                if (cancellationToken.IsCancellationRequested)
+                    return;
                 string message = await ReceiveMessageAsync(cancellationToken);
                 if (string.IsNullOrWhiteSpace(message))
                 {
@@ -279,7 +284,6 @@ public sealed class CDPClient : IAsyncDisposable
             FailAllPending(ex);
             FailAllWaiters(ex);
             SetConnectionState(CdpConnectionState.Faulted, ex, "CDP receive loop failed.");
-            throw;
         }
     }
 
@@ -446,24 +450,22 @@ public sealed class CDPClient : IAsyncDisposable
         {
             try
             {
-                await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", cancellationToken);
+                using CancellationTokenSource closeTimeout = new(TimeSpan.FromSeconds(3));
+                await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", closeTimeout.Token);
             }
             catch (WebSocketException)
             {
             }
-        }
-
-        if (_readerTask is not null)
-        {
-            try
+            catch (IOException)
             {
-                await _readerTask;
+            }
+            catch (ObjectDisposedException)
+            {
             }
             catch (OperationCanceledException)
             {
             }
         }
-
         FailAllPending(new OperationCanceledException("CDP session has been disconnected."));
         FailAllWaiters(new OperationCanceledException("CDP session has been disconnected."));
         if (clearEventRegistrations)

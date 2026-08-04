@@ -14,10 +14,10 @@ public class LauncheBthWrapper
     {
         return
         [
-            new LauncheBthWrapper() { Display = "首页", Memory = "Home" },
-            new LauncheBthWrapper() { Display = "鸣潮", Memory = "WutheringWaves" },
-            new LauncheBthWrapper() { Display = "战双", Memory = "PunishingGrayRaven" },
-            new LauncheBthWrapper() { Display = "云鸣潮", Memory = "CloudWutheringWaves" },
+            new LauncheBthWrapper() { Display = LanguageService.GetStringByText("首页"), Memory = "Home" },
+            new LauncheBthWrapper() { Display = LanguageService.GetStringByText("鸣潮"), Memory = "WutheringWaves" },
+            new LauncheBthWrapper() { Display = LanguageService.GetStringByText("战双"), Memory = "PunishingGrayRaven" },
+            new LauncheBthWrapper() { Display = LanguageService.GetStringByText("云鸣潮"), Memory = "CloudWutheringWaves" },
         ];
     }
 }

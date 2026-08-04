@@ -97,4 +97,5 @@ public class ViewFactorys : IViewFactorys
     {
         return this.ShowWindowBase<AutoKuroTokenPage>(null);
     }
+
 }

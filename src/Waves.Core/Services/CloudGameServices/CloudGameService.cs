@@ -71,7 +71,7 @@ public class CloudGameService : ICloudGameService
         return query;
     }
 
-    public async Task<CloudSendSMS> GetPhoneSMSAsync(
+    public async Task<CloudSendSMS?> GetPhoneSMSAsync(
         string phone,
         string geetestCaptchaOutput,
         string geetestPassToken,

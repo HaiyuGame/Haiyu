@@ -1,20 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 
-<Package
-  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
-  xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
-  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
-  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-  xmlns:uap6="http://schemas.microsoft.com/appx/manifest/uap/windows10/6"
-  IgnorableNamespaces="uap rescap uap6">
+<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities" xmlns:uap6="http://schemas.microsoft.com/appx/manifest/uap/windows10/6" IgnorableNamespaces="uap rescap uap6">
 
-  <Identity
-    Name="Blame.Haiyu"
-	
-    Publisher="CN=2566F4CC-49E7-48B8-9B11-F44F309CD097"
-    Version="1.3.4.0" />
+  <Identity Name="Blame.Haiyu" Publisher="CN=2566F4CC-49E7-48B8-9B11-F44F309CD097" Version="1.3.5.0" />
 
-  <mp:PhoneIdentity PhoneProductId="ab5fa69a-8861-45c5-b7af-05a080966447" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="ab5fa69a-8861-45c5-b7af-05a080966447" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
 
   <Properties>
     <DisplayName>Haiyu</DisplayName>
@@ -28,20 +18,13 @@
   </Dependencies>
 
   <Resources>
-    <Resource Language="x-generate"/>
+    <Resource Language="x-generate" />
   </Resources>
 
   <Applications>
-    <Application Id="App"
-      Executable="$targetnametoken$.exe"
-      EntryPoint="$targetentrypoint$">
-      <uap:VisualElements
-        DisplayName="Haiyu"
-        Description="库洛游戏启动器"
-        BackgroundColor="transparent"
-        Square150x150Logo="Assets\Package\Square150x150Logo.png"
-        Square44x44Logo="Assets\Package\Square44x44Logo.png">
-        <uap:DefaultTile Wide310x150Logo="Assets\Package\Wide310x150Logo.png"  Square71x71Logo="Assets\Package\SmallTile.png" Square310x310Logo="Assets\Package\LargeTile.png"/>
+    <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="$targetentrypoint$">
+      <uap:VisualElements DisplayName="Haiyu" Description="库洛游戏启动器" BackgroundColor="transparent" Square150x150Logo="Assets\Package\Square150x150Logo.png" Square44x44Logo="Assets\Package\Square44x44Logo.png">
+        <uap:DefaultTile Wide310x150Logo="Assets\Package\Wide310x150Logo.png" Square71x71Logo="Assets\Package\SmallTile.png" Square310x310Logo="Assets\Package\LargeTile.png" />
         <uap:SplashScreen Image="Assets\Package\SplashScreen.png" />
       </uap:VisualElements>
     </Application>
@@ -49,6 +32,6 @@
 
   <Capabilities>
     <rescap:Capability Name="runFullTrust" />
-    <uap6:Capability Name="graphicsCapture"/>
+    <uap6:Capability Name="graphicsCapture" />
   </Capabilities>
 </Package>

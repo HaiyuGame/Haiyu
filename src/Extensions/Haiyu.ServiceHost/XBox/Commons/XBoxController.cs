@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Haiyu.ServiceHost.XBox.helpers;
 using SharpDX.XInput;
-using Waves.Core.Settings;
+using Waves.Settings;
 
 namespace Haiyu.ServiceHost.XBox.Commons;
 

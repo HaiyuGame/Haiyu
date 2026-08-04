@@ -1,8 +1,9 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentDialog
     x:Class="Haiyu.Pages.Dialogs.CloudGameSettingDialog"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helper="using:Haiyu.Helpers"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:local="using:Haiyu.Pages.Dialogs"
@@ -28,7 +29,7 @@
             <RowDefinition />
             <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
-        <TextBlock VerticalAlignment="Center" Text="清晰度选择" />
+        <TextBlock VerticalAlignment="Center" Text="{x:Bind helper:LanguageService.GetString('Display_ClaritySelection')}" />
         <ComboBox
             Grid.Column="1"
             HorizontalAlignment="Stretch"
@@ -44,7 +45,7 @@
         <TextBlock
             Grid.Row="1"
             VerticalAlignment="Center"
-            Text="帧率" />
+            Text="{x:Bind helper:LanguageService.GetString('Display_FrameRate')}" />
         <ComboBox
             Grid.Row="1"
             Grid.Column="1"
@@ -54,32 +55,32 @@
         <TextBlock
             Grid.Row="2"
             VerticalAlignment="Center"
-            Text="画质增强" />
+            Text="{x:Bind helper:LanguageService.GetString('Display_ImageQualityEnhancement')}" />
         <ToggleSwitch
             Grid.Row="2"
             Grid.Column="1"
             VerticalAlignment="Center"
             IsOn="{x:Bind ViewModel.Enable, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-            OffContent="关"
-            OnContent="开" />
+            OffContent="{x:Bind helper:LanguageService.GetString('Display_LatchingPowerDown')}"
+            OnContent="{x:Bind helper:LanguageService.GetString('Display_On')}" />
 
         <TextBlock
             Grid.Row="3"
             VerticalAlignment="Center"
-            Text="是否显示网络状态" />
+            Text="{x:Bind helper:LanguageService.GetString('Display_NetworkStatus')}" />
         <ToggleSwitch
             Grid.Row="3"
             Grid.Column="1"
             VerticalAlignment="Center"
             IsOn="{x:Bind ViewModel.ShowNetworkState, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-            OffContent="关"
-            OnContent="开" />
+            OffContent="{x:Bind helper:LanguageService.GetString('Display_LatchingPowerDown')}"
+            OnContent="{x:Bind helper:LanguageService.GetString('Display_On')}" />
         <Button
             Grid.Row="4"
             Grid.ColumnSpan="2"
             Width="80"
             HorizontalAlignment="Center"
             Command="{x:Bind ViewModel.CloseCommand}"
-            Content="关闭" />
+            Content="{x:Bind helper:LanguageService.GetString('Display_Off')}" />
     </Grid>
 </ContentDialog>

@@ -113,9 +113,9 @@ partial class KuroGameContextViewModelV2
     {
         TransferChartSeries =
         [
-            CreateSpeedSeries("下载", DownloadSpeedPoints, Color.FromArgb(255, 0, 142, 255), 1),
-            CreateSpeedSeries("校验", VerifySpeedPoints, Color.FromArgb(255, 128, 0, 210), 0),
-            CreateSpeedSeries("解压", DecompressSpeedPoints, Color.FromArgb(255, 60, 183, 0), 2),
+            CreateSpeedSeries(LanguageService.GetStringByText("下载"), DownloadSpeedPoints, Color.FromArgb(255, 0, 142, 255), 1),
+            CreateSpeedSeries(LanguageService.GetStringByText("校验"), VerifySpeedPoints, Color.FromArgb(255, 128, 0, 210), 0),
+            CreateSpeedSeries(LanguageService.GetStringByText("解压"), DecompressSpeedPoints, Color.FromArgb(255, 60, 183, 0), 2),
         ];
         TransferChartXAxes = [new DateTimeAxis { DateFormatter = Formatter, Interval = TimeSpan.FromSeconds(1) }];
         TransferChartYAxes =
@@ -139,11 +139,7 @@ partial class KuroGameContextViewModelV2
 
     private static string Formatter(DateTime date)
     {
-        var secsAgo = (DateTime.Now - date).TotalSeconds;
-
-        return secsAgo < 1
-            ? "现在"
-            : $"{secsAgo:N0}秒前";
+        return DisplayTimeFormatter.FormatDuration(DateTime.Now - date);
     }
     #endregion
 
@@ -198,7 +194,7 @@ partial class KuroGameContextViewModelV2
         this.CurrentProgressValue = 0;
         this.GameContext.SystemEventPublisher.Publish(new()
         {
-            Message = $"取消下载成功",
+            Message = LanguageService.FormatByText(LanguageService.GetStringByText("取消下载成功")),
             Delay = 5
         });
     }

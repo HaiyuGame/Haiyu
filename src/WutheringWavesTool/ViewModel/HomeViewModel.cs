@@ -1,5 +1,7 @@
 ﻿using Haiyu.ViewModel.WikiViewModels;
 
+using Haiyu.Helpers;
+
 namespace Haiyu.ViewModel;
 
 public partial class HomeViewModel : ViewModelBase
@@ -19,8 +21,8 @@ public partial class HomeViewModel : ViewModelBase
     [ObservableProperty]
     public partial ObservableCollection<string> Tabs { get; set; } = new()
     {
-        "鸣潮",
-        "战双帕弥什",
+        LanguageService.GetString("WutheringName")!,
+        LanguageService.GetString("PunishName")!,
     };
 
     [ObservableProperty]
@@ -36,10 +38,10 @@ public partial class HomeViewModel : ViewModelBase
     {
         switch (value)
         {
-            case "战双帕弥什":
+            case var punishName when punishName == LanguageService.GetString("PunishName"):
                 this.NavigationService.NavigationTo<PunishWikiViewModel>(null, new DrillInNavigationTransitionInfo());
                 break;
-            case "鸣潮":
+            case var wutheringName when wutheringName == LanguageService.GetString("WutheringName"):
                 this.NavigationService.NavigationTo<WavesWikiViewModel>(null, new DrillInNavigationTransitionInfo());
                 break;
         }

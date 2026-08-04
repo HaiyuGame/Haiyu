@@ -84,9 +84,9 @@ namespace Haiyu.Models.Wrapper.Wiki
             {
                 foreach (var module in modules)
                 {
-                    if (module.Title == "诺曼复兴战") norman = module;
-                    if (module.Title == "历战映射") warzone = module;
-                    if (module.Title == "幻痛囚笼") cage = module;
+                    if (module.Title == LanguageService.GetStringByText("诺曼复兴战")) norman = module;
+                    if (module.Title == LanguageService.GetStringByText("历战映射")) warzone = module;
+                    if (module.Title == LanguageService.GetStringByText("幻痛囚笼")) cage = module;
                 }
             }
 
@@ -98,7 +98,7 @@ namespace Haiyu.Models.Wrapper.Wiki
             {
                 foreach (var module in mainModules)
                 {
-                    if (module.Title == "纷争战区")
+                    if (module.Title == LanguageService.GetStringByText("纷争战区"))
                     {
                         SetDisputeDataFromMain(module);
                         break;
@@ -139,16 +139,14 @@ namespace Haiyu.Models.Wrapper.Wiki
                         if (elapsed <= 0)
                         {
                             currVal = maxVal;
-                            msg = "已结束";
+                            msg = LanguageService.GetStringByText("已结束");
                             return (currVal, maxVal, msg);
                         }
 
 
 
                         currVal = _overCountdownTimeSpace.TotalSeconds;
-                        msg = $"剩余{_endCountdownTimeSpan.Days}天" +
-                                    $"{_endCountdownTimeSpan.Hours}小时" +
-                                    $"{_endCountdownTimeSpan.Minutes}分";
+                        msg = DisplayTimeFormatter.FormatDuration(_endCountdownTimeSpan);
                         return (currVal, maxVal, msg);
                     }
                     return (0, 0, string.Empty);
@@ -267,15 +265,16 @@ namespace Haiyu.Models.Wrapper.Wiki
                                                 if (elapsed <= 0)
                                                 {
                                                     disputeItem.CurrentProgress = disputeItem.MaxProgress;
-                                                    disputeItem.RemainingTime = "已结束";
+                                                    disputeItem.RemainingTime = LanguageService.GetStringByText("已结束");
                                                     disputeItem.ColorVal = "Red";
                                                     return;
                                                 }
 
                                                 disputeItem.CurrentProgress = _overCountdownTimeSpace.TotalSeconds;
-                                                disputeItem.RemainingTime = $"剩余{_endCountdownTimeSpan.Days}天" +
-                                                            $"{_endCountdownTimeSpan.Hours}小时" +
-                                                            $"{_endCountdownTimeSpan.Minutes}分";
+                                                disputeItem.RemainingTime =
+                                                    DisplayTimeFormatter.FormatDuration(
+                                                        _endCountdownTimeSpan
+                                                    );
                                                 disputeItem.ColorVal = "#66CCFF";
 
 
@@ -420,7 +419,7 @@ namespace Haiyu.Models.Wrapper.Wiki
         }
         public void UpdatePunishCageContent()
         {
-            var key = "高级区";
+            var key = LanguageService.GetStringByText("高级区");
             if (_punishCageCache.ContainsKey(key))
             {
                 var cacheItem = _punishCageCache[key];

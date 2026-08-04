@@ -19,4 +19,5 @@ public interface IViewFactorys
     public WindowModelBase ShowAnalysisRecordV2(CloudGameLoginSession selectLogin);
 
     public WindowModelBase ShowAutoKruoTokenWindow();
+
 }

@@ -36,7 +36,7 @@ public partial class PunishWikiViewModel : WikiViewModelBase
         }
         else
         {
-            TipShow.ShowMessage($"获取数据失败，请检查网络或重启应用", Symbol.Clear);
+            TipShow.ShowMessage(LanguageService.FormatByText(LanguageService.GetStringByText("获取数据失败，请检查网络或重启应用")), Symbol.Clear);
         }
     }
 
@@ -47,7 +47,7 @@ public partial class PunishWikiViewModel : WikiViewModelBase
             foreach (var value in wikiPage.result.Data.ContentJson.SideModules)
             {
                 if (value == null) return;
-                if (value.Title.Contains("池"))
+                if (value.Title.Contains(LanguageService.GetStringByText("池")))
                 {
                     sw.WriteLine(value.Title);
                     sw.WriteLine(value.Content);

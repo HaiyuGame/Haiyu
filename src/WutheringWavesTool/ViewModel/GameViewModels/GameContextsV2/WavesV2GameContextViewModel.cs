@@ -66,7 +66,7 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
 
     [ObservableProperty]
     public partial ObservableCollection<string> Tabs { get; set; } =
-        new ObservableCollection<string>() { "活动", "公告", "新闻" };
+        new ObservableCollection<string>() { LanguageService.GetStringByText("活动"), LanguageService.GetStringByText("公告"), LanguageService.GetStringByText("新闻") };
 
     [ObservableProperty]
     public partial string SelectTab { get; set; }
@@ -183,7 +183,7 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
         );
         if (lastSelect == null)
         {
-            LocalUserTitle = "请在右侧选择本地游戏账号信息";
+            LocalUserTitle = LanguageService.GetStringByText("请在右侧选择本地游戏账号信息");
             IsLocalUserRefresh = false;
             SwatchIndex = 2;
             return;
@@ -198,7 +198,7 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
             var localUsers = await this.GameContext.GetLocalGameOAuthAsync(this.CTS.Token);
             if (localUsers == null || localUsers.Count == 0)
             {
-                LocalUserTitle = "未获取到本地游戏账号信息";
+                LocalUserTitle = LanguageService.GetStringByText("未获取到本地游戏账号信息");
                 this.Base = null;
                 this.MusicData = null;
                 this.BattlePass = null;
@@ -218,7 +218,7 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
                     this.MotorData = null;
                     this.GameContext.SystemEventPublisher.Publish(new()
                     {
-                        Message = $"游戏账号:{item.Username}失效",
+                        Message = LanguageService.FormatByText(LanguageService.GetStringByText("游戏账号:{0}失效"), item.Username),
                         Delay = 5
                     });
                     IsLocalUserRefresh = false;
@@ -242,7 +242,7 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
         }
         if (selectItem == null)
         {
-            LocalUserTitle = "未获取到上次选择的本地游戏账号信息";
+            LocalUserTitle = LanguageService.GetStringByText("未获取到上次选择的本地游戏账号信息");
             this.Base = null;
             this.MusicData = null;
             this.BattlePass = null;
@@ -264,11 +264,11 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
         );
         if (result == null || result.Items == null || result.Items.Count == 0)
         {
-            LocalUserTitle = "获取账号信息失败";
-            await TipShow.ShowMessageAsync("请重新进入游戏获取信息", Symbol.Clear);
+            LocalUserTitle = LanguageService.GetStringByText("获取账号信息失败");
+            await TipShow.ShowMessageAsync(LanguageService.GetStringByText("请重新进入游戏获取信息"), Symbol.Clear);
             this.GameContext.SystemEventPublisher.Publish(new()
             {
-                Message = $"体力卡片刷新失败，请重新进入游戏获取",
+                Message = LanguageService.FormatByText(LanguageService.GetStringByText("体力卡片刷新失败，请重新进入游戏获取")),
                 Delay = 5
             });
             IsLocalUserRefresh = false;

@@ -1,3 +1,6 @@
+using Waves.Api.Models.KuroClient;
+using Waves.Api.Models.KuroClient.Options;
+
 namespace WavesLauncher.Core.Contracts;
 
 public interface IKuroClient
@@ -41,7 +44,11 @@ public interface IKuroClient
         CancellationToken token = default
     );
 
-    Task<ScanScreenModel?> PostQrValueAsync(KuroAccount account, string qrText, CancellationToken token = default);
+    Task<ScanScreenModel?> PostQrValueAsync(
+        KuroAccount account,
+        string qrText,
+        CancellationToken token = default
+    );
     Task<QRLoginResult?> QRLoginAsync(
         KuroAccount account,
         string qrText,
@@ -49,7 +56,11 @@ public interface IKuroClient
         string id,
         CancellationToken token = default
     );
-    Task<SMSModel?> GetQrCodeAsync(KuroAccount account, string qrCode, CancellationToken token = default);
+    Task<SMSModel?> GetQrCodeAsync(
+        KuroAccount account,
+        string qrCode,
+        CancellationToken token = default
+    );
 
     Task<DeviceInfo?> GetDeviceInfosAsync(KuroAccount account, CancellationToken token = default);
     Task<AddUserGameServer?> GetBindServerAsync(
@@ -161,4 +172,43 @@ public interface IKuroClient
     Task InitAsync();
     Task<WikiHomeModel> GetMainWikiAsync(KuroAccount account, CancellationToken token = default);
     Task InitMapPostion(KuroAccount account);
+
+    Task<KuroClientReturnCode<KuroClientSignInModel>?> SignInClientAsync(
+        KuroAccount account,
+        CancellationToken cts = default
+    );
+
+    Task<KuroClientReturnCode<KuroClientHomeFeedModel>?> FeedHomeListsAsync(
+        KuroAccount account,
+        HomeFeedOption option,
+        CancellationToken cts = default
+    );
+
+    Task<KuroClientReturnCode<bool>?> PostIdLikeAsync(
+        KuroAccount account,
+        HomeFeedLikeOption option,
+        CancellationToken token = default
+    );
+
+    Task<KuroClientReturnCode<bool>?> SharedPostIdAsync(
+        KuroAccount account,
+        HomeFeedSharedOption option,
+        CancellationToken token = default
+    );
+
+    Task<KuroClientReturnCode<KuroClientPostPageDetail>?> GetFeedPageDetailAsync(
+        KuroAccount account,
+        HomeFeedPostDetailOption option,
+        CancellationToken token = default
+    );
+
+    Task<KuroClientReturnCode<KuroEncourageProcessModel>?> GetEncourageProcessAsync(
+        KuroAccount account,
+        EncourageProcessOption option,
+        CancellationToken token = default
+    );
+    Task<KuroClientReturnCode<EncourageTotalGoldModel>?> GetEncourageTotalGoldAsync(
+        KuroAccount account,
+        CancellationToken token = default
+    );
 }

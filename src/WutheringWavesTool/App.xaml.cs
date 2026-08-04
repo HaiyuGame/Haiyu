@@ -4,7 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Windows.ApplicationModel.Resources;
 using Microsoft.Windows.AppLifecycle;
 using Waves.Core.Services;
-using Waves.Core.Settings;
+using Waves.Settings;
 using Windows.ApplicationModel.Activation;
 using Windows.ApplicationModel.Background;
 using Windows.Globalization;
@@ -21,7 +21,7 @@ public partial class App : ClientApplication
     private const int PROCESS_PER_MONITOR_DPI_AWARE = 2;
     private AppInstance mainInstance;
 
-    public static string AppVersion => "1.3.4";
+    public static string AppVersion => "1.3.5";
 
     public AppSettings AppSettings { get; private set; }
 
@@ -79,6 +79,14 @@ public partial class App : ClientApplication
 
     protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
+        var mainInstance = Microsoft.Windows.AppLifecycle.AppInstance.FindOrRegisterForKey("Haiyu_Main");
+        if (!mainInstance.IsCurrent)
+        {
+            var activatedEventArgs = Microsoft.Windows.AppLifecycle.AppInstance.GetCurrent().GetActivatedEventArgs();
+            await mainInstance.RedirectActivationToAsync(activatedEventArgs);
+            Process.GetCurrentProcess().Kill();
+            return;
+        }
         await Instance.InitServiceAsync();
         this.AppSettings = Instance.Host.Services.GetRequiredService<AppSettings>();
         this.UnhandledException += App_UnhandledException;
@@ -92,19 +100,6 @@ public partial class App : ClientApplication
 
         Instance.Host.Services.GetKeyedService<LoggerService>("AppLog").WriteInfo("启动程序中……");
 
-        var mainInstance = Microsoft.Windows.AppLifecycle.AppInstance.FindOrRegisterForKey(
-            "Haiyu_Main"
-        );
-        if (!mainInstance.IsCurrent)
-        {
-            mainInstance.Activated -= MainInstance_Activated;
-            var activatedEventArgs = Microsoft
-                .Windows.AppLifecycle.AppInstance.GetCurrent()
-                .GetActivatedEventArgs();
-            await mainInstance.RedirectActivationToAsync(activatedEventArgs);
-            Process.GetCurrentProcess().Kill();
-            return;
-        }
         await LanguageService.InitAsync();
         await Instance.Host.Services.GetRequiredService<IAppContext<App>>().LauncherAsync(this);
         await SetTheme();

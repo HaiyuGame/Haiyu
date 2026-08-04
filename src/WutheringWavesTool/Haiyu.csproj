@@ -121,6 +121,7 @@
 		<ProjectReference Include="..\Extensions\Waves.Api\Waves.Api.csproj" />
 		<ProjectReference Include="..\KuroAndroidMonitoring\ChromeCDPSharp.csproj" />
 		<ProjectReference Include="..\Waves.Core\Waves.Core.csproj" />
+		<ProjectReference Include="..\Waves.Settings\Waves.Settings.csproj" />
 		<ProjectReference Include="..\Haiyu.Controls\Haiyu.Controls.csproj" />
 		<ProjectReference Include="..\Haiyu.Charts.WinUI\Haiyu.Charts.WinUI.csproj" />
 		<ProjectReference Include="..\Haiyu.Pickers\Haiyu.Pickers.csproj" />
@@ -281,6 +282,18 @@
 		<None Update="Assets\HpatchzResource\hpatchz.exe">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
+		<None Update="Languages\en-US.json">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Languages\ja-JP.json">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Languages\zh-Hans.json">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Languages\zh-Hant.json">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<Page Update="Pages\Toolkits\AutoKuroTokenPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</Page>
@@ -382,7 +395,7 @@
 	  <None Remove="Pages\WavesAnalysisRecordPage.xaml" />
 	  <None Remove="WindowModels\CloudGameWindows.xaml" />
 	</ItemGroup>
-	<Target Name="CopyXamlResourcesForAot" AfterTargets="Publish" Condition="'$(PublishAot)' == 'true'">
+	<Target Name="CopyXamlResourcesForAot" AfterTargets="Publish" Condition="'$(PublishAot)' == 'true' and '$(WindowsPackageType)' != 'MSIX'">
 		<ItemGroup>
 			<_XamlResources Include="$(OutputPath)**\*.xbf" />
 			<_XamlResources Include="$(OutputPath)$(AssemblyName).pri" />

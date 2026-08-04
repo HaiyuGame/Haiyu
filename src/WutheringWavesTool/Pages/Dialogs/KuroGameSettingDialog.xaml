@@ -3,6 +3,7 @@
     x:Class="Haiyu.Pages.Dialogs.KuroGameSettingDialog"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helper="using:Haiyu.Helpers"
     xmlns:ani="using:CommunityToolkit.WinUI.Animations"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
@@ -16,25 +17,21 @@
             <i:InvokeCommandAction Command="{x:Bind ViewModel.LoadedCommand}" />
         </i:EventTriggerBehavior>
     </i:Interaction.Behaviors>
-    <Grid RowSpacing="5">
-        <Grid.ChildrenTransitions>
+    <StackPanel
+        HorizontalAlignment="Stretch"
+        Orientation="Vertical"
+        Spacing="5">
+        <StackPanel.ChildrenTransitions>
             <TransitionCollection>
                 <RepositionThemeTransition />
             </TransitionCollection>
-        </Grid.ChildrenTransitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto" />
-            <RowDefinition Height="auto" />
-            <RowDefinition Height="auto" />
-            <RowDefinition />
-            <RowDefinition />
-            <RowDefinition />
-        </Grid.RowDefinitions>
+        </StackPanel.ChildrenTransitions>
+
         <TextBlock
             HorizontalAlignment="Center"
             FontFamily="{ThemeResource DefaultFont}"
             FontSize="18"
-            Text="游戏设置" />
+            Text="{x:Bind helper:LanguageService.GetString('Display_GameSettings')}" />
         <Border
             Grid.Row="1"
             Grid.Column="1"
@@ -42,7 +39,7 @@
             Padding="15,10"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             CornerRadius="5">
-            <NumberBox Header="下载速度（0为不限速）" Value="{x:Bind ViewModel.DownloadSpeedLimit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <NumberBox Header="{x:Bind helper:LanguageService.GetString('Display_UnlimitedSpeed')}" Value="{x:Bind ViewModel.DownloadSpeedLimit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
         </Border>
         <Border
             Grid.Row="2"
@@ -52,7 +49,7 @@
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             CornerRadius="5">
             <ComboBox
-                Header="启动对象"
+                Header="{x:Bind helper:LanguageService.GetString('Display_StartupObject')}"
                 ItemsSource="{x:Bind ViewModel.LuancheExeNames, Mode=OneWay}"
                 SelectedItem="{x:Bind ViewModel.LauncheExeName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
         </Border>
@@ -63,6 +60,7 @@
             VerticalAlignment="Top"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             CornerRadius="5"
+            RowSpacing="5"
             Visibility="{x:Bind ViewModel.WavesSettingVisibility, Mode=OneWay}">
             <ani:Implicit.ShowAnimations>
                 <ani:OpacityAnimation To="1" Duration="0:0:0.5" />
@@ -96,7 +94,7 @@
             <TextBlock
                 Grid.Row="2"
                 VerticalAlignment="Center"
-                Text="禁用 Dlss" />
+                Text="{x:Bind helper:LanguageService.GetString('Display_DisableDlss')}" />
             <Border
                 Grid.Row="2"
                 Grid.Column="1"
@@ -118,13 +116,13 @@
             VerticalAlignment="Top"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             CornerRadius="5">
-            <TextBox Header="其他启动参数" Text="{x:Bind ViewModel.Arguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Header="{x:Bind helper:LanguageService.GetString('Display_OtherStartupParameters')}" Text="{x:Bind ViewModel.Arguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
         </Grid>
         <Button
             Grid.Row="5"
             Margin="0,10,0,0"
             HorizontalAlignment="Center"
             Command="{x:Bind ViewModel.CloseCommand}"
-            Content="保存" />
-    </Grid>
+            Content="{x:Bind helper:LanguageService.GetString('Display_SAVING')}" />
+    </StackPanel>
 </ContentDialog>

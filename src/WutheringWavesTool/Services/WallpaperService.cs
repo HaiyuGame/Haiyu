@@ -42,7 +42,7 @@ public class WallpaperService : IWallpaperService
         }
         catch (Exception ex)
         {
-            TipShow.ShowMessage($"图片路径或格式不合法,{ex.Message}", Symbol.Pictures);
+            TipShow.ShowMessage(LanguageService.FormatByText(LanguageService.GetStringByText("图片路径或格式不合法,{0}"), ex.Message), Symbol.Pictures);
             return await Task.FromResult(true);
         }
     }

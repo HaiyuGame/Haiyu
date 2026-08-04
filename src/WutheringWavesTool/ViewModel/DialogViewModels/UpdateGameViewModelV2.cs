@@ -87,7 +87,7 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
         }
         if (rootDir == result.Path)
         {
-            WindowExtension.MessageBox(0, "不能选择磁盘根目录作为补丁下载目录！", "警告", 0);
+            WindowExtension.MessageBox(0, LanguageService.GetStringByText("不能选择磁盘根目录作为补丁下载目录！"), LanguageService.GetStringByText("警告"), 0);
             EnableContinue = false;
             return;
         }
@@ -95,7 +95,7 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
         double freeSpaceGB = ByteConversion.BytesToGigabytes(driveInfo.TotalFreeSpace, 2);
         if (freeSpaceGB < PatcherFileSize)
         {
-            WindowExtension.MessageBox(0, "选择磁盘容量不足！", "警告", 0);
+            WindowExtension.MessageBox(0, LanguageService.GetStringByText("选择磁盘容量不足！"), LanguageService.GetStringByText("警告"), 0);
             EnableContinue = false;
             return;
         }
@@ -113,7 +113,7 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
         {
             if (launcher == null || launcher.ResourceDefault == null)
             {
-                WindowExtension.MessageBox(0, "游戏资源拉取失败！", "错误", 0);
+                WindowExtension.MessageBox(0, LanguageService.GetStringByText("游戏资源拉取失败！"), LanguageService.GetStringByText("错误"), 0);
                 await this.Close();
                 return;
             }
@@ -122,7 +122,7 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
         {
             if (launcher == null || launcher.Predownload == null)
             {
-                WindowExtension.MessageBox(0, "预下载资源拉取失败！", "错误", 0);
+                WindowExtension.MessageBox(0, LanguageService.GetStringByText("预下载资源拉取失败！"), LanguageService.GetStringByText("错误"), 0);
                 await this.Close();
                 return;
             }
@@ -138,7 +138,7 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
             );
         if (localVersion == null)
         {
-            WindowExtension.MessageBox(0, "本地游戏版本获取失败，请重启启动器后重新尝试", "错误", 0);
+            WindowExtension.MessageBox(0, LanguageService.GetStringByText("本地游戏版本获取失败，请重启启动器后重新尝试"), LanguageService.GetStringByText("错误"), 0);
             return;
         }
         LocalVersion = localVersion;
@@ -175,8 +175,8 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
         {
             WindowExtension.MessageBox(
                 0,
-                "网络请求失败，请稍后重新尝试",
-                "警告",
+                LanguageService.GetStringByText("网络请求失败，请稍后重新尝试"),
+                LanguageService.GetStringByText("警告"),
                 0
             );
             return;
@@ -184,7 +184,7 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
         var preious = await GameContext.GetPatchGameResourceAsync(cdnUrl.Url+patche.IndexFile);
         if(preious != null && preious.ApplyTypes == null && preious.Resource != null  && launcher.ResourceDefault.Config.PatchConfig.IndexOf(patche) != launcher.ResourceDefault.Config.PatchConfig.Count-1)
         {
-            LegacyMessageBox.ShowInformation(ownedHwnd, "警告：本地版本过于老旧，无法更新\r\n解决方案：建议进行 修复游戏 或 卸载之后重新下载\r\n原因说明：检索库洛服务器中不包含热补丁文件，无法进行增量更新","警告");
+            LegacyMessageBox.ShowInformation(ownedHwnd, LanguageService.GetStringByText("警告：本地版本过于老旧，无法更新\r\n解决方案：建议进行 修复游戏 或 卸载之后重新下载\r\n原因说明：检索库洛服务器中不包含热补丁文件，无法进行增量更新"),LanguageService.GetStringByText("警告"));
             return;
         }
         PatcherFileSize = ByteConversion.BytesToGigabytes(patche.Size, 2);
@@ -194,7 +194,7 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
             .FirstOrDefault(d => d.Name.Equals(driveLetter, StringComparison.OrdinalIgnoreCase));
         if (driveInfo == null || !driveInfo.IsReady)
         {
-            LegacyMessageBox.ShowInformation(ownedHwnd, "警告：本地版本过于老旧，无法更新\r\n解决方案：建议进行 修复游戏 或 卸载之后重新下载\r\n原因说明：检索库洛服务器中不包含热补丁文件，无法进行增量更新", "警告");
+            LegacyMessageBox.ShowInformation(ownedHwnd, LanguageService.GetStringByText("警告：本地版本过于老旧，无法更新\r\n解决方案：建议进行 修复游戏 或 卸载之后重新下载\r\n原因说明：检索库洛服务器中不包含热补丁文件，无法进行增量更新"), LanguageService.GetStringByText("警告"));
             return;
         }
         double totalSizeGB = ByteConversion.BytesToGigabytes(driveInfo.TotalSize, 2);
@@ -210,9 +210,9 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
         {
             this.DiskPipePoint = new ObservableCollection<object>()
             {
-                new PieData() { Name = "总容量", Values = [totalSizeGB] },
-                new PieData() { Name = "已用容量", Values = [usedSpaceGB] },
-                new PieData() { Name = "更新占用容量", Values = [PatcherFileSize] },
+                new PieData() { Name = LanguageService.GetStringByText("总容量"), Values = [totalSizeGB] },
+                new PieData() { Name = LanguageService.GetStringByText("已用容量"), Values = [usedSpaceGB] },
+                new PieData() { Name = LanguageService.GetStringByText("更新占用容量"), Values = [PatcherFileSize] },
             };
         }
         FreeDiskSpace = freeSpaceGB;
@@ -221,8 +221,8 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
             this.Logger.WriteError("磁盘空间不足");
             WindowExtension.MessageBox(
                 0,
-                "磁盘空间不足！可以选择其他盘作为补丁文件下载路径",
-                "警告",
+                LanguageService.GetStringByText("磁盘空间不足！可以选择其他盘作为补丁文件下载路径"),
+                LanguageService.GetStringByText("警告"),
                 0
             );
             EnableContinue = false;
@@ -247,11 +247,11 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
         this.InvokeType = item2;
         if (this.InvokeType == UpdateGameType.UpdateGame)
         {
-            this.InvokeName = "更新游戏";
+            this.InvokeName = LanguageService.GetStringByText("更新游戏");
         }
         else
         {
-            this.InvokeName = "预下载游戏";
+            this.InvokeName = LanguageService.GetStringByText("预下载游戏");
         }
     }
 }

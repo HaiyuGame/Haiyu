@@ -1,6 +1,7 @@
 using Haiyu.Models.Settings;
 using Haiyu.Plugin.Common;
 using Haiyu.Services.DialogServices;
+using Haiyu.ViewModel.OOBEViewModels;
 using Waves.Core.Helpers;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Security.Credentials.UI;
@@ -19,7 +20,9 @@ public sealed partial class SettingViewModel : ViewModelBase
         IScreenCaptureService screenCaptureService,
         IPickersService pickersService,
         IThemeService themeService,
-        GithubIpSettings githubIpSettings
+        GithubIpSettings githubIpSettings,
+        LanguageSelectViewModel languageSelectViewModel,
+        RpcSettings rpcSettings
     )
     {
         DialogManager = dialogManager;
@@ -32,6 +35,8 @@ public sealed partial class SettingViewModel : ViewModelBase
         PickersService = pickersService;
         ThemeService = themeService;
         GithubIpSettings = githubIpSettings;
+        LanguageSelectViewModel = languageSelectViewModel;
+        RpcSettings = rpcSettings;
         RegisterMessanger();
     }
 
@@ -57,6 +62,7 @@ public sealed partial class SettingViewModel : ViewModelBase
     public IPickersService PickersService { get; }
     public IThemeService ThemeService { get; }
     public GithubIpSettings GithubIpSettings { get; }
+    public RpcSettings RpcSettings { get; }
 
     [ObservableProperty]
     public partial bool? StartGameAllowCloseMain { get; set; }
@@ -71,10 +77,11 @@ public sealed partial class SettingViewModel : ViewModelBase
     public partial bool CheckUpdateVisibility { get; set; }
 
     [ObservableProperty]
-    public partial ObservableCollection<LauncheBthWrapper> AppLauncheBths { get; set; } = LauncheBthWrapper.CreateDefault();
+    public partial ObservableCollection<LauncheBthWrapper> AppLauncheBths { get; set; } =
+        LauncheBthWrapper.CreateDefault();
 
     [ObservableProperty]
-    public partial LauncheBthWrapper  SelectAppLauncheBth { get; set; }
+    public partial LauncheBthWrapper SelectAppLauncheBth { get; set; }
 
     partial void OnSelectAppLauncheBthChanged(LauncheBthWrapper value)
     {
@@ -143,7 +150,7 @@ public sealed partial class SettingViewModel : ViewModelBase
             return;
         foreach (var item in this.AppLauncheBths)
         {
-            if(saveOption == item.Memory)
+            if (saveOption == item.Memory)
             {
                 this.SelectAppLauncheBth = item;
                 break;
@@ -155,11 +162,14 @@ public sealed partial class SettingViewModel : ViewModelBase
     async Task CopyToken()
     {
         var result = await UserConsentVerifier.RequestVerificationAsync(
-            "复制授权码需要系统用户密码"
+            LanguageService.GetStringByText("复制授权码需要系统用户密码")
         );
         if (result != UserConsentVerificationResult.Verified)
         {
-            TipShow.ShowMessage("系统用户验证失败！", Symbol.Clear);
+            TipShow.ShowMessage(
+                LanguageService.GetStringByText("系统用户验证失败！"),
+                Symbol.Clear
+            );
             return;
         }
         var account = AccountService.CurrentAccount;
@@ -179,7 +189,6 @@ public sealed partial class SettingViewModel : ViewModelBase
         Clipboard.SetContent(package);
     }
 
-
     partial void OnSelectCloseIndexChanged(int value)
     {
         _ = OnSelectCloseIndexChangedAsync(value);
@@ -191,7 +200,6 @@ public sealed partial class SettingViewModel : ViewModelBase
             return;
         _ = AppSettings.SetStartGameAllowCloseMainAsync(value);
     }
-
 
     private async Task OnSelectCloseIndexChangedAsync(int value)
     {

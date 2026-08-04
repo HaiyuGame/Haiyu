@@ -87,7 +87,7 @@ partial class WavesAnalysisRecordViewModel
                     OK = 100 - data,
                     DisplayName = item.GetRecordNavItem().DisplayName,
                     ConsecutiveLoss = consecutiveLoss,
-                    GuaranteeStatus = isNextSmallGuarantee ? "小保底" : "大保底",
+                    GuaranteeStatus = isNextSmallGuarantee ? LanguageService.GetStringByText("小保底") : LanguageService.GetStringByText("大保底"),
                 }
             );
             this.SelectGuarante = GuaranteItems[0];
@@ -142,8 +142,8 @@ partial class WavesAnalysisRecordViewModel
         var fourStarTotal = allResources.Count(x => x.QualityLevel == 4);
         StarRatioChart = new ObservableCollection<PieSeries>()
         {
-            new PieSeries() { Name = "4星", Value = fourStarTotal },
-            new PieSeries() { Name = "5星", Value = allStarTotal },
+            new PieSeries() { Name = LanguageService.GetStringByText("4星"), Value = fourStarTotal },
+            new PieSeries() { Name = LanguageService.GetStringByText("5星"), Value = allStarTotal },
         };
 
         if (TimeLineChart == null)
@@ -168,10 +168,10 @@ partial class WavesAnalysisRecordViewModel
         GuaranteeChart.Clear();
         this.GuaranteeChart = new ObservableCollection<PieSeries>()
         {
-            new PieSeries() { Name = "中", Value = value.OK },
-            new PieSeries() { Name = "歪", Value = value.NG },
+            new PieSeries() { Name = LanguageService.GetStringByText("中"), Value = value.OK },
+            new PieSeries() { Name = LanguageService.GetStringByText("歪"), Value = value.NG },
         };
-        GuaranteeHeader = $"保底状态：{value.GuaranteeStatus}";
+        GuaranteeHeader = LanguageService.FormatByText(LanguageService.GetStringByText("保底状态：{0}"), value.GuaranteeStatus);
     }
 
     partial void OnSelectNavItemChanged(GameRecordNavigationItem value)
@@ -207,7 +207,7 @@ partial class WavesAnalysisRecordViewModel
                     Flage = false,
                     Count = lastCount,
                     ShowFlage = Visibility.Collapsed,
-                    Name = $"已经垫了{lastCount}发",
+                    Name = LanguageService.FormatByText(LanguageService.GetStringByText("已经垫了{0}发"), lastCount),
                 }
             );
             StarAvgValue = Math.Round(StarItems.Select(x => x.Count).Average(), 2);

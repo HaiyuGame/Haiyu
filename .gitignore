@@ -339,6 +339,9 @@ ASALocalRun/
 # MSBuild Binary and Structured Log
 *.binlog
 
+# Local release-tool output
+artifacts/
+
 # NVidia Nsight GPU debugger configuration file
 *.nvuser
 
@@ -366,3 +369,6 @@ FodyWeavers.xsd
 /src/Setup/Project.WPFSetup/Resources/unstaller.exe
 /src/Setup/Project.WPFSetup/Resources/uninstall.exe
 /src/.tmp-npm-cache
+/reverse_kcp_new
+/reverse_output
+/tools/wuwa_kcp

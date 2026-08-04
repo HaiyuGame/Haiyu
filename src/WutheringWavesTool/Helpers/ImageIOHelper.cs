@@ -43,7 +43,7 @@ public static class ImageIOHelper
     {
         System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create();
         if (!Directory.Exists(sourceFolder))
-            return (null, "源文件夹不存在！", "");
+            return (null, LanguageService.GetStringByText("源文件夹不存在！"), "");
         var dir = new DirectoryInfo(sourceFolder);
         var items = dir.EnumerateFiles()
             .Where(x => x.Name.EndsWith(".png") || x.Name.EndsWith(".jpg"));
@@ -87,7 +87,7 @@ public static class ImageIOHelper
         }
         if (string.IsNullOrWhiteSpace(fileMd5))
         {
-            return (null, "文件MD5计算失败！", fileMd5);
+            return (null, LanguageService.GetStringByText("文件MD5计算失败！"), fileMd5);
         }
         List<(string, string)> hashTable = new();
         foreach (var item in items)

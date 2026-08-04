@@ -54,7 +54,7 @@ public partial class WindowAllowTransparentBase : Window
     {
         if (_handle.IsNull)
         {
-            throw new InvalidOperationException("窗口句柄未初始化，无法设置置顶状态");
+            throw new InvalidOperationException(LanguageService.GetStringByText("窗口句柄未初始化，无法设置置顶状态"));
         }
 
         bool result = PInvoke.SetWindowPos(

@@ -11,21 +11,24 @@ public sealed partial class GetGeetWindow : WindowModelBase
         this.titleBar.Window = this;
         Type = type;
         this.webView2.NavigationCompleted += WebView2_NavigationCompleted;
-        switch (Type)
-        {
-            case GeetType.Login:
-
-                this.webView2.Source = new(AppDomain.CurrentDomain.BaseDirectory + "Assets\\geet.html");
-                break;
-            case GeetType.WebGame:
-                this.webView2.Source = new(AppDomain.CurrentDomain.BaseDirectory + "Assets\\geet2.html");
-                break;
-            default:
-                break;
-        }
-
+        this.webView2.Loaded += WebView2_Loaded;
 
         this.grid.RequestedTheme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
+    }
+
+    private async void WebView2_Loaded(object sender, RoutedEventArgs e)
+    {
+        this.webView2.Loaded -= WebView2_Loaded;
+        await global::Haiyu.Common.KuroWebView.WebView2EnvironmentProvider.EnsureInitializedAsync(
+            this.webView2
+        );
+
+        this.webView2.Source = Type switch
+        {
+            GeetType.Login => new(AppDomain.CurrentDomain.BaseDirectory + "Assets\\geet.html"),
+            GeetType.WebGame => new(AppDomain.CurrentDomain.BaseDirectory + "Assets\\geet2.html"),
+            _ => null,
+        };
     }
 
     private void WebView2_NavigationCompleted(

@@ -22,7 +22,7 @@ public class ServerDisplay
         [
             new ServerDisplay()
             {
-                Display = "官服",
+                Display = LanguageService.GetStringByText("官服"),
                 Key = $"{nameof(PunishMainGameContextV2)}",
                 Tag = "Main",
                 ShowCard = true,
@@ -36,13 +36,13 @@ public class ServerDisplay
             },
             new ServerDisplay()
             {
-                Display = "国际服",
+                Display = LanguageService.GetStringByText("国际服"),
                 Key = $"{nameof(PunishGlobalGameContextV2)}",
                 Tag = "Global",
                 ShowCard = true,
             },new ServerDisplay()
             {
-                Display = "台服",
+                Display = LanguageService.GetStringByText("台服"),
                 Key = $"{nameof(PunishTwGameContextV2)}",
                 Tag = "Tw",
                 ShowCard = true,
@@ -53,21 +53,21 @@ public class ServerDisplay
         [
             new ServerDisplay()
             {
-                Display = "官服",
+                Display = LanguageService.GetStringByText("官服"),
                 Key = $"{nameof(WavesMainGameContextV2)}",
                 Tag = "Main",
                 ShowCard = true,
             },
             new ServerDisplay()
             {
-                Display = "B服",
+                Display = LanguageService.GetStringByText("B服"),
                 Key = $"{nameof(WavesBiliBiliGameContextV2)}",
                 Tag = "BiliBili",
                 ShowCard = false,
             },
             new ServerDisplay()
             {
-                Display = "国际服",
+                Display = LanguageService.GetStringByText("国际服"),
                 Key = $"{nameof(WavesGlobalGameContextV2)}",
                 Tag = "Global",
                 ShowCard = true,

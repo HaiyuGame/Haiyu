@@ -4,7 +4,9 @@
       "commandName": "MsixPackage"
     },
     "Haiyu (Unpackaged)": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "remoteDebugEnabled": true,
+      "authenticationMode": "Windows"
     }
   }
 }

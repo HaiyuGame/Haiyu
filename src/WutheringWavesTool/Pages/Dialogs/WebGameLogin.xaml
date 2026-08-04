@@ -1,8 +1,9 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentDialog
     x:Class="Haiyu.Pages.Dialogs.WebGameLogin"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helper="using:Haiyu.Helpers"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:Haiyu.Pages.Dialogs"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -24,18 +25,18 @@
                     <RowDefinition />
                     <RowDefinition />
                 </Grid.RowDefinitions>
-                <TextBox PlaceholderText="手机号码" Text="{x:Bind ViewModel.Phone, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox PlaceholderText="{x:Bind helper:LanguageService.GetString('Display_PhoneNo')}" Text="{x:Bind ViewModel.Phone, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 <Grid Grid.Row="1" Margin="0,10,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition />
                         <ColumnDefinition Width="auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBox PlaceholderText="验证码" Text="{x:Bind ViewModel.Code, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox PlaceholderText="{x:Bind helper:LanguageService.GetString('Display_Code')}" Text="{x:Bind ViewModel.Code, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     <Button
                         Grid.Column="1"
                         Margin="5,0,0,0"
                         Command="{x:Bind ViewModel.ShowGetGeetCommand}"
-                        Content="获得验证码" />
+                        Content="{x:Bind helper:LanguageService.GetString('Display_Item4')}" />
                 </Grid>
             </Grid>
         </Border>
@@ -52,14 +53,14 @@
             <Button
                 HorizontalAlignment="Stretch"
                 Command="{x:Bind ViewModel.LoginCommand}"
-                Content="登录"
+                Content="{x:Bind helper:LanguageService.GetString('Display_Login')}"
                 Style="{ThemeResource AccentButtonStyle}" />
             <Button
                 Grid.Column="1"
                 Margin="5,0,0,0"
                 HorizontalAlignment="Stretch"
                 Command="{x:Bind ViewModel.CloseCommand}"
-                Content="关闭" />
+                Content="{x:Bind helper:LanguageService.GetString('Display_Off')}" />
         </Grid>
     </Grid>
 </ContentDialog>

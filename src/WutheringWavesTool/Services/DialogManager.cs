@@ -191,7 +191,7 @@ public abstract class DialogManager : IDialogManager
         ContentDialog dialog = new ContentDialog();
         dialog.XamlRoot = this.Root;
         dialog.Title = header;
-        dialog.PrimaryButtonText = "确定";
+        dialog.PrimaryButtonText = LanguageService.GetStringByText("确定");
         dialog.DefaultButton = ContentDialogButton.None;
         dialog.Content = content;
         var result = await dialog.ShowAsync();
@@ -200,4 +200,8 @@ public abstract class DialogManager : IDialogManager
 
     public async Task ShowWavesCloudSettingAsync(GameType type) =>
         await ShowDialogAsync<CloudGameSettingDialog>(type);
+    public async Task ShowGameLocalTokenAsync(string contextName)
+    {
+        await this.ShowDialogAsync<LocalGameTokenDialog>(contextName);
+    }
 }

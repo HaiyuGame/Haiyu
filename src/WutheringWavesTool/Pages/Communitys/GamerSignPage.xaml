@@ -1,8 +1,9 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <Page
     x:Class="Haiyu.Pages.Communitys.GamerSignPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helper="using:Haiyu.Helpers"
     xmlns:control="using:Haiyu.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
@@ -33,7 +34,7 @@
             TitleVerticalAlignment="Center">
             <control:TitleBar.Title>
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock FontSize="15" Text="签到-" />
+                    <TextBlock FontSize="15" Text="{x:Bind helper:LanguageService.GetString('Display_SignIn')}" />
                     <TextBlock FontSize="15" Text="{x:Bind ViewModel.UserName, Mode=OneWay}" />
                 </StackPanel>
             </control:TitleBar.Title>
@@ -71,11 +72,11 @@
                 HorizontalTextAlignment="Center">
                 <Run Text="{x:Bind ViewModel.SignStatus, Mode=OneWay}" />
                 <LineBreak />
-                <Run Text="累计签到" />
+                <Run Text="{x:Bind helper:LanguageService.GetString('Display_AkumulasiCheckIn')}" />
                 <Run Text="{x:Bind ViewModel.SignCount, Mode=OneWay}" />
-                <Run Text="天,剩余" />
+                <Run Text="{x:Bind helper:LanguageService.GetString('Display_PhX1DaySPhX2Left')}" />
                 <Run Text="{x:Bind ViewModel.UnSignCount, Mode=OneWay}" />
-                <Run Text="天" />
+                <Run Text="{x:Bind helper:LanguageService.GetString('Display_Day')}" />
             </TextBlock>
         </Grid>
     </Grid>

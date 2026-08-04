@@ -1,4 +1,4 @@
-﻿<UserControl
+<UserControl
     x:Class="Project.WPFSetup.Views.UpdateView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -97,10 +97,18 @@
                 VerticalAlignment="Center"
                 FontSize="25"
                 Text="完成" />
-            <ui:FluentButton
-                Grid.Row="1"
-                Command="{Binding CloseCommand}"
-                Content="退出" />
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <ui:FluentButton Command="{Binding RunAndCloseCommand}" Content="运行并退出" />
+                <ui:FluentButton
+                    Grid.Column="1"
+                    Margin="5,0,0,0"
+                    Command="{Binding CloseCommand}"
+                    Content="退出" />
+            </Grid>
         </Grid>
     </Grid>
 </UserControl>

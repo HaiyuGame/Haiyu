@@ -23,7 +23,6 @@ public sealed partial class CloudGameWindows : Window
         this._browser.RequestedTheme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
     }
 
-    
     private async void CloudGameWindows_Closing(AppWindow sender, AppWindowClosingEventArgs args)
     {
        

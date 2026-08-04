@@ -44,7 +44,7 @@
 	  <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.2.0" />
 	  <PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="3.0.1" />
     <PackageReference Include="NPOI" Version="2.8.0" />
-    <PackageReference Include="Syncfusion.Grid.WinUI" Version="33.2.13" />
+    <PackageReference Include="Syncfusion.Grid.WinUI" Version="34.1.32" />
     <PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.9" />
   </ItemGroup>
   <ItemGroup>

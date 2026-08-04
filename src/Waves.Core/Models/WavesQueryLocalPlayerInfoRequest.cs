@@ -1,4 +1,4 @@
-﻿namespace Waves.Core.Models;
+namespace Waves.Core.Models;
 
 public class WavesQueryLocalPlayerInfoRequest
 {
@@ -144,7 +144,7 @@ public class Base
             {
                 var dateTimeOffset = time - DateTime.Now;
                 this.StoreEnergyRecoverEndTime =
-                    $"{dateTimeOffset.Hours}:{dateTimeOffset.Minutes}:{dateTimeOffset.Seconds}S";
+                    DisplayTimeFormatter.FormatDuration(dateTimeOffset);
                 field = value;
                 return;
             }
@@ -177,7 +177,7 @@ public class Base
             {
                 var dateTimeOffset = time - DateTime.Now;
                 this.EnergyRecoverEndTime =
-                    $"{dateTimeOffset.Hours}:{dateTimeOffset.Minutes}:{dateTimeOffset.Seconds}";
+                    DisplayTimeFormatter.FormatDuration(dateTimeOffset);
                 field = value;
                 return;
             }

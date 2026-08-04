@@ -13,7 +13,7 @@ public partial class StaminaWrapper : ObservableObject
             {
                 IsShowTime = Visibility.Visible;
             }
-            this.CreateTime = $"{cTime.Year}年{cTime.Month}月{cTime.Day}日   {cTime.Hour}:{cTime.Minute}:{cTime.Second}";
+            this.CreateTime = DisplayTimeFormatter.FormatDateTime(cTime);
             this.MaxEnergy = data.MaxEnergy;
             this.StoreEnergy = data.StoreEnergy;
             this.MaxStoreEnergy = data.StoreEnergyLimit;

@@ -3,6 +3,7 @@
     x:Class="Haiyu.Pages.ToolkitPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helper="using:Haiyu.Helpers"
     xmlns:cui="using:CommunityToolkit.WinUI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
@@ -25,8 +26,8 @@
             <TextBlock
                 FontFamily="{ThemeResource DefaultFont}"
                 FontSize="18"
-                Text="工具" />
-            <cui:SettingsCard Description="本工具通过ADB Port调试端口，链接安卓系统的WebView，并通过CDP调用协议抓取Token信息" Header="库街区Token读取工具">
+                Text="{x:Bind helper:LanguageService.GetString('Display_Tools')}" />
+            <cui:SettingsCard Description="{x:Bind helper:LanguageService.GetString('Display_CallProtocol')}" Header="{x:Bind helper:LanguageService.GetString('Display_TokenReader')}">
                 <cui:SettingsCard.HeaderIcon>
                     <ImageIcon Source="/Assets/kuroRobot.png" />
                 </cui:SettingsCard.HeaderIcon>
@@ -40,7 +41,7 @@
                             FontFamily="Segoe Fluent Icons"
                             FontSize="13"
                             Glyph="&#xE8A7;" />
-                        <TextBlock FontSize="13" Text="打开" />
+                        <TextBlock FontSize="13" Text="{x:Bind helper:LanguageService.GetString('Display_Open')}" />
                     </StackPanel>
                 </Button>
             </cui:SettingsCard>
@@ -49,7 +50,7 @@
                     VerticalAlignment="Center"
                     FontFamily="{ThemeResource DefaultFont}"
                     FontSize="18"
-                    Text="服务" />
+                    Text="{x:Bind helper:LanguageService.GetString('Display_Service')}" />
                 <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
                     <Button Command="{x:Bind ViewModel.RefreshTasksCommand}">
                         <StackPanel Orientation="Horizontal" Spacing="4">
@@ -57,7 +58,7 @@
                                 FontFamily="Segoe Fluent Icons"
                                 FontSize="13"
                                 Glyph="&#xE72C;" />
-                            <TextBlock FontSize="13" Text="刷新" />
+                            <TextBlock FontSize="13" Text="{x:Bind helper:LanguageService.GetString('Display_Refresh')}" />
                         </StackPanel>
                     </Button>
                 </StackPanel>
@@ -84,12 +85,12 @@
                             <StackPanel Orientation="Horizontal" Spacing="5">
                                 <ToggleSwitch
                                     IsOn="{x:Bind AutoLaunche, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                    OffContent="手动"
-                                    OnContent="自启" />
+                                    OffContent="{x:Bind helper:LanguageService.GetString('Display_ManualCall')}"
+                                    OnContent="{x:Bind helper:LanguageService.GetString('Display_SelfLaunch')}" />
                                 <Button
                                     Command="{x:Bind SendStartCommand}"
                                     Style="{ThemeResource TransparentButtonStyle}"
-                                    ToolTipService.ToolTip="开始服务">
+                                    ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_ServiceToStart')}">
                                     <FontIcon
                                         FontFamily="Segoe Fluent Icons"
                                         FontSize="17"
@@ -98,7 +99,7 @@
                                 <Button
                                     Command="{x:Bind SendStopCommand}"
                                     Style="{ThemeResource TransparentButtonStyle}"
-                                    ToolTipService.ToolTip="终止服务">
+                                    ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_TerminationOfService')}">
                                     <FontIcon
                                         FontFamily="Segoe Fluent Icons"
                                         FontSize="17"
@@ -107,7 +108,7 @@
                                 <Button
                                     Command="{x:Bind SendInvokeCommand}"
                                     Style="{ThemeResource TransparentButtonStyle}"
-                                    ToolTipService.ToolTip="单次执行">
+                                    ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_SingleExecution')}">
                                     <FontIcon
                                         FontFamily="Segoe Fluent Icons"
                                         FontSize="17"

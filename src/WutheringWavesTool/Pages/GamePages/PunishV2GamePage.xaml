@@ -3,9 +3,11 @@
     x:Class="Haiyu.Pages.GamePages.PunishV2GamePage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helper="using:Haiyu.Helpers"
     xmlns:ani="using:CommunityToolkit.WinUI.Animations"
     xmlns:b="using:CommunityToolkit.WinUI.Behaviors"
     xmlns:bs="using:Haiyu.Behaviors"
+    xmlns:charts="using:Haiyu.Charts.WinUI"
     xmlns:control="using:Haiyu.Controls"
     xmlns:convert="using:Haiyu.Converter.DownloadState"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -13,7 +15,6 @@
     xmlns:item="using:Waves.Core.Models"
     xmlns:launcheModel="using:Waves.Api.Models"
     xmlns:local="using:Haiyu.Pages.GamePages"
-    xmlns:charts="using:Haiyu.Charts.WinUI"
     xmlns:m="using:Haiyu.Models"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:media="using:CommunityToolkit.WinUI.Media"
@@ -156,7 +157,7 @@
                             VerticalAlignment="Center"
                             FontFamily="{ThemeResource DefaultFont}"
                             FontSize="12">
-                            <Run Text="任务步骤(" />
+                            <Run Text="{x:Bind helper:LanguageService.GetString('Display_StepsForTask')}" />
                             <Run Text="{x:Bind ViewModel.CurrentStep, Mode=OneWay}" />
                             <Run Text="/" />
                             <Run Text="{x:Bind ViewModel.MaxStep, Mode=OneWay}" />
@@ -178,7 +179,7 @@
                             VerticalAlignment="Center"
                             FontFamily="{ThemeResource DefaultFont}"
                             FontSize="12"
-                            Text="步骤进度" />
+                            Text="{x:Bind helper:LanguageService.GetString('Display_StepProgress')}" />
                         <TextBlock
                             Grid.Row="2"
                             Grid.Column="1"
@@ -197,7 +198,7 @@
                             VerticalAlignment="Center"
                             FontFamily="{ThemeResource DefaultFont}"
                             FontSize="12"
-                            Text="活动文件" />
+                            Text="{x:Bind helper:LanguageService.GetString('Display_ActivityFile')}" />
                         <StackPanel
                             Grid.Row="3"
                             Grid.Column="1"
@@ -215,7 +216,7 @@
                             <Button
                                 Margin="5,0,0,0"
                                 Padding="3"
-                                ToolTipService.ToolTip="显示更多文件">
+                                ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_ShowMoreFiles')}">
                                 <FontIcon
                                     FontFamily="Segoe Fluent Icons"
                                     FontSize="12"
@@ -262,7 +263,7 @@
                             VerticalAlignment="Center"
                             FontFamily="{ThemeResource DefaultFont}"
                             FontSize="12"
-                            Text="数据容量" />
+                            Text="{x:Bind helper:LanguageService.GetString('Display_DataCapacity')}" />
                         <TextBlock
                             Grid.Row="4"
                             Grid.Column="1"
@@ -309,7 +310,7 @@
                             Command="{x:Bind ViewModel.PauseDownloadTaskCommand}"
                             IsEnabled="{x:Bind ViewModel.PauseStartEnable, Mode=OneWay}"
                             Style="{ThemeResource TransparentButtonStyle}"
-                            ToolTipService.ToolTip="暂停当前操作">
+                            ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_PauseCurrentAction')}">
                             <FontIcon
                                 FontFamily="Segoe Fluent Icons"
                                 FontSize="15"
@@ -324,7 +325,7 @@
                             Command="{x:Bind ViewModel.CancelDownloadTaskCommand}"
                             IsEnabled="{x:Bind ViewModel.PauseStartEnable, Mode=OneWay}"
                             Style="{ThemeResource TransparentButtonStyle}"
-                            ToolTipService.ToolTip="取消当前操作">
+                            ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_CancelThisOperation')}">
                             <FontIcon
                                 FontFamily="Segoe Fluent Icons"
                                 FontSize="15"
@@ -356,34 +357,34 @@
                                                     FontSize="14"
                                                     FontWeight="SemiBold"
                                                     Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-                                                    Text="使用注意事项" />
+                                                    Text="{x:Bind helper:LanguageService.GetString('Display_PrecautionsApplication')}" />
 
                                                 <LineBreak />
                                                 <LineBreak />
-                                                <Run FontSize="12" Text="• 增量更新机制" />
+                                                <Run FontSize="12" Text="{x:Bind helper:LanguageService.GetString('Display_UpdateMechanism')}" />
                                                 <LineBreak />
-                                                <Run FontSize="12" Text="   - 剩余时间计算排除合并操作耗时，仅供参考" />
-
-                                                <LineBreak />
-                                                <LineBreak />
-
-                                                <Run FontSize="12" Text="• 暂停与网络恢复" />
-                                                <LineBreak />
-                                                <Run FontSize="12" Text="   - 暂停期间断网将会退出下载状态" />
+                                                <Run FontSize="12" Text="{x:Bind helper:LanguageService.GetString('Display_ReferenceOnly')}" />
 
                                                 <LineBreak />
                                                 <LineBreak />
 
-                                                <Run FontSize="12" Text="• 进度持久化" />
+                                                <Run FontSize="12" Text="{x:Bind helper:LanguageService.GetString('Display_NetworkRecovery')}" />
                                                 <LineBreak />
-                                                <Run FontSize="12" Text="   - 意外退出需重新校验，建议保持程序前台运行" />
+                                                <Run FontSize="12" Text="{x:Bind helper:LanguageService.GetString('Display_DownloadState')}" />
 
                                                 <LineBreak />
                                                 <LineBreak />
 
-                                                <Run FontSize="12" Text="• 硬件兼容性" />
+                                                <Run FontSize="12" Text="{x:Bind helper:LanguageService.GetString('Display_PersistentProgress')}" />
                                                 <LineBreak />
-                                                <Run FontSize="12" Text="   - 机械硬盘校验效率约为SSD的1/3～1/5" />
+                                                <Run FontSize="12" Text="{x:Bind helper:LanguageService.GetString('Display_RunningForeground')}" />
+
+                                                <LineBreak />
+                                                <LineBreak />
+
+                                                <Run FontSize="12" Text="{x:Bind helper:LanguageService.GetString('Display_HardwareCompatibility')}" />
+                                                <LineBreak />
+                                                <Run FontSize="12" Text="{x:Bind helper:LanguageService.GetString('Display_1315SSD')}" />
                                             </Paragraph>
                                         </RichTextBlock>
                                     </Grid>
@@ -413,9 +414,9 @@
                                         <TextBox
                                             Width="120"
                                             VerticalAlignment="Center"
-                                            PlaceholderText="下载限速(mb/s)"
+                                            PlaceholderText="{x:Bind helper:LanguageService.GetString('Display_DownloadSpeedLimitMbS')}"
                                             Text="{x:Bind ViewModel.DownloadSpeedValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                            ToolTipService.ToolTip="默认为0，意为不限速" />
+                                            ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_NoSpeed')}" />
                                         <Button
                                             Grid.Column="1"
                                             Margin="5,0,0,0"
@@ -537,19 +538,19 @@
                                         <MenuFlyoutItem
                                             Command="{x:Bind ViewModel.RepirGameCommand}"
                                             IsEnabled="{x:Bind ViewModel.EnableStartGameBth, Mode=OneWay}"
-                                            Text="修复游戏"
-                                            ToolTipService.ToolTip="此选项等同于下载，启动器会下载服务器资源进行自动覆盖（包含Mod资源）">
+                                            Text="{x:Bind helper:LanguageService.GetString('Display_FixTheGame')}"
+                                            ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_ModResources')}">
                                             <MenuFlyoutItem.Icon>
                                                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xEC7A;" />
                                             </MenuFlyoutItem.Icon>
                                         </MenuFlyoutItem>
                                         <MenuFlyoutSeparator />
-                                        <MenuFlyoutItem Command="{x:Bind ViewModel.ShowGameResourceCommand}" Text="游戏资源管理">
+                                        <MenuFlyoutItem Command="{x:Bind ViewModel.ShowGameResourceCommand}" Text="{x:Bind helper:LanguageService.GetString('Display_GameResourceManagement')}">
                                             <MenuFlyoutItem.Icon>
                                                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xEF19;" />
                                             </MenuFlyoutItem.Icon>
                                         </MenuFlyoutItem>
-                                        <MenuFlyoutItem Command="{x:Bind ViewModel.ShowGameSettingCommand}" Text="游戏设置">
+                                        <MenuFlyoutItem Command="{x:Bind ViewModel.ShowGameSettingCommand}" Text="{x:Bind helper:LanguageService.GetString('Display_GameSettings')}">
                                             <MenuFlyoutItem.Icon>
                                                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE713;" />
                                             </MenuFlyoutItem.Icon>
@@ -558,8 +559,8 @@
                                         <MenuFlyoutItem
                                             Command="{x:Bind ViewModel.DeleteGameResourceCommand}"
                                             IsEnabled="{x:Bind ViewModel.EnableStartGameBth, Mode=OneWay}"
-                                            Text="卸载游戏"
-                                            ToolTipService.ToolTip="此选项将直接删除游戏文件夹">
+                                            Text="{x:Bind helper:LanguageService.GetString('Display_UninstallGame')}"
+                                            ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_FolderDirectly')}">
                                             <MenuFlyoutItem.Icon>
                                                 <SymbolIcon Symbol="Clear" />
                                             </MenuFlyoutItem.Icon>
@@ -608,7 +609,7 @@
                                             Grid.ColumnSpan="2"
                                             HorizontalAlignment="Left"
                                             Text="{x:Bind ViewModel.PreSetupHeaderText, Mode=OneWay}" />
-                                        <TextBlock Grid.Row="1" Text="处理速度" />
+                                        <TextBlock Grid.Row="1" Text="{x:Bind helper:LanguageService.GetString('Display_SpeedOfResolution')}" />
                                         <TextBlock
                                             Grid.Row="1"
                                             Grid.Column="1"
@@ -641,7 +642,7 @@
                             Command="{x:Bind ViewModel.AdvanceGameCommand}"
                             CornerRadius="80"
                             Style="{ThemeResource AccentBorderBurshButtonStyle}"
-                            ToolTipService.ToolTip="提前安装预下载内容"
+                            ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_DownloadedAdvance')}"
                             Visibility="{x:Bind ViewModel.PreAdvanceVisiblity, Mode=OneWay}">
                             <StackPanel Orientation="Vertical">
                                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE7B8;" />
@@ -662,7 +663,7 @@
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         Command="{x:Bind ViewModel.ShowSelectInstallFolderCommand}"
-                        ToolTipService.ToolTip="选择下载路径"
+                        ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_SelectDownloadPath')}"
                         Visibility="{x:Bind ViewModel.GameInstallBthVisibility, Mode=OneWay}">
                         <FontIcon
                             FontFamily="Segoe Fluent Icons"
@@ -677,7 +678,7 @@
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         Command="{x:Bind ViewModel.ShowSelectGameFolderCommand}"
-                        ToolTipService.ToolTip="定位游戏位置"
+                        ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_LocateGameLocation')}"
                         Visibility="{x:Bind ViewModel.GameInputFolderBthVisibility, Mode=OneWay}">
                         <FontIcon
                             FontFamily="Segoe Fluent Icons"
@@ -769,7 +770,7 @@
                                 RowSpacing="4"
                                 Visibility="{x:Bind ViewModel.IsLocalUserRefresh, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition />
+                                    <ColumnDefinition Width="auto" />
                                     <ColumnDefinition />
                                     <ColumnDefinition Width="auto" />
                                 </Grid.ColumnDefinitions>
@@ -777,7 +778,7 @@
                                     Margin="0,0,0,0"
                                     HorizontalAlignment="Left"
                                     FontFamily="{ThemeResource DefaultFont}">
-                                    <Run Text="等级" />
+                                    <Run Text="{x:Bind helper:LanguageService.GetString('Display_1')}" />
                                     <Run Text="{x:Bind ViewModel.GameItem.PlayerLevel, Mode=OneWay}" />
                                 </TextBlock>
                                 <TextBlock
@@ -785,7 +786,7 @@
                                     Margin="0,0,5,0"
                                     HorizontalAlignment="Right"
                                     FontFamily="{ThemeResource DefaultFont}">
-                                    <Run Text="识别码:" />
+                                    <Run Text="{x:Bind helper:LanguageService.GetString('Display_IdentificationCode')}" />
                                     <Run Text="{x:Bind ViewModel.GameItem.RoleId, Mode=OneWay}" />
                                 </TextBlock>
                                 <Button
@@ -1008,7 +1009,7 @@
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
                                     FontFamily="{ThemeResource DefaultFont}"
-                                    Text="敬请期待" />
+                                    Text="{x:Bind helper:LanguageService.GetString('Display_ComingSoon')}" />
                             </Grid>
                         </Grid>
                         <ProgressRing
@@ -1061,7 +1062,7 @@
                                             Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
                                             CornerRadius="0 5 0 0">
                                             <HyperlinkButton
-                                                Content="前往"
+                                                Content="{x:Bind helper:LanguageService.GetString('Display_Go')}"
                                                 FontSize="10"
                                                 NavigateUri="{x:Bind JumpUrl}" />
                                         </Border>
@@ -1139,7 +1140,7 @@
                 Click="Button_Click"
                 CornerRadius="0 5 5 0"
                 Style="{ThemeResource DefaultAcrylicButtonStyle}"
-                ToolTipService.ToolTip="切换卡片">
+                ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_ToggleCard')}">
                 <FontIcon
                     FontFamily="Segoe Fluent Icons"
                     FontSize="14"

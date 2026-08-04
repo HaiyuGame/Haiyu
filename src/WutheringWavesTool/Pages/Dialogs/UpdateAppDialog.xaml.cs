@@ -1,5 +1,5 @@
-﻿using Haiyu.Plugin.Models;
-using Waves.Core.Settings;
+using Haiyu.Plugin.Models;
+using Waves.Settings;
 
 
 namespace Haiyu.Pages.Dialogs;

@@ -1,16 +1,22 @@
 using Haiyu.ViewModel.OOBEViewModels;
+using Microsoft.Windows.AppLifecycle;
+using Waves.Settings;
 
 namespace Haiyu.ViewModel;
 
 public sealed partial class OOBEViewModel:ViewModelBase
 {
-    public OOBEViewModel([FromKeyedServices(nameof(OOBENavigationService))]INavigationService navigationService)
+    public OOBEViewModel(
+        [FromKeyedServices(nameof(OOBENavigationService))] INavigationService navigationService,
+        AppSettings appSettings)
     {
         NavigationService = navigationService;
+        AppSettings = appSettings;
         RegisterManager();
     }
 
     public INavigationService NavigationService { get; }
+    private AppSettings AppSettings { get; }
     public OOBEArgsMessager CurrentArgs { get; private set; }
 
     [ObservableProperty]
@@ -39,13 +45,10 @@ public sealed partial class OOBEViewModel:ViewModelBase
     }
 
     [RelayCommand]
-    public void Next()
+    public async Task NextAsync()
     {
-        if(this.CurrentArgs == null)
-        {
-            return;
-        }
-        this.NavigationService.NavigationTo(CurrentArgs.NextPage, null, new DrillInNavigationTransitionInfo());
+        await AppSettings.SetAutoOOBEAsync(false);
+        AppInstance.Restart(null);
     }
 
     [RelayCommand]

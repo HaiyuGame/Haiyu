@@ -10,7 +10,7 @@ public sealed partial class ShellPage : Page
     {
         this.InitializeComponent();
         this.ViewModel =
-            Instance.GetService<ShellViewModel>() ?? throw new ArgumentException("服务注册错误");
+            Instance.GetService<ShellViewModel>() ?? throw new ArgumentException(LanguageService.GetStringByText("服务注册错误"));
         this.Loaded += ShellPage_Loaded;
         this.ViewModel.HomeNavigationService.Navigated += HomeNavigationService_Navigated;
         this.ViewModel.HomeNavigationService.RegisterView(this.frame);

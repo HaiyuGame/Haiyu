@@ -22,7 +22,7 @@ public sealed class NativePickersService(Func<nint> ownerWindowProvider) : IPick
 
     public Task<PickFolderResult?> GetFolderPicker()
     {
-        var dialog = (NativeMethods.IFileDialog)new NativeMethods.FileOpenDialog();
+        var dialog = NativeMethods.CreateFileOpenDialog();
         try
         {
             var options = NativeMethods.FOS_PICKFOLDERS | NativeMethods.FOS_FORCEFILESYSTEM |
@@ -68,14 +68,24 @@ public sealed class NativePickersService(Func<nint> ownerWindowProvider) : IPick
         if (extensions.Count == 0)
             throw new ArgumentException("At least one file extension is required.", nameof(extensions));
 
-        var pathBuffer = AllocatePathBuffer(saveName);
-        var filter = Marshal.StringToHGlobalUni(CreateFilter(extensions));
-        var defaultExtension = requireExistingFile
-            ? nint.Zero
-            : Marshal.StringToHGlobalUni(GetDefaultExtension(extensions));
+        if (saveName?.Length >= BufferLength)
+            throw new ArgumentException($"The file name must be shorter than {BufferLength} characters.", nameof(saveName));
+
+        // Validate and create managed values before allocating unmanaged memory, so validation
+        // failures cannot leak a buffer.
+        var filterText = CreateFilter(extensions);
+        var defaultExtensionText = requireExistingFile ? null : GetDefaultExtension(extensions);
+        nint pathBuffer = nint.Zero;
+        nint filter = nint.Zero;
+        nint defaultExtension = nint.Zero;
 
         try
         {
+            pathBuffer = AllocatePathBuffer(saveName);
+            filter = Marshal.StringToHGlobalUni(filterText);
+            if (defaultExtensionText is not null)
+                defaultExtension = Marshal.StringToHGlobalUni(defaultExtensionText);
+
             var dialog = new NativeMethods.OPENFILENAME
             {
                 lStructSize = Marshal.SizeOf<NativeMethods.OPENFILENAME>(),
@@ -98,8 +108,10 @@ public sealed class NativePickersService(Func<nint> ownerWindowProvider) : IPick
         }
         finally
         {
-            Marshal.FreeHGlobal(pathBuffer);
-            Marshal.FreeHGlobal(filter);
+            if (pathBuffer != nint.Zero)
+                Marshal.FreeHGlobal(pathBuffer);
+            if (filter != nint.Zero)
+                Marshal.FreeHGlobal(filter);
             if (defaultExtension != nint.Zero)
                 Marshal.FreeHGlobal(defaultExtension);
         }
@@ -179,9 +191,19 @@ internal static class NativeMethods
         public uint FlagsEx;
     }
 
-    [ComImport]
-    [Guid("DC1C5A9C-E88A-4DDE-A5A1-60F82A20AEF7")]
-    internal class FileOpenDialog;
+    private static readonly Guid FileOpenDialogClsid = new("DC1C5A9C-E88A-4DDE-A5A1-60F82A20AEF7");
+
+    internal static IFileDialog CreateFileOpenDialog()
+    {
+        if (!OperatingSystem.IsWindows())
+            throw new PlatformNotSupportedException("The Windows File Open dialog is only available on Windows.");
+
+        var type = Type.GetTypeFromCLSID(FileOpenDialogClsid, throwOnError: true)
+                   ?? throw new InvalidOperationException("Windows File Open dialog is unavailable.");
+
+        return (IFileDialog)(Activator.CreateInstance(type)
+                             ?? throw new InvalidOperationException("Windows File Open dialog could not be created."));
+    }
 
     [ComImport]
     [Guid("42F85136-DB7E-439C-85F1-E4075D135FC8")]

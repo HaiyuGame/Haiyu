@@ -35,7 +35,7 @@ public partial class WallDataWrapper:ObservableObject
         get=> field;
         set
         {
-            this.ExperienseTimeString = $"{value.Days}:{value.Hours}:{value.Minutes}";
+            this.ExperienseTimeString = DisplayTimeFormatter.FormatDuration(value);
             field = value;
         }
     }
@@ -45,7 +45,7 @@ public partial class WallDataWrapper:ObservableObject
         get => field;
         set
         {
-            this.PlayerCardString = value.ToString("yyyy-MM-dd");
+            this.PlayerCardString = DisplayTimeFormatter.FormatDate(value.LocalDateTime);
             field = value;
         }
     }

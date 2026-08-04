@@ -1,8 +1,9 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentDialog
     x:Class="Haiyu.Pages.Dialogs.GameEnhancedDialog"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helper="using:Haiyu.Helpers"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:local="using:Haiyu.Pages.Dialogs"
@@ -24,7 +25,7 @@
             <TextBlock
                 Margin="0,10,0,0"
                 Foreground="{ThemeResource SystemColorGrayTextBrush}"
-                Text="以下功能需要使用管理员权限启动" />
+                Text="{x:Bind helper:LanguageService.GetString('Display_AdministratorPrivileges')}" />
         </StackPanel>
         <StackPanel
             Grid.Row="1"
@@ -39,12 +40,12 @@
                     <ColumnDefinition />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
-                <TextBlock VerticalAlignment="Center" Text="启用Xbox增强" />
+                <TextBlock VerticalAlignment="Center" Text="{x:Bind helper:LanguageService.GetString('Display_EnableXboxEnhancements')}" />
                 <Border Grid.Column="1" HorizontalAlignment="Right">
                     <ToggleButton
                         x:Name="xboxEnable"
                         Checked="xboxEnable_Checked"
-                        Content="启用"
+                        Content="{x:Bind helper:LanguageService.GetString('Display_ActivateTheLCC')}"
                         Tag="Xbox"
                         Unchecked="xboxEnable_Unchecked" />
                 </Border>
@@ -54,6 +55,6 @@
             Grid.Row="2"
             HorizontalAlignment="Stretch"
             Command="{x:Bind ViewModel.CloseCommand}"
-            Content="关闭" />
+            Content="{x:Bind helper:LanguageService.GetString('Display_Off')}" />
     </Grid>
 </ContentDialog>

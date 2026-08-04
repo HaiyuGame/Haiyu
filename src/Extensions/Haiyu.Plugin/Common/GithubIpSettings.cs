@@ -1,8 +1,6 @@
 using System.Text.Json;
-using Haiyu.Analyzers;
 using ProxyExtensions.Models;
-using Waves.Core.Common;
-using Waves.Core.Settings;
+using Waves.Settings;
 
 namespace Haiyu.Plugin.Common;
 

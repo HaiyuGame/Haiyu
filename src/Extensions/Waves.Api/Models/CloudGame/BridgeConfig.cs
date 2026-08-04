@@ -44,6 +44,9 @@ public class BridgeConfig
     [JsonPropertyName("useGamePlayLayer")]
     public bool UseGamePlayLayer { get; set; }
 
+    [JsonPropertyName("enableReplenishEsc")]
+    public bool EnableReplenishEsc { get; set; }
+
     [JsonPropertyName("enableReportLog")]
     public bool EnableReportLog { get; set; }
 

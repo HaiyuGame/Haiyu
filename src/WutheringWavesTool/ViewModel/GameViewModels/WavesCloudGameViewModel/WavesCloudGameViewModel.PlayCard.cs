@@ -27,7 +27,7 @@ partial class WavesCloudGameViewModel
         IsRefreshing = true;
         if (this.KuroCloudGameContext == null)
         {
-            await TipShow.ShowMessageAsync("游戏核心为空！请尝试刷新页面",Symbol.Clear);
+            await TipShow.ShowMessageAsync(LanguageService.GetStringByText("游戏核心为空！请尝试刷新页面"),Symbol.Clear);
             return;
         }
         await this.KuroCloudGameContext.WavesCloudSurivivalService.RefreshTaskAsync();

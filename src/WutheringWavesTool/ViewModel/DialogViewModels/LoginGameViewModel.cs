@@ -72,17 +72,17 @@ public sealed partial class LoginGameViewModel : DialogViewModelBase
             var sendSMS = await WavesClient.SendSMSAsync(Phone, GeetValue,IdV2);
             if (sendSMS == null)
             {
-                TipMessage = "验证失败！";
+                TipMessage = LanguageService.GetStringByText("验证失败！");
                 return;
             }
             if (sendSMS.Code == 242)
             {
-                TipMessage = "短信验证码发送频繁！";
+                TipMessage = LanguageService.GetStringByText("短信验证码发送频繁！");
                 return;
             }
             if (sendSMS.Data.GeeTest == false)
             {
-                TipMessage = "验证码发送成功！";
+                TipMessage = LanguageService.GetStringByText("验证码发送成功！");
             }
             else
             {
@@ -170,12 +170,12 @@ public sealed partial class LoginGameViewModel : DialogViewModelBase
                 }
                 else
                 {
-                    TipMessage = "错误！请反馈开发者";
+                    TipMessage = LanguageService.GetStringByText("错误！请反馈开发者");
                 }
             }
             else
             {
-                TipMessage = "TokenId格式错误！";
+                TipMessage = LanguageService.GetStringByText("TokenId格式错误！");
                 return;
             }
             

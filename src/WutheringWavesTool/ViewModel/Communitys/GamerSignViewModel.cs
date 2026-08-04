@@ -71,7 +71,7 @@ public sealed partial class GamerSignViewModel : ViewModelBase
             var signs = result.Data.SignInGoodsConfigs.Take(signCount);
             foreach (var item in signs)
             {
-                item.SignResult = "已签到";
+                item.SignResult = LanguageService.GetStringByText("已签到");
                 item.IsSign = true;
             }
             SignCount = signs.Where(x => x.IsSign).Count();
@@ -85,12 +85,12 @@ public sealed partial class GamerSignViewModel : ViewModelBase
                 {
                     SignImage = new BitmapImage(new System.Uri(todaySign.First().GoodsUrl));
                     SignName = todaySign.First().GoodsName + $"×{todaySign.First().GoodsNum}";
-                    SignStatus = "明日再来吧（奖励在上面写着呢）";
+                    SignStatus = LanguageService.GetStringByText("明日再来吧（奖励在上面写着呢）");
                 }
                 else
                 {
-                    SignMessage = "本月奖励已获得";
-                    SignStatus = "今日已签到";
+                    SignMessage = LanguageService.GetStringByText("本月奖励已获得");
+                    SignStatus = LanguageService.GetStringByText("今日已签到");
                 }
             }
             else
@@ -98,7 +98,7 @@ public sealed partial class GamerSignViewModel : ViewModelBase
                 SignBthEnable = true;
                 SignBthCheck = false;
                 var todaySign = result.Data.SignInGoodsConfigs.Skip(signCount - 1).Take(1);
-                SignStatus = "领取奖励";
+                SignStatus = LanguageService.GetStringByText("领取奖励");
                 SignImage = new BitmapImage(new System.Uri(todaySign.First().GoodsUrl));
                 SignName = todaySign.First().GoodsName + $"×{todaySign.First().GoodsNum}";
             }

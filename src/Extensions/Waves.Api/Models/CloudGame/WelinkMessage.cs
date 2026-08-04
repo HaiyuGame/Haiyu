@@ -69,6 +69,9 @@ namespace Waves.Api.Models.CloudGame
 
         [JsonPropertyName("detail")]
         public NetworkDetail? Detail { get; set; }
+
+        [JsonPropertyName("visible")]
+        public bool Visible { get; set; }
     }
 
 

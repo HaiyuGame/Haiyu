@@ -66,6 +66,14 @@ public sealed partial class CloudGameingViewModel:ViewModelBase
         this.Window = window;
         this.Option = option;
         this.Window.Closed += Window_Closed;
+        this.Window.Activated += Window_Activated;
+    }
+
+    private void Window_Activated(object sender, WindowActivatedEventArgs args)
+    {
+        ApplyWindowActivationState(
+            args.WindowActivationState != WindowActivationState.Deactivated
+        );
     }
 
     private async void Window_Closed(object sender, WindowEventArgs args)
@@ -83,7 +91,7 @@ public sealed partial class CloudGameingViewModel:ViewModelBase
         WebView2!.NavigationStarting += Browser_NavigationStarting;
         WebView2.NavigationCompleted += Browser_NavigationCompleted;
         this.WindowHandle = Window.GetWindowHandle();
-        await WebView2.EnsureCoreWebView2Async();
+        await WebView2EnvironmentProvider.EnsureInitializedAsync(WebView2);
         WebView2.CoreWebView2.Settings.AreDefaultContextMenusEnabled = true;
         WebView2.CoreWebView2.Settings.AreDevToolsEnabled = true;
         WebView2.CoreWebView2.Settings.IsPinchZoomEnabled = false;
@@ -275,7 +283,10 @@ public sealed partial class CloudGameingViewModel:ViewModelBase
                 EnvType = "pc",
                 FillVideo = false,
                 EnableInitSpeed = false,
+                // WebView2 needs Welink's input layer to discard the synthetic
+                // mouse move generated when pointer lock recenters the cursor.
                 UseGamePlayLayer = true,
+                EnableReplenishEsc = true,
                 EnableReportLog = true,
                 EnableReconnect = true,
                 BitRate = Option.Quality.BitRate,
@@ -318,8 +329,7 @@ public sealed partial class CloudGameingViewModel:ViewModelBase
                     UpdateNetworkDisplay(model);
                     break;
                 case "cursor-data":
-                    break;
-                case "pointer-lock":
+                    ApplyCloudCursorVisibility(model.Visible);
                     break;
                 case "error":
                     ShowSystemCursor();
