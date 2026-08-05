@@ -1,5 +1,7 @@
 using System.Security.Principal;
 using Haiyu.Plugin.Extensions;
+using Haiyu.Common.KuroWebView;
+using Haiyu.Models.Wrapper;
 using Microsoft.WindowsAppSDK;
 using Waves.Core.Common;
 using Waves.Settings;
@@ -24,12 +26,62 @@ partial class SettingViewModel
     [ObservableProperty]
     public partial string RpcToken { get; set; }
 
+    [ObservableProperty]
+    public partial WebViewRuntimeWrapper? WebViewRuntimeItem { get; set; }
+
+    [ObservableProperty]
+    public partial List<WebViewRuntimeWrapper> WebViewRuntimeOptions { get; set; } = [];
+
+    private bool _webViewRuntimeLoaded;
+
     void GetAllVersion()
     {
-        WebViewVersion = CoreWebView2Environment.GetAvailableBrowserVersionString() ?? LanguageService.GetStringByText("未安装");
-        this.WindowsAppSdkVersion = Microsoft.WindowsAppSDK.Runtime.Version.DotQuadString;
-        this.RunType = RuntimeFeature.IsDynamicCodeCompiled ? "JIT" : "AOT";
-        this.FrameworkType = RuntimeInformation.FrameworkDescription;
+        WebViewVersion = WebView2EnvironmentProvider.GetSelectedRuntimeVersion();
+        WindowsAppSdkVersion = Microsoft.WindowsAppSDK.Runtime.Version.DotQuadString;
+        RunType = RuntimeFeature.IsDynamicCodeCompiled ? "JIT" : "AOT";
+        FrameworkType = RuntimeInformation.FrameworkDescription;
+        _ = LoadWebViewRuntimeModeAsync();
+    }
+
+    private async Task LoadWebViewRuntimeModeAsync()
+    {
+        var mode = await AppSettings.GetWebViewRuntimeModeAsync();
+        var options = new List<WebViewRuntimeWrapper>();
+        var evergreen = CoreWebView2Environment.GetAvailableBrowserVersionString() ?? "\u672a\u5b89\u88c5";
+
+        options.Add(new WebViewRuntimeWrapper
+        {
+            DisplayName = $"\u7cfb\u7edf WebView2\uff08{evergreen}\uff09",
+            RuntimePath = "Evergreen"
+        });
+
+        foreach (var folder in WebView2EnvironmentProvider.GetFixedRuntimeFolders())
+        {
+            var executable = Path.Combine(folder, "msedgewebview2.exe");
+            var version = FileVersionInfo.GetVersionInfo(executable).FileVersion ?? Path.GetFileName(folder);
+            options.Add(new WebViewRuntimeWrapper
+            {
+                DisplayName = $"Fixed Runtime {version}",
+                RuntimePath = folder
+            });
+        }
+
+        WebViewRuntimeOptions = options;
+        WebViewRuntimeItem = options.FirstOrDefault(x =>
+            string.Equals(x.RuntimePath, mode, StringComparison.OrdinalIgnoreCase)
+        ) ?? options[0];
+        _webViewRuntimeLoaded = true;
+    }
+
+    async partial void OnWebViewRuntimeItemChanged(WebViewRuntimeWrapper? value)
+    {
+        if (!_webViewRuntimeLoaded || value is null)
+        {
+            return;
+        }
+
+        await AppSettings.SetWebViewRuntimeModeAsync(value.RuntimePath);
+        WebViewVersion = value.DisplayName;
     }
 
     [RelayCommand]

@@ -2,6 +2,16 @@ namespace Waves.Core.Models.CloudGame
 {
     public class CloudGameStreamSession
     {
+        public int ProviderType { get; init; }
+
+        public string TencentUserKey { get; init; } = string.Empty;
+
+        public string TencentDeviceId { get; init; } = string.Empty;
+
+        public string TencentAllocRespJson { get; init; } = string.Empty;
+
+        public string TencentToken { get; init; } = string.Empty;
+
         /// <summary>
         /// Welink 分发消息原文。
         /// </summary>

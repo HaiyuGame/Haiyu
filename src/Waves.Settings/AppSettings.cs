@@ -28,6 +28,7 @@ namespace Waves.Settings;
     JsonTypeInfoContextType = typeof(AppSettingJsonContext),
     JsonTypeInfoPropertyName = nameof(AppSettingJsonContext.Default.ListString))]
 [Settings<bool>(Name ="verifySkilDelete",Nullable = false,DefaultValue ="true")]
+[Settings<string>(Name = "WebViewRuntimeMode", Nullable = true, DefaultValue = "Evergreen")]
 public partial class AppSettings : SettingBase
 {
     public static string BassFolder =>

@@ -173,6 +173,7 @@ public static class CloudGameDataHelper
             BootstrapUrl = "https://mc.kurogames.com/cloud/index.html",
             AccessToken = session.AccessData.AccessToken,
             RefreshToken = session.PhoneToken.PhoneToken,
+            CloudApiToken = session.EndLoginData.Token,
             CookieDomain = ".kurogames.com",
             AdditionalHeaders = new Dictionary<string, string>(),
             Cookies = BuildCookieItems(session),

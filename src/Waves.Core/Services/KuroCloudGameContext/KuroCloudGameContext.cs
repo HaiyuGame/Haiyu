@@ -111,11 +111,16 @@ public class KuroCloudGameContext : IKuroCloudGameContext
             option.StreamOptions = new CloudGameStreamSession()
             {
                 TenantKey = CloudGameDataHelper.WelinkTenantKey,
+                ProviderType = invokeResult.Data.ProviderType,
                 ScriptUrl = CloudGameMethod.WelinkScriptUrl,
                 GameId = CloudGameDataHelper.WelinkGameId,
                 StartParameters = paramData,
                 RegionName = invokeResult.Data.RegionName,
                 DispatchMessage = invokeResult.Data.DispatchResult.DispatchMsg,
+                TencentUserKey = invokeResult.Data.DispatchResult.UserKey,
+                TencentDeviceId = invokeResult.Data.DispatchResult.DeviceId,
+                TencentAllocRespJson = invokeResult.Data.DispatchResult.AllocRespJson,
+                TencentToken = invokeResult.Data.DispatchResult.Tk,
                 SessionKey = "1-",
             };
             this.CloudGameEventPublisher.Publish(
@@ -218,18 +223,27 @@ public class KuroCloudGameContext : IKuroCloudGameContext
                     errCount++;
                     continue;
                 }
-                if (queueResult.Code == 0 && queueResult.Data?.Code == 200)
+                if (
+                    queueResult.Code == 0
+                    && queueResult.Data is not null
+                    && (queueResult.Data.Code == 0 || queueResult.Data.Code == 200)
+                )
                 {
                     await queqeCTS.CancelAsync();
                     option.IsComplete = true;
                     option.StreamOptions = new CloudGameStreamSession()
                     {
                         TenantKey = CloudGameDataHelper.WelinkTenantKey,
+                        ProviderType = queueResult.Data.ProviderType,
                         ScriptUrl = CloudGameMethod.WelinkScriptUrl,
                         GameId = CloudGameDataHelper.WelinkGameId,
                         StartParameters = welinkParam,
                         RegionName = queueResult.Data.RegionName,
                         DispatchMessage = queueResult.Data.DispatchResult.DispatchMsg,
+                        TencentUserKey = queueResult.Data.DispatchResult.UserKey,
+                        TencentDeviceId = queueResult.Data.DispatchResult.DeviceId,
+                        TencentAllocRespJson = queueResult.Data.DispatchResult.AllocRespJson,
+                        TencentToken = queueResult.Data.DispatchResult.Tk,
                         SessionKey = "1-",
                     };
                     this.CloudGameEventPublisher.Publish(

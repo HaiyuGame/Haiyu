@@ -40,4 +40,16 @@ public class DispatchResult
 
     [JsonPropertyName("reservedId")]
     public string ReservedId { get; set; }
+
+    [JsonPropertyName("userKey")]
+    public string UserKey { get; set; }
+
+    [JsonPropertyName("deviceId")]
+    public string DeviceId { get; set; }
+
+    [JsonPropertyName("allocRespJson")]
+    public string AllocRespJson { get; set; }
+
+    [JsonPropertyName("tk")]
+    public string Tk { get; set; }
 }

@@ -166,6 +166,9 @@ partial class CloudGameingViewModel
     private DispatcherTimer _cursorTimer;
     private DispatcherTimer _hotkeyTimer;
     private bool _f11WasDown;
+    private bool _isBorderlessFullScreen;
+    private Windows.Graphics.PointInt32 _windowedPosition;
+    private Windows.Graphics.SizeInt32 _windowedSize;
     private SUBCLASSPROC _webViewCursorSubclassProc;
 
     private void HideSystemCursor()
@@ -239,6 +242,7 @@ partial class CloudGameingViewModel
         {
             ShowSystemCursor();
         }
+
     }
 
     private void ApplyWindowActivationState(bool isActive)
@@ -253,6 +257,7 @@ partial class CloudGameingViewModel
         {
             ShowSystemCursor();
         }
+
     }
 
     private static bool IsSystemCursorVisible()
@@ -354,6 +359,110 @@ partial class CloudGameingViewModel
             this.TitleBarVisiblity = Visibility.Visible;
         }
         await SyncBridgeResolutionAsync();
+    }
+
+    private Task RefreshBridgeAfterFullscreenAsync()
+    {
+        // Probe: fullscreen also must not touch the bridge while we test SizeChanged.
+        Logger.WriteInfo(
+            $"[CloudGame][SizeProbe] fullscreen-toggle action=NONE " +
+            $"borderless={_isBorderlessFullScreen} " +
+            $"win={Window?.AppWindow?.Size.Width}x{Window?.AppWindow?.Size.Height}"
+        );
+        return Task.CompletedTask;
+    }
+
+    private async Task LogWebViewRenderStateAsync(string stage)
+    {
+        if (WebView2?.CoreWebView2 is null)
+        {
+            Logger.WriteInfo($"[CloudGame][Render] {stage}: CoreWebView2=null");
+            return;
+        }
+
+        try
+        {
+            // Prefer bridge helper (richer snapshot); fall back to inline probe.
+            var state = await WebView2.CoreWebView2.ExecuteScriptAsync(
+                $$"""
+                (() => {
+                    try {
+                        if (window.__KURO_STREAM_CONTROL__?.getRenderDiagnostic) {
+                            return JSON.stringify(window.__KURO_STREAM_CONTROL__.getRenderDiagnostic({{System.Text.Json.JsonSerializer.Serialize(stage)}}));
+                        }
+                    } catch (e) {
+                        /* fall through */
+                    }
+                    const styleOf = (el) => {
+                        if (!el) return null;
+                        const s = getComputedStyle(el);
+                        return {
+                            display: s.display,
+                            visibility: s.visibility,
+                            opacity: s.opacity,
+                            zIndex: s.zIndex,
+                            transform: s.transform,
+                            width: s.width,
+                            height: s.height
+                        };
+                    };
+                    const surface = document.getElementById('kuro-stream-surface');
+                    return JSON.stringify({
+                        stage: {{System.Text.Json.JsonSerializer.Serialize(stage)}},
+                        href: location.href,
+                        visibility: document.visibilityState,
+                        focused: document.hasFocus(),
+                        activeElement: document.activeElement && (document.activeElement.id || document.activeElement.tagName),
+                        inner: [innerWidth, innerHeight],
+                        body: [document.body?.clientWidth, document.body?.clientHeight],
+                        surface: surface ? [surface.clientWidth, surface.clientHeight] : null,
+                        surfaceStyle: styleOf(surface),
+                        dpr: devicePixelRatio,
+                        pointerLock: !!document.pointerLockElement,
+                        hasSdk: !!window.__KURO_STREAM_SDK__,
+                        hasControl: !!window.__KURO_STREAM_CONTROL__,
+                        canvas: [...document.querySelectorAll('canvas')].map(x => ({
+                            id: x.id,
+                            w: x.width,
+                            h: x.height,
+                            cw: x.clientWidth,
+                            ch: x.clientHeight,
+                            style: styleOf(x)
+                        })),
+                        video: [...document.querySelectorAll('video')].map(x => ({
+                            id: x.id,
+                            ready: x.readyState,
+                            network: x.networkState,
+                            w: x.videoWidth,
+                            h: x.videoHeight,
+                            cw: x.clientWidth,
+                            ch: x.clientHeight,
+                            paused: x.paused,
+                            ended: x.ended,
+                            muted: x.muted,
+                            currentTime: x.currentTime,
+                            style: styleOf(x)
+                        }))
+                    });
+                })()
+                """
+            ).AsTask().WaitAsync(TimeSpan.FromSeconds(3));
+            Logger.WriteInfo($"[CloudGame][Render] {stage}: {state}");
+        }
+        catch (TimeoutException)
+        {
+            Logger.WriteWarning($"[CloudGame][Render] {stage} WaitAsync timeout (3s)");
+        }
+        catch (OperationCanceledException ex)
+        {
+            Logger.WriteWarning(
+                $"[CloudGame][Render] {stage} canceled: {ex.GetType().Name}: {ex.Message}"
+            );
+        }
+        catch (Exception ex)
+        {
+            Logger.WriteError($"[CloudGame][Render] {stage} failed: {ex.GetType().Name}: {ex.Message}");
+        }
     }
 
     private void TryInstallWebViewCursorSubclass()

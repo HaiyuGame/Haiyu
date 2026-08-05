@@ -26,7 +26,7 @@ namespace Waves.Api.Models.CloudGame
         public int Bitrate { get; set; }
 
         [JsonPropertyName("serverFps")]
-        public string ServerFps { get; set; }
+        public System.Text.Json.JsonElement ServerFps { get; set; }
 
         [JsonPropertyName("fps")]
         public int Fps { get; set; }
@@ -65,7 +65,7 @@ namespace Waves.Api.Models.CloudGame
     public class WelinkMessage
     {
         [JsonPropertyName("type")]
-        public string Type { get; set; }
+        public string Type { get; set; } = string.Empty;
 
         [JsonPropertyName("detail")]
         public NetworkDetail? Detail { get; set; }
@@ -73,6 +73,4 @@ namespace Waves.Api.Models.CloudGame
         [JsonPropertyName("visible")]
         public bool Visible { get; set; }
     }
-
-
 }
