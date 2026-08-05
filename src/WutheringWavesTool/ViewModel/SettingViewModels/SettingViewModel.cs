@@ -150,6 +150,7 @@ public sealed partial class SettingViewModel : ViewModelBase
         this.SkipVerifyFiles = SkipGameVerifyWrapper.FromSettings(
             (await AppSettings.GetskipVerifyFilesAsync())
         );
+        this.AutoSkipVerifyDelete = await AppSettings.GetverifySkilDeleteAsync(this.CTS.Token);
     }
 
     private async Task LoadLauncheBth()

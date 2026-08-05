@@ -124,7 +124,13 @@ partial class KuroGameContextBaseV2
             await GameEventPublisher.PublisAsync(GameContextActionType.CdnSelect, "CDN选择完毕");
             this.CurrentSetups = 0;
             await this.GameEventPublisher.PublishStepAsync("下载校验", CurrentSetups, Setups);
-            await downloadMethod.ExecuteAsync(true);
+            var excuteResult =  await downloadMethod.ExecuteAsync(true);
+            if (excuteResult is not true)
+            {
+                Logger.WriteError("游戏文件修复失败，停止写入完成配置");
+                await SetCurrentStateNull(false);
+                return false;
+            }
             var writeConfig = new WriteGameResourceConfig(
                 this.GameLocalConfig,
                 launcher,
@@ -183,7 +189,7 @@ partial class KuroGameContextBaseV2
     /// </summary>
     /// <param name="token"></param>
     /// <returns></returns>
-    public async Task<bool> RepairGameAsync(List<string>? skipFilePath = null)
+    public async Task<bool> RepairGameAsync(bool isDelete = true, List<string>? skipFilePath = null)
     {
         var folder = await GameLocalConfig.GetConfigAsync(
             GameLocalSettingName.GameLauncherBassFolder
@@ -207,7 +213,7 @@ partial class KuroGameContextBaseV2
         }
         var gen = Interlocked.Increment(ref _operationGeneration);
         GameContextOutputArgs.CurrentGeneration.Value = gen;
-        _ = Task.Run(async () => await StartDownloadAsync(folder, launcher, true, skipFilePath));
+        _ = Task.Run(async () => await StartDownloadAsync(folder, launcher, isDelete, skipFilePath));
         return true;
     }
 

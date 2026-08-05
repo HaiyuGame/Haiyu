@@ -142,39 +142,13 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
     {
         try
         {
-            if (isDelete)
-            {
-                Logger.WriteInfo("修复游戏，开始删除本地多余文件");
-                var localFile = new DirectoryInfo(_folder).GetFiles(
-                    "*",
-                    SearchOption.AllDirectories
-                );
-                var serverFileSet = new HashSet<string>(
-                    _resource.Select(x => BuildFileHelper.BuildFilePath(_folder, x).ToLower())
-                );
-
-                var filesToDelete = localFile
-                    .Where(f =>
-                    {
-                        return !serverFileSet.Contains(f.FullName.ToLower());
-                    })
-                    .ToList();
-
-                if (filesToDelete.Any())
-                {
-                    foreach (var file in filesToDelete)
-                        TryDeleteFile(file.FullName);
-                    var fileNames = filesToDelete.Select(f => Path.GetFileName(f.FullName));
-                    Logger.WriteInfo($"删除：删除版本旧文件{string.Join(',', fileNames)}");
-                }
-            }
             ParallelOptions options = new ParallelOptions()
             {
                 MaxDegreeOfParallelism = 4,
                 CancellationToken = _downloadState.CancelToken.Token,
             };
             _downloadState.IsActive = true;
-            await ParallelDownloadAsync(
+            var downloadSucceeded = await ParallelDownloadAsync(
                     _downloadState,
                     _resource,
                     _launcher!.ResourceDefault.CdnList,
@@ -182,12 +156,42 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
                     _folder
                 )
                 .ConfigureAwait(false);
+
+            // 只有在校验/下载全部成功且任务未取消时，才删除多余文件。
+            // 避免用户取消或修复失败后，已删除的游戏配置无法恢复。
+            if (!downloadSucceeded || _downloadState.CancelToken.IsCancellationRequested)
+                return false;
+
+            if (isDelete)
+                DeleteExtraFiles();
+
             return true;
         }
         catch (Exception)
         {
             throw;
         }
+    }
+
+    private void DeleteExtraFiles()
+    {
+        Logger.WriteInfo("修复游戏，开始删除本地多余文件");
+        var localFile = new DirectoryInfo(_folder).GetFiles("*", SearchOption.AllDirectories);
+        var serverFileSet = new HashSet<string>(
+            _resource.Select(x => BuildFileHelper.BuildFilePath(_folder, x).ToLower())
+        );
+
+        var filesToDelete = localFile
+            .Where(f => !serverFileSet.Contains(f.FullName.ToLower()))
+            .ToList();
+
+        if (!filesToDelete.Any())
+            return;
+
+        foreach (var file in filesToDelete)
+            TryDeleteFile(file.FullName);
+        var fileNames = filesToDelete.Select(f => Path.GetFileName(f.FullName));
+        Logger.WriteInfo($"删除：删除版本旧文件{string.Join(',', fileNames)}");
     }
 
     private void TryDeleteFile(string fileName)
