@@ -11,6 +11,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
     private string _folder;
     private string _baseUrl;
     private bool _isProd;
+    private List<string>? skipVerifyFile;
     private IHttpClientService _httpClientService;
     private GameLauncherSource? _launcher;
     private long _totalDownloadedBytes;
@@ -47,7 +48,10 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
         Logger = loggerService;
     }
 
-    public void SetParam(Dictionary<string, object> param, IGameEventPublisher<GameContextOutputArgs> gameEventPublisher)
+    public void SetParam(
+        Dictionary<string, object> param,
+        IGameEventPublisher<GameContextOutputArgs> gameEventPublisher
+    )
     {
         Param = param;
         this.GameEventPublisher = gameEventPublisher;
@@ -115,10 +119,12 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
         {
             return false;
         }
-        if(!Param.CheckParam<bool>("isProd",out var isProd))
+        if (!Param.CheckParam<bool>("isProd", out var isProd))
         {
             return false;
         }
+        //非必要参数
+        Param.CheckParam<List<string>>("skipVerifyFile", out var skipVerifyFile);
         this._resource = resources?.ToList()!;
         this.isDelete = isDelete!;
         this._folder = folder!;
@@ -127,6 +133,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
         this._downloadState = downloadState!;
         this._baseUrl = baseUrl!;
         this._isProd = isProd;
+        this.skipVerifyFile = skipVerifyFile;
         InitProgress();
         return true;
     }
@@ -156,9 +163,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
                 if (filesToDelete.Any())
                 {
                     foreach (var file in filesToDelete)
-                    {
-                        File.Delete(file.FullName);
-                    }
+                        TryDeleteFile(file.FullName);
                     var fileNames = filesToDelete.Select(f => Path.GetFileName(f.FullName));
                     Logger.WriteInfo($"删除：删除版本旧文件{string.Join(',', fileNames)}");
                 }
@@ -182,6 +187,20 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
         catch (Exception)
         {
             throw;
+        }
+    }
+
+    private void TryDeleteFile(string fileName)
+    {
+        try
+        {
+            if (this.skipVerifyFile != null && this.skipVerifyFile.Contains(fileName))
+                return;
+            File.Delete(fileName);
+        }
+        catch (Exception ex)
+        {
+            Logger.WriteError(ex.Message + ex.StackTrace);
         }
     }
 
@@ -219,9 +238,11 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
                         new Progress<(GameContextActionType, bool, long, string, long, long)>(
                             value =>
                             {
-                                if (_disposed
+                                if (
+                                    _disposed
                                     || _downloadState.CancelToken.IsCancellationRequested
-                                    || !(_downloadState?.IsActive ?? false))
+                                    || !(_downloadState?.IsActive ?? false)
+                                )
                                     return;
                                 var args = UpdateFileProgress(
                                     value.Item1,
@@ -232,12 +253,30 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
                                     fileMaxSize: value.Item6
                                 );
                                 args.Prod = this._isProd;
-                                this.ProgressValue = (double)args.CurrentSize / (double)args.TotalSize;
+                                this.ProgressValue =
+                                    (double)args.CurrentSize / (double)args.TotalSize;
                                 this.GameEventPublisher.Publish(args);
                             }
                         );
                     var filePath = BuildFileHelper.BuildFilePath(folder, item);
-                    var downloadUrl = Path.Combine(this._baseUrl, item.Dest).Replace("\\","/");
+                    if (this.skipVerifyFile != null && this.skipVerifyFile.Contains(filePath))
+                    {
+                        if (
+                            !_disposed
+                            && !_downloadState.CancelToken.IsCancellationRequested
+                            && (_downloadState?.IsActive ?? false)
+                        )
+                        {
+                            var args = UpdateFileProgress(
+                                GameContextActionType.Verify,
+                                item.Size,
+                                true
+                            );
+                            GameEventPublisher.Publish(args);
+                        }
+                        return;
+                    }
+                    var downloadUrl = Path.Combine(this._baseUrl, item.Dest).Replace("\\", "/");
                     if (File.Exists(filePath))
                     {
                         if (item.ChunkInfos == null)
@@ -270,9 +309,11 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
                             }
                             else
                             {
-                                if (!_disposed
+                                if (
+                                    !_disposed
                                     && !_downloadState.CancelToken.IsCancellationRequested
-                                    && (_downloadState?.IsActive ?? false))
+                                    && (_downloadState?.IsActive ?? false)
+                                )
                                 {
                                     var args = UpdateFileProgress(
                                         GameContextActionType.Verify,
@@ -330,9 +371,11 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
                                 }
                                 else
                                 {
-                                    if (!_disposed
+                                    if (
+                                        !_disposed
                                         && !_downloadState.CancelToken.IsCancellationRequested
-                                        && (_downloadState?.IsActive ?? false))
+                                        && (_downloadState?.IsActive ?? false)
+                                    )
                                     {
                                         var args = UpdateFileProgress(
                                             GameContextActionType.Verify,
@@ -371,11 +414,13 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
         catch (Exception ex)
         {
             Logger.WriteError($"校验失败！{ex}");
-            GameEventPublisher.Publish(new GameContextOutputArgs
-            {
-                Type = GameContextActionType.TipMessage,
-                TipMessage = $"校验失败！{ex.Message}"
-            });
+            GameEventPublisher.Publish(
+                new GameContextOutputArgs
+                {
+                    Type = GameContextActionType.TipMessage,
+                    TipMessage = $"校验失败！{ex.Message}",
+                }
+            );
             return false;
         }
     }
@@ -430,7 +475,6 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
             IsAction = this._downloadState?.IsActive ?? false,
             IsPause = _downloadState?.IsPaused ?? false,
             TipMessage = tip,
-            
         };
         return args;
     }
@@ -445,11 +489,13 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
         catch (Exception ex)
         {
             Logger.WriteError($"取消任务失败: {ex.Message}");
-            GameEventPublisher.Publish(new GameContextOutputArgs
-            {
-                Type = GameContextActionType.TipMessage,
-                TipMessage = $"取消任务失败: {ex.Message}"
-            });
+            GameEventPublisher.Publish(
+                new GameContextOutputArgs
+                {
+                    Type = GameContextActionType.TipMessage,
+                    TipMessage = $"取消任务失败: {ex.Message}",
+                }
+            );
             return false;
         }
     }

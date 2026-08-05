@@ -43,6 +43,7 @@ public sealed partial class SettingViewModel : ViewModelBase
     private void RegisterMessanger()
     {
         this.Messenger.Register<CopyStringMessager>(this, CopyString);
+        this.Messenger.Register<SkipGameVerifyWrapper>(this, SkipGameVerifyFileMethod);
     }
 
     private void CopyString(object recipient, CopyStringMessager message)
@@ -140,7 +141,15 @@ public sealed partial class SettingViewModel : ViewModelBase
         GetAllVersion();
         await LoadUpdateAppType();
         await LoadLauncheBth();
+        await ReadVerifySkipFileAsync();
         ProgressAction = false;
+    }
+
+    private async Task ReadVerifySkipFileAsync()
+    {
+        this.SkipVerifyFiles = SkipGameVerifyWrapper.FromSettings(
+            (await AppSettings.GetskipVerifyFilesAsync())
+        );
     }
 
     private async Task LoadLauncheBth()

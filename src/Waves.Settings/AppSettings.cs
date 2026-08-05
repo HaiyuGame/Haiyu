@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Waves.Settings;
 
 [SettingsAttribute<string>(Name = "WallpaperType", Nullable = true)]
@@ -22,6 +24,9 @@ namespace Waves.Settings;
 [SettingsAttribute<bool>(Name = "StartGameAllowCloseMain", Nullable = true, DefaultValue = "False")]
 [SettingsAttribute<string>(Name = "MirrorKey", Nullable = true)]
 [SettingsAttribute<string>(Name = "LauncheBth", Nullable = true, DefaultValue = "Home")]
+[Settings<List<string>>(Name ="skipVerifyFiles",
+    JsonTypeInfoContextType = typeof(AppSettingJsonContext),
+    JsonTypeInfoPropertyName = nameof(AppSettingJsonContext.Default.ListString))]
 public partial class AppSettings : SettingBase
 {
     public static string BassFolder =>
@@ -55,6 +60,7 @@ public partial class AppSettings : SettingBase
         : base(SettingsFilePath)
     {
         _ = LoadSettingsAsync();
+        
     }
 
     public async Task<int> GetMaxIoConcurrentAsync(CancellationToken ct = default)
@@ -68,4 +74,11 @@ public partial class AppSettings : SettingBase
         await WriteAsync(Math.Clamp(value, 1, 4).ToString(), "MaxIoConcurrent", ct)
             .ConfigureAwait(false);
     }
+}
+
+
+[JsonSerializable(typeof(List<string>))]
+public partial class AppSettingJsonContext:JsonSerializerContext
+{
+
 }

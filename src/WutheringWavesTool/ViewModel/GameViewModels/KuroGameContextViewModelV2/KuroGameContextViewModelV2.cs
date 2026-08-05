@@ -937,8 +937,9 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
             ) == ContentDialogResult.Primary
         )
         {
+            var filePaths = await this.AppSettings.GetskipVerifyFilesAsync();
             Logger.WriteInfo($"开始尝试修复游戏文件");
-            StartBackground(() => GameContext.RepairGameAsync());
+            StartBackground(() => GameContext.RepairGameAsync(filePaths));
         }
         else
         {

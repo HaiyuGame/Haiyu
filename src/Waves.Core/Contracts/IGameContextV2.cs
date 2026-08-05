@@ -28,7 +28,7 @@ public interface IGameContextV2
     public DownloadState? ProdDownloadState { get; }
     public TimeSpan GetGameTime();
 
-    public Task<bool> RepairGameAsync();
+    public Task<bool> RepairGameAsync(List<string>? skipFilePath = null);
 
     #region Launcher
     Task<GameLauncherSource?> GetGameLauncherSourceAsync(

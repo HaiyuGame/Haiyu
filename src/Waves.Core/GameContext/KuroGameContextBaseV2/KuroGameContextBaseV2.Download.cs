@@ -52,7 +52,8 @@ partial class KuroGameContextBaseV2
     private async Task<bool> StartDownloadAsync(
         string folder,
         GameLauncherSource launcher,
-        bool isRepir = false
+        bool isRepir = false,
+        List<string>? repirSkipFile = null
     )
     {
         try
@@ -115,6 +116,7 @@ partial class KuroGameContextBaseV2
                     { "downloadState", DownloadState! },
                     { "baseUrl", baseUrl },
                     { "isProd", false },
+                    { "skipVerifyFile", repirSkipFile! },
                 },
                 this.GameEventPublisher
             );
@@ -181,7 +183,7 @@ partial class KuroGameContextBaseV2
     /// </summary>
     /// <param name="token"></param>
     /// <returns></returns>
-    public async Task<bool> RepairGameAsync()
+    public async Task<bool> RepairGameAsync(List<string>? skipFilePath = null)
     {
         var folder = await GameLocalConfig.GetConfigAsync(
             GameLocalSettingName.GameLauncherBassFolder
@@ -205,7 +207,7 @@ partial class KuroGameContextBaseV2
         }
         var gen = Interlocked.Increment(ref _operationGeneration);
         GameContextOutputArgs.CurrentGeneration.Value = gen;
-        _ = Task.Run(async () => await StartDownloadAsync(folder, launcher, true));
+        _ = Task.Run(async () => await StartDownloadAsync(folder, launcher, true, skipFilePath));
         return true;
     }
 
