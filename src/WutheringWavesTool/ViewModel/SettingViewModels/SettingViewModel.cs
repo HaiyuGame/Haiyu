@@ -138,7 +138,7 @@ public sealed partial class SettingViewModel : ViewModelBase
                 break;
         }
         await this.InitCapture();
-        GetAllVersion();
+        await GetAllVersionAsync();
         await LoadUpdateAppType();
         await LoadLauncheBth();
         await ReadVerifySkipFileAsync();

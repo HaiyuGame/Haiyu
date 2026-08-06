@@ -52,6 +52,8 @@ public partial class AppSettings : SettingBase
 
     private static readonly string SettingsFilePath = Path.Combine(BassFolder, "System.json");
 
+    public static readonly string WebViewFixRuntime = Path.Combine(BassFolder, "WebView2FixedRuntime");
+
     public static readonly string LogPath = BassFolder + "\\appLogs\\appLog.log";
 
     public static readonly string CloudFolderPath = BassFolder + "\\Cloud";

@@ -30,46 +30,46 @@ partial class SettingViewModel
     public partial WebViewRuntimeWrapper? WebViewRuntimeItem { get; set; }
 
     [ObservableProperty]
-    public partial List<WebViewRuntimeWrapper> WebViewRuntimeOptions { get; set; } = [];
+    public partial ObservableCollection<WebViewRuntimeWrapper> WebViewRuntimeOptions { get; set; } = [];
 
     private bool _webViewRuntimeLoaded;
 
-    void GetAllVersion()
+    async Task GetAllVersionAsync()
     {
-        WebViewVersion = WebView2EnvironmentProvider.GetSelectedRuntimeVersion();
         WindowsAppSdkVersion = Microsoft.WindowsAppSDK.Runtime.Version.DotQuadString;
         RunType = RuntimeFeature.IsDynamicCodeCompiled ? "JIT" : "AOT";
         FrameworkType = RuntimeInformation.FrameworkDescription;
-        _ = LoadWebViewRuntimeModeAsync();
+        await LoadWebViewRuntimeModeAsync();
     }
 
     private async Task LoadWebViewRuntimeModeAsync()
     {
-        var mode = await AppSettings.GetWebViewRuntimeModeAsync();
-        var options = new List<WebViewRuntimeWrapper>();
-        var evergreen = CoreWebView2Environment.GetAvailableBrowserVersionString() ?? "\u672a\u5b89\u88c5";
+        var mode = await AppSettings.GetWebViewRuntimeModeAsync(CTS.Token) ?? "Evergreen";
+        var evergreen =
+            CoreWebView2Environment.GetAvailableBrowserVersionString() ?? "未安装";
 
-        options.Add(new WebViewRuntimeWrapper
+        var options = new ObservableCollection<WebViewRuntimeWrapper>
         {
-            DisplayName = $"\u7cfb\u7edf WebView2\uff08{evergreen}\uff09",
-            RuntimePath = "Evergreen"
-        });
-
-        foreach (var folder in WebView2EnvironmentProvider.GetFixedRuntimeFolders())
-        {
-            var executable = Path.Combine(folder, "msedgewebview2.exe");
-            var version = FileVersionInfo.GetVersionInfo(executable).FileVersion ?? Path.GetFileName(folder);
-            options.Add(new WebViewRuntimeWrapper
+            new()
             {
-                DisplayName = $"Fixed Runtime {version}",
-                RuntimePath = folder
-            });
-        }
+                DisplayName = $"系统 WebView2（{evergreen}）",
+                RuntimePath = "Evergreen",
+            },
+        };
 
+        foreach (var item in WebView2EnvironmentProvider.GetFixedRuntimeFolders())
+        {
+            options.Add(item);
+        }
         WebViewRuntimeOptions = options;
-        WebViewRuntimeItem = options.FirstOrDefault(x =>
-            string.Equals(x.RuntimePath, mode, StringComparison.OrdinalIgnoreCase)
-        ) ?? options[0];
+        WebViewRuntimeItem =
+            WebViewRuntimeOptions.FirstOrDefault(x =>
+                x.RuntimePath.Equals(mode, StringComparison.OrdinalIgnoreCase)
+            ) ?? WebViewRuntimeOptions.FirstOrDefault();
+
+        WebViewVersion =
+            WebViewRuntimeItem?.DisplayName
+            ?? WebView2EnvironmentProvider.GetSelectedRuntimeVersion();
         _webViewRuntimeLoaded = true;
     }
 
@@ -167,6 +167,14 @@ partial class SettingViewModel
         {
             await TipShow.ShowMessageAsync(LanguageService.FormatByText(LanguageService.GetStringByText("桌面图标创建异常:{0}"), ex.Message), Symbol.Clear);
         }
+    }
+
+    [RelayCommand]
+    async Task OpenWebViewCabDialog()
+    {
+        await DialogManager.ShowWebViewCabManangerAsync();
+        _webViewRuntimeLoaded = false;
+        await LoadWebViewRuntimeModeAsync();
     }
 
     public static string CreateUwpShortcut(string filePath, string target)

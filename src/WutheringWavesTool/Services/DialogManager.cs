@@ -198,6 +198,8 @@ public abstract class DialogManager : IDialogManager
         return result;
     }
 
+    public async Task ShowWebViewCabManangerAsync() => await ShowDialogAsync<WebViewCabManagerDialog>();
+
     public async Task ShowWavesCloudSettingAsync(GameType type) =>
         await ShowDialogAsync<CloudGameSettingDialog>(type);
     public async Task ShowGameLocalTokenAsync(string contextName)

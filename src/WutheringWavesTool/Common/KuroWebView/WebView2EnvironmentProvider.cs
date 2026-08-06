@@ -1,18 +1,8 @@
+using Microsoft.Extensions.Options;
 using Waves.Settings;
 
 namespace Haiyu.Common.KuroWebView;
 
-/// <summary>
-/// Shared WebView2 environment.
-/// DEBUG (or HAIYU_WEBVIEW_CDP_PORT) enables Chromium remote debugging so external
-/// CDP tools can attach — Haiyu itself does not speak CDP.
-///
-/// Attach from outside:
-///   http://127.0.0.1:{port}/json/list
-///   Edge: edge://inspect  →  Configure  →  localhost:{port}
-///   Chrome: chrome://inspect
-/// Env: HAIYU_WEBVIEW_CDP_PORT=9223  |  0 to disable
-/// </summary>
 public static class WebView2EnvironmentProvider
 {
     public const int DefaultCdpPort = 9223;
@@ -38,16 +28,10 @@ public static class WebView2EnvironmentProvider
         return CoreWebView2Environment.GetAvailableBrowserVersionString() ?? "未安装";
     }
 
-    public static IReadOnlyList<string> GetFixedRuntimeFolders()
+    public static ObservableCollection<WebViewRuntimeWrapper> GetFixedRuntimeFolders()
     {
-        var roots = new[]
-        {
-            Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-                "Waves",
-                "WebView2FixedRuntime"
-            )
-        };
+        ObservableCollection<WebViewRuntimeWrapper> webs = [];
+        var roots = new[] { Path.Combine(AppSettings.WebViewFixRuntime) };
 
         var result = new List<string>();
         foreach (var root in roots)
@@ -57,17 +41,39 @@ public static class WebView2EnvironmentProvider
                 continue;
             }
 
-            foreach (var executable in Directory.EnumerateFiles(root, "msedgewebview2.exe", SearchOption.AllDirectories))
+            foreach (
+                var executable in Directory.EnumerateFiles(
+                    root,
+                    "msedgewebview2.exe",
+                    SearchOption.AllDirectories
+                )
+            )
             {
                 var folder = Path.GetDirectoryName(executable);
-                if (folder is not null && !result.Contains(folder, StringComparer.OrdinalIgnoreCase))
+                if (
+                    folder is not null
+                    && !result.Contains(folder, StringComparer.OrdinalIgnoreCase)
+                )
                 {
                     result.Add(folder);
                 }
             }
         }
-
-        return result;
+       
+        foreach (var item in result)
+        {
+            var executable = Path.Combine(item, "msedgewebview2.exe");
+            var version =
+                FileVersionInfo.GetVersionInfo(executable).FileVersion ?? Path.GetFileName(item);
+            webs.Add(
+                new WebViewRuntimeWrapper
+                {
+                    DisplayName = $"固定运行时 {version}",
+                    RuntimePath = item,
+                }
+            );
+        }
+        return webs;
     }
 
     public static async Task EnsureInitializedAsync(WebView2 webView)
@@ -90,7 +96,7 @@ public static class WebView2EnvironmentProvider
         }
         var options = new CoreWebView2EnvironmentOptions
         {
-            AdditionalBrowserArguments = string.Join(' ', args)
+            AdditionalBrowserArguments = string.Join(' ', args),
         };
 
         var settings = Instance.Host.Services.GetRequiredService<AppSettings>();
@@ -135,8 +141,7 @@ public static class WebView2EnvironmentProvider
     }
 
     private static bool IsRuntimeFolder(string? path) =>
-        !string.IsNullOrWhiteSpace(path)
-        && File.Exists(Path.Combine(path, "msedgewebview2.exe"));
+        !string.IsNullOrWhiteSpace(path) && File.Exists(Path.Combine(path, "msedgewebview2.exe"));
 
     private static int ResolveCdpPort()
     {

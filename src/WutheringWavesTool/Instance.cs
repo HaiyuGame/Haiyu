@@ -111,6 +111,8 @@ public static class InstanceBuilderExtensions
                     .AddTransient<SettingViewModel>()
                     .AddTransient<GameEnhancedDialog>()
                     .AddTransient<GameEnhancedViewModel>()
+                    .AddTransient<WebViewCabManagerDialog>()
+                    .AddTransient<WebViewCabManagerViewModel>()
                     .AddTransient<GamerSignPage>()
                     .AddTransient<GamerSignViewModel>()
                     .AddTransient<CloudSelectNodeDialog>()

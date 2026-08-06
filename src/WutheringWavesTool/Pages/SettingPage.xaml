@@ -520,20 +520,25 @@
                                 </StackPanel>
                             </ui:SettingsCard.Content>
                         </ui:SettingsCard>
-                        <ui:SettingsCard Header="{x:Bind helper:LanguageService.GetString('Display_WebKernelVersion')}">
-                            <TextBlock IsTextSelectionEnabled="True" Text="{x:Bind ViewModel.WebViewVersion, Mode=OneWay}" />
-                        </ui:SettingsCard>
-                        <ui:SettingsCard Description="更改后重启 Haiyu 生效；兼容版需单独安装" Header="WebView2 启动版本">
-                            <ComboBox
-                                MinWidth="280"
-                                ItemsSource="{x:Bind ViewModel.WebViewRuntimeOptions, Mode=OneWay}"
-                                SelectedItem="{x:Bind ViewModel.WebViewRuntimeItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate x:DataType="wr:WebViewRuntimeWrapper">
-                                        <TextBlock Text="{x:Bind DisplayName}" />
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>
+                        <ui:SettingsCard Description="{x:Bind ViewModel.WebViewVersion, Mode=OneWay}" Header="{x:Bind helper:LanguageService.GetString('Display_WebKernelVersion')}">
+                            <StackPanel Orientation="Horizontal">
+                                <Button Command="{x:Bind ViewModel.OpenWebViewCabDialogCommand}" Style="{ThemeResource TransparentButtonStyle}">
+                                    <FontIcon
+                                        FontFamily="Segoe Fluent Icons"
+                                        FontSize="15"
+                                        Glyph="&#xE7B8;" />
+                                </Button>
+                                <ComboBox
+                                    MinWidth="280"
+                                    ItemsSource="{x:Bind ViewModel.WebViewRuntimeOptions, Mode=OneWay}"
+                                    SelectedItem="{x:Bind ViewModel.WebViewRuntimeItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate x:DataType="wr:WebViewRuntimeWrapper">
+                                            <TextBlock Text="{x:Bind DisplayName}" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
                         </ui:SettingsCard>
                         <ui:SettingsCard Header="WindowsApp Sdk">
                             <TextBlock IsTextSelectionEnabled="True" Text="{x:Bind ViewModel.WindowsAppSdkVersion, Mode=OneWay}" />

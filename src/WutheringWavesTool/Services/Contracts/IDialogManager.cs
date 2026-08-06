@@ -34,6 +34,7 @@ public interface IDialogManager
 
     Task ShowGameLauncherChacheDialogAsync(GameLauncherCacheArgs args);
 
+    Task ShowWebViewCabManangerAsync();
     Task<ContentDialogResult> ShowOKDialogAsync(string header, string content);
     Task ShowGameSettingAsync(string contextName);
     Task ShowGameEnhancedDialogAsync();
