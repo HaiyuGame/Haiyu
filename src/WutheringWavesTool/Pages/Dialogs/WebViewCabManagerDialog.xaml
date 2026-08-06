@@ -32,7 +32,7 @@
                 <TextBlock
                     FontFamily="{ThemeResource DefaultFont}"
                     FontSize="16"
-                    Text="WebView 环境管理" />
+                    Text="{x:Bind helper:LanguageService.GetString('WebViewEnv_ManagerHeader')}" />
                 <TextBlock Foreground="{ThemeResource SystemColorGrayTextBrush}">
                     <Run Text="当前版本" />
                     <Run Text=": " />
@@ -47,7 +47,7 @@
                 <Button
                     Command="{x:Bind ViewModel.RefreshCommand}"
                     Style="{ThemeResource TransparentButtonStyle}"
-                    ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetStringByText('刷新')}">
+                    ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_Refresh')}">
                     <FontIcon
                         FontFamily="Segoe Fluent Icons"
                         FontSize="16"
@@ -56,7 +56,7 @@
                 <Button
                     Command="{x:Bind ViewModel.SelectCabFilesCommand}"
                     Style="{ThemeResource TransparentButtonStyle}"
-                    ToolTipService.ToolTip="导入 WebView 固定运行时 Zip">
+                    ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('WebViewEnv_ImportRT')}">
                     <FontIcon
                         FontFamily="Segoe Fluent Icons"
                         FontSize="16"
@@ -65,7 +65,7 @@
                 <Button
                     Command="{x:Bind ViewModel.CloseCommand}"
                     Style="{ThemeResource TransparentButtonStyle}"
-                    ToolTipService.ToolTip="关闭">
+                    ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_Close')}">
                     <FontIcon
                         FontFamily="Segoe Fluent Icons"
                         FontSize="14"
@@ -89,7 +89,7 @@
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Foreground="{ThemeResource SystemColorGrayTextBrush}"
-                Text="暂无可用运行时"
+                Text="{x:Bind helper:LanguageService.GetString('WebViewEnv_Empty')}"
                 Visibility="{x:Bind ViewModel.HasRuntimes, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}" />
 
             <ItemsView
@@ -130,7 +130,7 @@
                                     VerticalAlignment="Center"
                                     Command="{x:Bind DeleteRuntimeCommand}"
                                     Style="{ThemeResource TransparentButtonStyle}"
-                                    ToolTipService.ToolTip="删除"
+                                    ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_Delete')}"
                                     Visibility="{x:Bind IsEvergreen, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}">
                                     <FontIcon
                                         FontFamily="Segoe Fluent Icons"
@@ -158,14 +158,14 @@
                 MinWidth="100"
                 Padding="12,8"
                 Command="{x:Bind ViewModel.ApplySelectCommand}"
-                Content="{x:Bind helper:LanguageService.GetStringByText('应用')}"
+                Content="{x:Bind helper:LanguageService.GetString('Display_Apply')}"
                 CornerRadius="8"
                 Style="{ThemeResource AccentButtonStyle}" />
             <Button
                 MinWidth="100"
                 Padding="12,8"
                 Command="{x:Bind ViewModel.CloseCommand}"
-                Content="{x:Bind helper:LanguageService.GetStringByText('完成')}"
+                Content="{x:Bind helper:LanguageService.GetString('Display_Complete')}"
                 CornerRadius="8" />
         </StackPanel>
     </Grid>

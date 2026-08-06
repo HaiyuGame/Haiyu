@@ -52,7 +52,7 @@ partial class SettingViewModel
         {
             new()
             {
-                DisplayName = $"系统 WebView2（{evergreen}）",
+                DisplayName = $"System（{evergreen}）",
                 RuntimePath = "Evergreen",
             },
         };

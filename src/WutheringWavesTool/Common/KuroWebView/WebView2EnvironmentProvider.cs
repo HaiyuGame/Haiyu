@@ -68,7 +68,7 @@ public static class WebView2EnvironmentProvider
             webs.Add(
                 new WebViewRuntimeWrapper
                 {
-                    DisplayName = $"固定运行时 {version}",
+                    DisplayName = $"{version}",
                     RuntimePath = item,
                 }
             );

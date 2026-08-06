@@ -108,8 +108,8 @@ public partial class WebViewCabManagerViewModel : DialogViewModelBase
             {
                 TryDeleteDirectory(extractRoot);
                 await TipShow.ShowMessageAsync(
-                    LanguageService.GetStringByText(
-                        "未找到有效的 WebView2 固定运行时（缺少 msedgewebview2.exe）"
+                    LanguageService.GetString(
+                        "WebViewEnv_NoFindExe"
                     ),
                     Symbol.Clear
                 );
@@ -117,7 +117,7 @@ public partial class WebViewCabManagerViewModel : DialogViewModelBase
             }
 
             await TipShow.ShowMessageAsync(
-                LanguageService.GetStringByText("WebView 固定运行时导入成功"),
+                LanguageService.GetString("WebViewEnv_ImportComplete"),
                 Symbol.Accept
             );
             await LoadLocalWebViewCabEnvironmentAsync();
@@ -149,7 +149,7 @@ public partial class WebViewCabManagerViewModel : DialogViewModelBase
         if (selected is null)
         {
             await TipShow.ShowMessageAsync(
-                LanguageService.GetStringByText("请先选择一个 WebView 运行时"),
+                LanguageService.GetString("请先选择一个 WebView 运行时"),
                 Symbol.Clear
             );
             return;
@@ -164,7 +164,7 @@ public partial class WebViewCabManagerViewModel : DialogViewModelBase
         await AppSettings.SetWebViewRuntimeModeAsync(selected.RuntimePath);
         CurrentVersion = selected.DisplayName;
         await TipShow.ShowMessageAsync(
-            LanguageService.GetStringByText("已应用 WebView 运行时，重启相关页面后生效"),
+            LanguageService.GetString("WebViewEnv_ApplyComplete"),
             Symbol.Accept
         );
         await Close();
@@ -178,7 +178,7 @@ public partial class WebViewCabManagerViewModel : DialogViewModelBase
         if (!IsUnderFixRuntimeRoot(runtime.RuntimePath))
         {
             await TipShow.ShowMessageAsync(
-                LanguageService.GetStringByText("只能删除本工具导入的固定运行时"),
+                LanguageService.GetString("WebViewEnv_OnlyDeleteTip"),
                 Symbol.Clear
             );
             return;
@@ -208,7 +208,7 @@ public partial class WebViewCabManagerViewModel : DialogViewModelBase
 
             await LoadLocalWebViewCabEnvironmentAsync();
             await TipShow.ShowMessageAsync(
-                LanguageService.GetStringByText("已删除 WebView 固定运行时"),
+                LanguageService.GetString("WebViewEnv_DeleteComplete"),
                 Symbol.Accept
             );
         }
@@ -216,7 +216,7 @@ public partial class WebViewCabManagerViewModel : DialogViewModelBase
         {
             Logger.WriteError($"删除 WebView 固定运行时失败: {ex}");
             await TipShow.ShowMessageAsync(
-                LanguageService.FormatByText("删除失败: {0}", ex.Message),
+                LanguageService.FormatByText("WebViewEnv_DeleteError", ex.Message),
                 Symbol.Clear
             );
         }
@@ -232,7 +232,7 @@ public partial class WebViewCabManagerViewModel : DialogViewModelBase
         {
             new()
             {
-                DisplayName = $"系统 WebView2（{evergreenVersion}）",
+                DisplayName = $"WebView2（{evergreenVersion}）",
                 RuntimePath = "Evergreen",
                 IsSelect = selectedMode.Equals("Evergreen", StringComparison.OrdinalIgnoreCase),
             },

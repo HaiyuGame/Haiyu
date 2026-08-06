@@ -1,0 +1,91 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+
+		<!-- Target -->
+		<TargetFramework>net10.0-android</TargetFramework>
+		<RuntimeIdentifier>android-arm64</RuntimeIdentifier>
+
+		<!-- MAUI -->
+		<UseMaui>true</UseMaui>
+		<SingleProject>true</SingleProject>
+		<OutputType>Exe</OutputType>
+
+		<RootNamespace>Haiyu.Mobile</RootNamespace>
+
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+
+
+		<!-- NativeAOT -->
+		<IsAotCompatible>true</IsAotCompatible>
+		<PublishAot>true</PublishAot>
+
+		<!-- Trim -->
+		<PublishTrimmed>true</PublishTrimmed>
+
+
+		<!-- Android -->
+		<AndroidPackageFormat>apk</AndroidPackageFormat>
+
+
+		<!-- XAML Source Generator -->
+		<MauiXamlInflator>SourceGen</MauiXamlInflator>
+
+
+		<!-- App Info -->
+		<ApplicationTitle>Haiyu.Mobile</ApplicationTitle>
+
+		<ApplicationId>com.companyname.haiyu.mobile</ApplicationId>
+
+		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+		<ApplicationVersion>1</ApplicationVersion>
+
+
+		<!-- Android minimum -->
+		<SupportedOSPlatformVersion>21.0</SupportedOSPlatformVersion>
+
+
+		<!-- Only ARM64 -->
+		<Platforms>ARM64</Platforms>
+
+	</PropertyGroup>
+
+
+	<ItemGroup>
+
+		<!-- Icon -->
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+
+
+		<!-- Splash -->
+		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+
+
+		<!-- Images -->
+		<MauiImage Include="Resources\Images\*" />
+
+		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
+
+
+		<!-- Fonts -->
+		<MauiFont Include="Resources\Fonts\*" />
+
+
+		<!-- Raw -->
+		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+
+	</ItemGroup>
+
+
+	<ItemGroup>
+
+		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+
+
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
+
+	</ItemGroup>
+
+
+</Project>
