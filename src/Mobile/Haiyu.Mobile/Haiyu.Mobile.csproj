@@ -6,6 +6,8 @@
 		<TargetFramework>net10.0-android</TargetFramework>
 		<RuntimeIdentifier>android-arm64</RuntimeIdentifier>
 
+		
+		
 		<!-- MAUI -->
 		<UseMaui>true</UseMaui>
 		<SingleProject>true</SingleProject>
@@ -15,14 +17,22 @@
 
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-
+		
 
 		<!-- NativeAOT -->
 		<IsAotCompatible>true</IsAotCompatible>
-		<PublishAot>true</PublishAot>
+
+		<!-- Debug 不执行 NativeAOT -->
+		<PublishAot Condition="'$(Configuration)'=='Debug'">false</PublishAot>
+
+		<!-- Release 执行 NativeAOT -->
+		<PublishAot Condition="'$(Configuration)'=='Release'">true</PublishAot>
 
 		<!-- Trim -->
 		<PublishTrimmed>true</PublishTrimmed>
+
+		<EnableAotAnalyzer>true</EnableAotAnalyzer>
+		<EnableTrimAnalyzer>true</EnableTrimAnalyzer>
 
 
 		<!-- Android -->
@@ -40,7 +50,9 @@
 
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
 		<ApplicationVersion>1</ApplicationVersion>
-
+		<!--Zip Align-->
+		<AndroidUseApkSigner>true</AndroidUseApkSigner>
+		<AndroidZipAlign>true</AndroidZipAlign>
 
 		<!-- Android minimum -->
 		<SupportedOSPlatformVersion>21.0</SupportedOSPlatformVersion>
@@ -51,7 +63,14 @@
 
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
 
+		<PublishAot>false</PublishAot>
+
+		<PublishTrimmed>false</PublishTrimmed>
+
+	</PropertyGroup>
+	
 	<ItemGroup>
 
 		<!-- Icon -->
@@ -78,13 +97,26 @@
 	</ItemGroup>
 
 
+
 	<ItemGroup>
 
-		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+		<PackageReference Include="CommunityToolkit.Maui" Version="15.0.0" />
+
+		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.90" />
 
 
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.10" />
 
+
+		<PackageReference Include="ZXing.Net.Maui.Controls" Version="0.10.3" />
+
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <MauiXaml Update="NewPage1.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	</ItemGroup>
 
 
