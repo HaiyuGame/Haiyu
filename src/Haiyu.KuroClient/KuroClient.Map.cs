@@ -1,4 +1,4 @@
-namespace Waves.Core.Services;
+namespace Haiyu.KuroClient;
 
 partial class KuroClient
 {

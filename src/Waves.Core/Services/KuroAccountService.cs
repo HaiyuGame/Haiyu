@@ -154,7 +154,7 @@ public class KuroAccountService : IKuroAccountService
         if (this._cache.TryGetValue(userId, out var value))
         {
             _ = AppSettings.SetLastSelectUserAsync(value.Item2.TokenId).ConfigureAwait(false);
-            this.CurrentAccount = KuroAccount.From(value.Item2);
+            this.CurrentAccount = value.Item2.ToKuroAccount();
 
             WeakReferenceMessenger.Default.Send(new SelectUserMessanger(true));
         }
@@ -162,7 +162,7 @@ public class KuroAccountService : IKuroAccountService
 
     public void SetCurrentUser(LocalAccount localAccount, bool isWrite = true)
     {
-        this.CurrentAccount = KuroAccount.From(localAccount);
+        this.CurrentAccount = localAccount.ToKuroAccount();
         if (isWrite)
             _ = AppSettings.SetLastSelectUserAsync(localAccount.TokenId).ConfigureAwait(false);
     }

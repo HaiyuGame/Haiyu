@@ -208,7 +208,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase
             if (account is not null && await WavesClient.IsLoginAsync(account, CTS.Token))
             {
                 var roles = await TryInvokeAsync(async () =>
-                    await WavesClient.GetGamerAsync(account, Waves.Core.Models.Enums.GameType.Waves, this.CTS.Token)
+                    await WavesClient.GetGamerAsync(account, (int)Waves.Core.Models.Enums.GameType.Waves, this.CTS.Token)
                 );
                 if (roles.Code != 0)
                 {

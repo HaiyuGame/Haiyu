@@ -4,7 +4,7 @@ using Waves.Api.Models.Rpc;
 using Waves.Core.Common;
 using Waves.Core.Contracts;
 using Waves.Settings;
-using WavesLauncher.Core.Contracts;
+using Haiyu.KuroClient;
 
 namespace Haiyu.ServiceHost.Services;
 

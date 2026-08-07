@@ -1,8 +1,4 @@
-using System.Text.Json.Serialization.Metadata;
-using Waves.Api.Models.KuroClient;
-using Waves.Api.Models.KuroClient.Options;
-
-namespace Waves.Core.Services;
+namespace Haiyu.KuroClient;
 
 partial class KuroClient
 {
@@ -133,7 +129,7 @@ partial class KuroClient
             true,
             token
         );
-        var reponseBody = await HttpClientService.HttpClient.SendAsync(buildRequest, token);
+        var reponseBody = await HttpClient.SendAsync(buildRequest, token);
         var json = await reponseBody.Content.ReadAsStringAsync(token);
         var taskResult = JsonSerializer.Deserialize(json, jsonTypeInfo);
         if (taskResult == null || taskResult.Code != 200)

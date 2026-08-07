@@ -1,4 +1,4 @@
-namespace Waves.Core.Services;
+namespace Haiyu.KuroClient;
 
 partial class KuroClient
 {
@@ -26,7 +26,7 @@ partial class KuroClient
         );
         for (int i = 0; i < 5; i++)
         {
-            var result = await HttpClientService.HttpClient.SendAsync(request, token);
+            var result = await HttpClient.SendAsync(request, token);
             var jsonStr = await result.Content.ReadAsStringAsync(token);
 
             var resultCode = JsonSerializer.Deserialize(
@@ -69,7 +69,7 @@ partial class KuroClient
             new MediaTypeHeaderValue("application/x-www-form-urlencoded"),
             content
         );
-        var result = await this.HttpClientService.HttpClient.SendAsync(request, token);
+        var result = await this.HttpClient.SendAsync(request, token);
         var jsonStr = await result.Content.ReadAsStringAsync(token);
         var resultCode = JsonSerializer.Deserialize(
             jsonStr,
@@ -106,7 +106,7 @@ partial class KuroClient
             new MediaTypeHeaderValue("application/x-www-form-urlencoded"),
             content
         );
-        var result = await this.HttpClientService.HttpClient.SendAsync(request, token);
+        var result = await this.HttpClient.SendAsync(request, token);
         var jsonStr = await result.Content.ReadAsStringAsync(token);
         var resultCode = JsonSerializer.Deserialize(
             jsonStr,
@@ -142,7 +142,7 @@ partial class KuroClient
             new MediaTypeHeaderValue("application/x-www-form-urlencoded"),
             content
         );
-        var result = await this.HttpClientService.HttpClient.SendAsync(request, token);
+        var result = await this.HttpClient.SendAsync(request, token);
         var jsonStr = await result.Content.ReadAsStringAsync(token);
         var resultCode = JsonSerializer.Deserialize(
             jsonStr,
@@ -177,7 +177,7 @@ partial class KuroClient
             new MediaTypeHeaderValue("application/x-www-form-urlencoded"),
             content
         );
-        var result = await this.HttpClientService.HttpClient.SendAsync(request, token);
+        var result = await this.HttpClient.SendAsync(request, token);
         var jsonStr = await result.Content.ReadAsStringAsync(token);
         var resultCode = JsonSerializer.Deserialize(
             jsonStr,
@@ -215,7 +215,7 @@ partial class KuroClient
             content,
             true
         );
-        var result = await this.HttpClientService.HttpClient.SendAsync(request, token);
+        var result = await this.HttpClient.SendAsync(request, token);
         var jsonStr = await result.Content.ReadAsStringAsync(token);
         var resultCode = JsonSerializer.Deserialize(
             jsonStr,
@@ -253,7 +253,7 @@ partial class KuroClient
             new MediaTypeHeaderValue("application/x-www-form-urlencoded"),
             content
         );
-        var result = await this.HttpClientService.HttpClient.SendAsync(request, token);
+        var result = await this.HttpClient.SendAsync(request, token);
         var jsonStr = await result.Content.ReadAsStringAsync(token);
 
         return JsonSerializer.Deserialize(jsonStr, CommunityContext.Default.GamerDataBool);
@@ -283,7 +283,7 @@ partial class KuroClient
             new MediaTypeHeaderValue("application/x-www-form-urlencoded"),
             content
         );
-        var result = await this.HttpClientService.HttpClient.SendAsync(request, token);
+        var result = await this.HttpClient.SendAsync(request, token);
         var jsonStr = await result.Content.ReadAsStringAsync(token);
         var resultCode = JsonSerializer.Deserialize(
             jsonStr,
@@ -320,7 +320,7 @@ partial class KuroClient
             new MediaTypeHeaderValue("application/x-www-form-urlencoded"),
             content
         );
-        var result = await this.HttpClientService.HttpClient.SendAsync(request, token);
+        var result = await this.HttpClient.SendAsync(request, token);
         var jsonStr = await result.Content.ReadAsStringAsync(token);
         var resultCode = JsonSerializer.Deserialize(
             jsonStr,
@@ -360,7 +360,7 @@ partial class KuroClient
             new MediaTypeHeaderValue("application/x-www-form-urlencoded"),
             content
         );
-        var result = await this.HttpClientService.HttpClient.SendAsync(request, token);
+        var result = await this.HttpClient.SendAsync(request, token);
         var jsonStr = await result.Content.ReadAsStringAsync(token);
         var resultCode = JsonSerializer.Deserialize(
             jsonStr,
@@ -398,7 +398,7 @@ partial class KuroClient
                 new MediaTypeHeaderValue("application/x-www-form-urlencoded"),
                 content
             );
-            var result = await this.HttpClientService.HttpClient.SendAsync(request, token);
+            var result = await this.HttpClient.SendAsync(request, token);
             var jsonStr = await result.Content.ReadAsStringAsync(token);
             var resultCode = JsonSerializer.Deserialize(
                 jsonStr,
@@ -436,7 +436,7 @@ partial class KuroClient
                 new MediaTypeHeaderValue("application/x-www-form-urlencoded"),
                 content
             );
-            var result = await this.HttpClientService.HttpClient.SendAsync(request, token);
+            var result = await this.HttpClient.SendAsync(request, token);
             var jsonStr = await result.Content.ReadAsStringAsync(token);
 
             return JsonSerializer.Deserialize(jsonStr, CommunityContext.Default.BriefHeader);
@@ -526,7 +526,7 @@ partial class KuroClient
                 new MediaTypeHeaderValue("application/x-www-form-urlencoded"),
                 content
             );
-            var result = await this.HttpClientService.HttpClient.SendAsync(request, token);
+            var result = await this.HttpClient.SendAsync(request, token);
             var jsonStr = await result.Content.ReadAsStringAsync(token);
 
             return JsonSerializer.Deserialize(jsonStr, CommunityContext.Default.ResourceBrefItem);

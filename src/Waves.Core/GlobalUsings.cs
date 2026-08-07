@@ -49,6 +49,7 @@ global using Serilog.Core;
 global using Serilog.Sinks.File;
 
 global using Haiyu.Common;
+global using Haiyu.KuroClient;
 global using Haiyu.Models;
 
 global using Waves.Api.Models;
@@ -85,9 +86,6 @@ global using Waves.Core.Models.Enums;
 global using Waves.Core.Models.Handlers;
 global using Waves.Core.Services;
 global using Waves.Core.Services.CloudGameServices;
-global using Waves.Core.Socket;
 global using Waves.Settings;
-
-global using WavesLauncher.Core.Contracts;
 
 global using static System.Collections.Specialized.BitVector32;

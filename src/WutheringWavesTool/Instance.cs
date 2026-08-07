@@ -180,7 +180,7 @@ public static class InstanceBuilderExtensions
                     #endregion
                     #region Base
                     .AddSingleton<IAppContext<App>, AppContext<App>>()
-                    .AddSingleton<IKuroClient, KuroClient>()
+                    .AddSingleton<IKuroClient, global::Haiyu.KuroClient.KuroClient>()
                     .AddTransient<IPlayerCardService, PlayerCardService>()
                     .AddSingleton<ICloudGameService, CloudGameService>()
                     .AddSingleton<IScreenCaptureService, ScreenCaptureService>()

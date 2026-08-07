@@ -62,7 +62,7 @@ public sealed partial class LocalUserManagerViewModel : DialogViewModelBase
             if (long.TryParse(item.TokenId, out var id))
             {
                 var value = await KuroClient.GetWavesMineAsync(
-                    KuroAccount.From(item),
+                    item.ToKuroAccount(),
                     id,
                     this.CTS.Token
                 );

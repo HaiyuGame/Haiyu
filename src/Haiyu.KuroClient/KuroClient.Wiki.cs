@@ -1,4 +1,4 @@
-namespace Waves.Core.Services;
+namespace Haiyu.KuroClient;
 
 partial class KuroClient
 {
@@ -21,7 +21,7 @@ partial class KuroClient
             false,
             token
         );
-        var reponse = await HttpClientService.HttpClient.SendAsync(request, token);
+        var reponse = await HttpClient.SendAsync(request, token);
         return await reponse.Content.ReadFromJsonAsync(WikiContext.Default.WikiHomeModel, token);
     }
 }

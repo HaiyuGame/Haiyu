@@ -1,19 +1,13 @@
-namespace Waves.Core.Services;
+namespace Haiyu.KuroClient;
 
 public sealed partial class KuroClient : IKuroClient
 {
-    public IHttpClientService HttpClientService { get; }
-    public LoggerService LoggerService { get; }
-    public string Ip { get; private set; }
+    public HttpClient HttpClient { get; }
+    public string Ip { get; private set; } = string.Empty;
 
-    public KuroClient(
-        IHttpClientService httpClientService,
-        [FromKeyedServices("AppLog")] LoggerService loggerService
-    )
+    public KuroClient()
     {
-        HttpClientService = httpClientService;
-        LoggerService = loggerService;
-        HttpClientService.BuildClient();
+        HttpClient = new HttpClient(new KuroHttpHandler());
     }
 
     private Dictionary<string, string> GetDeviceHeader(
@@ -29,7 +23,6 @@ public sealed partial class KuroClient : IKuroClient
             { "Accept-Language", "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7" },
             { "source", "android" },
             { "devCode", account?.DeviceId ?? "" },
-            //{ "model","23117RK66C"},
             { "version", "3.1.2" },
             { "versionCode", "30102" },
             { "lang", "zh-Hans" },
@@ -144,7 +137,7 @@ public sealed partial class KuroClient : IKuroClient
             queryData,
             true
         );
-        var result = await HttpClientService.HttpClient.SendAsync(request);
+        var result = await HttpClient.SendAsync(request);
         var jsonStr = await result.Content.ReadAsStringAsync();
         var sign = JsonSerializer.Deserialize(jsonStr, CommunityContext.Default.SignIn);
         return sign;
@@ -169,7 +162,7 @@ public sealed partial class KuroClient : IKuroClient
             queryData,
             true
         );
-        var result = await HttpClientService.HttpClient.SendAsync(request);
+        var result = await HttpClient.SendAsync(request);
         string jsonStr = await result.Content.ReadAsStringAsync();
         return JsonSerializer.Deserialize(jsonStr, CommunityContext.Default.SignRecord);
     }
@@ -197,7 +190,7 @@ public sealed partial class KuroClient : IKuroClient
             queryData,
             true
         );
-        var result = await HttpClientService.HttpClient.SendAsync(request);
+        var result = await HttpClient.SendAsync(request);
         result.EnsureSuccessStatusCode();
         string jsonStr = await result.Content.ReadAsStringAsync();
         var jsonObj = JsonObject.Parse(jsonStr);
@@ -222,7 +215,7 @@ public sealed partial class KuroClient : IKuroClient
             true,
             token
         );
-        var result = await HttpClientService.HttpClient.SendAsync(request);
+        var result = await HttpClient.SendAsync(request);
         var jsonStr = await result.Content.ReadAsStringAsync();
         return (AccountMine?)
             JsonSerializer.Deserialize(jsonStr, typeof(AccountMine), CommunityContext.Default);
@@ -277,7 +270,7 @@ public sealed partial class KuroClient : IKuroClient
             true,
             token
         );
-        var result = await HttpClientService.HttpClient.SendAsync(request, token);
+        var result = await HttpClient.SendAsync(request, token);
         var jsonStr = await result.Content.ReadAsStringAsync(token);
 
         var resultCode = JsonSerializer.Deserialize(
@@ -311,7 +304,7 @@ public sealed partial class KuroClient : IKuroClient
             new Dictionary<string, string>() { { "qrCode", qrText } },
             true
         );
-        var result = await HttpClientService.HttpClient.SendAsync(request, token);
+        var result = await HttpClient.SendAsync(request, token);
         var jsonStr = await result.Content.ReadAsStringAsync(token);
         return JsonSerializer.Deserialize<ScanScreenModel>(
             jsonStr,
@@ -342,7 +335,7 @@ public sealed partial class KuroClient : IKuroClient
             },
             true
         );
-        var result = await HttpClientService.HttpClient.SendAsync(request, token);
+        var result = await HttpClient.SendAsync(request, token);
         var jsonStr = await result.Content.ReadAsStringAsync(token);
         return JsonSerializer.Deserialize<QRLoginResult>(jsonStr, QRContext.Default.QRLoginResult);
     }
@@ -360,7 +353,7 @@ public sealed partial class KuroClient : IKuroClient
             new MediaTypeHeaderValue("application/x-www-form-urlencoded"),
             query
         );
-        var result = await this.HttpClientService.HttpClient.SendAsync(request, token);
+        var result = await this.HttpClient.SendAsync(request, token);
         var jsonStr = await result.Content.ReadAsStringAsync(token);
         return (SMSModel?)JsonSerializer.Deserialize(jsonStr, QRContext.Default.SMSModel);
     }
@@ -377,7 +370,7 @@ public sealed partial class KuroClient : IKuroClient
             new MediaTypeHeaderValue("application/x-www-form-urlencoded"),
             []
         );
-        var result = await this.HttpClientService.HttpClient.SendAsync(request, token);
+        var result = await this.HttpClient.SendAsync(request, token);
         var jsonStr = await result.Content.ReadAsStringAsync(token);
         return (DeviceInfo?)JsonSerializer.Deserialize(jsonStr, QRContext.Default.DeviceInfo);
     }
@@ -402,7 +395,7 @@ public sealed partial class KuroClient : IKuroClient
                 { "serverId", serverId },
             }
         );
-        var result = await this.HttpClientService.HttpClient.SendAsync(request, token);
+        var result = await this.HttpClient.SendAsync(request, token);
         var jsonStr = await result.Content.ReadAsStringAsync(token);
         return JsonSerializer.Deserialize(jsonStr, BindGameContext.Default.SendGameVerifyCode);
     }
@@ -420,7 +413,7 @@ public sealed partial class KuroClient : IKuroClient
             new MediaTypeHeaderValue("application/x-www-form-urlencoded"),
             new Dictionary<string, string>() { { "gameId", gameId.ToString() } }
         );
-        var result = await this.HttpClientService.HttpClient.SendAsync(request, token);
+        var result = await this.HttpClient.SendAsync(request, token);
         var jsonStr = await result.Content.ReadAsStringAsync(token);
         return JsonSerializer.Deserialize(jsonStr, BindGameContext.Default.AddUserGameServer);
     }
@@ -447,7 +440,7 @@ public sealed partial class KuroClient : IKuroClient
                 { "serverId", serverId },
             }
         );
-        var result = await this.HttpClientService.HttpClient.SendAsync(request, token);
+        var result = await this.HttpClient.SendAsync(request, token);
         var jsonStr = await result.Content.ReadAsStringAsync(token);
         return JsonSerializer.Deserialize(jsonStr, BindGameContext.Default.BindGameVerifyCode);
     }
@@ -459,69 +452,4 @@ public sealed partial class KuroClient : IKuroClient
             this.Ip = await client.GetStringAsync("https://event.kurobbs.com/event/ip");
         }
     }
-
-#if false
-    public async Task SetAutoUserAsync(CancellationToken token = default)
-    {
-        try
-        {
-            var users = await AccountService.GetUsersAsync();
-            var tokenId = await AccountService.AppSettings.GetLastSelectUserAsync().ConfigureAwait(false);
-            var defaultSenect = users.FirstOrDefault(x => x.TokenId == tokenId);
-            if (tokenId != null && defaultSenect != null)
-            {
-                var mine = await GetWavesMineAsync(
-                    long.Parse(defaultSenect.TokenId),
-                    defaultSenect.TokenDid,
-                    defaultSenect.Token,
-                    token
-                );
-                if (mine == null || mine.Success == false || mine.Code != 200)
-                {
-                    await SetAutoUserAsync(users, token);
-                }
-                else
-                {
-                    //有信息则选定这个用户
-                    AccountService.SetCurrentUser(defaultSenect);
-                    await AccountService.AppSettings.SetLastSelectUserAsync(defaultSenect.TokenId).ConfigureAwait(false);
-                }
-
-            }
-            else
-            {
-                await SetAutoUserAsync(users, token);
-            }
-        }
-        catch (Exception ex)
-        {
-            LoggerService.WriteError(ex.Message + ex.StackTrace);
-        }
-    }
-
-    async Task SetAutoUserAsync(List<LocalAccount> accounts, CancellationToken token = default)
-    {
-        if (accounts.Count == 0)
-        {
-            return;
-        }
-        foreach (var item in accounts)
-        {
-            var mine = await GetWavesMineAsync(
-                    long.Parse(item.TokenId),
-                    item.TokenDid,
-                    item.Token,
-                    token
-                );
-            if (mine == null || mine.Success == false || mine.Code != 200)
-            {
-                await AccountService.DeleteUserAsync(item.TokenId);
-                continue;
-            }
-            //有信息则选定这个用户
-            AccountService.SetCurrentUser(item);
-            await AccountService.AppSettings.SetLastSelectUserAsync(item.TokenId).ConfigureAwait(false);
-        }
-    }
-#endif
 }

@@ -1,11 +1,8 @@
-using Waves.Api.Models.KuroClient;
-using Waves.Api.Models.KuroClient.Options;
-
-namespace WavesLauncher.Core.Contracts;
+namespace Haiyu.KuroClient;
 
 public interface IKuroClient
 {
-    IHttpClientService HttpClientService { get; }
+    HttpClient HttpClient { get; }
 
     Task<bool> IsLoginAsync(KuroAccount account, CancellationToken token = default);
     Task<GamerDataModel?> GetGamerDataAsync(
@@ -15,7 +12,7 @@ public interface IKuroClient
     );
     Task<GamerRoil?> GetGamerAsync(
         KuroAccount account,
-        GameType gameId,
+        int gameId,
         CancellationToken token = default
     );
 

@@ -1,4 +1,4 @@
-namespace Waves.Core.Socket;
+namespace Haiyu.KuroClient.Socket;
 
 public class WebSocketMapClient : IDisposable, IAsyncDisposable
 {

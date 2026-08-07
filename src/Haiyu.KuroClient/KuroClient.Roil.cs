@@ -1,4 +1,4 @@
-namespace Waves.Core.Services;
+namespace Haiyu.KuroClient;
 
 partial class KuroClient
 {
@@ -26,21 +26,21 @@ partial class KuroClient
             queryData,
             true
         );
-        var result = await HttpClientService.HttpClient.SendAsync(request);
+        var result = await HttpClient.SendAsync(request);
         string jsonStr = await result.Content.ReadAsStringAsync();
         return JsonSerializer.Deserialize(jsonStr, CommunityContext.Default.GamerDataModel);
     }
 
     public async Task<GamerRoil?> GetGamerAsync(
         KuroAccount account,
-        GameType gameId,
+        int gameId,
         CancellationToken token = default
     )
     {
         var header = GetDeviceHeader(account);
         var content = new Dictionary<string, string>()
         {
-            { "gameId", gameId == GameType.Waves ? "3" : "2" },
+            { "gameId", gameId.ToString() },
         };
         var request = await BuildRequestAsync(
             "https://api.kurobbs.com/gamer/role/list",
@@ -51,7 +51,7 @@ partial class KuroClient
             true,
             token
         );
-        var result = await HttpClientService.HttpClient.SendAsync(request);
+        var result = await HttpClient.SendAsync(request);
         var jsonStr = await result.Content.ReadAsStringAsync();
         return (GamerRoil?)JsonSerializer.Deserialize(jsonStr, CommunityContext.Default.GamerRoil);
     }
@@ -88,7 +88,7 @@ partial class KuroClient
             new MediaTypeHeaderValue("application/x-www-form-urlencoded"),
             query
         );
-        var result = await this.HttpClientService.HttpClient.SendAsync(request, token);
+        var result = await this.HttpClient.SendAsync(request, token);
         var jsonStr = await result.Content.ReadAsStringAsync(token);
         return (SMSResultModel?)
             JsonSerializer.Deserialize(jsonStr, CommunityContext.Default.SMSResultModel);
@@ -128,7 +128,7 @@ partial class KuroClient
             new MediaTypeHeaderValue("application/x-www-form-urlencoded"),
             query
         );
-        var result = await this.HttpClientService.HttpClient.SendAsync(request, token);
+        var result = await this.HttpClient.SendAsync(request, token);
         var jsonStr = await result.Content.ReadAsStringAsync(token);
         return JsonSerializer.Deserialize(jsonStr, CommunityContext.Default.AccountModel);
     }
