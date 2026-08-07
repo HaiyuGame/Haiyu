@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Haiyu.Mobile.Views.AddKuroUserPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:Haiyu.Mobile.ViewModels"
+    Title="添加库街区账号"
+    x:DataType="vm:AddKuroUserViewModel"
+    Shell.TabBarIsVisible="False">
+    <Grid
+        Margin="20"
+        HeightRequest="200"
+        HorizontalOptions="Fill"
+        VerticalOptions="Center">
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition Width="auto" />
+        </Grid.ColumnDefinitions>
+
+        <Entry
+            x:Name="AccountEditor"
+            Grid.ColumnSpan="2"
+            Margin="0"
+            BackgroundColor="Transparent"
+            FontSize="16"
+            IsPassword="False"
+            Placeholder="输入账号"
+            VerticalTextAlignment="Center" />
+
+        <Entry
+            Grid.Row="1"
+            Placeholder="输入验证码"
+            ReturnType="Send" />
+        <Button
+            Grid.Row="1"
+            Grid.Column="1"
+            Margin="5,5,0,0"
+            Command="{Binding SignGeetCommand}"
+            Text="发送验证码" />
+
+    </Grid>
+</ContentPage>

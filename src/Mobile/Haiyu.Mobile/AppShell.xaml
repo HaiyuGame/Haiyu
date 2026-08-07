@@ -4,11 +4,10 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:Haiyu.Mobile"
+    xmlns:view="clr-namespace:Haiyu.Mobile.Views"
     Title="Haiyu.Mobile">
-
-    <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
-
+    <TabBar x:Name="tabControl">
+        <ShellContent Title="账号" ContentTemplate="{DataTemplate view:UserManagerPage}" />
+        <ShellContent Title="设置" ContentTemplate="{DataTemplate view:SettingPage}" />
+    </TabBar>
 </Shell>

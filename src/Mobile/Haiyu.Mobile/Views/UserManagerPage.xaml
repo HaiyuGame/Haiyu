@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Haiyu.Mobile.Views.UserManagerPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:Haiyu.Mobile.ViewModels"
+    Title="账号管理"
+    x:DataType="vm:UserManagerViewModel">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Command="{Binding CreateKuroUserCommand}" Text="添加" />
+    </ContentPage.ToolbarItems>
+    <RefreshView Margin="15">
+        <ScrollView>
+            <StackLayout>
+                <Border Background="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray600}}" HeightRequest="200">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="10" />
+                    </Border.StrokeShape>
+                    <Grid Padding="10">
+                        <Button />
+                    </Grid>
+                </Border>
+            </StackLayout>
+        </ScrollView>
+    </RefreshView>
+</ContentPage>
