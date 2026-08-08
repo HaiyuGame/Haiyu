@@ -11,6 +11,7 @@
         <ShellContent
             Title="设置"
             ContentTemplate="{DataTemplate view:SettingPage}"
+            Icon="user.png"
             IsVisible="False" />
     </TabBar>
 </Shell>
