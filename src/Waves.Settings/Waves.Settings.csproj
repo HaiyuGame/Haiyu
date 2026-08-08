@@ -10,7 +10,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- SettingsGenerator 统一在此项目内生成 partial Get/Set 方法 -->
     <ProjectReference Include="..\Haiyu.Analyzers\Haiyu.Analyzers.csproj"
                       OutputItemType="Analyzer"
                       ReferenceOutputAssembly="false" />

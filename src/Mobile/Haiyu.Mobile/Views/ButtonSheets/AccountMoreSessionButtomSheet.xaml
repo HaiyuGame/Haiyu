@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Haiyu.Mobile.Views.ButtonSheets.AccountMoreSessionButtomSheet"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="AccountMoreSessionButtonSheet"
+    HeightRequest="180">
+    <Label
+        FontSize="25"
+        HorizontalOptions="Center"
+        Text="不知道放什么，先放个字吧~"
+        VerticalOptions="Center" />
+</ContentPage>

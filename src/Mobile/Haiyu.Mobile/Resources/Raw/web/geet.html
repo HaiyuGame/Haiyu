@@ -1,172 +1,91 @@
-<!DOCTYPE html>
 <html lang="zh">
-
 <head>
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-    <!-- 与外层 Grid/WebView 固定尺寸一致，禁止按设备宽度自动缩放 -->
-    <meta name="viewport" content="width=320, height=500, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>GeeTest</title>
-
     <style>
-        html, body {
+        html,
+        body {
+            width: 100%;
+            height: 100%;
             margin: 0;
             padding: 0;
-            width: 320px;
-            height: 500px;
             overflow: hidden;
             background: transparent;
         }
 
-        /* 整页铺满 320x500，不再自适应缩放 */
-        .box {
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
             box-sizing: border-box;
-            width: 320px;
-            height: 500px;
+            padding: 16px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .box {
+            width: 100%;
+            max-width: 300px;
             margin: 0;
-            padding: 16px 10px;
             text-align: center;
         }
 
-        /* 验证区：固定尺寸 */
         #captcha {
             display: block;
-            box-sizing: border-box;
-            width: 300px;
-            height: 60px;
+            width: 100%;
+            min-height: 52px;
             margin: 0 auto;
-            overflow: hidden;
-        }
-
-        /* 结果区：固定尺寸，占满剩余高度，写入内容也不变高 */
-        #result {
-            display: block;
-            box-sizing: border-box;
-            width: 300px;
-            height: 390px;
-            margin: 18px auto 0;
-            padding: 6px;
-            border: 2px solid #ccc;
-            border-radius: 4px;
-            font-size: 14px;
-            resize: none;
-            overflow: auto;
         }
     </style>
-
 </head>
-
 <body>
-
     <div class="box">
         <div id="captcha"></div>
-        <textarea id="result"></textarea>
     </div>
-
-    <!-- 本地资源 -->
-    <script src="./Js/jquery.min.js"></script>
-    <script src="./Js/gt4.js"></script>
-
+    <!--
+        <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+        <script src="https://static.geetest.com/v4/gt4.js"></script>
+        -->
+    <!--云鸣潮登陆验证-->
+    <!--1dd87176b1565667de6f8add815425ed-->
+    <script src="Js/jquery.min.js"></script>
+    <script src="Js/gt4.js"></script>
     <script type="application/javascript">
+        // 与 Windows 一致：成功时直接回传 getValidate() JSON
+        // Android 仅替换通信通道为 haiyu://
+        function postGeetResult(payload) {
+            var message = typeof payload === "string" ? payload : JSON.stringify(payload);
 
-        /*
-            WebView 通信桥
-
-            支持:
-            1. Windows WebView2
-            2. MAUI Android WebView
-        */
-
-        function haiyuPostMessage(data)
-        {
-            let message = JSON.stringify(data);
-
-            // Windows WebView2
-            if(window.chrome &&
-               window.chrome.webview)
-            {
+            if (window.chrome && window.chrome.webview) {
                 window.chrome.webview.postMessage(message);
                 return;
             }
 
-            // MAUI WebView
-            window.location.href =
-                "haiyu://message/" +
-                encodeURIComponent(message);
+            window.location.href = "haiyu://message/" + encodeURIComponent(message);
         }
 
         $(function () {
-
             initGeetest4({
-
-                captchaId:
-                "3f7e2d848ce0cb7e7d019d621e556ce2",
-
-                product:
-                "popup",
-
-                https:
-                true,
-
-                // 与 #captcha 固定区域一致
-                nativeButton:
-                {
-                    height: "60px",
-                    width: "300px",
-                }
-
-            },
-
-            function (captcha) {
-
-                captcha.appendTo("#captcha");
-
+                captchaId: "3f7e2d848ce0cb7e7d019d621e556ce2",
+                product: "popup",
+                https: true,
+                nativeButton: {
+                    height: "100%",
+                    width: "100%",
+                },
+            }, function (captcha) {
+                captcha.appendTo("#captcha")
                 captcha
-                .onReady(function()
-                {
-                })
-                .onSuccess(function()
-                {
-                    let validate =
-                        captcha.getValidate();
-
-                    let data =
-                    {
-                        method:
-                        "geetest.success",
-
-                        data:
-                        validate
-                    };
-
-                    $("#result").val(
-                        JSON.stringify(
-                            validate,
-                            null,
-                            2
-                        )
-                    );
-
-                    haiyuPostMessage(data);
-                })
-                .onError(function(error)
-                {
-                    haiyuPostMessage(
-                    {
-                        method:
-                        "geetest.error",
-
-                        data:
-                        error
-                    });
-                });
-
-            });
-
-        });
-
+                        .onReady(function () {
+                        })
+                        .onSuccess(function () {
+                            // Windows: window.chrome.webview.postMessage(JSON.stringify(captcha.getValidate()));
+                            postGeetResult(JSON.stringify(captcha.getValidate()));
+                        })
+                        .onError(function () {
+                        })
+            })
+        })
     </script>
-
 </body>
-
 </html>

@@ -1,20 +1,8 @@
-<!DOCTYPE html>
-<html lang="zh">
-
+﻿<html lang="zh">
 <head>
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-
     <title>GeeTest</title>
-
     <style>
-
-        body {
-            margin: 0;
-            padding: 0;
-            background: transparent;
-        }
-
-
         .box {
             height: 350px;
             width: 500px;
@@ -22,190 +10,60 @@
             text-align: center;
         }
 
-
         #captcha {
             display: inline-block;
             height: 60px;
             width: 350px;
         }
 
-
         #result {
             width: 100%;
             height: 400px;
-            padding: 5px;
+            padding: 5px 5px;
             box-sizing: border-box;
             border: 2px solid #ccc;
             border-radius: 4px;
             font-size: 16px;
             resize: none;
-            margin-top: 20px;
+            margin: 20px auto;
         }
     </style>
-
 </head>
-
-
 <body>
-
-
     <div class="box">
-
         <div id="captcha"></div>
-
-        <textarea id="result"></textarea>
-
     </div>
-
-
-
-    <!-- 本地资源 -->
-    <script src="./Js/jquery.min.js"></script>
-    <script src="./Js/gt4.js"></script>
-
-
-
+    <!--
+        <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+        <script src="https://static.geetest.com/v4/gt4.js"></script>
+        -->
+    <!--云鸣潮登陆验证-->
+    <!--1dd87176b1565667de6f8add815425ed-->
+    <script src="Js/jquery.min.js"></script>
+    <script src="Js/gt4.js"></script>
     <script type="application/javascript">
-
-
-        /*
-            WebView 通信桥
-
-            支持:
-            1. Windows WebView2
-            2. MAUI Android WebView
-        */
-
-        function haiyuPostMessage(data)
-        {
-            let message = JSON.stringify(data);
-
-
-            // Windows WebView2
-            if(window.chrome &&
-               window.chrome.webview)
-            {
-
-                window.chrome.webview.postMessage(message);
-
-                return;
-            }
-
-
-            // MAUI WebView
-            window.location.href =
-                "haiyu://message/" +
-                encodeURIComponent(message);
-        }
-
-
-
-
         $(function () {
-
-
             initGeetest4({
-
-                captchaId:
-                "3f7e2d848ce0cb7e7d019d621e556ce2",
-
-                product:
-                "popup",
-
-                https:
-                true,
-
-
-                nativeButton:
-                {
-                    height:"100%",
-                    width:"100%",
-                }
-
-
-            },
-
-
-            function (captcha) {
-
-
-                captcha.appendTo("#captcha");
-
-
-
+                captchaId: "3f7e2d848ce0cb7e7d019d621e556ce2",
+                product: "popup",
+                https: true,
+                nativeButton: {
+                    height: "100%",
+                    width: "100%",
+                },
+            }, function (captcha) {
+                captcha.appendTo("#captcha")
                 captcha
-
-                .onReady(function()
-                {
-
-                })
-
-
-
-                .onSuccess(function()
-                {
-
-
-                    let validate =
-                        captcha.getValidate();
-
-
-
-                    let data =
-                    {
-                        method:
-                        "geetest.success",
-
-                        data:
-                        validate
-                    };
-
-
-
-                    // 页面显示
-                    $("#result").val(
-                        JSON.stringify(
-                            validate,
-                            null,
-                            2
-                        )
-                    );
-
-
-
-                    // 发送给 C#
-                    haiyuPostMessage(data);
-
-
-
-                })
-
-
-
-                .onError(function(error)
-                {
-
-                    haiyuPostMessage(
-                    {
-                        method:
-                        "geetest.error",
-
-                        data:
-                        error
-                    });
-
-                });
-
-
-            });
-
-
-        });
-
-
+                        .onReady(function () {
+                        })
+                        .onSuccess(function () {
+                            window.chrome.webview.postMessage(JSON.stringify(captcha.getValidate()));
+                            /*$("#result").text(JSON.stringify(captcha.getValidate()))*/
+                        })
+                        .onError(function () {
+                        })
+            })
+        })
     </script>
-
-
 </body>
-
 </html>

@@ -8,29 +8,40 @@
     xmlns:vm="clr-namespace:Haiyu.Mobile.ViewModels.Popups"
     x:DataType="vm:LoginGeetViewModel"
     Background="Transparent"
-    HorizontalOptions="Fill"
+    HorizontalOptions="Center"
     InputTransparent="False"
-    VerticalOptions="Fill">
-    <Grid
-        x:Name="Grid"
-        HeightRequest="500"
-        InputTransparent="False"
-        WidthRequest="320">
+    VerticalOptions="Center">
+    <Border
+        BackgroundColor="{AppThemeBinding Light=White, Dark=#202020}"
+        HeightRequest="360"
+        HorizontalOptions="Center"
+        StrokeThickness="0"
+        VerticalOptions="Center"
+        WidthRequest="300">
+        <Border.StrokeShape>
+            <RoundRectangle CornerRadius="16" />
 
-        <WebView
-            x:Name="webView"
-            HeightRequest="500"
-            HorizontalOptions="Fill"
+        </Border.StrokeShape>
+
+        <Grid
+            x:Name="Grid"
             InputTransparent="False"
-            VerticalOptions="Fill"
-            WidthRequest="320">
-            <WebView.Behaviors>
-                <toolkit:EventToCommandBehavior
-                    BindingContext="{Binding BindingContext, Source={x:Reference Grid}}"
-                    Command="{Binding LoadedCommand}"
-                    CommandParameter="{x:Reference webView}"
-                    EventName="Loaded" />
-            </WebView.Behaviors>
-        </WebView>
-    </Grid>
+            HorizontalOptions="Fill"
+            VerticalOptions="Fill">
+
+            <WebView
+                x:Name="webView"
+                HorizontalOptions="Fill"
+                InputTransparent="False"
+                VerticalOptions="Fill">
+                <WebView.Behaviors>
+                    <toolkit:EventToCommandBehavior
+                        BindingContext="{Binding BindingContext, Source={x:Reference Grid}}"
+                        Command="{Binding LoadedCommand}"
+                        CommandParameter="{x:Reference webView}"
+                        EventName="Loaded" />
+                </WebView.Behaviors>
+            </WebView>
+        </Grid>
+    </Border>
 </ContentView>

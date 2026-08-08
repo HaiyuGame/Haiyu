@@ -109,6 +109,9 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.10" />
 
 
+		<PackageReference Include="Plugin.Maui.BottomSheet" Version="10.0.7" />
+
+
 		<PackageReference Include="ZXing.Net.Maui.Controls" Version="0.10.3" />
 
 	</ItemGroup>
@@ -116,6 +119,9 @@
 
 
 	<ItemGroup>
+	  <Compile Update="Views\ButtonSheets\AccountMoreSessionButtomSheet.xaml.cs">
+	    <DependentUpon>AccountMoreSessionButtomSheet.xaml</DependentUpon>
+	  </Compile>
 	  <Compile Update="Views\Popups\LoginGeetPopup.xaml.cs">
 	    <DependentUpon>LoginGeetPopup.xaml</DependentUpon>
 	  </Compile>
@@ -126,7 +132,16 @@
 	  <MauiXaml Update="Views\AddKuroUserPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Views\ButtonSheets\AccountMoreSessionButtomSheet.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\Popups\AddKuroTokenPopup.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Views\Popups\LoginGeetPopup.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\ScanGameQrPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Views\SettingPage.xaml">
@@ -139,7 +154,8 @@
 
 
 	<ItemGroup>
-	  <Folder Include="Services\" />
+	  <ProjectReference Include="..\..\Extensions\Waves.Api\Waves.Api.csproj" />
+	  <ProjectReference Include="..\..\Haiyu.KuroClient\Haiyu.KuroClient.csproj" />
 	</ItemGroup>
 
 

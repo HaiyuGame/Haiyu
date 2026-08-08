@@ -17,4 +17,14 @@ public sealed class KuroAccount
             DeviceId = deviceId,
         };
     }
+
+    public static KuroAccount Create(LocalAccount account)
+    {
+        return new KuroAccount
+        {
+            UserId = account.TokenId,
+            Token = account.Token,
+            DeviceId = account.TokenDid,
+        };
+    }
 }

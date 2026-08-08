@@ -8,6 +8,9 @@
     Title="Haiyu.Mobile">
     <TabBar x:Name="tabControl">
         <ShellContent Title="账号" ContentTemplate="{DataTemplate view:UserManagerPage}" />
-        <ShellContent Title="设置" ContentTemplate="{DataTemplate view:SettingPage}" />
+        <ShellContent
+            Title="设置"
+            ContentTemplate="{DataTemplate view:SettingPage}"
+            IsVisible="False" />
     </TabBar>
 </Shell>

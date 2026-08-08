@@ -35,16 +35,20 @@ public partial class LoginGeetViewModel : ViewModelBase
             await using var stream = await FileSystem.OpenAppPackageFileAsync(packagePath);
             using var reader = new StreamReader(stream);
             var html = await reader.ReadToEndAsync();
-            WebView!.Source = new HtmlWebViewSource
+            WebView.Source = new HtmlWebViewSource
             {
                 Html = html,
+#if ANDROID
                 BaseUrl = "file:///android_asset/web/"
+#else
+				BaseUrl = "web/"
+#endif
             };
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Load geet.html failed: {ex}");
-            WebView!.Source = new HtmlWebViewSource
+            WebView.Source = new HtmlWebViewSource
             {
                 Html = $"<html><body style='font-family:sans-serif;padding:16px'>" +
                        $"<h3>无法加载极验页面</h3>" +

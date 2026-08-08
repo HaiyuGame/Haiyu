@@ -10,6 +10,7 @@ namespace Haiyu.Mobile
             Routing.RegisterRoute(nameof(AddKuroUserPage), typeof(AddKuroUserPage));
             Routing.RegisterRoute(nameof(SettingPage), typeof(SettingPage));
             Routing.RegisterRoute(nameof(UserManagerPage), typeof(UserManagerPage));
+            Routing.RegisterRoute(nameof(ScanGameQrPage), typeof(ScanGameQrPage));
         }
     }
 }

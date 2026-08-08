@@ -1,4 +1,9 @@
-namespace Waves.Core.Models;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using MemoryPack;
+
+namespace Haiyu.KuroClient;
 
 /// <summary>
 /// 本地账号存储信息
