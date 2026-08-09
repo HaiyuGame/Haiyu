@@ -43,15 +43,15 @@ public sealed class AutoKuroGameSignService : TimedTaskServiceBase,ITaskName
         var accounts = await _kuroAccountService.GetUsersAsync();
         foreach (var account in accounts)
         {
-            var requestAccount = KuroAccount.From(account);
+            var requestAccount = account.ToKuroAccount();
             var wavesGamers = await _kuroClient.GetGamerAsync(
                 requestAccount,
-                Waves.Core.Models.Enums.GameType.Waves,
+                (int)Waves.Core.Models.Enums.GameType.Waves,
                 token
             );
             var punish = await _kuroClient.GetGamerAsync(
                 requestAccount,
-                Waves.Core.Models.Enums.GameType.Punish,
+                (int)Waves.Core.Models.Enums.GameType.Punish,
                 token
             );
             if (wavesGamers == null || wavesGamers.Code != 200 || punish==null || punish.Code != 200)

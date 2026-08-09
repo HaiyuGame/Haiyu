@@ -16,6 +16,7 @@
     xmlns:settings="using:Haiyu.Models.Settings"
     xmlns:uModel="using:Haiyu.ViewModel"
     xmlns:ui="using:CommunityToolkit.WinUI.Controls"
+    xmlns:wr="using:Haiyu.Models.Wrapper"
     xmlns:wui="using:Haiyu.Controls"
     mc:Ignorable="d">
     <i:Interaction.Behaviors>
@@ -295,6 +296,51 @@
                         <SymbolIcon Symbol="Find" />
                     </ui:SettingsCard.HeaderIcon>
                 </ui:SettingsCard>
+                <ui:SettingsCard Margin="0,5,0,0" Header="{x:Bind helper:LanguageService.GetString('Settings_AutoSkipDelete')}">
+                    <ui:SettingsCard.HeaderIcon>
+                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xECC9;" />
+                    </ui:SettingsCard.HeaderIcon>
+                    <Border Width="30" MaxWidth="30">
+                        <CheckBox IsChecked="{x:Bind ViewModel.AutoSkipVerifyDelete, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsThreeState="False" />
+                    </Border>
+                </ui:SettingsCard>
+                <ui:SettingsExpander
+                    Margin="0,5,0,0"
+                    Header="{x:Bind helper:LanguageService.GetString('Settings_SkipVerifyGameFile')}"
+                    ItemsSource="{x:Bind ViewModel.SkipVerifyFiles, Mode=OneWay}">
+                    <ui:SettingsExpander.ItemTemplate>
+                        <DataTemplate x:DataType="wr:SkipGameVerifyWrapper">
+                            <ui:SettingsCard Header="{x:Bind FilePath, Mode=OneWay}">
+                                <Button
+                                    Grid.Column="1"
+                                    Command="{x:Bind SenDeleteCommand}"
+                                    Style="{ThemeResource TransparentButtonStyle}">
+                                    <FontIcon
+                                        FontFamily="Segoe Fluent Icons"
+                                        FontSize="16"
+                                        Glyph="&#xE74D;" />
+                                </Button>
+                            </ui:SettingsCard>
+                        </DataTemplate>
+                    </ui:SettingsExpander.ItemTemplate>
+                    <ui:SettingsExpander.HeaderIcon>
+                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xF61C;" />
+                    </ui:SettingsExpander.HeaderIcon>
+                    <ui:SettingsExpander.Content>
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <TextBox Width="200" Text="{x:Bind ViewModel.InputSkipVerifyPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <Button
+                                Command="{x:Bind ViewModel.AddVerifyFileCommand}"
+                                Style="{ThemeResource TransparentButtonStyle}"
+                                ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Settings_SkipAddVerifyFile')}">
+                                <FontIcon
+                                    FontFamily="Segoe Fluent Icons"
+                                    FontSize="15"
+                                    Glyph="&#xE710;" />
+                            </Button>
+                        </StackPanel>
+                    </ui:SettingsExpander.Content>
+                </ui:SettingsExpander>
                 <TextBlock
                     Margin="0,15,0,0"
                     FontFamily="{StaticResource DefaultFont}"
@@ -474,8 +520,30 @@
                                 </StackPanel>
                             </ui:SettingsCard.Content>
                         </ui:SettingsCard>
-                        <ui:SettingsCard Header="{x:Bind helper:LanguageService.GetString('Display_WebKernelVersion')}">
-                            <TextBlock IsTextSelectionEnabled="True" Text="{x:Bind ViewModel.WebViewVersion, Mode=OneWay}" />
+                        <ui:SettingsCard Description="{x:Bind ViewModel.WebViewVersion, Mode=OneWay}" Header="{x:Bind helper:LanguageService.GetString('Display_WebKernelVersion')}">
+                            <StackPanel Orientation="Horizontal">
+                                <Button
+                                    Padding="25,8"
+                                    Command="{x:Bind ViewModel.OpenWebViewCabDialogCommand}"
+                                    CornerRadius="15"
+                                    Style="{ThemeResource AccentButtonStyle}">
+                                    <FontIcon
+                                        FontFamily="Segoe Fluent Icons"
+                                        FontSize="15"
+                                        Glyph="&#xE7B8;" />
+                                </Button>
+                                <ComboBox
+                                    MinWidth="280"
+                                    ItemsSource="{x:Bind ViewModel.WebViewRuntimeOptions, Mode=OneWay}"
+                                    SelectedItem="{x:Bind ViewModel.WebViewRuntimeItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    Visibility="Collapsed">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate x:DataType="wr:WebViewRuntimeWrapper">
+                                            <TextBlock Text="{x:Bind DisplayName}" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
                         </ui:SettingsCard>
                         <ui:SettingsCard Header="WindowsApp Sdk">
                             <TextBlock IsTextSelectionEnabled="True" Text="{x:Bind ViewModel.WindowsAppSdkVersion, Mode=OneWay}" />

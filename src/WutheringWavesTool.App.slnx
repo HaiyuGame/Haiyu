@@ -13,6 +13,11 @@
       <BuildType Solution="All|x64" Project="Debug" />
       <BuildType Solution="All|x86" Project="Debug" />
     </Project>
+    <Project Path="Haiyu.KuroClient/Haiyu.KuroClient.csproj" Id="a1b2c3d4-e5f6-7890-abcd-ef1234567890">
+      <BuildType Solution="All|Any CPU" Project="Release" />
+      <BuildType Solution="All|x64" Project="Debug" />
+      <BuildType Solution="All|x86" Project="Debug" />
+    </Project>
     <Project Path="KuroAndroidMonitoring/ChromeCDPSharp.csproj">
       <BuildType Solution="All|*" Project="Debug" />
     </Project>
@@ -20,6 +25,9 @@
       <BuildType Solution="All|Any CPU" Project="Release" />
       <BuildType Solution="All|x64" Project="Debug" />
       <BuildType Solution="All|x86" Project="Debug" />
+    </Project>
+    <Project Path="Waves.Settings/Waves.Settings.csproj">
+      <BuildType Solution="All|*" Project="Debug" />
     </Project>
   </Folder>
   <Folder Name="/Extensions/">

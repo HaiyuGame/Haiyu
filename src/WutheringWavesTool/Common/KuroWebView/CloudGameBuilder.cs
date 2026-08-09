@@ -102,12 +102,14 @@ public static class CloudGameBuilder
             background: #000;
             cursor: auto;
             z-index: 1;
+            overflow: hidden;
         }
 
         #kuro-stream-surface * {
             cursor: inherit !important;
         }
 
+        /* Window resize must only reflow CSS — never force a new encode size. */
         #bridge-overlay {
             position: absolute;
             inset: 0;
@@ -526,11 +528,15 @@ public static class CloudGameBuilder
                         for (const node of mutation.addedNodes) {
                             if (node instanceof HTMLMediaElement) {
                                 applyMediaAudioState(node);
+                                attachFirstFrameFallback(node);
                                 continue;
                             }
 
                             if (node instanceof Element) {
                                 applyMediaAudioState(node);
+                                for (const mediaElement of node.querySelectorAll("video")) {
+                                    attachFirstFrameFallback(mediaElement);
+                                }
                             }
                         }
                     }
@@ -559,51 +565,15 @@ public static class CloudGameBuilder
             };
 
             const applyImageEnhancement = (enabled) => {
-                enhancementState.enabled = Boolean(enabled);
-
-                if (!sdk) {
-                    return { enabled: enhancementState.enabled, applied: false };
-                }
-
-                const officialMethod = typeof sdk?.openSuperResolution === "function"
-                    ? {
-                        name: "openSuperResolution",
-                        args: [enhancementState.enabled]
-                    }
-                    : typeof sdk?.openEnhance === "function"
-                        ? {
-                            name: "openEnhance",
-                            args: [enhancementState.enabled ? 2 : 0]
-                        }
-                        : null;
-
-                if (!officialMethod) {
-                    post("warning", {
-                        message: {{ToJavaScriptString(LanguageService.GetStringByText("Welink SDK 未暴露官网使用的画质增强方法。"))}},
-                        enabled: enhancementState.enabled
-                    });
-                    return { enabled: enhancementState.enabled, applied: false };
-                }
-
-                try {
-                    sdk[officialMethod.name](...officialMethod.args);
-                    post("image-enhancement", {
-                        message: enhancementState.enabled
-                            ? {{ToJavaScriptString(LanguageService.GetStringByText("画质增强已开启"))}}
-                            : {{ToJavaScriptString(LanguageService.GetStringByText("画质增强已关闭"))}},
-                        enabled: enhancementState.enabled,
-                        method: officialMethod.name
-                    });
-                    return { enabled: enhancementState.enabled, applied: true, method: officialMethod.name };
-                } catch (error) {
-                    post("warning", {
-                        message: {{ToJavaScriptString(LanguageService.GetStringByText("调用画质增强方法失败："))}} + officialMethod.name,
-                        enabled: enhancementState.enabled,
-                        detail: error?.message || String(error)
-                    });
-                }
-
-                return { enabled: enhancementState.enabled, applied: false };
+                // Hard-disable enhance in WebView2 bridge. openSuperResolution / openEnhance
+                // have been present in the crash window (D3D11 video path).
+                enhancementState.enabled = false;
+                post("image-enhancement", {
+                    message: "WebView2 bridge keeps image enhancement off",
+                    enabled: false,
+                    method: "disabled"
+                });
+                return { enabled: false, applied: false, method: "disabled" };
             };
 
             const updateBridgeQualityConfig = (config) => {
@@ -621,8 +591,13 @@ public static class CloudGameBuilder
 
             const applyQualityProfile = (config, options = {}) => {
                 const nextConfig = updateBridgeQualityConfig(config);
+                const reason = options.reason || "applyQualityProfile";
 
                 if (!sdk) {
+                    post("diagnostic", {
+                        reason: `${reason}:no-sdk`,
+                        applied: false
+                    });
                     return { applied: false, config: nextConfig };
                 }
 
@@ -640,40 +615,91 @@ public static class CloudGameBuilder
                 const maxBitRate = Math.min(configuredMaxBitRate, targetBitRate);
                 const streamStrategy = nextConfig.streamStrategy;
 
+                post("diagnostic", {
+                    reason: `${reason}:begin`,
+                    resolution,
+                    bitRate: targetBitRate,
+                    minBitRate,
+                    maxBitRate,
+                    fps: nextConfig.fps || 60,
+                    streamStrategy,
+                    resendResolution: Boolean(options.resendResolution),
+                    firstFramePresented
+                });
+
                 if (typeof sdk?.setStreamStrategy === "function" && streamStrategy !== undefined && streamStrategy !== null) {
                     try {
                         sdk.setStreamStrategy(String(streamStrategy));
-                    } catch {
+                    } catch (error) {
+                        post("warning", {
+                            message: "setStreamStrategy failed",
+                            detail: error?.message || String(error)
+                        });
                     }
                 }
 
                 if (typeof sdk?.setBitrateRange === "function" && minBitRate > 0 && maxBitRate > 0) {
                     try {
                         sdk.setBitrateRange(minBitRate, maxBitRate, noReport);
-                    } catch {
+                    } catch (error) {
+                        post("warning", {
+                            message: "setBitrateRange failed",
+                            detail: error?.message || String(error)
+                        });
                     }
                 } else if (typeof sdk?.setBitrate === "function") {
                     try {
                         sdk.setBitrate(targetBitRate, noReport);
-                    } catch {
+                    } catch (error) {
+                        post("warning", {
+                            message: "setBitrate failed",
+                            detail: error?.message || String(error)
+                        });
                     }
                 }
 
                 if (typeof sdk?.setFps === "function") {
                     try {
                         sdk.setFps(nextConfig.fps || 60);
-                    } catch {
+                    } catch (error) {
+                        post("warning", {
+                            message: "setFps failed",
+                            detail: error?.message || String(error)
+                        });
                     }
                 }
 
-                applyImageEnhancement(enhancementState.enabled);
-                setGameResolution();
-
-                if (options.resendResolution) {
-                    setTimeout(() => setGameResolution(), 3000);
+                // Never re-open super-resolution from quality/first-frame paths.
+                // Chromium logs showed H264 decoder backup then BrowserProcessExited;
+                // openSuperResolution + setGameResolution thrash correlates with that.
+                if (options.applyEnhancement === true) {
+                    applyImageEnhancement(enhancementState.enabled);
                 }
 
-                return { applied: true, config: nextConfig };
+                // Only push resolution when explicitly requested or size really changed.
+                let resolutionOk = true;
+                if (options.resendResolution || options.forceResolution) {
+                    resolutionOk = setGameResolution();
+                }
+
+                // NO delayed second setGameResolution — that 3s resend after first-frame
+                // recreated VideoReceiveStream and preceded the last BrowserProcessExited.
+
+                post("diagnostic", {
+                    reason: `${reason}:end`,
+                    resolutionOk,
+                    resolution: getPhysicalResolution()
+                });
+
+                return {
+                    applied: true,
+                    resolutionOk,
+                    config: nextConfig,
+                    resolution,
+                    bitRate: targetBitRate,
+                    minBitRate,
+                    maxBitRate
+                };
             };
 
             const requestExit = () => {
@@ -700,15 +726,17 @@ public static class CloudGameBuilder
                 return { invoked: false };
             };
 
-            // Host-side controls exposed to the native window:
-            // requestExit closes the stream session, setVolume/setMuted sync audio,
-            // setImageEnhancement toggles the SDK's enhancement path,
-            // and applyQualityProfile reapplies bitrate/FPS/resolution settings.
+            // Host-side controls exposed to the native window.
+            // layoutSurface: CSS-only fit after window resize (safe).
+            // syncResolution: intentionally does NOT call setGameResolution on resize
+            // path from host SizeChanged — that renegotiates WebRTC and crashes WebView2.
             window.__KURO_STREAM_CONTROL__ = {
                 setVolume: setStreamVolume,
                 setMuted: setStreamMuted,
                 setImageEnhancement: applyImageEnhancement,
                 applyQualityProfile,
+                syncResolution: () => false,
+                layoutSurface: (reason) => layoutSurface(reason || "layout"),
                 requestExit,
                 getLastNetworkStat: () => lastNetworkStat
             };
@@ -813,11 +841,26 @@ public static class CloudGameBuilder
                 }
             };
 
+            // Official web client: body.clientWidth * devicePixelRatio.
+            // Bridge surface fills the host window, so prefer surface metrics
+            // with body/inner fallbacks.
             const getViewportResolution = () => ({
-                width: Math.max(1, Math.round(surface?.clientWidth || window.innerWidth || 1280)),
-                height: Math.max(1, Math.round(surface?.clientHeight || window.innerHeight || 720))
+                width: Math.max(1, Math.round(
+                    surface?.clientWidth
+                    || document.body?.clientWidth
+                    || window.innerWidth
+                    || 1280
+                )),
+                height: Math.max(1, Math.round(
+                    surface?.clientHeight
+                    || document.body?.clientHeight
+                    || window.innerHeight
+                    || 720
+                ))
             });
 
+            // Welink renegotiates the video track on setGameResolution; odd or
+            // out-of-range values can leave a blank surface after window resize.
             const clampEven = (value, min, max) => {
                 const rounded = Number.isFinite(value) ? Math.round(value) : min;
                 const clamped = Math.max(min, Math.min(max, rounded));
@@ -836,14 +879,152 @@ public static class CloudGameBuilder
             const getPhysicalResolution = () => {
                 const viewport = getViewportResolution();
                 const scale = Number(window.devicePixelRatio) > 0 ? Number(window.devicePixelRatio) : 1;
-                const physical = normalizeResolution(viewport.width * scale, viewport.height * scale);
                 return {
-                    ...physical,
+                    width: viewport.width * scale,
+                    height: viewport.height * scale,
                     viewportWidth: viewport.width,
                     viewportHeight: viewport.height,
                     scale
                 };
             };
+
+            let resolutionResizeTimer = 0;
+            let lastSyncedResolutionKey = "";
+
+            const styleSnapshot = (el) => {
+                if (!el) {
+                    return null;
+                }
+
+                const s = getComputedStyle(el);
+                const rect = el.getBoundingClientRect?.();
+                return {
+                    display: s.display,
+                    visibility: s.visibility,
+                    opacity: s.opacity,
+                    zIndex: s.zIndex,
+                    transform: s.transform,
+                    width: s.width,
+                    height: s.height,
+                    rect: rect
+                        ? {
+                            x: Math.round(rect.x),
+                            y: Math.round(rect.y),
+                            w: Math.round(rect.width),
+                            h: Math.round(rect.height)
+                        }
+                        : null
+                };
+            };
+
+            const collectRenderDiagnostic = (reason) => {
+                const surfaceEl = document.getElementById("kuro-stream-surface") || surface;
+                const videos = [...document.querySelectorAll("video")].map((x) => ({
+                    id: x.id,
+                    ready: x.readyState,
+                    network: x.networkState,
+                    w: x.videoWidth,
+                    h: x.videoHeight,
+                    cw: x.clientWidth,
+                    ch: x.clientHeight,
+                    paused: x.paused,
+                    ended: x.ended,
+                    muted: x.muted,
+                    volume: x.volume,
+                    currentTime: Number(x.currentTime?.toFixed?.(2) ?? x.currentTime),
+                    srcObject: Boolean(x.srcObject),
+                    trackCount: x.srcObject?.getVideoTracks?.()?.length ?? 0,
+                    trackStates: (x.srcObject?.getVideoTracks?.() || []).map((t) => ({
+                        id: t.id,
+                        enabled: t.enabled,
+                        muted: t.muted,
+                        readyState: t.readyState
+                    })),
+                    style: styleSnapshot(x)
+                }));
+                const canvases = [...document.querySelectorAll("canvas")].map((x) => ({
+                    id: x.id,
+                    w: x.width,
+                    h: x.height,
+                    cw: x.clientWidth,
+                    ch: x.clientHeight,
+                    style: styleSnapshot(x)
+                }));
+
+                return {
+                    reason,
+                    ts: Date.now(),
+                    href: location.href,
+                    visibility: document.visibilityState,
+                    focused: document.hasFocus(),
+                    activeElement: document.activeElement
+                        ? (document.activeElement.id || document.activeElement.tagName)
+                        : null,
+                    inner: [window.innerWidth, window.innerHeight],
+                    body: [document.body?.clientWidth || 0, document.body?.clientHeight || 0],
+                    surface: surfaceEl
+                        ? [surfaceEl.clientWidth, surfaceEl.clientHeight]
+                        : null,
+                    surfaceStyle: styleSnapshot(surfaceEl),
+                    overlayHidden: document.getElementById("bridge-overlay")?.classList?.contains("hidden") ?? null,
+                    dpr: window.devicePixelRatio,
+                    pointerLock: Boolean(document.pointerLockElement),
+                    firstFramePresented,
+                    hasSdk: Boolean(sdk || window.__KURO_STREAM_SDK__),
+                    physical: getPhysicalResolution(),
+                    lastSyncedResolutionKey,
+                    videoCount: videos.length,
+                    canvasCount: canvases.length,
+                    videos,
+                    canvases
+                };
+            };
+
+            if (window.__KURO_STREAM_CONTROL__) {
+                window.__KURO_STREAM_CONTROL__.getRenderDiagnostic = collectRenderDiagnostic;
+            }
+
+            // PROBE: window resize does nothing except post a log line.
+            // Host SizeChanged also does nothing. If crash still happens on maximize,
+            // it is NOT from Haiyu SizeChanged / setGameResolution / layoutSurface.
+            let lastSetGameResolutionAt = 0;
+            let jsResizeProbeSeq = 0;
+            const layoutSurface = (reason) => {
+                const n = ++jsResizeProbeSeq;
+                clearTimeout(resolutionResizeTimer);
+                resolutionResizeTimer = setTimeout(() => {
+                    const resolution = getPhysicalResolution();
+                    let ok = false;
+                    try {
+                        if (sdk && typeof sdk.setGameResolution === "function") {
+                            sdk.setGameResolution(resolution.width, resolution.height);
+                            lastSetGameResolutionAt = Date.now();
+                            lastSyncedResolutionKey = `${resolution.width}x${resolution.height}`;
+                            ok = true;
+                        }
+                    } catch (error) {
+                        post("warning", { message: `setGameResolution failed: ${String(error)}` });
+                    }
+                    post("resolution-sync", {
+                        reason,
+                        seq: n,
+                        ok,
+                        width: resolution.width,
+                        height: resolution.height,
+                        scale: resolution.scale,
+                        action: "setGameResolution"
+                    });
+                }, 100);
+                return true;
+            };
+
+            if (window.__KURO_STREAM_CONTROL__) {
+                window.__KURO_STREAM_CONTROL__.layoutSurface = layoutSurface;
+                window.__KURO_STREAM_CONTROL__.syncResolution = () => layoutSurface("control-sync");
+            }
+
+            window.addEventListener("resize", () => layoutSurface("js-resize"), false);
+            window.addEventListener("orientationchange", () => layoutSurface("js-orientation"), false);
 
             const getSdkLoginInfo = () => {
                 const appStore = parseJson(readStateItem("useMcCloudGameAppStore"));
@@ -936,6 +1117,11 @@ public static class CloudGameBuilder
 
             const setGameResolution = (width, height) => {
                 if (!sdk || typeof sdk.setGameResolution !== "function") {
+                    post("diagnostic", {
+                        reason: "setGameResolution:unavailable",
+                        hasSdk: Boolean(sdk),
+                        hasMethod: typeof sdk?.setGameResolution === "function"
+                    });
                     return false;
                 }
 
@@ -944,11 +1130,19 @@ public static class CloudGameBuilder
                     : getPhysicalResolution();
                 const targetWidth = target.width;
                 const targetHeight = target.height;
+                const key = `${targetWidth}x${targetHeight}`;
+                if (key === lastSyncedResolutionKey) {
+                    return true;
+                }
 
                 try {
                     sdk.setGameResolution(targetWidth, targetHeight);
+                    lastSyncedResolutionKey = key;
+                    lastSetGameResolutionAt = performance.now();
+                    // Compact post only — full DOM snapshots on every resolution
+                    // change flooded host IPC and correlated with process death.
                     post("game-resolution", {
-                        message: `${targetWidth}x${targetHeight}`,
+                        message: key,
                         width: targetWidth,
                         height: targetHeight,
                         viewportWidth: target.viewportWidth,
@@ -958,7 +1152,7 @@ public static class CloudGameBuilder
                     return true;
                 } catch (error) {
                     post("warning", {
-                        message: {{ToJavaScriptString(LanguageService.GetStringByText("设置游戏分辨率失败："))}} + `${targetWidth}x${targetHeight}`,
+                        message: {{ToJavaScriptString(LanguageService.GetStringByText("设置游戏分辨率失败："))}} + key,
                         detail: error?.message || String(error)
                     });
                     return false;
@@ -1071,11 +1265,10 @@ public static class CloudGameBuilder
                         break;
                     case "RequestGamePadDevice":
                         sendGamePadDeviceChangeData();
-                        setGameResolution();
                         break;
                     case "HotPatchEnterGame":
-                        setMessage({{ToJavaScriptString(LanguageService.GetStringByText("游戏热更已完成，正在进入游戏场景……"))}});
-                        setGameResolution();
+                        handleFirstVideoFrame();
+                        post("status", { message: "HotPatchEnterGame: playable" });
                         break;
                     case "HotPatchExitGame":
                         setMessage({{ToJavaScriptString(LanguageService.GetStringByText("游戏仍在加载资源，等待进入游戏场景……"))}});
@@ -1088,7 +1281,7 @@ public static class CloudGameBuilder
 
                 switch (key) {
                     case "InitPostWebView":
-                        setGameResolution();
+                        // Intentionally no setGameResolution — stream already negotiated.
                         break;
                     case "ExitGame":
                         setMessage({{ToJavaScriptString(LanguageService.GetStringByText("云端游戏要求退出当前会话。"))}}, "error");
@@ -1108,7 +1301,12 @@ public static class CloudGameBuilder
                             }
                         }
 
-                        applyQualityProfile(payload.bridgeConfig, { resendResolution: true });
+                        // Bitrate only — do not re-setGameResolution here (decoder already live).
+                        applyQualityProfile(payload.bridgeConfig, {
+                            reason: "sdk-6038",
+                            resendResolution: false,
+                            applyEnhancement: false
+                        });
                         hideOverlay();
                         focusSurface();
                         notifyForeground("sdk-first-video-frame");
@@ -1117,7 +1315,6 @@ public static class CloudGameBuilder
                     case 6252:
                         if (detail?.pipeState === 1) {
                             sendPreLaunchUserData();
-                            setGameResolution();
                         }
                         break;
                     case 6253: {
@@ -1191,38 +1388,86 @@ public static class CloudGameBuilder
 
             const handleFirstVideoFrame = () => {
                 if (firstFramePresented) {
+                    post("diagnostic", {
+                        reason: "first-frame:duplicate",
+                        snapshot: collectRenderDiagnostic("first-frame:duplicate")
+                    });
                     return;
                 }
 
                 firstFramePresented = true;
+                post("diagnostic", {
+                    reason: "first-frame:begin",
+                    snapshot: collectRenderDiagnostic("first-frame:begin")
+                });
 
                 if (typeof sdk?.gameVideoPlay === "function") {
                     try {
                         sdk.gameVideoPlay();
-                    } catch {
+                    } catch (error) {
+                        post("warning", {
+                            message: "gameVideoPlay failed",
+                            detail: error?.message || String(error)
+                        });
                     }
                 }
 
                 if (typeof sdk?.unblockKeyboard === "function") {
                     try {
                         sdk.unblockKeyboard();
-                    } catch {
+                    } catch (error) {
+                        post("warning", {
+                            message: "unblockKeyboard failed",
+                            detail: error?.message || String(error)
+                        });
                     }
                 }
 
                 if (typeof sdk?.unblockMouse === "function") {
                     try {
                         sdk.unblockMouse();
-                    } catch {
+                    } catch (error) {
+                        post("warning", {
+                            message: "unblockMouse failed",
+                            detail: error?.message || String(error)
+                        });
                     }
                 }
 
-                applyQualityProfile(payload.bridgeConfig);
+                // Bitrate/FPS only — do not force resolution renegotiation on first frame.
+                applyQualityProfile(payload.bridgeConfig, {
+                    reason: "first-frame",
+                    resendResolution: false,
+                    applyEnhancement: false
+                });
                 applyMediaAudioState(document);
                 hideOverlay();
                 focusSurface();
                 notifyForeground("first-video-frame");
                 post("first-frame");
+                post("diagnostic", { reason: "first-frame:end" });
+            };
+
+            // Welink 5.15 does not always expose onFirstVideoFrame as a writable
+            // method. The media element is the authoritative fallback: once it
+            // has decoded data or starts playing, remove the launch overlay and
+            // present the stream.
+            const attachFirstFrameFallback = (mediaElement) => {
+                if (!(mediaElement instanceof HTMLVideoElement) || mediaElement._kuroFirstFrameFallback) {
+                    return;
+                }
+
+                mediaElement._kuroFirstFrameFallback = true;
+                const present = () => {
+                    if (mediaElement.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+                        handleFirstVideoFrame();
+                    }
+                };
+
+                mediaElement.addEventListener("loadeddata", present, { once: true });
+                mediaElement.addEventListener("playing", present, { once: true });
+                mediaElement.addEventListener("timeupdate", present, { once: true });
+                present();
             };
 
             const setupVideoMouseHandlers = () => {
@@ -1231,6 +1476,7 @@ public static class CloudGameBuilder
                     return;
                 }
                 video._kuroMouseHandlersSetup = true;
+                attachFirstFrameFallback(video);
 
                 video.addEventListener("mousedown", () => {
                     focusSurface();
@@ -1286,6 +1532,9 @@ public static class CloudGameBuilder
             window.addEventListener("beforeunload", stopKeepAliveLoop, true);
             window.addEventListener("pagehide", stopKeepAliveLoop, true);
 
+            // WebView2 pointer-lock emits a synthetic recenter move and can
+            // also duplicate the same physical delta via pointerrawupdate +
+            // mousemove. Filter both so remote camera / aim stay usable.
             const installWebViewPointerFilter = () => {
                 if (window.__KURO_POINTER_FILTER_INSTALLED__) {
                     return;
@@ -1327,8 +1576,6 @@ public static class CloudGameBuilder
                             const maxMovementX = Math.max(160, window.innerWidth * 0.2);
                             const maxMovementY = Math.max(120, window.innerHeight * 0.2);
 
-                            // WebView2 emits one synthetic move when Chromium
-                            // recenters a locked pointer. It is not user input.
                             if (
                                 Math.abs(movementX) > maxMovementX
                                 || Math.abs(movementY) > maxMovementY
@@ -1350,8 +1597,6 @@ public static class CloudGameBuilder
                                 && movementX === lastRawMove.movementX
                                 && movementY === lastRawMove.movementY
                             ) {
-                                // WebView2 can deliver the same physical move
-                                // through both raw-update and mousemove.
                                 return;
                             }
                         }
@@ -1440,7 +1685,14 @@ public static class CloudGameBuilder
                     throw new Error({{ToJavaScriptString(LanguageService.GetStringByText("WelinkCloudGame 不可用，无法启动串流。"))}});
                 }
 
+                // Same capability gate as the official adapter: H.264/WebRTC is
+                // the baseline. WLRTC's reported codec is used only when its
+                // asynchronous runtime initialization succeeds as well.
+                let useWlRtc = false;
+                let selectedCodecType = 18;
+
                 const q = payload.bridgeConfig;
+                q.codecType = selectedCodecType;
                 const initialResolution = getPhysicalResolution();
                 const sdkInitConfig = {
                     ...q,
@@ -1453,6 +1705,66 @@ public static class CloudGameBuilder
                 sdk = new window.WelinkCloudGame(sdkInitConfig);
                 window.__KURO_STREAM_SDK__ = sdk;
                 window.WLCG = sdk;
+
+                // Official ordering is important: construct WelinkCloudGame first,
+                // then probe and initialize the optional WLRTC runtime.
+                try {
+                    if (typeof window.WelinkCloudGame.supportWLRTC === "function") {
+                        const wlRtcSupport = await window.WelinkCloudGame.supportWLRTC();
+                        if (wlRtcSupport && typeof window.WelinkCloudGame.initWLRTC === "function") {
+                            // WebView2 exposes chrome.webview. Its WebTransport path
+                            // currently reports init success but fails the opening
+                            // handshake on first use, then mixes WLRTC/H.265 dispatch
+                            // with a Chromium WebRTC/H.264 fallback. Treat that host
+                            // runtime as not WLRTC-capable.
+                            const wlRtcRuntimeAllowed = !Boolean(window.chrome?.webview);
+                            const initialized = wlRtcRuntimeAllowed && await new Promise((resolve) => {
+                                let completed = false;
+                                const finish = (value) => {
+                                    if (completed) return;
+                                    completed = true;
+                                    resolve(Boolean(value));
+                                };
+                                try {
+                                    window.WelinkCloudGame.initWLRTC(finish);
+                                } catch {
+                                    finish(false);
+                                }
+                                setTimeout(() => finish(false), 8000);
+                            });
+                            // Select WLRTC only when both the SDK initialization and
+                            // the current browser host capability gate pass.
+                            if (initialized && wlRtcRuntimeAllowed) {
+                                const detectedCodec = Number(wlRtcSupport.codec);
+                                if (detectedCodec === 18 || detectedCodec === 21) {
+                                    selectedCodecType = detectedCodec;
+                                    useWlRtc = true;
+                                }
+                            }
+                            post("rtc-capability", {
+                                supported: true,
+                                initialized,
+                                runtimeAllowed: wlRtcRuntimeAllowed,
+                                detectedCodec: Number(wlRtcSupport.codec) || 0
+                            });
+                        }
+                    }
+                } catch (error) {
+                    post("warning", { message: `WLRTC check failed; using WebRTC/H264: ${String(error)}` });
+                }
+
+                if (payload.dispatchMessage && typeof payload.dispatchMessage === "object") {
+                    payload.dispatchMessage.codecType = selectedCodecType;
+                }
+
+                if (typeof sdk.setRtcType === "function" && window.WelinkCloudGame.RTC_TYPE) {
+                    const rtcTypes = window.WelinkCloudGame.RTC_TYPE;
+                    sdk.setRtcType(useWlRtc ? rtcTypes.WL_RTC : rtcTypes.WEBRTC);
+                }
+                post("rtc-selection", {
+                    transport: useWlRtc ? "WLRTC" : "WEBRTC",
+                    codecType: selectedCodecType
+                });
 
                 // Welink 5.15 no longer predeclares these callback properties.
                 // Assign them unconditionally, as the official adapter does.
@@ -1495,6 +1807,8 @@ public static class CloudGameBuilder
                     };
                 }
 
+                // Auto-reconnect can spawn a second PeerConnection while the first is
+                // still decoding; chromium logs showed reconnect + H264 decoder thrash.
                 if (typeof sdk.openAutoReconnectServer === "function") {
                     try {
                         sdk.openAutoReconnectServer(true);
@@ -1544,14 +1858,15 @@ public static class CloudGameBuilder
                     }
                 }
 
-                setGameResolution();
+                // Resolution is seeded via videoWidth/videoHeight on the SDK constructor.
+                // Calling setGameResolution again here forces an early renegotiation while
+                // ICE is still connecting (chromium: repeated H264DecoderImpl create/fail).
 
                 setMessage({{ToJavaScriptString(LanguageService.GetStringByText("Welink 已初始化，正在连接云端实例……"))}});
                 await sdk.startGame(payload.dispatchMessage);
                 focusSurface();
                 syncForegroundFlag();
                 notifyForeground("start-game-dispatched");
-                setGameResolution();
                 startKeepAliveLoop();
 
                 setMessage({{ToJavaScriptString(LanguageService.GetStringByText("串流启动请求已发送，等待首帧到达……"))}});
@@ -1565,6 +1880,87 @@ public static class CloudGameBuilder
     </script>
 </body>
 </html>
+""";
+    }
+
+    public static string BuildTencentBridgeHtml(
+        string userKeyJson,
+        string deviceIdJson,
+        string allocRespJson,
+        string tokenJson,
+        string bridgeConfigJson)
+    {
+        return $$$"""
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+html,body,#kuro-stream-surface{width:100%;height:100%;margin:0;overflow:hidden;background:#000}
+#kuro-stream-surface{position:absolute;inset:0}
+#kuro-stream-surface canvas,#kuro-stream-surface video{width:100%!important;height:100%!important;object-fit:contain}
+#bridge-overlay{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:#05080d;color:#eaf4ff;font:22px/1.5 "Segoe UI",sans-serif}
+#bridge-overlay.hidden{display:none}
+</style></head><body>
+<div id="kuro-stream-surface" tabindex="0"></div><div id="bridge-overlay">正在连接腾讯云游戏实例……</div>
+<script>
+(()=>{
+ const nativeRequestPointerLock=Element.prototype.requestPointerLock;
+ if(nativeRequestPointerLock){Element.prototype.requestPointerLock=function(){return nativeRequestPointerLock.call(this)}}
+ const post=(type,data={})=>{try{chrome.webview.postMessage({type,...data})}catch{}};
+ const overlay=document.getElementById('bridge-overlay');
+ const surface=document.getElementById('kuro-stream-surface');
+ const quality={{{bridgeConfigJson}}};
+ const dispatch={userKey:{{{userKeyJson}}},deviceId:{{{deviceIdJson}}},allocRespJson:{{{allocRespJson}}},tk:{{{tokenJson}}}};
+ let player=null, firstFrame=false;
+ const showError=e=>{overlay.textContent=e?.message||String(e);post('error',{message:overlay.textContent})};
+ const present=()=>{if(firstFrame)return;firstFrame=true;overlay.classList.add('hidden');surface.focus();post('first-frame')};
+ const snapshot=reason=>post('diagnostic',{reason,visibility:document.visibilityState,focused:document.hasFocus(),inner:[innerWidth,innerHeight],dpr:devicePixelRatio,pointerLock:!!document.pointerLockElement,canvas:[...surface.querySelectorAll('canvas')].map(x=>({id:x.id,w:x.width,h:x.height,cw:x.clientWidth,ch:x.clientHeight,display:getComputedStyle(x).display})),video:[...surface.querySelectorAll('video')].map(x=>({id:x.id,ready:x.readyState,w:x.videoWidth,h:x.videoHeight,cw:x.clientWidth,ch:x.clientHeight,paused:x.paused,display:getComputedStyle(x).display}))});
+ const load=src=>new Promise((ok,bad)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=()=>bad(new Error('腾讯云游戏 SDK 加载失败'));document.head.appendChild(s)});
+ const state=()=>player?.getWebrtcStatus?.() ?? player?.cloudGame?.webrtc?.status;
+ const reconnect=async reason=>{try{post('status',{message:'腾讯串流重连：'+reason});await player?.reconnect?.();}catch(e){post('warning',{message:e?.message||String(e)})}};
+ const applyQuality=cfg=>{quality.bitRate=cfg?.bitRate??quality.bitRate;quality.fps=cfg?.fps??quality.fps;try{player?.setFrameRate?.(quality.fps||60);player?.setCustomBitrate?.(quality.bitRate||8000)}catch{}return {applied:true}};
+ window.__KURO_STREAM_CONTROL__={
+   requestExit:()=>player?.quitGame?.(),
+   setVolume:v=>player?.setVolume?.(Math.max(0,Math.min(100,Number(v)||0))/100),
+   setMuted:m=>player?.setVolume?.(m?0:1),
+   applyQualityProfile:applyQuality,
+   reconnect,
+   notifyForeground:()=>{surface.focus();const s=state();if(s===3||s===4||s==='disconnected'||s==='closed')reconnect('foreground')},
+   notifyBackground:()=>{}
+ };
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)window.__KURO_STREAM_CONTROL__.notifyForeground()},true);
+ document.addEventListener('visibilitychange',()=>snapshot('visibilitychange'),true);
+ document.addEventListener('pointerlockchange',()=>snapshot('pointerlockchange'),true);
+ window.addEventListener('resize',()=>requestAnimationFrame(()=>snapshot('resize')),true);
+ window.addEventListener('online',()=>reconnect('network-online'),true);
+ new MutationObserver(()=>{const c=surface.querySelector('canvas');const v=surface.querySelector('video');if(c&&(c.width>0||c.clientWidth>0))present();if(v&&v.readyState>=2)present()}).observe(surface,{childList:true,subtree:true,attributes:true});
+ (async()=>{
+   const allocation=JSON.parse(dispatch.allocRespJson||'{}');
+   if(!allocation.device)throw new Error('腾讯分配数据缺少 device');
+   await load('https://newcloudgame.cdn-go.cn/web-sdk/4.9.0/pc.min.js');
+   const api=window.CloudGame;
+   if(!api?.GameMatrixSDK)throw new Error('GameMatrixSDK 未加载');
+   const device=allocation.device;
+   player=new api.GameMatrixSDK({
+     observable:false,openid:device.identity||'',openkey:dispatch.userKey||'',bussid:device.appid||'',channelid:'',
+     gameLandscape:true,clientType:5,gameTag:allocation.realGame||device.tag||'',env:3,resolution:{mode:'full'},
+     lockEscKey:false,webrtcTimeout:20000,audio:{enabled:true},enableH265:true,enableDeleteFec:true,
+     allocDeviceInfo:{bizInfo:'',type:1,supportInstIp:true,newDevice:false},enableCookies:true,deviceMode:device,
+     token:dispatch.tk||'',enableSR:quality.enableImageEnhancement?1:0,needGamepad:true,hideInputUI:true,
+     container:'#kuro-stream-surface',host:'https://gamematrix.qq.com'
+   });
+   window.tencentGamePlayer=player;window.__KURO_STREAM_SDK__=player;
+   player.use(new api.PCPlugin({key:[{id:'1',version:'0.1.0',default:true,name:'键盘场景',zoom:{enable:true,p1:{x2:.5,y2:.4},p2:{x2:.5,y2:.6}},nativeEventMode:{enable:true,sensitivity:.65,alwaysSendNativeEvent:true}}],autoUpdateKeyConfigVersion:false}));
+   player.registEvent(api.EEvent.VideoReady,present);
+   player.registEvent(api.EEvent.GameReady,present);
+   player.registEvent(api.EEvent.StateChange,d=>post('diagnostic',{reason:'state-change',state:d}));
+   player.registEvent(api.EEvent.WebrtcStat,d=>post('network-stat',{detail:d||{}}));
+   player.registEvent(api.EEvent.Reconnect,d=>post('status',{message:'腾讯串流已重连',detail:d}));
+   player.registEvent(api.EEvent.Error,e=>post('warning',{message:e?.message||JSON.stringify(e),detail:e}));
+   await player.start();
+   applyQuality(quality);surface.focus();post('launch-dispatched');
+ })().catch(showError);
+})();
+</script></body></html>
 """;
     }
 

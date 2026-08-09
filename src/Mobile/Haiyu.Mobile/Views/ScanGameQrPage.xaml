@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Haiyu.Mobile.Views.ScanGameQrPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:qr="clr-namespace:Waves.Api.Models.QRLogin;assembly=Waves.Api"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:vm="clr-namespace:Haiyu.Mobile.ViewModels"
+    xmlns:zxing="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.MAUI.Controls"
+    x:Name="main"
+    Title="扫码登录游戏"
+    x:DataType="vm:ScanGameQrViewModel"
+    Shell.TabBarIsVisible="False">
+
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior
+            BindingContext="{Binding BindingContext, Source={x:Reference main}}"
+            Command="{Binding RefreshDataCommand}"
+            EventName="Loaded" />
+    </ContentPage.Behaviors>
+
+    <Grid
+        Padding="16"
+        RowDefinitions="*,Auto"
+        RowSpacing="16">
+
+        <!--  扫描二维码  -->
+        <VerticalStackLayout
+            HorizontalOptions="Fill"
+            IsVisible="{Binding IsScannerVisible}"
+            Spacing="12"
+            VerticalOptions="Center">
+            <Border
+                HeightRequest="300"
+                HorizontalOptions="Fill"
+                StrokeThickness="1">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="16" />
+                </Border.StrokeShape>
+                <zxing:CameraBarcodeReaderView
+                    x:Name="camera"
+                    BarcodesDetected="camera_BarcodesDetected"
+                    HorizontalOptions="Fill"
+                    IsDetecting="{Binding IsDetecting}"
+                    Options="{Binding Options}"
+                    VerticalOptions="Fill" />
+            </Border>
+            <Label
+                HorizontalTextAlignment="Center"
+                Text="将游戏登录二维码完整放入扫描区域"
+                TextColor="Gray" />
+        </VerticalStackLayout>
+
+        <!--  选择登录角色  -->
+        <Grid
+            IsVisible="{Binding IsRoleSelectionVisible}"
+            RowDefinitions="Auto,*,Auto"
+            RowSpacing="12">
+            <VerticalStackLayout Spacing="4">
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="20"
+                    Text="选择游戏角色" />
+                <Label Text="确认后将使用所选角色登录游戏。" TextColor="Gray" />
+            </VerticalStackLayout>
+
+            <CollectionView
+                Grid.Row="1"
+                ItemsSource="{Binding Datums}"
+                SelectedItem="{Binding SelectedDatum, Mode=TwoWay}"
+                SelectionMode="Single">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="qr:Datum">
+                        <Border
+                            Margin="0,4"
+                            Padding="14"
+                            StrokeThickness="1">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="12" />
+                            </Border.StrokeShape>
+                            <VerticalStackLayout Spacing="3">
+                                <Label FontAttributes="Bold" Text="{Binding GetName}" />
+                                <Label
+                                    FontSize="12"
+                                    Text="{Binding GameName}"
+                                    TextColor="Gray" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Grid
+                Grid.Row="2"
+                ColumnDefinitions="*,*"
+                ColumnSpacing="10">
+                <Button Command="{Binding ScanAgainCommand}" Text="重新扫码" />
+                <Button
+                    Grid.Column="1"
+                    Command="{Binding LoginCommand}"
+                    Text="确认登录" />
+            </Grid>
+        </Grid>
+
+        <VerticalStackLayout
+            IsVisible="{Binding IsVerificationVisible}"
+            Spacing="14"
+            VerticalOptions="Center">
+            <Label
+                FontAttributes="Bold"
+                FontSize="20"
+                Text="安全验证" />
+            <Label Text="当前设备需要进行二次验证，请输入绑定手机收到的验证码。" TextColor="Gray" />
+            <Entry
+                Keyboard="Numeric"
+                MaxLength="6"
+                Placeholder="请输入手机验证码"
+                Text="{Binding VerifyCode, Mode=TwoWay}" />
+            <Button Command="{Binding LoginCommand}" Text="验证并登录" />
+            <Button Command="{Binding ScanAgainCommand}" Text="取消并重新扫码" />
+        </VerticalStackLayout>
+
+        <VerticalStackLayout Grid.Row="1" Spacing="8">
+            <ActivityIndicator
+                HorizontalOptions="Center"
+                IsRunning="{Binding IsProcessing}"
+                IsVisible="{Binding IsProcessing}" />
+            <Label HorizontalTextAlignment="Center" Text="{Binding StatusText}" />
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

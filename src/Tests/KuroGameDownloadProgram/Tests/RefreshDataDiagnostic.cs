@@ -7,7 +7,7 @@ using Waves.Core.Contracts;
 using Waves.Core.Models.Enums;
 using Waves.Core.Services;
 using Waves.Settings;
-using WavesLauncher.Core.Contracts;
+using Haiyu.KuroClient;
 
 namespace KuroGameDownloadProgram.Tests;
 
@@ -85,7 +85,7 @@ internal static class RefreshDataDiagnostic
         Console.WriteLine("===== 3. 使用真实接口读取鸣潮角色 =====");
         var rolesResponse = await kuroClient.GetGamerAsync(
             account,
-            GameType.Waves,
+            (int)GameType.Waves,
             cancellationToken
         );
         Console.WriteLine($"role/list code: {rolesResponse?.Code}");

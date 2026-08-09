@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    x:Class="Haiyu.Mobile.Views.Popups.LoginGeetPopup"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:cui="clr-namespace:CommunityToolkit.Maui.Views;assembly=CommunityToolkit.Maui"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:vm="clr-namespace:Haiyu.Mobile.ViewModels.Popups"
+    x:DataType="vm:LoginGeetViewModel"
+    Background="Transparent"
+    HorizontalOptions="Center"
+    InputTransparent="False"
+    VerticalOptions="Center">
+    <Border
+        BackgroundColor="{AppThemeBinding Light=White, Dark=#202020}"
+        HeightRequest="360"
+        HorizontalOptions="Center"
+        StrokeThickness="0"
+        VerticalOptions="Center"
+        WidthRequest="300">
+        <Border.StrokeShape>
+            <RoundRectangle CornerRadius="16" />
+
+        </Border.StrokeShape>
+
+        <Grid
+            x:Name="Grid"
+            InputTransparent="False"
+            HorizontalOptions="Fill"
+            VerticalOptions="Fill">
+
+            <WebView
+                x:Name="webView"
+                HorizontalOptions="Fill"
+                InputTransparent="False"
+                VerticalOptions="Fill">
+                <WebView.Behaviors>
+                    <toolkit:EventToCommandBehavior
+                        BindingContext="{Binding BindingContext, Source={x:Reference Grid}}"
+                        Command="{Binding LoadedCommand}"
+                        CommandParameter="{x:Reference webView}"
+                        EventName="Loaded" />
+                </WebView.Behaviors>
+            </WebView>
+        </Grid>
+    </Border>
+</ContentView>

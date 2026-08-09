@@ -44,7 +44,7 @@ public sealed class ReleaseBuildService
         string outDir = Path.GetFullPath(packageOutput).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         string appxPackageDir = outDir.Replace('\\', '/') + "/";
         await RunAsync(msbuild,
-            $"\"{project}\" /restore /t:Publish /v:minimal " +
+            $"\"{project}\" /restore /t:Rebuild,Publish /v:minimal " +
             "/p:Configuration=Release /p:Platform=x64 /p:RuntimeIdentifier=win-x64 " +
             "/p:WindowsPackageType=MSIX /p:GenerateAppxPackageOnBuild=true " +
             "/p:AppxBundle=Always /p:AppxBundlePlatforms=x64 " +

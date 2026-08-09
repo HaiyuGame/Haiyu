@@ -1,5 +1,7 @@
-﻿using Haiyu.Services.DialogServices;
+using System.Text.RegularExpressions;
+using Haiyu.Services.DialogServices;
 using Waves.Core.Helpers;
+using Haiyu.KuroClient.Helper;
 
 namespace Haiyu.ViewModel.DialogViewModels;
 
@@ -62,14 +64,15 @@ public sealed partial class LoginGameViewModel : DialogViewModelBase
 
     public IKuroAccountService KuroAccountService { get; }
 
+
     private async void GeeSuccessMethod(object recipient, GeeSuccessMessanger message)
     {
         if (message.Type == GeetType.Login)
         {
             this.GeetValue = message.Result;
-            if (string.IsNullOrWhiteSpace(GeetValue))
+            if (string.IsNullOrWhiteSpace(GeetValue) || !Phone.IsMobile())
                 return;
-            var sendSMS = await WavesClient.SendSMSAsync(Phone, GeetValue,IdV2);
+            var sendSMS = await WavesClient.SendSMSAsync(Phone, GeetValue, IdV2);
             if (sendSMS == null)
             {
                 TipMessage = LanguageService.GetStringByText("验证失败！");
@@ -120,10 +123,10 @@ public sealed partial class LoginGameViewModel : DialogViewModelBase
     {
         if (_loginType == "Phone")
         {
-            var login = await WavesClient.LoginAsync(mobile: Phone, code: Code,IdV2);
-            if (!login.Success)
+            var login = await WavesClient.LoginAsync(mobile: Phone, code: Code, IdV2);
+            if (login == null || !login.Success)
             {
-                TipMessage = login.Msg;
+                TipMessage = login == null ? "错误" : login.Msg;
                 await Task.Delay(2000);
                 return;
             }
@@ -135,14 +138,12 @@ public sealed partial class LoginGameViewModel : DialogViewModelBase
             await KuroAccountService.SaveUserAsync(account);
 
             this.KuroAccountService.SetCurrentUser(account);
-            WeakReferenceMessenger.Default.Send(
-                new SelectUserMessanger(true)
-            );
+            WeakReferenceMessenger.Default.Send(new SelectUserMessanger(true));
             DialogManager.CloseDialog();
         }
         else
         {
-            if(long.TryParse(TokenId,out var _tokenID)) 
+            if (long.TryParse(TokenId, out var _tokenID))
             {
                 var requestAccount = new KuroAccount
                 {
@@ -159,9 +160,7 @@ public sealed partial class LoginGameViewModel : DialogViewModelBase
                     account.TokenDid = TokenDid;
                     await KuroAccountService.SaveUserAsync(account);
                     this.KuroAccountService.SetCurrentUser(account);
-                    WeakReferenceMessenger.Default.Send(
-                        new SelectUserMessanger(true)
-                    );
+                    WeakReferenceMessenger.Default.Send(new SelectUserMessanger(true));
                     DialogManager.CloseDialog();
                 }
                 else if (mine != null)
@@ -178,7 +177,6 @@ public sealed partial class LoginGameViewModel : DialogViewModelBase
                 TipMessage = LanguageService.GetStringByText("TokenId格式错误！");
                 return;
             }
-            
         }
     }
 }

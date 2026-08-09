@@ -54,7 +54,7 @@ public sealed partial class GamerSignViewModel : ViewModelBase
         if (account is null)
             return;
         var game = await TryInvokeAsync(async () =>
-            await WavesClient.GetGamerAsync(account, (GameType)this.SignRoil.GameId, this.CTS.Token)
+            await WavesClient.GetGamerAsync(account, this.SignRoil.GameId, this.CTS.Token)
         );
         if (game.Item1 != 0)
         {

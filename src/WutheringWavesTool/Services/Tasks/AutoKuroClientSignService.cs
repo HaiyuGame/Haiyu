@@ -57,7 +57,7 @@ public sealed class AutoKuroClientSignService : TimedTaskServiceBase, ITaskName
 
             try
             {
-                var account = KuroAccount.From(localAccount);
+                var account = localAccount.ToKuroAccount();
                 if (await ExecuteAccountTasksAsync(account, token))
                 {
                     completedAccounts++;

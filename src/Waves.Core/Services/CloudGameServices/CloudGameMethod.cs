@@ -16,6 +16,9 @@ public class CloudGameMethod
     public const int DefaultBitRate = 25000;
     public const int MinBitRate = 10000;
     public const int DefaultFps = 60;
+    // Official client defaults to H.264 (18). It only switches to H.265 (21)
+    // after supportWLRTC/initWLRTC succeeds. WebView2 follows the WebRTC path,
+    // so forcing 21 makes dispatch and the negotiated H.264 stream disagree.
     public const int DefaultCodecType = 18;
     public const int DefaultPayType = 1;
     public const int QueuePendingCode = 1712;

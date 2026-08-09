@@ -1,0 +1,16 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="ARM64" />
+  </Configurations>
+  <Folder Name="/Extensions/">
+    <Project Path="Extensions/Waves.Api/Waves.Api.csproj" />
+    <Project Path="Haiyu.Analyzers/Haiyu.Analyzers.csproj" />
+    <Project Path="Waves.Settings/Waves.Settings.csproj" />
+  </Folder>
+  <Project Path="Haiyu.KuroClient/Haiyu.KuroClient.csproj" />
+  <Project Path="Mobile/Haiyu.Mobile/Haiyu.Mobile.csproj" Id="a379614a-90eb-4593-8ea8-57964a5f4947">
+    <Platform Solution="*|ARM64" Project="ARM64" />
+    <Deploy />
+  </Project>
+</Solution>

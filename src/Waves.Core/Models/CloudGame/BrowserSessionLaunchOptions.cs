@@ -9,6 +9,8 @@ namespace Waves.Core.Models.CloudGame
 
         public string RefreshToken { get; init; } = string.Empty;
 
+        public string CloudApiToken { get; init; } = string.Empty;
+
         public string CookieDomain { get; init; } = string.Empty;
 
         public IReadOnlyDictionary<string, string> AdditionalHeaders { get; init; } =
@@ -44,6 +46,7 @@ namespace Waves.Core.Models.CloudGame
                 Cookies = this.Cookies,
                 HeaderHostPatterns = this.HeaderHostPatterns,
                 RefreshToken = this.RefreshToken,
+                CloudApiToken = this.CloudApiToken,
                 StorageItems = this.StorageItems,
                 StreamDpi = this.StreamDpi,
                 StreamOptions = this.StreamOptions,

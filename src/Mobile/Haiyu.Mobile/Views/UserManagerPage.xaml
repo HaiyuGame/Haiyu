@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Haiyu.Mobile.Views.UserManagerPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:haiyu="clr-namespace:Haiyu.KuroClient;assembly=Haiyu.KuroClient"
+    xmlns:itemvm="clr-namespace:Haiyu.Mobile.ViewModels.ItemsViewModles"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:vm="clr-namespace:Haiyu.Mobile.ViewModels"
+    x:Name="manager"
+    Title="账号管理"
+    x:DataType="vm:UserManagerViewModel">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Command="{Binding CreateKuroUserCommand}" Text="库街区登入" />
+        <ToolbarItem Command="{Binding CreateTokenKuroUserCommand}" Text="授权码登入" />
+    </ContentPage.ToolbarItems>
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior
+            BindingContext="{Binding BindingContext, Source={x:Reference manager}}"
+            Command="{Binding LoadedCommand}"
+            EventName="Loaded" />
+    </ContentPage.Behaviors>
+    <RefreshView
+        Margin="15"
+        Command="{x:Binding LoadedCommand}"
+        IsRefreshing="{Binding IsRefreshing, Mode=OneWay}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <ScrollView IsVisible="False">
+                <StackLayout>
+                    <Border Background="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray600}}" HeightRequest="200">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="10" />
+                        </Border.StrokeShape>
+                    </Border>
+                </StackLayout>
+            </ScrollView>
+            <CollectionView
+                Grid.Row="1"
+                Margin="0,10,0,0"
+                ItemsSource="{Binding LocalUsers, Mode=OneWay}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="itemvm:LocalUserItemViewModel">
+                        <Border
+                            x:Name="accountCard"
+                            Margin="5"
+                            Padding="15"
+                            Background="{AppThemeBinding Light={StaticResource Gray100},
+                                                         Dark={StaticResource Gray600}}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10" />
+                            </Border.StrokeShape>
+                            <Border.Behaviors>
+                                <toolkit:TouchBehavior
+                                    BindingContext="{Binding BindingContext, Source={x:Reference accountCard}}"
+                                    Command="{Binding SendShowSessionCommand}"
+                                    PressedOpacity="0.7"
+                                    PressedScale="0.97"
+                                    ShouldMakeChildrenInputTransparent="False" />
+                            </Border.Behaviors>
+                            <Grid x:Name="grid">
+                                <Grid.Behaviors>
+                                    <toolkit:EventToCommandBehavior
+                                        BindingContext="{Binding BindingContext, Source={x:Reference grid}}"
+                                        Command="{Binding LoadedCommand}"
+                                        EventName="Loaded" />
+                                </Grid.Behaviors>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="auto" />
+                                    <ColumnDefinition />
+                                    <ColumnDefinition Width="auto" />
+                                </Grid.ColumnDefinitions>
+                                <toolkit:AvatarView ImageSource="{Binding ImageCover, Mode=OneWay}" />
+                                <Grid Grid.Column="1" Margin="10,0,0,0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition />
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
+                                    <Label Text="{Binding UserName, Mode=OneWay}" />
+                                    <Label Grid.Row="1" Text="{Binding Sign, Mode=OneWay}" />
+                                </Grid>
+                                <Button
+                                    Grid.Column="2"
+                                    Command="{Binding GotoScanCommand}"
+                                    Text="扫码" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Grid>
+    </RefreshView>
+</ContentPage>

@@ -1,0 +1,91 @@
+<html lang="zh">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <title>GeeTest</title>
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: transparent;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            padding: 16px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .box {
+            width: 100%;
+            max-width: 300px;
+            margin: 0;
+            text-align: center;
+        }
+
+        #captcha {
+            display: block;
+            width: 100%;
+            min-height: 52px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <div id="captcha"></div>
+    </div>
+    <!--
+        <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+        <script src="https://static.geetest.com/v4/gt4.js"></script>
+        -->
+    <!--云鸣潮登陆验证-->
+    <!--1dd87176b1565667de6f8add815425ed-->
+    <script src="Js/jquery.min.js"></script>
+    <script src="Js/gt4.js"></script>
+    <script type="application/javascript">
+        // 与 Windows 一致：成功时直接回传 getValidate() JSON
+        // Android 仅替换通信通道为 haiyu://
+        function postGeetResult(payload) {
+            var message = typeof payload === "string" ? payload : JSON.stringify(payload);
+
+            if (window.chrome && window.chrome.webview) {
+                window.chrome.webview.postMessage(message);
+                return;
+            }
+
+            window.location.href = "haiyu://message/" + encodeURIComponent(message);
+        }
+
+        $(function () {
+            initGeetest4({
+                captchaId: "3f7e2d848ce0cb7e7d019d621e556ce2",
+                product: "popup",
+                https: true,
+                nativeButton: {
+                    height: "100%",
+                    width: "100%",
+                },
+            }, function (captcha) {
+                captcha.appendTo("#captcha")
+                captcha
+                        .onReady(function () {
+                        })
+                        .onSuccess(function () {
+                            // Windows: window.chrome.webview.postMessage(JSON.stringify(captcha.getValidate()));
+                            postGeetResult(JSON.stringify(captcha.getValidate()));
+                        })
+                        .onError(function () {
+                        })
+            })
+        })
+    </script>
+</body>
+</html>

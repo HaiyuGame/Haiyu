@@ -21,7 +21,7 @@ public partial class App : ClientApplication
     private const int PROCESS_PER_MONITOR_DPI_AWARE = 2;
     private AppInstance mainInstance;
 
-    public static string AppVersion => "1.3.5";
+    public static string AppVersion => "1.3.6";
 
     public AppSettings AppSettings { get; private set; }
 
@@ -58,8 +58,24 @@ public partial class App : ClientApplication
         Microsoft.UI.Xaml.UnhandledExceptionEventArgs e
     )
     {
-        if(e.Exception is OperationCanceledException)
+        // OperationCanceledException is often intentional (CTS.Cancel / HttpClient
+        // timeout / Task.WaitAsync). Still log once so we can see the stack instead
+        // of only "first-chance" noise in the debugger with no source.
+        if (e.Exception is OperationCanceledException or TaskCanceledException)
         {
+            try
+            {
+                Instance.Host.Services
+                    .GetRequiredKeyedService<LoggerService>("AppLog")
+                    .WriteWarning(
+                        $"[UnhandledCancel] {e.Exception.GetType().Name}: {e.Exception.Message}\n{e.Exception.StackTrace}"
+                    );
+            }
+            catch
+            {
+            }
+
+            e.Handled = true;
             return;
         }
         try

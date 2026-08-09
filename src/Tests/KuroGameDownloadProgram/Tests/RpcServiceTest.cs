@@ -6,7 +6,7 @@ using Waves.Core;
 using Waves.Core.Contracts;
 using Waves.Core.Services;
 using Waves.Settings;
-using WavesLauncher.Core.Contracts;
+using Haiyu.KuroClient;
 
 namespace KuroGameDownloadProgram.Tests;
 

@@ -7,6 +7,7 @@ namespace Haiyu.WindowModels;
 
 public sealed partial class CloudGameWindows : Window
 {
+    private bool _isClosing;
     public CloudGameingViewModel ViewModel { get; private set; }
     public CloudGameSettingViewModel CloudSettingModel { get; }
 
@@ -23,18 +24,34 @@ public sealed partial class CloudGameWindows : Window
         this._browser.RequestedTheme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
     }
 
-    private async void CloudGameWindows_Closing(AppWindow sender, AppWindowClosingEventArgs args)
+    private void CloudGameWindows_Closing(AppWindow sender, AppWindowClosingEventArgs args)
     {
-       
-        ViewModel.ShowSystemCursor();
-        this.ViewModel.Dispose();
-        this.ViewModel = null;
-        Close();
-        GC.Collect();
+        if (_isClosing)
+        {
+            return;
+        }
+
+        _isClosing = true;
+        // Dispose cancels KeepAlive CTS + ViewModelBase.CTS → expected OperationCanceledException
+        // on in-flight HTTP/timer. That is normal shutdown noise, not a gameplay crash.
+        try
+        {
+            ViewModel?.ShowSystemCursor();
+            ViewModel?.Dispose();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[CloudGameWindows] Dispose on close: {ex}");
+        }
+        finally
+        {
+            this.ViewModel = null;
+        }
     }
 
     private void TitleBar_PaneToggleRequested(Microsoft.UI.Xaml.Controls.TitleBar sender, object args)
     {
         this.view.IsPaneOpen = !this.view.IsPaneOpen;
     }
+
 }

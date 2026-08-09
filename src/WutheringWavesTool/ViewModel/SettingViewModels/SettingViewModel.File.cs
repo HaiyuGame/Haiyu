@@ -1,5 +1,7 @@
 using System.Security.Principal;
 using Haiyu.Plugin.Extensions;
+using Haiyu.Common.KuroWebView;
+using Haiyu.Models.Wrapper;
 using Microsoft.WindowsAppSDK;
 using Waves.Core.Common;
 using Waves.Settings;
@@ -24,12 +26,62 @@ partial class SettingViewModel
     [ObservableProperty]
     public partial string RpcToken { get; set; }
 
-    void GetAllVersion()
+    [ObservableProperty]
+    public partial WebViewRuntimeWrapper? WebViewRuntimeItem { get; set; }
+
+    [ObservableProperty]
+    public partial ObservableCollection<WebViewRuntimeWrapper> WebViewRuntimeOptions { get; set; } = [];
+
+    private bool _webViewRuntimeLoaded;
+
+    async Task GetAllVersionAsync()
     {
-        WebViewVersion = CoreWebView2Environment.GetAvailableBrowserVersionString() ?? LanguageService.GetStringByText("未安装");
-        this.WindowsAppSdkVersion = Microsoft.WindowsAppSDK.Runtime.Version.DotQuadString;
-        this.RunType = RuntimeFeature.IsDynamicCodeCompiled ? "JIT" : "AOT";
-        this.FrameworkType = RuntimeInformation.FrameworkDescription;
+        WindowsAppSdkVersion = Microsoft.WindowsAppSDK.Runtime.Version.DotQuadString;
+        RunType = RuntimeFeature.IsDynamicCodeCompiled ? "JIT" : "AOT";
+        FrameworkType = RuntimeInformation.FrameworkDescription;
+        await LoadWebViewRuntimeModeAsync();
+    }
+
+    private async Task LoadWebViewRuntimeModeAsync()
+    {
+        var mode = await AppSettings.GetWebViewRuntimeModeAsync(CTS.Token) ?? "Evergreen";
+        var evergreen =
+            CoreWebView2Environment.GetAvailableBrowserVersionString() ?? "未安装";
+
+        var options = new ObservableCollection<WebViewRuntimeWrapper>
+        {
+            new()
+            {
+                DisplayName = $"System（{evergreen}）",
+                RuntimePath = "Evergreen",
+            },
+        };
+
+        foreach (var item in WebView2EnvironmentProvider.GetFixedRuntimeFolders())
+        {
+            options.Add(item);
+        }
+        WebViewRuntimeOptions = options;
+        WebViewRuntimeItem =
+            WebViewRuntimeOptions.FirstOrDefault(x =>
+                x.RuntimePath.Equals(mode, StringComparison.OrdinalIgnoreCase)
+            ) ?? WebViewRuntimeOptions.FirstOrDefault();
+
+        WebViewVersion =
+            WebViewRuntimeItem?.DisplayName
+            ?? WebView2EnvironmentProvider.GetSelectedRuntimeVersion();
+        _webViewRuntimeLoaded = true;
+    }
+
+    async partial void OnWebViewRuntimeItemChanged(WebViewRuntimeWrapper? value)
+    {
+        if (!_webViewRuntimeLoaded || value is null)
+        {
+            return;
+        }
+
+        await AppSettings.SetWebViewRuntimeModeAsync(value.RuntimePath);
+        WebViewVersion = value.DisplayName;
     }
 
     [RelayCommand]
@@ -115,6 +167,14 @@ partial class SettingViewModel
         {
             await TipShow.ShowMessageAsync(LanguageService.FormatByText(LanguageService.GetStringByText("桌面图标创建异常:{0}"), ex.Message), Symbol.Clear);
         }
+    }
+
+    [RelayCommand]
+    async Task OpenWebViewCabDialog()
+    {
+        await DialogManager.ShowWebViewCabManangerAsync();
+        _webViewRuntimeLoaded = false;
+        await LoadWebViewRuntimeModeAsync();
     }
 
     public static string CreateUwpShortcut(string filePath, string target)

@@ -111,6 +111,8 @@ public static class InstanceBuilderExtensions
                     .AddTransient<SettingViewModel>()
                     .AddTransient<GameEnhancedDialog>()
                     .AddTransient<GameEnhancedViewModel>()
+                    .AddTransient<WebViewCabManagerDialog>()
+                    .AddTransient<WebViewCabManagerViewModel>()
                     .AddTransient<GamerSignPage>()
                     .AddTransient<GamerSignViewModel>()
                     .AddTransient<CloudSelectNodeDialog>()
@@ -178,7 +180,7 @@ public static class InstanceBuilderExtensions
                     #endregion
                     #region Base
                     .AddSingleton<IAppContext<App>, AppContext<App>>()
-                    .AddSingleton<IKuroClient, KuroClient>()
+                    .AddSingleton<IKuroClient, global::Haiyu.KuroClient.KuroClient>()
                     .AddTransient<IPlayerCardService, PlayerCardService>()
                     .AddSingleton<ICloudGameService, CloudGameService>()
                     .AddSingleton<IScreenCaptureService, ScreenCaptureService>()

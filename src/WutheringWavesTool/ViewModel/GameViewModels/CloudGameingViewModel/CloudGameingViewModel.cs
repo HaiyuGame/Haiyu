@@ -11,6 +11,7 @@ namespace Haiyu.ViewModel.GameViewModels;
 
 public sealed partial class CloudGameingViewModel:ViewModelBase
 {
+    private const string StreamBridgeUrl = "https://mc.kurogames.com/cloud/haiyu-stream-bridge.html";
     
     public WebView2 WebView2 { get; set; }
     public Window Window { get; set; }
@@ -65,19 +66,23 @@ public sealed partial class CloudGameingViewModel:ViewModelBase
         this.WebView2 = webView2;
         this.Window = window;
         this.Option = option;
+        Logger.WriteInfo($"[CloudGame] SetWebView provider={option.StreamOptions?.ProviderType}, dpi={option.StreamDpi}, quality={option.Quality?.Width}x{option.Quality?.Height}");
         this.Window.Closed += Window_Closed;
         this.Window.Activated += Window_Activated;
     }
 
     private void Window_Activated(object sender, WindowActivatedEventArgs args)
     {
-        ApplyWindowActivationState(
-            args.WindowActivationState != WindowActivationState.Deactivated
-        );
+        var active = args.WindowActivationState != WindowActivationState.Deactivated;
+        Logger.WriteInfo($"[CloudGame][Active] WindowActivated state={args.WindowActivationState}, active={active}");
+        ApplyWindowActivationState(active);
+        // Do not ExecuteScript on every activation — when the browser process is
+        // dying this throws COMException 0x8007139F and floods the log.
     }
 
     private async void Window_Closed(object sender, WindowEventArgs args)
     {
+        StopCloudSessionKeepAlive();
         await RequestExitAsync();
         this.KuroCloudGameContext.ClearWindow();
         this.KuroCloudGameContext.CloudGameEventPublisher.Publish(new(Waves.Core.Models.Enums.CloudCoreType.None));
@@ -92,18 +97,27 @@ public sealed partial class CloudGameingViewModel:ViewModelBase
         WebView2.NavigationCompleted += Browser_NavigationCompleted;
         this.WindowHandle = Window.GetWindowHandle();
         await WebView2EnvironmentProvider.EnsureInitializedAsync(WebView2);
-        WebView2.CoreWebView2.Settings.AreDefaultContextMenusEnabled = true;
-        WebView2.CoreWebView2.Settings.AreDevToolsEnabled = true;
+        WebView2.CoreWebView2.Settings.AreDefaultContextMenusEnabled = false;
+        WebView2.CoreWebView2.Settings.AreDevToolsEnabled = false;
         WebView2.CoreWebView2.Settings.IsPinchZoomEnabled = false;
         WebView2.CoreWebView2.Settings.IsSwipeNavigationEnabled = false;
         WebView2.CoreWebView2.Settings.IsStatusBarEnabled = false;
         WebView2.CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
-
+        WebView2.CoreWebView2.ProcessFailed += CoreWebView2_ProcessFailed;
         StartHotkeyTimer();
+
+        if (WebView2EnvironmentProvider.CdpPort > 0)
+        {
+            Logger.WriteInfo(
+                $"[CloudGame][CDP] WebView2 remote-debugging-port={WebView2EnvironmentProvider.CdpPort} " +
+                $"(http://127.0.0.1:{WebView2EnvironmentProvider.CdpPort}/json/list)"
+            );
+        }
 
         await ApplyLaunchOptionsAsync();
 
-        WebView2.CoreWebView2.Navigate("https://kuro-stream.local/bridge.html");
+        WebView2.CoreWebView2.Navigate(StreamBridgeUrl);
+        StartCloudSessionKeepAlive();
 
         #region NetworkVisiblity
         await UpdateNetworkVisiblity();
@@ -133,7 +147,7 @@ public sealed partial class CloudGameingViewModel:ViewModelBase
         if (Option.StreamOptions is not null)
         {
             core.AddWebResourceRequestedFilter(
-                "https://kuro-stream.local/bridge.html",
+                StreamBridgeUrl,
                 CoreWebView2WebResourceContext.Document
             );
             requiresWebResourceInterceptor = true;
@@ -223,7 +237,7 @@ public sealed partial class CloudGameingViewModel:ViewModelBase
             && Option.StreamOptions is not null
             && string.Equals(
                 args.Request.Uri,
-                "https://kuro-stream.local/bridge.html",
+                StreamBridgeUrl,
                 StringComparison.OrdinalIgnoreCase
             )
         )
@@ -261,6 +275,30 @@ public sealed partial class CloudGameingViewModel:ViewModelBase
 
     private string BuildStreamBridgeHtml(BrowserSessionLaunchOptions option)
     {
+        if (option.StreamOptions.ProviderType == 3)
+        {
+            var tencentQualityJson = JsonSerializer.Serialize(
+                new BridgeConfig()
+                {
+                    BitRate = option.Quality.BitRate,
+                    BitRateMin = option.Quality.BitRateMin,
+                    BitRateMax = option.Quality.BitRateMax,
+                    Fps = option.Quality.Fps,
+                    TargetWidth = option.Quality.Width,
+                    TargetHeight = option.Quality.Height,
+                    EnableImageEnhancement = option.Quality.EnableImageEnhancement,
+                },
+                CloudGameContext.Default.BridgeConfig
+            );
+            return CloudGameBuilder.BuildTencentBridgeHtml(
+                JsonSerializer.Serialize(option.StreamOptions.TencentUserKey, CloudGameContext.Default.String),
+                JsonSerializer.Serialize(option.StreamOptions.TencentDeviceId, CloudGameContext.Default.String),
+                JsonSerializer.Serialize(option.StreamOptions.TencentAllocRespJson, CloudGameContext.Default.String),
+                JsonSerializer.Serialize(option.StreamOptions.TencentToken, CloudGameContext.Default.String),
+                tencentQualityJson
+            );
+        }
+
         var dispatchMessageJson = option.StreamOptions.DispatchMessage;
         var storageItemsJson = JsonSerializer.Serialize(
             option.StorageItems,
@@ -280,12 +318,12 @@ public sealed partial class CloudGameingViewModel:ViewModelBase
                 EnableClipBoard = true,
                 MouseShortcut = (string?)null,
                 LockPoint = true,
+                // WebView2 needs the gameplay input layer; without it keyboard/mouse
+                // events never reach the remote stream after pointer lock / resize.
                 EnvType = "pc",
                 FillVideo = false,
-                EnableInitSpeed = false,
-                // WebView2 needs Welink's input layer to discard the synthetic
-                // mouse move generated when pointer lock recenters the cursor.
-                UseGamePlayLayer = true,
+                EnableInitSpeed = true,
+                UseGamePlayLayer = false,
                 EnableReplenishEsc = true,
                 EnableReportLog = true,
                 EnableReconnect = true,
@@ -297,7 +335,9 @@ public sealed partial class CloudGameingViewModel:ViewModelBase
                 TargetHeight = Option.Quality.Height,
                 CodecType = Option.Quality.CodecType,
                 StreamStrategy = Option.Quality.StreamStrategy,
-                EnableImageEnhancement = Option.Quality.EnableImageEnhancement,
+                // Super-resolution / enhance path has crashed WebView2 browser process
+                // (D3D11VideoDecoder + msedge.dll 0x80000003). Keep it off in host bridge.
+                EnableImageEnhancement = false,
                 Dpi = Option.StreamDpi,
             }, CloudGameContext.Default.BridgeConfig
         );
@@ -309,39 +349,111 @@ public sealed partial class CloudGameingViewModel:ViewModelBase
 
     private void CoreWebView2_WebMessageReceived(CoreWebView2 sender, CoreWebView2WebMessageReceivedEventArgs args)
     {
+        // Bridge posts many shapes of "detail" (string/number/object). Never bind the
+        // whole payload to NetworkDetail or pivotal frames throw and flood the log.
         try
         {
-            var model = JsonSerializer.Deserialize(args.WebMessageAsJson, CloudGameContext.Default.WelinkMessage);
-
-            switch (model.Type)
+            using var doc = JsonDocument.Parse(args.WebMessageAsJson);
+            var root = doc.RootElement;
+            if (!root.TryGetProperty("type", out var typeEl))
             {
-                case "status":
-                    break;
-                case "warning":
-                    break;
-                case "launch-dispatched":
-                    break;
-                case "first-frame":
-                    break;
-                case "quality-change":
-                    break;
+                return;
+            }
+
+            var type = typeEl.GetString() ?? string.Empty;
+
+            switch (type)
+            {
                 case "network-stat":
-                    UpdateNetworkDisplay(model);
+                {
+                    var model = JsonSerializer.Deserialize(
+                        args.WebMessageAsJson,
+                        CloudGameContext.Default.WelinkMessage
+                    );
+                    if (model?.Detail is not null)
+                    {
+                        UpdateNetworkDisplay(model);
+                    }
                     break;
+                }
                 case "cursor-data":
-                    ApplyCloudCursorVisibility(model.Visible);
+                {
+                    var visible = root.TryGetProperty("visible", out var v) && v.ValueKind switch
+                    {
+                        JsonValueKind.True => true,
+                        JsonValueKind.Number => v.TryGetInt32(out var number) && number != 0,
+                        JsonValueKind.String => bool.TryParse(v.GetString(), out var parsed) && parsed,
+                        _ => false
+                    };
+                    ApplyCloudCursorVisibility(visible);
+                    break;
+                }
+                case "first-frame":
+                    Logger.WriteInfo("[CloudGame][Bridge] first-frame received");
+                    break;
+                case "game-resolution":
+                case "resolution-sync":
+                {
+                    var reason = root.TryGetProperty("reason", out var rr) ? rr.ToString() : "";
+                    var w = root.TryGetProperty("width", out var we) ? we.ToString() : "?";
+                    var h = root.TryGetProperty("height", out var he) ? he.ToString() : "?";
+                    var action = root.TryGetProperty("action", out var ae) ? ae.ToString() : "";
+                    var seq = root.TryGetProperty("seq", out var se) ? se.ToString() : "";
+                    Logger.WriteInfo(
+                        $"[CloudGame][SizeProbe] bridge {type} reason={reason} seq={seq} " +
+                        $"{w}x{h} action={action}"
+                    );
+                    break;
+                }
+                case "diagnostic":
+                {
+                    var reason = root.TryGetProperty("reason", out var r) ? r.ToString() : "";
+                    Logger.WriteInfo($"[CloudGame][Diag] {reason}");
+                    break;
+                }
+                case "warning":
+                    Logger.WriteWarning($"[CloudGame][Bridge][warning] {args.WebMessageAsJson}");
                     break;
                 case "error":
+                    Logger.WriteError($"[CloudGame][Bridge][error] {args.WebMessageAsJson}");
                     ShowSystemCursor();
+                    break;
+                case "pivotal":
+                case "status":
+                case "keepalive":
+                case "game-send":
+                case "sdk-message":
+                case "launch-dispatched":
+                case "quality-change":
+                case "image-enhancement":
+                    // High-frequency / low-value; keep out of default log.
+                    break;
+                default:
+                    Logger.WriteInfo($"[CloudGame][Bridge] {type}: {TruncateForLog(args.WebMessageAsJson, 400)}");
                     break;
             }
         }
-        catch (Exception ex) { }
+        catch (Exception ex)
+        {
+            Logger.WriteError(
+                $"[CloudGame][Bridge] message handle failed: {ex.GetType().Name}: {ex.Message}; payload={TruncateForLog(args.WebMessageAsJson, 300)}"
+            );
+        }
+    }
+
+    private static string TruncateForLog(string? value, int max)
+    {
+        if (string.IsNullOrEmpty(value) || value.Length <= max)
+        {
+            return value ?? string.Empty;
+        }
+
+        return value.Substring(0, max) + $"...(+{value.Length - max})";
     }
 
     private void Browser_NavigationCompleted(WebView2 sender, CoreWebView2NavigationCompletedEventArgs args)
     {
-        TryInstallWebViewCursorSubclass();
+        Logger.WriteInfo($"[CloudGame] NavigationCompleted success={args.IsSuccess}, status={args.HttpStatusCode}, error={args.WebErrorStatus}");
 
         if (!args.IsSuccess)
         {
@@ -351,6 +463,130 @@ public sealed partial class CloudGameingViewModel:ViewModelBase
 
     private void Browser_NavigationStarting(WebView2 sender, CoreWebView2NavigationStartingEventArgs args)
     {
+        Logger.WriteInfo($"[CloudGame] NavigationStarting uri={args.Uri}");
         ShowSystemCursor();
+    }
+
+    private void CoreWebView2_ProcessFailed(CoreWebView2 sender, CoreWebView2ProcessFailedEventArgs args)
+    {
+        // BrowserProcessExited = entire Chromium process died; CoreWebView2 becomes null.
+        // Collect every field WebView2 exposes — this is the best in-app signal we get.
+        try
+        {
+            var exitHex = $"0x{(uint)args.ExitCode:X8}";
+            var module = string.Empty;
+            var description = string.Empty;
+            var frames = string.Empty;
+            try { module = args.FailureSourceModulePath ?? string.Empty; } catch { /* older runtime */ }
+            try { description = args.ProcessDescription ?? string.Empty; } catch { }
+            try
+            {
+                if (args.FrameInfosForFailedProcess is { Count: > 0 } list)
+                {
+                    frames = string.Join(
+                        " | ",
+                        list.Select(f =>
+                        {
+                            try
+                            {
+                                return $"name={f.Name};src={f.Source}";
+                            }
+                            catch
+                            {
+                                return f?.ToString() ?? "?";
+                            }
+                        })
+                    );
+                }
+            }
+            catch { }
+
+            var appWindow = Window?.AppWindow;
+            Logger.WriteError(
+                $"[CloudGame][ProcessFailed] kind={args.ProcessFailedKind}, reason={args.Reason}, " +
+                $"exitCode={args.ExitCode} ({exitHex}), module={module}, desc={description}, frames=[{frames}], " +
+                $"winSize={appWindow?.Size.Width}x{appWindow?.Size.Height}, " +
+                $"wv={WebView2?.ActualWidth:0.#}x{WebView2?.ActualHeight:0.#}, " +
+                $"cdpPort={WebView2EnvironmentProvider.CdpPort}, " +
+                $"time={DateTime.Now:O}"
+            );
+
+            // Persist a dedicated crash breadcrumb next to app logs for easy sharing.
+            try
+            {
+                var dir = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                    "Waves",
+                    "appLogs"
+                );
+                Directory.CreateDirectory(dir);
+                var path = Path.Combine(dir, $"webview-crash-{DateTime.Now:yyyyMMdd-HHmmss}.txt");
+                File.WriteAllText(
+                    path,
+                    string.Join(
+                        Environment.NewLine,
+                        [
+                            $"time={DateTime.Now:O}",
+                            $"kind={args.ProcessFailedKind}",
+                            $"reason={args.Reason}",
+                            $"exitCode={args.ExitCode}",
+                            $"exitHex={exitHex}",
+                            $"module={module}",
+                            $"description={description}",
+                            $"frames={frames}",
+                            $"win={appWindow?.Position.X},{appWindow?.Position.Y} {appWindow?.Size.Width}x{appWindow?.Size.Height}",
+                            $"presenter={appWindow?.Presenter.Kind}",
+                            $"wvActual={WebView2?.ActualWidth}x{WebView2?.ActualHeight}",
+                            $"dpi={Option?.StreamDpi}",
+                            $"quality={Option?.Quality?.Width}x{Option?.Quality?.Height}",
+                            $"codec={Option?.Quality?.CodecType}",
+                            $"cdpPort={WebView2EnvironmentProvider.CdpPort}",
+                            $"userData={AppSettings.WebCacheFolder}",
+                            "",
+                            "Note: BrowserProcessExited means the WebView2 Chromium process exited.",
+                            "Check Windows Event Viewer > Application for WebView2/Edge crash entries,",
+                            "and %LOCALAPPDATA%\\CrashDumps for *.dmp next to this timestamp.",
+                        ]
+                    )
+                );
+                Logger.WriteError($"[CloudGame][ProcessFailed] crash report written: {path}");
+            }
+            catch (Exception writeEx)
+            {
+                Logger.WriteError($"[CloudGame][ProcessFailed] crash report write failed: {writeEx.Message}");
+            }
+
+            ShowSystemCursor();
+
+            // Render-process-only failures can often recover with a reload.
+            // Browser process death requires a new WebView control (session is gone).
+            if (args.ProcessFailedKind == CoreWebView2ProcessFailedKind.RenderProcessExited)
+            {
+                Window?.DispatcherQueue.TryEnqueue(() =>
+                {
+                    try
+                    {
+                        Logger.WriteWarning("[CloudGame][ProcessFailed] attempting Reload after render process exit");
+                        WebView2?.CoreWebView2?.Reload();
+                    }
+                    catch (Exception reloadEx)
+                    {
+                        Logger.WriteError($"[CloudGame][ProcessFailed] Reload failed: {reloadEx}");
+                    }
+                });
+            }
+            else if (args.ProcessFailedKind == CoreWebView2ProcessFailedKind.BrowserProcessExited)
+            {
+                Logger.WriteError(
+                    "[CloudGame][ProcessFailed] Browser process dead — CoreWebView2 is unusable. " +
+                    "Close the cloud window and re-enter. See Documents\\Waves\\appLogs\\webview-crash-*.txt " +
+                    "and Documents\\Waves\\appLogs\\webview2-chromium.log / %LOCALAPPDATA%\\CrashDumps"
+                );
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.WriteError($"[CloudGame][ProcessFailed] log failed: {ex}");
+        }
     }
 }
