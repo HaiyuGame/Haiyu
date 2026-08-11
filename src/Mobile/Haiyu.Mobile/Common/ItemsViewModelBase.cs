@@ -9,5 +9,10 @@ public partial class ItemsViewModelBase<Args>:ViewModelBase,IItemData<Args>
 
     public IServiceProvider ServiceProvider { get; }
 
-    public Args BaseData { get; set; }
+
+
+    public virtual void SetData(Args args)
+    {
+
+    }
 }

@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Text.Json.Serialization;
 using Waves.Api.Models.CloudGame;
 using Waves.Api.Models.Communitys;
@@ -14,12 +14,12 @@ namespace Waves.Api.Models;
 [JsonSerializable(typeof(SMSResultModel))]
 [JsonSerializable(typeof(AccountData))]
 [JsonSerializable(typeof(SMSResult))]
+
 [JsonSerializable(typeof(GamerDataModel))]
 [JsonSerializable(typeof(GameData))]
 [JsonSerializable(typeof(EnergyData))]
 [JsonSerializable(typeof(LivenessData))]
 [JsonSerializable(typeof(ObservableCollection<BattlePassDataItem>))]
-[JsonSerializable(typeof(GamerRoil))]
 [JsonSerializable(typeof(GameRoilDataItem))]
 [JsonSerializable(typeof(ChainList))]
 [JsonSerializable(typeof(EquipPhantomList))]
@@ -79,6 +79,7 @@ namespace Waves.Api.Models;
 [JsonSerializable(typeof(GamerSlashDetailData))]
 [JsonSerializable(typeof(HalfList))]
 [JsonSerializable(typeof(SlashRoleList))]
+[JsonSerializable(typeof(GamerRoil))]
 [JsonSerializable(typeof(SlashDifficultyList))]
 [JsonSerializable(typeof(SlashChallengeList))]
 //资源简报

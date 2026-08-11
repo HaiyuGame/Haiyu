@@ -24,13 +24,16 @@ namespace Haiyu.Mobile.Services
                 args.Select(x =>
                 {
                     var item = ServiceProvider.GetRequiredService<T>();
-                    item.BaseData = x;
+                    item.SetData(x);
                     return item;
                 })
             );
 
-        public ObservableCollection<LocalUserItemViewModel> CreateLocalUserIetms(
+        public ObservableCollection<LocalUserItemViewModel> CreateLocalUserItems(
             List<LocalAccount> locals
         ) => CreateItem<LocalUserItemViewModel, LocalAccount>(locals);
+
+        public ObservableCollection<GameRoilItemViewModel> CreateGameRoilItems(List<GameRoilDataItem> roils)
+        => CreateItem<GameRoilItemViewModel, GameRoilDataItem>(roils);
     }
 }

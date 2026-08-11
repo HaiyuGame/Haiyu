@@ -9,4 +9,13 @@ public partial class AddKuroUserPage : ContentPage
 		InitializeComponent();
         this.BindingContext = addKuroUserViewModel;
 	}
+
+
+    protected override void OnNavigatedFrom(NavigatedFromEventArgs args)
+    {
+        if(this.BindingContext is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
+    }
 }

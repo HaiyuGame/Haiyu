@@ -1478,6 +1478,66 @@ public static class CloudGameBuilder
                 video._kuroMouseHandlersSetup = true;
                 attachFirstFrameFallback(video);
 
+                // Patch the handler itself: Welink assigns `video.onmousemove`
+                // after creating the video, so an addEventListener filter misses it.
+                // The watcher also covers a later SDK reassignment/reconnect.
+                let discardNextMove = true;
+                const wrappedHandlers = new WeakSet();
+                const resetTrajectory = () => { discardNextMove = true; };
+                document.addEventListener("pointerlockchange", resetTrajectory, true);
+                video.addEventListener("mouseleave", resetTrajectory, true);
+                video.addEventListener("mouseenter", resetTrajectory, true);
+                window.addEventListener("blur", resetTrajectory, true);
+                window.addEventListener("focus", resetTrajectory, true);
+
+                const wrapCurrentMouseHandler = () => {
+                    const sdkMouseMove = video.onmousemove;
+                    if (typeof sdkMouseMove !== "function" || wrappedHandlers.has(sdkMouseMove)) {
+                        return;
+                    }
+
+                    const wrapped = function (event) {
+                        const movementX = Number(event.movementX) || 0;
+                        const movementY = Number(event.movementY) || 0;
+
+                        // A lock transition, focus transition, leave or re-entry
+                        // changes WebView2's coordinate origin. Never forward that
+                        // first sample into Welink's cumulative mouse coordinates.
+                        if (discardNextMove) {
+                            discardNextMove = false;
+                            post("pointer-trajectory", {
+                                reason: "coordinate-origin-reset",
+                                movementX,
+                                movementY
+                            });
+                            return;
+                        }
+
+                        const limitX = Math.max(64, Math.round(video.clientWidth * 0.08));
+                        const limitY = Math.max(48, Math.round(video.clientHeight * 0.08));
+                        if (Math.abs(movementX) > limitX || Math.abs(movementY) > limitY) {
+                            post("pointer-trajectory", {
+                                reason: "out-of-path-delta",
+                                movementX,
+                                movementY,
+                                limitX,
+                                limitY
+                            });
+                            return;
+                        }
+
+                        return sdkMouseMove.call(this, event);
+                    };
+                    wrappedHandlers.add(wrapped);
+                    video.onmousemove = wrapped;
+                };
+
+                wrapCurrentMouseHandler();
+                video._kuroMouseHandlerWatch = window.setInterval(
+                    wrapCurrentMouseHandler,
+                    100
+                );
+
                 video.addEventListener("mousedown", () => {
                     focusSurface();
                 }, true);
@@ -1532,109 +1592,6 @@ public static class CloudGameBuilder
             window.addEventListener("beforeunload", stopKeepAliveLoop, true);
             window.addEventListener("pagehide", stopKeepAliveLoop, true);
 
-            // WebView2 pointer-lock emits a synthetic recenter move and can
-            // also duplicate the same physical delta via pointerrawupdate +
-            // mousemove. Filter both so remote camera / aim stay usable.
-            const installWebViewPointerFilter = () => {
-                if (window.__KURO_POINTER_FILTER_INSTALLED__) {
-                    return;
-                }
-
-                window.__KURO_POINTER_FILTER_INSTALLED__ = true;
-
-                const originalAddEventListener = EventTarget.prototype.addEventListener;
-                const originalRemoveEventListener = EventTarget.prototype.removeEventListener;
-                const wrappedListeners = new WeakMap();
-                let lastRawMove = null;
-
-                const getWrappedListener = (target, type, listener) => {
-                    if (!listener || (type !== "mousemove" && type !== "pointerrawupdate")) {
-                        return listener;
-                    }
-
-                    let targetListeners = wrappedListeners.get(target);
-                    if (!targetListeners) {
-                        targetListeners = new Map();
-                        wrappedListeners.set(target, targetListeners);
-                    }
-
-                    let listenerTypes = targetListeners.get(listener);
-                    if (!listenerTypes) {
-                        listenerTypes = new Map();
-                        targetListeners.set(listener, listenerTypes);
-                    }
-
-                    if (listenerTypes.has(type)) {
-                        return listenerTypes.get(type);
-                    }
-
-                    const wrapped = function (event) {
-                        if (document.pointerLockElement) {
-                            const movementX = Number(event.movementX) || 0;
-                            const movementY = Number(event.movementY) || 0;
-                            const now = Number(event.timeStamp) || performance.now();
-                            const maxMovementX = Math.max(160, window.innerWidth * 0.2);
-                            const maxMovementY = Math.max(120, window.innerHeight * 0.2);
-
-                            if (
-                                Math.abs(movementX) > maxMovementX
-                                || Math.abs(movementY) > maxMovementY
-                            ) {
-                                post("pointer-filter", {
-                                    reason: "recenter-spike",
-                                    movementX,
-                                    movementY
-                                });
-                                return;
-                            }
-
-                            if (type === "pointerrawupdate") {
-                                lastRawMove = { movementX, movementY, timeStamp: now };
-                            } else if (
-                                lastRawMove
-                                && now - lastRawMove.timeStamp >= 0
-                                && now - lastRawMove.timeStamp <= 12
-                                && movementX === lastRawMove.movementX
-                                && movementY === lastRawMove.movementY
-                            ) {
-                                return;
-                            }
-                        }
-
-                        if (typeof listener === "function") {
-                            return listener.call(this, event);
-                        }
-
-                        return listener.handleEvent(event);
-                    };
-
-                    listenerTypes.set(type, wrapped);
-                    return wrapped;
-                };
-
-                EventTarget.prototype.addEventListener = function (type, listener, options) {
-                    return originalAddEventListener.call(
-                        this,
-                        type,
-                        getWrappedListener(this, type, listener),
-                        options
-                    );
-                };
-
-                EventTarget.prototype.removeEventListener = function (type, listener, options) {
-                    const wrapped = wrappedListeners
-                        .get(this)
-                        ?.get(listener)
-                        ?.get(type);
-                    return originalRemoveEventListener.call(
-                        this,
-                        type,
-                        wrapped || listener,
-                        options
-                    );
-                };
-            };
-
             const loadScript = (source) => new Promise((resolve, reject) => {
                 const element = document.createElement("script");
                 element.src = source;
@@ -1678,7 +1635,6 @@ public static class CloudGameBuilder
 
             (async () => {
                 setMessage({{ToJavaScriptString(LanguageService.GetStringByText("正在加载 WelinkCloudGame SDK……"))}});
-                installWebViewPointerFilter();
                 await loadScript(payload.scriptUrl);
 
                 if (typeof window.WelinkCloudGame !== "function") {

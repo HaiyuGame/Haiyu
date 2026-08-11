@@ -3,11 +3,35 @@
     x:Class="Haiyu.Mobile.Views.ButtonSheets.AccountMoreSessionButtomSheet"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:itemVm="clr-namespace:Haiyu.Mobile.ViewModels.ItemsViewModles"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:vm="clr-namespace:Haiyu.Mobile.ViewModels.ButtonSheet"
+    x:Name="main"
     Title="AccountMoreSessionButtonSheet"
-    HeightRequest="180">
-    <Label
-        FontSize="25"
-        HorizontalOptions="Center"
-        Text="不知道放什么，先放个字吧~"
-        VerticalOptions="Center" />
+    x:DataType="vm:AccountMoreSessionViewModel">
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior BindingContext="{Binding BindingContext, Source={x:Reference main}}" Command="{Binding LoadedCommand}" />
+    </ContentPage.Behaviors>
+    <ContentPage.Resources>
+        <DataTemplate x:Key="GameRoilTemplate" x:DataType="itemVm:GameRoilItemViewModel">
+            <Border x:Name="roilData">
+                <Border.Behaviors>
+                    <toolkit:TouchBehavior
+                        BindingContext="{Binding BindingContext, Source={x:Reference roilData}}"
+                        Command="{Binding GotoGameSessionCommand}"
+                        PressedOpacity="0.7"
+                        PressedScale="0.97"
+                        ShouldMakeChildrenInputTransparent="False" />
+                </Border.Behaviors>
+
+                <Label Text="{Binding GamerId, Mode=OneWay}" />
+            </Border>
+        </DataTemplate>
+    </ContentPage.Resources>
+    <StackLayout>
+        <Label Text="鸣潮" />
+        <CollectionView ItemTemplate="{StaticResource GameRoilTemplate}" ItemsSource="{Binding WavesRoils, Mode=OneWay}" />
+        <Label Text="战双" />
+        <CollectionView ItemTemplate="{StaticResource GameRoilTemplate}" ItemsSource="{Binding PunishRoils, Mode=OneWay}" />
+    </StackLayout>
 </ContentPage>

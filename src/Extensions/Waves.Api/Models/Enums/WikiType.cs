@@ -1,4 +1,4 @@
-﻿namespace Waves.Api.Models.Enums;
+namespace Waves.Api.Models.Enums;
 
 public enum WikiType:int
 {
