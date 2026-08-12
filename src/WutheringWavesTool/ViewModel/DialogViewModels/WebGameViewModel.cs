@@ -50,51 +50,39 @@ public sealed partial class WebGameViewModel : DialogViewModelBase
 
     private CloudGameLoginSnapshot _snapshot;
 
-    public string GeetValue { get; set; }
-
     public IAppContext<App> AppContext { get; }
     public IViewFactorys ViewFactorys { get; }
     public IWavesCloudGameService CloudGameService { get; }
 
     private async void GeeSuccessMethod(object recipient, GeeSuccessMessanger message)
     {
-        if (message.Type == GeetType.WebGame)
-        {
-            this.GeetValue = message.Result;
-            if (string.IsNullOrWhiteSpace(GeetValue))
-                return;
-            var geetData = JsonSerializer.Deserialize(message.Result, GeetContext.Default.GeetData);
-            var sendSMS = await CloudGameService.GetPhoneSMSAsync(
-                Phone,
-                geetData.CaptchaOutput,
-                geetData.PassToken,
-                geetData.GenTime,
-                geetData.LotNumber,
-                this.CTS.Token
-            );
-            if (sendSMS.Item1 == null)
-            {
-                TipMessage = LanguageService.GetStringByText("发生验证码失败！");
-                return;
-            }
-            TipMessage = sendSMS.Item1.ErrorDescription;
-            this._snapshot = sendSMS.Item2;
-        }
+        if (message.Type == GeetType.WebGame) { }
     }
 
     [RelayCommand]
-    void ShowGetGeet()
+    async Task ShowGetGeet()
     {
         if (string.IsNullOrWhiteSpace(Phone))
             return;
-        var view = ViewFactorys.CreateGeetWindow(GeetType.WebGame);
-        view.AppWindowApp.Show();
+        var sendSMS = await CloudGameService.GetPhoneSMSAsync(Phone, this.CTS.Token);
+        if (sendSMS.Item1 == null)
+        {
+            TipMessage = LanguageService.GetStringByText("发生验证码失败！");
+            return;
+        }
+        TipMessage = sendSMS.Item1.ErrorDescription;
+        this._snapshot = sendSMS.Item2;
     }
 
     [RelayCommand]
     async Task Login()
     {
-        var result = await CloudGameService.LoginAsync(this._snapshot,this.Phone, this.Code, this.CTS.Token);
+        var result = await CloudGameService.LoginAsync(
+            this._snapshot,
+            this.Phone,
+            this.Code,
+            this.CTS.Token
+        );
         if (result.Code != 0)
         {
             TipMessage = result.Msg;

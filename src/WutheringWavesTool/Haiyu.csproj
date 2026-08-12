@@ -68,7 +68,6 @@
 	</ItemGroup>
 	<ItemGroup>
 		<Content Remove="Assets\Cursor\CursorResource.res" />
-		<Content Remove="assets\geet2.html" />
 		<Content Remove="Assets\HpatchzResource\hpatchz.exe" />
 		<Content Remove="assets\Readme.md" />
 		<Content Remove="Assets\RolePage\appLogo.png" />
@@ -280,9 +279,6 @@
 		<Content Update="Assets\appLogo.png">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
-		<None Update="Assets\geet2.html">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
 		<None Update="Assets\HpatchzResource\hpatchz.exe">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>

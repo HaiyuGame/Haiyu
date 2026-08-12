@@ -8,10 +8,6 @@ public interface IWavesCloudGameService
 
     Task<Tuple<CloudSendSMS?, CloudGameLoginSnapshot>> GetPhoneSMSAsync(
         string phone,
-        string geetestCaptchaOutput,
-        string geetestPassToken,
-        string geetestGenTime,
-        string geetestLotNumber,
         CancellationToken token = default
     );
 

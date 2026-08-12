@@ -1,4 +1,4 @@
-﻿namespace Haiyu.WindowModels;
+namespace Haiyu.WindowModels;
 
 public sealed partial class GetGeetWindow : WindowModelBase
 {
@@ -26,7 +26,6 @@ public sealed partial class GetGeetWindow : WindowModelBase
         this.webView2.Source = Type switch
         {
             GeetType.Login => new(AppDomain.CurrentDomain.BaseDirectory + "Assets\\geet.html"),
-            GeetType.WebGame => new(AppDomain.CurrentDomain.BaseDirectory + "Assets\\geet2.html"),
             _ => null,
         };
     }

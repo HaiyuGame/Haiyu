@@ -73,20 +73,12 @@ public class WavesCloudGameService : IWavesCloudGameService
 
     public async Task<Tuple<CloudSendSMS?, CloudGameLoginSnapshot>> GetPhoneSMSAsync(
         string phone,
-        string geetestCaptchaOutput,
-        string geetestPassToken,
-        string geetestGenTime,
-        string geetestLotNumber,
         CancellationToken token = default
     )
     {
         CloudGameLoginSnapshot loginSnapshot = CloudGameLoginSnapshot.Create();
         var querys = GetClientData(loginSnapshot);
         querys.Add("phone", phone);
-        querys.Add("geetestCaptchaOutput", geetestCaptchaOutput);
-        querys.Add("geetestPassToken", geetestPassToken);
-        querys.Add("geetestGenTime", geetestGenTime);
-        querys.Add("geetestLotNumber", geetestLotNumber);
         var str = await PostFormAsync(
             _sdkClient,
             "/sdkcom/v2/login/getPhoneCode.lg",
