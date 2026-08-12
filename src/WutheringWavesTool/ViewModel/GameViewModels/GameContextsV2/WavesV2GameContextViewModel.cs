@@ -36,8 +36,6 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
         if (this.Contents != null)
             this.Contents.Clear();
 
-        // IMemoryCache stores object references. These objects belong to the cached Starter,
-        // so cleanup must release the ViewModel references without mutating their Contents.
         this.Activity = null;
         this.Notice = null;
         this.News = null;
@@ -273,13 +271,12 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
         }
         if (selectItem == null)
         {
-            LocalUserTitle = LanguageService.GetStringByText("未获取到上次选择的本地游戏账号信息");
+            LocalUserTitle = LanguageService.GetStringByText("请选择账号");
             this.Base = null;
             this.MusicData = null;
             this.BattlePass = null;
             this.MotorData = null;
             IsLocalUserRefresh = false;
-
             return;
         }
         if (selectItem.PlayerItem is not WavesQueryPlayerItem playerItem)

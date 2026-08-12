@@ -3,7 +3,6 @@
     x:Class="Haiyu.Pages.GamePages.WavesV2GamePage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:helper="using:Haiyu.Helpers"
     xmlns:ani="using:CommunityToolkit.WinUI.Animations"
     xmlns:b="using:CommunityToolkit.WinUI.Behaviors"
     xmlns:bs="using:Haiyu.Behaviors"
@@ -11,6 +10,7 @@
     xmlns:control="using:Haiyu.Controls"
     xmlns:convert="using:Haiyu.Converter.DownloadState"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:helper="using:Haiyu.Helpers"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:item="using:Waves.Core.Models"
     xmlns:launcheModel="using:Waves.Api.Models"
@@ -716,6 +716,12 @@
             VerticalAlignment="Bottom"
             CornerRadius="5"
             Visibility="{x:Bind ViewModel.PlayerCardVisibility, Mode=OneWay}">
+            <ani:Implicit.ShowAnimations>
+                <ani:OpacityAnimation To="1" Duration="0:0:0.2" />
+            </ani:Implicit.ShowAnimations>
+            <ani:Implicit.HideAnimations>
+                <ani:OpacityAnimation To="0" Duration="0:0:0.2" />
+            </ani:Implicit.HideAnimations>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition Width="auto" />
@@ -724,6 +730,7 @@
                 x:Name="switcher"
                 StartCardIndex="{x:Bind ViewModel.SwatchIndex, Mode=OneWay}"
                 Style="{ThemeResource DefaultCardsSwitcher}">
+
                 <control:CardSwitcher.Card1>
                     <Grid
                         HorizontalAlignment="Stretch"
