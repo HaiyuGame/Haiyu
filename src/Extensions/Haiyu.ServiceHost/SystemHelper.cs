@@ -1,12 +1,24 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
+using Haiyu.ServiceHost.Contracts;
+using Haiyu.ServiceHost.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Haiyu.ServiceHost;
 
 public static class SystemHelper
 {
-    
+    public static IHostBuilder RegisterCache(this IHostBuilder builder)
+    {
+        builder.ConfigureServices(service =>
+        {
+            service.AddMemoryCache();
+            service.AddSingleton<IHaiyuMemoryCacheService, HaiyuMemoryCacheService>();
+        });
+        return builder;
+    }
 }
 
 public static class AdminPrivilegeHelper

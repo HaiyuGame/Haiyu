@@ -4,50 +4,57 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Haiyu.Helpers;
 using Haiyu.Models.Wrapper.Wiki;
+using Haiyu.ServiceHost.Contracts;
 using Waves.Api.Models.GameWikiiClient;
 using Waves.Core.Services;
 
 namespace Haiyu.ViewModel.WikiViewModels;
 
-public partial class WavesWikiViewModel : WikiViewModelBase
+public partial class WavesWikiViewModel : WikiViewModelBase, IHaiyuCacheOwner
 {
-    private static readonly WindowsOption SignWindowOption =
-        new()
-        {
-            Width = 400,
-            Height = 400,
-            MaxWidth = 400,
-            MaxHeight = 400,
-            IsResizable = false,
-            IsMaximizable = false,
-            CenterOnScreen = true,
-        };
+    private static readonly WindowsOption SignWindowOption = new()
+    {
+        Width = 400,
+        Height = 400,
+        MaxWidth = 400,
+        MaxHeight = 400,
+        IsResizable = false,
+        IsMaximizable = false,
+        CenterOnScreen = true,
+    };
 
-    private static readonly WindowsOption CommunityWindowOption =
-        new()
-        {
-            Width = 400,
-            Height = 700,
-            IsResizable = true,
-            CenterOnScreen = true,
-        };
+    private static readonly WindowsOption CommunityWindowOption = new()
+    {
+        Width = 400,
+        Height = 700,
+        IsResizable = true,
+        CenterOnScreen = true,
+    };
 
     private static readonly WindowsOption CommunityMapOption = new()
     {
         Width = 1000,
         Height = 500,
         IsResizable = false,
-        CenterOnScreen = false
+        CenterOnScreen = false,
     };
 
     public IKuroClient KuroClient { get; }
     public IKuroAccountService KuroAccountService { get; }
-    public WavesWikiViewModel(IAppContext<App> appContext,IKuroClient  kuroClient,IKuroAccountService kuroAccountService)
+    public IHaiyuMemoryCacheService CacheService { get; }
+
+    public WavesWikiViewModel(
+        IAppContext<App> appContext,
+        IKuroClient kuroClient,
+        IKuroAccountService kuroAccountService,
+        IHaiyuMemoryCacheService haiyuMemoryCacheService
+    )
     {
         this.Messenger.Register<SelectUserMessanger>(this, LoginMessangerMethod);
         AppContext = appContext;
         this.KuroClient = kuroClient;
         this.KuroAccountService = kuroAccountService;
+        CacheService = haiyuMemoryCacheService;
     }
 
     private async void LoginMessangerMethod(object recipient, SelectUserMessanger message)
@@ -64,6 +71,24 @@ public partial class WavesWikiViewModel : WikiViewModelBase
     [ObservableProperty]
     public partial bool KuroLogin { get; set; } = false;
 
+    #region Cache
+    /// <summary>
+    /// Wiki缓存占位符
+    /// </summary>
+    [HaiyuCache(
+        nameof(CacheWiki),
+        ExpirationSeconds = 300,
+        TargetName = nameof(WavesWikiViewModel)
+    )]
+    public WikiHomeModel CacheWiki { get; set; }
+
+    [HaiyuCache(
+        nameof(RoilCache),
+        ExpirationSeconds = 300,
+        TargetName = nameof(WavesWikiViewModel)
+    )]
+    public GamerRoil RoilCache { get; set; }
+    #endregion
 
     [ObservableProperty]
     public partial ObservableCollection<EventContentSideWrapper>? RoleActive { get; set; }
@@ -78,54 +103,82 @@ public partial class WavesWikiViewModel : WikiViewModelBase
     public partial ObservableCollection<GameRoilDataItem> Gamers { get; set; }
 
     [ObservableProperty]
-    public partial GameRoilDataItem SelectGamer { get; set; }
+    public partial GameRoilDataItem? SelectGamer { get; set; }
     public IAppContext<App> AppContext { get; }
 
     [RelayCommand]
     async Task Loaded()
     {
         Loading = true;
-        var wikiPage = await TryInvokeAsync(async () =>
-            await this.GameWikiClient.GetHomePageAsync(WikiType.Waves, this.CTS.Token)
+        var wikiPage = await this.TryCacheInvokeAsync(async ct =>
+            await LoadCacheWikiAsync(
+                string.Empty,
+                async _ =>
+                {
+                    var wikiPage = await this.GameWikiClient.GetHomePageAsync(
+                        WikiType.Waves,
+                        this.CTS.Token
+                    );
+                    return wikiPage;
+                },
+                HaiyuCacheMode.Default,
+                ct
+            )
         );
-        await RefreshUserAsync();
+        await RefreshUserAsync(false);
         if ((wikiPage.Result != null && wikiPage.Result.Data.ContentJson.Shortcuts != null))
         {
-            Actives = GameWikiClient.GetEventData(wikiPage.Result)!.Format(WikiType.Waves)??[];
-            var sides = wikiPage.Result.Data.ContentJson.SideModules.Where(x => x.Type == "events-side").ToList();
-            if(sides.Count == 2)
+            Actives = GameWikiClient.GetEventData(wikiPage.Result)!.Format(WikiType.Waves) ?? [];
+            var sides = wikiPage
+                .Result.Data.ContentJson.SideModules.Where(x => x.Type == "events-side")
+                .ToList();
+
+            if (sides.Count == 2)
             {
-                var role =  await FormatSideDataAsync(sides[0]);
-                RoleActive = role?.ToObservableCollection();
-                var weapon =  await FormatSideDataAsync(sides[1]);
+                var role = await FormatSideDataAsync(sides[0]);
+                this.RoleActive = role?.ToObservableCollection();
+                var weapon = await FormatSideDataAsync(sides[1]);
                 WeaponActive = weapon?.ToObservableCollection();
             }
             else
             {
-                TipShow.ShowMessage(LanguageService.GetStringByText("获取卡池信息出现了不可预料的情况，请确认官方Wiki显示是否正常"), Symbol.Clear);
+                TipShow.ShowMessage(
+                    LanguageService.GetStringByText(
+                        "获取卡池信息出现了不可预料的情况，请确认官方Wiki显示是否正常"
+                    ),
+                    Symbol.Clear
+                );
             }
-
         }
         else
         {
-            TipShow.ShowMessage(LanguageService.FormatByText(LanguageService.GetStringByText("获取数据失败，请检查网络或重启应用")), Symbol.Clear);
+            TipShow.ShowMessage(
+                LanguageService.FormatByText(
+                    LanguageService.GetStringByText("获取数据失败，请检查网络或重启应用")
+                ),
+                Symbol.Clear
+            );
         }
         Loading = false;
     }
-
 
     private async Task<List<EventContentSideWrapper>?> FormatSideDataAsync(SideModule sideModules)
     {
         if (sideModules.Content is JsonElement jsonElement)
         {
-            var jsonObject = jsonElement.Deserialize<EventContentSide>(WikiContext.Default.EventContentSide);
+            var jsonObject = jsonElement.Deserialize<EventContentSide>(
+                WikiContext.Default.EventContentSide
+            );
             List<EventContentSideWrapper> wrappers = new();
             foreach (var tag in jsonObject!.Tabs)
             {
                 EventContentSideWrapper wrapper = new();
                 wrapper.Title = tag.Name;
                 wrapper.ImgMode = tag.ImgMode;
-                if (DateTime.TryParse(tag.CountDown.DateRange[0], out var time) && DateTime.TryParse(tag.CountDown.DateRange[1], out var endTime))
+                if (
+                    DateTime.TryParse(tag.CountDown.DateRange[0], out var time)
+                    && DateTime.TryParse(tag.CountDown.DateRange[1], out var endTime)
+                )
                 {
                     wrapper.StartTime = time;
                     wrapper.StopTime = endTime;
@@ -142,7 +195,6 @@ public partial class WavesWikiViewModel : WikiViewModelBase
         else
             return [];
     }
-
 
     [RelayCommand]
     async Task OpenDataCenter()
@@ -177,12 +229,13 @@ public partial class WavesWikiViewModel : WikiViewModelBase
     [RelayCommand]
     async Task OpenGameSign()
     {
-        var win = Instance.Host.Services.GetRequiredService<IViewFactorys>()!.ShowSignWindow(this.SelectGamer);
+        var win = Instance
+            .Host.Services.GetRequiredService<IViewFactorys>()!
+            .ShowSignWindow(this.SelectGamer);
         win.ApplyWindowsOption(SignWindowOption);
         win.ExtendsContentIntoTitleBar = true;
         win.AppWindow.Show();
     }
-
 
     async partial void OnSelectGamerChanged(GameRoilDataItem value)
     {
@@ -199,31 +252,59 @@ public partial class WavesWikiViewModel : WikiViewModelBase
     }
 
     [RelayCommand]
-    private async Task RefreshUserAsync()
+    private async Task RefreshUserAsync() 
+    {
+        await RefreshUserAsync(true);
+    }
+
+    async Task RefreshUserAsync(bool isRefresh)
     {
         try
         {
+            var refreshMode = isRefresh ? HaiyuCacheMode.Refresh : HaiyuCacheMode.Default;
             this.SelectGamer = null;
             var account = AccountService.CurrentAccount;
             if (account is not null && await WavesClient.IsLoginAsync(account, CTS.Token))
             {
-                var roles = await TryInvokeAsync(async () =>
-                    await WavesClient.GetGamerAsync(account, (int)Waves.Core.Models.Enums.GameType.Waves, this.CTS.Token)
+                var result = await this.TryCacheInvokeAsync(async ct =>
+                    await this.LoadRoilCacheAsync(
+                        $"wavesWiki:{account.UserId}",
+                        async _ =>
+                        {
+                            return await WavesClient.GetGamerAsync(
+                                    account,
+                                    (int)Waves.Core.Models.Enums.GameType.Waves,
+                                    this.CTS.Token
+                                ) ?? throw new Exception("失效");
+                        },
+                        refreshMode,
+                        ct
+                    )
                 );
-                if (roles.Code != 0)
+                if (result.Code != 0 || result.Result == null)
                 {
-                    TipShow.ShowMessage(LanguageService.FormatByText(LanguageService.GetStringByText("获取数据失败，请检查网络或重启应用")), Symbol.Clear);
+                    TipShow.ShowMessage(
+                        LanguageService.FormatByText(
+                            LanguageService.GetStringByText("获取数据失败，请检查网络或重启应用")
+                        ),
+                        Symbol.Clear
+                    );
                     return;
                 }
-                this.Gamers = roles.Result.Data.ToObservableCollection();
+                this.Gamers = result.Result.Data.ToObservableCollection();
                 this.SelectGamer = Gamers[0];
                 this.KuroLogin = true;
             }
         }
         catch (Exception ex)
         {
-
-            TipShow.ShowMessage(LanguageService.FormatByText(LanguageService.GetStringByText("刷新失败:{0}"), ex.Message), Symbol.Accept);
+            TipShow.ShowMessage(
+                LanguageService.FormatByText(
+                    LanguageService.GetStringByText("刷新失败:{0}"),
+                    ex.Message
+                ),
+                Symbol.Accept
+            );
         }
     }
 
@@ -244,10 +325,12 @@ public partial class WavesWikiViewModel : WikiViewModelBase
         {
             return;
         }
-        KuroDataCenterWindow window = new KuroDataCenterWindow( context, CommunityWindowOption);
-        if(window.Content is FrameworkElement element)
+        KuroDataCenterWindow window = new KuroDataCenterWindow(context, CommunityWindowOption);
+        if (window.Content is FrameworkElement element)
         {
-            element.RequestedTheme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
+            element.RequestedTheme = Instance
+                .Host.Services.GetRequiredService<IThemeService>()
+                .CurrentTheme;
         }
         window.AppWindow.Show();
     }
@@ -285,11 +368,13 @@ public partial class WavesWikiViewModel : WikiViewModelBase
             SelectGamer.ServerId,
             SelectGamer.RoleId,
             SelectGamer.ServerName,
-            SelectGamer.RoleName);
+            SelectGamer.RoleName
+        );
     }
 
     private async Task<WebSessionContext?> CreateCommunitySessionContext(
-        Func<KuroLoginSnapshot, string, string, string?, string?, WebSessionContext> factory)
+        Func<KuroLoginSnapshot, string, string, string?, string?, WebSessionContext> factory
+    )
     {
         var snapshot = CreateLoginSnapshot();
         if (snapshot is null || SelectGamer is null)
@@ -297,23 +382,31 @@ public partial class WavesWikiViewModel : WikiViewModelBase
             return null;
         }
         var current = this.KuroAccountService.CurrentAccount;
-        if(current == null)
+        if (current == null)
         {
-            SystemEventMessager.Publish(new()
-            {
-                Message = LanguageService.GetStringByText("请选择一个账号"),
-                Delay = TimeSpan.FromSeconds(10).TotalSeconds
-            });
+            SystemEventMessager.Publish(
+                new()
+                {
+                    Message = LanguageService.GetStringByText("请选择一个账号"),
+                    Delay = TimeSpan.FromSeconds(10).TotalSeconds,
+                }
+            );
             return null;
         }
-        var refreshData = await this.KuroClient.RefreshGamerDataAsync(current, SelectGamer, this.CTS.Token);
+        var refreshData = await this.KuroClient.RefreshGamerDataAsync(
+            current,
+            SelectGamer,
+            this.CTS.Token
+        );
         if (refreshData == null || !refreshData.Success)
         {
-            SystemEventMessager.Publish(new()
-            {
-                Message = LanguageService.GetStringByText("当前账号异常，请重新登录"),
-                Delay = TimeSpan.FromSeconds(10).TotalSeconds
-            });
+            SystemEventMessager.Publish(
+                new()
+                {
+                    Message = LanguageService.GetStringByText("当前账号异常，请重新登录"),
+                    Delay = TimeSpan.FromSeconds(10).TotalSeconds,
+                }
+            );
             return null;
         }
         return factory(
@@ -321,7 +414,8 @@ public partial class WavesWikiViewModel : WikiViewModelBase
             SelectGamer.ServerId,
             SelectGamer.RoleId,
             SelectGamer.ServerName,
-            SelectGamer.RoleName);
+            SelectGamer.RoleName
+        );
     }
 
     private KuroLoginSnapshot? CreateLoginSnapshot()

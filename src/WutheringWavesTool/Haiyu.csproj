@@ -10,6 +10,8 @@
 		<PublishProfile>win-x64.pubxml</PublishProfile>
 		<UseWinUI>true</UseWinUI>
 		<LangVersion>preview</LangVersion>
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)Generated</CompilerGeneratedFilesOutputPath>
 		<SatelliteResourceLanguages></SatelliteResourceLanguages>
 		<InvariantGlobalization>true</InvariantGlobalization>
 		<WinUISDKReferences>false</WinUISDKReferences>
@@ -115,6 +117,7 @@
 		</PackageReference>
 	</ItemGroup>
 	<ItemGroup>
+		<ProjectReference Include="..\Haiyu.Analyzers\Haiyu.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 		<ProjectReference Include="..\Extensions\Haiyu.Plugin\Haiyu.Plugin.csproj" />
 		<ProjectReference Include="..\Extensions\Haiyu.ServiceHost\Haiyu.ServiceHost.csproj" />
 		<ProjectReference Include="..\Extensions\LanguageEditer.Model\LanguageEditer.Model.csproj" />

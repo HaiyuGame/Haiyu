@@ -38,7 +38,7 @@ public static class Instance
     public static async Task InitServiceAsync()
     {
         EnsureMemoryPackFormatters();
-        Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder().AppBuilder().Build();
+        Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder().RegisterCache().AppBuilder().Build();
         _ = Task.Run(async () => await Host.StartAsync());
     }
 
