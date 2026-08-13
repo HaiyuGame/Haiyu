@@ -1,4 +1,4 @@
-namespace Haiyu.ServiceHost.Contracts;
+namespace Cacheing.Contracts;
 
 public interface IHaiyuMemoryCacheService
 {

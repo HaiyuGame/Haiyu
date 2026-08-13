@@ -1,8 +1,8 @@
 using System.Collections.Concurrent;
-using Haiyu.ServiceHost.Contracts;
+using Cacheing.Contracts;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace Haiyu.ServiceHost.Services;
+namespace Cacheing.Services;
 
 public sealed class HaiyuMemoryCacheService : IHaiyuMemoryCacheService
 {

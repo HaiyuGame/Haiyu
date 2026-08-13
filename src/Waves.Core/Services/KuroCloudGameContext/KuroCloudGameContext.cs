@@ -1,10 +1,12 @@
+
+
 namespace Waves.Core.Services;
 
 public class KuroCloudGameContext : IKuroCloudGameContext
 {
-    internal KuroCloudGameContext(WavesCloudSurvivalService cloudGameService)
+    internal KuroCloudGameContext(IWavesCloudGameService wavesCloudGameService)
     {
-        WavesCloudSurivivalService = cloudGameService;
+        WavesCloudGameService = wavesCloudGameService;
     }
 
     /// <summary>
@@ -17,7 +19,6 @@ public class KuroCloudGameContext : IKuroCloudGameContext
     /// </summary>
     private string? GameTitleKey { get; set; }
 
-    public WavesCloudSurvivalService WavesCloudSurivivalService { get; }
 
     public IGameEventPublisher<CloudMessageArgs> CloudGameEventPublisher { get; internal set; }
 
@@ -27,6 +28,7 @@ public class KuroCloudGameContext : IKuroCloudGameContext
 
     public string GamerConfigPath { get; internal set; }
     public uint CurrentPayType { get; private set; }
+    public IWavesCloudGameService WavesCloudGameService { get; }
     #region 排队参数
     public CancellationTokenSource? queqeCTS = null;
     public System.Threading.PeriodicTimer? _queqeTimer;
@@ -42,14 +44,6 @@ public class KuroCloudGameContext : IKuroCloudGameContext
         }
         CloudGameProcessTracker = new CloudGameProcessTracker();
         await CloudGameProcessTracker.StartTrackingAsync(this.CloudGameEventPublisher);
-        if (WavesCloudSurivivalService.IsRuning)
-        {
-            await WavesCloudSurivivalService.StopAsync();
-        }
-        else
-        {
-            await WavesCloudSurivivalService.StartAsync();
-        }
         Directory.CreateDirectory(GamerConfigPath);
         this.GameLocalConfig = new GameLocalConfig(GamerConfigPath + "\\Settings.bat");
     }
@@ -85,7 +79,7 @@ public class KuroCloudGameContext : IKuroCloudGameContext
         );
         this.CurrentPayType = payType;
         var invokeResult =
-            await this.WavesCloudSurivivalService.WavesCloudGameService.CommonStartGameAsync(
+            await this.WavesCloudGameService.CommonStartGameAsync(
                 http,
                 session,
                 paramData,
@@ -214,7 +208,7 @@ public class KuroCloudGameContext : IKuroCloudGameContext
                 }
                 var http = CloudGameDataHelper.CreateWebCloudClient(session);
                 var queueResult =
-                    await this.WavesCloudSurivivalService.WavesCloudGameService.CommonQueueInfoAsync(
+                    await this.WavesCloudGameService.CommonQueueInfoAsync(
                         http,
                         session
                     );

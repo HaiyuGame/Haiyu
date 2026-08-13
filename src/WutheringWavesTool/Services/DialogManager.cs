@@ -183,6 +183,8 @@ public abstract class DialogManager : IDialogManager
 
     public async Task ShowWebGameDialogAsync() => await ShowDialogAsync<WebGameLogin>();
 
+    public async Task ShowCloudUserManagerDialogAsync() => await ShowDialogAsync<WavesCloudUserDialog>();
+
     public async Task ShowGameLauncherChacheDialogAsync(GameLauncherCacheArgs args) =>
         await ShowDialogAsync<GameLauncherCacheManager>(args);
 

@@ -23,6 +23,11 @@ public interface IWavesCloudGameService
         CancellationToken ct = default
     );
 
+
+    #region User
+    Task<CloudGameLoginSession?> GetCurrentUserSession();
+    Task<bool> SetCurrentUserSession(string userId);
+    #endregion
     Task<CloudApiResponse<AccessData>?> GetAccessToken(
         CloudGameLoginData data,
         string refreshPhoneToken,
@@ -129,4 +134,5 @@ public interface IWavesCloudGameService
         int poolType,
         CancellationToken token = default
     );
+    Task DeleteUserAsync(string id);
 }

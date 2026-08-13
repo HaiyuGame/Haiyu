@@ -119,6 +119,7 @@
 		<ProjectReference Include="..\Haiyu.Analyzers\Haiyu.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 		<ProjectReference Include="..\Extensions\Haiyu.Plugin\Haiyu.Plugin.csproj" />
 		<ProjectReference Include="..\Extensions\Haiyu.ServiceHost\Haiyu.ServiceHost.csproj" />
+		<ProjectReference Include="..\Extensions\Cacheing\Cacheing.csproj" />
 		<ProjectReference Include="..\Extensions\LanguageEditer.Model\LanguageEditer.Model.csproj" />
 		<ProjectReference Include="..\Extensions\Waves.Api\Waves.Api.csproj" />
 		<ProjectReference Include="..\Haiyu.KuroClient\Haiyu.KuroClient.csproj" />

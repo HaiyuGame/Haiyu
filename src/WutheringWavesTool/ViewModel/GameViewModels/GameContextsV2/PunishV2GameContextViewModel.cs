@@ -1,4 +1,4 @@
-using Haiyu.ServiceHost.Contracts;
+using Cacheing.Contracts;
 using Waves.Core.Common;
 using Waves.Core.Models.CoreApi;
 using Waves.Core.Models.Enums;

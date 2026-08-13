@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Haiyu.Helpers;
 using Haiyu.Models.Wrapper.Wiki;
-using Haiyu.ServiceHost.Contracts;
+using Cacheing.Contracts;
 using Waves.Api.Models.GameWikiiClient;
 using Waves.Core.Services;
 

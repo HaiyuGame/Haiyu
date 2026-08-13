@@ -1,5 +1,4 @@
-using Haiyu.ServiceHost.Contracts;
-using Microsoft.Extensions.Caching.Memory;
+using Cacheing.Contracts;
 using Waves.Core.Common;
 using Waves.Core.Models.CoreApi;
 using Waves.Core.Models.Enums;

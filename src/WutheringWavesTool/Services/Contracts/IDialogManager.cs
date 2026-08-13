@@ -25,6 +25,8 @@ public interface IDialogManager
     public Task<UpdateGameResult> ShowUpdateGameDialogAsyncV2(string contextName, UpdateGameType type);
     public Task<LauncheNodeConfig> ShowSelectGameNodeAsync(string id);
     public Task ShowWavesCloudSettingAsync(GameType ype);
+
+    Task ShowCloudUserManagerDialogAsync();
     Task ShowGameResourceV2DialogAsync(string contextName);
     public Task ShowDeleteGameResource(string contentName);
     public void CloseDialog();

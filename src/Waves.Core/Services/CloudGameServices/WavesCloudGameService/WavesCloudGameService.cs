@@ -1,6 +1,6 @@
 namespace Waves.Core.Services.CloudGameServices;
 
-public class WavesCloudGameService : IWavesCloudGameService
+public sealed partial class WavesCloudGameService : IWavesCloudGameService
 {
     public CloudConfigManager ConfigManager { get; }
 
@@ -445,4 +445,5 @@ public class WavesCloudGameService : IWavesCloudGameService
         var body = await response.Content.ReadAsStringAsync(ct);
         return body;
     }
+
 }

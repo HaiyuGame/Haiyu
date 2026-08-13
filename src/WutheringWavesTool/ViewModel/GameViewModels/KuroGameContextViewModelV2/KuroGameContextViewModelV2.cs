@@ -4,7 +4,7 @@ using System.Net.NetworkInformation;
 using System.Text;
 using Haiyu.Models.Dialogs;
 using Haiyu.Models.Enums;
-using Haiyu.ServiceHost.Contracts;
+using Cacheing.Contracts;
 using Haiyu.Services.DialogServices;
 using Waves.Api.Models.Launcher;
 using Waves.Core.Common;

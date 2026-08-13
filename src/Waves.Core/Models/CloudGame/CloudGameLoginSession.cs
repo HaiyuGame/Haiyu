@@ -20,7 +20,7 @@ public partial class CloudGameLoginSession:ObservableObject
 
     public DateTime SaveTime { get; internal set; }
 
-    public string GetId() => $"{OrginData.Username}{OrginData.Sdkuserid}";
+    public string GetId() => $"{OrginData.Username}";
 }
 
 /// <summary>

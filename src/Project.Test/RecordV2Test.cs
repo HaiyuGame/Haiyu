@@ -7,7 +7,7 @@ using Waves.Core;
 using Waves.Core.Contracts;
 using Waves.Core.Contracts.CloudGame;
 using Waves.Core.Services;
-using Waves.Core.Services.CloudGameServices;
+using Waves.Core.Services.CloudGameServices.WavesCloudGameService;
 using Waves.Settings;
 
 namespace Project.Test;
@@ -73,7 +73,6 @@ public class RecordV2Test
                 AppSettings.WavesRecordFolder
             ))
             .AddSingleton<IWavesCloudGameService, WavesCloudGameService>()
-            .AddSingleton<WavesCloudSurvivalService>()
             .AddSingleton<CloudConfigManager>(
                 (s) =>
                 {
@@ -87,7 +86,6 @@ public class RecordV2Test
         var context = Provider.GetKeyedService<IKuroCloudGameContext>(nameof(KuroCloudGameContext));
         ArgumentNullException.ThrowIfNull(context);
         await context.InitAsync();
-        await Provider.GetService<WavesCloudSurvivalService>()!.StartAsync();
         return context;
     }
 }

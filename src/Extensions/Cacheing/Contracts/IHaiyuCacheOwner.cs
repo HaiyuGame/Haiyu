@@ -1,4 +1,4 @@
-namespace Haiyu.ServiceHost.Contracts;
+namespace Cacheing.Contracts;
 
 /// <summary>
 /// Exposes the shared cache service to code emitted by <c>HaiyuCacheGenerator</c>.

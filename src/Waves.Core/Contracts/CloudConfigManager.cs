@@ -38,14 +38,14 @@ public sealed partial class CloudConfigManager
         return logins;
     }
 
-    public async Task<CloudGameLoginData?> GetUserAsync(string userName,CancellationToken token = default)
+    public async Task<CloudGameLoginData?> GetUserAsync(string id,CancellationToken token = default)
     {
         List<CloudGameLoginData> items = null;
         if(cacheData == null || cacheData.Count == 0)
             items = (await GetUsersAsync()).ToList();
         else
             items = cacheData.Values.ToList();
-        return items.Where(x => x.Username == userName).FirstOrDefault();
+        return items.FirstOrDefault(x => x.GetId() == id);
     }
 
     public async Task<bool> SaveUserAsync(CloudGameLoginData loginResult)

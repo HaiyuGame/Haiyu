@@ -13,8 +13,8 @@ namespace Haiyu.Analyzers;
 [Generator]
 public sealed class HaiyuCacheGenerator : IIncrementalGenerator
 {
-    private const string AttributeMetadataName = "Haiyu.ServiceHost.Contracts.HaiyuCacheAttribute";
-    private const string OwnerMetadataName = "Haiyu.ServiceHost.Contracts.IHaiyuCacheOwner";
+    private const string AttributeMetadataName = "Cacheing.Contracts.HaiyuCacheAttribute";
+    private const string OwnerMetadataName = "Cacheing.Contracts.IHaiyuCacheOwner";
 
     private static readonly DiagnosticDescriptor ContainingTypeMustBePartial = new(
         "HYC001", "Cache owner must be partial",
@@ -169,7 +169,7 @@ public sealed class HaiyuCacheGenerator : IIncrementalGenerator
         sb.Append(indent).AppendLine("    string instanceKey,");
         sb.Append(indent).Append("    global::System.Func<global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task<")
             .Append(typeName).AppendLine(">> factory,");
-        sb.Append(indent).AppendLine("    global::Haiyu.ServiceHost.Contracts.HaiyuCacheMode mode = global::Haiyu.ServiceHost.Contracts.HaiyuCacheMode.Default,");
+        sb.Append(indent).AppendLine("    global::Cacheing.Contracts.HaiyuCacheMode mode = global::Cacheing.Contracts.HaiyuCacheMode.Default,");
         sb.Append(indent).AppendLine("    global::System.Threading.CancellationToken cancellationToken = default)");
         sb.Append(indent).AppendLine("{");
         sb.Append(indent).Append("    return CacheService.GetOrCreateAsync<").Append(typeName).AppendLine(">");
@@ -190,7 +190,7 @@ public sealed class HaiyuCacheGenerator : IIncrementalGenerator
         sb.Append(indent).AppendLine("    string instanceKey,");
         sb.Append(indent).Append("    global::System.Func<global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task<")
             .Append(typeName).AppendLine(">> factory,");
-        sb.Append(indent).AppendLine("    global::Haiyu.ServiceHost.Contracts.HaiyuCacheMode mode = global::Haiyu.ServiceHost.Contracts.HaiyuCacheMode.Default,");
+        sb.Append(indent).AppendLine("    global::Cacheing.Contracts.HaiyuCacheMode mode = global::Cacheing.Contracts.HaiyuCacheMode.Default,");
         sb.Append(indent).AppendLine("    global::System.Threading.CancellationToken cancellationToken = default)");
         sb.Append(indent).AppendLine("{");
         sb.Append(indent).Append("    var value = await Get").Append(propertyName)
@@ -208,7 +208,7 @@ public sealed class HaiyuCacheGenerator : IIncrementalGenerator
         sb.Append(indent).AppendLine("    global::System.Threading.CancellationToken cancellationToken = default)");
         sb.Append(indent).AppendLine("{");
         sb.Append(indent).Append("    return Load").Append(propertyName)
-            .AppendLine("Async(instanceKey, factory, global::Haiyu.ServiceHost.Contracts.HaiyuCacheMode.Refresh, cancellationToken);");
+            .AppendLine("Async(instanceKey, factory, global::Cacheing.Contracts.HaiyuCacheMode.Refresh, cancellationToken);");
         sb.Append(indent).AppendLine("}");
         sb.AppendLine();
 

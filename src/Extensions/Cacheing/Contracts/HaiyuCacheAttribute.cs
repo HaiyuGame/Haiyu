@@ -1,4 +1,4 @@
-namespace Haiyu.ServiceHost.Contracts;
+namespace Cacheing.Contracts;
 
 [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
 public sealed class HaiyuCacheAttribute : Attribute
