@@ -5,6 +5,7 @@ using Haiyu.Plugin.Common;
 using Haiyu.Plugin.Contracts;
 using Haiyu.Plugin.Services;
 using Haiyu.ServiceHost;
+using Cacheing;
 using Haiyu.ServiceHost.Contracts;
 using Haiyu.ServiceHost.Services;
 using Haiyu.ServiceHost.XBox.Commons;
@@ -26,8 +27,8 @@ using Waves.Api.Models.Wrappers;
 using Waves.Core.Contracts.CloudGame;
 using Waves.Core.Models;
 using Waves.Core.Services;
-using Waves.Core.Services.CloudGameServices;
 using Waves.Settings;
+using Waves.Core.Services.CloudGameServices;
 
 namespace Haiyu;
 
@@ -38,7 +39,7 @@ public static class Instance
     public static async Task InitServiceAsync()
     {
         EnsureMemoryPackFormatters();
-        Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder().AppBuilder().Build();
+        Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder().RegisterCache().AppBuilder().Build();
         _ = Task.Run(async () => await Host.StartAsync());
     }
 
@@ -112,6 +113,8 @@ public static class InstanceBuilderExtensions
                     .AddTransient<GameEnhancedDialog>()
                     .AddTransient<GameEnhancedViewModel>()
                     .AddTransient<WebViewCabManagerDialog>()
+                    .AddTransient<WavesCloudUserViewModel>()
+                    .AddTransient<WavesCloudUserDialog>()
                     .AddTransient<WebViewCabManagerViewModel>()
                     .AddTransient<GamerSignPage>()
                     .AddTransient<GamerSignViewModel>()
@@ -180,9 +183,8 @@ public static class InstanceBuilderExtensions
                     #endregion
                     #region Base
                     .AddSingleton<IAppContext<App>, AppContext<App>>()
-                    .AddSingleton<IKuroClient, global::Haiyu.KuroClient.KuroClient>()
+                    .AddTransient<IKuroClient, global::Haiyu.KuroClient.KuroClient>()
                     .AddTransient<IPlayerCardService, PlayerCardService>()
-                    .AddSingleton<ICloudGameService, CloudGameService>()
                     .AddSingleton<IScreenCaptureService, ScreenCaptureService>()
                     .AddSingleton<IGameWikiClient, GameWikiClient>()
                     .AddTransient<IViewFactorys, ViewFactorys>()

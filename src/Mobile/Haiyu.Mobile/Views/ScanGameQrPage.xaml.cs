@@ -18,4 +18,12 @@ public partial class ScanGameQrPage : ContentPage
             vm.HandleBarcodesDetected(e);
         }
     }
+
+    protected override void OnNavigatedFrom(NavigatedFromEventArgs args)
+    {
+        if (this.BindingContext is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
+    }
 }

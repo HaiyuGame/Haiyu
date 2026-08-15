@@ -1,7 +1,9 @@
+using Cacheing.Contracts;
 using Waves.Core.Common;
 using Waves.Core.Models.CoreApi;
 using Waves.Core.Models.Enums;
 using Windows.ApplicationModel.DataTransfer;
+using ZXing.QrCode.Internal;
 
 namespace Haiyu.ViewModel.GameViewModels.GameContexts;
 
@@ -32,21 +34,11 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
     {
         if (this.Contents != null)
             this.Contents.Clear();
-        if (this.Activity != null)
-        {
-            this.Activity.Contents.Clear();
-            this.Activity.Contents = null;
-        }
-        if (this.Notice != null)
-        {
-            this.Notice.Contents.Clear();
-            this.Notice.Contents = null;
-        }
-        if (this.News != null)
-        {
-            this.News.Contents.Clear();
-            this.News.Contents = null;
-        }
+
+        this.Activity = null;
+        this.Notice = null;
+        this.News = null;
+
         if (this.SlideShows != null)
         {
             this.SlideShows.Clear();
@@ -66,17 +58,30 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
 
     [ObservableProperty]
     public partial ObservableCollection<string> Tabs { get; set; } =
-        new ObservableCollection<string>() { LanguageService.GetStringByText("活动"), LanguageService.GetStringByText("公告"), LanguageService.GetStringByText("新闻") };
+        new ObservableCollection<string>()
+        {
+            LanguageService.GetStringByText("活动"),
+            LanguageService.GetStringByText("公告"),
+            LanguageService.GetStringByText("新闻"),
+        };
 
     [ObservableProperty]
-    public partial string SelectTab { get; set; }
-
+    public partial string? SelectTab { get; set; }
 
     [ObservableProperty]
     public partial int SwatchIndex { get; set; }
 
     [ObservableProperty]
     public partial KRSDKLauncherCacheWrapper SelectDisplayerLocalUser { get; set; }
+
+    #region Cache
+    [HaiyuCache(
+        nameof(Starter),
+        ExpirationSeconds = 3500,
+        TargetName = nameof(WavesV2GameContextViewModel)
+    )]
+    public GameLauncherStarter Starter { get; set; }
+    #endregion
 
     partial void OnSelectTabChanged(string value)
     {
@@ -129,8 +134,6 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
     [ObservableProperty]
     public partial Base Base { get; private set; }
 
-
-
     [ObservableProperty]
     public partial MusicData MusicData { get; private set; }
 
@@ -146,22 +149,34 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
     {
         if (showCard)
         {
-            var starter = await this.GameContext.GetLauncherStarterAsync(this.CTS.Token);
-            if (starter == null)
-                return;
-           
-            this.SlideShows = starter.Slideshow.ToObservableCollection();
-            this.Notice = starter.Guidance.Notice;
-            this.News = starter.Guidance.News;
-            this.Activity = starter.Guidance.Activity;
-            PlayerCardVisibility = Visibility.Visible;
-            this.SelectTab = null;
-            this.SelectTab = Tabs[0];
-            await RefreshLocalGameUser();
+            var starter = await this.TryCacheInvokeAsync(async ct =>
+                await this.LoadStarterAsync(
+                    $"{nameof(WavesV2GameContextViewModel)}:{this.GameContext.ContextName}",
+                    async _ =>
+                    {
+                        var starter = await this.GameContext.GetLauncherStarterAsync(
+                            this.CTS.Token
+                        );
+                        return starter;
+                    },
+                    HaiyuCacheMode.Default,
+                    ct
+                )
+            );
+            if (starter.Code == 0 && starter.Result != null)
+            {
+                this.SlideShows = starter.Result.Slideshow.ToObservableCollection();
+                this.Notice = starter.Result.Guidance.Notice;
+                this.News = starter.Result.Guidance.News;
+                this.Activity = starter.Result.Guidance.Activity;
+                PlayerCardVisibility = Visibility.Visible;
+                this.SelectTab = null;
+                this.SelectTab = Tabs[0];
+            }
+            await RefreshLocalGameUser(null, false);
         }
         else
         {
-
             this.Base = null;
             this.MusicData = null;
             this.BattlePass = null;
@@ -171,11 +186,18 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
         }
     }
 
-
-
     [RelayCommand]
     private async Task RefreshLocalGameUser(KRSDKLauncherCacheWrapper wrapper = null)
     {
+        await RefreshLocalGameUser(wrapper, true);
+    }
+
+    private async Task RefreshLocalGameUser(
+        KRSDKLauncherCacheWrapper wrapper = null,
+        bool isRefresh = false
+    )
+    {
+        var cacheType = isRefresh ? HaiyuCacheMode.Refresh : HaiyuCacheMode.Default;
         IsLocalUserRefresh = true;
         var lastSelect = await this.GameContext.GameLocalConfig.GetConfigAsync(
             GameLocalSettingName.LasterSelectLocalUser,
@@ -208,20 +230,24 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
             foreach (var item in localUsers)
             {
                 var code = KrKeyHelper.Xor(item.OauthCode, 5);
-                var userPlayers = await GameContext.QueryPlayerInfoAsync(code);
+                var userPlayerCache = await this.TryInvokeAsync(async () =>
+                    await this.CacheService.GetOrCreateAsync(
+                        nameof(WavesV2GameContextViewModel),
+                        nameof(QueryPlayerInfo),
+                        $"{nameof(QueryPlayerInfo)}:{item.Id}",
+                        TimeSpan.FromSeconds(400),
+                        async ct => await GameContext.QueryPlayerInfoAsync(code, ct),
+                        cacheType,
+                        CTS.Token
+                    )
+                );
+                if (userPlayerCache.Code != 0 || userPlayerCache.Result == null)
+                {
+                    continue;
+                }
+                var userPlayers = userPlayerCache.Result;
                 if (userPlayers == null || userPlayers.Code != 0)
                 {
-
-                    this.Base = null;
-                    this.MusicData = null;
-                    this.BattlePass = null;
-                    this.MotorData = null;
-                    this.GameContext.SystemEventPublisher.Publish(new()
-                    {
-                        Message = LanguageService.FormatByText(LanguageService.GetStringByText("游戏账号:{0}失效"), item.Username),
-                        Delay = 5
-                    });
-                    IsLocalUserRefresh = false;
                     continue;
                 }
                 foreach (var player in userPlayers.Items)
@@ -230,7 +256,10 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
                     {
                         continue;
                     }
-                    KRSDKLauncherCacheWrapper info = new KRSDKLauncherCacheWrapper(item, wavesPlayer);
+                    KRSDKLauncherCacheWrapper info = new KRSDKLauncherCacheWrapper(
+                        item,
+                        wavesPlayer
+                    );
                     if (info.GetKey == lastSelect)
                     {
                         selectItem = info;
@@ -238,17 +267,15 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
                     }
                 }
             }
-
         }
         if (selectItem == null)
         {
-            LocalUserTitle = LanguageService.GetStringByText("未获取到上次选择的本地游戏账号信息");
+            LocalUserTitle = LanguageService.GetStringByText("请选择账号");
             this.Base = null;
             this.MusicData = null;
             this.BattlePass = null;
             this.MotorData = null;
             IsLocalUserRefresh = false;
-
             return;
         }
         if (selectItem.PlayerItem is not WavesQueryPlayerItem playerItem)
@@ -257,20 +284,38 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
             return;
         }
         LocalUserTitle = playerItem.RoleName;
-        var result = await this.GameContext.QueryRoleInfoAsync(
-            KrKeyHelper.Xor(selectItem.Cache.OauthCode, 5),
-            playerItem.Id,
-            playerItem.ServerName
+        var userPlayerInfoCache = await this.TryInvokeAsync(async () =>
+            await this.CacheService.GetOrCreateAsync(
+                nameof(WavesV2GameContextViewModel),
+                nameof(QueryRoleInfo),
+                $"{nameof(QueryRoleInfo)}:{playerItem.Id}",
+                TimeSpan.FromSeconds(400),
+                async ct =>
+                    await this.GameContext.QueryRoleInfoAsync(
+                        KrKeyHelper.Xor(selectItem.Cache.OauthCode, 5),
+                        playerItem.Id,
+                        playerItem.ServerName
+                    ),
+                HaiyuCacheMode.Default,
+                CTS.Token
+            )
         );
-        if (result == null || result.Items == null || result.Items.Count == 0)
+        if (userPlayerInfoCache.Code != 0 || userPlayerInfoCache.Result == null)
         {
             LocalUserTitle = LanguageService.GetStringByText("获取账号信息失败");
-            await TipShow.ShowMessageAsync(LanguageService.GetStringByText("请重新进入游戏获取信息"), Symbol.Clear);
-            this.GameContext.SystemEventPublisher.Publish(new()
-            {
-                Message = LanguageService.FormatByText(LanguageService.GetStringByText("体力卡片刷新失败，请重新进入游戏获取")),
-                Delay = 5
-            });
+            await TipShow.ShowMessageAsync(
+                LanguageService.GetStringByText("请重新进入游戏获取信息"),
+                Symbol.Clear
+            );
+            this.GameContext.SystemEventPublisher.Publish(
+                new()
+                {
+                    Message = LanguageService.FormatByText(
+                        LanguageService.GetStringByText("体力卡片刷新失败，请重新进入游戏获取")
+                    ),
+                    Delay = 5,
+                }
+            );
             IsLocalUserRefresh = false;
             this.Base = null;
             this.MusicData = null;
@@ -278,11 +323,12 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
             this.MotorData = null;
             return;
         }
+        var result = userPlayerInfoCache.Result;
         var wavesData = (result.Items[0] as WavesLocalGameRoleItem)!;
-        this.Base = wavesData.Base??new();
+        this.Base = wavesData.Base ?? new();
         this.MusicData = wavesData.MusicData;
-        this.BattlePass = wavesData.BattlePass??new();
-        this.MotorData = wavesData.MotorData??new();
+        this.BattlePass = wavesData.BattlePass ?? new();
+        this.MotorData = wavesData.MotorData ?? new();
         SwatchIndex = 1;
         IsLocalUserRefresh = false;
     }

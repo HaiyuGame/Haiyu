@@ -8,5 +8,6 @@ public partial class AddKuroTokenPopup : ContentView
 	{
 		InitializeComponent();
         this.BindingContext = viewModel;
+        
 	}
 }

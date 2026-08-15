@@ -1,3 +1,5 @@
+
+
 namespace Waves.Core;
 
 public static class Waves
@@ -118,13 +120,12 @@ public static class Waves
                     return context;
                 }
             )
-            .AddSingleton<WavesCloudSurvivalService>()
             .AddKeyedSingleton<CloudGameEventPublisher>(nameof(KuroCloudGameContext))
             .AddKeyedSingleton<IKuroCloudGameContext, KuroCloudGameContext>(
                 nameof(KuroCloudGameContext),
                 (provider, c) =>
                 {
-                    var context = new KuroCloudGameContext(provider.GetRequiredService<WavesCloudSurvivalService>());
+                    var context = new KuroCloudGameContext(provider.GetRequiredService<IWavesCloudGameService>());
                     context.GamerConfigPath = GameContextFactory.GameBassPath + "\\WavesCloudConfig";
                     context.CloudGameEventPublisher =
                         provider.GetRequiredKeyedService<CloudGameEventPublisher>(

@@ -76,8 +76,6 @@ public sealed partial class CloudGameingViewModel:ViewModelBase
         var active = args.WindowActivationState != WindowActivationState.Deactivated;
         Logger.WriteInfo($"[CloudGame][Active] WindowActivated state={args.WindowActivationState}, active={active}");
         ApplyWindowActivationState(active);
-        // Do not ExecuteScript on every activation — when the browser process is
-        // dying this throws COMException 0x8007139F and floods the log.
     }
 
     private async void Window_Closed(object sender, WindowEventArgs args)

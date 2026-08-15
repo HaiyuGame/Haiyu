@@ -27,8 +27,9 @@ namespace Waves.Settings;
 [Settings<List<string>>(Name ="skipVerifyFiles",
     JsonTypeInfoContextType = typeof(AppSettingJsonContext),
     JsonTypeInfoPropertyName = nameof(AppSettingJsonContext.Default.ListString))]
-[Settings<bool>(Name ="verifySkilDelete",Nullable = false,DefaultValue ="true")]
+[Settings<bool>(Name = "verifySkilDelete",Nullable = false,DefaultValue ="true")]
 [Settings<string>(Name = "WebViewRuntimeMode", Nullable = true, DefaultValue = "Evergreen")]
+[Settings<string>(Name = "SelectCloudUserID",Nullable =true)]
 public partial class AppSettings : SettingBase
 {
     public static string BassFolder =>

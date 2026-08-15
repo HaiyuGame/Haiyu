@@ -61,6 +61,6 @@ public class CloudGameLoginData
     public string? LoginDid { get; set; }
 
 
-    public string GetId() => $"{Username}{this.Sdkuserid}";
+    public string GetId() => $"{Username}";
 }
 

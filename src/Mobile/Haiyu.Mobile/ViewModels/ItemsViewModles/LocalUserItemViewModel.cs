@@ -27,6 +27,7 @@ namespace Haiyu.Mobile.ViewModels.ItemsViewModles
 
         [ObservableProperty]
         public partial int KuroCoin { get; set; }
+
         [ObservableProperty]
         public partial string ImageCover { get;  set; }
 
@@ -41,6 +42,7 @@ namespace Haiyu.Mobile.ViewModels.ItemsViewModles
 
         [ObservableProperty]
         public partial string Sign { get; set; }
+        public LocalAccount BaseData { get; private set; }
 
         [RelayCommand]
         public void SendShowSession()
@@ -58,6 +60,10 @@ namespace Haiyu.Mobile.ViewModels.ItemsViewModles
             });
         }
 
+        public override void SetData(LocalAccount args)
+        {
+            this.BaseData = args;
+        }
 
 
         [RelayCommand]

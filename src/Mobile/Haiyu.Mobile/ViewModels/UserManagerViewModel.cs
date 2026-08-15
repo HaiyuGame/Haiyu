@@ -87,7 +87,7 @@ public sealed partial class UserManagerViewModel : ViewModelBase
         var users = await MobileLocalAccountService.GetUsersAsync();
         if (users != null)
         {
-            LocalUsers = _itemFactory.CreateLocalUserIetms(users);
+            LocalUsers = _itemFactory.CreateLocalUserItems(users);
         }
         IsRefreshing = false;
     }

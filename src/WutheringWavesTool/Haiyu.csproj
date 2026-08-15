@@ -10,6 +10,8 @@
 		<PublishProfile>win-x64.pubxml</PublishProfile>
 		<UseWinUI>true</UseWinUI>
 		<LangVersion>preview</LangVersion>
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)Generated</CompilerGeneratedFilesOutputPath>
 		<SatelliteResourceLanguages></SatelliteResourceLanguages>
 		<InvariantGlobalization>true</InvariantGlobalization>
 		<WinUISDKReferences>false</WinUISDKReferences>
@@ -66,7 +68,6 @@
 	</ItemGroup>
 	<ItemGroup>
 		<Content Remove="Assets\Cursor\CursorResource.res" />
-		<Content Remove="assets\geet2.html" />
 		<Content Remove="Assets\HpatchzResource\hpatchz.exe" />
 		<Content Remove="assets\Readme.md" />
 		<Content Remove="Assets\RolePage\appLogo.png" />
@@ -115,8 +116,10 @@
 		</PackageReference>
 	</ItemGroup>
 	<ItemGroup>
+		<ProjectReference Include="..\Haiyu.Analyzers\Haiyu.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 		<ProjectReference Include="..\Extensions\Haiyu.Plugin\Haiyu.Plugin.csproj" />
 		<ProjectReference Include="..\Extensions\Haiyu.ServiceHost\Haiyu.ServiceHost.csproj" />
+		<ProjectReference Include="..\Extensions\Cacheing\Cacheing.csproj" />
 		<ProjectReference Include="..\Extensions\LanguageEditer.Model\LanguageEditer.Model.csproj" />
 		<ProjectReference Include="..\Extensions\Waves.Api\Waves.Api.csproj" />
 		<ProjectReference Include="..\Haiyu.KuroClient\Haiyu.KuroClient.csproj" />
@@ -277,9 +280,6 @@
 		<Content Update="Assets\appLogo.png">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
-		<None Update="Assets\geet2.html">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
 		<None Update="Assets\HpatchzResource\hpatchz.exe">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 
@@ -6,7 +6,6 @@ namespace Haiyu.ServiceHost;
 
 public static class SystemHelper
 {
-    
 }
 
 public static class AdminPrivilegeHelper

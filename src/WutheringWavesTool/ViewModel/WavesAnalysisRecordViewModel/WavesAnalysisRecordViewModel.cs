@@ -21,6 +21,7 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
     public CloudGameLoginSession Session { get; set; }
     public IWavesPlayerCardCacheServices Cache { get; }
     public IPickersService PickersService { get; }
+    public IWavesCloudGameService WavesCloudGameService { get; }
     public FiveGroupModel FiveGroup { get; private set; }
     public List<CommunityRoleData> AllRole { get; private set; }
     public List<CommunityWeaponData> AllWeapon { get; private set; }
@@ -29,13 +30,15 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
     public WavesAnalysisRecordViewModel(
         [FromKeyedServices(nameof(KuroCloudGameContext))] IKuroCloudGameContext cloudGameContext,
         IWavesPlayerCardCacheServices cache,
-        IPickersService pickersService
+        IPickersService pickersService,
+        IWavesCloudGameService wavesCloudGameService
     )
     {
         InitializeCharts();
         this.CloudGameContext = cloudGameContext;
         Cache = cache;
         PickersService = pickersService;
+        WavesCloudGameService = wavesCloudGameService;
     }
 
     [ObservableProperty]
@@ -75,11 +78,10 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
 
     async Task MargeNewRecordPlayerAsync()
     {
-        var newRecord =
-            await this.CloudGameContext.WavesCloudSurivivalService.WavesCloudGameService.GetRecordAsync(
-                this.Session,
-                this.CTS.Token
-            );
+        var newRecord = await this.WavesCloudGameService.GetRecordAsync(
+            this.Session,
+            this.CTS.Token
+        );
         if (newRecord == null || newRecord.Data == null)
         {
             return;
@@ -92,13 +94,12 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
         };
         foreach (var item in CardPoolTypeValues.All)
         {
-            var resources =
-                await this.CloudGameContext.WavesCloudSurivivalService.WavesCloudGameService.GetGameRecordResource(
-                    Session,
-                    newRecord.Data.RecordId,
-                    newRecord.Data.PlayerId.ToString(),
-                    (int)item
-                );
+            var resources = await this.WavesCloudGameService.GetGameRecordResource(
+                Session,
+                newRecord.Data.RecordId,
+                newRecord.Data.PlayerId.ToString(),
+                (int)item
+            );
             if (resources?.Data != null)
             {
                 cards.Items.Add(
@@ -128,7 +129,12 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
         }
         catch (Exception ex)
         {
-            LegacyMessageBox.ShowError(LanguageService.FormatByText(LanguageService.GetStringByText("导入失败：{0}"), ex.Message));
+            LegacyMessageBox.ShowError(
+                LanguageService.FormatByText(
+                    LanguageService.GetStringByText("导入失败：{0}"),
+                    ex.Message
+                )
+            );
         }
     }
 
@@ -142,7 +148,9 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
         var jsonFiles = Directory.GetFiles(folderPath, "*.json").ToList();
         if (jsonFiles.Count == 0)
         {
-            LegacyMessageBox.ShowError(LanguageService.GetStringByText("导入失败：文件夹中没有找到.json文件"));
+            LegacyMessageBox.ShowError(
+                LanguageService.GetStringByText("导入失败：文件夹中没有找到.json文件")
+            );
             return;
         }
 
@@ -166,7 +174,7 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
                 if (cache == null)
                     continue;
                 ArgumentNullException.ThrowIfNull(this.Session);
-                if(cache.Name != this.Session.OrginData.Username)
+                if (cache.Name != this.Session.OrginData.Username)
                 {
                     continue;
                 }
@@ -204,13 +212,21 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
 
         if (loadedNames.Count == 0)
         {
-            LegacyMessageBox.ShowError(LanguageService.GetStringByText("导入失败：未读取到有效的抽卡记录"));
+            LegacyMessageBox.ShowError(
+                LanguageService.GetStringByText("导入失败：未读取到有效的抽卡记录")
+            );
             return;
         }
 
         this.Cards = await Cache.SaveAsync(mergedCard);
         var names = string.Join("、", loadedNames);
-        LegacyMessageBox.ShowInformation(LanguageService.FormatByText(LanguageService.GetStringByText("成功导入 {0} 个账号的数据：{1}"), loadedNames.Count, names));
+        LegacyMessageBox.ShowInformation(
+            LanguageService.FormatByText(
+                LanguageService.GetStringByText("成功导入 {0} 个账号的数据：{1}"),
+                loadedNames.Count,
+                names
+            )
+        );
         IsLoading = true;
         await InitAnalysis();
         await AnalysisStarAsync();
@@ -219,14 +235,7 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
 
     internal void SetSessionAsync(CloudGameLoginSession session)
     {
-        var result = this.CloudGameContext.WavesCloudSurivivalService.Cache.TryGet(
-            session.OrginData.Username + session.OrginData.Sdkuserid
-        );
-        if (result == null)
-        {
-            LegacyMessageBox.ShowError(LanguageService.GetStringByText("账号异常……"));
-            this.Window.Close();
-        }
         this.Session = session;
     }
+
 }

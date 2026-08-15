@@ -4,7 +4,9 @@ using System.Net.NetworkInformation;
 using System.Text;
 using Haiyu.Models.Dialogs;
 using Haiyu.Models.Enums;
+using Cacheing.Contracts;
 using Haiyu.Services.DialogServices;
+using Waves.Api.Models.Launcher;
 using Waves.Core.Common;
 using Waves.Core.Models.CoreApi;
 using Waves.Core.Models.Enums;
@@ -12,7 +14,7 @@ using Waves.Core.Services;
 
 namespace Haiyu.ViewModel.GameViewModels;
 
-public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
+public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyuCacheOwner
 {
     private const int ChartPointKeepSeconds = 5;
     private const int ChartMaxPoints = 300;
@@ -33,7 +35,10 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
     public IWallpaperService WallpaperService { get; }
     public IViewFactorys ViewFactory { get; }
 
-    protected KuroGameContextViewModelV2(IAppContext<App> appContext, ITipShow tipShow)
+    protected KuroGameContextViewModelV2(
+        IAppContext<App> appContext,
+        ITipShow tipShow
+    )
     {
         this.Logger = Instance.Host.Services.GetRequiredKeyedService<LoggerService>("AppLog");
         DialogManager = Instance.Host.Services.GetRequiredKeyedService<IDialogManager>(
@@ -41,6 +46,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         );
         AppContext = appContext;
         TipShow = tipShow;
+        CacheService = Instance.Host.Services.GetRequiredService< IHaiyuMemoryCacheService>();
         IoCircuitBreaker = Instance.Host.Services.GetRequiredService<IIoCircuitBreaker>();
         WallpaperService = Instance.Host.Services.GetRequiredService<IWallpaperService>();
         this.ViewFactory = Instance.Host.Services.GetRequiredService<IViewFactorys>();
@@ -142,6 +148,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
     [ObservableProperty]
     public partial bool EnableStartGameBth { get; set; } = false;
 
+
     [ObservableProperty]
     public partial ObservableCollection<ServerDisplay> Servers { get; set; }
 
@@ -152,6 +159,8 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
     public partial bool ProcessAction { get; set; } = false;
 
     public abstract GameType GameType { get; }
+
+    public IHaiyuMemoryCacheService CacheService { get; }
 
     async partial void OnSelectServerChanged(ServerDisplay value)
     {
@@ -625,7 +634,9 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                     this.PreProgress = 100;
                     this.PredDownloadingVisibility = Visibility.Collapsed;
                     PreAdvanceVisiblity = Visibility.Visible;
-                    PreSetupHeaderText = LanguageService.GetStringByText("预下载完成，按下可以开始校验预下载内容");
+                    PreSetupHeaderText = LanguageService.GetStringByText(
+                        "预下载完成，按下可以开始校验预下载内容"
+                    );
                     ShowAdvanceInstallBth(status);
                 }
             }
@@ -825,7 +836,10 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
             }
             else
             {
-                TipShow.ShowMessage(LanguageService.GetStringByText("选择文件路径不合法，请重新选择"), Symbol.Clear);
+                TipShow.ShowMessage(
+                    LanguageService.GetStringByText("选择文件路径不合法，请重新选择"),
+                    Symbol.Clear
+                );
             }
         }
         else
@@ -927,8 +941,9 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
                 await DialogManager.ShowMessageDialog(
                     new ShowDialogOption()
                     {
-                        Context =
-                            LanguageService.GetStringByText("修复游戏会将游戏缓存全部删除，保持与服务器最新文件保持一致\r\n（包含画面设置、滤镜设置、预下载等内容)"),
+                        Context = LanguageService.GetStringByText(
+                            "修复游戏会将游戏缓存全部删除，保持与服务器最新文件保持一致\r\n（包含画面设置、滤镜设置、预下载等内容)"
+                        ),
                         CloseText = LanguageService.GetStringByText("取消"),
                         PrimaryText = LanguageService.GetStringByText("确认修复"),
                         ShowPrimaryButton = true,
@@ -940,7 +955,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
             var filePaths = await this.AppSettings.GetskipVerifyFilesAsync();
             var isDelete = await this.AppSettings.GetverifySkilDeleteAsync();
             Logger.WriteInfo($"开始尝试修复游戏文件");
-            StartBackground(() => GameContext.RepairGameAsync(!isDelete,filePaths));
+            StartBackground(() => GameContext.RepairGameAsync(!isDelete, filePaths));
         }
         else
         {
@@ -975,7 +990,10 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase
         var data = await this.GameContext.GetLocalGameOAuthAsync(this.CTS.Token);
         if (data == null)
         {
-            TipShow.ShowMessage(LanguageService.GetStringByText("不存在任何登陆信息，请登陆游戏后再次查看"), Symbol.Clear);
+            TipShow.ShowMessage(
+                LanguageService.GetStringByText("不存在任何登陆信息，请登陆游戏后再次查看"),
+                Symbol.Clear
+            );
             return;
         }
         await DialogManager.ShowGameLauncherChacheDialogAsync(

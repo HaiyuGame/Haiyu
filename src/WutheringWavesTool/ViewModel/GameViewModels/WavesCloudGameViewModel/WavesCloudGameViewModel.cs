@@ -19,6 +19,7 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
     public IAppContext<App> App { get; }
     public ITipShow TipShow { get; }
     public IViewFactorys ViewFactorys { get; }
+    public IWavesCloudGameService WavesCloudGameService { get; }
     public IWallpaperService WallpaperService { get; }
 
     [ObservableProperty]
@@ -28,15 +29,24 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
     public partial bool IsRefreshing { get; set; }
 
     [ObservableProperty]
-    public partial WallDataWrapper WallData { get; set; }
+    public partial WallDataWrapper WallData { get; set; } = CreateEmptyWallData();
 
     [ObservableProperty]
     public partial int NodesCount { get; set; }
 
-    [ObservableProperty]
-    public partial CloudGameLoginSession SelectLogin { get; set; }
 
     CloudGameUIActive _startBthActive;
+
+    // 用于阻止删除用户之前启动的余额请求在完成后把旧数据重新写回界面。
+    private int _wallDataRefreshVersion;
+
+    private static WallDataWrapper CreateEmptyWallData() => new()
+    {
+        FreeString = string.Empty,
+        PlayerCardString = string.Empty,
+        ExperienseTimeString = string.Empty,
+        PayString = string.Empty
+    };
 
     public WavesCloudGameViewModel(
         IWallpaperService wallpaperService,
@@ -44,7 +54,7 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
             IKuroCloudGameContext kuroCloudGameContext,
         [FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager,
         IAppContext<App> app,
-        ITipShow tipShow,IViewFactorys viewFactorys
+        ITipShow tipShow,IViewFactorys viewFactorys,IWavesCloudGameService wavesCloudGameService
     )
     {
         WallpaperService = wallpaperService;
@@ -53,8 +63,7 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
         App = app;
         TipShow = tipShow;
         ViewFactorys = viewFactorys;
-        KuroCloudGameContext.WavesCloudSurivivalService.MessageHandler +=
-            WavesCloudSurivivalService_MessageHandler;
+        WavesCloudGameService = wavesCloudGameService;
         KuroCloudGameContext.CloudGameProcessTracker.OnProgressChanged +=
             CloudGameProcessTracker_OnProgressChanged;
         ;
@@ -120,22 +129,24 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
         CloudGameProcessTracker_OnProgressChanged(this.KuroCloudGameContext.CloudGameProcessTracker);
     }
 
-    private async void WavesCloudSurivivalService_MessageHandler(
-        object sender,
-        CloudMessageArgs session
-    )
-    {
-        await Task.Delay(500);
-        if (session.Type == Waves.Core.Models.Enums.CloudCoreType.UserChanged)
-        {
-            await this.RefreshUserAsync();
-        }
-    }
-
     private void RegisterMessager()
     {
         this.Messenger.Register<CloudLoginMessager>(this, CloudLoginMethod);
         this.Messenger.Register<RefreshGamePageMessager>(this, RefreshGamePageMethod);
+        this.Messenger.Register<DeleteCloudUserMessager>(this, DeleteCloudUserMethod);
+    }
+
+    private void DeleteCloudUserMethod(object recipient, DeleteCloudUserMessager message)
+    {
+        if (string.IsNullOrWhiteSpace(this._userId))
+            return;
+        if(message.id == this._userId)
+        {
+            Interlocked.Increment(ref this._wallDataRefreshVersion);
+            this.WallData = CreateEmptyWallData();
+            this.UserName = string.Empty;
+            this._userId = string.Empty;
+        }
     }
 
     private async void RefreshGamePageMethod(object recipient, RefreshGamePageMessager message)
@@ -145,15 +156,12 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
 
     private async void CloudLoginMethod(object recipient, CloudLoginMessager message)
     {
-        await this.KuroCloudGameContext.WavesCloudSurivivalService.RefreshTaskAsync();
         await Task.Delay(2000);
         await this.RefreshUserAsync();
     }
 
     public override void Dispose()
     {
-        KuroCloudGameContext.WavesCloudSurivivalService.MessageHandler -=
-            WavesCloudSurivivalService_MessageHandler;
         KuroCloudGameContext.CloudGameProcessTracker.OnProgressChanged -=
             CloudGameProcessTracker_OnProgressChanged;
         base.Dispose();
@@ -170,7 +178,6 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
                 "https://aki-gm-resources-back.aki-game.com/pv/cg/login.webp"
             );
             await RefreshUserAsync();
-            await RefreshCloudNodesAsync();
             this.RefreshUIAsync();
             IsRefreshing = false;
         }
@@ -186,14 +193,15 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
     {
         if (this._startBthActive == CloudGameUIActive.StartGame)
         {
-            if(this.SelectLogin == null)
+            var selectLogin = await this.WavesCloudGameService.GetCurrentUserSession();
+            if (selectLogin == null)
             {
                 await TipShow.ShowMessageAsync(LanguageService.GetStringByText("请在左侧卡片登录一个账号"), Symbol.Clear);
                 return;
             }
             var wallData =
-            await this.KuroCloudGameContext.WavesCloudSurivivalService.WavesCloudGameService.GetWalletDataAsync(
-                this.SelectLogin,
+            await this.WavesCloudGameService.GetWalletDataAsync(
+                selectLogin,
                 this.CTS.Token
             );
 
@@ -203,7 +211,7 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
                 return;
             }
             var result = await DialogManager.ShowSelectGameNodeAsync(
-                this.SelectLogin.OrginData.Username + this.SelectLogin.OrginData.Sdkuserid
+                selectLogin.GetId()
             );
 
             if (result == null || result.SelectNode == null)
@@ -219,7 +227,7 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
             }
             _ = Task.Run(async () =>
                 await this.KuroCloudGameContext.StartGameAsync(
-                    this.SelectLogin,
+                    selectLogin,
                     result.Nodes,
                     result.SelectNode,
                     qualityOpt,
@@ -293,9 +301,10 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    void ShowWavesAnalysis()
+    async Task ShowWavesAnalysis()
     {
-        if(this.SelectLogin == null)
+        var selectLogin = await this.WavesCloudGameService.GetCurrentUserSession();
+        if(selectLogin == null)
         {
             SystemEventMessager.Publish(new()
             {
@@ -303,13 +312,20 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
             });
             return;
         }
-        var win = ViewFactorys.ShowAnalysisRecordV2(this.SelectLogin);
+        var win = ViewFactorys.ShowAnalysisRecordV2(selectLogin);
         var scale = Haiyu.Controls.TitleBar.GetScaleAdjustment(win);
         int targetDipWidth = 1200;
         int targetDipHeight = 750;
         win.Manager.Height = targetDipHeight;
         win.Manager.Width = targetDipWidth;
         win.AppWindow.Show();
+    }
+
+    [RelayCommand]
+    async Task OpenWavesCloudManagerDialog()
+    {
+        await DialogManager.ShowCloudUserManagerDialogAsync();
+        await RefreshCardAsync();
     }
 }
 
