@@ -53,16 +53,17 @@ public sealed partial class GameLauncherCacheViewModel : DialogViewModelBase
 
     async Task VerifySystem(string oauthCode)
     {
-        var result = await UserConsentVerifier.RequestVerificationAsync(
-            LanguageService.GetStringByText("复制游戏登陆码需要系统用户进行验证")
-        );
-        if (result == UserConsentVerificationResult.Verified)
-        {
-            var oAuth = KrKeyHelper.Xor(oauthCode, 5);
-            var package = new DataPackage();
-            package.SetText(oAuth);
-            Clipboard.SetContent(package);
-        }
+        //var result = await UserConsentVerifier.RequestVerificationAsync(
+        //    LanguageService.GetStringByText("复制游戏登陆码需要系统用户进行验证")
+        //);
+        //if (result == UserConsentVerificationResult.Verified)
+        //{
+            
+        //}
+        var oAuth = KrKeyHelper.Xor(oauthCode, 5);
+        var package = new DataPackage();
+        package.SetText(oAuth);
+        Clipboard.SetContent(package);
     }
 
     public async void SetData(GameLauncherCacheArgs args)

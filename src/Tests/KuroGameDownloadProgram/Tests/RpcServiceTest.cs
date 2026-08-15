@@ -47,7 +47,6 @@ public static class RpcServiceTest
                     );
                     s.AddSingleton<IKuroClient, KuroClient>();
                     s.AddSingleton<IKuroAccountService, KuroAccountService>();
-                    s.AddSingleton<ICloudGameService, CloudGameService>();
                     s.AddGameContext();
                 }
             )

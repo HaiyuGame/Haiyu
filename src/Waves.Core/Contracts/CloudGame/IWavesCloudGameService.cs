@@ -6,6 +6,8 @@ public interface IWavesCloudGameService
 
     CloudNetworkSpeedTestService CloudNetworkSpeedTestService { get; }
 
+    Task InitAsync();
+
     Task<Tuple<CloudSendSMS?, CloudGameLoginSnapshot>> GetPhoneSMSAsync(
         string phone,
         CancellationToken token = default

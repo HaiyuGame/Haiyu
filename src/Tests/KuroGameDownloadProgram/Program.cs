@@ -23,4 +23,4 @@ using Waves.Settings;
 
 //await KuroClientHomeFeedTest.StartTask();
 
-await RpcServiceTest.BuildService();
+await RpcTest.SendPingAsync();

@@ -143,17 +143,17 @@ public sealed partial class ShellViewModel : ViewModelBase
 
     private async void CopyTokenMethod(object recipient, CopyTokenAccount message)
     {
-        var result = await UserConsentVerifier.RequestVerificationAsync(
-            LanguageService.GetStringByText("复制授权码需要系统用户密码")
-        );
-        if (result != UserConsentVerificationResult.Verified)
-        {
-            TipShow.ShowMessage(
-                LanguageService.GetStringByText("系统用户验证失败！"),
-                Symbol.Clear
-            );
-            return;
-        }
+        //var result = await UserConsentVerifier.RequestVerificationAsync(
+        //    LanguageService.GetStringByText("复制授权码需要系统用户密码")
+        //);
+        //if (result != UserConsentVerificationResult.Verified)
+        //{
+        //    TipShow.ShowMessage(
+        //        LanguageService.GetStringByText("系统用户验证失败！"),
+        //        Symbol.Clear
+        //    );
+        //    return;
+        //}
 
         DataPackage package = new();
         package.SetText(message.accountToken);

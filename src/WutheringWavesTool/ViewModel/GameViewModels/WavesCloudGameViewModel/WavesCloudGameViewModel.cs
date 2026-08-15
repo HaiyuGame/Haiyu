@@ -156,7 +156,8 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
 
     private async void CloudLoginMethod(object recipient, CloudLoginMessager message)
     {
-        await Task.Delay(2000);
+        //await Task.Delay(2000);
+        await this.WavesCloudGameService.SetCurrentUserSession(message.UserName);
         await this.RefreshUserAsync();
     }
 

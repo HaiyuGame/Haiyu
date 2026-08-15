@@ -124,6 +124,8 @@ public class AppContext<T> : IAppContext<T>
             );
             await context.InitAsync();
         }
+        var wavesCloudService = Instance.Host.Services.GetRequiredService<IWavesCloudGameService>();
+        await wavesCloudService.InitAsync();
         await KuroClient.InitAsync();
     }
 
