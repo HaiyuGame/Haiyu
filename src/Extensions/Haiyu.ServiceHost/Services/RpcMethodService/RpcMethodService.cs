@@ -37,8 +37,8 @@ public partial class RpcMethodService : IRpcMethodService
     public CloudConfigManager CloudConfigManager { get; }
     public AppSettings AppSettings { get; }
 
-    public Dictionary<string, Func<string, List<RpcParams>?, Task<string>>> Method =>
-        new Dictionary<string, Func<string, List<RpcParams>?, Task<string>>>()
+    public Dictionary<string, Func<string, List<RpcParams>, Task<string>>> Method =>
+        new Dictionary<string, Func<string, List<RpcParams>, Task<string>>>()
         {
             { nameof(RpcMethodKey.app_ping), PingAsync },
             { nameof(RpcMethodKey.app_version), GetRpcVersionAsync },

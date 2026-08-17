@@ -1,24 +1,24 @@
-﻿using Microsoft.Extensions.Hosting;
 using System.Net;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Hosting;
+using Waves.Api.Models.Rpc;
 
 namespace Haiyu.RpcClient;
 
 public class WebSocketRpcClient : IRpcClient, IHostedService, IDisposable
 {
     private ClientWebSocket? _webSocket;
+
     // Use 'localhost' to match HttpListener prefix (was 127.0.0.1 which can cause HttpListener to reject the request)
     private string _host = "localhost";
     private string _webSocketUrl = string.Empty;
     private bool _disposed;
     private const int ReceiveBufferSize = 4096;
+    private readonly SemaphoreSlim _requestLock = new(1, 1);
 
-    public WebSocketRpcClient()
-    {
-
-    }
+    public WebSocketRpcClient() { }
 
     public WebSocketRpcClient(string host)
     {
@@ -66,13 +66,14 @@ public class WebSocketRpcClient : IRpcClient, IHostedService, IDisposable
         try
         {
             await _webSocket.ConnectAsync(new Uri(_webSocketUrl), cancellationToken);
-            Console.WriteLine("WebSocket连接建立成功！");
+            Console.Error.WriteLine("WebSocket连接建立成功！");
 
-            _ = Task.Run(() => ListenServerMessageAsync(cancellationToken), cancellationToken);
+            // SendRpcRequestAsync currently owns the receive side of this socket.
+            // Starting another receive loop here races with it and can consume its response.
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"WebSocket连接失败：{ex.Message}");
+            Console.Error.WriteLine($"WebSocket连接失败：{ex.Message}");
             throw;
         }
     }
@@ -88,8 +89,12 @@ public class WebSocketRpcClient : IRpcClient, IHostedService, IDisposable
         {
             if (_webSocket.State == WebSocketState.Open)
             {
-                await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "客户端正常关闭", cancellationToken);
-                Console.WriteLine("WebSocket连接正常关闭");
+                await _webSocket.CloseAsync(
+                    WebSocketCloseStatus.NormalClosure,
+                    "客户端正常关闭",
+                    cancellationToken
+                );
+                Console.Error.WriteLine("WebSocket连接正常关闭");
             }
             _webSocket.Dispose();
             _webSocket = null;
@@ -104,24 +109,28 @@ public class WebSocketRpcClient : IRpcClient, IHostedService, IDisposable
     /// <param name="request">请求对象</param>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>RPC响应结果</returns>
-    public async Task<TResponse> SendRpcRequestAsync<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken = default)
+    public async Task<string> SendRpcRequestAsync(
+        RpcRequest request,
+        CancellationToken cancellationToken = default
+    )
     {
         if (_webSocket == null || _webSocket.State != WebSocketState.Open)
             throw new InvalidOperationException("WebSocket未连接或连接已关闭");
         if (request == null)
             throw new ArgumentNullException(nameof(request), "RPC请求对象不能为空");
 
+        await _requestLock.WaitAsync(cancellationToken);
         try
         {
-            var requestJson = JsonSerializer.Serialize(request);
+            var requestJson = JsonSerializer.Serialize(request, RpcContext.Default.RpcRequest);
             var requestBytes = Encoding.UTF8.GetBytes(requestJson);
 
             await _webSocket.SendAsync(
                 new ArraySegment<byte>(requestBytes),
-                WebSocketMessageType.Binary,
+                WebSocketMessageType.Text,
                 endOfMessage: true,
-                cancellationToken);
-
+                cancellationToken
+            );
 
             var responseBytes = new List<byte>();
             var buffer = new byte[ReceiveBufferSize];
@@ -131,7 +140,8 @@ public class WebSocketRpcClient : IRpcClient, IHostedService, IDisposable
             {
                 receiveResult = await _webSocket.ReceiveAsync(
                     new ArraySegment<byte>(buffer),
-                    cancellationToken);
+                    cancellationToken
+                );
 
                 if (receiveResult.MessageType == WebSocketMessageType.Close)
                 {
@@ -142,21 +152,15 @@ public class WebSocketRpcClient : IRpcClient, IHostedService, IDisposable
                 var receivedBytes = new byte[receiveResult.Count];
                 Array.Copy(buffer, receivedBytes, receiveResult.Count);
                 responseBytes.AddRange(receivedBytes);
-
             } while (!receiveResult.EndOfMessage);
 
             var responseJson = Encoding.UTF8.GetString(responseBytes.ToArray());
-            var response = JsonSerializer.Deserialize<TResponse>(responseJson, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
 
-
-            return response ?? throw new InvalidOperationException("RPC响应反序列化结果为空");
+            return responseJson;
         }
-        catch (Exception ex)
+        finally
         {
-            throw;
+            _requestLock.Release();
         }
     }
 
@@ -173,11 +177,15 @@ public class WebSocketRpcClient : IRpcClient, IHostedService, IDisposable
         var buffer = new byte[ReceiveBufferSize];
         try
         {
-            while (!cancellationToken.IsCancellationRequested && _webSocket.State == WebSocketState.Open)
+            while (
+                !cancellationToken.IsCancellationRequested
+                && _webSocket.State == WebSocketState.Open
+            )
             {
                 var receiveResult = await _webSocket.ReceiveAsync(
                     new ArraySegment<byte>(buffer),
-                    cancellationToken);
+                    cancellationToken
+                );
 
                 if (receiveResult.MessageType == WebSocketMessageType.Close)
                 {
@@ -190,15 +198,10 @@ public class WebSocketRpcClient : IRpcClient, IHostedService, IDisposable
                 var pushMessage = Encoding.UTF8.GetString(pushMessageBytes);
             }
         }
-        catch (OperationCanceledException)
-        {
-        }
+        catch (OperationCanceledException) { }
         catch (Exception ex)
         {
-            if (!cancellationToken.IsCancellationRequested)
-            {
-
-            }
+            if (!cancellationToken.IsCancellationRequested) { }
         }
     }
 
@@ -217,6 +220,7 @@ public class WebSocketRpcClient : IRpcClient, IHostedService, IDisposable
         {
             _webSocket?.Dispose();
             _webSocket = null;
+            _requestLock.Dispose();
         }
 
         _disposed = true;

@@ -171,17 +171,17 @@ public sealed partial class SettingViewModel : ViewModelBase
     [RelayCommand]
     async Task CopyToken()
     {
-        var result = await UserConsentVerifier.RequestVerificationAsync(
-            LanguageService.GetStringByText("复制授权码需要系统用户密码")
-        );
-        if (result != UserConsentVerificationResult.Verified)
-        {
-            TipShow.ShowMessage(
-                LanguageService.GetStringByText("系统用户验证失败！"),
-                Symbol.Clear
-            );
-            return;
-        }
+        //var result = await UserConsentVerifier.RequestVerificationAsync(
+        //    LanguageService.GetStringByText("复制授权码需要系统用户密码")
+        //);
+        //if (result != UserConsentVerificationResult.Verified)
+        //{
+        //    TipShow.ShowMessage(
+        //        LanguageService.GetStringByText("系统用户验证失败！"),
+        //        Symbol.Clear
+        //    );
+        //    return;
+        //}
         var account = AccountService.CurrentAccount;
         if (account is not null && await WavesClient.IsLoginAsync(account))
         {

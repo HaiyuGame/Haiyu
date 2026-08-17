@@ -3,6 +3,7 @@
     x:Class="Haiyu.Pages.GamePages.WavesCloudGamePage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ani="using:CommunityToolkit.WinUI.Animations"
     xmlns:api="using:Waves.Api.Models.CloudGame"
     xmlns:cloud="using:Waves.Core.Models.CloudGame"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -27,13 +28,14 @@
 
         <Border
             Width="380"
+            Height="220"
             Margin="12"
             HorizontalAlignment="Left"
             VerticalAlignment="Bottom"
             Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
             BorderThickness="1"
-            CornerRadius="12">
+            CornerRadius="6">
             <Grid Padding="16" RowSpacing="8">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto" />
@@ -90,11 +92,26 @@
                 </Grid>
 
 
-
+                <TextBlock
+                    Grid.Row="2"
+                    Grid.RowSpan="2"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    FontFamily="{ThemeResource DefaultFont}"
+                    Text="{x:Bind helper:LanguageService.GetString('WavesCloud_EmptyLoginHeader')}"
+                    Visibility="{x:Bind ViewModel.IsLogin, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}">
+                    <ani:Implicit.ShowAnimations>
+                        <ani:OpacityAnimation To="1" Duration="0:0:0.2" />
+                    </ani:Implicit.ShowAnimations>
+                    <ani:Implicit.HideAnimations>
+                        <ani:OpacityAnimation To="0" Duration="0:0:0.2" />
+                    </ani:Implicit.HideAnimations>
+                </TextBlock>
                 <Grid
                     Grid.Row="2"
                     ColumnSpacing="5"
-                    RowSpacing="5">
+                    RowSpacing="5"
+                    Visibility="{x:Bind ViewModel.IsLogin, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <Grid.RowDefinitions>
                         <RowDefinition />
                         <RowDefinition />
@@ -103,7 +120,12 @@
                         <ColumnDefinition />
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
-
+                    <ani:Implicit.ShowAnimations>
+                        <ani:OpacityAnimation To="1" Duration="0:0:0.2" />
+                    </ani:Implicit.ShowAnimations>
+                    <ani:Implicit.HideAnimations>
+                        <ani:OpacityAnimation To="0" Duration="0:0:0.2" />
+                    </ani:Implicit.HideAnimations>
                     <Border
                         Padding="12"
                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"

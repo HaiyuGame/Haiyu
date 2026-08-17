@@ -13,6 +13,9 @@ partial class WavesCloudGameViewModel
 
     private string _userId;
 
+    [ObservableProperty]
+    public partial bool IsLogin { get; set; }
+
     async Task RefreshUserAsync()
     {
         var refreshVersion = Interlocked.Increment(ref this._wallDataRefreshVersion);
@@ -22,6 +25,7 @@ partial class WavesCloudGameViewModel
             this.WallData = CreateEmptyWallData();
             this.UserName = string.Empty;
             this._userId = string.Empty;
+            this.IsLogin = false;
             return;
         }
         this.UserName = session.OrginData.Username;
@@ -47,11 +51,11 @@ partial class WavesCloudGameViewModel
             );
         wrapper.Coin = result.Data.Coin;
 
-        // 用户可能在请求期间被删除；这种情况下丢弃已经过期的请求结果。
         if (refreshVersion != Volatile.Read(ref this._wallDataRefreshVersion))
             return;
 
         this.WallData = wrapper;
+        this.IsLogin = true;
     }
 
     [RelayCommand]

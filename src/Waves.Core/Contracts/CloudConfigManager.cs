@@ -41,10 +41,8 @@ public sealed partial class CloudConfigManager
     public async Task<CloudGameLoginData?> GetUserAsync(string id,CancellationToken token = default)
     {
         List<CloudGameLoginData> items = null;
-        if(cacheData == null || cacheData.Count == 0)
-            items = (await GetUsersAsync()).ToList();
-        else
-            items = cacheData.Values.ToList();
+
+        items = (await GetUsersAsync()).ToList();
         return items.FirstOrDefault(x => x.GetId() == id);
     }
 

@@ -1,4 +1,4 @@
-﻿using Haiyu.Services.DialogServices;
+using Haiyu.Services.DialogServices;
 
 namespace Haiyu.ViewModel.DialogViewModels;
 
@@ -29,9 +29,9 @@ public sealed partial class LocalUserManagerViewModel : DialogViewModelBase
         WeakReferenceMessenger.Default.Register<DeleteLocalAccount>(this, DeleteAccountMethod);
     }
 
-    private void DeleteAccountMethod(object recipient, DeleteLocalAccount message)
+    private async void DeleteAccountMethod(object recipient, DeleteLocalAccount message)
     {
-        throw new NotImplementedException();
+        await RefreshAsync();
     }
 
     private async void SetCurrentAccountMethod(object recipient, SetCurrentAccount message)

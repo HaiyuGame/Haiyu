@@ -10,4 +10,8 @@
 	  <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Waves.Api\Waves.Api.csproj" />
+  </ItemGroup>
+
 </Project>

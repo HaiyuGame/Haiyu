@@ -436,20 +436,20 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
     [RelayCommand]
     async Task CopySession()
     {
-        var result = await UserConsentVerifier.RequestVerificationAsync(
-            LanguageService.GetStringByText("复制这些信息需要你进行二次确认")
-        );
-        if (result == UserConsentVerificationResult.Verified)
-        {
-            var package = new DataPackage();
-            package.SetText($"""
+        //var result = await UserConsentVerifier.RequestVerificationAsync(
+        //    LanguageService.GetStringByText("复制这些信息需要你进行二次确认")
+        //);
+        //if (result == UserConsentVerificationResult.Verified)
+        //{
+            
+        //}
+        var package = new DataPackage();
+        package.SetText($"""
             Did:{this.Did}
             Token:{this.Token}
             PlayerId:{this.PlayerId}
             """);
-            Clipboard.SetContent(package);
-        }
-
+        Clipboard.SetContent(package);
     }
 
     public override void Dispose()

@@ -46,7 +46,7 @@ partial class WavesCloudGameService
             await ClearSession();
             return false;
         }
-
+        await this.AppSettings.SetSelectCloudUserIDAsync(user.GetId(),_taskCTS.Token);
         _loopTask = RunLoopAsync(_taskCTS.Token);
         return true;
     }
@@ -165,8 +165,6 @@ partial class WavesCloudGameService
 
     private async Task ClearSession()
     {
-        if(_currentData != null)
-            await this.ConfigManager.DeleteUserAsync(_currentData.GetId());
         TokenData = null;
         AccessData = null;
         EndLoginData = null;

@@ -3,6 +3,7 @@ namespace Waves.Core.Services.CloudGameServices;
 public sealed partial class WavesCloudGameService : IWavesCloudGameService
 {
     public CloudConfigManager ConfigManager { get; }
+    public AppSettings AppSettings { get; }
 
     #region 配置
     private const string SdkBaseUrl = "https://sdkapi.kurogame.com/";
@@ -47,9 +48,10 @@ public sealed partial class WavesCloudGameService : IWavesCloudGameService
 
     #endregion
 
-    public WavesCloudGameService(CloudConfigManager cloudConfigManager)
+    public WavesCloudGameService(CloudConfigManager cloudConfigManager,AppSettings appSettings)
     {
         this.ConfigManager = cloudConfigManager;
+        AppSettings = appSettings;
         _sdkClient = CreateClient(SdkBaseUrl);
         _cloudClient = CreateClient(CloudBaseUrl);
         CloudNetworkSpeedTestService = new CloudNetworkSpeedTestService();
@@ -446,4 +448,16 @@ public sealed partial class WavesCloudGameService : IWavesCloudGameService
         return body;
     }
 
+    public async Task InitAsync()
+    {
+        var lastLoginName = await AppSettings.GetSelectCloudUserIDAsync();
+        if (!string.IsNullOrWhiteSpace(lastLoginName))
+        {
+            var user = await this.ConfigManager.GetUserAsync(lastLoginName);
+            if(user != null)
+            {
+                await this.SetCurrentUserSession(lastLoginName);
+            }
+        }
+    }
 }
