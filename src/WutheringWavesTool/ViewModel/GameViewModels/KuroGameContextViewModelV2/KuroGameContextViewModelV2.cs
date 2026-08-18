@@ -545,15 +545,14 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
             ProcessAction = true;
 
             var status = await this.GameContext.GetGameContextStatusAsync(this.CTS.Token);
+            var hasAdvanceInstalled = await HasAdvanceInstalledAsync(status);
 
             if (!status.IsGameExists)
             {
-                Logger.WriteInfo("未找到游戏文件，显示下载按钮");
                 ShowSelectInstallBth(status);
             }
             if (status.IsGameExists && !status.IsLauncher)
             {
-                Logger.WriteInfo("游戏文件存在，但不能启动，显示继续按钮");
                 ShowGameDownloadBth(status);
             }
             else if (!status.IsAction && status.IsGameExists)
@@ -589,7 +588,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
             );
             var wallpaperType = await AppSettings.GetWallpaperTypeAsync(this.CTS.Token);
 
-            if (status.IsPredownloaded && !status.ProdIsAdvance)
+            if (status.IsPredownloaded && !hasAdvanceInstalled)
             {
                 if (IsAdvanceInstallAction(status))
                 {
@@ -903,6 +902,26 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
             && status.PredownloadedDone
             && (status.IsAction || status.IsPause)
             && !status.PredownloaAcion;
+    }
+
+    private async Task<bool> HasAdvanceInstalledAsync(GameContextStatus status)
+    {
+        if (status.ProdIsAdvance)
+        {
+            return true;
+        }
+
+        var localVersion = await GameContext.GameLocalConfig.GetConfigAsync(
+            GameLocalSettingName.LocalGameVersion
+        );
+        if (!Version.TryParse(localVersion, out var localGameVersion))
+        {
+            return false;
+        }
+
+        var launcher = await GameContext.GetGameLauncherSourceAsync(null, this.CTS.Token);
+        return Version.TryParse(launcher?.Predownload?.Version, out var predownloadVersion)
+            && localGameVersion == predownloadVersion;
     }
 
     private void ShowAdvanceInstallActionStatus(GameContextStatus status)
