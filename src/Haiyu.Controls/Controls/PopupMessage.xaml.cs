@@ -7,17 +7,17 @@ public sealed partial class PopupMessage : UserControl
 
     private Popup _popup = null;
 
-    public PopupMessage()
+    public PopupMessage(ElementTheme theme)
     {
         this.InitializeComponent();
         _popup = new Popup();
         _popup.Child = this;
-        this.RequestedTheme = Application.Current.RequestedTheme == ApplicationTheme.Dark ? ElementTheme.Dark : ElementTheme.Light;
+        this.RequestedTheme = theme;
         this.Loaded += PopupNoticeLoaded;
     }
 
-    public PopupMessage(string popupContentString, Panel uIElement, Symbol symbol)
-        : this()
+    public PopupMessage(string popupContentString, Panel uIElement, Symbol symbol, ElementTheme theme)
+        : this(theme)
     {
         PopupIcon.Symbol = symbol;
         _popupContent = popupContentString;

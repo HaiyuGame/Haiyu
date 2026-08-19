@@ -1,4 +1,4 @@
-﻿namespace Haiyu.Pages.Dialogs;
+namespace Haiyu.Pages.Dialogs;
 
 public sealed partial class GameResourceDialogV2 : ContentDialog
 {
