@@ -25,6 +25,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
     private DateTime _lastVerifyPointTime = DateTime.MinValue;
     private DateTime _lastDecompressPointTime = DateTime.MinValue;
     private DateTime _lastSeparatorRefreshTime = DateTime.MinValue;
+    private long _progressRenderVersion;
 
     public LoggerService Logger { get; }
     public IGameContextV2 GameContext { get; private set; }
@@ -224,6 +225,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
 
     private void DetachProgress()
     {
+        Interlocked.Increment(ref _progressRenderVersion);
         if (GameContext is null)
             return;
         GameContext.ProgressState.OnProgressChanged -= ProgressState_OnProgressChanged;
@@ -233,18 +235,22 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
     {
         if (!IsAlive || GameContext is null)
             return;
-
+        //渲染代数判定，CPU原子判断渲染次数
+        var renderVersion = Interlocked.Increment(ref _progressRenderVersion);
+        var context = GameContext;
         var args = tracker.LastArgs;
 
         await AppContext.TryInvokeAsync(async () =>
         {
-            if (!IsAlive || GameContext is null)
+            if (!IsCurrentProgressRender(renderVersion, context))
                 return;
             var actionType = args.Type;
-            var status = await this.GameContext.GetGameContextStatusAsync(
+            var status = await context.GetGameContextStatusAsync(
                 this.CTS == null ? default : this.CTS.Token
             );
-            if (!tracker.Prod)
+            if (!IsCurrentProgressRender(renderVersion, context))
+                return;
+            if (!args.Prod)
             {
                 var activeFiles = tracker.ActiveFilesItem;
                 if (ShouldReplaceActiveFilesItem(ActiveFilesItems, activeFiles))
@@ -423,6 +429,11 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
             }
         });
     }
+
+    private bool IsCurrentProgressRender(long renderVersion, IGameContextV2 context) =>
+        IsAlive
+        && ReferenceEquals(GameContext, context)
+        && Volatile.Read(ref _progressRenderVersion) == renderVersion;
 
     private void UpdateTransferProgressDisplay(
         GameProgressTracker tracker,

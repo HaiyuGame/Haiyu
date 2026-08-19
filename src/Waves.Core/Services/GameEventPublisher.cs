@@ -6,68 +6,9 @@ public sealed class GameEventPublisher
         IAsyncDisposable,
         IPublisher
 {
-    private async Task DispatchEventsAsync()
-    {
-        try
-        {
-            await foreach (var @event in Channel.Reader.ReadAllAsync(CTS.Token))
-            {
-                SubscriberEntry[] subscribersSnapshot;
-                lock (_subscribers)
-                {
-                    subscribersSnapshot = _subscribers.Where(s => !s.IsDisposed).ToArray();
-                }
-                if (subscribersSnapshot.Length > 0)
-                {
-                    var tasks = subscribersSnapshot
-                        .Select(s => SafelyHandleEvent(s.Handler, @event, s.Cts.Token))
-                        .Select(x => x.AsTask())
-                        .ToArray();
-                    await Task.WhenAll(tasks);
-                }
-            }
-        }
-        catch (OperationCanceledException) when (CTS.Token.IsCancellationRequested) { }
-    }
+    protected override bool IsBarrierEvent(GameContextOutputArgs @event) =>
+        @event.Type is GameContextActionType.None or GameContextActionType.GameExit;
 
-    private static async ValueTask SafelyHandleEvent(
-        Func<GameContextOutputArgs, ValueTask> handler,
-        GameContextOutputArgs @event,
-        CancellationToken token
-    )
-    {
-        try
-        {
-            await handler(@event);
-        }
-        catch (OperationCanceledException) when (token.IsCancellationRequested)
-        {
-            // 订阅者主动取消，正常
-        }
-        catch (Exception)
-        {
-            // 订阅者异常，记录但不影响其他订阅者
-            // 需要注入 ILogger
-        }
-    }
-
-    public void Unsubscribe(Guid id)
-    {
-        lock (_subscribers)
-        {
-            var subscriber = _subscribers.FirstOrDefault(s => s.Id == id);
-            if (subscriber != null)
-            {
-                subscriber.IsDisposed = true;
-                if (!subscriber.Cts.IsCancellationRequested)
-                {
-                    subscriber.Cts.Cancel();
-                    subscriber.Cts.Dispose();
-                }
-                _subscribers.Remove(subscriber);
-            }
-        }
-    }
 
     public override async ValueTask<IGameEventSubscription> SubscribeAsync(
         Func<GameContextOutputArgs, ValueTask> handler
