@@ -74,9 +74,13 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
 
     private async void CloudGameProcessTracker_OnProgressChanged(CloudGameProcessTracker obj)
     {
-        
+        if (!IsAlive)
+            return;
+
         await App.TryInvokeAsync(async () =>
         {
+            if (!IsAlive)
+                return;
             var state = await this.KuroCloudGameContext.GetCloudStateAsync();
             if (obj == null)
                 return;
@@ -149,45 +153,50 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
         }
     }
 
-    private async void RefreshGamePageMethod(object recipient, RefreshGamePageMessager message)
+    private void RefreshGamePageMethod(object recipient, RefreshGamePageMessager message)
     {
-        await this.Loaded();
+        _ = Loaded();
     }
 
-    private async void CloudLoginMethod(object recipient, CloudLoginMessager message)
+    private void CloudLoginMethod(object recipient, CloudLoginMessager message)
     {
-        //await Task.Delay(2000);
-        await this.WavesCloudGameService.SetCurrentUserSession(message.UserName);
-        await this.RefreshUserAsync();
+        _ = RunWhileAliveAsync(async _ =>
+        {
+            await this.WavesCloudGameService.SetCurrentUserSession(message.UserName);
+            await this.RefreshUserAsync();
+        });
     }
 
-    public override void Dispose()
+    protected override void OnDisposing()
     {
         KuroCloudGameContext.CloudGameProcessTracker.OnProgressChanged -=
             CloudGameProcessTracker_OnProgressChanged;
-        base.Dispose();
     }
 
     [RelayCommand]
-    async Task Loaded()
-    {
-        try
+    Task Loaded() =>
+        RunWhileAliveAsync(async _ =>
         {
-            IsRefreshing = true;
-            WallpaperService.SetMediaForUrl(
-                Waves.Core.Models.Enums.WallpaperShowType.Image,
-                "https://aki-gm-resources-back.aki-game.com/pv/cg/login.webp"
-            );
-            await RefreshUserAsync();
-            this.RefreshUIAsync();
-            IsRefreshing = false;
-        }
-        catch (Exception ex)
-        {
-            IsRefreshing = false;
-            this.Logger.WriteError(ex.Message + ex.StackTrace);
-        }
-    }
+            try
+            {
+                IsRefreshing = true;
+                WallpaperService.SetMediaForUrl(
+                    Waves.Core.Models.Enums.WallpaperShowType.Image,
+                    "https://aki-gm-resources-back.aki-game.com/pv/cg/login.webp"
+                );
+                await RefreshUserAsync();
+                this.RefreshUIAsync();
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                this.Logger.WriteError(ex.Message + ex.StackTrace);
+            }
+            finally
+            {
+                if (IsAlive)
+                    IsRefreshing = false;
+            }
+        });
 
     [RelayCommand]
     async Task InvokeTask()

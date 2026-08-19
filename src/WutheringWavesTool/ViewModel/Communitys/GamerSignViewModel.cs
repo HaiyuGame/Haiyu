@@ -10,6 +10,11 @@ public sealed partial class GamerSignViewModel : ViewModelBase
         AccountService = accountService;
     }
 
+    protected override void OnDisposing()
+    {
+        SignImage = null;
+    }
+
     public IKuroClient WavesClient { get; }
     public IKuroAccountService AccountService { get; }
     public GameRoilDataItem SignRoil { get; internal set; }

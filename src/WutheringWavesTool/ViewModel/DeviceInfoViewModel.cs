@@ -1,4 +1,4 @@
-﻿using Waves.Api.Models.QRLogin;
+using Waves.Api.Models.QRLogin;
 
 using Haiyu.Helpers;
 
@@ -198,12 +198,10 @@ public partial class DeviceInfoViewModel : WindowViewModelBase, IDisposable
         }
     }
 
-    public override void Dispose()
+    protected override void OnDisposing()
     {
         this.Displays.RemoveAll();
         this.Gamers.RemoveAll();
-        this.CTS.Cancel();
-        this.CTS.Dispose();
-        GC.SuppressFinalize(this);
+        base.OnDisposing();
     }
 }

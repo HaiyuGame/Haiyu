@@ -92,8 +92,11 @@ public sealed partial class SettingViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    async Task Loaded()
-    {
+    Task Loaded() =>
+        RunWhileAliveAsync(async token =>
+        {
+        try
+        {
         ProgressAction = true;
         var closeWindow = await AppSettings.GetCloseWindowAsync();
         switch (closeWindow)
@@ -142,8 +145,13 @@ public sealed partial class SettingViewModel : ViewModelBase
         await LoadUpdateAppType();
         await LoadLauncheBth();
         await ReadVerifySkipFileAsync();
-        ProgressAction = false;
-    }
+        }
+        finally
+        {
+            if (IsAlive)
+                ProgressAction = false;
+        }
+        });
 
     private async Task ReadVerifySkipFileAsync()
     {
@@ -224,8 +232,5 @@ public sealed partial class SettingViewModel : ViewModelBase
         }
     }
 
-    public override void Dispose()
-    {
-        base.Dispose();
-    }
+    public override void Dispose() => base.Dispose();
 }

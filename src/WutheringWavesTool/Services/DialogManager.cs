@@ -76,8 +76,21 @@ public abstract class DialogManager : IDialogManager
     {
         if (_dialog == null)
             return;
+        var context = _dialog.DataContext;
         _dialog.Hide();
-        GC.Collect();
+        _dialog.Content = null;
+        _dialog.DataContext = null;
+        _dialog.XamlRoot = null;
+        _dialog = null;
+        if (context is ViewModelBase viewModel)
+        {
+            if (!viewModel.IsDisposed)
+                viewModel.Dispose();
+        }
+        else if (context is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
     }
 
     public async Task<Result> GetDialogResultAsync<T, Result>(object? data)

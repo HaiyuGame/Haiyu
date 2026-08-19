@@ -18,11 +18,14 @@ public partial class PunishWikiViewModel : WikiViewModelBase
     [ObservableProperty]
     public partial PunishBannerWrapper BannerListContentWrapper { get; set; }
     [RelayCommand]
-    async Task Loaded()
-    {
+    Task Loaded() =>
+        RunWhileAliveAsync(async token =>
+        {
         var wikiPage = await TryInvokeAsync(async () =>
-            await this.GameWikiClient.GetHomePageAsync(WikiType.BGR, this.CTS.Token)
+            await this.GameWikiClient.GetHomePageAsync(WikiType.BGR, token)
         );
+        if (wikiPage.Code == -1)
+            return;
         if (wikiPage.Code == 0 || (wikiPage.Result != null && wikiPage.Result.Data.ContentJson.Shortcuts != null))
         {
             Sides = GameWikiClient.GetEventData(wikiPage.Result).Format(WikiType.BGR) ?? [];
@@ -38,7 +41,7 @@ public partial class PunishWikiViewModel : WikiViewModelBase
         {
             TipShow.ShowMessage(LanguageService.FormatByText(LanguageService.GetStringByText("获取数据失败，请检查网络或重启应用")), Symbol.Clear);
         }
-    }
+        });
 
     private void TestFunction((int code, WikiHomeModel result, string? msg) wikiPage)
     {
@@ -58,15 +61,13 @@ public partial class PunishWikiViewModel : WikiViewModelBase
             }
         }
     }
-    public override void Dispose()
+    protected override void OnDisposing()
     {
         Sides?.Clear();
         EveryWeekContent?.Dispose();
         BannerListContentWrapper?.Dispose();
-        if (EveryWeekContent != null) EveryWeekContent = null;
-        if (BannerListContentWrapper != null) BannerListContentWrapper = null;
-        WeakReferenceMessenger.Default.UnregisterAll(this);
-        base.Dispose();
+        EveryWeekContent = null;
+        BannerListContentWrapper = null;
     }
 }
 

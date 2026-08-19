@@ -31,11 +31,9 @@ public abstract partial class DialogViewModelBase : ViewModelBase
         await BeforeCloseAsync();
         BeforeClose();
         DialogManager.CloseDialog();
-        WeakReferenceMessenger.Default.UnregisterAll(this);
-        this.CTS.Cancel();
+        Dispose();
         AfterClose();
         await AfterCloseAsync();
-        GC.SuppressFinalize(this);
     }
 
     public virtual void BeforeClose() { }

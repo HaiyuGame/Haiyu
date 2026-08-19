@@ -34,7 +34,7 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
 
     public IPickersService PickerService { get; }
 
-    public Window Window { get; internal set; }
+    public Window? Window { get; internal set; }
 
     [ObservableProperty]
     public partial string AdbPath { get; set; } = string.Empty;
@@ -452,7 +452,7 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
         Clipboard.SetContent(package);
     }
 
-    public override void Dispose()
+    protected override void OnDisposing()
     {
         ClearNetworkSubscriptions();
         if (_cdpClient is not null)
@@ -464,6 +464,7 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
         }
 
         _adbClient.Dispose();
-        base.Dispose();
+        Window = null;
+        base.OnDisposing();
     }
 }

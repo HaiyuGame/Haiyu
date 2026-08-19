@@ -4,7 +4,7 @@ namespace Haiyu.Pages.Communitys;
 
 public sealed partial class GamerSignPage : Page, IWindowPage
 {
-    private Window window;
+    private bool _disposed;
 
     public GamerSignPage()
     {
@@ -14,18 +14,11 @@ public sealed partial class GamerSignPage : Page, IWindowPage
         this.RequestedTheme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
     }
 
-    public GamerSignViewModel ViewModel { get; }
-
-    protected override void OnNavigatedFrom(NavigationEventArgs e)
-    {
-        this.ViewModel.Dispose();
-        base.OnNavigatedFrom(e);
-        GC.Collect();
-    }
+    public GamerSignViewModel? ViewModel { get; private set; }
 
     public void SetData(object value)
     {
-        if (value is GameRoilDataItem item)
+        if (value is GameRoilDataItem item && ViewModel is not null)
         {
             this.ViewModel.SignRoil = item;
         }
@@ -40,6 +33,18 @@ public sealed partial class GamerSignPage : Page, IWindowPage
 
     public void Dispose()
     {
-        this.ViewModel.Dispose();
+        if (_disposed)
+            return;
+        _disposed = true;
+        try
+        {
+            this.Bindings.StopTracking();
+            this.ViewModel?.Dispose();
+        }
+        finally
+        {
+            this.titlebar.Window = null;
+            this.ViewModel = null;
+        }
     }
 }

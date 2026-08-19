@@ -6,7 +6,7 @@ namespace Haiyu.ViewModel;
 
 partial class WavesAnalysisRecordViewModel
 {
-    public override void Dispose()
+    protected override void OnDisposing()
     {
         NavItems?.Clear();
         GuaranteItems?.Clear();
@@ -22,6 +22,6 @@ partial class WavesAnalysisRecordViewModel
         AllRole = null;
         AllWeapon = null;
         Cards = null;
-        base.Dispose();
+        base.OnDisposing();
     }
 }

@@ -2,6 +2,8 @@ namespace Haiyu.Pages;
 
 public sealed partial class DeviceInfoPage : Page, IWindowPage
 {
+    private bool _disposed;
+
     public DeviceInfoPage()
     {
         InitializeComponent();
@@ -9,12 +11,7 @@ public sealed partial class DeviceInfoPage : Page, IWindowPage
         this.RequestedTheme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
     }
 
-
-    public DeviceInfoViewModel ViewModel { get; }
-
-    public void Dispose()
-    {
-    }
+    public DeviceInfoViewModel? ViewModel { get; private set; }
 
     public void SetData(object value)
     {
@@ -22,14 +19,24 @@ public sealed partial class DeviceInfoPage : Page, IWindowPage
 
     public void SetWindow(Window window)
     {
-        this.ViewModel.Initialization(window);
-        title.Window = this.ViewModel.Window;
-        title.Window.Closed += Window_Closed;
+        this.ViewModel?.Initialization(window);
+        title.Window = window;
     }
 
-    private void Window_Closed(object sender, WindowEventArgs args)
+    public void Dispose()
     {
-        this.Bindings.StopTracking();
-        this.ViewModel?.Dispose();
+        if (_disposed)
+            return;
+        _disposed = true;
+        try
+        {
+            this.Bindings.StopTracking();
+            this.ViewModel?.Dispose();
+        }
+        finally
+        {
+            title.Window = null;
+            this.ViewModel = null;
+        }
     }
 }

@@ -59,36 +59,43 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
         this.Messenger.Register<RefreshGamePageMessager>(this, RefreshGamePageMethod);
     }
 
-    private async void RefreshGamePageMethod(object recipient, RefreshGamePageMessager message)
+    private void RefreshGamePageMethod(object recipient, RefreshGamePageMessager message)
     {
-        await this.RefreshCoreAsync(this.SelectServer.ShowCard);
+        if (SelectServer is null)
+            return;
+        _ = RunWhileAliveAsync(_ => RefreshCoreAsync(SelectServer.ShowCard));
     }
 
     [RelayCommand]
-    public async Task Loaded()
-    {
-        this.Servers =
-            this.GameType == GameType.Waves
-                ? ServerDisplay.GetWavesV2Games
-                : ServerDisplay.GetPunishV2Games;
+    public Task Loaded() =>
+        RunWhileAliveAsync(async token =>
+        {
+            this.Servers =
+                this.GameType == GameType.Waves
+                    ? ServerDisplay.GetWavesV2Games
+                    : ServerDisplay.GetPunishV2Games;
 
-        var openService =
-            this.GameType == GameType.Waves
-                ? await AppSettings.GetWavesAutoOpenContextAsync(this.CTS.Token)
-                : await AppSettings.GetPunishAutoOpenContextAsync(this.CTS.Token);
+            var openService =
+                this.GameType == GameType.Waves
+                    ? await AppSettings.GetWavesAutoOpenContextAsync(token)
+                    : await AppSettings.GetPunishAutoOpenContextAsync(token);
 
-        var selectServer = Servers.Where(x => x.Key == openService).FirstOrDefault();
-        this.SelectServer = selectServer == null ? Servers[0] : selectServer;
-    }
+            var selectServer = Servers.Where(x => x.Key == openService).FirstOrDefault();
+            this.SelectServer = selectServer == null ? Servers[0] : selectServer;
+        });
 
     [ObservableProperty]
     public partial bool IsDx11Launcher { get; set; } = false;
 
     async partial void OnIsDx11LauncherChanged(bool value)
     {
-        await this.GameContext.GameLocalConfig.SaveConfigAsync(
-            GameLocalSettingName.IsDx11,
-            value == true ? "true" : "false"
+        if (GameContext is null)
+            return;
+        await RunWhileAliveAsync(_ =>
+            GameContext.GameLocalConfig.SaveConfigAsync(
+                GameLocalSettingName.IsDx11,
+                value == true ? "true" : "false"
+            )
         );
     }
 
@@ -164,62 +171,75 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
 
     async partial void OnSelectServerChanged(ServerDisplay value)
     {
+        if (value is null)
+            return;
         await SelectGameContextAsync(value.Key, value.ShowCard);
     }
 
     public async Task SelectGameContextAsync(string name, bool showCard)
     {
-        if (this.GameContext != null)
+        if (!IsAlive)
+            return;
+
+        DetachProgress();
+        var token = RestartLifetime();
+        try
         {
-            await this.CTS?.CancelAsync();
-            this.CTS = null;
+            await Task.Delay(200, token);
+            this.GameContext = Instance.Host.Services.GetRequiredKeyedService<IGameContextV2>(name);
+            GameContext.ProgressState.OnProgressChanged += ProgressState_OnProgressChanged;
+            CurrentProgressValue = 0;
+            await this.GameContext.ReEmitLastOutputAsync(true);
+            var status = await this.GameContext.GetGameContextStatusAsync(token);
+            if (!status.PredownloaAcion)
+            {
+                await this.GameContext.ReEmitLastOutputAsync(false);
+            }
+            var dx11 = await GameContext.GameLocalConfig.GetConfigAsync(GameLocalSettingName.IsDx11);
+            if (bool.TryParse(dx11, out var flag))
+            {
+                this.IsDx11Launcher = flag;
+            }
+            if (this.GameContext.GameType == GameType.Waves)
+            {
+                await AppSettings.SetWavesAutoOpenContextAsync(
+                    this.GameContext.ContextName,
+                    token
+                );
+            }
+            else if (this.GameContext.GameType == GameType.Punish)
+            {
+                await AppSettings.SetPunishAutoOpenContextAsync(
+                    this.GameContext.ContextName,
+                    token
+                );
+            }
+            await RefreshCoreAsync(showCard);
         }
-        await Task.Delay(200);
-        this.CTS = new CancellationTokenSource();
-        if (GameContext != null)
+        catch (OperationCanceledException)
         {
-            GameContext.ProgressState.OnProgressChanged -= ProgressState_OnProgressChanged;
+            DetachProgress();
         }
-        this.GameContext = Instance.Host.Services.GetRequiredKeyedService<IGameContextV2>(name);
-        GameContext.ProgressState.OnProgressChanged += ProgressState_OnProgressChanged;
-        CurrentProgressValue = 0;
-        await this.GameContext.ReEmitLastOutputAsync(true);
-        var status = await this.GameContext.GetGameContextStatusAsync(this.CTS.Token);
-        if (!status.PredownloaAcion)
-        {
-            await this.GameContext.ReEmitLastOutputAsync(false);
-        }
-        var dx11 = await GameContext.GameLocalConfig.GetConfigAsync(GameLocalSettingName.IsDx11);
-        if (bool.TryParse(dx11, out var flag))
-        {
-            this.IsDx11Launcher = flag;
-        }
-        if (this.GameContext.GameType == GameType.Waves)
-        {
-            await AppSettings.SetWavesAutoOpenContextAsync(
-                this.GameContext.ContextName,
-                this.CTS.Token
-            );
-        }
-        else if (this.GameContext.GameType == GameType.Punish)
-        {
-            await AppSettings.SetPunishAutoOpenContextAsync(
-                this.GameContext.ContextName,
-                this.CTS.Token
-            );
-        }
-        await RefreshCoreAsync(showCard);
-        GC.Collect();
+    }
+
+    private void DetachProgress()
+    {
+        if (GameContext is null)
+            return;
+        GameContext.ProgressState.OnProgressChanged -= ProgressState_OnProgressChanged;
     }
 
     private async void ProgressState_OnProgressChanged(GameProgressTracker tracker)
     {
-        var args = tracker.LastArgs;
-        if (this.GameContext == null)
+        if (!IsAlive || GameContext is null)
             return;
+
+        var args = tracker.LastArgs;
 
         await AppContext.TryInvokeAsync(async () =>
         {
+            if (!IsAlive || GameContext is null)
+                return;
             var actionType = args.Type;
             var status = await this.GameContext.GetGameContextStatusAsync(
                 this.CTS == null ? default : this.CTS.Token
@@ -410,7 +430,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
         GameContextStatus status
     )
     {
-        if (disposedValue)
+        if (!IsAlive)
             return;
         var now = DateTime.Now;
         this.MaxProgressValue = tracker.TotalBytes;
@@ -543,8 +563,9 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
         try
         {
             ProcessAction = true;
+            var token = LifetimeToken;
 
-            var status = await this.GameContext.GetGameContextStatusAsync(this.CTS.Token);
+            var status = await this.GameContext.GetGameContextStatusAsync(token);
             var hasAdvanceInstalled = await HasAdvanceInstalledAsync(status);
 
             if (!status.IsGameExists)
@@ -581,12 +602,12 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
             {
                 this.PauseIcon = "\uE768";
             }
-            var index = await this.GameContext.GetDefaultLauncherValue(this.CTS.Token);
+            var index = await this.GameContext.GetDefaultLauncherValue(token);
             var background = await this.GameContext.GetLauncherBackgroundDataAsync(
                 index.FunctionCode.Background,
-                this.CTS.Token
+                token
             );
-            var wallpaperType = await AppSettings.GetWallpaperTypeAsync(this.CTS.Token);
+            var wallpaperType = await AppSettings.GetWallpaperTypeAsync(token);
 
             if (status.IsPredownloaded && !hasAdvanceInstalled)
             {
@@ -672,7 +693,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
                     }
                 }
                 this.VersionLogo = new BitmapImage(new(background.Slogan));
-                var coreConfig = await GameContext.ReadContextConfigAsync(this.CTS.Token);
+                var coreConfig = await GameContext.ReadContextConfigAsync(token);
                 this.DownloadSpeedValue = coreConfig.LimitSpeed / 1000 / 1000;
                 await Task.WhenAll(ShowCardAsync(showCard), LoadAfter());
             }
@@ -680,11 +701,20 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
             this.DownloadSpeedPoints?.Clear();
             this.VerifySpeedPoints?.Clear();
             this.DownloadSpeedSeparators?.Clear();
-            ProcessAction = false;
+        }
+        catch (OperationCanceledException)
+        {
+            return;
         }
         catch (Exception ex)
         {
-            TipShow.ShowMessage(ex.Message, Symbol.Clear);
+            if (IsAlive)
+                TipShow.ShowMessage(ex.Message, Symbol.Clear);
+        }
+        finally
+        {
+            if (IsAlive)
+                ProcessAction = false;
         }
     }
 
@@ -1028,65 +1058,38 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
 
     public abstract void DisposeAfter();
 
-    public override void Dispose()
+    protected override void OnDisposing()
     {
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
+        disposedValue = true;
+        DetachProgress();
+        DownloadSpeedPoints?.Clear();
+        DownloadSpeedPoints = null;
+        DecompressSpeedPoints?.Clear();
+        DecompressSpeedPoints = null;
+        VerifySpeedPoints?.Clear();
+        VerifySpeedPoints = null;
+        DownloadSpeedSeparators?.Clear();
+        DownloadSpeedSeparators = null;
+        DisposeAfter();
     }
 
-    protected virtual void Dispose(bool disposing)
+    private void StartBackground(Func<Task> taskFunc)
     {
-        if (!disposedValue)
-        {
-            disposedValue = true;
-            if (this.GameContext != null)
-                this.GameContext.ProgressState.OnProgressChanged -= ProgressState_OnProgressChanged;
-            if (DownloadSpeedPoints != null)
-            {
-                this.DownloadSpeedPoints.Clear();
-                this.DownloadSpeedPoints = null;
-            }
-            if (DecompressSpeedPoints != null)
-            {
-                this.DecompressSpeedPoints.Clear();
-                this.DecompressSpeedPoints = null;
-            }
-            if (VerifySpeedPoints != null)
-            {
-                this.VerifySpeedPoints.Clear();
-                this.VerifySpeedPoints = null;
-            }
-            if (DownloadSpeedSeparators != null)
-            {
-                DownloadSpeedSeparators.Clear();
-                this.DownloadSpeedSeparators = null;
-            }
-            if (disposing)
-            {
-                DisposeAfter();
-            }
-            base.Dispose();
-        }
-    }
-
-    private async void StartBackground(Func<Task> taskFunc)
-    {
-        _ = Task.Run(async () =>
+        _ = RunWhileAliveAsync(async _ =>
         {
             try
             {
                 await taskFunc();
             }
-            catch (OperationCanceledException)
-            {
-                Logger.WriteInfo("后台任务已取消");
-            }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 Logger.WriteError($"后台任务异常: {ex.Message}");
-                await AppContext.TryInvokeAsync(() =>
-                    TipShow.ShowMessageAsync(ex.Message, Symbol.Clear)
-                );
+                if (IsAlive)
+                {
+                    await AppContext.TryInvokeAsync(() =>
+                        TipShow.ShowMessageAsync(ex.Message, Symbol.Clear)
+                    );
+                }
             }
         });
     }

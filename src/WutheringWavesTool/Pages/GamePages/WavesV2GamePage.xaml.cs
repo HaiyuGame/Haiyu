@@ -10,17 +10,22 @@ public sealed partial class WavesV2GamePage : Page,IPage
         ViewModel = Instance.Host.Services.GetRequiredService<WavesV2GameContextViewModel>();
     }
 
-    public WavesV2GameContextViewModel ViewModel { get; set; }
+    public WavesV2GameContextViewModel? ViewModel { get; set; }
 
     public Type PageType => typeof(WavesV2GamePage);
 
     protected override void OnNavigatedFrom(NavigationEventArgs e)
     {
-        this.Bindings.StopTracking();
-        this.ViewModel.Dispose();
-        this.ViewModel = null;
-        GC.Collect();
-        base.OnNavigatedFrom(e);
+        try
+        {
+            this.Bindings.StopTracking();
+            this.ViewModel?.Dispose();
+        }
+        finally
+        {
+            this.ViewModel = null;
+            base.OnNavigatedFrom(e);
+        }
     }
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {

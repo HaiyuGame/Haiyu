@@ -26,6 +26,20 @@ namespace Haiyu.Pages.OOBE
 
         public Type PageType => typeof(Page);
 
-        public LanguageSelectViewModel ViewModel { get; }
+        public LanguageSelectViewModel? ViewModel { get; private set; }
+
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
+        {
+            try
+            {
+                this.Bindings.StopTracking();
+                this.ViewModel?.Dispose();
+            }
+            finally
+            {
+                this.ViewModel = null;
+                base.OnNavigatedFrom(e);
+            }
+        }
     }
 }

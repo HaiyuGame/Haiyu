@@ -216,7 +216,7 @@ partial class CloudGameingViewModel
         }
     }
 
-    public override void Dispose()
+    protected override void OnDisposing()
     {
         Logger.WriteInfo("[CloudGame] Dispose begin (will cancel KeepAlive + ViewModel CTS)");
         StopCloudSessionKeepAlive();
@@ -224,8 +224,15 @@ partial class CloudGameingViewModel
         ReleaseWebViewCursorSubclass();
         if (Window is not null)
         {
+            Window.Closed -= Window_Closed;
             Window.Activated -= Window_Activated;
         }
+        KuroCloudGameContext.CloudGameProcessTracker.OnProgressChanged -=
+            CloudGameProcessTracker_OnProgressChanged;
+        KuroCloudGameContext.ClearWindow();
+        KuroCloudGameContext.CloudGameEventPublisher.Publish(
+            new(Waves.Core.Models.Enums.CloudCoreType.None)
+        );
         try
         {
             WebView2?.Close();
@@ -238,8 +245,8 @@ partial class CloudGameingViewModel
         this._cursorTimer = null;
         this._hotkeyTimer?.Stop();
         this._hotkeyTimer = null;
-        // ViewModelBase.Dispose cancels CTS — any await on CTS.Token will OCE here.
-        base.Dispose();
+        WebView2 = null;
+        Window = null;
         Logger.WriteInfo("[CloudGame] Dispose end");
     }
 }

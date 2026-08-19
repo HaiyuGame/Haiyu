@@ -32,12 +32,12 @@ public sealed partial class CloudGameWindows : Window
         }
 
         _isClosing = true;
-        // Dispose cancels KeepAlive CTS + ViewModelBase.CTS → expected OperationCanceledException
-        // on in-flight HTTP/timer. That is normal shutdown noise, not a gameplay crash.
+        this.AppWindow.Closing -= CloudGameWindows_Closing;
         try
         {
             ViewModel?.ShowSystemCursor();
             ViewModel?.Dispose();
+            (CloudSettingModel as IDisposable)?.Dispose();
         }
         catch (Exception ex)
         {
@@ -46,6 +46,7 @@ public sealed partial class CloudGameWindows : Window
         finally
         {
             this.ViewModel = null;
+            this.Content = null;
         }
     }
 
