@@ -1,3 +1,5 @@
+using Waves.Core.Models.Options;
+
 namespace Waves.Core.Contracts;
 
 public interface IGameContextV2

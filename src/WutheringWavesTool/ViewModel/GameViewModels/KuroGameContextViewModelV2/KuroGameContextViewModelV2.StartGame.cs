@@ -4,6 +4,7 @@ using Microsoft.Windows.AppNotifications.Builder;
 using Waves.Core.GameContext.ContextsV2.Punish;
 using Waves.Core.GameContext.ContextsV2.Waves;
 using Waves.Core.Models.Enums;
+using Waves.Core.Models.Options;
 
 namespace Haiyu.ViewModel.GameViewModels;
 

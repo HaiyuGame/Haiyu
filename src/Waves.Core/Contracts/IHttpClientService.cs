@@ -1,4 +1,6 @@
-﻿namespace Waves.Core.Contracts;
+using Waves.Core.Models.Options;
+
+namespace Waves.Core.Contracts;
 
 public interface IHttpClientService
 {
@@ -6,5 +8,5 @@ public interface IHttpClientService
 
     public HttpClient GameDownloadClient { get; }
 
-    public void BuildClient();
+    public void BuildClient(DownloadClientOption? option = null);
 }

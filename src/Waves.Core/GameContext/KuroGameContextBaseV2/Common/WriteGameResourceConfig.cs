@@ -1,3 +1,5 @@
+using Waves.Core.Models.Options;
+
 namespace Waves.Core.GameContext.KruoGameContextBaseV2.Common;
 
 /// <summary>

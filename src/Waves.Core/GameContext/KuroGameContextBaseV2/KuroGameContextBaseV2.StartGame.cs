@@ -1,3 +1,5 @@
+using Waves.Core.Models.Options;
+
 namespace Waves.Core.GameContext
 {
     partial class KuroGameContextBaseV2
