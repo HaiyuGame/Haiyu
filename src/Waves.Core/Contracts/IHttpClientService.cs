@@ -8,5 +8,5 @@ public interface IHttpClientService
 
     public HttpClient GameDownloadClient { get; }
 
-    public void BuildClient(DownloadClientOption? option = null);
+    public void BuildClient();
 }
