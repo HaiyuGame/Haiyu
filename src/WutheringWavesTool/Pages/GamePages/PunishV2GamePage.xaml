@@ -544,7 +544,15 @@
                                                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xEC7A;" />
                                             </MenuFlyoutItem.Icon>
                                         </MenuFlyoutItem>
-                                        <MenuFlyoutSeparator />
+                                        <MenuFlyoutItem
+                                            Command="{x:Bind ViewModel.ResetGameFolderCommand}"
+                                            IsEnabled="{x:Bind ViewModel.EnableStartGameBth, Mode=OneWay}"
+                                            Text="{x:Bind helper:LanguageService.GetString('WavesGame_ReselectGameFolder')}">
+                                            <MenuFlyoutItem.Icon>
+                                                <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE838;" />
+                                            </MenuFlyoutItem.Icon>
+                                        </MenuFlyoutItem>
+
                                         <MenuFlyoutItem
                                             Command="{x:Bind ViewModel.ShowGameLocalTokenWindowCommand}"
                                             IsEnabled="{x:Bind ViewModel.EnableStartGameBth, Mode=OneWay}"
@@ -554,6 +562,7 @@
                                                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE631;" />
                                             </MenuFlyoutItem.Icon>
                                         </MenuFlyoutItem>
+                                        <MenuFlyoutSeparator />
                                         <MenuFlyoutItem Command="{x:Bind ViewModel.ShowGameResourceCommand}" Text="{x:Bind helper:LanguageService.GetString('Display_GameResourceManagement')}">
                                             <MenuFlyoutItem.Icon>
                                                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xEF19;" />

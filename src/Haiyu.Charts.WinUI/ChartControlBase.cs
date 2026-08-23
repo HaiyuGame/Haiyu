@@ -124,6 +124,7 @@ public abstract partial class ChartControlBase : Grid, IDisposable
         var x = Math.Clamp(anchor.X - size.Width / 2, 4, Math.Max(4, ActualWidth - size.Width - 4));
         var y = anchor.Y - size.Height - 10;
         if (y < 4) y = Math.Min(ActualHeight - size.Height - 4, anchor.Y + 10);
+        
         _tooltipPresenter.Margin = new Thickness(x, Math.Max(4, y), 0, 0);
     }
     protected void HideTooltip() => _tooltipPresenter.Visibility = Visibility.Collapsed;
@@ -192,33 +193,9 @@ public abstract partial class ChartControlBase : Grid, IDisposable
 
     private void UpdateTooltipTheme()
     {
-        var resources = Application.Current?.Resources;
-        if (resources is not null
-            && resources.TryGetValue("TextFillColorPrimaryBrush", out var foreground)
-            && foreground is Brush foregroundBrush)
+        if (Parent is FrameworkElement ui)
         {
-            _tooltipText.Foreground = foregroundBrush;
-        }
-        else
-        {
-            _tooltipText.Foreground = new SolidColorBrush(
-                ActualTheme == ElementTheme.Dark ? Colors.White : Colors.Black
-            );
-        }
-
-        if (resources is not null
-            && resources.TryGetValue("SolidBackgroundFillColorBaseBrush", out var background)
-            && background is Brush backgroundBrush)
-        {
-            _tooltipPresenter.Background = backgroundBrush;
-        }
-        else
-        {
-            _tooltipPresenter.Background = new SolidColorBrush(
-                ActualTheme == ElementTheme.Dark
-                    ? Color.FromArgb(245, 32, 32, 32)
-                    : Color.FromArgb(245, 255, 255, 255)
-            );
+            _tooltipPresenter.RequestedTheme = ui.ActualTheme;
         }
     }
     private void OnKeyDown(object sender, KeyRoutedEventArgs e)

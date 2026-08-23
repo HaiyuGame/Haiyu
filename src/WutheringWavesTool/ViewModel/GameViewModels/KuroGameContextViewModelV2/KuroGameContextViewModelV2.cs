@@ -895,6 +895,44 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
         }
     }
 
+    [RelayCommand]
+    async Task ResetGameFolder()
+    {
+        var result = await DialogManager.ShowMessageDialog(new()
+        {
+            ShowPrimaryButton = true,
+            CloseText = "取消",
+            Context = "是否重新选择游戏路径？",
+            PrimaryText = "确定"
+        });
+        if(result != ContentDialogResult.Primary)
+        {
+            return;
+        }
+        var folder = await DialogManager.ShowSelectGameFolderV2Async(
+               this.GameContext.ContextType
+           );
+        if (folder.Result == ContentDialogResult.None)
+        {
+            return;
+        }
+        Logger.WriteInfo($"选择游戏安装文件：{folder.InstallFolder}");
+        if (File.Exists(folder.InstallFolder + $"//{this.GameContext.Config.GameExeName}"))
+        {
+            this.PauseIcon = "\uE769";
+            StartBackground(() =>
+                this.GameContext.StartDownloadTaskAsync(folder.InstallFolder)
+            );
+        }
+        else
+        {
+            TipShow.ShowMessage(
+                LanguageService.GetStringByText("选择文件路径不合法，请重新选择"),
+                Symbol.Clear
+            );
+        }
+    }
+
     /// <summary>
     /// 显示
     /// </summary>

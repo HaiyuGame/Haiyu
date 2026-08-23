@@ -58,9 +58,6 @@ public partial class App : ClientApplication
         Microsoft.UI.Xaml.UnhandledExceptionEventArgs e
     )
     {
-        // OperationCanceledException is often intentional (CTS.Cancel / HttpClient
-        // timeout / Task.WaitAsync). Still log once so we can see the stack instead
-        // of only "first-chance" noise in the debugger with no source.
         if (e.Exception is OperationCanceledException or TaskCanceledException)
         {
             try
