@@ -79,6 +79,7 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
     public DownloadState? ProdDownloadState { get; private set; }
 
     public string DisplayName { get; }
+    public IIoCircuitBreaker IoCircuitBreaker { get; }
 
     /// <summary>
     /// CDN测速工具
@@ -89,12 +90,18 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
     private IAsyncDisposable? _currentRunningAction;
     private long _operationGeneration;
 
-    public KuroGameContextBaseV2(KuroGameApiConfig config, string contextName, string display)
+    public KuroGameContextBaseV2(
+        KuroGameApiConfig config,
+        string contextName,
+        string display,
+        IIoCircuitBreaker ioCircuitBreaker
+    )
     {
         Logger = new LoggerService();
         Config = config;
         ContextName = contextName;
         this.DisplayName = display;
+        IoCircuitBreaker = ioCircuitBreaker;
     }
 
     /// <summary>
@@ -512,36 +519,43 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
         }
         try
         {
-            var allFiles = Directory
-                .EnumerateFiles(rootFolder, "*.*", SearchOption.AllDirectories)
-                .ToList();
-            long totalFileCount = allFiles.Count;
-            long deletedFileCount = 0;
+            // 枚举目录本身可能耗时较长，此阶段总量未知，通知 UI 显示不确定进度。
+            progress.Report((0, 0));
+            var (allFiles, allDirectories) = await Task.Run(() =>
+            {
+                var files = Directory
+                    .EnumerateFiles(rootFolder, "*", SearchOption.AllDirectories)
+                    .ToList();
+                var directories = Directory
+                    .EnumerateDirectories(rootFolder, "*", SearchOption.AllDirectories)
+                    .OrderByDescending(path => path.Count(c => c == Path.DirectorySeparatorChar))
+                    .ToList();
+                directories.Add(rootFolder);
+                return (files, directories);
+            }).ConfigureAwait(false);
 
-            if (totalFileCount == 0)
+            long totalItemCount = allFiles.Count + allDirectories.Count;
+            long processedItemCount = 0;
+
+            if (totalItemCount == 0)
             {
                 await ClearLocalConfigAsync();
                 progress.Report((1, 1));
                 return;
             }
 
-            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 8 };
+            progress.Report((0, totalItemCount));
 
-            const int progressReportInterval = 10;
+            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 8 };
 
             await Parallel.ForEachAsync(
                 allFiles,
                 parallelOptions,
-                async (filePath, token) =>
+                (filePath, token) =>
                 {
                     try
                     {
                         File.Delete(filePath);
-                        long current = Interlocked.Increment(ref deletedFileCount);
-                        if (current % progressReportInterval == 0 || current == totalFileCount)
-                        {
-                            progress.Report((current, totalFileCount));
-                        }
                     }
                     catch (Exception ex)
                     {
@@ -554,14 +568,37 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
                             }
                         );
                     }
+
+                    var current = Interlocked.Increment(ref processedItemCount);
+                    progress.Report((current, totalItemCount));
+                    return ValueTask.CompletedTask;
                 }
-            );
+            ).ConfigureAwait(false);
 
-            DeleteEmptyDirectories(rootFolder);
+            // 文件夹也属于删除工作量；从最深层开始删除，避免尾部清理长时间没有进度。
+            foreach (var directory in allDirectories)
+            {
+                try
+                {
+                    if (Directory.Exists(directory))
+                        Directory.Delete(directory, false);
+                }
+                catch (Exception ex)
+                {
+                    SystemEventPublisher.Publish(
+                        new() { Message = $"删除目录失败：{directory}，错误：{ex.Message}" }
+                    );
+                }
+                finally
+                {
+                    var current = Interlocked.Increment(ref processedItemCount);
+                    progress.Report((current, totalItemCount));
+                }
+            }
 
-            await ClearLocalConfigAsync();
+            await ClearLocalConfigAsync().ConfigureAwait(false);
 
-            progress.Report((totalFileCount, totalFileCount));
+            progress.Report((totalItemCount, totalItemCount));
         }
         catch (OperationCanceledException)
         {

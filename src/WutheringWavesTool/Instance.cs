@@ -6,8 +6,6 @@ using Haiyu.Plugin.Contracts;
 using Haiyu.Plugin.Services;
 using Haiyu.ServiceHost;
 using Cacheing;
-using Haiyu.ServiceHost.Contracts;
-using Haiyu.ServiceHost.Services;
 using Haiyu.ServiceHost.XBox.Commons;
 using Haiyu.Services.DialogServices;
 using Haiyu.Services.Navigations.NavigationViewServices;
@@ -95,7 +93,6 @@ public static class InstanceBuilderExtensions
                     .AddSingleton<AppSettings>()
                     .AddSingleton<GithubIpSettings>()
                     .AddSingleton<RpcSettings>()
-                    .AddSingleton<IIoCircuitBreaker, IoCircuitBreaker>()
                     .AddTransient<IAppActivation, AppActivation>()
                     #region XBox
                     .AddSingleton<XBoxConfig>()
@@ -263,6 +260,7 @@ public static class InstanceBuilderExtensions
                         nameof(GameRoilNavigationService)
                     )
                     #endregion
+                    
                     .AddGameContext();
             }
         );

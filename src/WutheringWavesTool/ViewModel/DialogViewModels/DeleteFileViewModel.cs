@@ -29,6 +29,9 @@ public sealed partial class DeleteFileViewModel : DialogViewModelBase
     [ObservableProperty]
     public partial double MaxTotal { get; set; }
 
+    [ObservableProperty]
+    public partial bool IsProgressIndeterminate { get; set; } = true;
+
     public void SetDeleteFileArgs(string folder)
     {
         this.ContextName = folder;
@@ -51,7 +54,7 @@ public sealed partial class DeleteFileViewModel : DialogViewModelBase
         var state = await this._gameContext.GetGameContextStatusAsync(this.CTS.Token);
         if (state.IsPredownloaded && state.PredownloaAcion)
         {
-            await TipShow.ShowMessageAsync(LanguageService.GetStringByText("预下载期间禁止修复游戏！"), Symbol.Clear);
+            await TipShow.ShowMessageAsync(LanguageService.GetStringByText("预下载期间禁止删除游戏"), Symbol.Clear);
             return;
         }
         if (this.ContextName is null)
@@ -59,10 +62,14 @@ public sealed partial class DeleteFileViewModel : DialogViewModelBase
             await this.Close();
             return;
         }
+        IsProgressIndeterminate = true;
+        Current = 0;
+        MaxTotal = 1;
         IProgress < (double deletedCount, double totalCount) > progress = new Progress<(double deletedCount, double count)>((s) =>
         {
+            IsProgressIndeterminate = s.count <= 0;
             Current = s.deletedCount;
-            MaxTotal = s.count;
+            MaxTotal = Math.Max(1, s.count);
         });
         this.bthEnable = false; 
         this.CancelCloseCommand.NotifyCanExecuteChanged();

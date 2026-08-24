@@ -191,30 +191,54 @@ partial class KuroGameContextBaseV2
     /// <returns></returns>
     public async Task<bool> RepairGameAsync(bool isDelete = true, List<string>? skipFilePath = null)
     {
-        var folder = await GameLocalConfig.GetConfigAsync(
-            GameLocalSettingName.GameLauncherBassFolder
-        );
-
-        if (string.IsNullOrWhiteSpace(folder))
+        if (!IoCircuitBreaker.TryAcquire())
             return false;
-        await GameLocalConfig.SaveConfigAsync(GameLocalSettingName.GameLauncherBassFolder, folder);
-        await GameLocalConfig.SaveConfigAsync(GameLocalSettingName.LocalGameUpdateing, "True");
-        var launcher = await this.GetGameLauncherSourceAsync(null);
-        if (launcher == null)
+
+        try
         {
-            this.GameEventPublisher.Publish(
-                new GameContextOutputArgs()
-                {
-                    TipMessage = "未请求到游戏文件信息",
-                    Type = GameContextActionType.TipMessage,
-                }
+            var folder = await GameLocalConfig.GetConfigAsync(
+                GameLocalSettingName.GameLauncherBassFolder
             );
+            if (string.IsNullOrWhiteSpace(folder))
+                return false;
+            await GameLocalConfig.SaveConfigAsync(
+                GameLocalSettingName.GameLauncherBassFolder,
+                folder
+            );
+            await GameLocalConfig.SaveConfigAsync(
+                GameLocalSettingName.LocalGameUpdateing,
+                "True"
+            );
+            var launcher = await GetGameLauncherSourceAsync(null);
+            if (launcher == null)
+            {
+                GameEventPublisher.Publish(
+                    new GameContextOutputArgs
+                    {
+                        TipMessage = "未请求到游戏文件信息",
+                        Type = GameContextActionType.TipMessage,
+                    }
+                );
+                return false;
+            }
+            var generation = Interlocked.Increment(ref _operationGeneration);
+            GameContextOutputArgs.CurrentGeneration.Value = generation;
+            await StartDownloadAsync(folder, launcher, isDelete, skipFilePath);
+            return true;
+        }
+        catch (OperationCanceledException)
+        {
             return false;
         }
-        var gen = Interlocked.Increment(ref _operationGeneration);
-        GameContextOutputArgs.CurrentGeneration.Value = gen;
-        _ = Task.Run(async () => await StartDownloadAsync(folder, launcher, isDelete, skipFilePath));
-        return true;
+        catch (Exception ex)
+        {
+            Logger.WriteError($"校验游戏失败：{ex}");
+            return false;
+        }
+        finally
+        {
+            IoCircuitBreaker.Release();
+        }
     }
 
     /// <summary>

@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using System.Text;
+using Cacheing.Contracts;
 using Haiyu.Models.Dialogs;
 using Haiyu.Models.Enums;
-using Cacheing.Contracts;
 using Haiyu.Services.DialogServices;
 using Waves.Api.Models.Launcher;
 using Waves.Core.Common;
@@ -32,14 +32,10 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
     public IDialogManager DialogManager { get; }
     public IAppContext<App> AppContext { get; }
     public ITipShow TipShow { get; }
-    public IIoCircuitBreaker IoCircuitBreaker { get; }
     public IWallpaperService WallpaperService { get; }
     public IViewFactorys ViewFactory { get; }
 
-    protected KuroGameContextViewModelV2(
-        IAppContext<App> appContext,
-        ITipShow tipShow
-    )
+    protected KuroGameContextViewModelV2(IAppContext<App> appContext, ITipShow tipShow)
     {
         this.Logger = Instance.Host.Services.GetRequiredKeyedService<LoggerService>("AppLog");
         DialogManager = Instance.Host.Services.GetRequiredKeyedService<IDialogManager>(
@@ -47,8 +43,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
         );
         AppContext = appContext;
         TipShow = tipShow;
-        CacheService = Instance.Host.Services.GetRequiredService< IHaiyuMemoryCacheService>();
-        IoCircuitBreaker = Instance.Host.Services.GetRequiredService<IIoCircuitBreaker>();
+        CacheService = Instance.Host.Services.GetRequiredService<IHaiyuMemoryCacheService>();
         WallpaperService = Instance.Host.Services.GetRequiredService<IWallpaperService>();
         this.ViewFactory = Instance.Host.Services.GetRequiredService<IViewFactorys>();
         InitializeTransferChart();
@@ -156,7 +151,6 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
     [ObservableProperty]
     public partial bool EnableStartGameBth { get; set; } = false;
 
-
     [ObservableProperty]
     public partial ObservableCollection<ServerDisplay> Servers { get; set; }
 
@@ -196,17 +190,16 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
             {
                 await this.GameContext.ReEmitLastOutputAsync(false);
             }
-            var dx11 = await GameContext.GameLocalConfig.GetConfigAsync(GameLocalSettingName.IsDx11);
+            var dx11 = await GameContext.GameLocalConfig.GetConfigAsync(
+                GameLocalSettingName.IsDx11
+            );
             if (bool.TryParse(dx11, out var flag))
             {
                 this.IsDx11Launcher = flag;
             }
             if (this.GameContext.GameType == GameType.Waves)
             {
-                await AppSettings.SetWavesAutoOpenContextAsync(
-                    this.GameContext.ContextName,
-                    token
-                );
+                await AppSettings.SetWavesAutoOpenContextAsync(this.GameContext.ContextName, token);
             }
             else if (this.GameContext.GameType == GameType.Punish)
             {
@@ -898,20 +891,20 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
     [RelayCommand]
     async Task ResetGameFolder()
     {
-        var result = await DialogManager.ShowMessageDialog(new()
-        {
-            ShowPrimaryButton = true,
-            CloseText = "取消",
-            Context = "是否重新选择游戏路径？",
-            PrimaryText = "确定"
-        });
-        if(result != ContentDialogResult.Primary)
+        var result = await DialogManager.ShowMessageDialog(
+            new()
+            {
+                ShowPrimaryButton = true,
+                CloseText = "取消",
+                Context = "是否重新选择游戏路径？",
+                PrimaryText = "确定",
+            }
+        );
+        if (result != ContentDialogResult.Primary)
         {
             return;
         }
-        var folder = await DialogManager.ShowSelectGameFolderV2Async(
-               this.GameContext.ContextType
-           );
+        var folder = await DialogManager.ShowSelectGameFolderV2Async(this.GameContext.ContextType);
         if (folder.Result == ContentDialogResult.None)
         {
             return;
@@ -920,9 +913,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
         if (File.Exists(folder.InstallFolder + $"//{this.GameContext.Config.GameExeName}"))
         {
             this.PauseIcon = "\uE769";
-            StartBackground(() =>
-                this.GameContext.StartDownloadTaskAsync(folder.InstallFolder)
-            );
+            StartBackground(() => this.GameContext.StartDownloadTaskAsync(folder.InstallFolder));
         }
         else
         {
@@ -1128,6 +1119,17 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
         {
             try
             {
+                if (taskFunc is Func<Task<bool>> func)
+                {
+                    var result = await func();
+                    if (!result)
+                    {
+                        await TipShow.ShowMessageAsync(
+                            "任务执行失败，请检查是否重复执行或者重启程序再次执行",
+                            Symbol.Clear
+                        );
+                    }
+                }
                 await taskFunc();
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
