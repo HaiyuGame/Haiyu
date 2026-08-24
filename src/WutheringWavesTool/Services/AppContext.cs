@@ -48,6 +48,11 @@ public class AppContext<T> : IAppContext<T>
     {
         try
         {
+            var mainSizeConfig = await this.AppSettings.GetMainWindowSettingsAsync();
+            if(mainSizeConfig == null)
+            {
+                mainSizeConfig = MainWindowSetting.Default;
+            }
             var xboxConfig = Instance.Host.Services.GetRequiredService<XBoxConfig>();
             if ((await xboxConfig.GetIsEnableAsync()) == true)
             {
@@ -78,7 +83,26 @@ public class AppContext<T> : IAppContext<T>
                     var page = Instance.Host.Services!.GetRequiredService<ShellPage>();
                     page.titlebar.Window = win;
                     win.Content = page;
-                    win.ApplyWindowsOption(MainWindow.DefaultWindowsOption);
+                    var defaultOption = MainWindow.DefaultWindowsOption;
+                    var widthRate =
+                        double.IsFinite(mainSizeConfig.WidthRate)
+                        && mainSizeConfig.WidthRate > 0
+                            ? mainSizeConfig.WidthRate
+                            : MainWindowSetting.Default.WidthRate;
+                    var heightRate =
+                        double.IsFinite(mainSizeConfig.HeightRate)
+                        && mainSizeConfig.HeightRate > 0
+                            ? mainSizeConfig.HeightRate
+                            : MainWindowSetting.Default.HeightRate;
+
+                    win.ApplyWindowsOption(
+                        defaultOption with
+                        {
+                            Width = defaultOption.Width * widthRate,
+                            Height = defaultOption.Height * heightRate,
+                            IsResizable = mainSizeConfig.IsResize,
+                        }
+                    );
                 }
             }
             catch (Exception ex) { }

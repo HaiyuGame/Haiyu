@@ -95,62 +95,68 @@ public sealed partial class SettingViewModel : ViewModelBase
     Task Loaded() =>
         RunWhileAliveAsync(async token =>
         {
-        try
-        {
-        ProgressAction = true;
-        var closeWindow = await AppSettings.GetCloseWindowAsync();
-        switch (closeWindow)
-        {
-            case "True":
-                this.SelectCloseIndex = 1;
-                break;
-            case "False":
-                this.SelectCloseIndex = 0;
-                break;
-        }
-        var wallpaperType = await AppSettings.GetWallpaperTypeAsync();
-        if (wallpaperType == null)
-        {
-            this.SelectWallpaperName = WallpaperTypes[0];
-        }
-        else
-        {
-            if (wallpaperType == "Video")
+            try
             {
-                this.SelectWallpaperName = WallpaperTypes[0];
+                ProgressAction = true;
+                var closeWindow = await AppSettings.GetCloseWindowAsync();
+                switch (closeWindow)
+                {
+                    case "True":
+                        this.SelectCloseIndex = 1;
+                        break;
+                    case "False":
+                        this.SelectCloseIndex = 0;
+                        break;
+                }
+                var wallpaperType = await AppSettings.GetWallpaperTypeAsync();
+                if (wallpaperType == null)
+                {
+                    this.SelectWallpaperName = WallpaperTypes[0];
+                }
+                else
+                {
+                    if (wallpaperType == "Video")
+                    {
+                        this.SelectWallpaperName = WallpaperTypes[0];
+                    }
+                    else
+                    {
+                        this.SelectWallpaperName = WallpaperTypes[1];
+                    }
+                }
+                this.StartGameAllowCloseMain = await AppSettings.GetStartGameAllowCloseMainAsync();
+                switch (await AppSettings.GetElementThemeAsync())
+                {
+                    case "Light":
+                        this.SelectTheme = Themes[1];
+                        break;
+                    case "Dark":
+                        this.SelectTheme = Themes[2];
+                        break;
+                    case "Default":
+                        this.SelectTheme = Themes[0];
+                        break;
+                    default:
+                        this.SelectTheme = Themes[0];
+                        break;
+                }
+                var windowOption = await this.AppSettings.GetMainWindowSettingsAsync();
+                if (windowOption == null)
+                    windowOption = MainWindowSetting.Default;
+                this.HeightRate = windowOption.HeightRate;
+                this.WidthRate = windowOption.WidthRate;
+                this.IsResize = windowOption.IsResize;
+                await this.InitCapture();
+                await GetAllVersionAsync();
+                await LoadUpdateAppType();
+                await LoadLauncheBth();
+                await ReadVerifySkipFileAsync();
             }
-            else
+            finally
             {
-                this.SelectWallpaperName = WallpaperTypes[1];
+                if (IsAlive)
+                    ProgressAction = false;
             }
-        }
-        this.StartGameAllowCloseMain = await AppSettings.GetStartGameAllowCloseMainAsync();
-        switch (await AppSettings.GetElementThemeAsync())
-        {
-            case "Light":
-                this.SelectTheme = Themes[1];
-                break;
-            case "Dark":
-                this.SelectTheme = Themes[2];
-                break;
-            case "Default":
-                this.SelectTheme = Themes[0];
-                break;
-            default:
-                this.SelectTheme = Themes[0];
-                break;
-        }
-        await this.InitCapture();
-        await GetAllVersionAsync();
-        await LoadUpdateAppType();
-        await LoadLauncheBth();
-        await ReadVerifySkipFileAsync();
-        }
-        finally
-        {
-            if (IsAlive)
-                ProgressAction = false;
-        }
         });
 
     private async Task ReadVerifySkipFileAsync()

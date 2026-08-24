@@ -27,6 +27,8 @@ using Waves.Core.Models;
 using Waves.Core.Services;
 using Waves.Settings;
 using Waves.Core.Services.CloudGameServices;
+using Haiyu.ServiceHost.Services;
+using Haiyu.ServiceHost.Contracts;
 
 namespace Haiyu;
 
