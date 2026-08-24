@@ -226,17 +226,13 @@
             <ui:TitleBar.Footer>
                 <StackPanel Orientation="Horizontal" Spacing="5">
                     <Grid
-                        Width="80"
-                        Height="37"
-                        CornerRadius="22">
+                        Width="76"
+                        Height="34">
                         <Button
-                            Width="80"
-                            Height="37"
-                            Padding="0"
-                            Background="{ThemeResource AppBarBackgroundThemeBrush}"
                             Click="OpenMessagePane"
+                            Style="{ThemeResource TitleBarWideButtonStyle}"
                             ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_SystemMessages')}">
-                            <Grid Margin="0,-2,0,0">
+                            <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition />
                                     <ColumnDefinition />
@@ -249,52 +245,42 @@
                                     Grid.Column="1"
                                     Margin="5,0,0,0"
                                     HorizontalAlignment="Right"
-                                    VerticalAlignment="Top"
-                                    FontSize="15"
+                                    VerticalAlignment="Center"
+                                    FontSize="14"
                                     Text="{x:Bind ViewModel.Messages.Count, Mode=OneWay}" />
                             </Grid>
                         </Button>
 
                     </Grid>
                     <Button
-                        Width="37"
-                        Height="37"
-                        Padding="5"
-                        Background="{ThemeResource AppBarBackgroundThemeBrush}"
                         Command="{x:Bind ViewModel.RefreshCurrentPageCommand}"
-                        CornerRadius="40"
+                        Style="{ThemeResource TitleBarButtonStyle}"
                         ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_RefreshCurrentPage')}">
                         <FontIcon
                             FontFamily="Segoe Fluent Icons"
-                            FontSize="12"
+                            FontSize="14"
                             Glyph="&#xE72C;" />
                     </Button>
                     <Button
-                        Width="37"
-                        Height="37"
-                        Background="{ThemeResource AppBarBackgroundThemeBrush}"
                         Command="{x:Bind ViewModel.MinCommand}"
-                        CornerRadius="40"
+                        Style="{ThemeResource TitleBarButtonStyle}"
                         ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_Minimize')}"
                         Visibility="Visible">
                         <FontIcon
                             FontFamily="Segoe Fluent Icons"
-                            FontSize="12"
+                            FontSize="14"
                             Glyph="&#xE654;" />
                     </Button>
                     <Button
-                        Width="37"
-                        Height="37"
                         Margin="0,0,5,0"
-                        Background="{ThemeResource AppBarBackgroundThemeBrush}"
                         Command="{x:Bind ViewModel.CloseWindowCommand}"
-                        CornerRadius="40"
+                        Style="{ThemeResource TitleBarButtonStyle}"
                         ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_Off')}"
                         Visibility="Visible">
 
                         <FontIcon
                             FontFamily="Segoe Fluent Icons"
-                            FontSize="12"
+                            FontSize="14"
                             Glyph="&#xE653;" />
                     </Button>
                 </StackPanel>
