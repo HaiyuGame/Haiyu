@@ -1,10 +1,12 @@
 using System.Security.Cryptography;
+using System.Text;
 using Haiyu.ServiceHost.Contracts;
 using Waves.Api.Models.Rpc;
 using Waves.Core.Common;
 using Waves.Core.Contracts;
 using Waves.Settings;
 using Haiyu.KuroClient;
+using Waves.Core.Contracts.CloudGame;
 
 namespace Haiyu.ServiceHost.Services;
 
@@ -22,20 +24,47 @@ public enum RpcMethodKey:int
     /// RPC协议支持接口名称
     /// </summary>
     app_methods = 2,
+    /// <summary>
+    /// KuroClient 支持的方法名称
+    /// </summary>
+    kuro_methods = 3,
+    /// <summary>
+    /// 调用 KuroClient 方法
+    /// </summary>
+    kuro_call = 4,
+    account_list = 5,
+    account_current = 6,
+    cloud_account_list = 7,
+    cloud_account_select = 8,
+    cloud_gacha_record_info = 9,
+    cloud_gacha_records = 10,
 }
 
 public partial class RpcMethodService : IRpcMethodService
 {
-    public RpcMethodService(IKuroClient kuroClient ,CloudConfigManager cloudConfigManager, AppSettings appSettings)
+    public RpcMethodService(
+        IKuroClient kuroClient,
+        CloudConfigManager cloudConfigManager,
+        AppSettings appSettings,
+        RpcSettings rpcSettings,
+        IKuroAccountService kuroAccountService,
+        IWavesCloudGameService wavesCloudGameService
+    )
     {
         KuroClient = kuroClient;
         CloudConfigManager = cloudConfigManager;
         AppSettings = appSettings;
+        RpcSettings = rpcSettings;
+        KuroAccountService = kuroAccountService;
+        WavesCloudGameService = wavesCloudGameService;
     }
 
     public IKuroClient KuroClient { get; }
     public CloudConfigManager CloudConfigManager { get; }
     public AppSettings AppSettings { get; }
+    public RpcSettings RpcSettings { get; }
+    public IKuroAccountService KuroAccountService { get; }
+    public IWavesCloudGameService WavesCloudGameService { get; }
 
     public Dictionary<string, Func<string, List<RpcParams>, Task<string>>> Method =>
         new Dictionary<string, Func<string, List<RpcParams>, Task<string>>>()
@@ -43,6 +72,14 @@ public partial class RpcMethodService : IRpcMethodService
             { nameof(RpcMethodKey.app_ping), PingAsync },
             { nameof(RpcMethodKey.app_version), GetRpcVersionAsync },
             { nameof(RpcMethodKey.app_methods),GetRpcMethodsAsync }
+            ,{ nameof(RpcMethodKey.kuro_methods), GetKuroClientMethodsAsync }
+            ,{ nameof(RpcMethodKey.kuro_call), CallKuroClientAsync }
+            ,{ nameof(RpcMethodKey.account_list), GetLocalAccountsAsync }
+            ,{ nameof(RpcMethodKey.account_current), GetCurrentAccountAsync }
+            ,{ nameof(RpcMethodKey.cloud_account_list), GetCloudAccountsAsync }
+            ,{ nameof(RpcMethodKey.cloud_account_select), SelectCloudAccountAsync }
+            ,{ nameof(RpcMethodKey.cloud_gacha_record_info), GetCloudGachaRecordInfoAsync }
+            ,{ nameof(RpcMethodKey.cloud_gacha_records), GetCloudGachaRecordsAsync }
         };
 
     public async Task<string> PingAsync(string key, List<RpcParams>? _param = null)
@@ -52,30 +89,20 @@ public partial class RpcMethodService : IRpcMethodService
 
     public bool VerifyToken(List<RpcParams>? rpcParams = null)
     {
-        MD5 md5 = MD5.Create();
-        try
-        {
-            if(TryGetValue("token",rpcParams,out var token))
-            {
-                if (AppSettings.GetRpcTokenAsync().GetAwaiter().GetResult() != Md5Helper.ComputeMd532(token))
-                {
-                    throw new ArgumentException("Verification failed");
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-        catch (Exception)
-        {
+        if (!TryGetValue("token", rpcParams, out var token) || string.IsNullOrWhiteSpace(token))
             throw new ArgumentException("Verification failed");
-        }
-        finally
-        {
-            md5.Dispose();
-        }
+
+        var configuredTokenHash = RpcSettings.GetAuthTokenAsync().GetAwaiter().GetResult();
+        if (string.IsNullOrWhiteSpace(configuredTokenHash))
+            throw new ArgumentException("Verification failed");
+
+        var suppliedTokenHash = Md5Helper.ComputeMd532(token);
+        var configuredBytes = Encoding.UTF8.GetBytes(configuredTokenHash.ToUpperInvariant());
+        var suppliedBytes = Encoding.UTF8.GetBytes(suppliedTokenHash.ToUpperInvariant());
+        if (!CryptographicOperations.FixedTimeEquals(configuredBytes, suppliedBytes))
+            throw new ArgumentException("Verification failed");
+
+        return true;
     }
 
     /// <summary>

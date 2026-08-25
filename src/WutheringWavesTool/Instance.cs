@@ -182,7 +182,7 @@ public static class InstanceBuilderExtensions
                     #endregion
                     #region Base
                     .AddSingleton<IAppContext<App>, AppContext<App>>()
-                    .AddTransient<IKuroClient, global::Haiyu.KuroClient.KuroClient>()
+                    .AddSingleton<IKuroClient, global::Haiyu.KuroClient.KuroClient>()
                     .AddTransient<IPlayerCardService, PlayerCardService>()
                     .AddSingleton<IScreenCaptureService, ScreenCaptureService>()
                     .AddSingleton<IGameWikiClient, GameWikiClient>()
