@@ -610,9 +610,9 @@
                             Height="70"
                             Margin="0"
                             Padding="0"
-                            Background="{ThemeResource AppBarBackgroundThemeBrush}"
                             Command="{x:Bind ViewModel.StartPreDownloadGameCommand}"
-                            CornerRadius="70">
+                            CornerRadius="70"
+                            Style="{ThemeResource TitleBarButtonStyle}">
                             <ToolTipService.ToolTip>
                                 <Grid>
                                     <Grid.RowDefinitions>
@@ -664,11 +664,11 @@
                             Width="70"
                             Height="70"
                             Margin="5,0,0,0"
-                            Background="{ThemeResource AppBarBackgroundThemeBrush}"
                             BorderBrush="{ThemeResource SystemColorGrayTextBrush}"
                             BorderThickness="5"
                             Command="{x:Bind ViewModel.AdvanceGameCommand}"
                             CornerRadius="80"
+                            Style="{ThemeResource TitleBarButtonStyle}"
                             ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_DownloadedAdvance')}"
                             Visibility="{x:Bind ViewModel.PreAdvanceVisiblity, Mode=OneWay}">
                             <StackPanel Orientation="Vertical">
