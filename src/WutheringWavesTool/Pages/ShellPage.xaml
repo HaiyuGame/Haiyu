@@ -225,9 +225,7 @@
             </ui:TitleBar.Header>
             <ui:TitleBar.Footer>
                 <StackPanel Orientation="Horizontal" Spacing="5">
-                    <Grid
-                        Width="76"
-                        Height="34">
+                    <Grid Width="76" Height="34">
                         <Button
                             Click="OpenMessagePane"
                             Style="{ThemeResource TitleBarWideButtonStyle}"
@@ -253,6 +251,7 @@
 
                     </Grid>
                     <Button
+                        Width="37"
                         Command="{x:Bind ViewModel.RefreshCurrentPageCommand}"
                         Style="{ThemeResource TitleBarButtonStyle}"
                         ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_RefreshCurrentPage')}">
@@ -262,6 +261,7 @@
                             Glyph="&#xE72C;" />
                     </Button>
                     <Button
+                        Width="37"
                         Command="{x:Bind ViewModel.MinCommand}"
                         Style="{ThemeResource TitleBarButtonStyle}"
                         ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_Minimize')}"
@@ -272,6 +272,7 @@
                             Glyph="&#xE654;" />
                     </Button>
                     <Button
+                        Width="37"
                         Margin="0,0,5,0"
                         Command="{x:Bind ViewModel.CloseWindowCommand}"
                         Style="{ThemeResource TitleBarButtonStyle}"

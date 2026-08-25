@@ -527,7 +527,7 @@
                                 HorizontalAlignment="Stretch"
                                 VerticalAlignment="Stretch"
                                 BorderThickness="0"
-                                Style="{ThemeResource TransparentButtonStyle}">
+                                Style="{ThemeResource TitleBarButtonStyle}">
                                 <FontIcon
                                     FontFamily="Segoe Fluent Icons"
                                     FontSize="18"
@@ -681,6 +681,7 @@
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         Command="{x:Bind ViewModel.ShowSelectInstallFolderCommand}"
+                        Style="{ThemeResource TitleBarButtonStyle}"
                         ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_SelectDownloadPath')}"
                         Visibility="{x:Bind ViewModel.GameInstallBthVisibility, Mode=OneWay}">
                         <FontIcon
@@ -696,6 +697,7 @@
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         Command="{x:Bind ViewModel.ShowSelectGameFolderCommand}"
+                        Style="{ThemeResource TitleBarButtonStyle}"
                         ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_LocateGameLocation')}"
                         Visibility="{x:Bind ViewModel.GameInputFolderBthVisibility, Mode=OneWay}">
                         <FontIcon

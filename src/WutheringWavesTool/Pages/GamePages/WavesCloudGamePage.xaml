@@ -339,7 +339,7 @@
                         Width="60"
                         Margin="5,5,5,5"
                         BorderThickness="0"
-                        Style="{ThemeResource TransparentButtonStyle}">
+                        Style="{ThemeResource TitleBarButtonStyle}">
                         <FontIcon
                             FontFamily="Segoe Fluent Icons"
                             FontSize="18"
