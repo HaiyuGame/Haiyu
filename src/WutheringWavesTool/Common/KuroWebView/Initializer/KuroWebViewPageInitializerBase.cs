@@ -15,7 +15,7 @@ namespace Haiyu.Common.KuroWebView.Initializer
 
         private string? _documentScriptId;
         private WebSessionContext _currentSession;
-        private bool _eventsHooked;
+        private CoreWebView2? _hookedCoreWebView2;
 
         public abstract bool CanInitialize(WebSessionContext session);
 
@@ -125,17 +125,27 @@ namespace Haiyu.Common.KuroWebView.Initializer
 
         private void HookEvents(WebView2 webView)
         {
-            if (_eventsHooked || webView.CoreWebView2 is null)
+            CoreWebView2? coreWebView2 = webView.CoreWebView2;
+            if (coreWebView2 is null || ReferenceEquals(_hookedCoreWebView2, coreWebView2))
             {
                 return;
             }
 
-            webView.CoreWebView2.NavigationCompleted += async (_, _) =>
+            if (_hookedCoreWebView2 is not null)
             {
-                await webView.CoreWebView2.ExecuteScriptAsync(BuildApplySessionScript(_currentSession));
-            };
+                _hookedCoreWebView2.NavigationCompleted -= OnNavigationCompleted;
+            }
 
-            _eventsHooked = true;
+            coreWebView2.NavigationCompleted += OnNavigationCompleted;
+            _hookedCoreWebView2 = coreWebView2;
+        }
+
+        private async void OnNavigationCompleted(
+            CoreWebView2 sender,
+            CoreWebView2NavigationCompletedEventArgs args
+        )
+        {
+            await sender.ExecuteScriptAsync(BuildApplySessionScript(_currentSession));
         }
 
         private string BuildBootstrapScript(WebSessionContext session)

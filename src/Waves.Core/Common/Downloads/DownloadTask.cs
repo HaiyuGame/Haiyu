@@ -211,21 +211,35 @@ public static class DownloadTask
                         await state.PauseToken.WaitIfPausedAsync().ConfigureAwait(false); // 暂停检查也异步化
                     int bytesToRead = (int)Math.Min(MaxBufferSize, chunkTotalSize - totalWritten);
                     byte[] buffer = memoryPool.Rent(bytesToRead);
-                    int bytesRead = await stream
-                        .ReadAsync(buffer.AsMemory(0, bytesToRead), downloadCts.Token)
-                        .ConfigureAwait(false);
-                    if (bytesRead == 0)
+                    try
                     {
-                        isBreak = true;
+                        int bytesRead = await stream
+                            .ReadAsync(buffer.AsMemory(0, bytesToRead), downloadCts.Token)
+                            .ConfigureAwait(false);
+
+                        if (bytesRead == 0)
+                        {
+                            isBreak = true;
+                            break;
+                        }
+
+                        if (state != null)
+                            await state.SpeedLimiter
+                                .LimitAsync(bytesRead, downloadCts.Token)
+                                .ConfigureAwait(false);
+
+                        await fileStream
+                            .WriteAsync(buffer.AsMemory(0, bytesRead), downloadCts.Token)
+                            .ConfigureAwait(false);
+
+                        totalWritten += bytesRead;
+                        accumulatedBytes += bytesRead;
+                        currentByte += bytesRead;
                     }
-                    if (state != null)
-                        await state.SpeedLimiter.LimitAsync(bytesRead, downloadCts.Token).ConfigureAwait(false);
-                    await fileStream
-                        .WriteAsync(buffer.AsMemory(0, bytesRead), downloadCts.Token)
-                        .ConfigureAwait(false);
-                    totalWritten += bytesRead;
-                    accumulatedBytes += bytesRead;
-                    currentByte += bytesRead;
+                    finally
+                    {
+                        memoryPool.Return(buffer);
+                    }
                     if (accumulatedBytes >= UpdateThreshold)
                     {
                         progress?.Report((GameContextActionType.Download,true,accumulatedBytes,filePath,currentByte, chunkTotalSize));
