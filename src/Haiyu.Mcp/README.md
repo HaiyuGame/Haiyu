@@ -26,6 +26,14 @@ be overridden by environment variables such as `Rpc__Port` and `Rpc__Token`.
 - `haiyu_ping`: test the WebSocket RPC connection.
 - `haiyu_get_version`: return Haiyu/RPC/framework/SDK version information.
 - `haiyu_get_methods`: list supported RPC methods.
+- `haiyu_kuro_methods`: list every KuroClient operation exposed through RPC.
+- `haiyu_kuro_call`: invoke any listed KuroClient operation with a JSON arguments object.
+- `haiyu_account_list`: list local accounts by account ID without returning account tokens.
+- `haiyu_account_current`: return the account currently selected in Haiyu.
+- `haiyu_cloud_account_list`: list saved Cloud Wuthering Waves accounts.
+- `haiyu_cloud_account_select`: select a cloud account and establish its session.
+- `haiyu_cloud_gacha_record_info`: get the selected account's gacha record identity.
+- `haiyu_cloud_gacha_records`: fetch raw gacha records for one pool or all pool types.
 - `haiyu_call_rpc`: invoke another RPC method with an optional JSON parameter array.
 
 ## Local MCP client configuration

@@ -169,6 +169,26 @@
                         ItemsSource="{x:Bind ViewModel.LanguageSelectViewModel.Languages, Mode=OneWay}"
                         SelectedItem="{x:Bind ViewModel.LanguageSelectViewModel.SelectLanguage, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 </ui:SettingsCard>
+                <ui:SettingsExpander Margin="0,5,0,0" Header="{x:Bind helper:LanguageService.GetString('Setting_WindowHeightHeader')}">
+                    <ui:SettingsExpander.HeaderIcon>
+                        <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE944;" />
+                    </ui:SettingsExpander.HeaderIcon>
+                    <Button Command="{x:Bind ViewModel.SaveWindowSettingCommand}" Content="{x:Bind helper:LanguageService.GetString('Display_SAVING')}" />
+                    <ui:SettingsExpander.Items>
+                        <ui:SettingsCard Header="{x:Bind helper:LanguageService.GetString('Setting_WindowHeightRate')}">
+                            <TextBox Text="{x:Bind ViewModel.HeightRate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        </ui:SettingsCard>
+                        <ui:SettingsCard Header="{x:Bind helper:LanguageService.GetString('Setting_WindowWidthRate')}">
+
+                            <TextBox Text="{x:Bind ViewModel.WidthRate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        </ui:SettingsCard>
+                        <ui:SettingsCard Header="{x:Bind helper:LanguageService.GetString('Setting_WindowIsResize')}">
+                            <Border Width="40">
+                                <CheckBox IsChecked="{x:Bind ViewModel.IsResize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            </Border>
+                        </ui:SettingsCard>
+                    </ui:SettingsExpander.Items>
+                </ui:SettingsExpander>
                 <ui:SettingsCard
                     Margin="0,5,0,0"
                     HorizontalAlignment="Stretch"

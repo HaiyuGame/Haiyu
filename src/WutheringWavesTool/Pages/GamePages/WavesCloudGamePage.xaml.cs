@@ -15,12 +15,17 @@ public sealed partial class WavesCloudGamePage : Page,IPage
 
     protected override void OnNavigatedFrom(NavigationEventArgs e)
     {
-        this.Bindings.StopTracking();
-        this.ViewModel.Dispose();
-        this.ViewModel = null;
-        GC.Collect();
-        base.OnNavigatedFrom(e);
+        try
+        {
+            this.Bindings.StopTracking();
+            this.ViewModel?.Dispose();
+        }
+        finally
+        {
+            this.ViewModel = null;
+            base.OnNavigatedFrom(e);
+        }
     }
 
-    public WavesCloudGameViewModel ViewModel { get; set; }
+    public WavesCloudGameViewModel? ViewModel { get; set; }
 }

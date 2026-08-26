@@ -1,3 +1,5 @@
+using Waves.Core.Models.Options;
+
 namespace Waves.Core.Services;
 
 public delegate void LogMessageHandler(ILogger logger, LogMessage logMessage);

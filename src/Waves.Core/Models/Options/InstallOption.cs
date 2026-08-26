@@ -1,4 +1,4 @@
-namespace Waves.Core.Models;
+namespace Waves.Core.Models.Options;
 
 /// <summary>
 /// 下载安装模式

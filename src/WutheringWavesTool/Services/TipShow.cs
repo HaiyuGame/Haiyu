@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.WinUI;
+using CommunityToolkit.WinUI;
 
 namespace Haiyu.Services;
 
@@ -15,10 +15,12 @@ public class TipShow : ITipShow
     public void ShowMessage(string message, Symbol icon)
     {
         if (this.Owner == null)
-            return;
+            return; 
+
+        var theme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
         this.Owner.DispatcherQueue.TryEnqueue(() =>
         {
-            PopupMessage popup = new(message, Owner, icon);
+            PopupMessage popup = new(message, Owner, icon,theme);
             popup.ShowPopup();
         });
     }
@@ -27,9 +29,11 @@ public class TipShow : ITipShow
     {
         if (this.Owner == null)
             return;
+
+        var theme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
         await this.Owner.DispatcherQueue.EnqueueAsync(() =>
         {
-            PopupMessage popup = new(message, Owner, icon);
+            PopupMessage popup = new(message, Owner, icon, theme);
             popup.ShowPopup();
         });
     }

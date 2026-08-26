@@ -4,6 +4,8 @@ namespace Haiyu.Pages.Toolkits;
 
 public sealed partial class AutoKuroTokenPage : Page, IWindowPage
 {
+    private bool _disposed;
+
     public AutoKuroTokenPage()
     {
         InitializeComponent();
@@ -11,18 +13,17 @@ public sealed partial class AutoKuroTokenPage : Page, IWindowPage
         this.RequestedTheme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
     }
 
-    public AutoKuroTokenViewModel ViewModel { get; private set; }
-
-    public void Dispose() { }
+    public AutoKuroTokenViewModel? ViewModel { get; private set; }
 
     public void SetData(object value) { }
 
     public void SetWindow(Window window)
     {
+        if (ViewModel is null)
+            return;
         this.ViewModel.Window = window;
         this.ViewModel.Window.ExtendsContentIntoTitleBar = true;
         this.titleBar.Window = window;
-        this.ViewModel.Window.AppWindow.Closing += AppWindow_Closing;
         this.ViewModel.Window.ApplyWindowsOption(
             new()
             {
@@ -39,10 +40,20 @@ public sealed partial class AutoKuroTokenPage : Page, IWindowPage
         );
     }
 
-    private void AppWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
+    public void Dispose()
     {
-        this.ViewModel.Window.AppWindow.Closing -= AppWindow_Closing;
-        this.ViewModel.Dispose();
-        this.ViewModel = null;
+        if (_disposed)
+            return;
+        _disposed = true;
+        try
+        {
+            this.Bindings.StopTracking();
+            this.ViewModel?.Dispose();
+        }
+        finally
+        {
+            this.titleBar.Window = null;
+            this.ViewModel = null;
+        }
     }
 }

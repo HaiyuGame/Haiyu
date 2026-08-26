@@ -11,6 +11,11 @@ public static class Waves
     /// <returns></returns>
     public static IServiceCollection AddGameContext(this IServiceCollection services)
     {
+        // AddGameContext 是完整的核心注册入口。TryAdd 保留宿主提供的自定义实现，
+        // 同时保证控制台、测试项目只调用 AddGameContext 也能解析游戏上下文。
+        services.TryAddSingleton<AppSettings>();
+        services.TryAddSingleton<IIoCircuitBreaker, IoCircuitBreaker>();
+
         #region 新核心测试
         //事件订阅发布器
         services
@@ -20,7 +25,9 @@ public static class Waves
                 nameof(PunishMainGameContextV2),
                 (provider, c) =>
                 {
-                    var context = GameContextFactory.GetMainPunishGameContextV2();
+                    var context = GameContextFactory.GetMainPunishGameContextV2(
+                        provider.GetRequiredService<IIoCircuitBreaker>()
+                    );
                     context.HttpClientService = provider.GetRequiredService<IHttpClientService>();
                     context.GameEventPublisher =
                         provider.GetRequiredKeyedService<GameEventPublisher>(
@@ -35,7 +42,9 @@ public static class Waves
                 nameof(PunishBiliBiliGameContextV2),
                 (provider, c) =>
                 {
-                    var context = GameContextFactory.GetBiliBiliPunishGameContextV2();
+                    var context = GameContextFactory.GetBiliBiliPunishGameContextV2(
+                        provider.GetRequiredService<IIoCircuitBreaker>()
+                    );
                     context.HttpClientService = provider.GetRequiredService<IHttpClientService>();
                     context.GameEventPublisher =
                         provider.GetRequiredKeyedService<GameEventPublisher>(
@@ -50,7 +59,9 @@ public static class Waves
                 nameof(PunishGlobalGameContextV2),
                 (provider, c) =>
                 {
-                    var context = GameContextFactory.GetGlobalPunishGameContextV2();
+                    var context = GameContextFactory.GetGlobalPunishGameContextV2(
+                        provider.GetRequiredService<IIoCircuitBreaker>()
+                    );
                     context.HttpClientService = provider.GetRequiredService<IHttpClientService>();
                     context.GameEventPublisher =
                         provider.GetRequiredKeyedService<GameEventPublisher>(
@@ -65,7 +76,9 @@ public static class Waves
                 nameof(PunishTwGameContextV2),
                 (provider, c) =>
                 {
-                    var context = GameContextFactory.GetTwPunishGameContextV2();
+                    var context = GameContextFactory.GetTwPunishGameContextV2(
+                        provider.GetRequiredService<IIoCircuitBreaker>()
+                    );
                     context.HttpClientService = provider.GetRequiredService<IHttpClientService>();
                     context.GameEventPublisher =
                         provider.GetRequiredKeyedService<GameEventPublisher>(
@@ -80,7 +93,9 @@ public static class Waves
                 nameof(WavesMainGameContextV2),
                 (provider, c) =>
                 {
-                    var context = GameContextFactory.GetMainWavesGameContextV2();
+                    var context = GameContextFactory.GetMainWavesGameContextV2(
+                        provider.GetRequiredService<IIoCircuitBreaker>()
+                    );
                     context.HttpClientService = provider.GetRequiredService<IHttpClientService>();
                     context.GameEventPublisher =
                         provider.GetRequiredKeyedService<GameEventPublisher>(
@@ -95,7 +110,9 @@ public static class Waves
                 nameof(WavesBiliBiliGameContextV2),
                 (provider, c) =>
                 {
-                    var context = GameContextFactory.GetBilibiliWavesGameContextV2();
+                    var context = GameContextFactory.GetBilibiliWavesGameContextV2(
+                        provider.GetRequiredService<IIoCircuitBreaker>()
+                    );
                     context.HttpClientService = provider.GetRequiredService<IHttpClientService>();
                     context.GameEventPublisher =
                         provider.GetRequiredKeyedService<GameEventPublisher>(
@@ -110,7 +127,9 @@ public static class Waves
                 nameof(WavesGlobalGameContextV2),
                 (provider, c) =>
                 {
-                    var context = GameContextFactory.GetWavesGlobalGameContextV2();
+                    var context = GameContextFactory.GetWavesGlobalGameContextV2(
+                        provider.GetRequiredService<IIoCircuitBreaker>()
+                    );
                     context.HttpClientService = provider.GetRequiredService<IHttpClientService>();
                     context.GameEventPublisher =
                         provider.GetRequiredKeyedService<GameEventPublisher>(

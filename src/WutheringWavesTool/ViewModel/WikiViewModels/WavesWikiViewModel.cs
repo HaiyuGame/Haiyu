@@ -57,9 +57,9 @@ public partial class WavesWikiViewModel : WikiViewModelBase, IHaiyuCacheOwner
         CacheService = haiyuMemoryCacheService;
     }
 
-    private async void LoginMessangerMethod(object recipient, SelectUserMessanger message)
+    private void LoginMessangerMethod(object recipient, SelectUserMessanger message)
     {
-        await Loaded();
+        _ = Loaded();
     }
 
     [ObservableProperty]
@@ -107,60 +107,69 @@ public partial class WavesWikiViewModel : WikiViewModelBase, IHaiyuCacheOwner
     public IAppContext<App> AppContext { get; }
 
     [RelayCommand]
-    async Task Loaded()
-    {
-        Loading = true;
-        var wikiPage = await this.TryCacheInvokeAsync(async ct =>
-            await LoadCacheWikiAsync(
-                string.Empty,
-                async _ =>
-                {
-                    var wikiPage = await this.GameWikiClient.GetHomePageAsync(
-                        WikiType.Waves,
-                        this.CTS.Token
-                    );
-                    return wikiPage;
-                },
-                HaiyuCacheMode.Default,
-                ct
-            )
-        );
-        await RefreshUserAsync(false);
-        if ((wikiPage.Result != null && wikiPage.Result.Data.ContentJson.Shortcuts != null))
+    Task Loaded() =>
+        RunWhileAliveAsync(async token =>
         {
-            Actives = GameWikiClient.GetEventData(wikiPage.Result)!.Format(WikiType.Waves) ?? [];
-            var sides = wikiPage
-                .Result.Data.ContentJson.SideModules.Where(x => x.Type == "events-side")
-                .ToList();
-
-            if (sides.Count == 2)
+            try
             {
-                var role = await FormatSideDataAsync(sides[0]);
-                this.RoleActive = role?.ToObservableCollection();
-                var weapon = await FormatSideDataAsync(sides[1]);
-                WeaponActive = weapon?.ToObservableCollection();
-            }
-            else
-            {
-                TipShow.ShowMessage(
-                    LanguageService.GetStringByText(
-                        "获取卡池信息出现了不可预料的情况，请确认官方Wiki显示是否正常"
-                    ),
-                    Symbol.Clear
+                Loading = true;
+                var wikiPage = await this.TryCacheInvokeAsync(
+                    async ct =>
+                        await LoadCacheWikiAsync(
+                            string.Empty,
+                            async _ =>
+                                await this.GameWikiClient.GetHomePageAsync(WikiType.Waves, ct),
+                            HaiyuCacheMode.Default,
+                            token
+                        ),
+                    token
                 );
+                if (wikiPage.Code == -1)
+                    return;
+                await RefreshUserAsync(false);
+                if ((wikiPage.Result != null && wikiPage.Result.Data.ContentJson.Shortcuts != null))
+                {
+                    Actives =
+                        GameWikiClient.GetEventData(wikiPage.Result)!.Format(WikiType.Waves) ?? [];
+                    var sides = wikiPage
+                        .Result.Data.ContentJson.SideModules.Where(x => x.Type == "events-side")
+                        .ToList();
+
+                    if (sides.Count == 2)
+                    {
+                        var role = await FormatSideDataAsync(sides[0]);
+                        this.RoleActive = role?.ToObservableCollection();
+                        var weapon = await FormatSideDataAsync(sides[1]);
+                        WeaponActive = weapon?.ToObservableCollection();
+                    }
+                    else
+                    {
+                        TipShow.ShowMessage(
+                            LanguageService.GetStringByText(
+                                "获取卡池信息出现了不可预料的情况，请确认官方Wiki显示是否正常"
+                            ),
+                            Symbol.Clear
+                        );
+                    }
+                }
+                else
+                {
+                    TipShow.ShowMessage(
+                        LanguageService.FormatByText(
+                            LanguageService.GetStringByText(
+                                "获取数据失败，请检查网络或重启应用"
+                            )
+                        ),
+                        Symbol.Clear
+                    );
+                }
             }
-        }
-        else
-        {
-            TipShow.ShowMessage(
-                LanguageService.FormatByText(
-                    LanguageService.GetStringByText("获取数据失败，请检查网络或重启应用")
-                ),
-                Symbol.Clear
-            );
-        }
-        Loading = false;
-    }
+            finally
+            {
+                if (IsAlive)
+                    Loading = false;
+            }
+        });
 
     private async Task<List<EventContentSideWrapper>?> FormatSideDataAsync(SideModule sideModules)
     {
@@ -241,7 +250,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase, IHaiyuCacheOwner
     {
         if (value == null)
             return;
-        await RefreshBaseData(value);
+        await RunWhileAliveAsync(_ => RefreshBaseData(value));
     }
 
     private async Task RefreshBaseData(GameRoilDataItem value)
@@ -264,7 +273,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase, IHaiyuCacheOwner
             var refreshMode = isRefresh ? HaiyuCacheMode.Refresh : HaiyuCacheMode.Default;
             this.SelectGamer = null;
             var account = AccountService.CurrentAccount;
-            if (account is not null && await WavesClient.IsLoginAsync(account, CTS.Token))
+            if (account is not null && await WavesClient.IsLoginAsync(account, LifetimeToken))
             {
                 var result = await this.TryCacheInvokeAsync(async ct =>
                     await this.LoadRoilCacheAsync(
@@ -274,12 +283,13 @@ public partial class WavesWikiViewModel : WikiViewModelBase, IHaiyuCacheOwner
                             return await WavesClient.GetGamerAsync(
                                     account,
                                     (int)Waves.Core.Models.Enums.GameType.Waves,
-                                    this.CTS.Token
+                                    ct
                                 ) ?? throw new Exception("失效");
                         },
                         refreshMode,
                         ct
-                    )
+                    ),
+                    LifetimeToken
                 );
                 if (result.Code != 0 || result.Result == null)
                 {
@@ -296,8 +306,14 @@ public partial class WavesWikiViewModel : WikiViewModelBase, IHaiyuCacheOwner
                 this.KuroLogin = true;
             }
         }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
         catch (Exception ex)
         {
+            if (!IsAlive)
+                return;
             TipShow.ShowMessage(
                 LanguageService.FormatByText(
                     LanguageService.GetStringByText("刷新失败:{0}"),
@@ -308,15 +324,14 @@ public partial class WavesWikiViewModel : WikiViewModelBase, IHaiyuCacheOwner
         }
     }
 
-    public override void Dispose()
+    protected override void OnDisposing()
     {
-        Actives.Clear();
+        Actives?.Clear();
         Actives = null;
         WeaponActive?.Clear();
         RoleActive?.Clear();
         WeaponActive = null;
         RoleActive = null;
-        base.Dispose();
     }
 
     private void OpenKuroCommunityWindow(WebSessionContext? context)

@@ -23,7 +23,8 @@
             Text="{x:Bind helper:LanguageService.GetString('Display_UninstalledSoon')}" />
         <ProgressBar
             Grid.Row="1"
-            MaxHeight="{x:Bind ViewModel.MaxTotal, Mode=OneWay}"
+            IsIndeterminate="{x:Bind ViewModel.IsProgressIndeterminate, Mode=OneWay}"
+            Maximum="{x:Bind ViewModel.MaxTotal, Mode=OneWay}"
             HorizontalAlignment="Stretch"
             Value="{x:Bind ViewModel.Current, Mode=OneWay}" />
         <Grid Grid.Row="2" ColumnSpacing="10">

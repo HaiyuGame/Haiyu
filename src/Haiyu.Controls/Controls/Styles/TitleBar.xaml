@@ -1,10 +1,119 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Haiyu.Controls">
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+            <SolidColorBrush x:Key="TitleBarButtonBackgroundBrush" Color="#E6FFFFFF" />
+            <SolidColorBrush x:Key="TitleBarButtonBackgroundPointerOverBrush" Color="#FFFFFFFF" />
+            <SolidColorBrush x:Key="TitleBarButtonBackgroundPressedBrush" Color="#FFDCE8F2" />
+            <SolidColorBrush x:Key="TitleBarButtonForegroundBrush" Color="#E4000000" />
+            <SolidColorBrush x:Key="TitleBarButtonForegroundDisabledBrush" Color="#72000000" />
+            <SolidColorBrush x:Key="TitleBarButtonBorderBrush" Color="#29000000" />
+            <SolidColorBrush x:Key="TitleBarButtonBorderPointerOverBrush" Color="#47000000" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+            <SolidColorBrush x:Key="TitleBarButtonBackgroundBrush" Color="#D9212121" />
+            <SolidColorBrush x:Key="TitleBarButtonBackgroundPointerOverBrush" Color="#F23A3A3A" />
+            <SolidColorBrush x:Key="TitleBarButtonBackgroundPressedBrush" Color="#F20E0E0E" />
+            <SolidColorBrush x:Key="TitleBarButtonForegroundBrush" Color="#FFFFFFFF" />
+            <SolidColorBrush x:Key="TitleBarButtonForegroundDisabledBrush" Color="#72FFFFFF" />
+            <SolidColorBrush x:Key="TitleBarButtonBorderBrush" Color="#3DFFFFFF" />
+            <SolidColorBrush x:Key="TitleBarButtonBorderPointerOverBrush" Color="#66FFFFFF" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="HighContrast">
+            <StaticResource x:Key="TitleBarButtonBackgroundBrush" ResourceKey="SystemColorButtonFaceColorBrush" />
+            <StaticResource x:Key="TitleBarButtonBackgroundPointerOverBrush" ResourceKey="SystemColorHighlightColorBrush" />
+            <StaticResource x:Key="TitleBarButtonBackgroundPressedBrush" ResourceKey="SystemColorHighlightColorBrush" />
+            <StaticResource x:Key="TitleBarButtonForegroundBrush" ResourceKey="SystemColorButtonTextColorBrush" />
+            <StaticResource x:Key="TitleBarButtonForegroundDisabledBrush" ResourceKey="SystemColorGrayTextColorBrush" />
+            <StaticResource x:Key="TitleBarButtonBorderBrush" ResourceKey="SystemColorButtonTextColorBrush" />
+            <StaticResource x:Key="TitleBarButtonBorderPointerOverBrush" ResourceKey="SystemColorHighlightTextColorBrush" />
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+
     <x:Double x:Key="TitleBarTallHeight">48</x:Double>
     <x:Double x:Key="TitleBarStandardHeight">32</x:Double>
+
+    <!--  标题栏命令使用紧凑的 Fluent 轻量按钮，避免深色实心圆遮挡背景内容。  -->
+    <Style x:Key="TitleBarButtonStyle" TargetType="Button">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Background" Value="{ThemeResource TitleBarButtonBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{ThemeResource TitleBarButtonForegroundBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource TitleBarButtonBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+        <Setter Property="UseSystemFocusVisuals" Value="True" />
+        <Setter Property="FocusVisualMargin" Value="-2" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border
+                        x:Name="ButtonChrome"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+                        <Border.BackgroundTransition>
+                            <BrushTransition Duration="0:0:0.10" />
+                        </Border.BackgroundTransition>
+                        <ContentPresenter
+                            x:Name="ContentPresenter"
+                            Padding="{TemplateBinding Padding}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            ContentTransitions="{TemplateBinding ContentTransitions}"
+                            Foreground="{TemplateBinding Foreground}"
+                            RenderTransformOrigin="0.5,0.5">
+                            <ContentPresenter.RenderTransform>
+                                <ScaleTransform x:Name="PressedScaleTransform" ScaleX="1" ScaleY="1" />
+                            </ContentPresenter.RenderTransform>
+                        </ContentPresenter>
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal" />
+                                <VisualState x:Name="PointerOver">
+                                    <VisualState.Setters>
+                                        <Setter Target="ButtonChrome.Background" Value="{ThemeResource TitleBarButtonBackgroundPointerOverBrush}" />
+                                        <Setter Target="ButtonChrome.BorderBrush" Value="{ThemeResource TitleBarButtonBorderPointerOverBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Pressed">
+                                    <VisualState.Setters>
+                                        <Setter Target="ButtonChrome.Background" Value="{ThemeResource TitleBarButtonBackgroundPressedBrush}" />
+                                        <Setter Target="ContentPresenter.Opacity" Value="0.78" />
+                                        <Setter Target="PressedScaleTransform.ScaleX" Value="0.92" />
+                                        <Setter Target="PressedScaleTransform.ScaleY" Value="0.92" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Disabled">
+                                    <VisualState.Setters>
+                                        <Setter Target="ButtonChrome.Opacity" Value="0.62" />
+                                        <Setter Target="ContentPresenter.Foreground" Value="{ThemeResource TitleBarButtonForegroundDisabledBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style
+        x:Key="TitleBarWideButtonStyle"
+        BasedOn="{StaticResource TitleBarButtonStyle}"
+        TargetType="Button">
+        <Setter Property="Width" Value="76" />
+    </Style>
+
     <Style TargetType="local:TitleBar">
         <Setter Property="MinHeight" Value="{ThemeResource TitleBarStandardHeight}" />
         <Setter Property="HeadHorizontalAlignment" Value="Stretch" />

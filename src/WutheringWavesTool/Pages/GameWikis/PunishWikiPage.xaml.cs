@@ -10,20 +10,32 @@ public sealed partial class PunishWikiPage : Page, IPage,IDisposable
         InitializeComponent();
         this.ViewModel = Instance.Host.Services.GetRequiredService<PunishWikiViewModel>();
     }
-    public PunishWikiViewModel ViewModel { get; private set; }
+    public PunishWikiViewModel? ViewModel { get; private set; }
     public Type PageType => typeof(PunishWikiPage);
 
     public void Dispose()
     {
-        this.ViewModel.Dispose();
+        try
+        {
+            this.ViewModel?.Dispose();
+        }
+        finally
+        {
+            this.ViewModel = null;
+        }
     }
 
     protected override void OnNavigatedFrom(NavigationEventArgs e)
     {
-        base.OnNavigatedTo(e);
-        this.Bindings.StopTracking();
-        this.ViewModel.Dispose();
-        this.ViewModel = null;
-        base.OnNavigatedFrom(e);
+        try
+        {
+            this.Bindings.StopTracking();
+            this.ViewModel?.Dispose();
+        }
+        finally
+        {
+            this.ViewModel = null;
+            base.OnNavigatedFrom(e);
+        }
     }
 }

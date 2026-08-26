@@ -29,9 +29,16 @@ public partial class HomeViewModel : ViewModelBase
     public partial string SelectTab { get; set; }
 
     [RelayCommand]
-    async Task Loaded()
+    Task Loaded() =>
+        RunWhileAliveAsync(_ =>
+        {
+            this.SelectTab = Tabs.First();
+            return Task.CompletedTask;
+        });
+
+    protected override void OnDisposing()
     {
-        this.SelectTab = Tabs.First();
+        NavigationService.UnRegisterView();
     }
 
     partial void OnSelectTabChanged(string value)

@@ -1,4 +1,4 @@
-﻿namespace Waves.Core.Models;
+namespace Waves.Core.Models.Options;
 
 public class CoreLogOption
 {

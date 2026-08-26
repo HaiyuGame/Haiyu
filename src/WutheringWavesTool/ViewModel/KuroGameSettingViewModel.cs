@@ -1,4 +1,5 @@
 using Waves.Core.Models.Enums;
+using Waves.Core.Models.Options;
 
 namespace Haiyu.ViewModel;
 

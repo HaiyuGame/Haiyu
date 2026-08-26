@@ -23,4 +23,4 @@ using Waves.Settings;
 
 //await KuroClientHomeFeedTest.StartTask();
 
-await RpcTest.SendPingAsync();
+await IoCircuitBreakerTest.StartTest(args);

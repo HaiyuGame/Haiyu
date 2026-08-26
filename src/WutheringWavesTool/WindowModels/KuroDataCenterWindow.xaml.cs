@@ -20,11 +20,17 @@ public sealed partial class KuroDataCenterWindow : Window
 
     private void AppWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
     {
-        if (webView2 != null)
-        {
-            webView2.Close();
-        }
         this.AppWindow.Closing -= AppWindow_Closing;
+        try
+        {
+            webView2?.Close();
+        }
+        catch
+        {
+        }
+        if (titleBar is not null)
+            titleBar.Window = null;
+        this.Content = null;
     }
 
     private async void grid_Loaded(object sender, RoutedEventArgs e)

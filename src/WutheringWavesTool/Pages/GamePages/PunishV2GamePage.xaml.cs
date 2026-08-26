@@ -28,15 +28,20 @@ public sealed partial class PunishV2GamePage : Page,IPage
     }
 
 
-    public PunishV2GameContextViewModel ViewModel { get; set; }
+    public PunishV2GameContextViewModel? ViewModel { get; set; }
 
     protected override void OnNavigatedFrom(NavigationEventArgs e)
     {
-        this.Bindings.StopTracking();
-        this.ViewModel.Dispose();
-        this.ViewModel = null;
-        GC.Collect();
-        base.OnNavigatedFrom(e);
+        try
+        {
+            this.Bindings.StopTracking();
+            this.ViewModel?.Dispose();
+        }
+        finally
+        {
+            this.ViewModel = null;
+            base.OnNavigatedFrom(e);
+        }
     }
 
     private void Button_Click(object sender, RoutedEventArgs e)

@@ -12,16 +12,24 @@ public sealed partial class SettingPage : Page, IPage
 
     protected override void OnNavigatedFrom(NavigationEventArgs e)
     {
-        GC.Collect();
-        this.ViewModel.Dispose();
-        this.Bindings.StopTracking();
-        base.OnNavigatedFrom(e);
+        try
+        {
+            this.Bindings.StopTracking();
+            this.ViewModel?.Dispose();
+        }
+        finally
+        {
+            this.ViewModel = null;
+            base.OnNavigatedFrom(e);
+        }
     }
 
-    public SettingViewModel ViewModel { get; }
+    public SettingViewModel? ViewModel { get; private set; }
 
     private async void Button_Click(object sender, RoutedEventArgs e)
     {
+        if (ViewModel is null)
+            return;
         await ViewModel.DialogManager.ShowMessageDialog(new ShowDialogOption()
         {
             Context = LanguageService.GetStringByText(

@@ -30,12 +30,7 @@ if (string.IsNullOrWhiteSpace(rpcOptions.Port))
 if (string.IsNullOrWhiteSpace(rpcOptions.Token))
     throw new InvalidOperationException("Rpc:Token must be configured.");
 
-builder.Services
-    .AddMcpServer()
-    .WithStdioServerTransport()
-    .WithTools<HaiyuTool>()
-    .Services.AddSingleton(rpcOptions);
-
+builder.Services.AddSingleton(rpcOptions);
 builder.Services.AddSingleton(sp =>
 {
     var options = sp.GetRequiredService<RpcBridgeOptions>();
@@ -44,5 +39,12 @@ builder.Services.AddSingleton(sp =>
     return client;
 });
 builder.Services.AddHostedService(sp => sp.GetRequiredService<WebSocketRpcClient>());
+
+// Register the stdio MCP transport after the RPC hosted service so tool calls
+// are accepted only after the WebSocket connection has been established.
+builder.Services
+    .AddMcpServer()
+    .WithStdioServerTransport()
+    .WithTools<HaiyuTool>();
 
 await builder.Build().RunAsync();

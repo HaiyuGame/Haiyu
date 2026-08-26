@@ -30,7 +30,6 @@ public abstract partial class ChartControlBase : Grid, IDisposable
     {
         _tooltipPresenter = new Border
         {
-            Background = new SolidColorBrush(Color.FromArgb(235, 32, 32, 32)),
             CornerRadius = new CornerRadius(4),
             Padding = new Thickness(10, 6, 10, 6),
             Child = _tooltipText,
@@ -39,6 +38,7 @@ public abstract partial class ChartControlBase : Grid, IDisposable
             IsHitTestVisible = false,
             Visibility = Visibility.Collapsed,
         };
+        UpdateTooltipTheme();
         Microsoft.UI.Xaml.Controls.Canvas.SetZIndex(_tooltipPresenter, 100);
         Children.Add(_tooltipPresenter);
         IsTabStop = true;
@@ -67,6 +67,7 @@ public abstract partial class ChartControlBase : Grid, IDisposable
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         if (_disposed || _active) return;
+        UpdateTooltipTheme();
         var canvas = new CanvasControl { ClearColor = Colors.Transparent };
         Canvas = canvas;
         Children.Insert(0, canvas);
@@ -123,6 +124,7 @@ public abstract partial class ChartControlBase : Grid, IDisposable
         var x = Math.Clamp(anchor.X - size.Width / 2, 4, Math.Max(4, ActualWidth - size.Width - 4));
         var y = anchor.Y - size.Height - 10;
         if (y < 4) y = Math.Min(ActualHeight - size.Height - 4, anchor.Y + 10);
+        
         _tooltipPresenter.Margin = new Thickness(x, Math.Max(4, y), 0, 0);
     }
     protected void HideTooltip() => _tooltipPresenter.Visibility = Visibility.Collapsed;
@@ -183,7 +185,19 @@ public abstract partial class ChartControlBase : Grid, IDisposable
         ApplyKeyboardZoom(e.GetCurrentPoint(canvas).Properties.MouseWheelDelta > 0 ? 1.15 : 1 / 1.15); e.Handled = true;
     }
     private void OnDoubleTapped(object sender, DoubleTappedRoutedEventArgs e) => ResetView();
-    private void OnActualThemeChanged(FrameworkElement sender, object args) => Invalidate();
+    private void OnActualThemeChanged(FrameworkElement sender, object args)
+    {
+        UpdateTooltipTheme();
+        Invalidate();
+    }
+
+    private void UpdateTooltipTheme()
+    {
+        if (Parent is FrameworkElement ui)
+        {
+            _tooltipPresenter.RequestedTheme = ui.ActualTheme;
+        }
+    }
     private void OnKeyDown(object sender, KeyRoutedEventArgs e)
     {
         if (e.Key == Windows.System.VirtualKey.Escape) { ResetView(); e.Handled = true; }

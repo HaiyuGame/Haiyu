@@ -6,8 +6,6 @@ using Haiyu.Plugin.Contracts;
 using Haiyu.Plugin.Services;
 using Haiyu.ServiceHost;
 using Cacheing;
-using Haiyu.ServiceHost.Contracts;
-using Haiyu.ServiceHost.Services;
 using Haiyu.ServiceHost.XBox.Commons;
 using Haiyu.Services.DialogServices;
 using Haiyu.Services.Navigations.NavigationViewServices;
@@ -29,6 +27,8 @@ using Waves.Core.Models;
 using Waves.Core.Services;
 using Waves.Settings;
 using Waves.Core.Services.CloudGameServices;
+using Haiyu.ServiceHost.Services;
+using Haiyu.ServiceHost.Contracts;
 
 namespace Haiyu;
 
@@ -95,7 +95,6 @@ public static class InstanceBuilderExtensions
                     .AddSingleton<AppSettings>()
                     .AddSingleton<GithubIpSettings>()
                     .AddSingleton<RpcSettings>()
-                    .AddSingleton<IIoCircuitBreaker, IoCircuitBreaker>()
                     .AddTransient<IAppActivation, AppActivation>()
                     #region XBox
                     .AddSingleton<XBoxConfig>()
@@ -183,7 +182,7 @@ public static class InstanceBuilderExtensions
                     #endregion
                     #region Base
                     .AddSingleton<IAppContext<App>, AppContext<App>>()
-                    .AddTransient<IKuroClient, global::Haiyu.KuroClient.KuroClient>()
+                    .AddSingleton<IKuroClient, global::Haiyu.KuroClient.KuroClient>()
                     .AddTransient<IPlayerCardService, PlayerCardService>()
                     .AddSingleton<IScreenCaptureService, ScreenCaptureService>()
                     .AddSingleton<IGameWikiClient, GameWikiClient>()
@@ -263,6 +262,7 @@ public static class InstanceBuilderExtensions
                         nameof(GameRoilNavigationService)
                     )
                     #endregion
+                    
                     .AddGameContext();
             }
         );

@@ -1,6 +1,6 @@
 namespace Haiyu.Pages;
 
-public sealed partial class ToolkitPage : Page,IPage
+public sealed partial class ToolkitPage : Page, IPage
 {
     public ToolkitPage()
     {
@@ -10,5 +10,19 @@ public sealed partial class ToolkitPage : Page,IPage
 
     public Type PageType => typeof(ToolkitPage);
 
-    public ToolkitViewModel ViewModel { get; }
+    public ToolkitViewModel? ViewModel { get; private set; }
+
+    protected override void OnNavigatedFrom(NavigationEventArgs e)
+    {
+        try
+        {
+            this.Bindings.StopTracking();
+            this.ViewModel?.Dispose();
+        }
+        finally
+        {
+            this.ViewModel = null;
+            base.OnNavigatedFrom(e);
+        }
+    }
 }

@@ -24,12 +24,22 @@ namespace Waves.Settings;
 [Settings<bool>(Name = "StartGameAllowCloseMain", Nullable = true, DefaultValue = "False")]
 [Settings<string>(Name = "MirrorKey", Nullable = true)]
 [Settings<string>(Name = "LauncheBth", Nullable = true, DefaultValue = "Home")]
-[Settings<List<string>>(Name ="skipVerifyFiles",
+[Settings<List<string>>(
+    Name = "skipVerifyFiles",
     JsonTypeInfoContextType = typeof(AppSettingJsonContext),
-    JsonTypeInfoPropertyName = nameof(AppSettingJsonContext.Default.ListString))]
-[Settings<bool>(Name = "verifySkilDelete",Nullable = false,DefaultValue ="true")]
+    JsonTypeInfoPropertyName = nameof(AppSettingJsonContext.Default.ListString)
+)]
+[Settings<bool>(Name = "verifySkilDelete", Nullable = false, DefaultValue = "true")]
 [Settings<string>(Name = "WebViewRuntimeMode", Nullable = true, DefaultValue = "Evergreen")]
-[Settings<string>(Name = "SelectCloudUserID",Nullable =true)]
+[Settings<string>(Name = "SelectCloudUserID", Nullable = true)]
+[Settings<MainWindowSetting>(
+    Name = "MainWindowSettings",
+    Nullable = true,
+    JsonTypeInfoContextType = typeof(AppSettingJsonContext),
+    JsonTypeInfoPropertyName = nameof(AppSettingJsonContext.Default.MainWindowSetting)
+)]
+#region Windows Settings
+#endregion
 public partial class AppSettings : SettingBase
 {
     public static string BassFolder =>
@@ -53,7 +63,10 @@ public partial class AppSettings : SettingBase
 
     private static readonly string SettingsFilePath = Path.Combine(BassFolder, "System.json");
 
-    public static readonly string WebViewFixRuntime = Path.Combine(BassFolder, "WebView2FixedRuntime");
+    public static readonly string WebViewFixRuntime = Path.Combine(
+        BassFolder,
+        "WebView2FixedRuntime"
+    );
 
     public static readonly string LogPath = BassFolder + "\\appLogs\\appLog.log";
 
@@ -65,7 +78,6 @@ public partial class AppSettings : SettingBase
         : base(SettingsFilePath)
     {
         _ = LoadSettingsAsync();
-        
     }
 
     public async Task<int> GetMaxIoConcurrentAsync(CancellationToken ct = default)
@@ -81,9 +93,48 @@ public partial class AppSettings : SettingBase
     }
 }
 
+public class MainWindowSetting
+{
+    /// <summary>
+    /// 高度缩放比例
+    /// </summary>
+    [JsonPropertyName("heightRate")]
+    public double HeightRate { get; set; }
+
+    /// <summary>
+    /// 宽度缩放比例
+    /// </summary>
+    [JsonPropertyName("widthRate")]
+    public double WidthRate { get; set; }
+
+    /// <summary>
+    /// 是否允许调整窗口大小
+    /// </summary>
+    [JsonPropertyName("isResize")]
+    public bool IsResize { get; set; }
+
+    /// <summary>
+    /// 上次窗口位置X坐标
+    /// </summary>
+    [JsonPropertyName("leftX")]
+    public double? LeftX { get; set; }
+
+    /// <summary>
+    /// 上次窗口位置Y坐标
+    /// </summary>
+    [JsonPropertyName("leftY")]
+    public double? LeftY { get; set; }
+
+    public static MainWindowSetting Default => new MainWindowSetting
+    {
+        HeightRate = 1.0,
+        WidthRate = 1.0,
+        IsResize = true,
+        LeftX = null,
+        LeftY = null
+    };
+}
 
 [JsonSerializable(typeof(List<string>))]
-public partial class AppSettingJsonContext:JsonSerializerContext
-{
-
-}
+[JsonSerializable(typeof(MainWindowSetting))]
+public partial class AppSettingJsonContext : JsonSerializerContext { }

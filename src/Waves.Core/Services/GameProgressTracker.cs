@@ -149,7 +149,7 @@ public sealed class GameProgressTracker : TrackerBase<GameProgressTracker, GameC
 
         if (_isTerminated)
         {
-            if (args.Generation > 0 && args.Generation < _terminationGeneration)
+            if (args.Generation > 0 && args.Generation <= _terminationGeneration)
                 return default;
             _isTerminated = false;
         }

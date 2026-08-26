@@ -16,6 +16,20 @@ public sealed partial class GetGeetWindow : WindowModelBase
         this.grid.RequestedTheme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
     }
 
+    protected override void OnDetaching()
+    {
+        this.webView2.NavigationCompleted -= WebView2_NavigationCompleted;
+        try
+        {
+            this.webView2?.Close();
+        }
+        catch
+        {
+        }
+        if (titleBar is not null)
+            titleBar.Window = null;
+    }
+
     private async void WebView2_Loaded(object sender, RoutedEventArgs e)
     {
         this.webView2.Loaded -= WebView2_Loaded;

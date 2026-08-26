@@ -19,7 +19,7 @@ namespace Waves.Core.Contracts.Events
         public EventPublishBase()
         {
             Channel = System.Threading.Channels.Channel.CreateBounded<EventArgs>(
-                new BoundedChannelOptions(100)
+                new BoundedChannelOptions(200)
                 {
                     FullMode = BoundedChannelFullMode.DropOldest, // 缓冲区满时丢弃旧事件
                 }
@@ -33,8 +33,15 @@ namespace Waves.Core.Contracts.Events
         {
             if (_isDisposed)
                 return;
+            if (@event is not null && IsBarrierEvent(@event))
+            {
+                while (Channel.Reader.TryRead(out _)) { }
+            }
+
             Channel.Writer.TryWrite(@event);
         }
+
+        protected virtual bool IsBarrierEvent(EventArgs @event) => false;
 
         public abstract ValueTask<IGameEventSubscription> SubscribeAsync(
             Func<EventArgs, ValueTask> handler

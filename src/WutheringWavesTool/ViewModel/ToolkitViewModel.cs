@@ -28,10 +28,7 @@ public sealed partial class ToolkitViewModel:ViewModelBase
     public partial ObservableCollection<TaskWrapper> Tasks { get; set; }
 
     [RelayCommand]
-    async Task Loaded()
-    {
-        await RefreshTasks();
-    }
+    Task Loaded() => RunWhileAliveAsync(_ => RefreshTasks());
 
     [RelayCommand]
     async Task RefreshTasks()
@@ -47,8 +44,10 @@ public sealed partial class ToolkitViewModel:ViewModelBase
     }
 
 
-    private async void SendTaskMethod(object recipient, SendTaskMessager message)
+    private void SendTaskMethod(object recipient, SendTaskMessager message)
     {
+        _ = RunWhileAliveAsync(async token =>
+        {
         switch (message.type)
         {
             case SendTaskType.Start:
@@ -60,7 +59,7 @@ public sealed partial class ToolkitViewModel:ViewModelBase
                 await this.RefreshTasks();
                 break;
             case SendTaskType.Invoke:
-                await TaskManager.InvokeTaskAsync(message.wrapper.Guid,this.CTS.Token);
+                await TaskManager.InvokeTaskAsync(message.wrapper.Guid, token);
                 break;
             case SendTaskType.Launche:
                 await AppSettings.WriteAsync(message.wrapper.AutoLaunche.ToString(), message.wrapper.SettingName);
@@ -68,5 +67,6 @@ public sealed partial class ToolkitViewModel:ViewModelBase
             default:
                 break;
         }
+        });
     }
 }

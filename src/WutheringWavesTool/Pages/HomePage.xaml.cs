@@ -11,25 +11,31 @@
 
         public Type PageType => typeof(HomePage);
 
-        public HomeViewModel ViewModel { get; }
+        public HomeViewModel? ViewModel { get; private set; }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
-            base.OnNavigatedFrom(e);
-            this.Bindings.StopTracking();
-            if (frame.Content is IDisposable disposable)
+            try
             {
-                disposable.Dispose();
-                frame.Content = null;
+                this.Bindings.StopTracking();
+                if (frame.Content is IDisposable disposable)
+                {
+                    disposable.Dispose();
+                    frame.Content = null;
+                }
+                this.ViewModel?.Dispose();
             }
-            this.ViewModel.NavigationService.UnRegisterView();
-            ViewModel.Dispose();
+            finally
+            {
+                this.ViewModel = null;
+                base.OnNavigatedFrom(e);
+            }
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-            this.ViewModel.NavigationService.RegisterView(this.frame);
+            this.ViewModel?.NavigationService.RegisterView(this.frame);
         }
 
 

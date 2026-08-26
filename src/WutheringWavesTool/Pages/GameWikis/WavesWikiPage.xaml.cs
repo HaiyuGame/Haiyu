@@ -10,17 +10,31 @@ public sealed partial class WavesWikiPage : Page, IPage,IDisposable
         this.ViewModel = Instance.GetService<WavesWikiViewModel>();
     }
 
-    public WavesWikiViewModel ViewModel { get; private set; }
+    public WavesWikiViewModel? ViewModel { get; private set; }
     protected override void OnNavigatedFrom(NavigationEventArgs e)
     {
-        this.ViewModel.Dispose();
-        this.ViewModel = null;
-        base.OnNavigatedFrom(e);
+        try
+        {
+            this.Bindings.StopTracking();
+            this.ViewModel?.Dispose();
+        }
+        finally
+        {
+            this.ViewModel = null;
+            base.OnNavigatedFrom(e);
+        }
     }
 
     public void Dispose()
     {
-        this.ViewModel.Dispose();
+        try
+        {
+            this.ViewModel?.Dispose();
+        }
+        finally
+        {
+            this.ViewModel = null;
+        }
     }
 
     public Type PageType => typeof(WavesWikiPage);
