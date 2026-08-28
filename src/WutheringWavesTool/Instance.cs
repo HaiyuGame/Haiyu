@@ -232,6 +232,7 @@ public static class InstanceBuilderExtensions
                     .AddTransient<IWavesPlayerCardCacheServices, WavesPlayerCardCacheServices>(
                         _ => new WavesPlayerCardCacheServices(AppSettings.WavesRecordFolder)
                     )
+                   .AddHostedService<ABIRuntimeService>()
                     #endregion
                     #region Toolkit
                     .AddTransient<ToolkitPage>()

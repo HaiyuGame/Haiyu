@@ -1,0 +1,33 @@
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using ABIRuntime.Abstractions;
+using ABIRuntime.Runtime;
+using Haiyu.ABI.Services;
+
+namespace Haiyu.ABI;
+
+public static unsafe class CoreExports
+{
+
+    [UnmanagedCallersOnly(EntryPoint = "ElevatedEntry",
+        CallConvs = new[] { typeof(CallConvStdcall) })]
+    public static void ElevatedEntry(
+        nint window, nint module, byte* commandLine, int showCommand)
+    {
+        try
+        {
+            string arguments = Marshal.PtrToStringAnsi((nint) commandLine) ?? string.Empty;
+            string[] parts = arguments.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length != 2) return;
+
+            var services = new PrivilegedServiceRegistry();
+            BuiltInServices.Register(services);
+            ElevatedHost.RunAsync(parts[0], parts[1], services)
+                .GetAwaiter().GetResult();
+        }
+        catch
+        {
+            // 异常不能跨越 unmanaged 导出边界；客户端会收到断线错误。
+        }
+    }
+}

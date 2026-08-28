@@ -2,7 +2,7 @@
 
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities" xmlns:uap6="http://schemas.microsoft.com/appx/manifest/uap/windows10/6" IgnorableNamespaces="uap rescap uap6">
 
-  <Identity Name="Blame.Haiyu" Publisher="CN=2566F4CC-49E7-48B8-9B11-F44F309CD097" Version="1.3.7.0" />
+  <Identity Name="Blame.Haiyu" Publisher="CN=2566F4CC-49E7-48B8-9B11-F44F309CD097" Version="1.3.8.0" />
 
   <mp:PhoneIdentity PhoneProductId="ab5fa69a-8861-45c5-b7af-05a080966447" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
 
