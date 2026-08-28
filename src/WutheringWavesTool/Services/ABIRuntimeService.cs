@@ -5,38 +5,95 @@ using Microsoft.Extensions.Hosting;
 
 namespace Haiyu.Services;
 
-public class ABIRuntimeService : IHostedService
+public sealed class ABIRuntimeService : IHostedService
 {
-    PrivilegedRuntime? _runtime;
+    private PrivilegedRuntime? _runtime;
+    private CancellationTokenSource? _monitorCancellation;
+    private Task? _monitorTask;
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+    public Task StartAsync(CancellationToken cancellationToken)
     {
-        _runtime = new("Haiyu.ABI.dll");
-        var progress = new Progress<IPrivilegedProgress<CleanMemoryProgress>>(progress =>
-        {
-            Console.WriteLine(
-                $"Stage: {progress.Stage}, Progress: {progress.Percentage}, Message: {progress.Message}"
-            );
-        });
-        var task = await _runtime.InvokeAsync<CleanMemoryRequest, RunResult, CleanMemoryProgress>(
-            new(
-                "haiyu.clean.v1",
-                ABIJsonContext.Default.CleanMemoryRequest,
-                ABIJsonContext.Default.RunResult,
-                ABIJsonContext.Default.CleanMemoryProgresss
-            ),
-            new CleanMemoryRequest(""),
-            progress,
-            cancellationToken
+        string corePath = Path.Combine(
+            AppDomain.CurrentDomain.BaseDirectory,
+            "Haiyu.ABI",
+            "Haiyu.ABI.dll"
         );
+
+        _runtime = new PrivilegedRuntime(corePath);
+        _monitorCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+
+        var progress = new Progress<IPrivilegedProgress<CMonitorProgress>>(value =>
+        {
+            if (value.Data?.data is not { } data)
+                return;
+
+            Debug.WriteLine($"{data.ForgroundProgramName},{data.FOrgroundProgramFps}");
+        });
+
+        _monitorTask = MonitorAsync(progress, _monitorCancellation.Token);
+        return Task.CompletedTask;
+    }
+
+    private async Task MonitorAsync(
+        IProgress<IPrivilegedProgress<CMonitorProgress>> progress,
+        CancellationToken cancellationToken
+    )
+    {
+        try
+        {
+            IPrivilegedResult<RunResult> result = await _runtime!.InvokeAsync<
+                CMonitorRequest,
+                RunResult,
+                CMonitorProgress
+            >(
+                new(
+                    "haiyu.monitor.v1",
+                    ABIJsonContext.Default.CMonitorRequest,
+                    ABIJsonContext.Default.RunResult,
+                    ABIJsonContext.Default.CMonitorProgress
+                ),
+                new CMonitorRequest(),
+                progress,
+                cancellationToken
+            );
+
+            if (!result.IsSuccess)
+            {
+                Debug.WriteLine($"FPS 监控失败：0x{result.StatusCode:X8} {result.Message}");
+            }
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            Debug.WriteLine("FPS 监控已取消。");
+        }
+        catch (Exception exception)
+        {
+            Debug.WriteLine($"FPS 监控异常：{exception}");
+        }
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        if (_runtime != null)
+        if (_monitorCancellation is not null)
+            await _monitorCancellation.CancelAsync();
+
+        if (_monitorTask is not null)
+        {
+            try
+            {
+                await _monitorTask.WaitAsync(cancellationToken);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
+        }
+
+        if (_runtime is not null)
         {
             await _runtime.DisposeAsync();
             _runtime = null;
         }
+
+        _monitorCancellation?.Dispose();
+        _monitorCancellation = null;
+        _monitorTask = null;
     }
 }

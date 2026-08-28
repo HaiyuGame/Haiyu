@@ -10,13 +10,6 @@ namespace Haiyu.ABI.Services;
 public sealed partial class ComputerMonitorService
     : IPrivilegedService<CMonitorRequest, RunResult, CMonitorProgress>
 {
-    FpsCounter counter = null;
-
-    public ComputerMonitorService()
-    {
-        counter = new();
-    }
-
     public PrivilegedServiceContract<CMonitorRequest, RunResult, CMonitorProgress> Contract =>
         new(
             "haiyu.monitor.v1",
@@ -31,8 +24,7 @@ public sealed partial class ComputerMonitorService
         CancellationToken cancellationToken
     )
     {
-        if (counter == null)
-            return new(-1, "初始化监控失败");
+        using var counter = new FpsCounter();
         counter.FpsOutput = new Action<Tuple<string, int>>(
             (s) =>
             {
@@ -48,24 +40,7 @@ public sealed partial class ComputerMonitorService
             }
         );
         counter.Start();
-        Task task = new(counter.Start,cancellationToken);
-        try
-        {
-            await task;
-            return new(0, "监控结束");
-        }
-        catch(OperationCanceledException ex)
-        {
-            // 取消
-        }
-        catch (Exception)
-        {
-            // 其他异常
-        }
-        finally
-        {
-            counter.Dispose();
-        }
+        await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
         return new(0, "监控结束");
     }
 }

@@ -11,6 +11,7 @@ public static class BuiltInServices
     public static void Register(IPrivilegedServiceRegistry registry)
     {
         registry.Add(new MemoryCleanerService());
+        registry.Add(new ComputerMonitorService());
     }
 }
 

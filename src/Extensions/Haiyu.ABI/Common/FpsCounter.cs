@@ -31,7 +31,8 @@ public class FpsCounter:IDisposable
 
     public void Start()
     {
-        m_EtwSession = new TraceEventSession("mysess");
+        m_EtwSession = new TraceEventSession(
+            $"Haiyu.Fps.{Environment.ProcessId}.{Guid.NewGuid():N}");
         m_EtwSession.StopOnDispose = true;
         m_EtwSession.EnableProvider("Microsoft-Windows-D3D9");
         m_EtwSession.EnableProvider("Microsoft-Windows-DXGI");
