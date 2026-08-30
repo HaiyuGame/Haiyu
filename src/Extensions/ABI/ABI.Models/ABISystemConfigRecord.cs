@@ -1,11 +1,13 @@
 using System.Text.Json.Serialization;
+using MemoryPack;
 
 namespace ABI.Models;
 
 /// <summary>
 /// ABI 进行系统自检
 /// </summary>
-public class ABISystemConfigRequest
+[MemoryPackable]
+public partial class ABISystemConfigRequest
 {
     [JsonPropertyName("baseDirectory")]
     public string BaseDirectory { get; set;  }
@@ -18,7 +20,8 @@ public class ABISystemConfigRequest
 /// <summary>
 /// ABI 进行系统自检进度
 /// </summary>
-public class ABISystemConfigProgress
+[MemoryPackable]
+public partial class ABISystemConfigProgress
 {
     [JsonPropertyName("isRuning")]
     public bool IsRuning { get; set; }

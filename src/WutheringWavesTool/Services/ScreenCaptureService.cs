@@ -7,7 +7,7 @@ namespace Haiyu.Services;
 
 public class ScreenCaptureService : IScreenCaptureService
 {
-    private WindowMessageMonitor? _monitor;
+    private WinUIEx.Messaging.WindowMessageMonitor? _monitor;
 
     private const int HOTKEY_ID = 141;
     public IAppContext<App> AppContext { get; }
@@ -17,7 +17,7 @@ public class ScreenCaptureService : IScreenCaptureService
     {
         AppContext = appContext;
         AppSettings = appSettings;
-        _monitor = new WindowMessageMonitor(AppContext.App.MainWindow);
+        _monitor = new WinUIEx.Messaging.WindowMessageMonitor(AppContext.App.MainWindow);
         _monitor.WindowMessageReceived += Monitor_WindowMessageReceived;
     }
 
@@ -51,7 +51,7 @@ public class ScreenCaptureService : IScreenCaptureService
         return (false, LanguageService.FormatByText(LanguageService.GetStringByText("快捷键注册")) + (success ? LanguageService.GetStringByText("成功") : LanguageService.GetStringByText("失败")));
     }
 
-    private void Monitor_WindowMessageReceived(object sender, WindowMessageEventArgs e)
+    private void Monitor_WindowMessageReceived(object sender, WinUIEx.Messaging.WindowMessageEventArgs e)
     {
         if (e.Message.MessageId == 0x0312)
         {

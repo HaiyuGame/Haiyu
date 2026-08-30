@@ -10,13 +10,14 @@
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:local="using:Haiyu.Pages.Toolkits"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:Haiyu.ViewModel.ToolkitsViewModel"
     mc:Ignorable="d">
     <i:Interaction.Behaviors>
         <i:EventTriggerBehavior EventName="Loaded">
             <i:InvokeCommandAction Command="{x:Bind ViewModel.LoadedCommand}" />
         </i:EventTriggerBehavior>
     </i:Interaction.Behaviors>
-    <Grid>
+    <Grid Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="5">
         <Grid.Resources>
             <Style x:Key="TokenPanelBorderStyle" TargetType="Border">
                 <Setter Property="Padding" Value="14" />
@@ -33,15 +34,75 @@
                 <Setter Property="CornerRadius" Value="5" />
             </Style>
         </Grid.Resources>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto" />
-            <RowDefinition />
-        </Grid.RowDefinitions>
-        <TextBlock
-            Grid.Row="1"
+        <StackPanel
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            FontSize="18"
-            Text="{x:Bind ViewModel.MonitorText, Mode=OneWay}" />
+            Orientation="Horizontal"
+            Spacing="5">
+            <TextBlock Text="FPS:" />
+            <TextBlock Text="{x:Bind ViewModel.FPS, Mode=OneWay}" />
+            <ItemsControl ItemsSource="{x:Bind ViewModel.CPUS, Mode=OneWay}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <ItemsStackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:MonitorDeviceItem">
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <TextBlock Text="{x:Bind Index, Mode=OneWay}" />
+                            <TextBlock>
+                                <Run Text="{x:Bind Load, Mode=OneWay}" />
+                                <Run Text="%" />
+                            </TextBlock>
+                            <TextBlock>
+                                <Run Text="{x:Bind Tempate, Mode=OneWay}" />
+                                <Run Text="℃" />
+                            </TextBlock>
+                            <TextBlock>
+                                <Run Text="{x:Bind Voltages, Mode=OneWay}" />
+                                <Run Text="V" />
+                            </TextBlock>
+                            <TextBlock>
+                                <Run Text="{x:Bind Clock, Mode=OneWay}" />
+                                <Run Text="MHz" />
+                            </TextBlock>
+                        </StackPanel>
+                    </DataTemplate>
+
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <ItemsControl ItemsSource="{x:Bind ViewModel.GPUS, Mode=OneWay}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <ItemsStackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:MonitorDeviceItem">
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <TextBlock Text="{x:Bind Index, Mode=OneWay}" />
+                            <TextBlock>
+                                <Run Text="{x:Bind Load, Mode=OneWay}" />
+                                <Run Text="%" />
+                            </TextBlock>
+                            <TextBlock>
+                                <Run Text="{x:Bind Tempate, Mode=OneWay}" />
+                                <Run Text="℃" />
+                            </TextBlock>
+                            <TextBlock>
+                                <Run Text="{x:Bind Voltages, Mode=OneWay}" />
+                                <Run Text="V" />
+                            </TextBlock>
+                            <TextBlock>
+                                <Run Text="{x:Bind Clock, Mode=OneWay}" />
+                                <Run Text="MHz" />
+                            </TextBlock>
+                        </StackPanel>
+                    </DataTemplate>
+
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
     </Grid>
 </Page>

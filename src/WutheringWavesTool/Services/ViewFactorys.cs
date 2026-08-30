@@ -76,18 +76,6 @@ public class ViewFactorys : IViewFactorys
 
 
 
-    public TransparentWindow CreateTransperentWindow()
-    {
-        return new TransparentWindow();
-    }
-
-
-
-    public Window CreateAllowTransparent()
-    {
-        return new Window();
-    }
-
     public WindowModelBase ShowAnalysisRecordV2(CloudGameLoginSession selectLogin)
     {
         return this.ShowWindowBase<WavesAnalysisRecordPage>(selectLogin);
@@ -101,7 +89,7 @@ public class ViewFactorys : IViewFactorys
 
     public Window ShowMonitorToolWindow()
     {
-        var win = new Window();
+        var win = new TransparentWindowBase();
         var page = Instance.Host.Services!.GetRequiredService<MonitorToolPage>();
         page.SetWindow(win);
         win.Content = page;

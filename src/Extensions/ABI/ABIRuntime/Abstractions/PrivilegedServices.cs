@@ -1,7 +1,8 @@
-using System.Text.Json;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization.Metadata;
 using ABI.Models;
 using ABIRuntime.Runtime;
+using MemoryPack;
 
 namespace ABIRuntime.Abstractions;
 
@@ -43,7 +44,10 @@ public enum PrivilegedStage
 }
 
 /// <summary>客户端与高权限宿主共享的强类型服务契约。</summary>
-public sealed record PrivilegedServiceContract<TRequest, TResponse, TProgress>(
+public sealed record PrivilegedServiceContract<
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TRequest,
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TResponse,
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TProgress>(
     string Operation,
     JsonTypeInfo<TRequest> RequestType,
     JsonTypeInfo<TResponse> ResponseType,
@@ -51,7 +55,10 @@ public sealed record PrivilegedServiceContract<TRequest, TResponse, TProgress>(
     where TResponse : class;
 
 /// <summary>高权限业务服务；实现类无需了解 UAC、管道或 Rundll32。</summary>
-public interface IPrivilegedService<TRequest, TResponse, TProgress>
+public interface IPrivilegedService<
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TRequest,
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TResponse,
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TProgress>
     where TResponse : class
 {
     PrivilegedServiceContract<TRequest, TResponse, TProgress> Contract { get; }
@@ -64,7 +71,10 @@ public interface IPrivilegedService<TRequest, TResponse, TProgress>
 
 public interface IPrivilegedServiceRegistry
 {
-    void Add<TRequest, TResponse, TProgress>(
+    void Add<
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TRequest,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TResponse,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TProgress>(
         IPrivilegedService<TRequest, TResponse, TProgress> service)
         where TResponse : class;
 }
@@ -75,7 +85,10 @@ public sealed class PrivilegedServiceRegistry : IPrivilegedServiceRegistry
     private readonly Dictionary<string, IServiceInvoker> _services =
         new(StringComparer.Ordinal);
 
-    public void Add<TRequest, TResponse, TProgress>(
+    public void Add<
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TRequest,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TResponse,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TProgress>(
         IPrivilegedService<TRequest, TResponse, TProgress> service)
         where TResponse : class
     {
@@ -99,38 +112,40 @@ internal interface IServiceInvoker
         CancellationToken cancellationToken);
 }
 
-/// <summary>上下层转递：JSON 请求 → 强类型 Service → JSON 进度/响应。</summary>
-internal sealed class ServiceInvoker<TRequest, TResponse, TProgress>(
+/// <summary>上下层转递：MemoryPack 请求 → 强类型 Service → 二进制进度/响应。</summary>
+internal sealed class ServiceInvoker<
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TRequest,
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TResponse,
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TProgress>(
     IPrivilegedService<TRequest, TResponse, TProgress> service) : IServiceInvoker
     where TResponse : class
 {
     public async ValueTask InvokeAsync(Stream pipe, PipeMessage request,
         CancellationToken cancellationToken)
     {
-        TRequest input = JsonSerializer.Deserialize(
-            request.Payload, service.Contract.RequestType)!;
+        ABIMemoryPack.EnsureFormatters();
+        TRequest input = MemoryPackSerializer.Deserialize<TRequest>(
+            request.Payload, ABIMemoryPack.Options)!;
 
         if (input is null)
             throw new InvalidDataException("Service 请求数据为空。");
 
-        var progress = new HostProgress<TProgress>(
-            pipe, request, service.Contract.ProgressType);
+        var progress = new HostProgress<TProgress>(pipe, request);
 
         TResponse output = await service.ExecuteAsync(
             input, progress, cancellationToken).ConfigureAwait(false);
 
-        string json = JsonSerializer.Serialize(output, service.Contract.ResponseType);
+        byte[] payload = MemoryPackSerializer.Serialize(output, ABIMemoryPack.Options);
         await PipeProtocol.WriteAsync(pipe,
             new PipeMessage(PipeMessageKind.Result, request.RequestId, request.Version,
-                request.Operation, json, 100, "操作完成"), cancellationToken)
+                request.Operation, payload, 100, "操作完成"), cancellationToken)
             .ConfigureAwait(false);
     }
 }
 
 internal sealed class HostProgress<TProgress>(
     Stream pipe,
-    PipeMessage request,
-    JsonTypeInfo<TProgress> progressType) : IProgress<TProgress>
+    PipeMessage request) : IProgress<TProgress>
 {
     private readonly object _sync = new();
 
@@ -138,10 +153,10 @@ internal sealed class HostProgress<TProgress>(
     {
         lock (_sync)
         {
-            string json = JsonSerializer.Serialize(value, progressType);
+            byte[] payload = MemoryPackSerializer.Serialize(value, ABIMemoryPack.Options);
             PipeProtocol.WriteAsync(pipe,
                 new PipeMessage(PipeMessageKind.Progress, request.RequestId,
-                    request.Version, request.Operation, json, 0, "业务进度"),
+                    request.Version, request.Operation, payload, 0, "业务进度"),
                 CancellationToken.None).AsTask().GetAwaiter().GetResult();
         }
     }

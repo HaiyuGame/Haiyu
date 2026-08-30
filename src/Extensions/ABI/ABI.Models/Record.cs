@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using MemoryPack;
 
 namespace ABI.Models;
 
@@ -14,39 +15,41 @@ namespace ABI.Models;
 /// 清理内存请求，programNames为要清理的程序名，多个程序名用逗号分隔
 /// </summary>
 /// <param name="programNames"></param>
-public sealed record CleanMemoryRequest(string programNames);
+[MemoryPackable]
+public sealed partial record CleanMemoryRequest(string programNames);
 
 /// <summary>
 /// 清理内存进度
 /// </summary>
 /// <param name="Percentage"></param>
 /// <param name="Message"></param>
-public sealed record CleanMemoryProgress(int Percentage, string Message);
+[MemoryPackable]
+public sealed partial record CleanMemoryProgress(int Percentage, string Message);
 #endregion
 
-#region FPS
+#region Hardware monitor
 
 /// <summary>
-/// FPS 监控
+/// 系统硬件监控
 /// </summary>
-public sealed record CMonitorRequest();
+[MemoryPackable]
+public sealed partial record CMonitorRequest();
 
-public sealed class CMonitorProgressData
-{
-    [JsonPropertyName("forgroundProgramName")]
-    public string ForgroundProgramName { get; set; }
+[MemoryPackable]
+public sealed partial record CMonitorProgress(
+    [property: JsonPropertyName("data")] MonitorRecord data
+);
 
-    [JsonPropertyName("forgroudProgramFps")]
-    public int FOrgroundProgramFps { get; set; }
-}
+#endregion
 
-/// <summary>
-/// FPS上报
-/// </summary>
-/// <param name="programName"></param>
-/// <param name="fpsCount"></param>
-public sealed record CMonitorProgress(
-    [property: JsonPropertyName("data")] CMonitorProgressData data
+#region FPS monitor
+
+[MemoryPackable]
+public sealed partial record FpsMonitorRequest();
+
+[MemoryPackable]
+public sealed partial record FpsMonitorProgress(
+    [property: JsonPropertyName("data")] FPSData data
 );
 
 #endregion
@@ -55,7 +58,8 @@ public sealed record CMonitorProgress(
 /// </summary>
 /// <param name="code"></param>
 /// <param name="msg"></param>
-public sealed record RunResult(int code, string msg);
+[MemoryPackable]
+public sealed partial record RunResult(int code, string msg);
 
 public enum PipeMessageKind
 {
@@ -67,13 +71,18 @@ public enum PipeMessageKind
     Cancelled,
 }
 
-public sealed record PipeMessage(
+[MemoryPackable]
+public sealed partial record PipeMessage(
     PipeMessageKind Kind,
     Guid RequestId,
     int Version,
     string Operation,
-    string Payload,
+    byte[] Payload,
     int Percentage = 0,
     string Message = "",
     int StatusCode = 0
 );
+
+/// <summary>控制管道用于创建独立请求管道的连接信息。</summary>
+[MemoryPackable]
+public sealed partial record OpenRequestMessage(string PipeName, string Secret);

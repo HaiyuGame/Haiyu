@@ -30,7 +30,7 @@ public sealed class ABIRuntimeService
                 IPrivilegedProgress<ABISystemConfigProgress>
             >(p =>
             {
-                if (p is ABISystemConfigProgress configProgress)
+                if (p.Data is { } configProgress)
                 {
                     Console.WriteLine($"Run{configProgress.IsRuning}");
                 }

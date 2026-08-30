@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="MemoryPack" Version="1.21.4" />
+  </ItemGroup>
+
 </Project>

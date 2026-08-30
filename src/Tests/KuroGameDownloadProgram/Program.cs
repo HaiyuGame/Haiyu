@@ -21,6 +21,4 @@ using Waves.Core.Models.Enums;
 using Waves.Core.Services;
 using Waves.Settings;
 
-//await KuroClientHomeFeedTest.StartTask();
-
-await IoCircuitBreakerTest.StartTest(args);
+await ABITest.MonitorTest();

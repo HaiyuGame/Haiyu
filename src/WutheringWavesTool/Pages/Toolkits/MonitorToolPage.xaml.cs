@@ -1,5 +1,6 @@
 using System.Runtime.Intrinsics.Arm;
 using Haiyu.ViewModel.ToolkitsViewModel;
+using Windows.Win32.Foundation;
 
 namespace Haiyu.Pages.Toolkits;
 
@@ -24,27 +25,15 @@ public sealed partial class MonitorToolPage : Page, IWindowPage
             return;
         var workArea = WindowExtension.GetWorkarea();
         var dpi = WindowExtension.GetScaleAdjustment(window);
-        window.SystemBackdrop = new MicaBackdrop()
-        {
-            Kind = Microsoft.UI.Composition.SystemBackdrops.MicaKind.BaseAlt,
-        };
-        window.AppWindow.IsShownInSwitchers = false;
-        window.AppWindow.TitleBar.ExtendsContentIntoTitleBar = true;
-
-        if (window.AppWindow.Presenter is OverlappedPresenter presenter)
-        {
-            presenter.IsResizable = false;
-            presenter.SetBorderAndTitleBar(true, false);
-            presenter.IsAlwaysOnTop = true;
-        }
         double height = 50;
-        int leftMargin = 600;
-        int rightMargin = 600;
-
+        int leftMargin = 200;
+        int rightMargin = 200;
         double width = workArea.Value.Right - workArea.Value.Left - leftMargin - rightMargin;
-
         int left = workArea.Value.Left + leftMargin;
-        int top = workArea.Value.Top + 20;
+        int top = workArea.Value.Top;
+        nint rawHwnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
+        HWND hwnd = new(rawHwnd);
+        WindowExtension.SetWindowTopMost(hwnd, true);
         window.SetWindowSize(width / dpi, height / dpi);
         window.AppWindow.Move(new Windows.Graphics.PointInt32
         {

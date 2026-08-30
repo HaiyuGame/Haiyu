@@ -1,3 +1,7 @@
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.UI.WindowsAndMessaging;
+
 namespace Haiyu.Common;
 
 public static partial class WindowExtension
@@ -177,9 +181,9 @@ public static partial class WindowExtension
         return lpPoint;
     }
 
-    public static RECT? GetWorkarea()
+    public static Common.Win32.RECT? GetWorkarea()
     {
-        RECT workArea = new RECT();
+        Common.Win32.RECT workArea = new Common.Win32.RECT();
         if (SystemParametersInfo(SPI_GETWORKAREA, 0, ref workArea, 0))
         {
             return workArea;
@@ -196,6 +200,25 @@ public static partial class WindowExtension
         string lpDirectory,
         ShowCommands nShowCmd
     );
+
+    internal static void SetWindowTopMost(HWND hwnd, bool enabled)
+    {
+        HWND insertAfter = enabled
+            ? new HWND(-1) // HWND_TOPMOST
+            : new HWND(-2); // HWND_NOTOPMOST
+
+        PInvoke.SetWindowPos(
+            hwnd,
+            insertAfter,
+            0,
+            0,
+            0,
+            0,
+            SET_WINDOW_POS_FLAGS.SWP_NOMOVE |
+            SET_WINDOW_POS_FLAGS.SWP_NOSIZE |
+            SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE |
+            SET_WINDOW_POS_FLAGS.SWP_SHOWWINDOW);
+    }
 
     public enum ShowCommands : int
     {
@@ -326,7 +349,6 @@ public static class NativeWindowHelper
                 return IntPtr.Zero;
             }
 
-            // Handle DPI change at runtime
             if (msg == WM_DPICHANGED && targetDipWidth.HasValue && targetDipHeight.HasValue)
             {
                 int newDpiX = wParam.ToInt32() & 0xFFFF;
@@ -334,11 +356,9 @@ public static class NativeWindowHelper
                 int newPixelWidth = (int)Math.Round(targetDipWidth.Value * newScale);
                 int newPixelHeight = (int)Math.Round(targetDipHeight.Value * newScale);
 
-                // Let WinUI 3 process DPI change first so it updates internal state
                 var result = CallWindowProc(originalWndProc, wndHwnd, msg, wParam, lParam);
 
-                // Then override to maintain fixed DIP size
-                var rect = Marshal.PtrToStructure<RECT>(lParam);
+                var rect = Marshal.PtrToStructure<Common.Win32.RECT>(lParam);
                 window.AppWindow.Move(new Windows.Graphics.PointInt32 { X = rect.Left, Y = rect.Top });
                 window.AppWindow.Resize(new Windows.Graphics.SizeInt32 { Width = newPixelWidth, Height = newPixelHeight });
 
@@ -347,7 +367,6 @@ public static class NativeWindowHelper
 
             try
             {
-                // Ensure parameters are valid before calling originalWndProc
                 if (wndHwnd != IntPtr.Zero && originalWndProc != IntPtr.Zero)
                 {
                     return CallWindowProc(originalWndProc, wndHwnd, msg, wParam, lParam);

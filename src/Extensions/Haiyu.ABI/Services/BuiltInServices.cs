@@ -12,6 +12,7 @@ public static class BuiltInServices
     {
         registry.Add(new MemoryCleanerService());
         registry.Add(new ComputerMonitorService());
+        registry.Add(new FpsMonitorService());
         registry.Add(new ABISystemConfigService());
     }
 }

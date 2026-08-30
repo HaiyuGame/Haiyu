@@ -47,4 +47,16 @@ public static class Contract
             ABIJsonContext.Default.RunResult,
             ABIJsonContext.Default.CMonitorProgress
         );
+
+    public static PrivilegedServiceContract<
+        FpsMonitorRequest,
+        RunResult,
+        FpsMonitorProgress
+    > FpsMonitorContract =>
+        new(
+            "haiyu.fpsMonitor.v1",
+            ABIJsonContext.Default.FpsMonitorRequest,
+            ABIJsonContext.Default.RunResult,
+            ABIJsonContext.Default.FpsMonitorProgress
+        );
 }

@@ -12,7 +12,6 @@ public interface IViewFactorys
 
 
 
-    public TransparentWindow CreateTransperentWindow();
 
     public WindowModelBase ShowAdminDevice();
 

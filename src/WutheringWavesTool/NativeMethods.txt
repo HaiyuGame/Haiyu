@@ -1,4 +1,4 @@
-﻿﻿CoWaitForMultipleObjects
+﻿CoWaitForMultipleObjects
 CreateEvent
 CreateRectRgn
 CreateSolidBrush
@@ -55,3 +55,4 @@ TOKEN_ELEVATION_TYPE
 WritePrivateProfileString
 WINDOW_EX_STYLE
 WM_ERASEBKGND
+SetLayeredWindowAttributes

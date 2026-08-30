@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>preview</LangVersion>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,6 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Extensions\ABI\ABI.Models\ABI.Models.csproj" />
+    <ProjectReference Include="..\..\Extensions\Haiyu.ABI\Haiyu.ABI.csproj" />
     <ProjectReference Include="..\..\Extensions\Haiyu.RpcClient\Haiyu.RpcClient.csproj" />
     <ProjectReference Include="..\..\Extensions\Haiyu.Plugin\Haiyu.Plugin.csproj" />
     <ProjectReference Include="..\..\Extensions\Haiyu.ServiceHost\Haiyu.ServiceHost.csproj" />
