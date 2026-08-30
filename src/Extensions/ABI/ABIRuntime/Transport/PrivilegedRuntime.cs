@@ -15,10 +15,12 @@ public sealed class PrivilegedRuntime : IAsyncDisposable
     private NamedPipeServerStream? _pipe;
     private string? _secret;
 
-    public PrivilegedRuntime(string coreDllPath = "ABIRuntime.Core.dll")
+    public int RunFlage { get; private set; }
+
+    public PrivilegedRuntime(string coreDllPath)
     {
-        if (string.IsNullOrWhiteSpace(coreDllPath))
-            throw new ArgumentException("Core DLL 路径不能为空。", nameof(coreDllPath));
+        if (string.IsNullOrWhiteSpace(coreDllPath) || !File.Exists(coreDllPath))
+            throw new ArgumentException("Core DLL 路径不能为空或不存在。", nameof(coreDllPath));
         _coreDllPath = coreDllPath;
     }
 
@@ -247,7 +249,8 @@ public sealed class PrivilegedRuntime : IAsyncDisposable
                 "正在请求管理员权限"
             )
         );
-        ElevationLauncher.Start(pipeName, _secret, _coreDllPath);
+        var hint =  ElevationLauncher.Start(pipeName, _secret, _coreDllPath);
+        this.RunFlage = hint;
         progress?.Report(
             new PrivilegedProgress<TProgress>(PrivilegedStage.Connecting, 30, "正在连接高权限宿主")
         );

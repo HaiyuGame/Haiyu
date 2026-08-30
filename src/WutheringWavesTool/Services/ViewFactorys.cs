@@ -98,4 +98,13 @@ public class ViewFactorys : IViewFactorys
         return this.ShowWindowBase<AutoKuroTokenPage>(null);
     }
 
+
+    public Window ShowMonitorToolWindow()
+    {
+        var win = new Window();
+        var page = Instance.Host.Services!.GetRequiredService<MonitorToolPage>();
+        page.SetWindow(win);
+        win.Content = page;
+        return win;
+    }
 }

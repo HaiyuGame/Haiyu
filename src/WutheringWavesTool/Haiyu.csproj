@@ -284,6 +284,9 @@
 		<None Update="Assets\HpatchzResource\hpatchz.exe">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
+		<Page Update="Pages\Toolkits\MonitorToolPage.xaml">
+		  <SubType>Designer</SubType>
+		</Page>
 		<Page Update="Pages\Toolkits\AutoKuroTokenPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</Page>

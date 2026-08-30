@@ -9,6 +9,8 @@ namespace ABI.Models;
 [JsonSerializable(typeof(CMonitorRequest))]
 [JsonSerializable(typeof(CMonitorProgress))]
 [JsonSerializable(typeof(CMonitorProgressData))]
+[JsonSerializable(typeof(ABISystemConfigRequest))]
+[JsonSerializable(typeof(ABISystemConfigProgress))]
 public partial class ABIJsonContext : JsonSerializerContext
 {
     

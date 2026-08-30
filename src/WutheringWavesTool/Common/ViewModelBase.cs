@@ -5,7 +5,7 @@ namespace Haiyu.Common;
 
 public partial class ViewModelBase : ObservableRecipient, IDisposable
 {
-    public CancellationTokenSource? CTS { get; set; }
+    public CancellationTokenSource CTS { get; set; }
 
     public bool IsDisposed { get; private set; }
 

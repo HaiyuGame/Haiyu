@@ -1,4 +1,4 @@
-﻿namespace Haiyu.Common;
+namespace Haiyu.Common;
 
 public static partial class WindowExtension
 {

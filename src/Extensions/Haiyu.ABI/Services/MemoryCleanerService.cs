@@ -9,17 +9,8 @@ namespace Haiyu.ABI.Services;
 public class MemoryCleanerService
     : IPrivilegedService<CleanMemoryRequest, RunResult, CleanMemoryProgress>
 {
-    public PrivilegedServiceContract<
-        CleanMemoryRequest,
-        RunResult,
-        CleanMemoryProgress
-    > Contract =>
-        new(
-            "haiyu.clean.v1",
-            ABIJsonContext.Default.CleanMemoryRequest,
-            ABIJsonContext.Default.RunResult,
-            ABIJsonContext.Default.CleanMemoryProgress
-        );
+    public PrivilegedServiceContract<CleanMemoryRequest, RunResult, CleanMemoryProgress> Contract =>
+        ABIRuntime.Contract.CleanMemoryContract;
 
     public async ValueTask<RunResult> ExecuteAsync(
         CleanMemoryRequest request,

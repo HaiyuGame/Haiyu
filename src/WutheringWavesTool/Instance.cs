@@ -232,13 +232,15 @@ public static class InstanceBuilderExtensions
                     .AddTransient<IWavesPlayerCardCacheServices, WavesPlayerCardCacheServices>(
                         _ => new WavesPlayerCardCacheServices(AppSettings.WavesRecordFolder)
                     )
-                   .AddHostedService<ABIRuntimeService>()
+                   .AddSingleton<ABIRuntimeService>()
                     #endregion
                     #region Toolkit
                     .AddTransient<ToolkitPage>()
                     .AddTransient<ToolkitViewModel>()
                     .AddTransient<AutoKuroTokenPage>()
                     .AddTransient<AutoKuroTokenViewModel>()
+                    .AddTransient<MonitorToolPage>()
+                    .AddTransient<MonitorToolViewModel>()
                     #endregion
                     .AddKeyedSingleton<IDialogManager, MainDialogService>(nameof(MainDialogService))
                     .AddKeyedSingleton<LoggerService>(

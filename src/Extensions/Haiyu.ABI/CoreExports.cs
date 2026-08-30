@@ -9,6 +9,13 @@ namespace Haiyu.ABI;
 public static unsafe class CoreExports
 {
 
+    /// <summary>
+    /// 导出函数
+    /// </summary>
+    /// <param name="window"></param>
+    /// <param name="module"></param>
+    /// <param name="commandLine"></param>
+    /// <param name="showCommand"></param>
     [UnmanagedCallersOnly(EntryPoint = "ElevatedEntry",
         CallConvs = new[] { typeof(CallConvStdcall) })]
     public static void ElevatedEntry(
@@ -21,13 +28,13 @@ public static unsafe class CoreExports
             if (parts.Length != 2) return;
 
             var services = new PrivilegedServiceRegistry();
-            BuiltInServices.Register(services);
+            services.Register();
             ElevatedHost.RunAsync(parts[0], parts[1], services)
                 .GetAwaiter().GetResult();
         }
         catch
         {
-            // 异常不能跨越 unmanaged 导出边界；客户端会收到断线错误。
+            
         }
     }
 }

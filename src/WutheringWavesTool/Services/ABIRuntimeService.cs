@@ -1,99 +1,62 @@
 using ABI.Models;
 using ABIRuntime.Abstractions;
 using ABIRuntime.Runtime;
+using Haiyu.Plugin.Common.LegacyMessageBox;
 using Microsoft.Extensions.Hosting;
 
 namespace Haiyu.Services;
 
-public sealed class ABIRuntimeService : IHostedService
+public sealed class ABIRuntimeService
 {
-    private PrivilegedRuntime? _runtime;
-    private CancellationTokenSource? _monitorCancellation;
-    private Task? _monitorTask;
+    public PrivilegedRuntime? Runtime { get; private set; }
 
-    public Task StartAsync(CancellationToken cancellationToken)
+    /// <summary>
+    /// 初始化后台ABI运行时
+    /// </summary>
+    public async Task<bool> Initialize(string baseDirectory)
     {
         string corePath = Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory,
             "Haiyu.ABI",
             "Haiyu.ABI.dll"
         );
-
-        _runtime = new PrivilegedRuntime(corePath);
-        _monitorCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-
-        var progress = new Progress<IPrivilegedProgress<CMonitorProgress>>(value =>
-        {
-            if (value.Data?.data is not { } data)
-                return;
-
-            Debug.WriteLine($"{data.ForgroundProgramName},{data.FOrgroundProgramFps}");
-        });
-
-        _monitorTask = MonitorAsync(progress, _monitorCancellation.Token);
-        return Task.CompletedTask;
-    }
-
-    private async Task MonitorAsync(
-        IProgress<IPrivilegedProgress<CMonitorProgress>> progress,
-        CancellationToken cancellationToken
-    )
-    {
         try
         {
-            IPrivilegedResult<RunResult> result = await _runtime!.InvokeAsync<
-                CMonitorRequest,
-                RunResult,
-                CMonitorProgress
-            >(
-                new(
-                    "haiyu.monitor.v1",
-                    ABIJsonContext.Default.CMonitorRequest,
-                    ABIJsonContext.Default.RunResult,
-                    ABIJsonContext.Default.CMonitorProgress
-                ),
-                new CMonitorRequest(),
-                progress,
-                cancellationToken
-            );
-
-            if (!result.IsSuccess)
+            if (Runtime == null || Runtime.RunFlage != 0)
             {
-                Debug.WriteLine($"FPS 监控失败：0x{result.StatusCode:X8} {result.Message}");
+                Runtime = new PrivilegedRuntime(corePath);
             }
+            Progress<IPrivilegedProgress<ABISystemConfigProgress>> progress = new Progress<
+                IPrivilegedProgress<ABISystemConfigProgress>
+            >(p =>
+            {
+                if (p is ABISystemConfigProgress configProgress)
+                {
+                    Console.WriteLine($"Run{configProgress.IsRuning}");
+                }
+            });
+            var result = await this.Runtime.InvokeAsync(
+                ABIRuntime.Contract.ABISystemConfigContract,
+                new ABISystemConfigRequest() { BaseDirectory = baseDirectory },
+                progress,
+                default
+            );
+            return result.IsSuccess;
         }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        catch (Exception)
         {
-            Debug.WriteLine("FPS 监控已取消。");
-        }
-        catch (Exception exception)
-        {
-            Debug.WriteLine($"FPS 监控异常：{exception}");
+            LegacyMessageBox.ShowError(
+                "初始化后台ABI运行时失败，请确保 Haiyu.ABI.dll 存在于 Haiyu.ABI 文件夹中。",
+                "错误"
+            );
+            return false;
         }
     }
 
-    public async Task StopAsync(CancellationToken cancellationToken)
+    public async Task Close()
     {
-        if (_monitorCancellation is not null)
-            await _monitorCancellation.CancelAsync();
-
-        if (_monitorTask is not null)
-        {
-            try
-            {
-                await _monitorTask.WaitAsync(cancellationToken);
-            }
-            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
-        }
-
-        if (_runtime is not null)
-        {
-            await _runtime.DisposeAsync();
-            _runtime = null;
-        }
-
-        _monitorCancellation?.Dispose();
-        _monitorCancellation = null;
-        _monitorTask = null;
+        if (Runtime == null)
+            return;
+        await Runtime.DisposeAsync();
     }
 }

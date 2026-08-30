@@ -11,12 +11,7 @@ public sealed partial class ComputerMonitorService
     : IPrivilegedService<CMonitorRequest, RunResult, CMonitorProgress>
 {
     public PrivilegedServiceContract<CMonitorRequest, RunResult, CMonitorProgress> Contract =>
-        new(
-            "haiyu.monitor.v1",
-            ABIJsonContext.Default.CMonitorRequest,
-            ABIJsonContext.Default.RunResult,
-            ABIJsonContext.Default.CMonitorProgress
-        );
+        ABIRuntime.Contract.ComputerMonitorContract;
 
     public async ValueTask<RunResult> ExecuteAsync(
         CMonitorRequest request,

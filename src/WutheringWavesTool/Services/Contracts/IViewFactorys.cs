@@ -18,6 +18,12 @@ public interface IViewFactorys
 
     public WindowModelBase ShowAnalysisRecordV2(CloudGameLoginSession selectLogin);
 
+    #region Tool
+
     public WindowModelBase ShowAutoKruoTokenWindow();
+
+    public Window ShowMonitorToolWindow();
+    #endregion
+
 
 }

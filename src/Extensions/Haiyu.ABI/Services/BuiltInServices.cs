@@ -8,10 +8,11 @@ namespace Haiyu.ABI.Services;
 
 public static class BuiltInServices
 {
-    public static void Register(IPrivilegedServiceRegistry registry)
+    public static void Register(this IPrivilegedServiceRegistry registry)
     {
         registry.Add(new MemoryCleanerService());
         registry.Add(new ComputerMonitorService());
+        registry.Add(new ABISystemConfigService());
     }
 }
 
