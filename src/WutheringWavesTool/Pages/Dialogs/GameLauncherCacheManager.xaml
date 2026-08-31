@@ -3,8 +3,8 @@
     x:Class="Haiyu.Pages.Dialogs.GameLauncherCacheManager"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:helper="using:Haiyu.Helpers"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:helper="using:Haiyu.Helpers"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:local="using:Haiyu.Pages.Dialogs"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -52,8 +52,8 @@
                 <DataTemplate x:DataType="um:KRSDKLauncherCacheWrapper">
                     <ItemContainer IsSelected="{x:Bind IsSelect, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_DOUBLETAPToSet')}">
                         <Grid
-                            Margin="0,5"
                             Padding="8"
+                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                             CornerRadius="5">
                             <Grid.RowDefinitions>
                                 <RowDefinition />

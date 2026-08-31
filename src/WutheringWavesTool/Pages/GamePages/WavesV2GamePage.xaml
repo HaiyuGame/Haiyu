@@ -1218,11 +1218,13 @@
             <Button
                 Grid.Column="1"
                 Height="40"
-                Margin="-4,0,0,0"
+                Margin="0,0,0,0"
+                Padding="10"
                 VerticalAlignment="Center"
+                BorderThickness="0,1,1,1"
                 Click="Button_Click"
                 CornerRadius="0 5 5 0"
-                Style="{ThemeResource DefaultAcrylicButtonStyle}"
+                Style="{ThemeResource TitleBarButtonStyle}"
                 ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_ToggleCard')}">
                 <FontIcon
                     FontFamily="Segoe Fluent Icons"

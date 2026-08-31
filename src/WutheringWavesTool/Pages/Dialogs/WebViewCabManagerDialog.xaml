@@ -101,8 +101,7 @@
                     <DataTemplate x:DataType="wr:WebViewRuntimeWrapper">
                         <ItemContainer IsSelected="{x:Bind IsSelect, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                             <Grid
-                                Margin="0,4"
-                                Padding="12,10"
+                                Padding="12,15"
                                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 BorderBrush="{ThemeResource ControlSolidFillColorDefault}"
                                 BorderThickness="1"
@@ -142,7 +141,7 @@
                     </DataTemplate>
                 </ItemsView.ItemTemplate>
                 <ItemsView.Layout>
-                    <StackLayout Orientation="Vertical" Spacing="2" />
+                    <StackLayout Orientation="Vertical" Spacing="5" />
                 </ItemsView.Layout>
             </ItemsView>
         </Grid>
