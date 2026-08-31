@@ -8,6 +8,9 @@ namespace Haiyu.Services;
 
 public sealed class ABIRuntimeService
 {
+    private readonly SemaphoreSlim _initializeGate = new(1, 1);
+    private bool _initialized;
+
     public PrivilegedRuntime? Runtime { get; private set; }
 
     /// <summary>
@@ -15,6 +18,12 @@ public sealed class ABIRuntimeService
     /// </summary>
     public async Task<bool> Initialize(string baseDirectory)
     {
+        await _initializeGate.WaitAsync();
+        try
+        {
+            if (_initialized && Runtime is not null)
+                return true;
+
         string corePath = Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory,
             "Haiyu.ABI",
@@ -41,7 +50,8 @@ public sealed class ABIRuntimeService
                 progress,
                 default
             );
-            return result.IsSuccess;
+            _initialized = result.IsSuccess;
+            return _initialized;
         }
         catch (Exception)
         {
@@ -51,6 +61,11 @@ public sealed class ABIRuntimeService
             );
             return false;
         }
+        }
+        finally
+        {
+            _initializeGate.Release();
+        }
     }
 
     public async Task Close()
@@ -58,5 +73,7 @@ public sealed class ABIRuntimeService
         if (Runtime == null)
             return;
         await Runtime.DisposeAsync();
+        Runtime = null;
+        _initialized = false;
     }
 }

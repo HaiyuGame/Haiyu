@@ -252,8 +252,11 @@ public sealed class PrivilegedRuntime : IAsyncDisposable
 
             progress?.Report(new PrivilegedProgress<TProgress>(
                 PrivilegedStage.RequestingElevation, 15, "正在请求管理员权限"));
-            RunFlage = ElevationLauncher.Start(
-                controlPipeName, _controlSecret, _coreDllPath);
+            RunFlage = await Task.Run(
+                    () => ElevationLauncher.Start(
+                        controlPipeName, _controlSecret, _coreDllPath),
+                    cancellationToken)
+                .ConfigureAwait(false);
             if (RunFlage != 0)
                 throw new InvalidOperationException($"高权限宿主启动失败：{RunFlage}。");
 

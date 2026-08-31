@@ -31,7 +31,7 @@ public sealed class TimestampCollection
             //
             // 防止长期不查询时无限增长。
             //
-            while (timestamps.Count > 8192)
+            while (timestamps.Count > 32768)
             {
                 timestamps.Dequeue();
             }
@@ -45,16 +45,6 @@ public sealed class TimestampCollection
         lock (sync)
         {
             //
-            // 已经过期的历史数据可以直接扔掉。
-            //
-            while (
-                timestamps.TryPeek(
-                    out double timestamp) &&
-                timestamp < from)
-            {
-                timestamps.Dequeue();
-            }
-
             int count = 0;
 
             foreach (double timestamp in timestamps)
@@ -67,6 +57,17 @@ public sealed class TimestampCollection
             }
 
             return count;
+        }
+    }
+
+    /// <summary>取得指定时间范围的快照，不破坏较长统计窗口所需的历史数据。</summary>
+    public double[] Query(double from, double to)
+    {
+        lock (sync)
+        {
+            return timestamps
+                .Where(timestamp => timestamp >= from && timestamp <= to)
+                .ToArray();
         }
     }
 

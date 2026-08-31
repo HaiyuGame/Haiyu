@@ -34,8 +34,10 @@
                 <Button
                     Grid.Row="2"
                     Grid.Column="2"
+                    Padding="12,8"
                     HorizontalAlignment="Right"
-                    Command="{x:Bind ViewModel.ShowAutoKuroTokenCommand}">
+                    Command="{x:Bind ViewModel.ShowAutoKuroTokenCommand}"
+                    Style="{ThemeResource TitleBarButtonStyle}">
                     <StackPanel Orientation="Horizontal" Spacing="4">
                         <FontIcon
                             FontFamily="Segoe Fluent Icons"
@@ -47,7 +49,11 @@
             </cui:SettingsCard>
             <cui:SettingsCard Description="利用ETW机制和驱动层来获取当前应用程序的FPS计数和计算机硬件信息，此功能启动时会进行请求管理员权限" Header="PC 监控">
                 <StackPanel Orientation="Horizontal">
-                    <Button Command="{x:Bind ViewModel.ShowMonitorToolCommand}" Content="打开窗口监控" />
+                    <Button
+                        Padding="12,8"
+                        Command="{x:Bind ViewModel.ShowMonitorToolCommand}"
+                        Content="打开窗口监控"
+                        Style="{ThemeResource TitleBarButtonStyle}" />
                 </StackPanel>
             </cui:SettingsCard>
             <Grid Margin="0,15,0,0" VerticalAlignment="Center">
@@ -57,7 +63,10 @@
                     FontSize="18"
                     Text="{x:Bind helper:LanguageService.GetString('Display_Service')}" />
                 <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
-                    <Button Command="{x:Bind ViewModel.RefreshTasksCommand}">
+                    <Button
+                        Padding="12,8"
+                        Command="{x:Bind ViewModel.RefreshTasksCommand}"
+                        Style="{ThemeResource TitleBarButtonStyle}">
                         <StackPanel Orientation="Horizontal" Spacing="4">
                             <FontIcon
                                 FontFamily="Segoe Fluent Icons"

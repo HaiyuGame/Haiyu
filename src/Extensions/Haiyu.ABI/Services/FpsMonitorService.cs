@@ -18,11 +18,7 @@ public sealed class FpsMonitorService
     {
         await using var fpsCounter = new FpsCounter();
         fpsCounter.FpsOutput = value =>
-            progress.Report(new FpsMonitorProgress(new FPSData
-            {
-                ForgroundProgramName = value.Item1,
-                FOrgroundProgramFps = value.Item2,
-            }));
+            progress.Report(new FpsMonitorProgress(value));
 
         await fpsCounter.StartAsync(cancellationToken);
         await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);

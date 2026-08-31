@@ -137,7 +137,10 @@
                     <ui:SettingsCard.HeaderIcon>
                         <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE790;" />
                     </ui:SettingsCard.HeaderIcon>
-                    <ComboBox ItemsSource="{x:Bind ViewModel.Themes, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectTheme, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <ComboBox
+                        ItemsSource="{x:Bind ViewModel.Themes, Mode=OneWay}"
+                        SelectedItem="{x:Bind ViewModel.SelectTheme, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Style="{ThemeResource TitleBarComboBoxStyle}" />
                 </ui:SettingsCard>
                 <ui:SettingsCard
                     Margin="0,5,0,0"
@@ -147,7 +150,10 @@
                     <ui:SettingsCard.HeaderIcon>
                         <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE768;" />
                     </ui:SettingsCard.HeaderIcon>
-                    <ComboBox ItemsSource="{x:Bind ViewModel.AppLauncheBths, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectAppLauncheBth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <ComboBox
+                        ItemsSource="{x:Bind ViewModel.AppLauncheBths, Mode=OneWay}"
+                        SelectedItem="{x:Bind ViewModel.SelectAppLauncheBth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Style="{ThemeResource TitleBarComboBoxStyle}">
                         <ComboBox.ItemTemplate>
                             <DataTemplate x:DataType="settings:LauncheBthWrapper">
                                 <TextBlock Text="{x:Bind Display}" />
@@ -167,13 +173,18 @@
                         Grid.Column="1"
                         Margin="10,0,0,0"
                         ItemsSource="{x:Bind ViewModel.LanguageSelectViewModel.Languages, Mode=OneWay}"
-                        SelectedItem="{x:Bind ViewModel.LanguageSelectViewModel.SelectLanguage, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        SelectedItem="{x:Bind ViewModel.LanguageSelectViewModel.SelectLanguage, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Style="{ThemeResource TitleBarComboBoxStyle}" />
                 </ui:SettingsCard>
                 <ui:SettingsExpander Margin="0,5,0,0" Header="{x:Bind helper:LanguageService.GetString('Setting_WindowHeightHeader')}">
                     <ui:SettingsExpander.HeaderIcon>
                         <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE944;" />
                     </ui:SettingsExpander.HeaderIcon>
-                    <Button Command="{x:Bind ViewModel.SaveWindowSettingCommand}" Content="{x:Bind helper:LanguageService.GetString('Display_SAVING')}" />
+                    <Button
+                        Padding="12,8"
+                        Command="{x:Bind ViewModel.SaveWindowSettingCommand}"
+                        Content="{x:Bind helper:LanguageService.GetString('Display_SAVING')}"
+                        Style="{ThemeResource TitleBarButtonStyle}" />
                     <ui:SettingsExpander.Items>
                         <ui:SettingsCard Header="{x:Bind helper:LanguageService.GetString('Setting_WindowHeightRate')}">
                             <TextBox Text="{x:Bind ViewModel.HeightRate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
@@ -222,7 +233,10 @@
                         <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8B9;" />
                     </ui:SettingsCard.HeaderIcon>
                     <ui:SettingsCard.Content>
-                        <ComboBox ItemsSource="{x:Bind ViewModel.WallpaperTypes, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectWallpaperName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <ComboBox
+                            ItemsSource="{x:Bind ViewModel.WallpaperTypes, Mode=OneWay}"
+                            SelectedItem="{x:Bind ViewModel.SelectWallpaperName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            Style="{ThemeResource TitleBarComboBoxStyle}">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate x:DataType="uModel:WallpaperType">
                                     <TextBlock Text="{x:Bind Name}" />
@@ -250,7 +264,8 @@
                                 <ComboBox
                                     Margin="0,0,5,0"
                                     ItemsSource="{x:Bind ViewModel.CaptureModifierKeys, Mode=OneWay}"
-                                    SelectedItem="{x:Bind ViewModel.CaptureModifierKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                    SelectedItem="{x:Bind ViewModel.CaptureModifierKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    Style="{ThemeResource TitleBarComboBoxStyle}">
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate x:DataType="ext:ModifierKey">
                                             <TextBlock Text="{x:Bind Name}" />
@@ -264,7 +279,8 @@
                                 <ComboBox
                                     Margin="5,0,0,0"
                                     ItemsSource="{x:Bind ViewModel.CaptureKeys, Mode=OneWay}"
-                                    SelectedItem="{x:Bind ViewModel.CaptureKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                    SelectedItem="{x:Bind ViewModel.CaptureKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    Style="{ThemeResource TitleBarComboBoxStyle}">
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate x:DataType="ext:Keys">
                                             <TextBlock Text="{x:Bind Name}" />
@@ -290,7 +306,7 @@
                         <FontIcon FontFamily="Segoe UI Emoji" Glyph="&#x1F615;" />
                     </ui:SettingsCard.HeaderIcon>
                     <ui:SettingsCard.Content>
-                        <ComboBox SelectedIndex="{x:Bind ViewModel.SelectCloseIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <ComboBox SelectedIndex="{x:Bind ViewModel.SelectCloseIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{ThemeResource TitleBarComboBoxStyle}">
                             <ComboBoxItem Content="{x:Bind helper:LanguageService.GetString('Display_Tray')}" />
                             <ComboBoxItem Content="{x:Bind helper:LanguageService.GetString('Display_Quit')}" />
                         </ComboBox>
@@ -382,9 +398,11 @@
                                 IsEnabled="{x:Bind githubCdnEnable.IsOn, Mode=OneWay}"
                                 Text="{x:Bind ViewModel.GithubCdn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                             <Button
+                                Padding="12,8"
                                 Command="{x:Bind ViewModel.SaveeGithubCdnCommand}"
                                 Content="{x:Bind helper:LanguageService.GetString('Display_SAVING')}"
-                                IsEnabled="{x:Bind githubCdnEnable.IsOn, Mode=OneWay}" />
+                                IsEnabled="{x:Bind githubCdnEnable.IsOn, Mode=OneWay}"
+                                Style="{ThemeResource TitleBarButtonStyle}" />
                         </StackPanel>
                     </ui:SettingsCard.Content>
                 </ui:SettingsCard>
@@ -401,9 +419,11 @@
                                 OffContent="{x:Bind helper:LanguageService.GetString('Display_Inactive')}"
                                 OnContent="{x:Bind helper:LanguageService.GetString('Display_ENTRYINTOFORCE')}" />
                             <Button
+                                Padding="12,8"
                                 Command="{x:Bind ViewModel.SaveGithubIpConfigCommand}"
                                 Content="{x:Bind helper:LanguageService.GetString('Display_ValidationConfiguration')}"
-                                IsEnabled="{x:Bind githubFrontEnable.IsOn, Mode=OneWay}" />
+                                IsEnabled="{x:Bind githubFrontEnable.IsOn, Mode=OneWay}"
+                                Style="{ThemeResource TitleBarButtonStyle}" />
                         </StackPanel>
                     </ui:SettingsExpander.Content>
                     <ui:SettingsExpander.ItemTemplate>
@@ -425,7 +445,11 @@
                         <FontIcon FontFamily="Segoe UI Emoji" Glyph="&#x1F5DD;" />
                     </ui:SettingsExpander.HeaderIcon>
                     <ui:SettingsExpander.Content>
-                        <Button Command="{x:Bind ViewModel.UpdateVersionCommand}" Content="{x:Bind helper:LanguageService.GetString('Display_Update')}" />
+                        <Button
+                            Padding="12,8"
+                            Command="{x:Bind ViewModel.UpdateVersionCommand}"
+                            Content="{x:Bind helper:LanguageService.GetString('Display_Update')}"
+                            Style="{ThemeResource TitleBarButtonStyle}" />
                     </ui:SettingsExpander.Content>
 
                     <ui:SettingsExpander.Items>
@@ -436,7 +460,10 @@
                                         <ColumnDefinition />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
-                                    <ComboBox ItemsSource="{x:Bind ViewModel.UpdateAppType, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectUpdateAppType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <ComboBox
+                                        ItemsSource="{x:Bind ViewModel.UpdateAppType, Mode=OneWay}"
+                                        SelectedItem="{x:Bind ViewModel.SelectUpdateAppType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        Style="{ThemeResource TitleBarComboBoxStyle}" />
 
                                 </Grid>
                             </ui:SettingsCard.Content>
@@ -447,9 +474,15 @@
                                     <TextBox Width="200" Text="{x:Bind ViewModel.MirrorKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                     <Button
                                         Margin="5,0,0,0"
+                                        Padding="12,8"
                                         Command="{x:Bind ViewModel.SetMirrorKeyCommand}"
-                                        Content="{x:Bind helper:LanguageService.GetString('Display_OK')}" />
-                                    <Button Margin="5,0,0,0" Click="Button_Click">
+                                        Content="{x:Bind helper:LanguageService.GetString('Display_OK')}"
+                                        Style="{ThemeResource TitleBarButtonStyle}" />
+                                    <Button
+                                        Margin="5,0,0,0"
+                                        Padding="12,8"
+                                        Click="Button_Click"
+                                        Style="{ThemeResource TitleBarButtonStyle}">
                                         <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE897;" />
                                     </Button>
                                 </StackPanel>
@@ -507,9 +540,10 @@
                                 PasswordRevealMode="Peek" />
                             <Button
                                 Margin="4,0,0,0"
+                                Padding="12,8"
                                 Command="{x:Bind ViewModel.SetRpcTokenCommand}"
                                 Content="{x:Bind helper:LanguageService.GetString('Display_OK')}"
-                                Style="{ThemeResource TransparentButtonStyle}" />
+                                Style="{ThemeResource TitleBarButtonStyle}" />
                         </StackPanel>
                     </ui:SettingsCard.Content>
                     <ui:SettingsCard.HeaderIcon>
@@ -546,7 +580,7 @@
                                     Padding="25,8"
                                     Command="{x:Bind ViewModel.OpenWebViewCabDialogCommand}"
                                     CornerRadius="15"
-                                    Style="{ThemeResource AccentButtonStyle}">
+                                    Style="{ThemeResource TitleBarButtonStyle}">
                                     <FontIcon
                                         FontFamily="Segoe Fluent Icons"
                                         FontSize="15"
@@ -556,6 +590,7 @@
                                     MinWidth="280"
                                     ItemsSource="{x:Bind ViewModel.WebViewRuntimeOptions, Mode=OneWay}"
                                     SelectedItem="{x:Bind ViewModel.WebViewRuntimeItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    Style="{ThemeResource TitleBarComboBoxStyle}"
                                     Visibility="Collapsed">
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate x:DataType="wr:WebViewRuntimeWrapper">

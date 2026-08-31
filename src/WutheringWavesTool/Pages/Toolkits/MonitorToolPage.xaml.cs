@@ -30,7 +30,7 @@ public sealed partial class MonitorToolPage : Page, IWindowPage
         int rightMargin = 200;
         double width = workArea.Value.Right - workArea.Value.Left - leftMargin - rightMargin;
         int left = workArea.Value.Left + leftMargin;
-        int top = workArea.Value.Top;
+        int top = workArea.Value.Top+10;
         nint rawHwnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
         HWND hwnd = new(rawHwnd);
         WindowExtension.SetWindowTopMost(hwnd, true);

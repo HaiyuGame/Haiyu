@@ -107,8 +107,41 @@ public partial class NetworkData
 public partial class FPSData
 {
     [JsonPropertyName("forgroundProgramName")]
-    public string ForgroundProgramName { get; set; }
+    public string ForgroundProgramName { get; set; } = string.Empty;
 
     [JsonPropertyName("forgroudProgramFps")]
     public int FOrgroundProgramFps { get; set; }
+
+    /// <summary>最近一帧的耗时，单位 ms。</summary>
+    public double CurrentFrameTime { get; set; }
+
+    /// <summary>统计窗口内的平均 FPS。</summary>
+    public double AverageFps { get; set; }
+
+    /// <summary>统计窗口内的平均帧耗时，单位 ms。</summary>
+    public double AverageFrameTime { get; set; }
+
+    /// <summary>最慢 1% 帧对应的 FPS（由 P99 帧耗时换算）。</summary>
+    public double Low1PercentFps { get; set; }
+
+    /// <summary>最慢 0.1% 帧对应的 FPS（由 P99.9 帧耗时换算）。</summary>
+    public double Low01PercentFps { get; set; }
+
+    public double FrameTimeP95 { get; set; }
+    public double FrameTimeP99 { get; set; }
+    public double FrameTimeP999 { get; set; }
+    public double MaxFrameTime { get; set; }
+    public double FrameTimeStandardDeviation { get; set; }
+
+    /// <summary>超过 33.33 ms 的帧数。</summary>
+    public int SlowFrameCount { get; set; }
+
+    /// <summary>超过 max(20 ms, 中位数 * 2.5) 的突刺帧数。</summary>
+    public int StutterCount { get; set; }
+
+    public int SampleFrameCount { get; set; }
+    public double SampleDurationSeconds { get; set; }
+
+    /// <summary>供帧时间曲线使用的最近采样，单位 ms，最多 240 个点。</summary>
+    public double[] RecentFrameTimes { get; set; } = [];
 }

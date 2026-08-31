@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading.Channels;
+using ABI.Models;
 using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Session;
 
@@ -22,7 +23,7 @@ public sealed partial class FpsCounter : IDisposable, IAsyncDisposable
 
     public Dictionary<int, TimestampCollection> Frames { get; } = new();
 
-    public Action<Tuple<string, int>>? FpsOutput;
+    public Action<FPSData>? FpsOutput;
 
     private readonly object sync = new();
 
@@ -50,7 +51,7 @@ public sealed partial class FpsCounter : IDisposable, IAsyncDisposable
 
     /// <summary>
     /// 输出刷新间隔。
-    /// FPS 统计窗口仍然是最近 1 秒。
+    /// 实时 FPS 使用最近 1 秒，帧时间统计使用最近 30 秒。
     /// </summary>
     public TimeSpan RefreshInterval { get; set; } = TimeSpan.FromMilliseconds(100);
 
@@ -98,21 +99,10 @@ public sealed partial class FpsCounter : IDisposable, IAsyncDisposable
 
         m_EtwSession.Source.AllEvents += Source_AllEvents;
 
-        //
-        // TraceEvent.Process() 本身就是阻塞方法，
-        // 所以仍然需要后台线程执行。
-        //
         etwTask = Task.Run(() => EtwThreadProc(token), CancellationToken.None);
 
-        //
-        // ETW callback 只往 Channel 塞数据，
-        // 真正的 Frames 更新放到异步消费者。
-        //
         consumerTask = ConsumeEventsAsync(token);
 
-        //
-        // FPS 输出改为异步 PeriodicTimer。
-        //
         outputTask = OutputThreadProcAsync(token);
 
         return Task.CompletedTask;
@@ -140,10 +130,6 @@ public sealed partial class FpsCounter : IDisposable, IAsyncDisposable
                 return;
             }
 
-            //
-            // TraceEvent.ID 不是 int，
-            // 保留你原来显式转换的写法。
-            //
             bool isPresent =
                 ((int)obj.ID == EventID_D3D9PresentStart && obj.ProviderGuid == D3D9_provider)
                 || ((int)obj.ID == EventID_DxgiPresentStart && obj.ProviderGuid == DXGI_provider);
@@ -156,10 +142,6 @@ public sealed partial class FpsCounter : IDisposable, IAsyncDisposable
             if (pid <= 0)
                 return;
 
-            //
-            // 用 ETW 事件自己的时间戳，
-            // 不再使用 Stopwatch 的消费时间。
-            //
             double timestamp = obj.TimeStampRelativeMSec;
 
             eventChannel.Writer.TryWrite(new PresentEvent(pid, timestamp));
@@ -229,14 +211,80 @@ public sealed partial class FpsCounter : IDisposable, IAsyncDisposable
                     continue;
                 }
 
-                double from = to - 1000;
-
-                int count = frames.QueryCount(from, to);
-
-                FpsOutput?.Invoke(new Tuple<string, int>(frames.Name, count));
+                double[] timestamps = frames.Query(to - 30_000, to);
+                FpsOutput?.Invoke(CreateFpsData(frames.Name, timestamps, to));
             }
         }
         catch (OperationCanceledException) { }
+    }
+
+    private static FPSData CreateFpsData(string processName, double[] timestamps, double to)
+    {
+        int currentFps = timestamps.Count(timestamp => timestamp >= to - 1000);
+        if (timestamps.Length < 2)
+        {
+            return new FPSData
+            {
+                ForgroundProgramName = processName,
+                FOrgroundProgramFps = currentFps,
+                SampleFrameCount = timestamps.Length,
+            };
+        }
+
+        var frameTimes = new double[timestamps.Length - 1];
+        for (int i = 1; i < timestamps.Length; i++)
+        {
+            frameTimes[i - 1] = Math.Max(0, timestamps[i] - timestamps[i - 1]);
+        }
+
+        double duration = timestamps[^1] - timestamps[0];
+        double averageFrameTime = frameTimes.Average();
+        double[] sorted = [.. frameTimes.Order()];
+        double p95 = Percentile(sorted, 0.95);
+        double p99 = Percentile(sorted, 0.99);
+        double p999 = Percentile(sorted, 0.999);
+        double median = Percentile(sorted, 0.5);
+        double variance = frameTimes.Average(value =>
+        {
+            double delta = value - averageFrameTime;
+            return delta * delta;
+        });
+        double stutterThreshold = Math.Max(20, median * 2.5);
+
+        return new FPSData
+        {
+            ForgroundProgramName = processName,
+            FOrgroundProgramFps = currentFps,
+            CurrentFrameTime = frameTimes[^1],
+            AverageFps = duration > 0 ? frameTimes.Length * 1000d / duration : 0,
+            AverageFrameTime = averageFrameTime,
+            Low1PercentFps = p99 > 0 ? 1000d / p99 : 0,
+            Low01PercentFps = p999 > 0 ? 1000d / p999 : 0,
+            FrameTimeP95 = p95,
+            FrameTimeP99 = p99,
+            FrameTimeP999 = p999,
+            MaxFrameTime = sorted[^1],
+            FrameTimeStandardDeviation = Math.Sqrt(variance),
+            SlowFrameCount = frameTimes.Count(value => value > 1000d / 30d),
+            StutterCount = frameTimes.Count(value => value > stutterThreshold),
+            SampleFrameCount = timestamps.Length,
+            SampleDurationSeconds = duration / 1000d,
+            RecentFrameTimes = frameTimes.Length <= 240 ? frameTimes : frameTimes[^240..],
+        };
+    }
+
+    private static double Percentile(double[] sortedValues, double percentile)
+    {
+        if (sortedValues.Length == 0)
+            return 0;
+
+        double rank = (sortedValues.Length - 1) * percentile;
+        int lower = (int)Math.Floor(rank);
+        int upper = (int)Math.Ceiling(rank);
+        if (lower == upper)
+            return sortedValues[lower];
+
+        return sortedValues[lower] + ((sortedValues[upper] - sortedValues[lower]) * (rank - lower));
     }
 
     private static string GetProcessName(int processId)

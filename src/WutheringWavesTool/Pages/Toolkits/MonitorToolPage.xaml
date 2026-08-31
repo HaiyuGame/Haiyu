@@ -17,7 +17,7 @@
             <i:InvokeCommandAction Command="{x:Bind ViewModel.LoadedCommand}" />
         </i:EventTriggerBehavior>
     </i:Interaction.Behaviors>
-    <Grid Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="5">
+    <Grid>
         <Grid.Resources>
             <Style x:Key="TokenPanelBorderStyle" TargetType="Border">
                 <Setter Property="Padding" Value="14" />
@@ -35,13 +35,51 @@
             </Style>
         </Grid.Resources>
         <StackPanel
+            Padding="10,0"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
             Orientation="Horizontal"
             Spacing="5">
-            <TextBlock Text="FPS:" />
-            <TextBlock Text="{x:Bind ViewModel.FPS, Mode=OneWay}" />
-            <ItemsControl ItemsSource="{x:Bind ViewModel.CPUS, Mode=OneWay}">
+            <StackPanel
+                Margin="5,0"
+                Padding="12,6"
+                Background="{ThemeResource AcrylicBackgroundFillColorBaseBrush}"
+                CornerRadius="5"
+                Orientation="Horizontal"
+                Spacing="12">
+
+                <StackPanel
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal"
+                    Spacing="3">
+                    <TextBlock Text="FPS" />
+                    <TextBlock FontWeight="Bold" Text="{x:Bind ViewModel.FPS, Mode=OneWay}" />
+                </StackPanel>
+                <StackPanel
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal"
+                    Spacing="3">
+                    <TextBlock Text="Frame Time" />
+                    <TextBlock FontWeight="SemiBold" Text="{x:Bind ViewModel.FrameTime, Mode=OneWay}" />
+                    <TextBlock Text="ms" />
+                </StackPanel>
+                <StackPanel
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal"
+                    Spacing="3">
+                    <TextBlock Text="0.1% Low" />
+                    <TextBlock FontWeight="SemiBold" Text="{x:Bind ViewModel.Low01PercentFPS, Mode=OneWay}" />
+                </StackPanel>
+                <StackPanel
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal"
+                    Spacing="3">
+                    <TextBlock Text="MAX Time" />
+                    <TextBlock Text="{x:Bind ViewModel.MaxFrameTime, Mode=OneWay}" />
+                    <TextBlock Text="ms" />
+                </StackPanel>
+            </StackPanel>
+            <ItemsControl ItemsSource="{x:Bind ViewModel.CPUS, Mode=OneWay}" Visibility="Visible">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <ItemsStackPanel Orientation="Horizontal" />
@@ -49,8 +87,16 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="vm:MonitorDeviceItem">
-                        <StackPanel Orientation="Horizontal" Spacing="5">
-                            <TextBlock Text="{x:Bind Index, Mode=OneWay}" />
+                        <StackPanel
+                            Margin="5,0,0,0"
+                            Padding="5"
+                            Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+                            CornerRadius="5"
+                            Orientation="Horizontal"
+                            Spacing="5">
+                            <TextBlock>
+                                <Run Text="{x:Bind IndexStr, Mode=OneWay}" />
+                            </TextBlock>
                             <TextBlock>
                                 <Run Text="{x:Bind Load, Mode=OneWay}" />
                                 <Run Text="%" />
@@ -72,7 +118,10 @@
 
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
-            <ItemsControl ItemsSource="{x:Bind ViewModel.GPUS, Mode=OneWay}">
+            <ItemsControl
+                VerticalAlignment="Center"
+                ItemsSource="{x:Bind ViewModel.GPUS, Mode=OneWay}"
+                Visibility="Visible">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <ItemsStackPanel Orientation="Horizontal" />
@@ -80,8 +129,16 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="vm:MonitorDeviceItem">
-                        <StackPanel Orientation="Horizontal" Spacing="5">
-                            <TextBlock Text="{x:Bind Index, Mode=OneWay}" />
+                        <StackPanel
+                            Margin="5,0,0,0"
+                            Padding="5"
+                            Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+                            CornerRadius="5"
+                            Orientation="Horizontal"
+                            Spacing="5">
+                            <TextBlock>
+                                <Run Text="{x:Bind IndexStr, Mode=OneWay}" />
+                            </TextBlock>
                             <TextBlock>
                                 <Run Text="{x:Bind Load, Mode=OneWay}" />
                                 <Run Text="%" />
@@ -89,10 +146,6 @@
                             <TextBlock>
                                 <Run Text="{x:Bind Tempate, Mode=OneWay}" />
                                 <Run Text="℃" />
-                            </TextBlock>
-                            <TextBlock>
-                                <Run Text="{x:Bind Voltages, Mode=OneWay}" />
-                                <Run Text="V" />
                             </TextBlock>
                             <TextBlock>
                                 <Run Text="{x:Bind Clock, Mode=OneWay}" />
