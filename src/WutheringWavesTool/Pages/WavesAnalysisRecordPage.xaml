@@ -3,15 +3,15 @@
     x:Class="Haiyu.Pages.WavesAnalysisRecordPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:helper="using:Haiyu.Helpers"
     xmlns:ani="using:CommunityToolkit.WinUI.Animations"
+    xmlns:charts="using:Haiyu.Charts.WinUI"
     xmlns:cm="using:Haiyu.Models.Charts"
     xmlns:controls="using:Haiyu.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:helper="using:Haiyu.Helpers"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:itemWrapper="using:Haiyu.Models.Wrapper"
     xmlns:local="using:Haiyu.Pages"
-    xmlns:charts="using:Haiyu.Charts.WinUI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:model1="using:Waves.Api.Models.Record"
     mc:Ignorable="d">
@@ -99,7 +99,11 @@
                                 <RowDefinition Height="auto" />
                                 <RowDefinition />
                             </Grid.RowDefinitions>
-                            <ComboBox ItemsSource="{x:Bind ViewModel.NavItems, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectNavItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <ComboBox
+                                HorizontalAlignment="Left"
+                                ItemsSource="{x:Bind ViewModel.NavItems, Mode=OneWay}"
+                                SelectedItem="{x:Bind ViewModel.SelectNavItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                Style="{ThemeResource TitleBarComboBoxStyle}">
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate x:DataType="model1:GameRecordNavigationItem">
                                         <TextBlock Text="{x:Bind DisplayName}" />
@@ -373,7 +377,8 @@
                             HorizontalAlignment="Right"
                             VerticalAlignment="Center"
                             ItemsSource="{x:Bind ViewModel.GuaranteItems, Mode=OneWay}"
-                            SelectedItem="{x:Bind ViewModel.SelectGuarante, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            SelectedItem="{x:Bind ViewModel.SelectGuarante, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            Style="{ThemeResource TitleBarComboBoxStyle}">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate x:DataType="model1:GuaranteRangeWrapper">
                                     <TextBlock Text="{x:Bind DisplayName, Mode=OneWay}" />

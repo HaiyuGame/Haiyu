@@ -391,7 +391,6 @@
                     </StackPanel>
                 </NavigationView.PaneFooter>
                 <Grid>
-
                     <Frame x:Name="frame" />
                 </Grid>
             </NavigationView>

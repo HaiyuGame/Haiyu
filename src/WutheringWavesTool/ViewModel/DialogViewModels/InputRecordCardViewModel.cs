@@ -1,4 +1,4 @@
-﻿namespace Haiyu.ViewModel.DialogViewModels;
+namespace Haiyu.ViewModel.DialogViewModels;
 
 public partial class InputRecordCardViewModel : ObservableObject
 {

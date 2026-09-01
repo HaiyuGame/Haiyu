@@ -1,11 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Text;
 using ABI.Models;
 using ABIRuntime.Abstractions;
 using Waves.Core.Services;
-using ZXing.Aztec.Internal;
 
 namespace Haiyu.ViewModel.ToolkitsViewModel;
 
@@ -14,17 +9,17 @@ public sealed partial class MonitorToolViewModel : ViewModelBase
     private CancellationTokenSource? _monitorCancellation;
 
     public MonitorToolViewModel(
-        ABIRuntimeService aBIRuntimeService,
+        IAppContext<App> appContext,
         ITipShow tipShow,
         SystemEventPublisher systemEventPublisher
     )
     {
-        ABIRuntimeService = aBIRuntimeService;
+        this.AppContext = appContext;
         TipShow = tipShow;
         SystemEventPublisher = systemEventPublisher;
     }
 
-    public ABIRuntimeService ABIRuntimeService { get; }
+    public IAppContext<App> AppContext { get; }
     public ITipShow TipShow { get; }
     public SystemEventPublisher SystemEventPublisher { get; }
 
@@ -81,10 +76,10 @@ public sealed partial class MonitorToolViewModel : ViewModelBase
         _monitorCancellation?.Dispose();
         _monitorCancellation = CancellationTokenSource.CreateLinkedTokenSource(this.CTS.Token);
 
-        bool initialized = await ABIRuntimeService.Initialize(
+        bool initialized = await AppContext.ABIRuntimeService.Initialize(
             AppDomain.CurrentDomain.BaseDirectory
         );
-        if (!initialized || ABIRuntimeService.Runtime is null || !IsAlive)
+        if (!initialized || AppContext.ABIRuntimeService.Runtime is null || !IsAlive)
         {
             Debug.WriteLine("监控运行时初始化失败。");
             return;
@@ -217,14 +212,15 @@ public sealed partial class MonitorToolViewModel : ViewModelBase
     {
         try
         {
-            if (ABIRuntimeService.Runtime == null)
+            if (AppContext.ABIRuntimeService.Runtime == null)
                 return;
-            IPrivilegedResult<RunResult> result = await ABIRuntimeService.Runtime!.InvokeAsync(
-                ABIRuntime.Contract.FpsMonitorContract,
-                new FpsMonitorRequest(),
-                progress,
-                token.Token
-            );
+            IPrivilegedResult<RunResult> result =
+                await AppContext.ABIRuntimeService.Runtime!.InvokeAsync(
+                    ABIRuntime.Contract.FpsMonitorContract,
+                    new FpsMonitorRequest(),
+                    progress,
+                    token.Token
+                );
 
             if (!result.IsSuccess)
             {
@@ -232,7 +228,7 @@ public sealed partial class MonitorToolViewModel : ViewModelBase
                     new()
                     {
                         Delay = System.TimeSpan.FromSeconds(20).TotalSeconds,
-                        Message = $"硬件监控异常{result.Message}",
+                        Message = $"Device Monitor {result.Message}",
                     }
                 );
                 Logger.WriteError($"硬件监控异常{result.Message}");
@@ -248,7 +244,7 @@ public sealed partial class MonitorToolViewModel : ViewModelBase
                 new()
                 {
                     Delay = TimeSpan.FromSeconds(20).TotalSeconds,
-                    Message = $"硬件监控异常{exception.Message}",
+                    Message = $"Device Monitor{exception.Message}",
                 }
             );
             Logger.WriteError($"硬件监控异常{exception.Message}{exception.StackTrace}");
@@ -276,14 +272,15 @@ public sealed partial class MonitorToolViewModel : ViewModelBase
     {
         try
         {
-            if (ABIRuntimeService.Runtime == null)
+            if (AppContext.ABIRuntimeService.Runtime == null)
                 return;
-            IPrivilegedResult<RunResult> result = await ABIRuntimeService.Runtime!.InvokeAsync(
-                ABIRuntime.Contract.ComputerMonitorContract,
-                new CMonitorRequest(),
-                progress,
-                token.Token
-            );
+            IPrivilegedResult<RunResult> result =
+                await AppContext.ABIRuntimeService.Runtime!.InvokeAsync(
+                    ABIRuntime.Contract.ComputerMonitorContract,
+                    new CMonitorRequest(),
+                    progress,
+                    token.Token
+                );
 
             if (!result.IsSuccess)
             {

@@ -1,4 +1,4 @@
-﻿namespace Haiyu.Services.Contracts;
+namespace Haiyu.Services.Contracts;
 
 public interface IAppContext<T>
     where T : ClientApplication
@@ -13,6 +13,8 @@ public interface IAppContext<T>
     /// </summary>
     public Controls.TitleBar MainTitle { get; }
     public IWallpaperService WallpaperService { get; }
+
+    public ABIRuntimeService ABIRuntimeService { get; }
 
     /// <summary>
     /// 启动程序

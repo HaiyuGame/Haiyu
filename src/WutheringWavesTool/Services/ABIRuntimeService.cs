@@ -41,7 +41,7 @@ public sealed class ABIRuntimeService
             {
                 if (p.Data is { } configProgress)
                 {
-                    Console.WriteLine($"Run{configProgress.IsRuning}");
+                    Debug.WriteLine($"Run{configProgress.IsRuning}");
                 }
             });
             var result = await this.Runtime.InvokeAsync(

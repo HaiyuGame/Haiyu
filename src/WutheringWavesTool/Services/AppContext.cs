@@ -22,7 +22,8 @@ public class AppContext<T> : IAppContext<T>
         [FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager,
         [FromKeyedServices("AppLog")] LoggerService loggerService,
         AppSettings appSettings,
-        IAppActivation appActivation
+        IAppActivation appActivation,
+        ABIRuntimeService aBIRuntimeService
     )
     {
         KuroClient = wavesClient;
@@ -31,6 +32,7 @@ public class AppContext<T> : IAppContext<T>
         LoggerService = loggerService;
         AppSettings = appSettings;
         AppActivation = appActivation;
+        ABIRuntimeService = aBIRuntimeService;
     }
 
     private ContentDialog _dialog;
@@ -43,13 +45,14 @@ public class AppContext<T> : IAppContext<T>
     public LoggerService LoggerService { get; }
     public AppSettings AppSettings { get; }
     public IAppActivation AppActivation { get; }
+    public ABIRuntimeService ABIRuntimeService { get; }
 
     public async Task LauncherAsync(T app)
     {
         try
         {
             var mainSizeConfig = await this.AppSettings.GetMainWindowSettingsAsync();
-            if(mainSizeConfig == null)
+            if (mainSizeConfig == null)
             {
                 mainSizeConfig = MainWindowSetting.Default;
             }
@@ -85,13 +88,11 @@ public class AppContext<T> : IAppContext<T>
                     win.Content = page;
                     var defaultOption = MainWindow.DefaultWindowsOption;
                     var widthRate =
-                        double.IsFinite(mainSizeConfig.WidthRate)
-                        && mainSizeConfig.WidthRate > 0
+                        double.IsFinite(mainSizeConfig.WidthRate) && mainSizeConfig.WidthRate > 0
                             ? mainSizeConfig.WidthRate
                             : MainWindowSetting.Default.WidthRate;
                     var heightRate =
-                        double.IsFinite(mainSizeConfig.HeightRate)
-                        && mainSizeConfig.HeightRate > 0
+                        double.IsFinite(mainSizeConfig.HeightRate) && mainSizeConfig.HeightRate > 0
                             ? mainSizeConfig.HeightRate
                             : MainWindowSetting.Default.HeightRate;
 
@@ -118,7 +119,9 @@ public class AppContext<T> : IAppContext<T>
             LoggerService.WriteError(ex.Message);
             WindowExtension.MessageBox(
                 IntPtr.Zero,
-                LanguageService.GetStringByText("出现故障性错误，请检查网络连接和日志！关闭当前消息自动打开日志文件夹"),
+                LanguageService.GetStringByText(
+                    "出现故障性错误，请检查网络连接和日志！关闭当前消息自动打开日志文件夹"
+                ),
                 "Haiyu",
                 0
             );
@@ -305,7 +308,11 @@ public class AppContext<T> : IAppContext<T>
                     Instance
                         .Host.Services.GetRequiredService<SystemEventPublisher>()
                         .Publish(
-                            new SystemMessagerModel() { Message = LanguageService.GetStringByText("获取更新信息失败"), Delay = 5 }
+                            new SystemMessagerModel()
+                            {
+                                Message = LanguageService.GetStringByText("获取更新信息失败"),
+                                Delay = 5,
+                            }
                         );
                 }
             }
@@ -313,7 +320,13 @@ public class AppContext<T> : IAppContext<T>
             {
                 Instance
                     .Host.Services.GetRequiredService<SystemEventPublisher>()
-                    .Publish(new SystemMessagerModel() { Message = LanguageService.GetStringByText("当前已是最新版本"), Delay = 5 });
+                    .Publish(
+                        new SystemMessagerModel()
+                        {
+                            Message = LanguageService.GetStringByText("当前已是最新版本"),
+                            Delay = 5,
+                        }
+                    );
             }
         }
         catch (Exception)

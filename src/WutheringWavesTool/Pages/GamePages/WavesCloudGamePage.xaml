@@ -363,7 +363,7 @@
             VerticalAlignment="Top">
             <StackPanel Orientation="Horizontal">
                 <Button
-                    Padding="5"
+                    Padding="10"
                     Command="{x:Bind ViewModel.ShowWavesAnalysisCommand}"
                     Style="{ThemeResource TitleBarButtonStyle}">
                     <StackPanel Orientation="Horizontal" Spacing="5">
@@ -371,7 +371,7 @@
                             FontFamily="Segoe Fluent Icons"
                             FontSize="15"
                             Glyph="&#xF133;" />
-                        <TextBlock FontSize="12" Text="{x:Bind helper:LanguageService.GetString('Display_DrawAnalysis')}" />
+                        <TextBlock FontSize="14" Text="{x:Bind helper:LanguageService.GetString('Display_DrawAnalysis')}" />
                     </StackPanel>
                 </Button>
             </StackPanel>
