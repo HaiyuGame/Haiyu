@@ -7,6 +7,11 @@
     <LangVersion>preview</LangVersion>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Services\**" />
+    <EmbeddedResource Remove="Services\**" />
+    <None Remove="Services\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.9" />
@@ -26,10 +31,6 @@
     <ProjectReference Include="..\..\Haiyu.KuroClient\Haiyu.KuroClient.csproj" />
     <ProjectReference Include="..\..\Waves.Core\Waves.Core.csproj" />
     <ProjectReference Include="..\..\Waves.Settings\Waves.Settings.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Services\" />
   </ItemGroup>
 
   <ItemGroup>

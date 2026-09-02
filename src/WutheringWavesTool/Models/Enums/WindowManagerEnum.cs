@@ -1,16 +1,16 @@
 namespace Haiyu.Models.Enums;
 
 /// <summary>
-/// 窗口生命周期叠加
+/// Window管理模型
 /// </summary>
-public enum WindowManagerLifeType
+public enum WindowRole:uint
 {
     /// <summary>
-    /// 多窗口
+    /// 主Shell Window
     /// </summary>
-    Multiple,
+    Shell = 0,
     /// <summary>
-    /// 单例
+    /// 其他窗口
     /// </summary>
-    Single
+    Page = 1,
 }

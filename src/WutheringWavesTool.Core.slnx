@@ -45,12 +45,26 @@
     <Project Path="D:/WorkSpace/Haiyu/src/Extensions/LanguageEditer.Model/LanguageEditer.Model.csproj" Id="54317a76-6add-4f74-ad1e-9525d1d5df9b">
       <BuildType Solution="All|*" Project="Debug" />
     </Project>
+    <Project Path="Extensions/Haiyu.ABI/Haiyu.ABI.csproj">
+      <BuildType Solution="All|*" Project="Debug" />
+    </Project>
+  </Folder>
+  <Folder Name="/Extensions/ABI/">
+    <Project Path="Extensions/ABI/ABI.Models/ABI.Models.csproj">
+      <BuildType Solution="All|*" Project="Debug" />
+    </Project>
+    <Project Path="Extensions/ABI/ABIRuntime/ABIRuntime.csproj">
+      <BuildType Solution="All|*" Project="Debug" />
+    </Project>
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="D:/WorkSpace/Haiyu/src/Project.Test/Project.Test.csproj" Id="36c8b6d8-2ab5-4c85-96f6-bec4b62dc021">
       <BuildType Solution="All|Any CPU" Project="Release" />
       <BuildType Solution="All|x64" Project="Debug" />
       <BuildType Solution="All|x86" Project="Debug" />
+    </Project>
+    <Project Path="Tests/KuroGameDownloadProgram/KuroGameDownloadProgram.csproj">
+      <BuildType Solution="All|*" Project="Debug" />
     </Project>
   </Folder>
   <Project Path="D:/WorkSpace/Haiyu/src/Extensions/ProxyExtensions/ProxyExtensions.csproj" Id="5e689f49-98ad-49b7-a9e1-5d8714328cf1">
