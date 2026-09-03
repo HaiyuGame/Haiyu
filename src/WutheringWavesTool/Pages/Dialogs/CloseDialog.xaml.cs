@@ -1,3 +1,4 @@
+using Haiyu.Common.Contracts;
 using Haiyu.Models.Dialogs;
 using Haiyu.Services.DialogServices;
 using Waves.Settings;

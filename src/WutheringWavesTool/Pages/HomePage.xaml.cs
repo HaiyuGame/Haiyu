@@ -1,4 +1,6 @@
-﻿namespace Haiyu.Pages
+using Haiyu.Common.Contracts;
+
+namespace Haiyu.Pages
 {
     public sealed partial class HomePage : Page, IPage
     {

@@ -1,3 +1,4 @@
+using Haiyu.Common.Contracts;
 using Haiyu.ViewModel.Communitys;
 
 namespace Haiyu.Pages.Communitys;

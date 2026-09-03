@@ -1,4 +1,6 @@
-﻿namespace Haiyu.Services.Navigations;
+using Haiyu.Common.Contracts;
+
+namespace Haiyu.Services.Navigations;
 
 public class HomeNavigationService : NavigationServiceBase
 {

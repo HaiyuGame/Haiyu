@@ -1,3 +1,4 @@
+using Haiyu.Common.Contracts;
 using Haiyu.ViewModel.ToolkitsViewModel;
 
 namespace Haiyu.Pages.Toolkits;

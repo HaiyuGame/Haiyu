@@ -1,4 +1,6 @@
-﻿namespace Haiyu.Pages.Dialogs;
+using Haiyu.Common.Contracts;
+
+namespace Haiyu.Pages.Dialogs;
 
 public sealed partial class InputRecordCardDialog : ContentDialog, IDialog
 {

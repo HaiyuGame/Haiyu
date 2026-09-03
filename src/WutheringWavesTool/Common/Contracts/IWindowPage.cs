@@ -1,4 +1,4 @@
-﻿namespace Haiyu.Common;
+namespace Haiyu.Common.Contracts;
 
 public interface IWindowPage : IDisposable
 {

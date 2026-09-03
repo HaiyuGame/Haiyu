@@ -1,3 +1,5 @@
+using Haiyu.Common.Contracts;
+
 namespace Haiyu.Pages.Dialogs;
 
 public sealed partial class LocalGameTokenDialog : ContentDialog,IDialog

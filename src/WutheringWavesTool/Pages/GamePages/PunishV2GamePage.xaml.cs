@@ -1,3 +1,4 @@
+using Haiyu.Common.Contracts;
 using Haiyu.ViewModel.GameViewModels.GameContexts;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;

@@ -1,4 +1,6 @@
-﻿namespace Haiyu.Services.Contracts;
+using Haiyu.Common.Contracts;
+
+namespace Haiyu.Services.Contracts;
 
 public interface IPageService
 {

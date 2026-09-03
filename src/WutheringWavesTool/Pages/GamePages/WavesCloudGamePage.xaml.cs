@@ -1,4 +1,5 @@
-﻿using Haiyu.ViewModel.GameViewModels;
+using Haiyu.Common.Contracts;
+using Haiyu.ViewModel.GameViewModels;
 
 namespace Haiyu.Pages.GamePages;
 

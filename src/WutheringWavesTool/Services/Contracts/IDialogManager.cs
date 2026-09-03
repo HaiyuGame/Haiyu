@@ -1,3 +1,4 @@
+using Haiyu.Common.Contracts;
 using Haiyu.Models.Dialogs;
 using Haiyu.Plugin.Models;
 using Waves.Api.Models.CloudGame;

@@ -1,4 +1,5 @@
 using System.Runtime.Intrinsics.Arm;
+using Haiyu.Common.Contracts;
 using Haiyu.ViewModel.ToolkitsViewModel;
 using Windows.Win32.Foundation;
 

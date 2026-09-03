@@ -1,4 +1,5 @@
-﻿using Haiyu.ViewModel.WikiViewModels;
+using Haiyu.Common.Contracts;
+using Haiyu.ViewModel.WikiViewModels;
 
 namespace Haiyu.Pages.GameWikis;
 

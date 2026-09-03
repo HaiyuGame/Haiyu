@@ -1,3 +1,4 @@
+using Haiyu.Common.Contracts;
 using Haiyu.Pages.Communitys;
 using Haiyu.Pages.Toolkits;
 using Waves.Api.Models.CloudGame;

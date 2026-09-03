@@ -1,4 +1,5 @@
-﻿using Haiyu.Models.Dialogs;
+using Haiyu.Common.Contracts;
+using Haiyu.Models.Dialogs;
 
 namespace Haiyu.Pages.Dialogs
 {

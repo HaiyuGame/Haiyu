@@ -1,3 +1,4 @@
+using Haiyu.Common.Contracts;
 using Haiyu.Pages.GamePages;
 using Haiyu.Pages.GameWikis;
 using Haiyu.Pages.OOBE;

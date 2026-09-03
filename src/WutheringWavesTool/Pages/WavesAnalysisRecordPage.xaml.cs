@@ -1,3 +1,5 @@
+using Haiyu.Common.Contracts;
+
 namespace Haiyu.Pages;
 
 public sealed partial class WavesAnalysisRecordPage : Page,IWindowPage

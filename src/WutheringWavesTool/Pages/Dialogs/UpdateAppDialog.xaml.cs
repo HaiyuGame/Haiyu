@@ -1,3 +1,4 @@
+using Haiyu.Common.Contracts;
 using Haiyu.Plugin.Models;
 using Waves.Settings;
 

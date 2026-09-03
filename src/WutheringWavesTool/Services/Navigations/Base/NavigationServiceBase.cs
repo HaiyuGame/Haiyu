@@ -1,3 +1,5 @@
+using Haiyu.Common.Contracts;
+
 namespace Haiyu.Services.Navigations.Base;
 
 public class NavigationServiceBase : INavigationService

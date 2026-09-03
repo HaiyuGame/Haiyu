@@ -1,3 +1,4 @@
+using Haiyu.Common.Contracts;
 using Haiyu.ServiceHost;
 
 namespace Haiyu.Pages.Dialogs;

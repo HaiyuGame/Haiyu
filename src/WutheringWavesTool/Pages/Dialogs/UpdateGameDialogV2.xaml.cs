@@ -1,4 +1,5 @@
-﻿using Haiyu.Models.Dialogs;
+using Haiyu.Common.Contracts;
+using Haiyu.Models.Dialogs;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
