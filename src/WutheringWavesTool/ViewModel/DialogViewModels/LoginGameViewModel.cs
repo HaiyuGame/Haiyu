@@ -1,7 +1,6 @@
 using System.Text.RegularExpressions;
-using Haiyu.Services.DialogServices;
-using Waves.Core.Helpers;
 using Haiyu.KuroClient.Helper;
+using Waves.Core.Helpers;
 
 namespace Haiyu.ViewModel.DialogViewModels;
 
@@ -13,10 +12,10 @@ public sealed partial class LoginGameViewModel : DialogViewModelBase
         IAppContext<App> appContext,
         IViewFactorys viewFactorys,
         IKuroClient wavesClient,
-        [FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager,
+        DialogSession dialogSession,
         IKuroAccountService kuroAccountService
     )
-        : base(dialogManager)
+        : base(dialogSession)
     {
         AppContext = appContext;
         ViewFactorys = viewFactorys;
@@ -63,7 +62,6 @@ public sealed partial class LoginGameViewModel : DialogViewModelBase
     public IKuroClient WavesClient { get; }
 
     public IKuroAccountService KuroAccountService { get; }
-
 
     private async void GeeSuccessMethod(object recipient, GeeSuccessMessanger message)
     {
@@ -139,7 +137,7 @@ public sealed partial class LoginGameViewModel : DialogViewModelBase
 
             this.KuroAccountService.SetCurrentUser(account);
             WeakReferenceMessenger.Default.Send(new SelectUserMessanger(true));
-            DialogManager.CloseDialog();
+            this.CloseAsync();
         }
         else
         {
@@ -161,7 +159,7 @@ public sealed partial class LoginGameViewModel : DialogViewModelBase
                     await KuroAccountService.SaveUserAsync(account);
                     this.KuroAccountService.SetCurrentUser(account);
                     WeakReferenceMessenger.Default.Send(new SelectUserMessanger(true));
-                    DialogManager.CloseDialog();
+                    this.CloseAsync();
                 }
                 else if (mine != null)
                 {

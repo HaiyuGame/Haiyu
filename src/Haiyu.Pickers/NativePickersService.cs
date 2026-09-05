@@ -6,30 +6,38 @@ namespace Haiyu.Pickers;
 /// Uses the desktop common dialogs supplied by Windows itself. Invoke it on the UI thread
 /// that owns the supplied window.
 /// </summary>
-public sealed class NativePickersService(Func<nint> ownerWindowProvider) : IPickersService
+public sealed class NativePickersService() : IPickersService
 {
     private const int BufferLength = 32_768;
     private const int Canceled = unchecked((int)0x800704C7);
 
-    public Task<PickFileResult?> GetFileOpenPicker(IReadOnlyCollection<string> extensions) =>
-        ShowFileDialog(extensions, null, requireExistingFile: true);
+    public Task<PickFileResult?> GetFileOpenPicker(
+        IReadOnlyCollection<string> extensions,
+        nint value
+    ) => ShowFileDialog(extensions, null, requireExistingFile: true, value);
 
-    public Task<PickFileResult?> GetFileSavePicker(IReadOnlyCollection<string> extensions, string saveName)
+    public Task<PickFileResult?> GetFileSavePicker(
+        IReadOnlyCollection<string> extensions,
+        string saveName,
+        nint value
+    )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(saveName);
-        return ShowFileDialog(extensions, saveName, requireExistingFile: false);
+        return ShowFileDialog(extensions, saveName, requireExistingFile: false, value);
     }
 
-    public Task<PickFolderResult?> GetFolderPicker()
+    public Task<PickFolderResult?> GetFolderPicker(nint value)
     {
         var dialog = NativeMethods.CreateFileOpenDialog();
         try
         {
-            var options = NativeMethods.FOS_PICKFOLDERS | NativeMethods.FOS_FORCEFILESYSTEM |
-                          NativeMethods.FOS_PATHMUSTEXIST;
+            var options =
+                NativeMethods.FOS_PICKFOLDERS
+                | NativeMethods.FOS_FORCEFILESYSTEM
+                | NativeMethods.FOS_PATHMUSTEXIST;
             Marshal.ThrowExceptionForHR(NativeMethods.SetOptions(dialog, options));
 
-            var result = NativeMethods.Show(dialog, ownerWindowProvider());
+            var result = NativeMethods.Show(dialog, value);
             if (result == Canceled)
                 return Task.FromResult<PickFolderResult?>(null);
             Marshal.ThrowExceptionForHR(result);
@@ -38,10 +46,17 @@ public sealed class NativePickersService(Func<nint> ownerWindowProvider) : IPick
             try
             {
                 Marshal.ThrowExceptionForHR(
-                    NativeMethods.GetDisplayName(item, NativeMethods.SIGDN_FILESYSPATH, out var path));
+                    NativeMethods.GetDisplayName(
+                        item,
+                        NativeMethods.SIGDN_FILESYSPATH,
+                        out var path
+                    )
+                );
                 try
                 {
-                    return Task.FromResult<PickFolderResult?>(new PickFolderResult(Marshal.PtrToStringUni(path)!));
+                    return Task.FromResult<PickFolderResult?>(
+                        new PickFolderResult(Marshal.PtrToStringUni(path)!)
+                    );
                 }
                 finally
                 {
@@ -62,15 +77,22 @@ public sealed class NativePickersService(Func<nint> ownerWindowProvider) : IPick
     private Task<PickFileResult?> ShowFileDialog(
         IReadOnlyCollection<string> extensions,
         string? saveName,
-        bool requireExistingFile
+        bool requireExistingFile,
+        nint value
     )
     {
         ArgumentNullException.ThrowIfNull(extensions);
         if (extensions.Count == 0)
-            throw new ArgumentException("At least one file extension is required.", nameof(extensions));
+            throw new ArgumentException(
+                "At least one file extension is required.",
+                nameof(extensions)
+            );
 
         if (saveName?.Length >= BufferLength)
-            throw new ArgumentException($"The file name must be shorter than {BufferLength} characters.", nameof(saveName));
+            throw new ArgumentException(
+                $"The file name must be shorter than {BufferLength} characters.",
+                nameof(saveName)
+            );
 
         // Validate and create managed values before allocating unmanaged memory, so validation
         // failures cannot leak a buffer.
@@ -90,22 +112,30 @@ public sealed class NativePickersService(Func<nint> ownerWindowProvider) : IPick
             var dialog = new NativeMethods.OPENFILENAME
             {
                 lStructSize = Marshal.SizeOf<NativeMethods.OPENFILENAME>(),
-                hwndOwner = ownerWindowProvider(),
+                hwndOwner = value,
                 lpstrFilter = filter,
                 lpstrFile = pathBuffer,
                 nMaxFile = BufferLength,
                 lpstrDefExt = defaultExtension,
-                Flags = NativeMethods.OFN_EXPLORER | NativeMethods.OFN_PATHMUSTEXIST |
-                        NativeMethods.OFN_NOCHANGEDIR |
-                        (requireExistingFile ? NativeMethods.OFN_FILEMUSTEXIST : NativeMethods.OFN_OVERWRITEPROMPT),
+                Flags =
+                    NativeMethods.OFN_EXPLORER
+                    | NativeMethods.OFN_PATHMUSTEXIST
+                    | NativeMethods.OFN_NOCHANGEDIR
+                    | (
+                        requireExistingFile
+                            ? NativeMethods.OFN_FILEMUSTEXIST
+                            : NativeMethods.OFN_OVERWRITEPROMPT
+                    ),
             };
 
             var accepted = requireExistingFile
                 ? NativeMethods.GetOpenFileName(ref dialog)
                 : NativeMethods.GetSaveFileName(ref dialog);
-            return Task.FromResult(accepted
-                ? new PickFileResult(Marshal.PtrToStringUni(pathBuffer)!)
-                : HandleFileDialogFailure<PickFileResult>());
+            return Task.FromResult(
+                accepted
+                    ? new PickFileResult(Marshal.PtrToStringUni(pathBuffer)!)
+                    : HandleFileDialogFailure<PickFileResult>()
+            );
         }
         finally
         {
@@ -127,7 +157,8 @@ public sealed class NativePickersService(Func<nint> ownerWindowProvider) : IPick
         return buffer;
     }
 
-    private static T? HandleFileDialogFailure<T>() where T : class
+    private static T? HandleFileDialogFailure<T>()
+        where T : class
     {
         var error = NativeMethods.CommDlgExtendedError();
         if (error == 0 || error == Canceled)
@@ -138,12 +169,16 @@ public sealed class NativePickersService(Func<nint> ownerWindowProvider) : IPick
 
     private static string CreateFilter(IEnumerable<string> extensions)
     {
-        var values = extensions.Select(NormalizeExtension).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+        var values = extensions
+            .Select(NormalizeExtension)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
         var pattern = string.Join(';', values.Select(static extension => $"*{extension}"));
         return $"支持的文件 ({pattern})\0{pattern}\0所有文件 (*.*)\0*.*\0\0";
     }
 
-    private static string GetDefaultExtension(IEnumerable<string> extensions) => NormalizeExtension(extensions.First())[1..];
+    private static string GetDefaultExtension(IEnumerable<string> extensions) =>
+        NormalizeExtension(extensions.First())[1..];
 
     private static string NormalizeExtension(string extension)
     {
@@ -200,14 +235,19 @@ internal static class NativeMethods
     internal static nint CreateFileOpenDialog()
     {
         if (!OperatingSystem.IsWindows())
-            throw new PlatformNotSupportedException("The Windows File Open dialog is only available on Windows.");
+            throw new PlatformNotSupportedException(
+                "The Windows File Open dialog is only available on Windows."
+            );
 
-        Marshal.ThrowExceptionForHR(CoCreateInstance(
-            in FileOpenDialogClsid,
-            nint.Zero,
-            CLSCTX_INPROC_SERVER,
-            in FileDialogIid,
-            out var dialog));
+        Marshal.ThrowExceptionForHR(
+            CoCreateInstance(
+                in FileOpenDialogClsid,
+                nint.Zero,
+                CLSCTX_INPROC_SERVER,
+                in FileDialogIid,
+                out var dialog
+            )
+        );
         return dialog;
     }
 
@@ -229,7 +269,10 @@ internal static class NativeMethods
     {
         var vtable = *(nint**)dialog;
         fixed (nint* itemPointer = &item)
-            return ((delegate* unmanaged[Stdcall]<nint, nint*, int>)vtable[20])(dialog, itemPointer);
+            return ((delegate* unmanaged[Stdcall]<nint, nint*, int>)vtable[20])(
+                dialog,
+                itemPointer
+            );
     }
 
     internal static unsafe int GetDisplayName(nint item, uint displayNameType, out nint displayName)
@@ -237,7 +280,10 @@ internal static class NativeMethods
         var vtable = *(nint**)item;
         fixed (nint* displayNamePointer = &displayName)
             return ((delegate* unmanaged[Stdcall]<nint, uint, nint*, int>)vtable[5])(
-                item, displayNameType, displayNamePointer);
+                item,
+                displayNameType,
+                displayNamePointer
+            );
     }
 
     internal static unsafe void Release(nint instance)
@@ -255,7 +301,8 @@ internal static class NativeMethods
         nint outer,
         uint context,
         in Guid interfaceId,
-        out nint instance);
+        out nint instance
+    );
 
     [DllImport("comdlg32.dll", EntryPoint = "GetOpenFileNameW")]
     [return: MarshalAs(UnmanagedType.Bool)]
@@ -267,5 +314,4 @@ internal static class NativeMethods
 
     [DllImport("comdlg32.dll")]
     internal static extern int CommDlgExtendedError();
-
 }

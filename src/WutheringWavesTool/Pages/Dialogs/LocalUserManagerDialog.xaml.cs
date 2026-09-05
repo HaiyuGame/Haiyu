@@ -17,11 +17,14 @@ using Windows.Foundation.Collections;
 namespace Haiyu.Pages.Dialogs;
 public sealed partial class LocalUserManagerDialog : ContentDialog,IDialog
 {
-    public LocalUserManagerDialog()
+    public LocalUserManagerDialog(
+        LocalUserManagerViewModel viewModel,
+        IThemeService themeService
+    )
     {
         InitializeComponent();
-        this.RequestedTheme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
-        this.ViewModel = Instance.Host.Services.GetRequiredService<LocalUserManagerViewModel>();
+        ViewModel = viewModel;
+        RequestedTheme = themeService.CurrentTheme;
     }
 
     public LocalUserManagerViewModel ViewModel { get; }

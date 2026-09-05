@@ -21,7 +21,7 @@ partial class KuroGameContextViewModelV2
             }
             if((await AppSettings.GetStartGameAllowCloseMainAsync()) == true)
             {
-                this.AppContext.MinToTaskbar();
+                this.AppContext.WindowManager.Shell.Hide();
             }
         }
         if (_buttonAction == ButtonActionType.PrepareUpdate)
@@ -29,7 +29,7 @@ partial class KuroGameContextViewModelV2
             var localVersion = await GameContext.GameLocalConfig.GetConfigAsync(
                 GameLocalSettingName.LocalGameVersion
             );
-            var result = await DialogManager.ShowUpdateGameDialogAsyncV2(
+            var result = await WindowManager.Shell.DialogManager.ShowUpdateGameDialogAsyncV2(
                 this.GameContext.ContextName,
                 UpdateGameType.UpdateGame
             );
@@ -92,12 +92,12 @@ partial class KuroGameContextViewModelV2
     {
         if (!(GameContext.ContextName == nameof(WavesMainGameContextV2) || GameContext.ContextName == nameof(PunishMainGameContextV2)))
         {
-            await DialogManager.ShowMessageDialog(new ShowDialogOption()
+            await WindowManager.Shell.DialogManager.ShowMessageDialog(new ShowDialogOption()
             {
                 Context = LanguageService.GetStringByText("不支持的游戏类型")
             });
             return;
         }
-        await this.DialogManager.ShowGameLocalTokenAsync(this.GameContext.ContextName);
+        await WindowManager.Shell.DialogManager.ShowGameLocalTokenAsync(this.GameContext.ContextName);
     }
 }

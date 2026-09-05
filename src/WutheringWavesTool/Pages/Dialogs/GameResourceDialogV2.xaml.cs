@@ -1,6 +1,8 @@
+using Haiyu.Common.Contracts;
+
 namespace Haiyu.Pages.Dialogs;
 
-public sealed partial class GameResourceDialogV2 : ContentDialog
+public sealed partial class GameResourceDialogV2 : ContentDialog, IDialog
 {
     public GameResourceDialogV2(GameResourceViewModelV2 viewModel)
     {
@@ -11,8 +13,12 @@ public sealed partial class GameResourceDialogV2 : ContentDialog
 
     public GameResourceViewModelV2 ViewModel { get; }
 
-    internal void SetData(string contextName)
+    public void SetData(object data)
     {
-        this.ViewModel.SetData(contextName);
+        if (data is string str)
+        {
+            this.ViewModel.SetData(str);
+        }
     }
+
 }

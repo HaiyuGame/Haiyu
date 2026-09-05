@@ -21,10 +21,10 @@ public sealed partial class SelectGameFolderDialogV2
     : ContentDialog,
         IResultDialog<SelectDownloadFolderResult>
 {
-    public SelectGameFolderDialogV2()
+    public SelectGameFolderDialogV2(SelectGameFolderViewModelV2 viewModel)
     {
         this.InitializeComponent();
-        this.ViewModel = Instance.Host.Services.GetRequiredService<SelectGameFolderViewModelV2>();
+        this.ViewModel = viewModel;
         this.RequestedTheme = Instance
             .Host.Services.GetRequiredService<IThemeService>()
             .CurrentTheme;
@@ -32,15 +32,6 @@ public sealed partial class SelectGameFolderDialogV2
 
     public SelectGameFolderViewModelV2 ViewModel { get; }
 
-    public SelectDownloadFolderResult GetResult()
-    {
-        return new()
-        {
-            Result = ViewModel.Result,
-            InstallFolder = System.IO.Path.GetDirectoryName(ViewModel.ExePath),
-            Launcher = ViewModel.Launcher,
-        };
-    }
 
     public void SetData(object data)
     {

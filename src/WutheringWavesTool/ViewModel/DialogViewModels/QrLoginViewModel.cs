@@ -1,7 +1,5 @@
-
 using Haiyu.Common.QR;
 using Haiyu.Models.Dialogs;
-using Haiyu.Services.DialogServices;
 using Microsoft.Graphics.Canvas;
 using Waves.Api.Models.QRLogin;
 using Windows.Graphics.Capture;
@@ -12,16 +10,25 @@ namespace Haiyu.ViewModel.DialogViewModels;
 
 public partial class QrLoginViewModel : DialogViewModelBase
 {
-    public QrLoginViewModel([FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager, IAppContext<App> appContext, IKuroClient wavesClient, IKuroAccountService accountService) : base(dialogManager)
+    public QrLoginViewModel(
+        IAppContext<App> appContext,
+        IKuroClient wavesClient,
+        IKuroAccountService accountService,
+        DialogSession dialogSession,
+        IWindowManager windowManager
+    )
+        : base(dialogSession)
     {
         AppContext = appContext;
         WavesClient = wavesClient;
         AccountService = accountService;
+        _windowManager = windowManager;
     }
 
     private CanvasDevice _canvasDevice;
     private Direct3D11CaptureFramePool? _framePool;
     private GraphicsCaptureSession? _session;
+    private readonly IWindowManager _windowManager;
 
     public IAppContext<App> AppContext { get; }
     public IKuroClient WavesClient { get; }
@@ -64,7 +71,8 @@ public partial class QrLoginViewModel : DialogViewModelBase
     }
 
     [ObservableProperty]
-    public partial string ScreenMessage { get; set; } = LanguageService.GetStringByText("选择显示器");
+    public partial string ScreenMessage { get; set; } =
+        LanguageService.GetStringByText("选择显示器");
 
     [ObservableProperty]
     public partial ObservableCollection<Datum> Datums { get; set; }
@@ -88,23 +96,19 @@ public partial class QrLoginViewModel : DialogViewModelBase
                     return;
                 CanvasBitmap canvasBitmap = CanvasBitmap.CreateFromDirect3D11Surface(
                     _canvasDevice,
-                    frame.Surface);
+                    frame.Surface
+                );
                 await FillSurfaceWithBitmap(canvasBitmap);
                 Logger.WriteInfo("开始读取屏幕帧");
             }
-
-            catch (Exception e) when (_canvasDevice.IsDeviceLost(e.HResult))
-            {
-            }
+            catch (Exception e) when (_canvasDevice.IsDeviceLost(e.HResult)) { }
         }
     }
-
 
     private async Task FillSurfaceWithBitmap(CanvasBitmap canvasBitmap)
     {
         try
         {
-
             var luminanceSource = new CanvasBitmapLuminanceSource(canvasBitmap);
 
             var binaryBitmap = new BinaryBitmap(new HybridBinarizer(luminanceSource));
@@ -112,7 +116,7 @@ public partial class QrLoginViewModel : DialogViewModelBase
             var hints = new DecodingOptions
             {
                 PossibleFormats = new List<BarcodeFormat> { BarcodeFormat.QR_CODE },
-                TryHarder = true
+                TryHarder = true,
             };
             var result2 = reader.decode(binaryBitmap);
             if (result2 == null)
@@ -124,7 +128,8 @@ public partial class QrLoginViewModel : DialogViewModelBase
                 if (account is null)
                     return;
                 var result = await WavesClient.PostQrValueAsync(account, QRResult, CTS.Token);
-                if (result == null) return;
+                if (result == null)
+                    return;
                 if (result.Code == 200 && result.Success == true)
                 {
                     TipMessage = LanguageService.GetStringByText("获取登陆信息成功");
@@ -150,10 +155,8 @@ public partial class QrLoginViewModel : DialogViewModelBase
             }
             else
             {
-
                 Logger.WriteInfo("屏幕帧读取二维码失败，正在截取下一帧");
             }
-
         }
         catch (Exception ex)
         {
@@ -167,7 +170,8 @@ public partial class QrLoginViewModel : DialogViewModelBase
     public partial string TipMessage { get; set; }
 
     [ObservableProperty]
-    public partial string QRResult { get; set; } = LanguageService.GetStringByText("选择游戏窗口（需要露出游戏二维码）");
+    public partial string QRResult { get; set; } =
+        LanguageService.GetStringByText("选择游戏窗口（需要露出游戏二维码）");
 
     [ObservableProperty]
     public partial string VerifyCode { get; set; } = "";
@@ -183,7 +187,7 @@ public partial class QrLoginViewModel : DialogViewModelBase
             return;
         }
         var picker = new GraphicsCapturePicker();
-        InitializeWithWindow.Initialize(picker, this.AppContext.App.MainWindow.GetWindowHandle());
+        InitializeWithWindow.Initialize(picker, _windowManager.Shell.GetWindow().GetWindowHandle());
         GraphicsCaptureItem item = await picker.PickSingleItemAsync();
         if (item != null)
         {
@@ -195,7 +199,12 @@ public partial class QrLoginViewModel : DialogViewModelBase
                 _framePool?.Dispose();
             }
             _canvasDevice = new CanvasDevice();
-            _framePool = Direct3D11CaptureFramePool.Create(_canvasDevice, Windows.Graphics.DirectX.DirectXPixelFormat.B8G8R8A8UIntNormalized, 1, item.Size);
+            _framePool = Direct3D11CaptureFramePool.Create(
+                _canvasDevice,
+                Windows.Graphics.DirectX.DirectXPixelFormat.B8G8R8A8UIntNormalized,
+                1,
+                item.Size
+            );
             _framePool.FrameArrived += _framePool_FrameArrived;
             _session = _framePool.CreateCaptureSession(item);
             _session.StartCapture();
@@ -220,7 +229,13 @@ public partial class QrLoginViewModel : DialogViewModelBase
         var account = AccountService.CurrentAccount;
         if (account is null)
             return;
-        var result = await WavesClient.QRLoginAsync(account, QRResult, VerifyCode, this.SelectDatum.Id, CTS.Token);
+        var result = await WavesClient.QRLoginAsync(
+            account,
+            QRResult,
+            VerifyCode,
+            this.SelectDatum.Id,
+            CTS.Token
+        );
         if (result == null)
         {
             TipMessage = LanguageService.GetStringByText("登陆失败，请及时联系开发者");
@@ -244,4 +259,3 @@ public partial class QrLoginViewModel : DialogViewModelBase
         await Close();
     }
 }
-

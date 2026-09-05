@@ -9,9 +9,11 @@ namespace Haiyu.ViewModel.DialogViewModels;
 public sealed partial class WavesCloudUserViewModel : DialogViewModelBase
 {
     public WavesCloudUserViewModel(
+        DialogSession dialogSession,
         IWavesCloudGameService wavesCloudGameService,
         [FromKeyedServices(nameof(KuroCloudGameContext))] IKuroCloudGameContext cloudGameContext
     )
+        : base(dialogSession)
     {
         WavesCloudGameService = wavesCloudGameService;
         CloudGameContext = cloudGameContext;
@@ -38,11 +40,10 @@ public sealed partial class WavesCloudUserViewModel : DialogViewModelBase
     [RelayCommand]
     async Task Loaded()
     {
-        
         var users = await this.WavesCloudGameService.ConfigManager.GetUsersAsync();
         var temp = users.Select(x => new CloudGameLoginDataWrapper(x)).ToObservableCollection();
         var currentLogin = await this.WavesCloudGameService.GetCurrentUserSession();
-        if(currentLogin != null)
+        if (currentLogin != null)
         {
             foreach (var item in temp)
             {
@@ -55,7 +56,6 @@ public sealed partial class WavesCloudUserViewModel : DialogViewModelBase
         this.CloudUsers = temp;
     }
 
-
     [RelayCommand]
     public async Task ApplyCloudUser()
     {
@@ -67,6 +67,6 @@ public sealed partial class WavesCloudUserViewModel : DialogViewModelBase
         {
             await AppSettings.SetSelectCloudUserIDAsync(selectUser.Id);
         }
-        this.Close();
+        await this.CloseAsync();
     }
 }

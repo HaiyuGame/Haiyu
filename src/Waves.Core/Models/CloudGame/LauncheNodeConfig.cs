@@ -4,5 +4,5 @@ public class LauncheNodeConfig
 {
     public IEnumerable<CloudGameNode> Nodes { get; set; }
 
-    public CloudGameNode SelectNode { get; set; }
+    public CloudGameNode? SelectNode { get; set; }
 }

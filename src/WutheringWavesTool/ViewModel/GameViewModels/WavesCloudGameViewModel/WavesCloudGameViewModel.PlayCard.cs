@@ -64,7 +64,7 @@ partial class WavesCloudGameViewModel
         IsRefreshing = true;
         if (this.KuroCloudGameContext == null)
         {
-            await TipShow.ShowMessageAsync(LanguageService.GetStringByText("游戏核心为空！请尝试刷新页面"),Symbol.Clear);
+            await WindowManager.Shell.TipShow.ShowMessageAsync(LanguageService.GetStringByText("游戏核心为空！请尝试刷新页面"),Symbol.Clear);
             return;
         }
         await this.RefreshUserAsync();
@@ -74,7 +74,7 @@ partial class WavesCloudGameViewModel
     [RelayCommand]
     async Task AddUserAsync()
     {
-        await DialogManager.ShowWebGameDialogAsync();
+        await WindowManager.Shell.DialogManager.ShowWebGameDialogAsync();
     }
 
 

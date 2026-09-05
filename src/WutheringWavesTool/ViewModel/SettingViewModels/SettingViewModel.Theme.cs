@@ -36,7 +36,7 @@ partial class SettingViewModel
             LeftY = null,
         };
         await AppSettings.SetMainWindowSettingsAsync(mainSizeConfig);
-        var defaultOption = MainWindow.DefaultWindowsOption;
+        var defaultOption = WindowsOption.DefaultWindowsOption;
         var widthRate =
             double.IsFinite(mainSizeConfig.WidthRate) && mainSizeConfig.WidthRate > 0
                 ? mainSizeConfig.WidthRate
@@ -46,14 +46,15 @@ partial class SettingViewModel
                 ? mainSizeConfig.HeightRate
                 : MainWindowSetting.Default.HeightRate;
 
-        this.AppContext.App.MainWindow.ApplyWindowsOption(
-            defaultOption with
-            {
-                Width = defaultOption.Width * widthRate,
-                Height = defaultOption.Height * heightRate,
-                IsResizable = mainSizeConfig.IsResize,
-            }
-        );
+        this.AppContext.WindowManager.Shell.GetWindow()
+            .ApplyWindowsOption(
+                defaultOption with
+                {
+                    Width = defaultOption.Width * widthRate,
+                    Height = defaultOption.Height * heightRate,
+                    IsResizable = mainSizeConfig.IsResize,
+                }
+            );
     }
 
     partial void OnSelectThemeChanged(string value)
@@ -78,7 +79,7 @@ partial class SettingViewModel
     [RelayCommand]
     async Task ShowGameEnhancedDialog()
     {
-        await DialogManager.ShowGameEnhancedDialogAsync();
+        await this.WindowManager.Shell.DialogManager.ShowGameEnhancedDialogAsync();
     }
 
     [ObservableProperty]

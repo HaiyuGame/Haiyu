@@ -4,11 +4,14 @@ namespace Haiyu.Pages.Dialogs;
 
 public sealed partial class WebViewCabManagerDialog : ContentDialog, IDialog
 {
-    public WebViewCabManagerDialog()
+    public WebViewCabManagerDialog(
+        WebViewCabManagerViewModel viewModel,
+        IThemeService themeService
+    )
     {
         InitializeComponent();
-        ViewModel = Instance.Host.Services.GetRequiredService<WebViewCabManagerViewModel>();
-        RequestedTheme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
+        ViewModel = viewModel;
+        RequestedTheme = themeService.CurrentTheme;
     }
 
     public WebViewCabManagerViewModel ViewModel { get; }

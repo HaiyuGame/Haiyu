@@ -60,7 +60,7 @@ namespace Haiyu.Services
                     }
                     else
                     {
-                        Instance.Host.Services.GetRequiredService<IAppContext<App>>().App.MainWindow.Show();
+                        Instance.Host.Services.GetRequiredService<IAppContext<App>>().WindowManager.Shell.Show();
                     }
                 }
             }

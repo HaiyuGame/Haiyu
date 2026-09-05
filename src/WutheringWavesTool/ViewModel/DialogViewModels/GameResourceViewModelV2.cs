@@ -1,13 +1,10 @@
-using Haiyu.Services.DialogServices;
 
 namespace Haiyu.ViewModel.DialogViewModels;
 
 public sealed partial class GameResourceViewModelV2 : DialogViewModelBase
 {
-    public GameResourceViewModelV2(
-        [FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager
-    )
-        : base(dialogManager) { }
+    public GameResourceViewModelV2(DialogSession dialogSession)
+        : base(dialogSession) { }
 
     public string ContextName { get; private set; }
     public IGameContextV2 GameContext { get; private set; }
@@ -37,13 +34,15 @@ public sealed partial class GameResourceViewModelV2 : DialogViewModelBase
     internal void SetData(string contextName)
     {
         ContextName = contextName;
-        this.GameContext = Instance.Host.Services.GetRequiredKeyedService<IGameContextV2>(contextName);
+        this.GameContext = Instance.Host.Services.GetRequiredKeyedService<IGameContextV2>(
+            contextName
+        );
     }
 
     [RelayCommand]
     async Task Loaded()
     {
-        var result =  await GameContext.GameLocalConfig.GetConfigAsync(
+        var result = await GameContext.GameLocalConfig.GetConfigAsync(
             GameLocalSettingName.GameLauncherBassFolder
         );
         var prodFolder = await GameContext.GameLocalConfig.GetConfigAsync(
@@ -101,9 +100,19 @@ public sealed partial class GameResourceViewModelV2 : DialogViewModelBase
     [RelayCommand]
     async Task OpenFolder()
     {
-        var path = await GameContext.GameLocalConfig.GetConfigAsync(GameLocalSettingName.GameLauncherBassFolder) ?? "";
+        var path =
+            await GameContext.GameLocalConfig.GetConfigAsync(
+                GameLocalSettingName.GameLauncherBassFolder
+            ) ?? "";
 
-        WindowExtension.ShellExecute(IntPtr.Zero, "open", path, null, null, WindowExtension.SW_SHOWNORMAL);
+        WindowExtension.ShellExecute(
+            IntPtr.Zero,
+            "open",
+            path,
+            null,
+            null,
+            WindowExtension.SW_SHOWNORMAL
+        );
     }
 
     [RelayCommand]

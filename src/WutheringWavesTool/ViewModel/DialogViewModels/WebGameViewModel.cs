@@ -1,4 +1,3 @@
-using Haiyu.Services.DialogServices;
 using Waves.Core.Contracts.CloudGame;
 using Waves.Core.Models.CloudGame;
 
@@ -12,9 +11,9 @@ public sealed partial class WebGameViewModel : DialogViewModelBase
         IAppContext<App> appContext,
         IViewFactorys viewFactorys,
         IWavesCloudGameService cloudGameService,
-        [FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager
+        DialogSession dialogSession
     )
-        : base(dialogManager)
+        : base(dialogSession)
     {
         AppContext = appContext;
         ViewFactorys = viewFactorys;

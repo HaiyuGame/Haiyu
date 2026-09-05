@@ -41,11 +41,12 @@ public class ViewFactorys : IViewFactorys
 
     public GetGeetWindow CreateGeetWindow(GeetType type)
     {
-        return new GetGeetWindow(
-            WindowNative.GetWindowHandle(AppContext.App.MainWindow),
-            type,
-            GeetWindowOption
-        );
+        return null;
+        //return new GetGeetWindow(
+        //    WindowNative.GetWindowHandle(AppContext.App.MainWindow),
+        //    type,
+        //    GeetWindowOption
+        //);
     }
 
     public WindowModelBase ShowSignWindow(GameRoilDataItem role) =>
@@ -54,25 +55,27 @@ public class ViewFactorys : IViewFactorys
     public WindowModelBase ShowWindowBase<T>(object? data)
         where T : UIElement, IWindowPage
     {
-        var win = new WindowModelBase(WindowNative.GetWindowHandle(AppContext.App.MainWindow));
-        var page = Instance.Host.Services!.GetRequiredService<T>();
-        if (data != null)
-            page.SetData(data);
-        page.SetWindow(win);
-        win.Content = page;
-        return win;
+        return null;
+        //var win = new WindowModelBase(WindowNative.GetWindowHandle(AppContext.App.MainWindow));
+        //var page = Instance.Host.Services!.GetRequiredService<T>();
+        //if (data != null)
+        //    page.SetData(data);
+        //page.SetWindow(win);
+        //win.Content = page;
+        //return win;
     }
 
     public WindowModelBase ShowAdminDevice()
     {
-        var win = new WindowModelBase(
-            WindowNative.GetWindowHandle(AppContext.App.MainWindow),
-            DeviceInfoWindowOption
-        );
-        var page = Instance.Host.Services!.GetRequiredService<DeviceInfoPage>();
-        page.SetWindow(win);
-        win.Content = page;
-        return win;
+        return null;
+        //var win = new WindowModelBase(
+            //WindowNative.GetWindowHandle(AppContext.App.MainWindow),
+            //DeviceInfoWindowOption
+        //);
+        //var page = Instance.Host.Services!.GetRequiredService<DeviceInfoPage>();
+        //page.SetWindow(win);
+        //win.Content = page;
+        //return win;
     }
 
 

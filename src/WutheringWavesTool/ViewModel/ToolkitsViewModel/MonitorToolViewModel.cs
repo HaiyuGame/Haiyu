@@ -10,17 +10,14 @@ public sealed partial class MonitorToolViewModel : ViewModelBase
 
     public MonitorToolViewModel(
         IAppContext<App> appContext,
-        ITipShow tipShow,
         SystemEventPublisher systemEventPublisher
     )
     {
         this.AppContext = appContext;
-        TipShow = tipShow;
         SystemEventPublisher = systemEventPublisher;
     }
 
     public IAppContext<App> AppContext { get; }
-    public ITipShow TipShow { get; }
     public SystemEventPublisher SystemEventPublisher { get; }
 
     Progress<IPrivilegedProgress<CMonitorProgress>>? _monitorProgress = null;

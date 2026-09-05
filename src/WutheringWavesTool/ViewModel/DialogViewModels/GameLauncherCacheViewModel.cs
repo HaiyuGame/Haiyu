@@ -1,5 +1,4 @@
 using Haiyu.Models.Dialogs;
-using Haiyu.Services.DialogServices;
 using Waves.Api.Models.Launcher;
 using Waves.Core.Common;
 using Windows.ApplicationModel.DataTransfer;
@@ -18,16 +17,12 @@ public sealed partial class GameLauncherCacheViewModel : DialogViewModelBase
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SetSelectCommand))]
-
     public partial bool IsLoading { get; set; }
 
-    
     public bool IsOk() => !IsLoading;
 
-    public GameLauncherCacheViewModel(
-        [FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager
-    )
-        : base(dialogManager)
+    public GameLauncherCacheViewModel(DialogSession dialogSession)
+        : base(dialogSession)
     {
         RegisterMessager();
     }
@@ -58,7 +53,7 @@ public sealed partial class GameLauncherCacheViewModel : DialogViewModelBase
         //);
         //if (result == UserConsentVerificationResult.Verified)
         //{
-            
+
         //}
         var oAuth = KrKeyHelper.Xor(oauthCode, 5);
         var package = new DataPackage();
@@ -94,7 +89,7 @@ public sealed partial class GameLauncherCacheViewModel : DialogViewModelBase
                 continue;
             }
 
-            if(userPlayers.Code != 0)
+            if (userPlayers.Code != 0)
             {
                 continue;
             }
@@ -115,12 +110,17 @@ public sealed partial class GameLauncherCacheViewModel : DialogViewModelBase
     public async Task SetSelect()
     {
         var item = Items.Where(x => x.IsSelect).FirstOrDefault();
-        if(item == null)
+        if (item == null)
         {
             return;
         }
-        await GameContext.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.LasterSelectLocalUser,item.GetKey);
-        WeakReferenceMessenger.Default.Send<LocalGameRefreshBindUser>(new LocalGameRefreshBindUser(item));
+        await GameContext.GameLocalConfig.SaveConfigAsync(
+            GameLocalSettingName.LasterSelectLocalUser,
+            item.GetKey
+        );
+        WeakReferenceMessenger.Default.Send<LocalGameRefreshBindUser>(
+            new LocalGameRefreshBindUser(item)
+        );
         await this.Close();
     }
 
@@ -130,6 +130,4 @@ public sealed partial class GameLauncherCacheViewModel : DialogViewModelBase
         this.Items = null;
         base.AfterClose();
     }
-
-    
 }

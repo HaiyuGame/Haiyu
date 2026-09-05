@@ -142,7 +142,7 @@ partial class SettingViewModel
             var invalidIp = ips.FirstOrDefault(ip => !IPAddress.TryParse(ip, out _));
             if (invalidIp != null)
             {
-                TipShow.ShowMessage(LanguageService.FormatByText(LanguageService.GetStringByText("{0} 存在无效 IP：{1}"), group.Host, invalidIp), Symbol.Important);
+                WindowManager.Shell.TipShow.ShowMessage(LanguageService.FormatByText(LanguageService.GetStringByText("{0} 存在无效 IP：{1}"), group.Host, invalidIp), Symbol.Important);
                 return;
             }
 
@@ -157,7 +157,7 @@ partial class SettingViewModel
 
         await GithubIpSettings.SetgithubIpsAsync(settings);
         await LoadGithubIpConfigAsync();
-        TipShow.ShowMessage(LanguageService.GetStringByText("Github 域前置配置已保存"), Symbol.Accept);
+        WindowManager.Shell.TipShow.ShowMessage(LanguageService.GetStringByText("Github 域前置配置已保存"), Symbol.Accept);
     }
 
     [RelayCommand]
@@ -166,19 +166,19 @@ partial class SettingViewModel
         var cdn = GithubCdn?.Trim();
         if (string.IsNullOrWhiteSpace(cdn))
         {
-            TipShow.ShowMessage(LanguageService.GetStringByText("Github CDN 配置不能为空"), Symbol.Important);
+            WindowManager.Shell.TipShow.ShowMessage(LanguageService.GetStringByText("Github CDN 配置不能为空"), Symbol.Important);
             return;
         }
 
         if (!cdn.Contains("{downloadUrl}", StringComparison.Ordinal))
         {
-            TipShow.ShowMessage(LanguageService.GetStringByText("Github CDN 配置必须包含 {downloadUrl}"), Symbol.Important);
+            WindowManager.Shell.TipShow.ShowMessage(LanguageService.GetStringByText("Github CDN 配置必须包含 {downloadUrl}"), Symbol.Important);
             return;
         }
 
         await GithubIpSettings.SetgithubCdnAsync(cdn, this.CTS.Token);
         GithubCdn = await GithubIpSettings.GetgithubCdnAsync(this.CTS.Token);
-        TipShow.ShowMessage(LanguageService.GetStringByText("Github CDN 配置已保存"), Symbol.Accept);
+        WindowManager.Shell.TipShow.ShowMessage(LanguageService.GetStringByText("Github CDN 配置已保存"), Symbol.Accept);
     }
 
     [RelayCommand]
@@ -186,7 +186,7 @@ partial class SettingViewModel
     {
         await GithubIpSettings.SetgithubFrontingEnabledAsync(GithubFrontingEnabled, this.CTS.Token);
         await GithubIpSettings.SetgithubCdnEnabledAsync(GithubCdnEnabled, this.CTS.Token);
-        TipShow.ShowMessage(LanguageService.GetStringByText("Github 下载选项已保存"), Symbol.Accept);
+        WindowManager.Shell.TipShow.ShowMessage(LanguageService.GetStringByText("Github 下载选项已保存"), Symbol.Accept);
     }
 
     [RelayCommand]
@@ -207,6 +207,6 @@ partial class SettingViewModel
             mirror.SetMirrorKey(MirrorKey);
         }
 
-        TipShow.ShowMessage(LanguageService.GetStringByText("设置成功！"), Symbol.Accept);
+        WindowManager.Shell.TipShow.ShowMessage(LanguageService.GetStringByText("设置成功！"), Symbol.Accept);
     }
 }

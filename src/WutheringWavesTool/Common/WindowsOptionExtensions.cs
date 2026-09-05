@@ -9,7 +9,7 @@ public static class WindowsOptionExtensions
             return;
         }
 
-        var manager = WindowManager.Get(window);
+        var manager = WinUIEx.WindowManager.Get(window);
 
         if (option.Width.HasValue)
         {

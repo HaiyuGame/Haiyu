@@ -74,7 +74,7 @@ partial class KuroGameContextViewModelV2
                 return;
             }
         }
-        var result = await DialogManager.ShowUpdateGameDialogAsync(
+        var result = await WindowManager.Shell.DialogManager.ShowUpdateGameDialogAsync(
             this.GameContext.ContextName,
             UpdateGameType.ProDownload
         );
@@ -123,7 +123,7 @@ partial class KuroGameContextViewModelV2
     [RelayCommand]
     public async Task AdvanceGameAsync()
     {
-        var result = await DialogManager.ShowMessageDialog(new ShowDialogOption()
+        var result =  await WindowManager.Shell.DialogManager.ShowMessageDialog(new ShowDialogOption()
         {
             CloseText = LanguageService.GetStringByText("取消"),
             Context = LanguageService.GetStringByText("提前安装游戏文件之后，在最新版本开服之前无法正常启动游戏，请确认是否安装"),

@@ -4,11 +4,14 @@ namespace Haiyu.Pages.Dialogs;
 
 public sealed partial class DeleteFileDialog : ContentDialog,IDialog
 {
-    public DeleteFileDialog()
+    public DeleteFileDialog(
+        DeleteFileViewModel viewModel,
+        IThemeService themeService
+    )
     {
         InitializeComponent();
-        this.ViewModel = Instance.Host.Services.GetRequiredService<DeleteFileViewModel>();
-        this.RequestedTheme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
+        ViewModel = viewModel;
+        RequestedTheme = themeService.CurrentTheme;
     }
 
     public DeleteFileViewModel ViewModel { get; set; }

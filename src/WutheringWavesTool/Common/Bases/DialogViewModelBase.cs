@@ -1,37 +1,38 @@
-using Haiyu.Services.DialogServices;
-using Waves.Core.Services;
-
 namespace Haiyu.Common.Bases;
 
 public abstract partial class DialogViewModelBase : ViewModelBase
 {
-    public DialogViewModelBase(
-        [FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager
-    )
+    private readonly DialogSession? _dialogSession;
+
+    protected DialogViewModelBase(DialogSession dialogSession)
     {
-        DialogManager = dialogManager;
-        this.Logger = Instance.Host.Services.GetKeyedService<LoggerService>("AppLog");
+        _dialogSession = dialogSession;
     }
 
-    public DialogViewModelBase()
-    {
-        DialogManager = Instance.Host.Services.GetRequiredKeyedService<IDialogManager>(nameof(MainDialogService));
-        this.Logger = Instance.Host.Services.GetKeyedService<LoggerService>("AppLog");
-    }
-
-    public ContentDialogResult? Result { get; set; }
-    public IDialogManager DialogManager { get; }
-    public LoggerService Logger { get; }
+    public object? Result { get; set; }
 
     [RelayCommand]
-    protected async Task Close()
+    protected Task Close()
     {
-        if (Result == null)
-            this.Result = ContentDialogResult.None;
+        return CloseAsync(Result ?? ContentDialogResult.None);
+    }
+
+    protected async Task CloseAsync(object? result = null)
+    {
+        Result = result;
+
         await BeforeCloseAsync();
         BeforeClose();
-        DialogManager.CloseDialog();
-        Dispose();
+
+        if (_dialogSession is not null)
+        {
+            _dialogSession.Close(result);
+        }
+        else
+        {
+            Dispose();
+        }
+
         AfterClose();
         await AfterCloseAsync();
     }
@@ -40,6 +41,7 @@ public abstract partial class DialogViewModelBase : ViewModelBase
 
     public virtual void AfterClose() { }
 
-    public async virtual Task BeforeCloseAsync() { }
-    public async virtual Task AfterCloseAsync() { }
+    public virtual Task BeforeCloseAsync() => Task.CompletedTask;
+
+    public virtual Task AfterCloseAsync() => Task.CompletedTask;
 }

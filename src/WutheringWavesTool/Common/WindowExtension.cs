@@ -301,18 +301,16 @@ public static partial class LayerWindowHelper
 
 public static class NativeWindowHelper
 {
-    private const int WM_NCLBUTTONDBLCLK = 0x00A3; // Non-client left button double-click
-    private const int WM_SYSCOMMAND = 0x0112; // System command message
-    private const int SC_MAXIMIZE = 0xF030; // Maximize command
-    private const int WM_SIZE = 0x0005; // Resize message
-    private const int SIZE_MAXIMIZED = 2; // Maximized size
-    private const int WM_DPICHANGED = 0x02E0; // DPI change message
+    private const int WM_NCLBUTTONDBLCLK = 0x00A3; 
+    private const int WM_SYSCOMMAND = 0x0112;
+    private const int SC_MAXIMIZE = 0xF030;
+    private const int WM_SIZE = 0x0005;
+    private const int SIZE_MAXIMIZED = 2;
+    private const int WM_DPICHANGED = 0x02E0;
     private const int GWLP_WNDPROC = -4;
 
-    // Static field to hold the delegate, preventing it from being garbage-collected
     private static WndProcDelegate _currentWndProcDelegate;
 
-    // Delegate for the new window procedure
     private delegate IntPtr WndProcDelegate(IntPtr hwnd, uint msg, IntPtr wParam, IntPtr lParam);
 
     public static void ForceDisableMaximize(Window window, int? targetDipWidth = null, int? targetDipHeight = null)
@@ -329,23 +327,18 @@ public static class NativeWindowHelper
         IntPtr originalWndProc = GetWindowLongPtr(hwnd, GWLP_WNDPROC);
         if (originalWndProc == IntPtr.Zero)
         {
-            System.Diagnostics.Debug.WriteLine("Failed to retrieve the original WndProc.");
             return;
         }
 
         _currentWndProcDelegate = (wndHwnd, msg, wParam, lParam) =>
         {
-            // Suppress double-click maximize
             if (msg == WM_NCLBUTTONDBLCLK)
             {
-                System.Diagnostics.Debug.WriteLine("Double-click maximize suppressed.");
                 return IntPtr.Zero;
             }
 
-            // Suppress system maximize command (e.g., via keyboard shortcuts or title bar menu)
             if (msg == WM_SYSCOMMAND && wParam.ToInt32() == SC_MAXIMIZE)
             {
-                System.Diagnostics.Debug.WriteLine("Maximize via system command suppressed.");
                 return IntPtr.Zero;
             }
 
@@ -373,38 +366,27 @@ public static class NativeWindowHelper
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine("Invalid parameters in WndProc call.");
                     return IntPtr.Zero;
                 }
             }
             catch (Exception ex)
             {
-                // Handle exceptions to avoid crashing
-                System.Diagnostics.Debug.WriteLine($"Error in WndProc: {ex.Message}");
                 return IntPtr.Zero;
             }
         };
 
         try
         {
-            // Hook the new WndProc
             IntPtr result = SetWindowLongPtr(hwnd, GWLP_WNDPROC, Marshal.GetFunctionPointerForDelegate(_currentWndProcDelegate));
-            if (result == IntPtr.Zero)
-            {
-                System.Diagnostics.Debug.WriteLine($"Failed to set new WndProc. Error: {Marshal.GetLastWin32Error()}");
-            }
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Error hooking window procedure: {ex.Message}");
             return;
         }
 
-        // Prevent garbage collection of the delegate (redundant but safe)
         GC.KeepAlive(_currentWndProcDelegate);
     }
 
-    // Win32 API declarations
     [DllImport("user32.dll", SetLastError = true)]
     private static extern IntPtr CallWindowProc(IntPtr lpPrevWndFunc, IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
 

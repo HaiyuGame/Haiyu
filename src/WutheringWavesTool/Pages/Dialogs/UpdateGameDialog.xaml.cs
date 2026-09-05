@@ -7,11 +7,14 @@ namespace Haiyu.Pages.Dialogs;
 public sealed partial class UpdateGameDialog : ContentDialog,
             IResultDialog<UpdateGameResult>
 {
-    public UpdateGameDialog()
+    public UpdateGameDialog(
+        UpdateGameViewModel viewModel,
+        IThemeService themeService
+    )
     {
         InitializeComponent();
-        this.ViewModel = Instance.Host.Services.GetRequiredService<UpdateGameViewModel>();
-        this.RequestedTheme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
+        ViewModel = viewModel;
+        RequestedTheme = themeService.CurrentTheme;
     }
 
     public UpdateGameViewModel ViewModel { get; }

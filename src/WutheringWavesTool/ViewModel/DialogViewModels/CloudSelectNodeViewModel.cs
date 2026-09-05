@@ -3,11 +3,15 @@ using Waves.Core.Contracts.CloudGame;
 
 namespace Haiyu.ViewModel.DialogViewModels;
 
-public sealed partial class CloudSelectNodeViewModel:DialogViewModelBase
+public sealed partial class CloudSelectNodeViewModel : DialogViewModelBase
 {
     public IWavesCloudGameService KuroCloudGameContext { get; }
 
-    public CloudSelectNodeViewModel(IWavesCloudGameService kuroCloudGameContext)
+    public CloudSelectNodeViewModel(
+        DialogSession dialogSession,
+        IWavesCloudGameService kuroCloudGameContext
+    )
+        : base(dialogSession)
     {
         this.KuroCloudGameContext = kuroCloudGameContext;
     }
@@ -18,27 +22,30 @@ public sealed partial class CloudSelectNodeViewModel:DialogViewModelBase
     [ObservableProperty]
     public partial ObservableCollection<CloudGameNode> Nodes { get; set; }
 
-
     [ObservableProperty]
     public partial CloudGameNode? SelectNode { get; set; }
 
-
-    public string Id { get;  set; }
+    public string Id { get; set; }
 
     [RelayCommand]
     private async Task RefreshNodesAsync()
     {
         IsRefreshing = true;
         var session = await this.KuroCloudGameContext.GetCurrentUserSession();
-        if(session == null)
+        if (session == null)
         {
             SelectNode = null;
-            await this.Close();
+            this.Result = new LauncheNodeConfig()
+            {
+                Nodes = Nodes,
+                SelectNode = SelectNode
+            };
+            await this.CloseAsync(Result);
             this.Dispose();
             return;
         }
 
-        var nodes = await KuroCloudGameContext.GetPingGameNodeAsync(session,this.CTS.Token);
+        var nodes = await KuroCloudGameContext.GetPingGameNodeAsync(session, this.CTS.Token);
         this.Nodes = new(nodes.Data);
         IsRefreshing = false;
     }

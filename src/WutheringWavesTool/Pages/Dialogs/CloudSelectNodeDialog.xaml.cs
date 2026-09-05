@@ -6,24 +6,18 @@ namespace Haiyu.Pages.Dialogs
 {
     public sealed partial class CloudSelectNodeDialog : ContentDialog,IResultDialog<LauncheNodeConfig>
     {
-        public CloudSelectNodeDialog()
-        {
-            InitializeComponent();
-            this.ViewModel = Instance.Host.Services.GetRequiredService<CloudSelectNodeViewModel>();
-
-            this.RequestedTheme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
-        }
+        public CloudSelectNodeDialog(
+        CloudSelectNodeViewModel viewModel,
+        IThemeService themeService
+    )
+    {
+        InitializeComponent();
+        ViewModel = viewModel;
+        RequestedTheme = themeService.CurrentTheme;
+    }
 
         public CloudSelectNodeViewModel ViewModel { get; }
 
-        public LauncheNodeConfig? GetResult()
-        {
-            return new()
-            {
-                Nodes = ViewModel.Nodes,
-                SelectNode = ViewModel.SelectNode
-            };
-        }
 
         public void SetData(object data)
         {

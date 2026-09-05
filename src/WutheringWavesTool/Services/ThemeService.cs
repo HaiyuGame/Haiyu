@@ -41,7 +41,7 @@ public sealed class ThemeService : IThemeService
 
     public void SetTheme(ElementTheme? theme = null)
     {
-        if(AppContext.App.MainWindow.Content is Page page)
+        if(AppContext.WindowManager.Shell.GetWindow().Content is Page page)
         {
             if (theme == null)
             {

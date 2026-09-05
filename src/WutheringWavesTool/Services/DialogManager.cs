@@ -7,9 +7,16 @@ using Waves.Core.Models.Enums;
 
 namespace Haiyu.Services;
 
-public abstract class DialogManager : IDialogManager
+public sealed class DialogManager : IDialogManager
 {
+    public DialogManager(IServiceScopeFactory serviceScopeFactory)
+    {
+        _serviceScopeFactory = serviceScopeFactory;
+    }
+
     ContentDialog? _dialog = null;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+
     public XamlRoot Root { get; private set; }
 
     public void RegisterRoot(XamlRoot root)
@@ -26,58 +33,63 @@ public abstract class DialogManager : IDialogManager
 
     public async Task ShowGameResourceV2DialogAsync(string contextName)
     {
-        if(_dialog != null)
-        {
-            _dialog.Hide();
-            _dialog = null;
-        }
-        var dialog = Instance.Host.Services.GetRequiredService<GameResourceDialogV2>();
-        dialog.SetData(contextName);
-        dialog.XamlRoot = this.Root;
-        this._dialog = dialog;
-        await _dialog.ShowAsync();
+        await this.ShowDialogAsync<GameResourceDialogV2>(contextName);
     }
 
-    public async Task ShowDialogAsync<T>()
+    public async Task<object?> ShowDialogAsync<T>(object data = null)
         where T : ContentDialog, IDialog
     {
-        if (_dialog != null)
+        var root = Root;
+
+        await using var dialogScope = this._serviceScopeFactory.CreateAsyncScope();
+
+        var provider = dialogScope.ServiceProvider;
+
+        var session = provider.GetRequiredService<DialogSession>();
+
+        var dialog = provider.GetRequiredService<T>();
+
+        dialog.XamlRoot = root;
+
+        if (data is not null)
         {
-            _dialog.Hide();
-            _dialog = null;
+            dialog.SetData(data);
         }
-        var dialog = Instance.Host.Services.GetRequiredService<T>();
-        dialog.XamlRoot = this.Root;
-        this._dialog = dialog;
-        var result = await _dialog.ShowAsync();
-        _dialog = null;
+
+        session.Attach(dialog);
+
+        _dialog = dialog;
+
+        try
+        {
+            var winuiResult = await dialog.ShowAsync();
+            if (!session.IsClosed)
+            {
+                session.Complete(winuiResult);
+            }
+
+            return session.Result;
+        }
+        finally
+        {
+            session.Detach();
+
+            if (ReferenceEquals(_dialog, dialog))
+            {
+                _dialog = null;
+            }
+        }
     }
 
-    public async Task ShowUpdateDialog(DisplayVersionInfo info) =>
+    public async Task ShowUpdateDialog(DisplayVersionInfo info)
+    {
         await ShowDialogAsync<UpdateAppDialog>(info);
-
-    public async Task<ContentDialogResult> ShowDialogAsync<T>(object data)
-        where T : ContentDialog, IDialog
-    {
-        if (_dialog != null)
-        {
-            _dialog.Hide();
-            _dialog = null;
-        }
-        var dialog = Instance.Host.Services.GetRequiredService<T>();
-        dialog.XamlRoot = this.Root;
-        dialog.SetData(data);
-        this._dialog = dialog;
-        var result = await _dialog.ShowAsync();
-        _dialog = null;
-        return result;
     }
 
     public void CloseDialog()
     {
         if (_dialog == null)
             return;
-        var context = _dialog.DataContext;
         _dialog.Hide();
         //if (context is ViewModelBase viewModel)
         //{
@@ -90,23 +102,15 @@ public abstract class DialogManager : IDialogManager
         //}
     }
 
-    public async Task<Result> GetDialogResultAsync<T, Result>(object? data)
-        where T : ContentDialog, IResultDialog<Result>, new()
-        where Result : new()
+    public async Task<Result?> GetDialogResultAsync<T, Result>(object? data)
+        where T : ContentDialog, IResultDialog<Result>
     {
-        if (_dialog != null)
+        var t = await this.ShowDialogAsync<T>(data);
+        if (t is Result r)
         {
-            _dialog.Hide();
-            _dialog = null;
+            return r;
         }
-        var dialog = Instance.Host.Services.GetRequiredService<T>();
-        dialog.XamlRoot = this.Root;
-        dialog.SetData(data);
-        this._dialog = dialog;
-        await _dialog.ShowAsync();
-        var result = ((IResultDialog<Result>)_dialog).GetResult();
-        _dialog = null;
-        return result;
+        return default;
     }
 
     public async Task<SelectDownloadFolderResult> ShowSelectGameFolderV2Async(Type type) =>
@@ -126,7 +130,7 @@ public abstract class DialogManager : IDialogManager
             new Tuple<string, UpdateGameType>(contextName, type)
         );
 
-    public async Task<UpdateGameResult> ShowUpdateGameDialogAsyncV2(
+    public async Task<UpdateGameResult?> ShowUpdateGameDialogAsyncV2(
         string contextName,
         UpdateGameType type
     ) =>
@@ -134,17 +138,16 @@ public abstract class DialogManager : IDialogManager
             new Tuple<string, UpdateGameType>(contextName, type)
         );
 
-
-    public async Task<LauncheNodeConfig> ShowSelectGameNodeAsync(string id)
-        =>await GetDialogResultAsync<CloudSelectNodeDialog, LauncheNodeConfig>(id);
+    public async Task<LauncheNodeConfig?> ShowSelectGameNodeAsync(string id) =>
+        await GetDialogResultAsync<CloudSelectNodeDialog, LauncheNodeConfig>(id);
 
     public async Task ShowDeleteGameResource(string contentName) =>
         await ShowDialogAsync<DeleteFileDialog>(contentName);
 
-    public async Task<SelectDownloadFolderResult> ShowSelectDownloadFolderV2Async(Type type) =>
+    public async Task<SelectDownloadFolderResult?> ShowSelectDownloadFolderV2Async(Type type) =>
         await GetDialogResultAsync<SelectDownoadGameDialogV2, SelectDownloadFolderResult>(type);
 
-    public async Task<CloseWindowResult> ShowCloseWindowResult() =>
+    public async Task<CloseWindowResult?> ShowCloseWindowResult() =>
         await GetDialogResultAsync<CloseDialog, CloseWindowResult>(null);
 
     public async Task ShowLocalUserManagerAsync() =>
@@ -156,9 +159,7 @@ public abstract class DialogManager : IDialogManager
     public async Task<QRScanResult> GetQRLoginResultAsync() =>
         await GetDialogResultAsync<QRLoginDialog, QRScanResult>(null);
 
-    public async Task<ContentDialogResult> ShowMessageDialog(
-        ShowDialogOption option
-    )
+    public async Task<ContentDialogResult> ShowMessageDialog(ShowDialogOption option)
     {
         if (_dialog != null)
         {
@@ -176,13 +177,17 @@ public abstract class DialogManager : IDialogManager
         {
             dialog.IsPrimaryButtonEnabled = false;
         }
-        dialog.CloseButtonText = option.CloseText ;
+        dialog.CloseButtonText = option.CloseText;
         dialog.RequestedTheme = Instance
             .Host.Services.GetRequiredService<IThemeService>()
             .CurrentTheme;
         dialog.IsSecondaryButtonEnabled = false;
         dialog.DefaultButton = ContentDialogButton.Close;
-        dialog.Content = new TextBlock() { Text = option.Context, TextWrapping = TextWrapping.Wrap };
+        dialog.Content = new TextBlock()
+        {
+            Text = option.Context,
+            TextWrapping = TextWrapping.Wrap,
+        };
         var result = await dialog.ShowAsync();
         this._dialog = null;
         return result;
@@ -193,7 +198,8 @@ public abstract class DialogManager : IDialogManager
 
     public async Task ShowWebGameDialogAsync() => await ShowDialogAsync<WebGameLogin>();
 
-    public async Task ShowCloudUserManagerDialogAsync() => await ShowDialogAsync<WavesCloudUserDialog>();
+    public async Task ShowCloudUserManagerDialogAsync() =>
+        await ShowDialogAsync<WavesCloudUserDialog>();
 
     public async Task ShowGameLauncherChacheDialogAsync(GameLauncherCacheArgs args) =>
         await ShowDialogAsync<GameLauncherCacheManager>(args);
@@ -210,10 +216,12 @@ public abstract class DialogManager : IDialogManager
         return result;
     }
 
-    public async Task ShowWebViewCabManangerAsync() => await ShowDialogAsync<WebViewCabManagerDialog>();
+    public async Task ShowWebViewCabManangerAsync() =>
+        await ShowDialogAsync<WebViewCabManagerDialog>();
 
     public async Task ShowWavesCloudSettingAsync(GameType type) =>
         await ShowDialogAsync<CloudGameSettingDialog>(type);
+
     public async Task ShowGameLocalTokenAsync(string contextName)
     {
         await this.ShowDialogAsync<LocalGameTokenDialog>(contextName);

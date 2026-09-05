@@ -7,11 +7,14 @@ namespace Haiyu.Pages.Dialogs;
 
 public sealed partial class UpdateAppDialog : ContentDialog,IDialog
 {
-    public UpdateAppDialog()
+    public UpdateAppDialog(
+        UpdateAppViewModel viewModel,
+        IThemeService themeService
+    )
     {
         InitializeComponent();
-        this.RequestedTheme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
-        this.ViewModel = Instance.Host.Services.GetRequiredService<UpdateAppViewModel>();
+        ViewModel = viewModel;
+        RequestedTheme = themeService.CurrentTheme;
     }
 
     public UpdateAppViewModel ViewModel { get; }

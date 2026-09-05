@@ -5,12 +5,15 @@ namespace Haiyu.Pages.Dialogs
 {
     public sealed partial class GameLauncherCacheManager : ContentDialog, IDialog
     {
-        public GameLauncherCacheManager()
-        {
-            InitializeComponent();
-            this.ViewModel = Instance.GetService<GameLauncherCacheViewModel>();
-            this.RequestedTheme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
-        }
+        public GameLauncherCacheManager(
+        GameLauncherCacheViewModel viewModel,
+        IThemeService themeService
+    )
+    {
+        InitializeComponent();
+        ViewModel = viewModel;
+        RequestedTheme = themeService.CurrentTheme;
+    }
 
         public GameLauncherCacheViewModel ViewModel { get; }
 

@@ -1,7 +1,7 @@
 using System.Security.Principal;
-using Haiyu.Plugin.Extensions;
 using Haiyu.Common.KuroWebView;
 using Haiyu.Models.Wrapper;
+using Haiyu.Plugin.Extensions;
 using Microsoft.WindowsAppSDK;
 using Waves.Core.Common;
 using Waves.Settings;
@@ -30,7 +30,8 @@ partial class SettingViewModel
     public partial WebViewRuntimeWrapper? WebViewRuntimeItem { get; set; }
 
     [ObservableProperty]
-    public partial ObservableCollection<WebViewRuntimeWrapper> WebViewRuntimeOptions { get; set; } = [];
+    public partial ObservableCollection<WebViewRuntimeWrapper> WebViewRuntimeOptions { get; set; } =
+    [];
 
     private bool _webViewRuntimeLoaded;
 
@@ -45,16 +46,11 @@ partial class SettingViewModel
     private async Task LoadWebViewRuntimeModeAsync()
     {
         var mode = await AppSettings.GetWebViewRuntimeModeAsync(CTS.Token) ?? "Evergreen";
-        var evergreen =
-            CoreWebView2Environment.GetAvailableBrowserVersionString() ?? "未安装";
+        var evergreen = CoreWebView2Environment.GetAvailableBrowserVersionString() ?? "未安装";
 
         var options = new ObservableCollection<WebViewRuntimeWrapper>
         {
-            new()
-            {
-                DisplayName = $"System（{evergreen}）",
-                RuntimePath = "Evergreen",
-            },
+            new() { DisplayName = $"System（{evergreen}）", RuntimePath = "Evergreen" },
         };
 
         foreach (var item in WebView2EnvironmentProvider.GetFixedRuntimeFolders())
@@ -89,11 +85,11 @@ partial class SettingViewModel
     {
         if (string.IsNullOrWhiteSpace(this.RpcToken))
         {
-            TipShow.ShowMessage(LanguageService.GetStringByText("密钥不能为空"), Symbol.Clear);
+            await WindowManager.Shell.TipShow.ShowMessageAsync(LanguageService.GetStringByText("密钥不能为空"), Symbol.Clear);
             return;
         }
         await RpcSettings.SetAuthTokenAsync(Md5Helper.ComputeMd532(RpcToken));
-        TipShow.ShowMessage(LanguageService.GetStringByText("密钥已经更新"), Symbol.Accept);
+        await WindowManager.Shell.TipShow.ShowMessageAsync(LanguageService.GetStringByText("密钥已经更新"), Symbol.Accept);
     }
 
     [RelayCommand]
@@ -141,7 +137,8 @@ partial class SettingViewModel
         {
             var saveDialog = await PickersService.GetFileSavePicker(
                 new List<string>() { ".lnk" },
-                "Haiyu"
+                "Haiyu",
+                WindowManager.Shell.GetWindow().GetWindowHandle()
             );
             if (saveDialog != null)
             {
@@ -154,25 +151,37 @@ partial class SettingViewModel
                     WindowsIdentity.GetCurrent().User!.Value
                 );
                 var haiyu = packages.Where(x => x.DisplayName.Contains("Haiyu")).FirstOrDefault();
-                if(haiyu == null)
+                if (haiyu == null)
                 {
-                    await TipShow.ShowMessageAsync(LanguageService.GetStringByText("当前应用程序为独立模式，无法创建桌面图标"), Symbol.Accept);
+                    await WindowManager.Shell.TipShow.ShowMessageAsync(
+                        LanguageService.GetStringByText("当前应用程序为独立模式，无法创建桌面图标"),
+                        Symbol.Accept
+                    );
                     return;
                 }
                 CreateUwpShortcut(saveDialog.Path, $"shell:AppsFolder\\{haiyu.Id.FamilyName}!App");
-                await TipShow.ShowMessageAsync(LanguageService.GetStringByText("桌面图标创建成功"), Symbol.Accept);
+                await WindowManager.Shell.TipShow.ShowMessageAsync(
+                    LanguageService.GetStringByText("桌面图标创建成功"),
+                    Symbol.Accept
+                );
             }
         }
         catch (Exception ex)
         {
-            await TipShow.ShowMessageAsync(LanguageService.FormatByText(LanguageService.GetStringByText("桌面图标创建异常:{0}"), ex.Message), Symbol.Clear);
+            await WindowManager.Shell.TipShow.ShowMessageAsync(
+                LanguageService.FormatByText(
+                    LanguageService.GetStringByText("桌面图标创建异常:{0}"),
+                    ex.Message
+                ),
+                Symbol.Clear
+            );
         }
     }
 
     [RelayCommand]
     async Task OpenWebViewCabDialog()
     {
-        await DialogManager.ShowWebViewCabManangerAsync();
+        await this.WindowManager.Shell.DialogManager.ShowWebViewCabManangerAsync();
         _webViewRuntimeLoaded = false;
         await LoadWebViewRuntimeModeAsync();
     }
@@ -208,7 +217,12 @@ partial class SettingViewModel
 
             // 3. 检查执行结果
             if (process.ExitCode != 0)
-                throw new Exception(LanguageService.FormatByText(LanguageService.GetStringByText("PowerShell执行失败: {0}"), error));
+                throw new Exception(
+                    LanguageService.FormatByText(
+                        LanguageService.GetStringByText("PowerShell执行失败: {0}"),
+                        error
+                    )
+                );
 
             return output.Trim();
         }

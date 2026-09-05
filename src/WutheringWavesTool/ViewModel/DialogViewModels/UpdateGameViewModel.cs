@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Haiyu.Models.Dialogs;
-using Haiyu.Services.DialogServices;
 using Waves.Core.Common;
 using Waves.Core.Helpers;
 using Waves.Core.Models.Enums;
@@ -12,12 +11,14 @@ namespace Haiyu.ViewModel.DialogViewModels;
 public sealed partial class UpdateGameViewModel : DialogViewModelBase
 {
     public UpdateGameViewModel(
-        [FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager,
-        IPickersService pickersService
+        DialogSession dialogSession,
+        IPickersService pickersService,
+        IWindowManager windowManager
     )
-        : base(dialogManager)
+        : base(dialogSession)
     {
         PickersService = pickersService;
+        _windowManager = windowManager;
     }
 
     public IGameContextV2 GameContext { get; private set; }
@@ -48,6 +49,7 @@ public sealed partial class UpdateGameViewModel : DialogViewModelBase
     public partial string DiffSavePath { get; set; }
 
     private string? _localPath;
+    private readonly IWindowManager _windowManager;
 
     [ObservableProperty]
     public partial string InvokeName { get; set; }
@@ -68,7 +70,9 @@ public sealed partial class UpdateGameViewModel : DialogViewModelBase
     [RelayCommand]
     async Task SelectDiffPath()
     {
-        var result = await PickersService.GetFolderPicker();
+        var result = await PickersService.GetFolderPicker(
+            _windowManager.Shell.GetWindow().GetWindowHandle()
+        );
         if (result == null)
             return;
 
@@ -83,7 +87,12 @@ public sealed partial class UpdateGameViewModel : DialogViewModelBase
         }
         if (rootDir == result.Path)
         {
-            WindowExtension.MessageBox(0, LanguageService.GetStringByText("不能选择磁盘根目录作为补丁下载目录！"), LanguageService.GetStringByText("警告"), 0);
+            WindowExtension.MessageBox(
+                0,
+                LanguageService.GetStringByText("不能选择磁盘根目录作为补丁下载目录！"),
+                LanguageService.GetStringByText("警告"),
+                0
+            );
             EnableContinue = false;
             return;
         }
@@ -91,7 +100,12 @@ public sealed partial class UpdateGameViewModel : DialogViewModelBase
         double freeSpaceGB = ByteConversion.BytesToGigabytes(driveInfo.TotalFreeSpace, 2);
         if (freeSpaceGB < PatcherFileSize)
         {
-            WindowExtension.MessageBox(0, LanguageService.GetStringByText("选择磁盘容量不足！"), LanguageService.GetStringByText("警告"), 0);
+            WindowExtension.MessageBox(
+                0,
+                LanguageService.GetStringByText("选择磁盘容量不足！"),
+                LanguageService.GetStringByText("警告"),
+                0
+            );
             EnableContinue = false;
             return;
         }
@@ -104,36 +118,51 @@ public sealed partial class UpdateGameViewModel : DialogViewModelBase
         string? localVersion = "";
         var launcher = await this.GameContext.GetGameLauncherSourceAsync(null, this.CTS.Token);
         #region 前置判断
-        if(this.InvokeType == UpdateGameType.UpdateGame)
+        if (this.InvokeType == UpdateGameType.UpdateGame)
         {
             if (launcher == null || launcher.ResourceDefault == null)
             {
-                WindowExtension.MessageBox(0, LanguageService.GetStringByText("游戏资源拉取失败！"), LanguageService.GetStringByText("错误"), 0);
+                WindowExtension.MessageBox(
+                    0,
+                    LanguageService.GetStringByText("游戏资源拉取失败！"),
+                    LanguageService.GetStringByText("错误"),
+                    0
+                );
                 await this.Close();
                 return;
             }
         }
         else
         {
-            if(launcher == null || launcher.Predownload == null)
+            if (launcher == null || launcher.Predownload == null)
             {
-                WindowExtension.MessageBox(0, LanguageService.GetStringByText("预下载资源拉取失败！"), LanguageService.GetStringByText("错误"), 0);
+                WindowExtension.MessageBox(
+                    0,
+                    LanguageService.GetStringByText("预下载资源拉取失败！"),
+                    LanguageService.GetStringByText("错误"),
+                    0
+                );
                 await this.Close();
                 return;
             }
         }
         #endregion
         _localPath = await this.GameContext.GameLocalConfig.GetConfigAsync(
-               GameLocalSettingName.GameLauncherBassFolder,
-               this.CTS.Token
-           );
+            GameLocalSettingName.GameLauncherBassFolder,
+            this.CTS.Token
+        );
         localVersion = await this.GameContext.GameLocalConfig.GetConfigAsync(
-                GameLocalSettingName.LocalGameVersion,
-                this.CTS.Token
-            );
-        if(localVersion == null)
+            GameLocalSettingName.LocalGameVersion,
+            this.CTS.Token
+        );
+        if (localVersion == null)
         {
-            WindowExtension.MessageBox(0, LanguageService.GetStringByText("本地游戏版本获取失败，请重启启动器后重新尝试"), LanguageService.GetStringByText("错误"), 0);
+            WindowExtension.MessageBox(
+                0,
+                LanguageService.GetStringByText("本地游戏版本获取失败，请重启启动器后重新尝试"),
+                LanguageService.GetStringByText("错误"),
+                0
+            );
             return;
         }
         LocalVersion = localVersion;
@@ -160,11 +189,13 @@ public sealed partial class UpdateGameViewModel : DialogViewModelBase
                 : launcher
                     .Predownload.Config.PatchConfig.Where(x => x.Version == localVersion)
                     .FirstOrDefault();
-        if(patche == null)
+        if (patche == null)
         {
             WindowExtension.MessageBox(
                 IntPtr.Zero,
-                LanguageService.GetStringByText("请联系开发者处理此问题：本地版本过于等于预下载版本，流程被打乱，无法进行预下载"),
+                LanguageService.GetStringByText(
+                    "请联系开发者处理此问题：本地版本过于等于预下载版本，流程被打乱，无法进行预下载"
+                ),
                 "Haiyu",
                 0
             );
@@ -192,9 +223,21 @@ public sealed partial class UpdateGameViewModel : DialogViewModelBase
         {
             this.DiskPipePoint = new ObservableCollection<object>()
             {
-                new PieData() { Name = LanguageService.GetStringByText("总容量"), Values = [totalSizeGB] },
-                new PieData() { Name = LanguageService.GetStringByText("已用容量"), Values = [usedSpaceGB] },
-                new PieData() { Name = LanguageService.GetStringByText("更新占用容量"), Values = [PatcherFileSize] },
+                new PieData()
+                {
+                    Name = LanguageService.GetStringByText("总容量"),
+                    Values = [totalSizeGB],
+                },
+                new PieData()
+                {
+                    Name = LanguageService.GetStringByText("已用容量"),
+                    Values = [usedSpaceGB],
+                },
+                new PieData()
+                {
+                    Name = LanguageService.GetStringByText("更新占用容量"),
+                    Values = [PatcherFileSize],
+                },
             };
         }
         FreeDiskSpace = freeSpaceGB;
@@ -227,7 +270,7 @@ public sealed partial class UpdateGameViewModel : DialogViewModelBase
     {
         this.GameContext = context;
         this.InvokeType = item2;
-        if(this.InvokeType == UpdateGameType.UpdateGame)
+        if (this.InvokeType == UpdateGameType.UpdateGame)
         {
             this.InvokeName = LanguageService.GetStringByText("更新游戏");
         }

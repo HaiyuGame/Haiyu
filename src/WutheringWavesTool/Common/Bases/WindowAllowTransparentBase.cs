@@ -1,4 +1,4 @@
-﻿using Windows.Win32;
+using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.WindowsAndMessaging;
 using Microsoft.UI;
@@ -14,7 +14,7 @@ public partial class WindowAllowTransparentBase : Window
 
     OverlappedPresenter? Overlapped => this.AppWindow.Presenter as OverlappedPresenter;
 
-    public WindowManager Manager => WindowManager.Get(this);
+    public WinUIEx.WindowManager Manager => WinUIEx.WindowManager.Get(this);
 
     private Windows.Win32.Foundation.HWND _handle; // 优化：私有字段加下划线命名规范
     private WINDOW_EX_STYLE WinExStyle

@@ -4,10 +4,10 @@ namespace Haiyu.Pages.Dialogs;
 
 public sealed partial class LoginDialog : ContentDialog, IDialog
 {
-    public LoginDialog()
+    public LoginDialog(LoginGameViewModel viewModel)
     {
         this.InitializeComponent();
-        this.ViewModel = Instance.Host.Services.GetRequiredService<LoginGameViewModel>();
+        this.ViewModel = viewModel;
 
         this.RequestedTheme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
     }

@@ -4,11 +4,14 @@ namespace Haiyu.Pages.Dialogs;
 
 public sealed partial class LocalGameTokenDialog : ContentDialog,IDialog
 {
-    public LocalGameTokenDialog()
+    public LocalGameTokenDialog(
+        LocalGameTokenViewModel viewModel,
+        IThemeService themeService
+    )
     {
         InitializeComponent();
-        this.ViewModel = Instance.Host.Services.GetRequiredService<LocalGameTokenViewModel>();
-        this.RequestedTheme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
+        ViewModel = viewModel;
+        RequestedTheme = themeService.CurrentTheme;
     }
 
 

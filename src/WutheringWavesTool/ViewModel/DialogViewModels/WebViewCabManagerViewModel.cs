@@ -1,5 +1,4 @@
 using Haiyu.Common.KuroWebView;
-using Haiyu.Services.DialogServices;
 
 namespace Haiyu.ViewModel.DialogViewModels;
 
@@ -8,24 +7,25 @@ namespace Haiyu.ViewModel.DialogViewModels;
 /// </summary>
 public partial class WebViewCabManagerViewModel : DialogViewModelBase
 {
+    private readonly IWindowManager _windowManager;
+
     public WebViewCabManagerViewModel(
-        [FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager,
+        DialogSession dialogSession,
         IPickersService pickersService,
         IAppContext<App> appContext,
-        ITipShow tipShow
+        IWindowManager windowManager
     )
-        : base(dialogManager)
+        : base(dialogSession)
     {
         PickersService = pickersService;
         AppContext = appContext;
-        TipShow = tipShow;
+        _windowManager = windowManager;
         Runtimes = [];
         RegisterMessager();
     }
 
     public IPickersService PickersService { get; }
     public IAppContext<App> AppContext { get; }
-    public ITipShow TipShow { get; }
 
     [ObservableProperty]
     public partial ObservableCollection<WebViewRuntimeWrapper> Runtimes { get; set; }
@@ -78,7 +78,10 @@ public partial class WebViewCabManagerViewModel : DialogViewModelBase
     [RelayCommand(CanExecute = nameof(CanOperate))]
     public async Task SelectCabFilesAsync()
     {
-        var cabFile = await PickersService.GetFileOpenPicker([".zip"]);
+        var cabFile = await PickersService.GetFileOpenPicker(
+            [".zip"],
+            this._windowManager.Shell.GetWindow().GetWindowHandle()
+        );
         if (cabFile is null || !File.Exists(cabFile.Path))
             return;
 
@@ -88,35 +91,28 @@ public partial class WebViewCabManagerViewModel : DialogViewModelBase
 
         try
         {
-            IProgress<double> progress = new Progress<double>(value =>
+            IProgress<double> progress = new Progress<double>(async value =>
             {
-                AppContext.TryInvoke(() =>
+                _windowManager.Shell.TryInvoke(() =>
                 {
                     ZipArchiveProgress = Math.Clamp(value * 100d, 0d, 100d);
                 });
             });
 
-            await ZipArchiveHelper.UnZipFileAsync(
-                cabFile.Path,
-                extractRoot,
-                progress,
-                CTS.Token
-            );
+            await ZipArchiveHelper.UnZipFileAsync(cabFile.Path, extractRoot, progress, CTS.Token);
 
             var runtimeFolder = FindRuntimeFolder(extractRoot);
             if (runtimeFolder is null)
             {
                 TryDeleteDirectory(extractRoot);
-                await TipShow.ShowMessageAsync(
-                    LanguageService.GetString(
-                        "WebViewEnv_NoFindExe"
-                    ),
+                await AppContext.WindowManager.Shell.TipShow.ShowMessageAsync(
+                    LanguageService.GetString("WebViewEnv_NoFindExe"),
                     Symbol.Clear
                 );
                 return;
             }
 
-            await TipShow.ShowMessageAsync(
+            await AppContext.WindowManager.Shell.TipShow.ShowMessageAsync(
                 LanguageService.GetString("WebViewEnv_ImportComplete"),
                 Symbol.Accept
             );
@@ -130,7 +126,7 @@ public partial class WebViewCabManagerViewModel : DialogViewModelBase
         {
             TryDeleteDirectory(extractRoot);
             Logger.WriteError($"导入 WebView 固定运行时失败: {ex}");
-            await TipShow.ShowMessageAsync(
+            await AppContext.WindowManager.Shell.TipShow.ShowMessageAsync(
                 LanguageService.FormatByText("导入失败: {0}", ex.Message),
                 Symbol.Clear
             );
@@ -148,7 +144,7 @@ public partial class WebViewCabManagerViewModel : DialogViewModelBase
         var selected = Runtimes.FirstOrDefault(x => x.IsSelect);
         if (selected is null)
         {
-            await TipShow.ShowMessageAsync(
+            await AppContext.WindowManager.Shell.TipShow.ShowMessageAsync(
                 LanguageService.GetString("请先选择一个 WebView 运行时"),
                 Symbol.Clear
             );
@@ -163,7 +159,7 @@ public partial class WebViewCabManagerViewModel : DialogViewModelBase
 
         await AppSettings.SetWebViewRuntimeModeAsync(selected.RuntimePath);
         CurrentVersion = selected.DisplayName;
-        await TipShow.ShowMessageAsync(
+        await AppContext.WindowManager.Shell.TipShow.ShowMessageAsync(
             LanguageService.GetString("WebViewEnv_ApplyComplete"),
             Symbol.Accept
         );
@@ -177,7 +173,7 @@ public partial class WebViewCabManagerViewModel : DialogViewModelBase
 
         if (!IsUnderFixRuntimeRoot(runtime.RuntimePath))
         {
-            await TipShow.ShowMessageAsync(
+            await AppContext.WindowManager.Shell.TipShow.ShowMessageAsync(
                 LanguageService.GetString("WebViewEnv_OnlyDeleteTip"),
                 Symbol.Clear
             );
@@ -207,7 +203,7 @@ public partial class WebViewCabManagerViewModel : DialogViewModelBase
             }
 
             await LoadLocalWebViewCabEnvironmentAsync();
-            await TipShow.ShowMessageAsync(
+            await AppContext.WindowManager.Shell.TipShow.ShowMessageAsync(
                 LanguageService.GetString("WebViewEnv_DeleteComplete"),
                 Symbol.Accept
             );
@@ -215,7 +211,7 @@ public partial class WebViewCabManagerViewModel : DialogViewModelBase
         catch (Exception ex)
         {
             Logger.WriteError($"删除 WebView 固定运行时失败: {ex}");
-            await TipShow.ShowMessageAsync(
+            await AppContext.WindowManager.Shell.TipShow.ShowMessageAsync(
                 LanguageService.FormatByText("WebViewEnv_DeleteError", ex.Message),
                 Symbol.Clear
             );
@@ -319,7 +315,6 @@ public partial class WebViewCabManagerViewModel : DialogViewModelBase
             // ignore cleanup failures
         }
     }
-
 
     public override void AfterClose()
     {

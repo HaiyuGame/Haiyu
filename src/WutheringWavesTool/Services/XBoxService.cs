@@ -15,7 +15,8 @@ public class XBoxService
     public XBoxController Controller { get; private set; }
 
     public XBoxConfig Config { get; }
-    public ITipShow TipShow { get; }
+    public IWindowManager WindowManager { get; }
+    public ITipShow TipShow => WindowManager.Shell.TipShow;
 
     private CancellationTokenSource? _cts;
     private Task? _pollTask;
@@ -29,11 +30,11 @@ public class XBoxService
     private bool _xPressed;
     private bool _bPressed;
 
-    public XBoxService(XBoxController xBoxController,XBoxConfig xBoxConfig,ITipShow tipShow)
+    public XBoxService(XBoxController xBoxController,XBoxConfig xBoxConfig,IWindowManager windowManager)
     {
         Controller = xBoxController;
         Config = xBoxConfig;
-        TipShow = tipShow;
+        WindowManager = windowManager;
     }
 
 

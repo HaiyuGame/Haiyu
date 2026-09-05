@@ -6,12 +6,15 @@ namespace Haiyu.Pages.Dialogs
 {
     public sealed partial class KuroGameSettingDialog : ContentDialog, IDialog
     {
-        public KuroGameSettingDialog()
-        {
-            InitializeComponent();
-            this.ViewModel = Instance.Host.Services.GetRequiredService<KuroGameSettingViewModel>();
-            this.RequestedTheme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
-        }
+        public KuroGameSettingDialog(
+        KuroGameSettingViewModel viewModel,
+        IThemeService themeService
+    )
+    {
+        InitializeComponent();
+        ViewModel = viewModel;
+        RequestedTheme = themeService.CurrentTheme;
+    }
 
         public KuroGameSettingViewModel ViewModel { get; }
 

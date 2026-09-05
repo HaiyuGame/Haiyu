@@ -1,3 +1,4 @@
+using Cacheing;
 using Haiyu.Helpers;
 using Haiyu.Pages.Communitys;
 using Haiyu.Pages.Toolkits;
@@ -5,9 +6,9 @@ using Haiyu.Plugin.Common;
 using Haiyu.Plugin.Contracts;
 using Haiyu.Plugin.Services;
 using Haiyu.ServiceHost;
-using Cacheing;
+using Haiyu.ServiceHost.Contracts;
+using Haiyu.ServiceHost.Services;
 using Haiyu.ServiceHost.XBox.Commons;
-using Haiyu.Services.DialogServices;
 using Haiyu.Services.Navigations.NavigationViewServices;
 using Haiyu.Services.Tasks;
 using Haiyu.ViewModel.Communitys;
@@ -25,10 +26,8 @@ using Waves.Api.Models.Wrappers;
 using Waves.Core.Contracts.CloudGame;
 using Waves.Core.Models;
 using Waves.Core.Services;
-using Waves.Settings;
 using Waves.Core.Services.CloudGameServices;
-using Haiyu.ServiceHost.Services;
-using Haiyu.ServiceHost.Contracts;
+using Waves.Settings;
 
 namespace Haiyu;
 
@@ -39,7 +38,11 @@ public static class Instance
     public static async Task InitServiceAsync()
     {
         EnsureMemoryPackFormatters();
-        Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder().RegisterCache().AppBuilder().Build();
+        Host = Microsoft
+            .Extensions.Hosting.Host.CreateDefaultBuilder()
+            .RegisterCache()
+            .AppBuilder()
+            .Build();
         _ = Task.Run(async () => await Host.StartAsync());
     }
 
@@ -168,14 +171,6 @@ public static class InstanceBuilderExtensions
                 #endregion
                     #region More
                     .AddTransient<IPageService, PageService>()
-                    .AddTransient<IPickersService>(serviceProvider => new NativePickersService(() =>
-                        WinRT.Interop.WindowNative.GetWindowHandle(
-                            serviceProvider.GetRequiredService<IAppContext<App>>().App.MainWindow
-                        )
-                    ))
-                    .AddSingleton<ITipShow, TipShow>()
-                    .AddKeyedTransient<ITipShow, PageTipShow>("Cache")
-                    .AddKeyedTransient<IDialogManager, MainDialogService>("Cache")
                     .AddSingleton<IWavesCloudGameService, WavesCloudGameService>()
                     .AddKeyedSingleton<IUpdateService, GithubUpdateService>("GitHub")
                     .AddKeyedSingleton<IUpdateService, MirrorUpdateService>("Mirror")
@@ -202,7 +197,7 @@ public static class InstanceBuilderExtensions
                     .AddSingleton<IWallpaperService, WallpaperService>(
                         (s) =>
                         {
-                            var service = new WallpaperService(s.GetRequiredService<ITipShow>());
+                            var service = new WallpaperService(s.GetRequiredService<IWindowManager>());
                             service.RegisterHostPath(AppSettings.WrallpaperFolder);
                             return service;
                         }
@@ -232,7 +227,7 @@ public static class InstanceBuilderExtensions
                     .AddTransient<IWavesPlayerCardCacheServices, WavesPlayerCardCacheServices>(
                         _ => new WavesPlayerCardCacheServices(AppSettings.WavesRecordFolder)
                     )
-                   .AddSingleton<ABIRuntimeService>()
+                    .AddSingleton<ABIRuntimeService>()
                     #endregion
                     #region Toolkit
                     .AddTransient<ToolkitPage>()
@@ -242,7 +237,13 @@ public static class InstanceBuilderExtensions
                     .AddTransient<MonitorToolPage>()
                     .AddTransient<MonitorToolViewModel>()
                     #endregion
-                    .AddKeyedSingleton<IDialogManager, MainDialogService>(nameof(MainDialogService))
+                    #region WindowContext
+                    .AddScoped<ITipShow, TipShow>()
+                    .AddScoped<IDialogManager, DialogManager>()
+                    .AddScoped<IPickersService, NativePickersService>()
+                    .AddScoped<DialogSession>()
+                    .AddSingleton<IWindowManager, Services.WindowManager>()
+                    #endregion
                     .AddKeyedSingleton<LoggerService>(
                         "AppLog",
                         (s, e) =>
@@ -253,9 +254,7 @@ public static class InstanceBuilderExtensions
                         }
                     )
                     #region Record
-                    .AddScoped<IDialogManager, ScopeDialogService>()
                     .AddScoped<ITipShow, TipShow>()
-                    .AddKeyedScoped<IPlayerRecordContext, PlayerRecordContext>("PlayerRecord")
                     .AddKeyedScoped<INavigationService, RecordNavigationService>(
                         nameof(RecordNavigationService)
                     )
@@ -265,7 +264,6 @@ public static class InstanceBuilderExtensions
                         nameof(GameRoilNavigationService)
                     )
                     #endregion
-                    
                     .AddGameContext();
             }
         );

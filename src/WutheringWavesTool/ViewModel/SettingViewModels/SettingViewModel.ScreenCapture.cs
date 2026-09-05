@@ -1,4 +1,4 @@
-﻿using Haiyu.Plugin.Extensions;
+using Haiyu.Plugin.Extensions;
 
 namespace Haiyu.ViewModel;
 
@@ -27,7 +27,7 @@ partial class SettingViewModel
     {
         AppSettings.SetCaptureModifierKeyAsync(value.Name).GetAwaiter().GetResult();
         var result = ScreenCaptureService.Register();
-        this.TipShow.ShowMessage(result.Item2, Symbol.Read);
+        this.AppContext.WindowManager.Shell.TipShow.ShowMessage(result.Item2, Symbol.Read);
     }
 
     partial void OnIsOnChanged(bool value)
@@ -40,7 +40,7 @@ partial class SettingViewModel
     {
         AppSettings.SetCaptureKeyAsync(value.Name).GetAwaiter().GetResult();
         var result = ScreenCaptureService.Register();
-        this.TipShow.ShowMessage(result.Item2, Symbol.Read);
+        this.AppContext.WindowManager.Shell.TipShow.ShowMessage(result.Item2, Symbol.Read);
     }
 
     public async Task InitCapture()
@@ -64,7 +64,7 @@ partial class SettingViewModel
         }
         catch (Exception ex)
         {
-            TipShow.ShowMessage(LanguageService.FormatByText(LanguageService.GetStringByText("注册失败{0}"), ex.Message), Symbol.Clear);
+            WindowManager.Shell.TipShow.ShowMessage(LanguageService.FormatByText(LanguageService.GetStringByText("注册失败{0}"), ex.Message), Symbol.Clear);
         }
     }
 }

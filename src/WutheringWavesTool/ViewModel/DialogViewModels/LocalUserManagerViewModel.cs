@@ -1,15 +1,15 @@
-using Haiyu.Services.DialogServices;
+
 
 namespace Haiyu.ViewModel.DialogViewModels;
 
 public sealed partial class LocalUserManagerViewModel : DialogViewModelBase
 {
     public LocalUserManagerViewModel(
-        [FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager,
+        DialogSession dialogSession,
         IKuroAccountService kuroAccountService,
         IKuroClient kruoClient
     )
-        : base(dialogManager)
+        : base(dialogSession)
     {
         KuroAccountService = kuroAccountService;
         KuroClient = kruoClient;
@@ -36,7 +36,7 @@ public sealed partial class LocalUserManagerViewModel : DialogViewModelBase
 
     private async void SetCurrentAccountMethod(object recipient, SetCurrentAccount message)
     {
-        this.KuroAccountService.SetCurrentUser(message.userId,true);
+        this.KuroAccountService.SetCurrentUser(message.userId, true);
         await RefreshAsync();
     }
 
@@ -68,7 +68,7 @@ public sealed partial class LocalUserManagerViewModel : DialogViewModelBase
                 );
                 if (value == null)
                     continue;
-                if(value.Success  == false)
+                if (value.Success == false)
                 {
                     await KuroAccountService.DeleteUserAsync(item.TokenId);
                     continue;

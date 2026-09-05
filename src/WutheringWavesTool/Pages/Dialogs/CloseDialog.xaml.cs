@@ -1,6 +1,5 @@
 using Haiyu.Common.Contracts;
 using Haiyu.Models.Dialogs;
-using Haiyu.Services.DialogServices;
 using Waves.Settings;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -8,24 +7,23 @@ using Waves.Settings;
 
 namespace Haiyu.Pages.Dialogs
 {
-    public sealed partial class CloseDialog : ContentDialog,
-            IResultDialog<CloseWindowResult>
+    public sealed partial class CloseDialog : ContentDialog, IResultDialog<CloseWindowResult>
     {
-        public CloseDialog()
+        public CloseDialog(DialogSession dialogSession)
         {
             this.InitializeComponent();
-            this.RequestedTheme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
+            this.RequestedTheme = Instance
+                .Host.Services.GetRequiredService<IThemeService>()
+                .CurrentTheme;
             this.AppSettings = Instance.Host.Services.GetRequiredService<AppSettings>();
+            DialogSession = dialogSession;
         }
 
-        private bool isExit = false, isMin = false;
+        private bool isExit = false,
+            isMin = false;
 
         public AppSettings AppSettings { get; }
-
-        public CloseWindowResult GetResult()
-        {
-            return new CloseWindowResult() { IsExit = this.isExit, IsMinTaskBar = this.isMin };
-        }
+        public DialogSession DialogSession { get; }
 
         private async void Min_Win(object sender, RoutedEventArgs e)
         {
@@ -35,7 +33,10 @@ namespace Haiyu.Pages.Dialogs
             }
             this.isExit = false;
             this.isMin = true;
-            Instance.Host.Services.GetRequiredKeyedService<IDialogManager>(nameof(MainDialogService)).CloseDialog();
+
+            DialogSession.Close(
+                new CloseWindowResult() { IsExit = this.isExit, IsMinTaskBar = this.isMin }
+            );
         }
 
         private async void Close_Win(object sender, RoutedEventArgs e)
@@ -46,11 +47,11 @@ namespace Haiyu.Pages.Dialogs
             }
             this.isExit = true;
             this.isMin = false;
-            Instance.Host.Services.GetRequiredKeyedService<IDialogManager>(nameof(MainDialogService)).CloseDialog();
+            DialogSession.Close(
+                new CloseWindowResult() { IsExit = this.isExit, IsMinTaskBar = this.isMin }
+            );
         }
 
-        public void SetData(object data)
-        {
-        }
+        public void SetData(object data) { }
     }
 }

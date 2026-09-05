@@ -11,15 +11,14 @@ public class WallpaperService : IWallpaperService
     private WallpaperShowType? mediaCacheType;
     private string? mediaFallbackUrl;
 
-    public WallpaperService(ITipShow tipShow)
+    public WallpaperService(IWindowManager windowManager)
     {
-        TipShow = tipShow;
+        WindowManager = windowManager;
     }
 
 
     public string BaseFolder { get; private set; }
     public Controls.ImageEx ImageHost { get; private set; }
-    public ITipShow TipShow { get; }
     public string NowHexValue { get; private set; }
 
     public void RegisterHostPath(string folder)
@@ -42,7 +41,7 @@ public class WallpaperService : IWallpaperService
         }
         catch (Exception ex)
         {
-            TipShow.ShowMessage(LanguageService.FormatByText(LanguageService.GetStringByText("图片路径或格式不合法,{0}"), ex.Message), Symbol.Pictures);
+            WindowManager.Shell.TipShow.ShowMessage(LanguageService.FormatByText(LanguageService.GetStringByText("图片路径或格式不合法,{0}"), ex.Message), Symbol.Pictures);
             return await Task.FromResult(true);
         }
     }
@@ -60,8 +59,7 @@ public class WallpaperService : IWallpaperService
         }
     }
     public ApplicationBackgroundControl Media { get; private set; }
-
-
+    public IWindowManager WindowManager { get; }
 
     public async IAsyncEnumerable<WallpaperModel> GetFilesAsync(
         [EnumeratorCancellation] CancellationToken token = default

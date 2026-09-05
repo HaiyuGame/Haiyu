@@ -1,4 +1,4 @@
-﻿using WinUIEx.Messaging;
+using WinUIEx.Messaging;
 
 namespace Haiyu.Controls;
 

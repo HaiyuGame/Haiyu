@@ -1,5 +1,5 @@
+using Haiyu.Common.WindowContext;
 using Haiyu.Pages.GamePages;
-using Haiyu.Services.DialogServices;
 using Haiyu.ViewModel.GameViewModels;
 using Haiyu.ViewModel.GameViewModels.GameContexts;
 using Waves.Api.Models.KuroClient;
@@ -20,9 +20,8 @@ public sealed partial class ShellViewModel : ViewModelBase
         [FromKeyedServices(nameof(HomeNavigationService))] INavigationService homeNavigationService,
         [FromKeyedServices(nameof(HomeNavigationViewService))]
             INavigationViewService homeNavigationViewService,
-        ITipShow tipShow,
         IAppContext<App> appContext,
-        [FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager,
+        IWindowManager windowManager,
         IViewFactorys viewFactorys,
         IWallpaperService wallpaperService,
         IKuroClient kuroClient,
@@ -33,9 +32,8 @@ public sealed partial class ShellViewModel : ViewModelBase
     {
         HomeNavigationService = homeNavigationService;
         HomeNavigationViewService = homeNavigationViewService;
-        TipShow = tipShow;
         AppContext = appContext;
-        DialogManager = dialogManager;
+        this.WindowManager = windowManager;
         ViewFactorys = viewFactorys;
         WallpaperService = wallpaperService;
         KuroClient = kuroClient;
@@ -66,11 +64,11 @@ public sealed partial class ShellViewModel : ViewModelBase
 
     public INavigationService HomeNavigationService { get; }
     public INavigationViewService HomeNavigationViewService { get; }
-    public ITipShow TipShow { get; }
     public IAppContext<App> AppContext { get; }
-    public IDialogManager DialogManager { get; }
     public IViewFactorys ViewFactorys { get; }
     public IWallpaperService WallpaperService { get; }
+
+    public IWindowManager WindowManager { get; }
     public IKuroClient KuroClient { get; }
     public IKuroAccountService KuroAccountService { get; }
     public SystemEventPublisher SystemEventPublisher { get; }
@@ -219,7 +217,7 @@ public sealed partial class ShellViewModel : ViewModelBase
     [RelayCommand]
     async Task ShowOpenLocalUser()
     {
-        await DialogManager.ShowLocalUserManagerAsync();
+        await WindowManager.Shell.DialogManager.ShowLocalUserManagerAsync();
     }
 
     [RelayCommand]
@@ -232,19 +230,19 @@ public sealed partial class ShellViewModel : ViewModelBase
     [RelayCommand]
     void Min()
     {
-        this.AppContext.Minimise();
+        this.WindowManager.Shell.Minimize();
     }
 
     [RelayCommand]
     void CloseWindow()
     {
-        this.AppContext.CloseAsync();
+        //this.AppContext.WindowManager.Shell.CloseAsync();
     }
 
     [RelayCommand]
     void ShowWindow()
     {
-        this.AppContext.App.MainWindow.Show();
+        this.AppContext.WindowManager.Shell.GetWindow().Show();
     }
 
     [RelayCommand]
@@ -270,19 +268,19 @@ public sealed partial class ShellViewModel : ViewModelBase
     [RelayCommand]
     async Task OpenScreenCapture()
     {
-        var result = await DialogManager.GetQRLoginResultAsync();
+        var result = await WindowManager.Shell.DialogManager.GetQRLoginResultAsync();
     }
 
     [RelayCommand]
     async Task Login()
     {
-        await DialogManager.ShowLoginDialogAsync();
+        await WindowManager.Shell.DialogManager.ShowLoginDialogAsync();
     }
 
     [RelayCommand]
     async Task LoginWebGame()
     {
-        await DialogManager.ShowWebGameDialogAsync();
+        await WindowManager.Shell.DialogManager.ShowWebGameDialogAsync();
     }
 
     private async void LoginMessangerMethod(object recipient, SelectUserMessanger message)
@@ -291,7 +289,10 @@ public sealed partial class ShellViewModel : ViewModelBase
         WavesCommunitySelectItemVisiblity = Visibility.Visible;
         await RefreshHeaderUser();
         await Task.Delay(800);
-        this.AppContext.MainTitle.UpDate();
+        if (this.WindowManager.Shell is ShellWindowContext shell)
+        {
+            shell.MainTitle.UpDate();
+        }
     }
 
     [RelayCommand]
@@ -305,7 +306,7 @@ public sealed partial class ShellViewModel : ViewModelBase
             var result = await KuroClient.GetWavesMineAsync(account, _id, this.CTS.Token);
             if (result == null)
             {
-                TipShow.ShowMessage(
+                WindowManager.Shell.TipShow.ShowMessage(
                     LanguageService.GetStringByText("检查一下你的网络"),
                     Symbol.Clear
                 );
@@ -313,14 +314,17 @@ public sealed partial class ShellViewModel : ViewModelBase
             }
             if (!result.Success)
             {
-                TipShow.ShowMessage(result.Msg, Symbol.Clear);
+                WindowManager.Shell.TipShow.ShowMessage(result.Msg, Symbol.Clear);
                 return;
             }
             HeaderUserName = result.Data.Mine.UserName;
             HeaderCover = result.Data.Mine.HeadUrl;
             GamerRoleListsVisibility = Visibility.Visible;
         }
-        this.AppContext.MainTitle.UpDate();
+        if (this.WindowManager.Shell is ShellWindowContext shell)
+        {
+            shell.MainTitle.UpDate();
+        }
     }
 
     [RelayCommand]
@@ -341,7 +345,10 @@ public sealed partial class ShellViewModel : ViewModelBase
             this.GamerRoleListsVisibility = Visibility.Visible;
             await this.RefreshHeaderUser();
         }
-        this.AppContext.MainTitle.UpDate();
+        if (this.WindowManager.Shell is ShellWindowContext shell)
+        {
+            shell.MainTitle.UpDate();
+        }
         await this.KuroAccountService.SetAutoUser();
         await RefreshHeaderUser();
         await OpenMain();
@@ -352,7 +359,7 @@ public sealed partial class ShellViewModel : ViewModelBase
 
     private async ValueTask OnMessageChanged(SystemMessagerModel model)
     {
-        await this.AppContext.TryInvokeAsync(async () =>
+        await this.WindowManager.Shell.TryInvokeAsync(async () =>
         {
             this.Messages.Add(model);
             if (Messages.Count > 50)
@@ -376,7 +383,7 @@ public sealed partial class ShellViewModel : ViewModelBase
         try
         {
             await Task.Delay(delay, ct);
-            await AppContext.TryInvokeAsync(async () => Messages.Remove(model));
+            await WindowManager.Shell.TryInvokeAsync(async () => Messages.Remove(model));
         }
         catch (OperationCanceledException) { }
     }
@@ -438,12 +445,12 @@ public sealed partial class ShellViewModel : ViewModelBase
         catch (Exception ex)
         {
             SystemEventMessager.Publish(
-                    new SystemMessagerModel()
-                    {
-                        Message = LanguageService.GetString("Code_KuroCoinFetchFailed")!,
-                        Delay = TimeSpan.FromSeconds(3).TotalSeconds,
-                    }
-                );
+                new SystemMessagerModel()
+                {
+                    Message = LanguageService.GetString("Code_KuroCoinFetchFailed")!,
+                    Delay = TimeSpan.FromSeconds(3).TotalSeconds,
+                }
+            );
             this.Logger.WriteError(ex.Message + ex.StackTrace);
             return;
         }

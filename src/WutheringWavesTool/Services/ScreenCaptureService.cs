@@ -13,11 +13,13 @@ public class ScreenCaptureService : IScreenCaptureService
     public IAppContext<App> AppContext { get; }
     public AppSettings AppSettings { get; }
 
-    public ScreenCaptureService(IAppContext<App> appContext,AppSettings appSettings)
+    public ScreenCaptureService(IAppContext<App> appContext, AppSettings appSettings)
     {
         AppContext = appContext;
         AppSettings = appSettings;
-        _monitor = new WinUIEx.Messaging.WindowMessageMonitor(AppContext.App.MainWindow);
+        _monitor = new WinUIEx.Messaging.WindowMessageMonitor(
+            AppContext.WindowManager.Shell.GetWindow()
+        );
         _monitor.WindowMessageReceived += Monitor_WindowMessageReceived;
     }
 
@@ -35,7 +37,11 @@ public class ScreenCaptureService : IScreenCaptureService
         }
         else
         {
-            modifier = ModifierKey.GetDefault().Where(x => x.Name == captureModifierKey).FirstOrDefault()?.Value;
+            modifier = ModifierKey
+                .GetDefault()
+                .Where(x => x.Name == captureModifierKey)
+                .FirstOrDefault()
+                ?.Value;
             key = Keys.GetDefault().Where(x => x.Name == captureKey).FirstOrDefault()?.Value;
         }
         if (modifier == null || key == null)
@@ -43,15 +49,26 @@ public class ScreenCaptureService : IScreenCaptureService
             return (false, LanguageService.GetStringByText("热键失效！"));
         }
         bool success = Haiyu.Plugin.Extensions.NativeMethods.RegisterHotKey(
-               AppContext.App.MainWindow.GetWindowHandle(),
-               HOTKEY_ID,
-               modifier.Value,
-               key.Value
-           );
-        return (false, LanguageService.FormatByText(LanguageService.GetStringByText("快捷键注册")) + (success ? LanguageService.GetStringByText("成功") : LanguageService.GetStringByText("失败")));
+            AppContext.WindowManager.Shell.GetWindow().GetWindowHandle(),
+            HOTKEY_ID,
+            modifier.Value,
+            key.Value
+        );
+        return (
+            false,
+            LanguageService.FormatByText(LanguageService.GetStringByText("快捷键注册"))
+                + (
+                    success
+                        ? LanguageService.GetStringByText("成功")
+                        : LanguageService.GetStringByText("失败")
+                )
+        );
     }
 
-    private void Monitor_WindowMessageReceived(object sender, WinUIEx.Messaging.WindowMessageEventArgs e)
+    private void Monitor_WindowMessageReceived(
+        object sender,
+        WinUIEx.Messaging.WindowMessageEventArgs e
+    )
     {
         if (e.Message.MessageId == 0x0312)
         {
@@ -67,7 +84,7 @@ public class ScreenCaptureService : IScreenCaptureService
     private async Task Capture()
     {
         int width,
-                height;
+            height;
         byte[] rawPixels = ScreenCapture.CaptureScreenPixels(out width, out height);
         await ScreenCapture.SaveRawPixelsToFileAsync(
             rawPixels,
@@ -80,6 +97,9 @@ public class ScreenCaptureService : IScreenCaptureService
 
     public void Unregister()
     {
-        Haiyu.Plugin.Extensions.NativeMethods.UnregisterHotKey(AppContext.App.MainWindow.GetWindowHandle(), HOTKEY_ID);
+        Haiyu.Plugin.Extensions.NativeMethods.UnregisterHotKey(
+            AppContext.WindowManager.Shell.GetWindow().GetWindowHandle(),
+            HOTKEY_ID
+        );
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Haiyu.Common.Bases;
+namespace Haiyu.Common.Bases;
 
 public partial class WindowModelBase : Window
 {
@@ -11,7 +11,7 @@ public partial class WindowModelBase : Window
 
     OverlappedPresenter? Overlapped => this.AppWindow.Presenter as OverlappedPresenter;
 
-    public WindowManager Manager => WindowManager.Get(this);
+    public WinUIEx.WindowManager Manager => WinUIEx.WindowManager.Get(this);
 
     public WindowModelBase(nint value, WindowsOption? windowsOption = null)
     {

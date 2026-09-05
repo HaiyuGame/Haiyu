@@ -14,16 +14,21 @@ public interface IDialogManager
     public void RegisterRoot(XamlRoot root);
     public Task ShowLoginDialogAsync();
     public Task<Result> GetDialogResultAsync<T, Result>(object? data)
-        where T : ContentDialog, IResultDialog<Result>, new()
-        where Result : new();
+        where T : ContentDialog, IResultDialog<Result>;
     public Task ShowLocalUserManagerAsync();
     public Task ShowUpdateDialog(DisplayVersionInfo info);
     public Task<SelectDownloadFolderResult> ShowSelectGameFolderV2Async(Type type);
     public Task<SelectDownloadFolderResult> ShowSelectDownloadFolderV2Async(Type type);
     public Task<CloseWindowResult> ShowCloseWindowResult();
     public Task<QRScanResult> GetQRLoginResultAsync();
-    public Task<UpdateGameResult> ShowUpdateGameDialogAsync(string contextName, UpdateGameType type);
-    public Task<UpdateGameResult> ShowUpdateGameDialogAsyncV2(string contextName, UpdateGameType type);
+    public Task<UpdateGameResult> ShowUpdateGameDialogAsync(
+        string contextName,
+        UpdateGameType type
+    );
+    public Task<UpdateGameResult> ShowUpdateGameDialogAsyncV2(
+        string contextName,
+        UpdateGameType type
+    );
     public Task<LauncheNodeConfig> ShowSelectGameNodeAsync(string id);
     public Task ShowWavesCloudSettingAsync(GameType ype);
 
@@ -41,7 +46,6 @@ public interface IDialogManager
     Task<ContentDialogResult> ShowOKDialogAsync(string header, string content);
     Task ShowGameSettingAsync(string contextName);
     Task ShowGameEnhancedDialogAsync();
-
 
     Task ShowGameLocalTokenAsync(string contextName);
 }

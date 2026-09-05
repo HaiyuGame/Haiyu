@@ -351,6 +351,7 @@
 	<ItemGroup>
 		<Folder Include="Assets\GameAssets\Punish\" />
 		<Folder Include="Assets\Languages\" />
+		<Folder Include="Services\DialogServices\" />
 	</ItemGroup>
 	<PropertyGroup Label="Globals">
 	  <GenerateTemporaryStoreCertificate>True</GenerateTemporaryStoreCertificate>

@@ -27,13 +27,14 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
     private string? _lastReadableResponseRequestId;
     private Dictionary<string, object?>? _requestHeader;
 
-    public AutoKuroTokenViewModel(IPickersService pickersService)
+    public AutoKuroTokenViewModel(IPickersService pickersService,IWindowManager windowManager)
     {
         PickerService = pickersService;
+        WindowManager = windowManager;
     }
 
     public IPickersService PickerService { get; }
-
+    public IWindowManager WindowManager { get; }
     public Window? Window { get; internal set; }
 
     [ObservableProperty]
@@ -69,7 +70,10 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
     [RelayCommand]
     public async Task SelectAdbPathAsync()
     {
-        var openFile = await PickerService.GetFileOpenPicker([".exe"]);
+        var openFile = await PickerService.GetFileOpenPicker(
+            [".exe"],
+            this.WindowManager.Shell.GetWindow().GetWindowHandle()
+        );
         if (
             openFile is null
             || !openFile.Path.Contains("adb.exe", StringComparison.OrdinalIgnoreCase)

@@ -5,13 +5,14 @@ namespace Haiyu.Pages.Dialogs;
 
 public sealed partial class GameEnhancedDialog : ContentDialog, IDialog
 {
-    public GameEnhancedDialog()
+    public GameEnhancedDialog(
+        GameEnhancedViewModel viewModel,
+        IThemeService themeService
+    )
     {
         InitializeComponent();
-        this.ViewModel = Instance.Host.Services.GetRequiredService<GameEnhancedViewModel>();
-        this.RequestedTheme = Instance
-            .Host.Services.GetRequiredService<IThemeService>()
-            .CurrentTheme;
+        ViewModel = viewModel;
+        RequestedTheme = themeService.CurrentTheme;
     }
 
     public GameEnhancedViewModel ViewModel { get; }

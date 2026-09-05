@@ -119,13 +119,14 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
     {
         try
         {
-            var picker = await PickersService.GetFolderPicker();
-
-            if (picker == null)
-                return;
-
-            var files = picker.Path;
-            await ImportDefaultFolderAsync(files);
+            //TODO 后续修改
+            //var picker = await PickersService.GetFolderPicker();
+            //
+            //if (picker == null)
+            //    return;
+            //
+            //var files = picker.Path;
+            //await ImportDefaultFolderAsync(files);
         }
         catch (Exception ex)
         {

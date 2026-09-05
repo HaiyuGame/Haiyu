@@ -2,7 +2,6 @@ using System.Threading.Tasks;
 using Haiyu.ServiceHost;
 using Haiyu.ServiceHost.XBox.Commons;
 using Haiyu.Services;
-using Haiyu.Services.DialogServices;
 using Waves.Settings;
 
 namespace Haiyu.ViewModel.DialogViewModels;
@@ -11,17 +10,14 @@ public sealed partial class GameEnhancedViewModel : DialogViewModelBase
 {
     public XBoxService XBoxService { get; }
     public XBoxConfig XboxConfig { get; }
-    public ITipShow TipShow { get; }
 
     public GameEnhancedViewModel(
-        [FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager,
+        DialogSession dialogSession,
         XBoxService xboxService,
-        XBoxConfig xBoxConfig,
-        ITipShow tipShow
+        XBoxConfig xBoxConfig
     )
-        : base(dialogManager)
+        : base(dialogSession)
     {
-        TipShow = tipShow;
         this.XBoxService = xboxService;
         XboxConfig = xBoxConfig;
     }

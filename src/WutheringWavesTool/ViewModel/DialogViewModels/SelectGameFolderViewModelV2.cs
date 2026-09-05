@@ -1,5 +1,4 @@
 using System.Text.RegularExpressions;
-using Haiyu.Services.DialogServices;
 using Microsoft.UI.Xaml.Shapes;
 
 namespace Haiyu.ViewModel.DialogViewModels;
@@ -7,12 +6,14 @@ namespace Haiyu.ViewModel.DialogViewModels;
 public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
 {
     public SelectGameFolderViewModelV2(
-        [FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager,
-        IPickersService pickersService
+        DialogSession dialogSession,
+        IPickersService pickersService,
+        IWindowManager windowManager
     )
-        : base(dialogManager)
+        : base(dialogSession)
     {
         PickersService = pickersService;
+        WindowManager = windowManager;
     }
 
     public IGameContextV2 GameContext { get; private set; }
@@ -21,7 +22,8 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
     public partial string ExePath { get; set; }
 
     [ObservableProperty]
-    public partial string TipMessage { get; set; } = LanguageService.GetStringByText("选择目标程序，以查看驱动器详情");
+    public partial string TipMessage { get; set; } =
+        LanguageService.GetStringByText("选择目标程序，以查看驱动器详情");
 
     [ObservableProperty]
     public partial bool IsVerify { get; set; }
@@ -40,12 +42,16 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
     [ObservableProperty]
     public partial double MaxValue { get; set; }
     public IPickersService PickersService { get; }
+    public IWindowManager WindowManager { get; }
     public GameLauncherSource? Launcher { get; internal set; }
 
     [RelayCommand]
     async Task SelectGameProgram()
     {
-        var exe = await PickersService.GetFileOpenPicker([".exe"]);
+        var exe = await PickersService.GetFileOpenPicker(
+            [".exe"],
+            WindowManager.Shell.GetWindow().GetWindowHandle()
+        );
         if (exe == null)
             return;
         if (System.IO.Path.GetFileName(exe.Path) != GameContext.Config.GameExeName)
@@ -71,14 +77,19 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
 
         if (driveInfo == null)
         {
-            TipMessage = LanguageService.FormatByText(LanguageService.GetStringByText("无法找到对应驱动器: {0}"), rootPath);
+            TipMessage = LanguageService.FormatByText(
+                LanguageService.GetStringByText("无法找到对应驱动器: {0}"),
+                rootPath
+            );
             return;
         }
 
         Launcher = await this.GameContext.GetGameLauncherSourceAsync(null, this.CTS.Token);
         if (Launcher == null)
         {
-            TipMessage = LanguageService.FormatByText(LanguageService.GetStringByText("游戏数据拉取失败"));
+            TipMessage = LanguageService.FormatByText(
+                LanguageService.GetStringByText("游戏数据拉取失败")
+            );
             return;
         }
 
@@ -108,12 +119,11 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
         IsVerify = true;
     }
 
-
     [RelayCommand]
-    void StartVerify()
+    async Task StartVerify()
     {
         this.Result = ContentDialogResult.Primary;
-        this.DialogManager.CloseDialog();
+        await this.Close();
     }
 
     [RelayCommand]
@@ -157,25 +167,27 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
         )
             return;
         await this.GameContext.GameLocalConfig.SaveConfigAsync(
-                GameLocalSettingName.LocalGameVersion,
-                SelectedVersion
-            );
+            GameLocalSettingName.LocalGameVersion,
+            SelectedVersion
+        );
         await this.GameContext.GameLocalConfig.SaveConfigAsync(
-                GameLocalSettingName.GameLauncherBassFolder,
-                folder
-            );
+            GameLocalSettingName.GameLauncherBassFolder,
+            folder
+        );
         await this.GameContext.GameLocalConfig.SaveConfigAsync(
-                GameLocalSettingName.LocalGameUpdateing,
-                "False"
-            );
+            GameLocalSettingName.LocalGameUpdateing,
+            "False"
+        );
         await this.GameContext.GameLocalConfig.SaveConfigAsync(
-                GameLocalSettingName.GameLauncherBassProgram,
-                ExePath
-            );
-        this.GameContext.GameEventPublisher.Publish(new GameContextOutputArgs()
-        {
-            Type = Waves.Core.Models.Enums.GameContextActionType.None
-        });
+            GameLocalSettingName.GameLauncherBassProgram,
+            ExePath
+        );
+        this.GameContext.GameEventPublisher.Publish(
+            new GameContextOutputArgs()
+            {
+                Type = Waves.Core.Models.Enums.GameContextActionType.None,
+            }
+        );
         await this.Close();
     }
 

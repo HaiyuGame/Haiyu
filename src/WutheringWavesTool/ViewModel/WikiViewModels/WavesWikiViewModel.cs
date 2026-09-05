@@ -48,6 +48,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase, IHaiyuCacheOwner
         IKuroClient kuroClient,
         IKuroAccountService kuroAccountService,
         IHaiyuMemoryCacheService haiyuMemoryCacheService
+        
     )
     {
         this.Messenger.Register<SelectUserMessanger>(this, LoginMessangerMethod);
@@ -144,7 +145,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase, IHaiyuCacheOwner
                     }
                     else
                     {
-                        TipShow.ShowMessage(
+                        AppContext.WindowManager.Shell.TipShow.ShowMessage(
                             LanguageService.GetStringByText(
                                 "获取卡池信息出现了不可预料的情况，请确认官方Wiki显示是否正常"
                             ),
@@ -154,7 +155,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase, IHaiyuCacheOwner
                 }
                 else
                 {
-                    TipShow.ShowMessage(
+                    AppContext.WindowManager.Shell.TipShow.ShowMessage(
                         LanguageService.FormatByText(
                             LanguageService.GetStringByText(
                                 "获取数据失败，请检查网络或重启应用"
@@ -293,7 +294,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase, IHaiyuCacheOwner
                 );
                 if (result.Code != 0 || result.Result == null)
                 {
-                    TipShow.ShowMessage(
+                    AppContext.WindowManager.Shell.TipShow.ShowMessage(
                         LanguageService.FormatByText(
                             LanguageService.GetStringByText("获取数据失败，请检查网络或重启应用")
                         ),
@@ -314,7 +315,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase, IHaiyuCacheOwner
         {
             if (!IsAlive)
                 return;
-            TipShow.ShowMessage(
+            AppContext.WindowManager.Shell.TipShow.ShowMessage(
                 LanguageService.FormatByText(
                     LanguageService.GetStringByText("刷新失败:{0}"),
                     ex.Message

@@ -1,6 +1,5 @@
 using Haiyu.Models.Settings;
 using Haiyu.Plugin.Common;
-using Haiyu.Services.DialogServices;
 using Haiyu.ViewModel.OOBEViewModels;
 using Waves.Core.Helpers;
 using Windows.ApplicationModel.DataTransfer;
@@ -11,12 +10,11 @@ namespace Haiyu.ViewModel;
 public sealed partial class SettingViewModel : ViewModelBase
 {
     public SettingViewModel(
-        [FromKeyedServices(nameof(MainDialogService))] IDialogManager dialogManager,
+        IWindowManager windowManager,
         IKuroClient wavesClient,
         IKuroAccountService accountService,
         IAppContext<App> appContext,
         IViewFactorys viewFactorys,
-        ITipShow tipShow,
         IScreenCaptureService screenCaptureService,
         IPickersService pickersService,
         IThemeService themeService,
@@ -25,12 +23,11 @@ public sealed partial class SettingViewModel : ViewModelBase
         RpcSettings rpcSettings
     )
     {
-        DialogManager = dialogManager;
+        WindowManager = windowManager;
         WavesClient = wavesClient;
         AccountService = accountService;
         AppContext = appContext;
         ViewFactorys = viewFactorys;
-        TipShow = tipShow;
         ScreenCaptureService = screenCaptureService;
         PickersService = pickersService;
         ThemeService = themeService;
@@ -53,12 +50,11 @@ public sealed partial class SettingViewModel : ViewModelBase
         Clipboard.SetContent(package);
     }
 
-    public IDialogManager DialogManager { get; }
+    public IWindowManager WindowManager { get; }
     public IKuroClient WavesClient { get; }
     public IKuroAccountService AccountService { get; }
     public IAppContext<App> AppContext { get; }
     public IViewFactorys ViewFactorys { get; }
-    public ITipShow TipShow { get; }
     public IScreenCaptureService ScreenCaptureService { get; }
     public IPickersService PickersService { get; }
     public IThemeService ThemeService { get; }

@@ -9,8 +9,11 @@ namespace Haiyu.ViewModel.GameViewModels.GameContexts;
 
 public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
 {
-    public WavesV2GameContextViewModel(IAppContext<App> appContext, ITipShow tipShow)
-        : base(appContext, tipShow)
+    public WavesV2GameContextViewModel(
+        IAppContext<App> appContext,
+        IWindowManager windowManager
+    )
+        : base(appContext, windowManager)
     {
         WeakReferenceMessenger.Default.Register<LocalGameRefreshBindUser>(
             this,
@@ -303,7 +306,7 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
         if (userPlayerInfoCache.Code != 0 || userPlayerInfoCache.Result == null)
         {
             LocalUserTitle = LanguageService.GetStringByText("获取账号信息失败");
-            await TipShow.ShowMessageAsync(
+            await WindowManager.Shell.TipShow.ShowMessageAsync(
                 LanguageService.GetStringByText("请重新进入游戏获取信息"),
                 Symbol.Clear
             );
