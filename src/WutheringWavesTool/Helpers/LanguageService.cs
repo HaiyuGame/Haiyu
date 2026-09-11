@@ -45,7 +45,7 @@ public static class LanguageService
         }
     }
 
-    public static string? GetString(string key)
+    public static string GetString(string key)
     {
         var language = AppSettings.GetLanguageAsync().GetAwaiter().GetResult();
         string result = "";

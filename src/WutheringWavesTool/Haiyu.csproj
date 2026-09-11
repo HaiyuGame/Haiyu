@@ -392,6 +392,7 @@
 	  <None Remove="Pages\WavesAnalysisRecordPage.xaml" />
 	  <None Remove="WindowModels\CloudGameWindows.xaml" />
 	</ItemGroup>
+	<!--
 	<Target Name="CopyXamlResourcesForAot" AfterTargets="Publish" Condition="'$(PublishAot)' == 'true' and '$(WindowsPackageType)' != 'MSIX'">
 		<ItemGroup>
 			<_XamlResources Include="$(OutputPath)**\*.xbf" />
@@ -399,6 +400,9 @@
 		</ItemGroup>
 		<Copy SourceFiles="@(_XamlResources)" DestinationFiles="@(_XamlResources->'$(PublishDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
 	</Target>
+	
+	
+	-->
 	<ItemGroup>
 	  <PRIResource Remove="Common\Plugins\**" />
 	</ItemGroup>
