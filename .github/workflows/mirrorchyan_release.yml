@@ -21,7 +21,7 @@ jobs:
       - uses: MirrorChyan/uploading-action@v1
         with:
           filetype: latest-release
-          filename: "Haiyu*"
+          filename: "*Haiyu*.exe"
           tag: ${{ inputs.tag  }}
 
           mirrorchyan_rid: Haiyu
