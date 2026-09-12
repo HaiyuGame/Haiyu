@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using Project.WPFSetup.Common.Setups;
 using Project.WPFSetup.Resources;
 
@@ -14,7 +14,7 @@ public class SetupProperty
 
     public string Version { get; set; }
 
-    public string UninstallString { get; set; }
+    public string UninstallString => GetUninstallPath();
 
     public string UninstallName { get; set; }
 
