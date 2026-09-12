@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:h="using:Haiyu.Helpers"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="using:CommunityToolkit.WinUI.Controls"
@@ -37,18 +38,18 @@
                     </StackPanel.ChildrenTransitions>
 
 
-                    <ui:SettingsExpander Description="监控悬浮窗的文字和排列方式" Header="外观">
+                    <ui:SettingsExpander Description="{x:Bind h:LanguageService.GetString('MonitorSetting_Description')}" Header="{x:Bind h:LanguageService.GetString('MonitorSetting_Theme')}">
                         <ui:SettingsExpander.HeaderIcon>
                             <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE790;" />
                         </ui:SettingsExpander.HeaderIcon>
                         <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="字体">
+                            <ui:SettingsCard Header="{x:Bind h:LanguageService.GetString('MonitorSetting_FontFamily')}">
                                 <ComboBox
                                     MinWidth="180"
                                     ItemsSource="{x:Bind ViewModel.FontFamilies}"
                                     SelectedItem="{x:Bind ViewModel.FontFamily, Mode=TwoWay}" />
                             </ui:SettingsCard>
-                            <ui:SettingsCard Description="10 至 32" Header="字体大小">
+                            <ui:SettingsCard Header="{x:Bind h:LanguageService.GetString('MonitorSetting_FontSize')}">
                                 <NumberBox
                                     Width="140"
                                     Maximum="32"
@@ -57,7 +58,7 @@
                                     SpinButtonPlacementMode="Inline"
                                     Value="{x:Bind ViewModel.FontSize, Mode=TwoWay}" />
                             </ui:SettingsCard>
-                            <ui:SettingsCard Description="选择监控悬浮窗的文字颜色" Header="字体颜色">
+                            <ui:SettingsCard Header="{x:Bind h:LanguageService.GetString('MonitorSetting_FontColor')}">
                                 <Button MinWidth="140">
                                     <Button.Content>
                                         <StackPanel Orientation="Horizontal" Spacing="8">
@@ -85,7 +86,7 @@
                                     </Button.Flyout>
                                 </Button>
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="项目间距">
+                            <ui:SettingsCard Header="{x:Bind h:LanguageService.GetString('MonitorSetting_ItemSpacing')}">
                                 <NumberBox
                                     Width="140"
                                     Maximum="30"
@@ -94,87 +95,87 @@
                                     SpinButtonPlacementMode="Inline"
                                     Value="{x:Bind ViewModel.MonitorItemSpacing, Mode=TwoWay}" />
                             </ui:SettingsCard>
-                            <ui:SettingsCard Description="鼠标操作穿过监控悬浮窗" Header="允许桌面交互">
+                            <ui:SettingsCard Header="{x:Bind h:LanguageService.GetString('MonitorSetting_AllowTranDesktop')}">
                                 <ToggleSwitch IsOn="{x:Bind ViewModel.IsAllowDesktop, Mode=TwoWay}" />
                             </ui:SettingsCard>
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 
-                    <ui:SettingsExpander Description="选择需要显示的帧率数据" Header="帧率">
+                    <ui:SettingsExpander Header="{x:Bind h:LanguageService.GetString('MoniterSetting_FpsHeader')}">
                         <ui:SettingsExpander.HeaderIcon>
                             <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE7F8;" />
                         </ui:SettingsExpander.HeaderIcon>
                         <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="当前 FPS">
+                            <ui:SettingsCard Header="{x:Bind h:LanguageService.GetString('MoniterSetting_FpsHeader')}">
                                 <ToggleSwitch IsOn="{x:Bind ViewModel.CurrentFpsEnable, Mode=TwoWay}" />
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="1% Low">
+                            <ui:SettingsCard Header="{x:Bind h:LanguageService.GetString('MoniterSetting_1%LowFps')}">
                                 <ToggleSwitch IsOn="{x:Bind ViewModel.FPS1LowEnable, Mode=TwoWay}" />
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="0.1% Low">
+                            <ui:SettingsCard Header="{x:Bind h:LanguageService.GetString('MoniterSetting_01%LowFps')}">
                                 <ToggleSwitch IsOn="{x:Bind ViewModel.FPS01LowEnable, Mode=TwoWay}" />
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="最高 FPS">
+                            <ui:SettingsCard Header="{x:Bind h:LanguageService.GetString('MoniterSetting_MaxFps')}">
                                 <ToggleSwitch IsOn="{x:Bind ViewModel.FPSMaxEnable, Mode=TwoWay}" />
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="最大帧时间">
+                            <ui:SettingsCard Header="{x:Bind h:LanguageService.GetString('MoniterSetting_MaxFrameTime')}">
                                 <ToggleSwitch IsOn="{x:Bind ViewModel.MaxFrameTimeEnable, Mode=TwoWay}" />
                             </ui:SettingsCard>
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 
-                    <ui:SettingsExpander Description="处理器监控项目" Header="CPU">
+                    <ui:SettingsExpander Header="CPU">
                         <ui:SettingsExpander.HeaderIcon>
                             <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE950;" />
                         </ui:SettingsExpander.HeaderIcon>
                         <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="占用率">
+                            <ui:SettingsCard Header="{x:Bind h:LanguageService.GetString('MoniterSetting_Load')}">
                                 <ToggleSwitch IsOn="{x:Bind ViewModel.CPULoadEnable, Mode=TwoWay}" />
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="温度">
+                            <ui:SettingsCard Header="{x:Bind h:LanguageService.GetString('MoniterSetting_Temp')}">
                                 <ToggleSwitch IsOn="{x:Bind ViewModel.CPUTempateEnable, Mode=TwoWay}" />
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="电压">
+                            <ui:SettingsCard Header="{x:Bind h:LanguageService.GetString('MoniterSetting_Voltages')}">
                                 <ToggleSwitch IsOn="{x:Bind ViewModel.CPUVoltagesEnable, Mode=TwoWay}" />
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="频率">
+                            <ui:SettingsCard Header="{x:Bind h:LanguageService.GetString('MoniterSetting_Clock')}">
                                 <ToggleSwitch IsOn="{x:Bind ViewModel.CPUClockEnable, Mode=TwoWay}" />
                             </ui:SettingsCard>
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 
-                    <ui:SettingsExpander Description="显卡监控项目" Header="GPU">
+                    <ui:SettingsExpander Header="GPU">
                         <ui:SettingsExpander.HeaderIcon>
                             <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE7F4;" />
                         </ui:SettingsExpander.HeaderIcon>
                         <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="占用率">
+                            <ui:SettingsCard Header="{x:Bind h:LanguageService.GetString('MoniterSetting_Load')}">
                                 <ToggleSwitch IsOn="{x:Bind ViewModel.GPULoadEnable, Mode=TwoWay}" />
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="温度">
+                            <ui:SettingsCard Header="{x:Bind h:LanguageService.GetString('MoniterSetting_Temp')}">
                                 <ToggleSwitch IsOn="{x:Bind ViewModel.GPUTempateEnable, Mode=TwoWay}" />
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="电压">
+                            <ui:SettingsCard Header="{x:Bind h:LanguageService.GetString('MoniterSetting_Voltages')}">
                                 <ToggleSwitch IsOn="{x:Bind ViewModel.GPUVoltagesEnable, Mode=TwoWay}" />
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="频率">
+                            <ui:SettingsCard Header="{x:Bind h:LanguageService.GetString('MoniterSetting_Clock')}">
                                 <ToggleSwitch IsOn="{x:Bind ViewModel.GPUClockEnable, Mode=TwoWay}" />
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="显存">
+                            <ui:SettingsCard Header="{x:Bind h:LanguageService.GetString('MoniterSetting_VRam')}">
                                 <ToggleSwitch IsOn="{x:Bind ViewModel.GPUVMemoryEnable, Mode=TwoWay}" />
                             </ui:SettingsCard>
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 
-                    <ui:SettingsExpander Description="系统内存与设备功耗" Header="其他数据">
+                    <ui:SettingsExpander Header="{x:Bind h:LanguageService.GetString('MoniterSetting_MemoryAndMoreDevice')}">
                         <ui:SettingsExpander.HeaderIcon>
                             <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE9D9;" />
                         </ui:SettingsExpander.HeaderIcon>
                         <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="功耗">
+                            <ui:SettingsCard Header="{x:Bind h:LanguageService.GetString('MoniterSetting_Power')}">
                                 <ToggleSwitch IsOn="{x:Bind ViewModel.PowerEnable, Mode=TwoWay}" />
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="内存">
+                            <ui:SettingsCard Header="{x:Bind h:LanguageService.GetString('MoniterSetting_Memory')}">
                                 <ToggleSwitch IsOn="{x:Bind ViewModel.MemoryEnable, Mode=TwoWay}" />
                             </ui:SettingsCard>
                         </ui:SettingsExpander.Items>

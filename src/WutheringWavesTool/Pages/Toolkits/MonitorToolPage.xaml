@@ -39,12 +39,6 @@
                 <Setter Property="CornerRadius" Value="5" />
             </Style>
         </Grid.Resources>
-        <Grid.ContextFlyout>
-            <MenuFlyout>
-                <MenuFlyoutSubItem Text="显示" />
-                <MenuFlyoutItem Text="退出" />
-            </MenuFlyout>
-        </Grid.ContextFlyout>
         <StackPanel
             x:Name="MonitorPanel"
             Padding="10,0"
@@ -73,7 +67,7 @@
                     Orientation="Horizontal"
                     Spacing="3"
                     Visibility="{x:Bind ViewModel.MaxFrameTimeEnable, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <TextBlock Text="最大帧时间" />
+                    <TextBlock Text="{x:Bind helper:LanguageService.GetString('MoniterSetting_MaxFrameTime')}" />
                     <TextBlock FontWeight="SemiBold" Text="{x:Bind ViewModel.MaxFrameTime, Mode=OneWay}" />
                     <TextBlock Text="ms" />
                 </StackPanel>
@@ -98,7 +92,7 @@
                     Orientation="Horizontal"
                     Spacing="3"
                     Visibility="{x:Bind ViewModel.FPSMaxEnable, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <TextBlock Text="最高 FPS" />
+                    <TextBlock Text="{x:Bind helper:LanguageService.GetString('MoniterSetting_MaxFps')}" />
                     <TextBlock FontWeight="SemiBold" Text="{x:Bind ViewModel.MaximumFPS, Mode=OneWay}" />
                 </StackPanel>
             </StackPanel>
@@ -191,7 +185,7 @@
                 Orientation="Horizontal"
                 Spacing="3"
                 Visibility="{x:Bind ViewModel.MemoryEnable, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                <TextBlock Text="内存" />
+                <TextBlock Text="{x:Bind helper:LanguageService.GetString('MoniterSetting_Memory')}" />
                 <TextBlock Text="{x:Bind ViewModel.MemoryText, Mode=OneWay}" />
             </StackPanel>
             <StackPanel
@@ -199,7 +193,7 @@
                 Orientation="Horizontal"
                 Spacing="3"
                 Visibility="{x:Bind ViewModel.PowerEnable, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                <TextBlock Text="功耗" />
+                <TextBlock Text="{x:Bind helper:LanguageService.GetString('MoniterSetting_Power')}" />
                 <TextBlock Text="{x:Bind ViewModel.Power, Mode=OneWay}" />
                 <TextBlock Text="W" />
             </StackPanel>

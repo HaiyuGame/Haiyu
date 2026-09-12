@@ -151,7 +151,11 @@ public class GithubUpdateService : IUpdateService
             {
                 return null;
             }
-            var asset = _cacheInfo?.Item1?.Assets.FirstOrDefault();
+            var asset = _cacheInfo?.Item1?.Assets.FirstOrDefault(x => x.Name.Contains(".exe"));
+            if(asset == null)
+            {
+                throw new Exception("update resource error");
+            }
             if (asset == null || string.IsNullOrWhiteSpace(asset.Url))
             {
                 return null;

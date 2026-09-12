@@ -6,6 +6,17 @@
     <Nullable>enable</Nullable>
 	  <PublishAot>true</PublishAot>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PlatformTarget>x64</PlatformTarget>
+    <SignAssembly>False</SignAssembly>
+    <DelaySign>False</DelaySign>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <IsAotCompatible>True</IsAotCompatible>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <IsAotCompatible>True</IsAotCompatible>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,6 +29,8 @@
     <ProjectReference Include="..\ABI\ABI.Models\ABI.Models.csproj" />
     <ProjectReference Include="..\ABI\ABIRuntime\ABIRuntime.csproj" />
   </ItemGroup>
+
+  
 
   <ItemGroup>
     <None Update="Assets\PawnIOSetup.exe">

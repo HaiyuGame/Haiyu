@@ -45,7 +45,7 @@
                         <TextBlock
                             VerticalAlignment="Center"
                             FontSize="14"
-                            Text="导入功能扩展包" />
+                            Text="{x:Bind helper:LanguageService.GetString('Toolkit_ImportABI')}" />
                     </StackPanel>
                 </Button>
             </Grid>
@@ -109,7 +109,10 @@
                     </StackPanel>
                 </StackPanel>
             </cui:SettingsCard>
-            <cui:SettingsExpander Description="利用WindowsAPI 内核API强制整理物理内存" Header="内存清理">
+            <cui:SettingsCard Description="{x:Bind helper:LanguageService.GetString('Toolkit_ClearToolDescription')}" Header="{x:Bind helper:LanguageService.GetString('Toolkit_ClearToolHeader')}">
+                <cui:SettingsCard.HeaderIcon>
+                    <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE83D;" />
+                </cui:SettingsCard.HeaderIcon>
                 <Button
                     Grid.Row="2"
                     Grid.Column="2"
@@ -125,7 +128,7 @@
                         <TextBlock FontSize="13" Text="{x:Bind helper:LanguageService.GetString('Display_Open')}" />
                     </StackPanel>
                 </Button>
-            </cui:SettingsExpander>
+            </cui:SettingsCard>
             <Grid Margin="0,15,0,0" VerticalAlignment="Center">
                 <TextBlock
                     VerticalAlignment="Center"

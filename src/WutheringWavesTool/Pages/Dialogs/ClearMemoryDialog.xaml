@@ -6,38 +6,55 @@
     xmlns:control="using:Haiyu.Controls"
     xmlns:cui="using:CommunityToolkit.WinUI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:h="using:Haiyu.Helpers"
     xmlns:helper="using:Haiyu.Helpers"
+    xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:local="using:Haiyu.Pages.Dialogs"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Background="{ThemeResource AcrylicBackgroundFillColorBaseBrush}"
     CornerRadius="5"
     mc:Ignorable="d">
-    <Grid Height="400">
+    <i:Interaction.Behaviors>
+        <i:EventTriggerBehavior EventName="Loaded">
+            <i:InvokeCommandAction Command="{x:Bind ViewModel.LoadedCommand}" />
+        </i:EventTriggerBehavior>
+    </i:Interaction.Behaviors>
+    <Grid Height="270">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition MaxHeight="200" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <TextBlock Text="内存清理" />
+        <TextBlock
+            VerticalAlignment="Center"
+            FontSize="18"
+            Text="{x:Bind h:LanguageService.GetString('Toolkit_ClearMemory')}" />
         <Button
             HorizontalAlignment="Right"
             Command="{x:Bind ViewModel.CloseCommand}"
-            Style="{ThemeResource TransparentButtonStyle}" />
+            Style="{ThemeResource TransparentButtonStyle}">
+            <FontIcon
+                FontFamily="Segoe Fluent Icons"
+                FontSize="14"
+                Glyph="&#xE653;" />
+        </Button>
         <Grid Grid.Row="1">
             <control:StorageRing
                 x:Name="ring"
                 Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"
                 MaxAngle="360"
+                Maximum="{x:Bind ViewModel.MemoryTotal, Mode=OneWay}"
                 MinAngle="0"
                 PercentCaution="75"
                 PercentCritical="90"
                 TrackRingThickness="10"
                 ValueRingThickness="10"
-                Value="100" />
+                Value="{x:Bind ViewModel.MemoryUsed, Mode=OneWay}" />
             <TextBlock
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                FontSize="30"
-                Text="100%" />
+                FontSize="25"
+                Text="{x:Bind ViewModel.MemoryUsedStr, Mode=OneWay}" />
         </Grid>
         <StackPanel
             Grid.Row="2"
@@ -46,7 +63,7 @@
             Orientation="Horizontal">
             <Button
                 Command="{x:Bind ViewModel.InvokeClearCommand}"
-                Content="执行清理"
+                Content="{x:Bind h:LanguageService.GetString('ToolKit_InvokeMemory')}"
                 Style="{ThemeResource AccentButtonStyle}" />
         </StackPanel>
     </Grid>

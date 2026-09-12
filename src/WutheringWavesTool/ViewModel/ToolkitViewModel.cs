@@ -71,20 +71,23 @@ public sealed partial class ToolkitViewModel : ViewModelBase
             }
             var moniter = this.AppContext.WindowManager.GetWindowContext("MonitorTool");
             if (moniter != null)
+            {
                 moniter.Close();
-            await this.AppContext.WindowManager.Shell.TipShow.ShowMessageAsync(
-                "Waiting abi as exit",
-                Symbol.Clear
-            );
+            }
             if(this.AppContext.ABIRuntimeService.Runtime != null)
             {
+                await this.AppContext.WindowManager.Shell.TipShow.ShowMessageAsync(
+                    LanguageService.GetString("Toolkit_WaitABIExit"),
+                    Symbol.Message
+                );
                 await this.AppContext.ABIRuntimeService.Close();
                 await Task.Delay(3000);
             }
-            Directory.Delete(AppSettings.ABIRuntimeSavePath, true);
+            if (Directory.Exists(AppSettings.ABIRuntimeSavePath))
+                Directory.Delete(AppSettings.ABIRuntimeSavePath, true);
             await this.AppContext.WindowManager.Shell.TipShow.ShowMessageAsync(
-                "Start Import",
-                Symbol.Clear
+                LanguageService.GetString("Tool_StartImport"),
+                Symbol.Message
             );
             IProgress<double> p = new Progress<double>(p => Debug.WriteLine(p));
             await ZipArchiveHelper.UnZipFileAsync(
@@ -94,14 +97,18 @@ public sealed partial class ToolkitViewModel : ViewModelBase
                 this.CTS.Token
             );
             await this.AppContext.WindowManager.Shell.TipShow.ShowMessageAsync(
-                "Import Complete",
-                Symbol.Clear
+                LanguageService.GetString("Tool_ImportComplete"),
+                Symbol.Message
             );
             await this.AppContext.ABIRuntimeService.Initialize(Waves.Settings.AppSettings.ABIRuntimeSavePath);
             await this.Loaded();
         }
         catch (Exception ex)
         {
+            await this.AppContext.WindowManager.Shell.TipShow.ShowMessageAsync(
+                LanguageService.GetString("Tool_ImportError")+ex.Message,
+                Symbol.Message
+            );
             return;
         }
     }

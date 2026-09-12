@@ -12,20 +12,17 @@ public partial class WebViewCabManagerViewModel : DialogViewModelBase
 
     public WebViewCabManagerViewModel(
         DialogSession dialogSession,
-        IAppContext<App> appContext,
         IWindowManager windowManager
     )
         : base(dialogSession)
     {
-        PickersService = this.AppContext.WindowManager.Shell.PickersService;
-        AppContext = appContext;
         _windowManager = windowManager;
         Runtimes = [];
+        PickersService = this.AppContext.WindowManager.Shell.PickersService;
         RegisterMessager();
     }
 
     public IPickersService PickersService { get; }
-    public IAppContext<App> AppContext { get; }
 
     [ObservableProperty]
     public partial ObservableCollection<WebViewRuntimeWrapper> Runtimes { get; set; }
