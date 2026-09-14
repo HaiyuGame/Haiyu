@@ -817,7 +817,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
             var result = await WindowManager.Shell.DialogManager.ShowSelectDownloadFolderV2Async(
                 this.GameContext.ContextType
             );
-            if (result.Result == ContentDialogResult.None)
+            if (result == null || result.Result == ContentDialogResult.None)
             {
                 return;
             }
