@@ -35,9 +35,6 @@
     <PackageReference Include="WinUIEx" Version="2.9.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Waves.Core\Waves.Core.csproj" />
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="Controls\Colors\" />
   </ItemGroup>
 </Project>

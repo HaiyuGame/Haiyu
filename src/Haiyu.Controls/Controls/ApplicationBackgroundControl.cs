@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using Waves.Core.Models.Enums;
+using Haiyu.Controls.Models;
 using Windows.Media.Core;
 using Windows.Media.Playback;
 

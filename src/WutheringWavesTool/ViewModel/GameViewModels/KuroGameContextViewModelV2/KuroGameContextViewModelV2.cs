@@ -1,4 +1,5 @@
 using Cacheing.Contracts;
+using Haiyu.Controls.Models;
 using Haiyu.Models.Dialogs;
 using Haiyu.Models.Enums;
 using Waves.Core.Models.Enums;
@@ -662,7 +663,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
                 if (status.Gameing)
                 {
                     WallpaperService.SetMediaForUrl(
-                        Waves.Core.Models.Enums.WallpaperShowType.Image,
+                        WallpaperShowType.Image,
                         background.FirstFrameImage
                     );
                 }
@@ -671,7 +672,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
                     if (wallpaperType == "Video")
                     {
                         WallpaperService.SetMediaForUrl(
-                            Waves.Core.Models.Enums.WallpaperShowType.Video,
+                            WallpaperShowType.Video,
                             background.BackgroundFile,
                             background.FirstFrameImage
                         );
@@ -680,7 +681,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
                     else
                     {
                         WallpaperService.SetMediaForUrl(
-                            Waves.Core.Models.Enums.WallpaperShowType.Image,
+                            WallpaperShowType.Image,
                             background.FirstFrameImage
                         );
                     }

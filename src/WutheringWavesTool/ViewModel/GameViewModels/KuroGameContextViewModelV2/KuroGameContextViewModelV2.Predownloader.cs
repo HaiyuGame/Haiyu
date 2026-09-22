@@ -78,7 +78,8 @@ partial class KuroGameContextViewModelV2
             this.GameContext.ContextName,
             UpdateGameType.ProDownload
         );
-        if (result.IsOk)
+        
+        if (result != null && result.IsOk)
         {
             StartBackground(() => this.GameContext.StartProdDownloadGameResourceAsync());
         }

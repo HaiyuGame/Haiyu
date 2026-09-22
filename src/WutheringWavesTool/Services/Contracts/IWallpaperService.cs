@@ -1,5 +1,5 @@
-﻿using Haiyu.Helpers;
-using Waves.Core.Models.Enums;
+using Haiyu.Controls.Models;
+using Haiyu.Helpers;
 
 namespace Haiyu.Services.Contracts;
 
