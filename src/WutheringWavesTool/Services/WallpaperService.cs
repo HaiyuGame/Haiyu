@@ -1,6 +1,6 @@
+using Haiyu.Controls.Models;
 using Haiyu.Helpers;
 using System.Security.Cryptography;
-using Waves.Core.Models.Enums;
 
 namespace Haiyu.Services;
 

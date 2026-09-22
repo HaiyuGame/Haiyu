@@ -1,4 +1,5 @@
 using System.Text;
+using Haiyu.Controls.Models;
 using Waves.Api.Models.CloudGame;
 using Waves.Core.Common;
 using Waves.Core.Contracts.CloudGame;
@@ -194,7 +195,7 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
             {
                 IsRefreshing = true;
                 WallpaperService.SetMediaForUrl(
-                    Waves.Core.Models.Enums.WallpaperShowType.Image,
+                    WallpaperShowType.Image,
                     "https://aki-gm-resources-back.aki-game.com/pv/cg/login.webp"
                 );
                 await RefreshUserAsync();

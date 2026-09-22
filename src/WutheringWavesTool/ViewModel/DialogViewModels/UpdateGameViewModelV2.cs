@@ -64,18 +64,11 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
     [ObservableProperty]
     public partial ObservableCollection<object> DiskPipePoint { get; set; }
     public IPickersService PickersService { get; }
-    public bool IsOk { get; private set; }
-
-    public UpdateGameResult? GameResult()
-    {
-        return new UpdateGameResult() { DiffSavePath = DiffSavePath, IsOk = this.IsOk };
-    }
 
     [RelayCommand]
     async Task SelectDiffPath()
     {
-        var result = await PickersService.GetFolderPicker(
-        );
+        var result = await PickersService.GetFolderPicker();
         if (result == null)
             return;
 
@@ -211,13 +204,7 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
             return;
         }
         var preious = await GameContext.GetPatchGameResourceAsync(cdnUrl.Url + patche.IndexFile);
-        if (
-            preious != null
-            && preious.ApplyTypes == null
-            && preious.Resource != null
-            && launcher.ResourceDefault.Config.PatchConfig.IndexOf(patche)
-                != launcher.ResourceDefault.Config.PatchConfig.Count - 1
-        )
+        if (preious == null)
         {
             LegacyMessageBox.ShowInformation(
                 ownedHwnd,
@@ -296,8 +283,7 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
     [RelayCommand]
     async Task Invoke()
     {
-        this.IsOk = true;
-        this.Result = new UpdateGameResult() { IsOk = this.IsOk };
+        this.Result = new UpdateGameResult() { IsOk = true };
         await this.Close();
     }
 

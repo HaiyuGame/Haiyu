@@ -347,9 +347,6 @@
 		<Page Update="Pages\Dialogs\LocalUserManagerDialog.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
-		<Page Update="Pages\Dialogs\UpdateGameDialog.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
 	</ItemGroup>
 	<ItemGroup>
 		<Folder Include="Assets\GameAssets\Punish\" />

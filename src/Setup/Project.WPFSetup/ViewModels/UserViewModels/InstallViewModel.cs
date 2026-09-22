@@ -106,7 +106,6 @@ public sealed partial class InstallViewModel : ObservableRecipient
         this.SelectInstallVisibility = Visibility.Collapsed;
         InstalledVisibility = Visibility.Collapsed;
         InstallingVisibility = Visibility.Visible;
-        SetupProperty.UninstallString = SetupProperty.GetUninstallPath();
         if (CreateStartMenuCheck)
         {
             SetupProperty.Setups.Add(new StartMenuLinkSetup());

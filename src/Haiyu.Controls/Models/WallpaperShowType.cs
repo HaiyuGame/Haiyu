@@ -1,4 +1,4 @@
-﻿namespace Waves.Core.Models.Enums;
+namespace Haiyu.Controls.Models;
 
 public enum WallpaperShowType
 {

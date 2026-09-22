@@ -93,7 +93,6 @@ public class AppContext<T> : IAppContext<T>
                 null,
                 WindowExtension.SW_SHOWNORMAL
             );
-            Process.GetCurrentProcess().Kill();
         }
     }
 

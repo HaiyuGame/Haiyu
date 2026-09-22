@@ -129,7 +129,7 @@ public sealed class DialogManager : IDialogManager
         string contextName,
         UpdateGameType type
     ) =>
-        await GetDialogResultAsync<UpdateGameDialog, UpdateGameResult>(
+        await GetDialogResultAsync<UpdateGameDialogV2, UpdateGameResult>(
             new Tuple<string, UpdateGameType>(contextName, type)
         );
 
