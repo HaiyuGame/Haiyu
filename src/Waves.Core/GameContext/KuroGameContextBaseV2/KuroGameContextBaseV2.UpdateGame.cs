@@ -413,20 +413,29 @@ partial class KuroGameContextBaseV2
                     );
                     return false;
                 }
-                downloadMethod.SetParam(
-                    new Dictionary<string, object>()
-                    {
-                        { "resource", downloadTasks[i].Items },
-                        { "launcher", _launcher },
-                        { "isDelete", false },
-                        { "folder", downloadTasks[i].Folder },
-                        { "httpClient", HttpClientService! },
-                        { "downloadState", state },
-                        { "baseUrl", cdn },
-                        { "isProd", option.IsProd },
-                    },
-                    this.GameEventPublisher
+                var param = new Dictionary<string, object>()
+                {
+                    { "resource", downloadTasks[i].Items },
+                    { "launcher", _launcher },
+                    { "isDelete", false },
+                    { "folder", downloadTasks[i].Folder },
+                    { "httpClient", HttpClientService! },
+                    { "downloadState", state },
+                    { "baseUrl", cdn },
+                    { "isProd", option.IsProd },
+                };
+
+                var fastVerify = await this.GameLocalConfig.GetConfigAsync(
+                    GameLocalSettingName.FastVerify
                 );
+                if (
+                    !string.IsNullOrWhiteSpace(fastVerify)
+                    && bool.TryParse(fastVerify, out var fastVerifyFlage)
+                )
+                {
+                    param.Add("fastVerify", fastVerifyFlage);
+                }
+                downloadMethod.SetParam(param, this.GameEventPublisher);
                 this._currentRunningAction = downloadMethod;
                 CurrentSetups = i;
                 await this.GameEventPublisher.PublishStepAsync(
@@ -690,8 +699,8 @@ partial class KuroGameContextBaseV2
                 return;
             }
             var resourceIndexUrl =
-               launcher.ResourceDefault.CdnList.Where(x => x.P != 0).OrderBy(x => x.P).First().Url
-               + launcher.Predownload.Config.IndexFile;
+                launcher.ResourceDefault.CdnList.Where(x => x.P != 0).OrderBy(x => x.P).First().Url
+                + launcher.Predownload.Config.IndexFile;
             checkBaseUrl = launcher.Predownload.Config.BaseUrl;
             resource = await this.GetGameResourceAsync(resourceIndexUrl);
         }
@@ -873,10 +882,10 @@ partial class KuroGameContextBaseV2
                 );
                 CdnTestResult? cdnResult = null;
                 cdnResult = await TestCdnAsync(
-                       launcher.ResourceDefault.CdnList,
-                       installTasks[i].baseUrl,
-                       checkAllResource.ToList()
-                   );
+                    launcher.ResourceDefault.CdnList,
+                    installTasks[i].baseUrl,
+                    checkAllResource.ToList()
+                );
                 if (cdnResult == null)
                 {
                     Logger.WriteError("获取资源信息失败，最终校验启动失败，跳过此校验");
@@ -888,22 +897,30 @@ partial class KuroGameContextBaseV2
                     );
                     return;
                 }
-                string baseUrl = Path.Combine(cdnResult.Value.Url,installTasks[i].baseUrl);
-                
-                downloadMethod.SetParam(
-                    new Dictionary<string, object>()
-                    {
-                        { "resource", installTasks[i].Items.ToList() },
-                        { "launcher", launcher },
-                        { "isDelete", false },
-                        { "folder", installTasks[i].Folder },
-                        { "httpClient", HttpClientService! },
-                        { "downloadState", state },
-                        { "baseUrl", baseUrl },
-                        { "isProd", option.IsProd },
-                    },
-                    this.GameEventPublisher
+                string baseUrl = Path.Combine(cdnResult.Value.Url, installTasks[i].baseUrl);
+
+                var param = new Dictionary<string, object>()
+                {
+                    { "resource", installTasks[i].Items.ToList() },
+                    { "launcher", launcher },
+                    { "isDelete", false },
+                    { "folder", installTasks[i].Folder },
+                    { "httpClient", HttpClientService! },
+                    { "downloadState", state },
+                    { "baseUrl", baseUrl },
+                    { "isProd", option.IsProd },
+                };
+                var fastVerify = await this.GameLocalConfig.GetConfigAsync(
+                    GameLocalSettingName.FastVerify
                 );
+                if (
+                    !string.IsNullOrWhiteSpace(fastVerify)
+                    && bool.TryParse(fastVerify, out var fastVerifyFlage)
+                )
+                {
+                    param.Add("fastVerify", fastVerifyFlage);
+                }
+                downloadMethod.SetParam(param, this.GameEventPublisher);
                 this._currentRunningAction = downloadMethod;
                 await downloadMethod.ExecuteAsync(true);
             }

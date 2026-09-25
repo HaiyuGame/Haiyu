@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Waves.Core.GameContext.KruoGameContextBaseV2.Common;
 
 /// <summary>
@@ -12,6 +14,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
     private string _baseUrl;
     private bool _isProd;
     private List<string>? skipVerifyFile;
+    private bool fastVerify = false;
     private IHttpClientService _httpClientService;
     private GameLauncherSource? _launcher;
     private long _totalDownloadedBytes;
@@ -123,7 +126,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
         {
             return false;
         }
-        //非必要参数
+        Param.CheckParam<bool>("fastVerify", out var firstVerify);
         Param.CheckParam<List<string>>("skipVerifyFile", out var skipVerifyFile);
         this._resource = resources?.ToList()!;
         this.isDelete = isDelete!;
@@ -134,6 +137,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
         this._baseUrl = baseUrl!;
         this._isProd = isProd;
         this.skipVerifyFile = skipVerifyFile;
+        this.fastVerify = firstVerify;
         InitProgress();
         return true;
     }
@@ -330,6 +334,39 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
                         }
                         else
                         {
+                            if (
+                                fastVerify
+                                && BuildFileHelper.GetFileLength(filePath, out var currentFileSize)
+                                && currentFileSize == item.Size
+                            )
+                            {
+                                var lastChunk = item.ChunkInfos.Last();
+                                var needDownload = await VerifyTask.ValidateFileChunks(
+                                    lastChunk,
+                                    filePath,
+                                    downloadState,
+                                    _downloadState.CancelToken
+                                );
+                                //快速校验，跳过其他分片，只校验文件大小和尾部hash是否对齐
+                                if (!needDownload)
+                                {
+                                    if (
+                                        !_disposed
+                                        && !_downloadState.CancelToken.IsCancellationRequested
+                                        && (_downloadState?.IsActive ?? false)
+                                    )
+                                    {
+                                        var args = UpdateFileProgress(
+                                            GameContextActionType.Verify,
+                                            item.Size,
+                                            true
+                                        );
+
+                                        GameEventPublisher.Publish(args);
+                                    }
+                                    return;
+                                }
+                            }
                             var fileName = System.IO.Path.GetFileName(filePath);
                             for (int i = 0; i < item.ChunkInfos.Count; i++)
                             {

@@ -105,26 +105,29 @@ partial class KuroGameContextBaseV2
             }
 
             var baseUrl = cdnResult.Value.url + launcher.ResourceDefault.Config.BaseUrl;
-            downloadMethod.SetParam(
-                new Dictionary<string, object>()
-                {
-                    { "resource", resource.Resource },
-                    { "launcher", launcher },
-                    { "isDelete", isRepir },
-                    { "folder", folder },
-                    { "httpClient", HttpClientService! },
-                    { "downloadState", DownloadState! },
-                    { "baseUrl", baseUrl },
-                    { "isProd", false },
-                    { "skipVerifyFile", repirSkipFile! },
-                },
-                this.GameEventPublisher
-            );
+            var param = new Dictionary<string, object>()
+            {
+                { "resource", resource.Resource },
+                { "launcher", launcher },
+                { "isDelete", isRepir },
+                { "folder", folder },
+                { "httpClient", HttpClientService! },
+                { "downloadState", DownloadState! },
+                { "baseUrl", baseUrl },
+                { "isProd", false },
+                { "skipVerifyFile", repirSkipFile! },
+            };
+            var fastVerify = await this.GameLocalConfig.GetConfigAsync(GameLocalSettingName.FastVerify);
+            if (!string.IsNullOrWhiteSpace(fastVerify) && bool.TryParse(fastVerify,out var fastVerifyFlage))
+            {
+                param.Add("fastVerify",fastVerifyFlage);
+            }
+            downloadMethod.SetParam(param, this.GameEventPublisher);
             _currentRunningAction = downloadMethod;
             await GameEventPublisher.PublisAsync(GameContextActionType.CdnSelect, "CDN选择完毕");
             this.CurrentSetups = 0;
             await this.GameEventPublisher.PublishStepAsync("下载校验", CurrentSetups, Setups);
-            var excuteResult =  await downloadMethod.ExecuteAsync(true);
+            var excuteResult = await downloadMethod.ExecuteAsync(true);
             if (excuteResult is not true)
             {
                 Logger.WriteError("游戏文件修复失败，停止写入完成配置");
@@ -166,7 +169,6 @@ partial class KuroGameContextBaseV2
             }
             await this.GameEventPublisher.PublishStepAsync("写入配置", CurrentSetups, Setups);
             await writeConfig.WriteDownloadComplateAsync(this.GameEventPublisher, true);
-            //通知UI刷新
             await state.CancelToken.CancelAsync();
             state.IsActive = false;
             await Task.Delay(200);
@@ -205,10 +207,7 @@ partial class KuroGameContextBaseV2
                 GameLocalSettingName.GameLauncherBassFolder,
                 folder
             );
-            await GameLocalConfig.SaveConfigAsync(
-                GameLocalSettingName.LocalGameUpdateing,
-                "True"
-            );
+            await GameLocalConfig.SaveConfigAsync(GameLocalSettingName.LocalGameUpdateing, "True");
             var launcher = await GetGameLauncherSourceAsync(null);
             if (launcher == null)
             {

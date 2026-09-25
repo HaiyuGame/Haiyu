@@ -6,9 +6,8 @@ namespace Haiyu.ViewModel;
 
 public sealed partial class KuroGameSettingViewModel : DialogViewModelBase
 {
-    public KuroGameSettingViewModel(DialogSession dialogSession) : base(dialogSession)
-    {
-    }
+    public KuroGameSettingViewModel(DialogSession dialogSession)
+        : base(dialogSession) { }
 
     public IGameContextV2 GameContext { get; private set; }
 
@@ -20,17 +19,26 @@ public sealed partial class KuroGameSettingViewModel : DialogViewModelBase
     [ObservableProperty]
     public partial string LauncheExeName { get; set; }
 
+    [ObservableProperty]
+    public partial bool FastVerify { get; set; }
+
     [RelayCommand]
     async Task Loaded()
     {
         var speed = await this.GameContext.GameLocalConfig.GetConfigAsync(
             GameLocalSettingName.LimitSpeed
         );
+        var fastVerify = await this.GameContext.GameLocalConfig.GetConfigAsync(
+            GameLocalSettingName.FastVerify
+        );
         if (long.TryParse(speed, out var speedValue))
         {
             this.DownloadSpeedLimit = speedValue;
         }
-
+        if(bool.TryParse(fastVerify,out var fastVerifyFlage))
+        {
+            this.FastVerify = fastVerifyFlage;
+        }
         Arguments =
             await this.GameContext.GameLocalConfig.GetConfigAsync(
                 GameLocalSettingName.StartGameArguments
@@ -38,7 +46,9 @@ public sealed partial class KuroGameSettingViewModel : DialogViewModelBase
         LauncheExeName =
             await this.GameContext.GameLocalConfig.GetConfigAsync(
                 GameLocalSettingName.StartGameExeName
-            ) ?? LuancheExeNames?.FirstOrDefault() ?? string.Empty;
+            )
+            ?? LuancheExeNames?.FirstOrDefault()
+            ?? string.Empty;
 
         if (this.GameType == GameType.Waves)
         {
@@ -92,7 +102,7 @@ public sealed partial class KuroGameSettingViewModel : DialogViewModelBase
     [ObservableProperty]
     public partial bool Directx11Enable { get; set; }
 
-    public async override Task BeforeCloseAsync()
+    public override async Task BeforeCloseAsync()
     {
         await this.GameContext.SetDownloadSpeedAsync((long)DownloadSpeedLimit);
         if (this.GameType == GameType.Waves)
@@ -105,6 +115,7 @@ public sealed partial class KuroGameSettingViewModel : DialogViewModelBase
                     [GameLocalSettingName.StartGameArguments] = Arguments ?? string.Empty,
                     [GameLocalSettingName.StartGameExeName] =
                         LauncheExeName ?? LuancheExeNames?.FirstOrDefault() ?? string.Empty,
+                    [GameLocalSettingName.FastVerify] = this.FastVerify.ToString()
                 }
             );
         }
@@ -116,6 +127,7 @@ public sealed partial class KuroGameSettingViewModel : DialogViewModelBase
                     [GameLocalSettingName.StartGameArguments] = Arguments ?? string.Empty,
                     [GameLocalSettingName.StartGameExeName] =
                         LauncheExeName ?? LuancheExeNames?.FirstOrDefault() ?? string.Empty,
+                    [GameLocalSettingName.FastVerify] = this.FastVerify.ToString()
                 }
             );
         }

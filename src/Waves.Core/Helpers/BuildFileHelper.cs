@@ -83,4 +83,16 @@ public static class BuildFileHelper
             return Task.FromResult(0L);
         }
     }
+
+    public static bool GetFileLength(string path,out long size)
+    {
+        if (File.Exists(path))
+        {
+            FileInfo info = new FileInfo(path);
+            size = info.Length;
+            return true;
+        }
+        size = 0;
+        return false;
+    }
 }

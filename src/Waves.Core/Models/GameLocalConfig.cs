@@ -64,6 +64,11 @@ public class GameLocalSettingName
     /// </summary>
     public const string ProdIsAdvance = nameof(ProdIsAdvance);
 
+    /// <summary>
+    /// 快速校验
+    /// </summary>
+    public const string FastVerify = nameof(FastVerify);
+
     public const string GameTime = nameof(GameTime);
 }
 
