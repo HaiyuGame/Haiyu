@@ -18,10 +18,10 @@
         </i:EventTriggerBehavior>
     </i:Interaction.Behaviors>
     <StackPanel
-        Width="400"
+        Width="450"
         HorizontalAlignment="Stretch"
         Orientation="Vertical"
-        Spacing="5">
+        Spacing="12">
         <StackPanel.ChildrenTransitions>
             <TransitionCollection>
                 <RepositionThemeTransition />
@@ -33,35 +33,36 @@
             FontFamily="{ThemeResource DefaultFont}"
             FontSize="18"
             Text="{x:Bind helper:LanguageService.GetString('Display_GameSettings')}" />
+        <Grid ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Border
+                Padding="16,12"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                CornerRadius="5">
+                <NumberBox
+                    HorizontalAlignment="Stretch"
+                    Header="{x:Bind helper:LanguageService.GetString('Display_UnlimitedSpeed')}"
+                    Value="{x:Bind ViewModel.DownloadSpeedLimit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            </Border>
+            <Border
+                Grid.Column="1"
+                Padding="16,12"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                CornerRadius="5">
+                <ComboBox
+                    HorizontalAlignment="Stretch"
+                    Header="{x:Bind helper:LanguageService.GetString('Display_StartupObject')}"
+                    ItemsSource="{x:Bind ViewModel.LuancheExeNames, Mode=OneWay}"
+                    SelectedItem="{x:Bind ViewModel.LauncheExeName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            </Border>
+        </Grid>
         <Border
-            Grid.Row="1"
-            Grid.Column="1"
-            Margin="0,15,0,0"
-            Padding="15,10"
-            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-            CornerRadius="5">
-            <NumberBox Header="{x:Bind helper:LanguageService.GetString('Display_UnlimitedSpeed')}" Value="{x:Bind ViewModel.DownloadSpeedLimit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-        </Border>
-        <Border
-            Grid.Row="2"
-            Grid.Column="1"
-            Margin="0,0,0,0"
-            Padding="15,10"
-            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-            CornerRadius="5">
-            <ComboBox
-                Header="{x:Bind helper:LanguageService.GetString('Display_StartupObject')}"
-                ItemsSource="{x:Bind ViewModel.LuancheExeNames, Mode=OneWay}"
-                SelectedItem="{x:Bind ViewModel.LauncheExeName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-        </Border>
-        <Grid
-            Grid.Row="3"
-            Padding="10,5"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Top"
+            Padding="16,12"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             CornerRadius="5"
-            RowSpacing="5"
             Visibility="{x:Bind ViewModel.WavesSettingVisibility, Mode=OneWay}">
             <ani:Implicit.ShowAnimations>
                 <ani:OpacityAnimation To="1" Duration="0:0:0.5" />
@@ -69,78 +70,38 @@
             <ani:Implicit.HideAnimations>
                 <ani:OpacityAnimation To="1" Duration="0:0:0.5" />
             </ani:Implicit.HideAnimations>
-            <Grid.RowDefinitions>
-                <RowDefinition />
-                <RowDefinition />
-                <RowDefinition />
-                <RowDefinition />
-                <RowDefinition />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition Width="auto" />
-            </Grid.ColumnDefinitions>
-            <TextBlock VerticalAlignment="Center" Text="Directx11" />
-            <Border
-                Grid.Column="1"
-                Width="30"
-                MaxWidth="30"
-                HorizontalAlignment="Right">
+            <Grid ColumnSpacing="24">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
                 <CheckBox
-                    Margin="5"
                     VerticalAlignment="Center"
-                    HorizontalContentAlignment="Right"
+                    Content="Directx11"
                     IsChecked="{x:Bind ViewModel.Directx11Enable, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-            </Border>
-            <NavigationViewItemSeparator Grid.Row="1" Grid.ColumnSpan="2" />
-            <TextBlock
-                Grid.Row="2"
-                VerticalAlignment="Center"
-                Text="{x:Bind helper:LanguageService.GetString('Display_DisableDlss')}" />
-            <Border
-                Grid.Row="2"
-                Grid.Column="1"
-                Width="30"
-                MaxWidth="30"
-                HorizontalAlignment="Right">
                 <CheckBox
-                    Margin="5"
+                    Grid.Column="1"
                     VerticalAlignment="Center"
-                    HorizontalContentAlignment="Right"
+                    Content="{x:Bind helper:LanguageService.GetString('Display_DisableDlss')}"
                     IsChecked="{x:Bind ViewModel.DlssEnable, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-            </Border>
-
-            <NavigationViewItemSeparator Grid.Row="3" Grid.ColumnSpan="2" />
-            <TextBlock
-                Grid.Row="4"
-                VerticalAlignment="Center"
-                Text="快速校验" />
-            <Border
-                Grid.Row="4"
-                Grid.Column="1"
-                Width="30"
-                MaxWidth="30"
-                HorizontalAlignment="Right">
                 <CheckBox
-                    Margin="5"
+                    Grid.Column="2"
                     VerticalAlignment="Center"
-                    HorizontalContentAlignment="Right"
+                    Content="快速校验"
                     IsChecked="{x:Bind ViewModel.FastVerify, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-            </Border>
-        </Grid>
-        <Grid
-            Grid.Row="4"
-            Margin="0,0,0,0"
-            Padding="15,15"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Top"
+            </Grid>
+        </Border>
+        <Border
+            Padding="16,12"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             CornerRadius="5">
-            <TextBox Header="{x:Bind helper:LanguageService.GetString('Display_OtherStartupParameters')}" Text="{x:Bind ViewModel.Arguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-        </Grid>
+            <TextBox
+                HorizontalAlignment="Stretch"
+                Header="{x:Bind helper:LanguageService.GetString('Display_OtherStartupParameters')}"
+                Text="{x:Bind ViewModel.Arguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+        </Border>
         <Button
-            Grid.Row="5"
-            Margin="0,10,0,0"
             HorizontalAlignment="Center"
             Command="{x:Bind ViewModel.CloseCommand}"
             Content="{x:Bind helper:LanguageService.GetString('Display_SAVING')}" />

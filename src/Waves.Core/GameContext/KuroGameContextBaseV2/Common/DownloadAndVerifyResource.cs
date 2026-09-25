@@ -341,11 +341,27 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
                             )
                             {
                                 var lastChunk = item.ChunkInfos.Last();
-                                var needDownload = await VerifyTask.ValidateFileChunks(
-                                    lastChunk,
-                                    filePath,
-                                    downloadState,
-                                    _downloadState.CancelToken
+                                var firstChunk = item.ChunkInfos.First();
+                                var splitChunk = item.ChunkInfos[item.ChunkInfos.Count / 2];
+                                var needDownload = (
+                                    await VerifyTask.ValidateFileChunks(
+                                        lastChunk,
+                                        filePath,
+                                        downloadState,
+                                        _downloadState.CancelToken
+                                    )
+                                    || await VerifyTask.ValidateFileChunks(
+                                        firstChunk,
+                                        filePath,
+                                        downloadState,
+                                        _downloadState.CancelToken
+                                    )
+                                    || await VerifyTask.ValidateFileChunks(
+                                        splitChunk,
+                                        filePath,
+                                        downloadState,
+                                        _downloadState.CancelToken
+                                    )
                                 );
                                 //快速校验，跳过其他分片，只校验文件大小和尾部hash是否对齐
                                 if (!needDownload)

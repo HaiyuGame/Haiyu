@@ -2,11 +2,10 @@ namespace Waves.Core.Common.Downloads;
 
 public static class DownloadTask
 {
-    const int MaxBufferSize = 65536;
-    const long UpdateThreshold = 1048576;
-    /// <summary>
-    /// 开始下载分片
-    /// </summary>
+    private const int MaxBufferSize = 65536;
+    private const long UpdateThreshold = 1048576;
+    private const int MaxRetryCount = 4;
+
     public static async Task DownloadFileByChunks(
         IHttpClientService httpClientService,
         string url,
@@ -17,128 +16,38 @@ public static class DownloadTask
         long allSize = 0L,
         DownloadState state = null,
         CancellationTokenSource? downloadCts = default,
-        IProgress<(GameContextActionType,bool,long,string,long,long)> progress = null
+        IProgress<(GameContextActionType, bool, long, string, long, long)> progress = null
     )
     {
-        using (
-            var fileStream = new FileStream(
-                filePath,
-                FileMode.OpenOrCreate,
-                FileAccess.ReadWrite,
-                FileShare.Read,
-                262144,
-                true
-            )
-        )
-        {
-            try
-            {
-                if (downloadCts == null || downloadCts.IsCancellationRequested || state?.IsStop == true)
-                {
-                    throw new OperationCanceledException();
-                }
-                long accumulatedBytes = 0;
-                long currentBytes = 0;
-                if (start == 0 && end == -1)
-                {
-                    //Logger.WriteError($"文件{filePath}，分片数据错误，start={start},end={end}");
-                }
-                using var request = new HttpRequestMessage(
-                    HttpMethod.Get,
-                    url
-                );
-                request.Headers.Range = new RangeHeaderValue(start, end);
-                using var response = await httpClientService.GameDownloadClient.SendAsync(
-                    request,
-                    HttpCompletionOption.ResponseHeadersRead,
-                    downloadCts.Token
-                );
-                var stream = await response.Content.ReadAsStreamAsync(downloadCts.Token);
-                if (start < 0 || end < start)
-                {
-                    throw new ArgumentException($"分片范围无效: {start}-{end}");
-                }
+        ValidateArguments(start, end, end - start, downloadCts);
+        await using var fileStream = new FileStream(
+            filePath,
+            FileMode.OpenOrCreate,
+            FileAccess.ReadWrite,
+            FileShare.Read,
+            262144,
+            true
+        );
 
-                long totalWritten = 0;
-                long chunkTotalSize = end - start + 1;
-                var memoryPool = ArrayPool<byte>.Shared;
-                fileStream.Seek(start, SeekOrigin.Begin);
-                bool isBreak = false;
-                while (totalWritten < chunkTotalSize)
-                {
-                    if (downloadCts == null || downloadCts.IsCancellationRequested || state?.IsStop == true)
-                    {
-                        throw new OperationCanceledException();
-                    }
-                    if (state != null)
-                        await state.PauseToken.WaitIfPausedAsync().ConfigureAwait(false); // 暂停检查也异步化
-                    int bytesToRead = (int)Math.Min(MaxBufferSize, chunkTotalSize - totalWritten);
-                    byte[] buffer = ArrayPool<byte>.Shared.Rent(bytesToRead);
-                    try
-                    {
-                        int bytesRead = await stream
-                            .ReadAsync(buffer.AsMemory(0, bytesToRead), downloadCts.Token)
-                            .ConfigureAwait(false);
-                        if (bytesRead == 0)
-                        {
-                            isBreak = true;
-                            break;
-                        }
-                        if (state != null)
-                            await state
-                                .SpeedLimiter.LimitAsync(bytesRead,downloadCts.Token)
-                                .ConfigureAwait(false);
-                        await fileStream
-                            .WriteAsync(buffer.AsMemory(0, bytesRead), downloadCts.Token)
-                            .ConfigureAwait(false);
-                        totalWritten += bytesRead;
-                        accumulatedBytes += bytesRead;
-                        currentBytes+= bytesRead;
-                        if (accumulatedBytes >= UpdateThreshold)
-                        {
-                            progress?.Report((GameContextActionType.Download,true,accumulatedBytes,filePath,currentBytes, chunkTotalSize));
-                            accumulatedBytes = 0;
-                        }
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        throw;
-                    }
-                    catch (Exception ex)
-                    {
-                        //Logger.WriteError(ex.Message);
-                    }
-                    finally
-                    {
-                        ArrayPool<byte>.Shared.Return(buffer);
-                    }
-                }
-                if (accumulatedBytes > 0 && !isBreak)
-                {
-                    progress?.Report((GameContextActionType.Download, true, accumulatedBytes, filePath, currentBytes, chunkTotalSize));
-                }
-                if (isLast)
-                    fileStream.SetLength(allSize);
-                stream.Close();
-                await stream.DisposeAsync();
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (Exception)
-            {
-                await fileStream.FlushAsync(downloadCts!=null? downloadCts.Token:default);
-                await fileStream.FlushAsync();
-                await fileStream.DisposeAsync();
-            }
-        }
+        await DownloadRangeWithRetryAsync(
+                httpClientService,
+                url,
+                fileStream,
+                filePath,
+                start,
+                end,
+                state,
+                downloadCts!.Token,
+                progress
+            )
+            .ConfigureAwait(false);
+
+        if (isLast)
+            fileStream.SetLength(allSize);
+
+        await fileStream.FlushAsync(downloadCts.Token).ConfigureAwait(false);
     }
 
-
-    /// <summary>
-    /// 校验整个文件
-    /// </summary>
     public static async Task DownloadFileByFull(
         IHttpClientService httpClientService,
         string url,
@@ -147,124 +56,291 @@ public static class DownloadTask
         IndexChunkInfo chunk,
         DownloadState state = null,
         CancellationTokenSource? downloadCts = default,
-        IProgress<(GameContextActionType, bool, long,string,long,long)> progress = null
+        IProgress<(GameContextActionType, bool, long, string, long, long)> progress = null
     )
     {
-        long accumulatedBytes = 0;
-        long currentByte = 0;
-        using (
-            var fileStream = new FileStream(
+        ValidateArguments(chunk.Start, chunk.End, size, downloadCts);
+        await using var fileStream = new FileStream(
+            filePath,
+            FileMode.OpenOrCreate,
+            FileAccess.ReadWrite,
+            FileShare.None,
+            262144,
+            true
+        );
+
+        await DownloadRangeWithRetryAsync(
+                httpClientService,
+                url,
+                fileStream,
                 filePath,
-                FileMode.OpenOrCreate,
-                FileAccess.ReadWrite,
-                FileShare.None,
-                262144,
-                true
+                chunk.Start,
+                chunk.End,
+                state,
+                downloadCts!.Token,
+                progress
             )
-        )
+            .ConfigureAwait(false);
+
+        fileStream.SetLength(size);
+        await fileStream.FlushAsync(downloadCts.Token).ConfigureAwait(false);
+    }
+
+    private static async Task DownloadRangeWithRetryAsync(
+        IHttpClientService httpClientService,
+        string url,
+        FileStream fileStream,
+        string filePath,
+        long start,
+        long end,
+        DownloadState? state,
+        CancellationToken cancellationToken,
+        IProgress<(GameContextActionType, bool, long, string, long, long)>? progress
+    )
+    {
+        long totalSize = end - start + 1;
+        long totalWritten = 0;
+        long accumulatedBytes = 0;
+        int retryCount = 0;
+
+        while (totalWritten < totalSize)
         {
+            ThrowIfCanceled(state, cancellationToken);
+            long requestStart = start + totalWritten;
+
             try
             {
-                if (chunk.Start == 0 && chunk.End == -1)
-                {
-                    //Logger.WriteError(
-                    //    $"文件{filePath}，分片数据错误，start={chunk.Start},end={chunk.End}"
-                    //);
-                    return;
-                }
-                using var request = new HttpRequestMessage(
-                    HttpMethod.Get,
-                    url
-                );
-                request.Headers.Range = new RangeHeaderValue(chunk.Start, chunk.End);
+                using var request = new HttpRequestMessage(HttpMethod.Get, url);
+                request.Headers.Range = new RangeHeaderValue(requestStart, end);
+
                 using var response = await httpClientService
                     .GameDownloadClient.SendAsync(
                         request,
                         HttpCompletionOption.ResponseHeadersRead,
-                        downloadCts.Token
+                        cancellationToken
                     )
-                    .ConfigureAwait(false); // 非UI上下文切换
-
-                response.EnsureSuccessStatusCode();
-                var stream = await response
-                    .Content.ReadAsStreamAsync(downloadCts.Token)
                     .ConfigureAwait(false);
-                if (chunk.Start < 0 || chunk.End < chunk.Start)
+
+                if (IsTransientStatusCode(response.StatusCode))
                 {
-                    //Logger.WriteError($"分片范围无效，start={chunk.Start},end={chunk.End}");
-                    throw new ArgumentException($"分片范围无效: {chunk.Start}-{chunk.End}");
+                    throw new HttpRequestException(
+                        $"CDN returned {(int)response.StatusCode} ({response.StatusCode}).",
+                        null,
+                        response.StatusCode
+                    );
                 }
 
-                long totalWritten = 0;
-                long chunkTotalSize = chunk.End - chunk.Start + 1;
-                var memoryPool = ArrayPool<byte>.Shared;
+                response.EnsureSuccessStatusCode();
+                ValidateRangeResponse(response, requestStart, end, totalWritten);
 
-                fileStream.Seek(chunk.Start, SeekOrigin.Begin);
-                bool isBreak = false;
-                while (totalWritten < chunkTotalSize)
+                await using var networkStream = await response
+                    .Content.ReadAsStreamAsync(cancellationToken)
+                    .ConfigureAwait(false);
+
+                fileStream.Seek(requestStart, SeekOrigin.Begin);
+
+                while (totalWritten < totalSize)
                 {
-                    if (downloadCts.IsCancellationRequested || state?.IsStop == true)
-                    {
-                        throw new OperationCanceledException();
-                    }
+                    ThrowIfCanceled(state, cancellationToken);
                     if (state != null)
-                        await state.PauseToken.WaitIfPausedAsync().ConfigureAwait(false); // 暂停检查也异步化
-                    int bytesToRead = (int)Math.Min(MaxBufferSize, chunkTotalSize - totalWritten);
-                    byte[] buffer = memoryPool.Rent(bytesToRead);
+                        await state.PauseToken.WaitIfPausedAsync().ConfigureAwait(false);
+
+                    int bytesToRead = (int)Math.Min(MaxBufferSize, totalSize - totalWritten);
+                    byte[] buffer = ArrayPool<byte>.Shared.Rent(bytesToRead);
                     try
                     {
-                        int bytesRead = await stream
-                            .ReadAsync(buffer.AsMemory(0, bytesToRead), downloadCts.Token)
+                        int bytesRead = await ReadWithIdleTimeoutAsync(
+                                networkStream,
+                                buffer.AsMemory(0, bytesToRead),
+                                cancellationToken
+                            )
                             .ConfigureAwait(false);
 
                         if (bytesRead == 0)
-                        {
-                            isBreak = true;
-                            break;
-                        }
+                            throw new IOException(
+                                $"下载流提前结束：{totalWritten}/{totalSize}，{filePath}"
+                            );
 
                         if (state != null)
-                            await state.SpeedLimiter
-                                .LimitAsync(bytesRead, downloadCts.Token)
+                        {
+                            await state
+                                .SpeedLimiter.LimitAsync(bytesRead, cancellationToken)
                                 .ConfigureAwait(false);
+                        }
 
                         await fileStream
-                            .WriteAsync(buffer.AsMemory(0, bytesRead), downloadCts.Token)
+                            .WriteAsync(buffer.AsMemory(0, bytesRead), cancellationToken)
                             .ConfigureAwait(false);
 
                         totalWritten += bytesRead;
                         accumulatedBytes += bytesRead;
-                        currentByte += bytesRead;
+
+                        if (accumulatedBytes >= UpdateThreshold)
+                        {
+                            progress?.Report(
+                                (
+                                    GameContextActionType.Download,
+                                    true,
+                                    accumulatedBytes,
+                                    filePath,
+                                    totalWritten,
+                                    totalSize
+                                )
+                            );
+                            accumulatedBytes = 0;
+                        }
                     }
                     finally
                     {
-                        memoryPool.Return(buffer);
-                    }
-                    if (accumulatedBytes >= UpdateThreshold)
-                    {
-                        progress?.Report((GameContextActionType.Download,true,accumulatedBytes,filePath,currentByte, chunkTotalSize));
-                        accumulatedBytes = 0;
+                        ArrayPool<byte>.Shared.Return(buffer);
                     }
                 }
-                if (accumulatedBytes > 0 && !isBreak)
-                {
-                    progress?.Report((GameContextActionType.Download, true, accumulatedBytes, filePath, currentByte, chunkTotalSize));
-                }
-                if (totalWritten != chunkTotalSize)
-                {
-                    throw new IOException($"分片写入不完整: {totalWritten}/{chunkTotalSize}");
-                }
-                fileStream.SetLength(size);
             }
-            catch (Exception ex)
+            catch (OperationCanceledException)
+                when (!cancellationToken.IsCancellationRequested && state?.IsStop != true)
             {
-                //Logger.WriteError($"下载文件{filePath}出现异常" + ex.Message);
+                await DelayBeforeRetryAsync(
+                        ++retryCount,
+                        filePath,
+                        requestStart,
+                        end,
+                        cancellationToken
+                    )
+                    .ConfigureAwait(false);
             }
-            finally
+            catch (HttpRequestException ex) when (IsTransient(ex))
             {
-                await fileStream.FlushAsync().ConfigureAwait(false);
-                await fileStream.DisposeAsync().ConfigureAwait(false);
+                await DelayBeforeRetryAsync(
+                        ++retryCount,
+                        filePath,
+                        requestStart,
+                        end,
+                        cancellationToken
+                    )
+                    .ConfigureAwait(false);
+            }
+            catch (IOException)
+            {
+                await DelayBeforeRetryAsync(
+                        ++retryCount,
+                        filePath,
+                        requestStart,
+                        end,
+                        cancellationToken
+                    )
+                    .ConfigureAwait(false);
             }
         }
+
+        if (accumulatedBytes > 0)
+        {
+            progress?.Report(
+                (
+                    GameContextActionType.Download,
+                    true,
+                    accumulatedBytes,
+                    filePath,
+                    totalWritten,
+                    totalSize
+                )
+            );
+        }
+    }
+
+    private static async ValueTask<int> ReadWithIdleTimeoutAsync(
+        Stream stream,
+        Memory<byte> buffer,
+        CancellationToken cancellationToken
+    )
+    {
+        using var idleCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        idleCts.CancelAfter(TimeSpan.FromSeconds(90));
+        return await stream.ReadAsync(buffer, idleCts.Token).ConfigureAwait(false);
+    }
+
+    private static async Task DelayBeforeRetryAsync(
+        int retryCount,
+        string filePath,
+        long requestStart,
+        long end,
+        CancellationToken cancellationToken
+    )
+    {
+        if (retryCount > MaxRetryCount)
+            throw new IOException(
+                $"下载重试 {MaxRetryCount} 次后仍然失败：{filePath}，范围 {requestStart}-{end}"
+            );
+
+        int baseDelay = Math.Min(1000 * (1 << (retryCount - 1)), 8000);
+        int delay = baseDelay + Random.Shared.Next(200, 800);
+        Log.Warning(
+            "下载中断，{Delay}ms 后进行第 {Retry}/{MaxRetry} 次续传：{FilePath} [{Start}-{End}]",
+            delay,
+            retryCount,
+            MaxRetryCount,
+            filePath,
+            requestStart,
+            end
+        );
+        await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
+    }
+
+    private static void ValidateArguments(
+        long start,
+        long end,
+        long size,
+        CancellationTokenSource? downloadCts
+    )
+    {
+        if (downloadCts == null)
+            throw new ArgumentNullException(nameof(downloadCts));
+        if ((start < 0 || end < start) && size != 0)
+            throw new ArgumentException($"分片范围无效：{start}-{end}");
+        downloadCts.Token.ThrowIfCancellationRequested();
+    }
+
+    private static void ThrowIfCanceled(DownloadState? state, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (state?.IsStop == true)
+            throw new OperationCanceledException(cancellationToken);
+    }
+
+    private static void ValidateRangeResponse(
+        HttpResponseMessage response,
+        long requestStart,
+        long requestEnd,
+        long totalWritten
+    )
+    {
+        if (response.StatusCode == HttpStatusCode.PartialContent)
+        {
+            var range = response.Content.Headers.ContentRange;
+            if (range?.From != requestStart || range.To > requestEnd)
+                throw new IOException(
+                    $"CDN返回了错误的分片范围：请求 {requestStart}-{requestEnd}，返回 {range}"
+                );
+            return;
+        }
+
+        // 首次完整范围请求兼容忽略 Range、直接返回完整内容的服务器。
+        if (totalWritten == 0 && requestStart == 0)
+            return;
+
+        throw new IOException(
+            $"CDN未响应续传范围 {requestStart}-{requestEnd}，状态码 {(int)response.StatusCode}"
+        );
+    }
+
+    private static bool IsTransient(HttpRequestException exception)
+    {
+        return exception.StatusCode == null || IsTransientStatusCode(exception.StatusCode.Value);
+    }
+
+    private static bool IsTransientStatusCode(HttpStatusCode statusCode)
+    {
+        int code = (int)statusCode;
+        return statusCode is HttpStatusCode.RequestTimeout or HttpStatusCode.TooManyRequests
+            || code is 500 or 502 or 503 or 504;
     }
 }
