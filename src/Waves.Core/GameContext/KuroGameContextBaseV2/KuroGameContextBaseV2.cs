@@ -22,6 +22,9 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
     /// </summary>
     public IHttpClientService HttpClientService { get; set; }
 
+
+    public abstract bool IsBunle { get; }
+
     /// <summary>
     /// CDN测试工具
     /// </summary>

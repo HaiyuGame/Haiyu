@@ -3,14 +3,13 @@ using System.Net.WebSockets;
 using ChromeCDPSharp.Common;
 using ChromeCDPSharp.Models;
 using ChromeCDPSharp.Serialization;
+using Haiyu.Common.Contracts;
 using Waves.Core.Common;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Security.Credentials.UI;
 using ZXing.Aztec.Internal;
 
 namespace Haiyu.ViewModel.ToolkitsViewModel;
-
-
 
 public partial class AutoKuroTokenViewModel : ViewModelBase
 {
@@ -27,15 +26,14 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
     private string? _lastReadableResponseRequestId;
     private Dictionary<string, object?>? _requestHeader;
 
-    public AutoKuroTokenViewModel(IPickersService pickersService,IWindowManager windowManager)
+    public AutoKuroTokenViewModel(WindowSession windowSession, IWindowManager windowManager)
     {
-        PickerService = pickersService;
+        WindowSession = windowSession;
         WindowManager = windowManager;
     }
 
-    public IPickersService PickerService { get; }
+    public WindowSession WindowSession { get; }
     public IWindowManager WindowManager { get; }
-    public Window? Window { get; internal set; }
 
     [ObservableProperty]
     public partial string AdbPath { get; set; } = string.Empty;
@@ -70,9 +68,7 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
     [RelayCommand]
     public async Task SelectAdbPathAsync()
     {
-        var openFile = await PickerService.GetFileOpenPicker(
-            [".exe"]
-        );
+        var openFile = await WindowSession.Context.PickersService.GetFileOpenPicker([".exe"]);
         if (
             openFile is null
             || !openFile.Path.Contains("adb.exe", StringComparison.OrdinalIgnoreCase)
@@ -122,18 +118,33 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
             }
             catch (Exception ex)
             {
-                AppendLog(LanguageService.FormatByText(LanguageService.GetStringByText("跳过 Socket {0}: {1}"), socket.SocketName, ex.Message));
+                AppendLog(
+                    LanguageService.FormatByText(
+                        LanguageService.GetStringByText("跳过 Socket {0}: {1}"),
+                        socket.SocketName,
+                        ex.Message
+                    )
+                );
                 continue;
             }
 
             foreach (var target in targets.Where(static target => target.IsPageLike))
             {
-                AppendLog(LanguageService.FormatByText(LanguageService.GetStringByText("发现页面: [{0}] {1} {2}"), socket.SocketName, target.Title, target.Url));
+                AppendLog(
+                    LanguageService.FormatByText(
+                        LanguageService.GetStringByText("发现页面: [{0}] {1} {2}"),
+                        socket.SocketName,
+                        target.Title,
+                        target.Url
+                    )
+                );
             }
 
             var candidate = targets
                 .Where(static target => target.IsPageLike)
-                .Where(static target => !string.Equals(target.Url, "about:blank", StringComparison.OrdinalIgnoreCase))
+                .Where(static target =>
+                    !string.Equals(target.Url, "about:blank", StringComparison.OrdinalIgnoreCase)
+                )
                 .Select(target => (Socket: socket, Target: target))
                 .FirstOrDefault();
             if (selectedTarget is null && candidate.Target is not null)
@@ -148,7 +159,13 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
             return;
         }
 
-        AppendLog(LanguageService.FormatByText(LanguageService.GetStringByText("选中页面: {0} {1}"), selectedTarget.Value.Target.Title, selectedTarget.Value.Target.Url));
+        AppendLog(
+            LanguageService.FormatByText(
+                LanguageService.GetStringByText("选中页面: {0} {1}"),
+                selectedTarget.Value.Target.Title,
+                selectedTarget.Value.Target.Url
+            )
+        );
         _webSocketDebuggerUrl = selectedTarget.Value.Target.WebSocketDebuggerUrl;
         await ConnectCdpClientAsync(_webSocketDebuggerUrl);
     }
@@ -198,19 +215,27 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
                         _requestHeader = e.Request.Headers;
                         if (TryGetHeader(_requestHeader, "did", out var did))
                         {
-                            this.Window.DispatcherQueue.TryEnqueue(() =>
-                            {
-                                this.Did = did?.ToString();
-                            });
+                            this.WindowSession.Context.GetWindow()
+                                .DispatcherQueue.TryEnqueue(() =>
+                                {
+                                    this.Did = did?.ToString();
+                                });
                         }
                         if (TryGetHeader(_requestHeader, "token", out var token))
                         {
-                            this.Window.DispatcherQueue.TryEnqueue(() =>
-                            {
-                                this.Token = token?.ToString();
-                            });
+                            this.WindowSession.Context.GetWindow()
+                                .DispatcherQueue.TryEnqueue(() =>
+                                {
+                                    this.Token = token?.ToString();
+                                });
                         }
-                        AppendLog(LanguageService.FormatByText(LanguageService.GetStringByText("捕获请求: {0} {1}"), e.Request.Method, e.Request.Url));
+                        AppendLog(
+                            LanguageService.FormatByText(
+                                LanguageService.GetStringByText("捕获请求: {0} {1}"),
+                                e.Request.Method,
+                                e.Request.Url
+                            )
+                        );
                     }
 
                     return ValueTask.CompletedTask;
@@ -230,7 +255,13 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
                             _trackedRequestIds.Add(e.RequestId);
                         }
 
-                        AppendLog(LanguageService.FormatByText(LanguageService.GetStringByText("响应头已到达: {0} {1}"), e.Response.Status, e.Response.Url));
+                        AppendLog(
+                            LanguageService.FormatByText(
+                                LanguageService.GetStringByText("响应头已到达: {0} {1}"),
+                                e.Response.Status,
+                                e.Response.Url
+                            )
+                        );
                     }
 
                     return ValueTask.CompletedTask;
@@ -257,15 +288,26 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
                             );
                             var jsonO = JsonObject.Parse(result.Body);
                             var playerId = jsonO?["data"]?["userId"];
-                            this.Window.DispatcherQueue.TryEnqueue(() =>
-                            {
-                                this.PlayerId = playerId?.ToString();
-                            });
-                            AppendLog(LanguageService.FormatByText(LanguageService.GetStringByText("已读取目标响应 Body: {0}"), e.RequestId));
+                            this.WindowSession.Context.GetWindow()
+                                .DispatcherQueue.TryEnqueue(() =>
+                                {
+                                    this.PlayerId = playerId?.ToString();
+                                });
+                            AppendLog(
+                                LanguageService.FormatByText(
+                                    LanguageService.GetStringByText("已读取目标响应 Body: {0}"),
+                                    e.RequestId
+                                )
+                            );
                         }
                         catch (Exception ex)
                         {
-                            AppendLog(LanguageService.FormatByText(LanguageService.GetStringByText("读取响应 Body 失败: {0}"), ex.Message));
+                            AppendLog(
+                                LanguageService.FormatByText(
+                                    LanguageService.GetStringByText("读取响应 Body 失败: {0}"),
+                                    ex.Message
+                                )
+                            );
                         }
                     }
                 }
@@ -279,7 +321,12 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
                 {
                     if (RemoveTrackedRequest(e.RequestId))
                     {
-                        AppendLog(LanguageService.FormatByText(LanguageService.GetStringByText("响应失败，无法读取 Body: {0}"), e.ErrorText));
+                        AppendLog(
+                            LanguageService.FormatByText(
+                                LanguageService.GetStringByText("响应失败，无法读取 Body: {0}"),
+                                e.ErrorText
+                            )
+                        );
                     }
 
                     return ValueTask.CompletedTask;
@@ -292,7 +339,8 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
             new NetworkEnableParams(
                 MaxTotalBufferSize: 100 * 1024 * 1024,
                 MaxResourceBufferSize: 10 * 1024 * 1024,
-                MaxPostDataSize: 1024 * 1024),
+                MaxPostDataSize: 1024 * 1024
+            ),
             CdpJsonContext.Default.NetworkEnableParams,
             CdpJsonContext.Default.CdpCommandResponseEmptyResult,
             CTS.Token
@@ -312,7 +360,11 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
 
         if (string.IsNullOrWhiteSpace(_lastReadableResponseRequestId))
         {
-            AppendLog(LanguageService.GetStringByText("还没有已完成的响应体，请先触发目标请求并等待 loadingFinished。"));
+            AppendLog(
+                LanguageService.GetStringByText(
+                    "还没有已完成的响应体，请先触发目标请求并等待 loadingFinished。"
+                )
+            );
             return;
         }
 
@@ -343,7 +395,12 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
         _cdpClient.ConnectionStateChanged += OnCdpClientConnectionStateChanged;
         _cdpClient.EventHandlerException += OnCdpClientEventHandlerException;
         await _cdpClient.ConnectAsync(CTS.Token);
-        AppendLog(LanguageService.FormatByText(LanguageService.GetStringByText("CDP 已连接: {0}"), webSocketDebuggerUrl));
+        AppendLog(
+            LanguageService.FormatByText(
+                LanguageService.GetStringByText("CDP 已连接: {0}"),
+                webSocketDebuggerUrl
+            )
+        );
         await StartTrafficMonitorAsync();
     }
 
@@ -352,16 +409,22 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
         CdpConnectionStateChangedEventArgs e
     )
     {
-        Window.DispatcherQueue.TryEnqueue(() =>
-        {
-            WebSocketState = e.WebSocketState;
-            CdpState = e.CurrentState;
-        });
+        this.WindowSession.Context.GetWindow()
+            .DispatcherQueue.TryEnqueue(() =>
+            {
+                WebSocketState = e.WebSocketState;
+                CdpState = e.CurrentState;
+            });
     }
 
     private void OnCdpClientEventHandlerException(object? sender, Exception e)
     {
-        AppendLog(LanguageService.FormatByText(LanguageService.GetStringByText("CDP 事件处理异常: {0}"), e.Message));
+        AppendLog(
+            LanguageService.FormatByText(
+                LanguageService.GetStringByText("CDP 事件处理异常: {0}"),
+                e.Message
+            )
+        );
     }
 
     private static bool IsTargetUrl(string url)
@@ -414,16 +477,17 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
 
     private void AppendLog(string message)
     {
-        Window.DispatcherQueue.TryEnqueue(() =>
-        {
-            _logLines.Enqueue($"{DateTime.Now:HH:mm:ss} {message}");
-            while (_logLines.Count > 200)
+        this.WindowSession.Context.GetWindow()
+            .DispatcherQueue.TryEnqueue(() =>
             {
-                _logLines.Dequeue();
-            }
+                _logLines.Enqueue($"{DateTime.Now:HH:mm:ss} {message}");
+                while (_logLines.Count > 200)
+                {
+                    _logLines.Dequeue();
+                }
 
-            LogText = string.Join(Environment.NewLine, _logLines.Reverse());
-        });
+                LogText = string.Join(Environment.NewLine, _logLines.Reverse());
+            });
     }
 
     private void ClearNetworkSubscriptions()
@@ -444,14 +508,16 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
         //);
         //if (result == UserConsentVerificationResult.Verified)
         //{
-            
+
         //}
         var package = new DataPackage();
-        package.SetText($"""
+        package.SetText(
+            $"""
             Did:{this.Did}
             Token:{this.Token}
             PlayerId:{this.PlayerId}
-            """);
+            """
+        );
         Clipboard.SetContent(package);
     }
 
@@ -467,7 +533,6 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
         }
 
         _adbClient.Dispose();
-        Window = null;
         base.OnDisposing();
     }
 }

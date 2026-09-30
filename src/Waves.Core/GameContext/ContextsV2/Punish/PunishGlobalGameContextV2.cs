@@ -8,4 +8,5 @@ public class PunishGlobalGameContextV2 : KuroGameContextBaseV2
 
     public override Type ContextType => typeof(PunishGlobalGameContextV2);
     public override GameType GameType => GameType.Punish;
+    public override bool IsBunle => false;
 }
