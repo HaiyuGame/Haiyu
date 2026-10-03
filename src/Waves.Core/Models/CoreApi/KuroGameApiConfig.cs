@@ -2,6 +2,11 @@ namespace Waves.Core.Models.CoreApi
 {
     public class KuroGameApiConfig:IGameAPIConfig
     {
+        /// <summary>
+        /// 版本
+        /// </summary>
+        public string BunleVersion { get; set;  }
+
         public static string[] BaseAddress =
         [
             "https://prod-cn-alicdn-gamestarter.kurogame.com",
@@ -18,6 +23,8 @@ namespace Waves.Core.Models.CoreApi
         public string AppId { get; set; }
 
         public string AppKey { get; set; }
+
+        public string AppKeyV2 { get; set;  }
 
         public string GameIdentity { get; set; }
 
@@ -36,6 +43,7 @@ namespace Waves.Core.Models.CoreApi
                 AppId = "10003",
                 GameID = "G152",
                 AppKey = "Y8xXrXk65DqFHEDgApn3cpK5lfczpFx5",
+                AppKeyV2 = "oLNgHF1CESo51DGHN2odtp40e3oI1HfZ",
                 GameIdentity = "Aki",
                 GameExeName = "Wuthering Waves.exe",
                 ConfigUrl =

@@ -12,7 +12,6 @@ namespace Waves.Core.GameContext
             var url = $"{address}/launcher/game/{cacheConfig.GameID}/{cacheConfig.AppId}_{cacheConfig.AppKey}/index.json?_t={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
             try
             {
-               
                 var result = await HttpClientService.HttpClient.GetAsync(url);
                 var jsonStr = await result.Content.ReadAsStringAsync();
                 var laucherIndex = await result.Content.ReadFromJsonAsync<GameLauncherSource>(
