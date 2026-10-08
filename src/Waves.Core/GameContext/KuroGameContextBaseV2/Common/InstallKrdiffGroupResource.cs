@@ -5,6 +5,7 @@ namespace Waves.Core.GameContext.KruoGameContextBaseV2.Common;
 /// </summary>
 public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncDisposable
 {
+    private long _generation;
     private List<PatchGameFileInfo> krdiffs;
     private string diffFolderPath;
     private List<PatchGameFileInfo> groupFileInfos;
@@ -28,6 +29,7 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
 
     public void SetParam(Dictionary<string, object> param, GameEventPublisher gameEventPublisher)
     {
+        _generation = GameContextOutputArgs.CurrentGeneration.Value;
         this.Param = param;
         this.GameEventPublisher = gameEventPublisher;
     }
@@ -80,6 +82,7 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
                 GameEventPublisher.Publish(
                     new GameContextOutputArgs
                     {
+            Generation = _generation,
                         Type = GameContextActionType.Error,
                         TipMessage = "初始化失败",
                     }
@@ -98,6 +101,7 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
                     GameEventPublisher.Publish(
                         new GameContextOutputArgs
                         {
+            Generation = _generation,
                             Type = GameContextActionType.TipMessage,
                             TipMessage =
                                 $"磁盘空间不足，剩余空间{GameProgressTracker.FormatBytes(diskSize)},需要空间{GameProgressTracker.FormatBytes(size)}，解压损坏！请修复游戏",
@@ -113,6 +117,7 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
                     GameEventPublisher.Publish(
                         new GameContextOutputArgs
                         {
+            Generation = _generation,
                             Type = GameContextActionType.Error,
                             TipMessage = $"补丁文件不存在，跳过: {System.IO.Path.GetFileName(krdiffPath)}",
                         }
@@ -126,6 +131,7 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
                             GameEventPublisher.Publish(
                                 new GameContextOutputArgs
                                 {
+            Generation = _generation,
                                     Type = GameContextActionType.Decompress,
                                     CurrentSize = (long)s.Item3.PatchedCurrentBytes,
                                     TotalSize = (long)s.Item3.PatchTotalBytes,
@@ -159,6 +165,7 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
                     GameEventPublisher.Publish(
                         new GameContextOutputArgs
                         {
+            Generation = _generation,
                             Type = GameContextActionType.Error,
                             TipMessage = $"补丁解压失败，退出码: {decompressResult}，跳过: {System.IO.Path.GetFileName(krdiffPath)}",
                         }
@@ -212,6 +219,7 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
             Logger.WriteError($"安装补丁组文件异常: {ex.Message}");
             GameEventPublisher.Publish(new GameContextOutputArgs
             {
+            Generation = _generation,
                 Type = GameContextActionType.Error,
                 TipMessage = $"安装补丁组文件异常: {ex.Message}"
             });

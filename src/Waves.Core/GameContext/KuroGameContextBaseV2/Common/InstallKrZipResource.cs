@@ -5,6 +5,7 @@ namespace Waves.Core.GameContext.KruoGameContextBaseV2.Common;
 /// </summary>
 public class InstallKrZipResource : IProgressSetup,IAsyncDisposable
 {
+    private long _generation;
     private List<PatchGameFileInfo> zipInfos;
 
     private string baseGamePath;
@@ -41,6 +42,7 @@ public class InstallKrZipResource : IProgressSetup,IAsyncDisposable
 
     public void SetParam(Dictionary<string, object> param, IGameEventPublisher<GameContextOutputArgs> gameEventPublisher)
     {
+        _generation = GameContextOutputArgs.CurrentGeneration.Value;
         this.GameEventPublisher = gameEventPublisher;
         this.Param = param;
     }
@@ -77,6 +79,7 @@ public class InstallKrZipResource : IProgressSetup,IAsyncDisposable
             this.GameEventPublisher.Publish(
                 new GameContextOutputArgs()
                 {
+            Generation = _generation,
                     Type = Models.Enums.GameContextActionType.TipMessage,
                     TipMessage = "参数不正确，无法解压",
                 }
@@ -96,6 +99,7 @@ public class InstallKrZipResource : IProgressSetup,IAsyncDisposable
             {
                 GameEventPublisher.Publish(new GameContextOutputArgs()
                 {
+            Generation = _generation,
                     Type = GameContextActionType.TipMessage,
                     TipMessage = "解压文件不存在，无法解压，请直接修复游戏",
                 });
@@ -159,6 +163,7 @@ public class InstallKrZipResource : IProgressSetup,IAsyncDisposable
         }
         var args = new GameContextOutputArgs
         {
+            Generation = _generation,
             Type = type,
             CurrentSize = _totalProgressSize,
             TotalSize = _currentZipMaxSize > 0 ? _currentZipMaxSize : fileMaxSize,

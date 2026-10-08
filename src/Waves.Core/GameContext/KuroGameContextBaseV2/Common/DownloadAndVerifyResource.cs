@@ -26,6 +26,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
     private long _totalfileSize;
     private int _totalFileTotal;
     private volatile bool _disposed;
+    private long _generation;
     #endregion
 
     private DownloadState _downloadState;
@@ -54,6 +55,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
         IGameEventPublisher<GameContextOutputArgs> gameEventPublisher
     )
     {
+        _generation = GameContextOutputArgs.CurrentGeneration.Value;
         Param = param;
         this.GameEventPublisher = gameEventPublisher;
     }
@@ -532,6 +534,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
         }
         var args = new GameContextOutputArgs
         {
+            Generation = _generation,
             Type = type,
             CurrentSize = _totalProgressSize,
             TotalSize = _totalfileSize,

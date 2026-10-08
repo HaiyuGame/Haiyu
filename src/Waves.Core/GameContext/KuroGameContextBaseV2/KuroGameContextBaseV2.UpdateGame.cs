@@ -326,28 +326,40 @@ partial class KuroGameContextBaseV2
 
     private async Task SetCurrentStateNull(bool? isProd)
     {
-        if (isProd != true && DownloadState is not null) DownloadState.IsActive = false;
-        if (isProd != false && ProdDownloadState is not null) ProdDownloadState.IsActive = false;
+        var generation = Volatile.Read(ref _operationGeneration);
+        var action = _currentRunningAction;
         _currentRunningAction = null;
-        if (isProd == null)
+        var states = new[] { isProd != true ? DownloadState : null, isProd != false ? ProdDownloadState : null };
+        try
         {
-            this.ProdDownloadState = null;
-            this.DownloadState = null;
+            foreach (var state in states)
+            {
+                if (state is null) continue;
+                state.IsActive = false;
+                if (state.CancelToken is not null) await state.CancelToken.CancelAsync();
+            }
+            if (action is not null) await action.DisposeAsync();
         }
-        else if (isProd.Value)
+        catch (Exception ex)
         {
-            this.ProdDownloadState = null;
+            Logger.WriteError($"任务收尾失败：{ex}");
         }
-        else
+        finally
         {
-            this.DownloadState = null;
+            if (isProd != true) DownloadState = null;
+            if (isProd != false) ProdDownloadState = null;
+            Setups = [];
+            CurrentSetups = 0;
+            ProgressState.ActiveFiles.Clear();
+            GameEventPublisher.Publish(new()
+            {
+                Type = GameContextActionType.None,
+                Generation = generation,
+                Prod = isProd == true,
+                IsAction = false,
+                IsPause = false
+            });
         }
-        foreach (var item in this.ProgressState.ActiveFiles)
-        {
-            ProgressState.ActiveFiles.TryRemove(item);
-        }
-        await Task.Delay(100);
-        this.GameEventPublisher.Publish(new() { Type = GameContextActionType.None });
     }
 
 }

@@ -20,6 +20,27 @@ public sealed class LauncherResourceProviderTests
         """;
 
     [TestMethod]
+    public async Task SavedBundleSelectionOverridesDefaultButExplicitParameterWins()
+    {
+        using var h = new Handler();
+        using var client = new HttpClient(h);
+        var path = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".json");
+        var local = new GameLocalConfig(path);
+        var config = Config();
+        config.BunleDefaultBundleName = "MissingDefault";
+        var provider = new BundleGameResourceProvider(client);
+        provider.SetConfig(local, config);
+        try
+        {
+            await local.SaveConfigAsync(GameLocalSettingName.BunleName, "HD");
+            Assert.AreEqual("HD", (await provider.GetResourceSummaryAsync()).BundleName);
+            await local.SaveConfigAsync(GameLocalSettingName.BunleName, "MissingSaved");
+            Assert.AreEqual("HD", (await provider.GetResourceSummaryAsync(new() { BundleName = "HD" })).BundleName);
+        }
+        finally { File.Delete(path); }
+    }
+
+    [TestMethod]
     public async Task BundleConfigurationAcceptsGzipWithOrWithoutEncodingHeader()
     {
         foreach (var hasHeader in new[] { false, true })

@@ -5,6 +5,7 @@ namespace Waves.Core.GameContext.KruoGameContextBaseV2.Common;
 /// </summary>
 public class InstallKrdiffResource:IProgressSetup,IAsyncDisposable
 {
+    private long _generation;
     private List<PatchGameFileInfo> krdiffs;
     private string diffFolderPath;
     private string gameBaseFolder;
@@ -28,6 +29,7 @@ public class InstallKrdiffResource:IProgressSetup,IAsyncDisposable
 
     public void SetParam(Dictionary<string, object> param)
     {
+        _generation = GameContextOutputArgs.CurrentGeneration.Value;
         this.Param = param;
     }
 
@@ -63,6 +65,7 @@ public class InstallKrdiffResource:IProgressSetup,IAsyncDisposable
                 GameEventPublisher.Publish(
                     new GameContextOutputArgs
                     {
+            Generation = _generation,
                         Type = GameContextActionType.TipMessage,
                         ErrorString = $"磁盘空间不足，剩余可用空间{diskSize}字节,严重不足",
                     }
@@ -78,6 +81,7 @@ public class InstallKrdiffResource:IProgressSetup,IAsyncDisposable
                         GameEventPublisher.Publish(
                             new GameContextOutputArgs
                             {
+            Generation = _generation,
                                 Type = GameContextActionType.Decompress,
                                 CurrentSize = (long)s.Item3.PatchedCurrentBytes,
                                 TotalSize = (long)s.Item3.PatchTotalBytes,
@@ -106,6 +110,7 @@ public class InstallKrdiffResource:IProgressSetup,IAsyncDisposable
                 GameEventPublisher.Publish(
                     new GameContextOutputArgs
                     {
+            Generation = _generation,
                         Type = GameContextActionType.Error,
                         TipMessage = $"补丁解压失败，退出码: {decompressResult}，跳过: {System.IO.Path.GetFileName(krdiffPath)}",
                     }

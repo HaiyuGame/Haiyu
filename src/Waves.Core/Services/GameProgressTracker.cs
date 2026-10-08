@@ -110,11 +110,18 @@ public sealed class GameProgressTracker : TrackerBase<GameProgressTracker, GameC
     private DateTime? lastTime;
     private bool _isTerminated;
     private long _terminationGeneration;
+    private long _latestGeneration;
 
     public override ValueTask HandleEventAsync(GameContextOutputArgs args)
     {
         if (args == null)
             return default;
+
+        if (args.Generation > 0)
+        {
+            if (args.Generation < _latestGeneration) return default;
+            _latestGeneration = args.Generation;
+        }
 
         if (args.Type == GameContextActionType.None)
         {
@@ -134,6 +141,11 @@ public sealed class GameProgressTracker : TrackerBase<GameProgressTracker, GameC
             FileCurrentSize = 0;
             FileTotalSize = 0;
             CurrentStepTip = string.Empty;
+            StepName = string.Empty;
+            CurrentStepIndex = 0;
+            TotalSteps = 0;
+            AllSteps = [];
+            Prod = args.Prod;
             ActiveFiles.Clear();
             Interlocked.Increment(ref _activeFilesVersion);
             if (args.Generation > _terminationGeneration)
@@ -149,7 +161,9 @@ public sealed class GameProgressTracker : TrackerBase<GameProgressTracker, GameC
 
         if (_isTerminated)
         {
-            if (args.Generation > 0 && args.Generation <= _terminationGeneration)
+            if (args.Generation <= _terminationGeneration &&
+                (args.Generation > 0 || args.Type is GameContextActionType.Download or GameContextActionType.Verify
+                    or GameContextActionType.Decompress or GameContextActionType.ZipDecompress))
                 return default;
             _isTerminated = false;
         }

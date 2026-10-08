@@ -25,6 +25,8 @@ public class GameLocalSettingName
     public const string LocalGameVersion = nameof(LocalGameVersion);
 
     /// <summary>Haiyu 自己保存的独立资源包安装版本；不读取或兼容官方安装记录。</summary>
+    public const string BunleName = nameof(BunleName);
+
     public const string BunlePackVersion_Common = nameof(BunlePackVersion_Common);
     public const string BunlePackVersion_HD = nameof(BunlePackVersion_HD);
     public const string BunlePackVersion_SD = nameof(BunlePackVersion_SD);

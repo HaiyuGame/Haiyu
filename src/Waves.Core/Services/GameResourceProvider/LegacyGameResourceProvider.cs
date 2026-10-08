@@ -368,7 +368,6 @@ public sealed partial class LegacyGameResourceProvider : IGameResourceProvider
             token,
             resourcesBasePath
         );
-        // 完整索引若带压缩载体描述，校验的是其目标 Entries/DstFiles，而非缓存中的载体。
         var targets = result
             .ZipResources.Where(x => x.IsSelected)
             .SelectMany(x => x.Entries)

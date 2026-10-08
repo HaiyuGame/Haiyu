@@ -22,6 +22,28 @@ namespace Project.Test;
 public sealed class ResourceExecutionTests
 {
     [TestMethod]
+    public async Task CompletionResetsProgressAndRejectsLateCallbacks()
+    {
+        var tracker = new GameProgressTracker();
+        await tracker.HandleEventAsync(new() { Generation = 1, Type = GameContextActionType.Verify,
+            IsAction = true, TotalSize = 100, CurrentSize = 100, IsStepUpdate = true,
+            AllSteps = ["校验", "保存"], StepName = "校验", TotalSteps = 2 });
+        await tracker.HandleEventAsync(new() { Generation = 1, Type = GameContextActionType.None, Prod = true });
+        foreach (var generation in new long[] { 0, 1 })
+            await tracker.HandleEventAsync(new() { Generation = generation, Type = GameContextActionType.Verify, IsAction = true, TotalSize = 100 });
+        Assert.AreEqual(GameContextActionType.None, tracker.CurrentAction);
+        Assert.IsFalse(tracker.IsActive);
+        Assert.AreEqual(0, tracker.AllSteps.Count);
+        Assert.IsTrue(tracker.Prod);
+        await tracker.HandleEventAsync(new() { Generation = 2, Type = GameContextActionType.Download, IsAction = true, TotalSize = 100 });
+        Assert.IsTrue(tracker.IsActive);
+        await tracker.HandleEventAsync(new() { Generation = 1, Type = GameContextActionType.None });
+        await tracker.HandleEventAsync(new() { Generation = 1, Type = GameContextActionType.Verify });
+        Assert.AreEqual(GameContextActionType.Download, tracker.CurrentAction);
+        Assert.IsTrue(tracker.IsActive);
+    }
+
+    [TestMethod]
     public async Task FullInstallationConsumesUnifiedZipPlanAndVerifiesExtractedFiles()
     {
         await using var fixture = await Fixture.Create();
@@ -40,6 +62,25 @@ public sealed class ResourceExecutionTests
         Assert.IsTrue(await fixture.VersionIs("2"));
         Assert.IsTrue(fixture.Handler.Paths.Contains("/full-index"));
         Assert.IsFalse(fixture.Handler.Paths.Contains("/patch-index"));
+        await fixture.WaitUntil(() => Task.FromResult(fixture.Context.ProgressState.LastArgs.Type == GameContextActionType.None));
+        Assert.IsNull(fixture.Context.DownloadState);
+        Assert.IsFalse(fixture.Context.IsResourceOperationActive);
+        Assert.IsFalse(fixture.Context.ProgressState.IsActive);
+        Assert.AreEqual(0, fixture.Context.ProgressState.AllSteps.Count);
+    }
+
+    [TestMethod]
+    public async Task RepairCanRunAgainAfterCompletion()
+    {
+        await using var fixture = await Fixture.Create();
+        for (var i = 0; i < 2; i++)
+        {
+            Assert.IsTrue(await fixture.Context.RepairGameAsync(isDelete: false));
+            await fixture.WaitUntil(() => Task.FromResult(fixture.Context.ProgressState.LastArgs.Type == GameContextActionType.None));
+            Assert.IsFalse(fixture.Context.IsResourceOperationActive);
+            Assert.IsNull(fixture.Context.DownloadState);
+            Assert.IsFalse(fixture.Context.ProgressState.IsActive);
+        }
     }
 
     [TestMethod]
@@ -68,6 +109,9 @@ public sealed class ResourceExecutionTests
         await fixture.WaitUntil(() => Task.FromResult(fixture.Context.ProdDownloadState is null && !fixture.Context.IsResourceOperationActive));
         Assert.IsTrue(await fixture.VersionIs("1"));
         Assert.AreEqual(fixture.Cache, await fixture.Context.GameLocalConfig.GetConfigAsync(GameLocalSettingName.ProdDownloadPath));
+        await fixture.WaitUntil(() => Task.FromResult(fixture.Context.ProgressState.LastArgs.Type == GameContextActionType.None));
+        Assert.IsTrue(fixture.Context.ProgressState.LastArgs.Prod);
+        Assert.IsFalse(fixture.Context.ProgressState.IsActive);
         fixture.Handler.OfficialVersion = "3";
         fixture.Handler.HasPredownload = false;
         await fixture.Context.StartInstallGameResource(InstallOption.CreateProdownlad());
@@ -140,6 +184,10 @@ public sealed class ResourceExecutionTests
         Assert.IsTrue(await fixture.Context.UpdateGameResourceAsync(fixture.Cache));
         await fixture.Handler.DownloadStarted.Task.WaitAsync(TimeSpan.FromSeconds(8));
         Assert.IsFalse(await fixture.Context.UpdateGameResourceAsync(fixture.Cache));
+        Assert.IsTrue(await fixture.Context.PauseDownloadAsync());
+        Assert.IsTrue(fixture.Context.DownloadState!.IsPaused);
+        Assert.IsTrue(await fixture.Context.ResumeDownloadAsync());
+        Assert.IsFalse(fixture.Context.DownloadState.IsPaused);
         Assert.IsTrue(await fixture.Context.StopCannelTaskAsync());
         await fixture.WaitUntil(() => Task.FromResult(fixture.Context.DownloadState is null && !fixture.Context.IsResourceOperationActive));
         Assert.IsTrue(await fixture.VersionIs("1"));

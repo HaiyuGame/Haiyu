@@ -29,6 +29,7 @@ public sealed partial class BundleGameResourceProvider : IGameResourceProvider
     /// <summary>null 使用服务端组合/全局配置中的 Apply Method。</summary>
     public string? ApplyMethod { get; set; }
     public string? CurrentBundleName { get; set; }
+    private string? _savedBundleName;
 
     public void SetConfig(GameLocalConfig gameLocal, KuroGameApiConfig apiConfig)
     {
@@ -42,6 +43,7 @@ public sealed partial class BundleGameResourceProvider : IGameResourceProvider
             throw new InvalidOperationException("请先调用 SetConfig 初始化资源管理器。");
         if (string.IsNullOrWhiteSpace(ApiConfig.BunleConfigUrl))
             throw new InvalidOperationException("请配置 BunleConfigUrl，或读取新版启动器的 Assets/KRApp.conf。");
+        _savedBundleName = await LocalConfig.GetConfigAsync(GameLocalSettingName.BunleName, token);
         var source = await ReadJsonAsync(ConfigurationUrls(), GameLauncherBunleSourceContext.Default.GameLauncherBunleSource, token);
         if (source.Bundles.Count == 0 || source.ResourcePacks.Count == 0)
             throw new InvalidDataException("分包地址返回的配置未包含 bundles/resourcePacks。");
@@ -53,6 +55,8 @@ public sealed partial class BundleGameResourceProvider : IGameResourceProvider
             return parameter.BundleName;
         if (!string.IsNullOrWhiteSpace(CurrentBundleName))
             return CurrentBundleName;
+        if (!string.IsNullOrWhiteSpace(_savedBundleName))
+            return _savedBundleName;
         if (!string.IsNullOrWhiteSpace(ApiConfig.BunleDefaultBundleName))
             return ApiConfig.BunleDefaultBundleName;
         if (source.Bundles.ContainsKey("default"))
