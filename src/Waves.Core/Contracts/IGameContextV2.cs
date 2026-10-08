@@ -7,6 +7,12 @@ public interface IGameContextV2
     public string GameContextNameKey { get; }
     public IHttpClientService HttpClientService { get; set; }
 
+    public IGameResourceProvider GameResourceProvider { get;  }
+
+    Task<bool> CheckUpdateAsync(CancellationToken token = default);
+    Task<GameVersionInfo> GetInstallGameResourceAsync(CancellationToken token = default);
+    Task<GameVersionInfo> GetUpdateGameResourceAsync(CancellationToken token = default);
+    Task<GameVersionInfo> GetGameProdownloadResourceAsync(CancellationToken token = default);
     public Task InitAsync();
     public string ContextName { get; }
 

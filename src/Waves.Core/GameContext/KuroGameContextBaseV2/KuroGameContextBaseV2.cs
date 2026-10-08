@@ -1,3 +1,5 @@
+using Waves.Core.Services.GameResourceProvider;
+
 namespace Waves.Core.GameContext;
 
 /// <summary>
@@ -21,7 +23,6 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
     /// Http 请求服务，包含下载Client与配置Client
     /// </summary>
     public IHttpClientService HttpClientService { get; set; }
-
 
     public abstract bool IsBunle { get; }
 
@@ -83,6 +84,7 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
 
     public string DisplayName { get; }
     public IIoCircuitBreaker IoCircuitBreaker { get; }
+    public IGameResourceProvider GameResourceProvider { get; private set; }
 
     /// <summary>
     /// CDN测速工具
@@ -105,6 +107,14 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
         ContextName = contextName;
         this.DisplayName = display;
         IoCircuitBreaker = ioCircuitBreaker;
+        if (this.IsBunle)
+        {
+            this.GameResourceProvider = new BundleGameResourceProvider();
+        }
+        else
+        {
+            this.GameResourceProvider = new LegacyGameResourceProvider();
+        }
     }
 
     /// <summary>
@@ -116,6 +126,9 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
         this.HttpClientService.BuildClient();
         Directory.CreateDirectory(GamerConfigPath);
         this.GameLocalConfig = new GameLocalConfig(GamerConfigPath + "\\Settings.bat");
+        if (GameResourceProvider is LegacyGameResourceProvider)
+            GameResourceProvider = new LegacyGameResourceProvider(HttpClientService);
+        GameResourceProvider.SetConfig(GameLocalConfig, Config);
         var logPath = GamerConfigPath + "\\logs\\log.log";
         Logger.InitLogger(logPath, Serilog.RollingInterval.Day);
         CDNSpeedTester = new CDNSpeedTester();
@@ -525,17 +538,20 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
             // 枚举目录本身可能耗时较长，此阶段总量未知，通知 UI 显示不确定进度。
             progress.Report((0, 0));
             var (allFiles, allDirectories) = await Task.Run(() =>
-            {
-                var files = Directory
-                    .EnumerateFiles(rootFolder, "*", SearchOption.AllDirectories)
-                    .ToList();
-                var directories = Directory
-                    .EnumerateDirectories(rootFolder, "*", SearchOption.AllDirectories)
-                    .OrderByDescending(path => path.Count(c => c == Path.DirectorySeparatorChar))
-                    .ToList();
-                directories.Add(rootFolder);
-                return (files, directories);
-            }).ConfigureAwait(false);
+                {
+                    var files = Directory
+                        .EnumerateFiles(rootFolder, "*", SearchOption.AllDirectories)
+                        .ToList();
+                    var directories = Directory
+                        .EnumerateDirectories(rootFolder, "*", SearchOption.AllDirectories)
+                        .OrderByDescending(path =>
+                            path.Count(c => c == Path.DirectorySeparatorChar)
+                        )
+                        .ToList();
+                    directories.Add(rootFolder);
+                    return (files, directories);
+                })
+                .ConfigureAwait(false);
 
             long totalItemCount = allFiles.Count + allDirectories.Count;
             long processedItemCount = 0;
@@ -551,32 +567,34 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
 
             var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 8 };
 
-            await Parallel.ForEachAsync(
-                allFiles,
-                parallelOptions,
-                (filePath, token) =>
-                {
-                    try
+            await Parallel
+                .ForEachAsync(
+                    allFiles,
+                    parallelOptions,
+                    (filePath, token) =>
                     {
-                        File.Delete(filePath);
-                    }
-                    catch (Exception ex)
-                    {
-                        var message = $"删除文件失败：{filePath}，错误：{ex.Message}";
-                        SystemEventPublisher.Publish(
-                            new()
-                            {
-                                Message = message,
-                                Delay = TimeSpan.FromMinutes(1).TotalSeconds,
-                            }
-                        );
-                    }
+                        try
+                        {
+                            File.Delete(filePath);
+                        }
+                        catch (Exception ex)
+                        {
+                            var message = $"删除文件失败：{filePath}，错误：{ex.Message}";
+                            SystemEventPublisher.Publish(
+                                new()
+                                {
+                                    Message = message,
+                                    Delay = TimeSpan.FromMinutes(1).TotalSeconds,
+                                }
+                            );
+                        }
 
-                    var current = Interlocked.Increment(ref processedItemCount);
-                    progress.Report((current, totalItemCount));
-                    return ValueTask.CompletedTask;
-                }
-            ).ConfigureAwait(false);
+                        var current = Interlocked.Increment(ref processedItemCount);
+                        progress.Report((current, totalItemCount));
+                        return ValueTask.CompletedTask;
+                    }
+                )
+                .ConfigureAwait(false);
 
             // 文件夹也属于删除工作量；从最深层开始删除，避免尾部清理长时间没有进度。
             foreach (var directory in allDirectories)

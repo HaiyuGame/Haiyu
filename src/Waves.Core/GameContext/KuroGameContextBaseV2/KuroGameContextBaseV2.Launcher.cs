@@ -1,61 +1,60 @@
+﻿using Waves.Core.Services.GameResourceProvider;
+
 namespace Waves.Core.GameContext
 {
     partial class KuroGameContextBaseV2
     {
+        public Task<bool> CheckUpdateAsync(CancellationToken token = default) =>
+            GameResourceProvider.CheckUpdateAsync(token);
+
+        public Task<GameVersionInfo> GetInstallGameResourceAsync(CancellationToken token = default) =>
+            GameResourceProvider.GetInstallGameResourceAsync(token);
+
+        public Task<GameVersionInfo> GetUpdateGameResourceAsync(CancellationToken token = default) =>
+            GameResourceProvider.GetUpdateGameResourceAsync(token);
+
+        public Task<GameVersionInfo> GetGameProdownloadResourceAsync(CancellationToken token = default) =>
+            GameResourceProvider.GetGameProdownloadResourceAsync(token);
+
+        // 旧 DTO 入口暂时保留；请求实现统一交给 Legacy Provider。
+        private LegacyGameResourceProvider GetLegacyResourceProvider(KuroGameApiConfig? apiConfig = null)
+        {
+            if (apiConfig is null && GameResourceProvider is LegacyGameResourceProvider legacy)
+                return legacy;
+            var provider = new LegacyGameResourceProvider(HttpClientService);
+            provider.SetConfig(GameLocalConfig, apiConfig ?? Config);
+            return provider;
+        }
+
         public virtual async Task<GameLauncherSource?> GetGameLauncherSourceAsync(
             KuroGameApiConfig apiConfig = null,
-            CancellationToken token = default
-        )
+            CancellationToken token = default)
         {
-            var cacheConfig = apiConfig ?? this.Config;
-            var address = GetLauncherHeaderUrl();
-            var url = $"{address}/launcher/game/{cacheConfig.GameID}/{cacheConfig.AppId}_{cacheConfig.AppKey}/index.json?_t={DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
             try
             {
-                var result = await HttpClientService.HttpClient.GetAsync(url);
-                var jsonStr = await result.Content.ReadAsStringAsync();
-                var laucherIndex = await result.Content.ReadFromJsonAsync<GameLauncherSource>(
-                    GameLauncherSourceContext.Default.GameLauncherSource
-                );
-                return laucherIndex;
+                return await GetLegacyResourceProvider(apiConfig).GetGameLauncherSourceAsync(token);
             }
+            catch (OperationCanceledException) when (token.IsCancellationRequested) { throw; }
             catch (Exception ex)
             {
-                Logger.WriteError($"请求{url}出错：{ex.Message}");
-                SystemEventPublisher.Publish(new() { Message = $"请求{url}出错：{ex.Message}" });
+                Logger.WriteError($"获取游戏资源配置出错：{ex.Message}");
+                SystemEventPublisher.Publish(new() { Message = $"获取游戏资源配置出错：{ex.Message}" });
                 return null;
             }
         }
 
         public async Task<IndexGameResource?> GetGameResourceAsync(
-            string url,
-            CancellationToken token = default
-        )
-        {
-            var result = await HttpClientService.HttpClient.GetAsync(url, token);
-            return await result
-                .Content.ReadFromJsonAsync<IndexGameResource>(
-                    IndexGameResourceContext.Default.IndexGameResource,
-                    token
-                );
-        }
+            string url, CancellationToken token = default) =>
+            await GetLegacyResourceProvider().GetGameResourceAsync(url, token);
 
         public async Task<PatchIndexGameResource?> GetPatchGameResourceAsync(
-            string url,
-            CancellationToken token = default
-        )
+            string url, CancellationToken token = default)
         {
             try
             {
-                var result = await HttpClientService.HttpClient.GetAsync(url, token);
-                result.EnsureSuccessStatusCode();
-                return result
-                    .Content.ReadFromJsonAsync<PatchIndexGameResource>(
-                        PathIndexGameResourceContext.Default.PatchIndexGameResource,
-                        token
-                    )
-                    .Result;
+                return await GetLegacyResourceProvider().GetPatchGameResourceAsync(url, token);
             }
+            catch (OperationCanceledException) when (token.IsCancellationRequested) { throw; }
             catch (Exception ex)
             {
                 Logger.WriteError($"请求{url}出错：{ex.Message}");

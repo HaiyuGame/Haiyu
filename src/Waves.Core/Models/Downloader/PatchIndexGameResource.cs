@@ -66,6 +66,9 @@ public class ZipFileInfo
 
 public class PatchIndexGameResource : IndexGameResource
 {
+    [JsonPropertyName("groupResource")]
+    public List<IndexResource>? GroupResource { get; set; }
+
     [JsonPropertyName("deleteFiles")]
     public List<string> DeleteFiles { get; set; }
 

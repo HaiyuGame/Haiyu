@@ -7,7 +7,7 @@ namespace Waves.Core.Common;
 /// <summary>
 /// 资源包组合控制器
 /// </summary>
-public static class DownloadResourceProvider
+public static class DownloadResourceExtensions
 {
     /// <summary>
     /// 合并V1的下载资源

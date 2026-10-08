@@ -10,5 +10,5 @@ public class WavesBiliBiliGameContextV2 : KuroGameContextBaseV2
     public override GameType GameType => Models.Enums.GameType.Waves;
 
 
-    public override bool IsBunle => true;
+    public override bool IsBunle => false;
 }

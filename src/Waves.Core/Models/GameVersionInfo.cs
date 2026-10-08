@@ -45,6 +45,10 @@ public class GameVersionInfo
 /// </summary>
 public class GameFileInfo
 {
+    public string Url { get; set; } = string.Empty;
+
+    public string? FromFolder { get; set; }
+
     public string Dest { get; set; } = string.Empty;
 
     public long Size { get; set; }
