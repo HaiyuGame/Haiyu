@@ -35,7 +35,11 @@ public sealed partial class SelectGameFolderDialogV2
 
     public void SetData(object data)
     {
-        if (data is Type type)
+        if (data is GameFolderDialogRequest request)
+        {
+            ViewModel.SetData(request.ContextType, request.Parameter);
+        }
+        else if (data is Type type)
         {
             ViewModel.SetData(type);
         }

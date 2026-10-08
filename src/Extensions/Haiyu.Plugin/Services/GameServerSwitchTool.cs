@@ -56,73 +56,55 @@ public class GameServerSwitchTool : ITool
         CancellationToken token = default
     )
     {
-        var resourceIndexUrl =
-            (await inputGameContext.GetGameLauncherSourceAsync(null, token))
-                .ResourceDefault.CdnList.Where(x => x.P != 0)
-                .OrderBy(x => x.P)
-                .First()
-                .Url
-            + (await inputGameContext.GetGameLauncherSourceAsync(null, token))
-                .ResourceDefault
-                .Config
-                .IndexFile;
-        var inputResource = await inputGameContext.GetGameResourceAsync(resourceIndexUrl);
-        var resourceIndexUrl2 =
-            (await outputGameContext.GetGameLauncherSourceAsync(null, token))
-                .ResourceDefault.CdnList.Where(x => x.P != 0)
-                .OrderBy(x => x.P)
-                .First()
-                .Url
-            + (await outputGameContext.GetGameLauncherSourceAsync(null, token))
-                .ResourceDefault
-                .Config
-                .IndexFile;
-        var outputResource = await outputGameContext.GetGameResourceAsync(resourceIndexUrl2);
+        var inputSummary = await inputGameContext.GetResourceSummaryAsync(token: token);
+        var outputSummary = await outputGameContext.GetResourceSummaryAsync(token: token);
+        var inputResource = await inputGameContext.GetVerificationResourceAsync(inputSummary.OfficialVersion, token: token);
+        var outputResource = await outputGameContext.GetVerificationResourceAsync(outputSummary.OfficialVersion, token: token);
         var folder =
             await inputGameContext.GameLocalConfig.GetConfigAsync(
                 GameLocalSettingName.GameLauncherBassFolder
             ) ?? "";
 
         var inputPathToMd5 = inputResource
-            .Resource.Where(r => !string.IsNullOrEmpty(r.Dest))
+            .DefaultResource.Where(r => !string.IsNullOrEmpty(r.Dest))
             .ToDictionary(
                 keySelector: r => BuildFileHelper.BuildFilePath(folder, r.Dest),
-                elementSelector: r => r.Md5,
+                elementSelector: r => r.Hash,
                 comparer: StringComparer.OrdinalIgnoreCase
             );
         var outputPaths = outputResource
-            .Resource.Where(r => !string.IsNullOrEmpty(r.Dest))
+            .DefaultResource.Where(r => !string.IsNullOrEmpty(r.Dest))
             .Select(r => BuildFileHelper.BuildFilePath(folder, r.Dest))
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
         var newFiles = outputResource
-            .Resource.Where(r =>
+            .DefaultResource.Where(r =>
                 !string.IsNullOrEmpty(r.Dest)
                 && !inputPathToMd5.ContainsKey(BuildFileHelper.BuildFilePath(folder, r.Dest))
             )
             .ToList();
         var rewriteFiles = outputResource
-            .Resource.Where(r =>
+            .DefaultResource.Where(r =>
                 !string.IsNullOrEmpty(r.Dest)
                 && inputPathToMd5.ContainsKey(BuildFileHelper.BuildFilePath(folder, r.Dest))
                 && !string.Equals(
-                    r.Md5,
+                    r.Hash,
                     inputPathToMd5[BuildFileHelper.BuildFilePath(folder, r.Dest)],
                     StringComparison.OrdinalIgnoreCase
                 )
             )
             .ToList();
         var deleteFiles = inputResource
-            .Resource.Where(r =>
+            .DefaultResource.Where(r =>
                 !string.IsNullOrEmpty(r.Dest)
                 && !outputPaths.Contains(BuildFileHelper.BuildFilePath(folder, r.Dest))
             )
             .ToList();
         var unchangedFiles = outputResource
-            .Resource.Where(r =>
+            .DefaultResource.Where(r =>
                 !string.IsNullOrEmpty(r.Dest)
                 && inputPathToMd5.ContainsKey(BuildFileHelper.BuildFilePath(folder, r.Dest))
                 && string.Equals(
-                    r.Md5,
+                    r.Hash,
                     inputPathToMd5[BuildFileHelper.BuildFilePath(folder, r.Dest)],
                     StringComparison.OrdinalIgnoreCase
                 )
@@ -138,17 +120,17 @@ public class GameServerSwitchTool : ITool
             ExtremeRatioThreshold = 0.8, // 极端占比阈值（80%）
         };
         double newFileRatio =
-            outputResource.Resource.Count == 0
+            outputResource.DefaultResource.Count == 0
                 ? 0
-                : (double)newFiles.Count / outputResource.Resource.Count;
+                : (double)newFiles.Count / outputResource.DefaultResource.Count;
         double rewriteFileRatio =
-            outputResource.Resource.Count == 0
+            outputResource.DefaultResource.Count == 0
                 ? 0
-                : (double)rewriteFiles.Count / outputResource.Resource.Count;
+                : (double)rewriteFiles.Count / outputResource.DefaultResource.Count;
         double deleteFileRatio =
-            inputResource.Resource.Count == 0
+            inputResource.DefaultResource.Count == 0
                 ? 0
-                : (double)deleteFiles.Count / inputResource.Resource.Count;
+                : (double)deleteFiles.Count / inputResource.DefaultResource.Count;
         double newFileScore = newFileRatio * config.NewFileRatioWeight;
         double rewriteFileScore = rewriteFileRatio * config.RewriteFileRatioWeight;
         double deleteFileScore = deleteFileRatio * config.DeleteFileRatioWeight;

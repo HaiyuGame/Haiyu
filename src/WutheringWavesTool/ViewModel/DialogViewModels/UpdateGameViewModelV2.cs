@@ -1,3 +1,4 @@
+using Waves.Core.Models.Options;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -25,6 +26,7 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
     }
 
     public IGameContextV2 GameContext { get; private set; }
+    public GameResourceParameter? Parameter { get; private set; }
     public UpdateGameType InvokeType { get; private set; }
     public IAppContext<App> App { get; }
 
@@ -53,6 +55,8 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
     public partial string DiffSavePath { get; set; }
 
     private string? _localPath;
+    private long _downloadBytes;
+    private bool _resourceReady;
     private readonly IWindowManager _windowManager;
 
     [ObservableProperty]
@@ -72,7 +76,7 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
         if (result == null)
             return;
 
-        DiffSavePath = result.Path;
+        DiffSavePath = InstallOption.BuildCacheFolder(result.Path, InvokeType != UpdateGameType.UpdateGame);
         var rootDir = Path.GetPathRoot(result.Path);
         DriveInfo? driveInfo = DriveInfo
             .GetDrives()
@@ -80,6 +84,7 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
         if (driveInfo == null || !driveInfo.IsReady)
         {
             EnableContinue = false;
+            return;
         }
         if (rootDir == result.Path)
         {
@@ -94,7 +99,7 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
         }
         double totalSizeGB = ByteConversion.BytesToGigabytes(driveInfo.TotalSize, 2);
         double freeSpaceGB = ByteConversion.BytesToGigabytes(driveInfo.TotalFreeSpace, 2);
-        if (freeSpaceGB < PatcherFileSize)
+        if (driveInfo.TotalFreeSpace < _downloadBytes)
         {
             WindowExtension.MessageBox(
                 0,
@@ -105,57 +110,63 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
             EnableContinue = false;
             return;
         }
-        EnableContinue = true;
+        FreeDiskSpace = freeSpaceGB;
+        EnableContinue = _resourceReady;
     }
 
     [RelayCommand]
     async Task Loaded()
     {
+        if (!IsAlive) return;
+        var token = LifetimeToken;
+        EnableContinue = false;
+        _resourceReady = false;
+        _downloadBytes = 0;
+        try
+        {
+            await LoadDetailsAsync(token);
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested) { }
+        catch (Exception ex)
+        {
+            _resourceReady = false;
+            EnableContinue = false;
+            if (IsAlive) ShowLoadError($"加载资源信息失败：{ex.Message}");
+        }
+    }
+
+    private void ShowLoadError(string message)
+    {
+        Logger.WriteError($"{GameContext?.ContextName} / {InvokeType}: {message}");
+        var hwnd = Win32Interop.GetWindowFromWindowId(App.WindowManager.Shell.GetWindow().AppWindow.Id);
+        LegacyMessageBox.ShowInformation(hwnd, message, LanguageService.GetStringByText("提示"));
+    }
+
+    private async Task LoadDetailsAsync(CancellationToken token)
+    {
         string? localVersion = "";
-        IntPtr ownedHwnd = Win32Interop.GetWindowFromWindowId(
-            this.App.WindowManager.Shell.GetWindow().AppWindow.Id
-        );
-        var launcher = await this.GameContext.GetGameLauncherSourceAsync(null, this.CTS.Token);
-        #region 前置判断
-        if (this.InvokeType == UpdateGameType.UpdateGame)
+        var summary = await GameContext.GetResourceSummaryAsync(Parameter, token);
+        token.ThrowIfCancellationRequested();
+        var resourceSize = InvokeType == UpdateGameType.UpdateGame ? summary.Update : summary.Predownload;
+        LocalVersion = summary.LocalVersion;
+        NewVersion = InvokeType == UpdateGameType.UpdateGame ? summary.OfficialVersion : summary.PredownloadVersion ?? "";
+        if (resourceSize.Availability != global::Waves.Core.Models.GameResourceAvailability.Ready)
         {
-            if (launcher == null || launcher.ResourceDefault == null)
+            var reason = resourceSize.Availability switch
             {
-                WindowExtension.MessageBox(
-                    0,
-                    LanguageService.GetStringByText("游戏资源拉取失败！"),
-                    LanguageService.GetStringByText("错误"),
-                    0
-                );
-                this.Result = new UpdateGameResult() { IsOk = false };
-                await CloseAsync(Result);
-                return;
-            }
+                global::Waves.Core.Models.GameResourceAvailability.AlreadyCurrent => "当前已是目标版本。",
+                global::Waves.Core.Models.GameResourceAvailability.MissingPatch => "当前安装版本没有匹配的增量补丁，任务已跳过。",
+                global::Waves.Core.Models.GameResourceAvailability.NoPredownload => "当前没有预下载资源。",
+                _ => "资源状态尚未就绪。"
+            };
+            ShowLoadError($"{reason}\r\n本地版本：{LocalVersion}，目标版本：{NewVersion}\r\n可使用刷新按钮重新查询。资源状态：{resourceSize.Availability}");
+            return;
         }
-        else
-        {
-            if (launcher == null || launcher.Predownload == null)
-            {
-                WindowExtension.MessageBox(
-                    0,
-                    LanguageService.GetStringByText("预下载资源拉取失败！"),
-                    LanguageService.GetStringByText("错误"),
-                    0
-                );
-                this.Result = new UpdateGameResult() { IsOk = true };
-                await CloseAsync(Result);
-                return;
-            }
-        }
-        #endregion
         _localPath = await this.GameContext.GameLocalConfig.GetConfigAsync(
             GameLocalSettingName.GameLauncherBassFolder,
-            this.CTS.Token
+            token
         );
-        localVersion = await this.GameContext.GameLocalConfig.GetConfigAsync(
-            GameLocalSettingName.LocalGameVersion,
-            this.CTS.Token
-        );
+        localVersion = summary.LocalVersion;
         if (localVersion == null)
         {
             WindowExtension.MessageBox(
@@ -166,69 +177,32 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
             );
             return;
         }
+        if (string.IsNullOrWhiteSpace(_localPath) || !Directory.Exists(_localPath))
+        {
+            ShowLoadError("游戏目录不存在，请检查已选择的游戏目录。");
+            return;
+        }
         LocalVersion = localVersion;
-        NewVersion =
-            this.InvokeType == UpdateGameType.UpdateGame
-                ? launcher.ResourceDefault.Version
-                : launcher.Predownload.Version;
-        NewFileSize = ByteConversion.BytesToGigabytes(
-            this.InvokeType == UpdateGameType.UpdateGame
-                ? launcher.ResourceDefault.Config.UnCompressSize
-                : launcher.Predownload.Config.UnCompressSize,
-            2
-        );
+        NewVersion = InvokeType == UpdateGameType.UpdateGame ? summary.OfficialVersion : summary.PredownloadVersion!;
+        NewFileSize = ByteConversion.BytesToGigabytes(resourceSize.TargetSize, 2);
         var localSize = await FolderSizeCalculator.CalculateFolderSizeAsync(
             _localPath!,
-            this.CTS.Token
+            token
         );
+        token.ThrowIfCancellationRequested();
         LocalFileSize = ByteConversion.BytesToGigabytes(localSize, 2);
-        var patche =
-            this.InvokeType == UpdateGameType.UpdateGame
-                ? launcher
-                    .ResourceDefault.Config.PatchConfig.Where(x => x.Version == localVersion)
-                    .FirstOrDefault()
-                : launcher
-                    .Predownload.Config.PatchConfig.Where(x => x.Version == localVersion)
-                    .FirstOrDefault();
-        var cdnUrl =
-            launcher.ResourceDefault.CdnList.Where(x => x.P != 0).OrderBy(x => x.P).FirstOrDefault()
-            ?? null;
-        if (cdnUrl == null || patche == null)
-        {
-            WindowExtension.MessageBox(
-                0,
-                LanguageService.GetStringByText("网络请求失败，请稍后重新尝试"),
-                LanguageService.GetStringByText("警告"),
-                0
-            );
-            return;
-        }
-        var preious = await GameContext.GetPatchGameResourceAsync(cdnUrl.Url + patche.IndexFile);
-        if (preious == null)
-        {
-            LegacyMessageBox.ShowInformation(
-                ownedHwnd,
-                LanguageService.GetStringByText(
-                    "警告：本地版本过于老旧，无法更新\r\n解决方案：建议进行 修复游戏 或 卸载之后重新下载\r\n原因说明：检索库洛服务器中不包含热补丁文件，无法进行增量更新"
-                ),
-                LanguageService.GetStringByText("警告")
-            );
-            return;
-        }
-        PatcherFileSize = ByteConversion.BytesToGigabytes(patche.Size, 2);
-        string? driveLetter = Path.GetPathRoot(_localPath);
+        _downloadBytes = resourceSize.DownloadSize;
+        _resourceReady = true;
+        if (string.IsNullOrWhiteSpace(DiffSavePath))
+            DiffSavePath = InstallOption.BuildCacheFolder(_localPath!, InvokeType != UpdateGameType.UpdateGame);
+        PatcherFileSize = ByteConversion.BytesToGigabytes(_downloadBytes, 2);
+        string? driveLetter = Path.GetPathRoot(DiffSavePath);
         DriveInfo? driveInfo = DriveInfo
             .GetDrives()
             .FirstOrDefault(d => d.Name.Equals(driveLetter, StringComparison.OrdinalIgnoreCase));
         if (driveInfo == null || !driveInfo.IsReady)
         {
-            LegacyMessageBox.ShowInformation(
-                ownedHwnd,
-                LanguageService.GetStringByText(
-                    "警告：本地版本过于老旧，无法更新\r\n解决方案：建议进行 修复游戏 或 卸载之后重新下载\r\n原因说明：检索库洛服务器中不包含热补丁文件，无法进行增量更新"
-                ),
-                LanguageService.GetStringByText("警告")
-            );
+            ShowLoadError("缓存目录所在磁盘尚未就绪，请选择其他目录。");
             return;
         }
         double totalSizeGB = ByteConversion.BytesToGigabytes(driveInfo.TotalSize, 2);
@@ -262,7 +236,7 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
             };
         }
         FreeDiskSpace = freeSpaceGB;
-        if (FreeDiskSpace < PatcherFileSize)
+        if (driveInfo.TotalFreeSpace < _downloadBytes)
         {
             this.Logger.WriteError("磁盘空间不足");
             WindowExtension.MessageBox(
@@ -275,21 +249,22 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
         }
         else
         {
-            this.DiffSavePath = Path.Combine(_localPath!, "Diff");
-            EnableContinue = true;
+            EnableContinue = _resourceReady;
         }
     }
 
     [RelayCommand]
     async Task Invoke()
     {
-        this.Result = new UpdateGameResult() { IsOk = true };
+        if (!EnableContinue || !_resourceReady || string.IsNullOrWhiteSpace(DiffSavePath)) return;
+        this.Result = new UpdateGameResult() { IsOk = true, DiffSavePath = DiffSavePath, Parameter = Parameter };
         await this.Close();
     }
 
-    internal void SetData(IGameContextV2 context, UpdateGameType item2)
+    internal void SetData(IGameContextV2 context, UpdateGameType item2, GameResourceParameter? parameter = null)
     {
         this.GameContext = context;
+        Parameter = parameter;
         this.InvokeType = item2;
         if (this.InvokeType == UpdateGameType.UpdateGame)
         {

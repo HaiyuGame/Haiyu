@@ -9,10 +9,12 @@ public interface IGameContextV2
 
     public IGameResourceProvider GameResourceProvider { get;  }
 
-    Task<bool> CheckUpdateAsync(CancellationToken token = default);
-    Task<GameVersionInfo> GetInstallGameResourceAsync(CancellationToken token = default);
-    Task<GameVersionInfo> GetUpdateGameResourceAsync(CancellationToken token = default);
-    Task<GameVersionInfo> GetGameProdownloadResourceAsync(CancellationToken token = default);
+    Task<bool> CheckUpdateAsync(GameResourceParameter? parameter = null, CancellationToken token = default);
+    Task<GameVersionInfo> GetInstallGameResourceAsync(GameResourceParameter? parameter = null, CancellationToken token = default);
+    Task<GameVersionInfo> GetUpdateGameResourceAsync(GameResourceParameter? parameter = null, CancellationToken token = default);
+    Task<GameVersionInfo> GetGameProdownloadResourceAsync(GameResourceParameter? parameter = null, CancellationToken token = default);
+    Task<GameResourceSummary> GetResourceSummaryAsync(GameResourceParameter? parameter = null, CancellationToken token = default);
+    Task<GameVersionInfo> GetVerificationResourceAsync(string targetVersion, GameResourceParameter? parameter = null, CancellationToken token = default);
     public Task InitAsync();
     public string ContextName { get; }
 
@@ -42,14 +44,9 @@ public interface IGameContextV2
     public DownloadState? ProdDownloadState { get; }
     public TimeSpan GetGameTime();
 
-    public Task<bool> RepairGameAsync(bool isDelete=true,List<string>? skipFilePath = null);
+    public Task<bool> RepairGameAsync(bool isDelete=true,List<string>? skipFilePath = null, GameResourceParameter? parameter = null);
 
     #region Launcher
-    Task<GameLauncherSource?> GetGameLauncherSourceAsync(
-        KuroGameApiConfig apiConfig = null,
-        CancellationToken token = default
-    );
-
     Task<GameLauncherStarter?> GetLauncherStarterAsync(CancellationToken token = default);
     #endregion
 
@@ -58,14 +55,6 @@ public interface IGameContextV2
     #endregion
 
     #region Downloader
-    Task<IndexGameResource?> GetGameResourceAsync(
-        string url,
-        CancellationToken token = default
-    );
-    Task<PatchIndexGameResource?> GetPatchGameResourceAsync(
-        string url,
-        CancellationToken token = default
-    );
     Task<GameContextConfig> ReadContextConfigAsync(CancellationToken token = default);
 
     /// <summary>
@@ -77,7 +66,8 @@ public interface IGameContextV2
     Task<bool> StartDownloadTaskAsync(
         string folder,
         bool isDelete = false,
-        CancellationToken token = default
+        CancellationToken token = default,
+        GameResourceParameter? parameter = null
     );
 
     /// <summary>
@@ -86,7 +76,7 @@ public interface IGameContextV2
     /// <param name="launcher"></param>
     /// <param name="downloadFolder"></param>
     /// <returns></returns>
-    Task<bool> StartProdDownloadGameResourceAsync();
+    Task<bool> StartProdDownloadGameResourceAsync(string? downloadFolder = null, GameResourceParameter? parameter = null);
 
     bool IsDownloadTaskCancel();
 
@@ -131,12 +121,7 @@ public interface IGameContextV2
     /// 安装预下载内容
     /// </summary>
     /// <returns></returns>
-    Task StartInstallGameResource(
-        GameLauncherSource launcher,
-        PatchConfig previous,
-        PatchIndexGameResource patch,
-        InstallOption option
-    );
+    Task StartInstallGameResource(GameVersionInfo plan, InstallOption option, GameResourceParameter? parameter = null);
     /// <summary>
     /// 开始游戏
     /// </summary>
@@ -147,7 +132,7 @@ public interface IGameContextV2
     /// 更新游戏
     /// </summary>
     /// <returns></returns>
-    Task<bool> UpdateGameResourceAsync();
+    Task<bool> UpdateGameResourceAsync(string? downloadFolder = null, GameResourceParameter? parameter = null);
     Task DeleteResourceAsync(
         IProgress<(double deletedCount, double totalCount)> progress
     );
@@ -156,11 +141,11 @@ public interface IGameContextV2
     /// 提前安装
     /// </summary>
     /// <returns></returns>
-    Task AdvanceInstallGameResourceAsync();
+    Task AdvanceInstallGameResourceAsync(GameResourceParameter? parameter = null);
 
     #endregion
 
-    Task StartInstallGameResource(InstallOption option);
+    Task StartInstallGameResource(InstallOption option, GameResourceParameter? parameter = null);
 
     Task<LIndex?> GetDefaultLauncherValue(CancellationToken token = default);
 

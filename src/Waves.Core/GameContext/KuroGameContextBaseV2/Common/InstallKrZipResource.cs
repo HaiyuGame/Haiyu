@@ -5,7 +5,7 @@ namespace Waves.Core.GameContext.KruoGameContextBaseV2.Common;
 /// </summary>
 public class InstallKrZipResource : IProgressSetup,IAsyncDisposable
 {
-    private List<IndexResource> zipInfos;
+    private List<PatchGameFileInfo> zipInfos;
 
     private string baseGamePath;
 
@@ -47,7 +47,7 @@ public class InstallKrZipResource : IProgressSetup,IAsyncDisposable
 
     public bool Check()
     {
-        if (!Param.CheckParam<List<IndexResource>>("zipInfos", out var zipInfos))
+        if (!Param.CheckParam<List<PatchGameFileInfo>>("zipInfos", out var zipInfos))
         {
             return false;
         }
@@ -126,6 +126,7 @@ public class InstallKrZipResource : IProgressSetup,IAsyncDisposable
                 progress,
                 Logger
             );
+            if (!unzipResult || downloadState.CancelToken.IsCancellationRequested) return false;
             File.Delete(item.Key);
         }
         return true;

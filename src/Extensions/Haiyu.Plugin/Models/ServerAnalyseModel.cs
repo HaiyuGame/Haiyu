@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using Waves.Core.Models.Downloader;
+using System.Collections.Generic;
+using Waves.Core.Models;
 
 namespace Haiyu.Plugin.Models;
 
@@ -8,19 +8,19 @@ namespace Haiyu.Plugin.Models;
 /// </summary>
 public class ServerAnalyseModel
 {
-    public List<IndexResource> RewriterFiles { get; }
-    public List<IndexResource> DeleteFiles { get; }
-    public List<IndexResource> UnchangedFiles { get; }
-    public List<IndexResource> AddFiles { get; }
+    public List<GameFileInfo> RewriterFiles { get; }
+    public List<GameFileInfo> DeleteFiles { get; }
+    public List<GameFileInfo> UnchangedFiles { get; }
+    public List<GameFileInfo> AddFiles { get; }
 
     public double ScoreValue { get; }
     public bool IsSwitch { get; }
 
     public ServerAnalyseModel(
-        List<IndexResource> addFiles,
-        List<IndexResource> rewriterFiles,
-        List<IndexResource> deleteFiles,
-        List<IndexResource> unchangedFiles,
+        List<GameFileInfo> addFiles,
+        List<GameFileInfo> rewriterFiles,
+        List<GameFileInfo> deleteFiles,
+        List<GameFileInfo> unchangedFiles,
        bool isSwitch
 ,
        double scoreValue)

@@ -49,6 +49,11 @@ public sealed class BundleCdnSource
 
 public sealed class BundleResourcePack
 {
+    [JsonPropertyName("folder")]
+    public string Folder { get; set; } = string.Empty;
+
+    [JsonPropertyName("zipConfig")]
+    public BundlePatchConfig? ZipConfig { get; set; }
     [JsonPropertyName("version")]
     public string Version { get; set; } = string.Empty;
 
@@ -76,6 +81,8 @@ public sealed class BundleResourcePack
 
 public sealed class BundlePatchConfig
 {
+    [JsonPropertyName("folder")]
+    public string Folder { get; set; } = string.Empty;
     [JsonPropertyName("version")]
     public string Version { get; set; } = string.Empty;
 
@@ -142,6 +149,9 @@ public sealed class GameLauncherBundle
 
 public sealed class BundleProfileConfig
 {
+    [JsonPropertyName("predownloadSwitch")]
+    public int? PredownloadSwitch { get; set; }
+
     [JsonPropertyName("displayName")]
     public Dictionary<string, string> DisplayName { get; set; } = [];
 

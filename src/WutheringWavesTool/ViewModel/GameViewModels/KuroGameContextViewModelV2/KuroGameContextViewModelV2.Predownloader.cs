@@ -76,12 +76,12 @@ partial class KuroGameContextViewModelV2
         }
         var result = await WindowManager.Shell.DialogManager.ShowUpdateGameDialogAsync(
             this.GameContext.ContextName,
-            UpdateGameType.ProDownload
+            UpdateGameType.ProDownload, ResourceParameter
         );
         
         if (result != null && result.IsOk)
         {
-            StartBackground(() => this.GameContext.StartProdDownloadGameResourceAsync());
+            StartBackground(() => this.GameContext.StartProdDownloadGameResourceAsync(result.DiffSavePath, result.Parameter));
         }
     }
 
@@ -98,14 +98,14 @@ partial class KuroGameContextViewModelV2
         var done =  await this.GameContext.GameLocalConfig.GetConfigAsync(GameLocalSettingName.ProdDownloadFolderDone);
         var version =  await this.GameContext.GameLocalConfig.GetConfigAsync(GameLocalSettingName.ProdDownloadVersion);
         var path =  await this.GameContext.GameLocalConfig.GetConfigAsync(GameLocalSettingName.ProdDownloadPath);
-        var launcher = await this.GameContext.GetGameLauncherSourceAsync(null,this.CTS.Token);
+        var launcher = await this.GameContext.GetResourceSummaryAsync(ResourceParameter, this.CTS.Token);
         if(string.IsNullOrWhiteSpace(version))
         {
             done = "false";
         }
         if (done!= null && done.ToLower() == "true" && Directory.Exists(path))
         {
-            StartBackground(() => this.GameContext.StartProdDownloadGameResourceAsync());
+            StartBackground(() => this.GameContext.StartProdDownloadGameResourceAsync(path, ResourceParameter));
         }
         else
         {
@@ -135,6 +135,6 @@ partial class KuroGameContextViewModelV2
         {
             return;
         }
-        this.StartBackground(this.GameContext.AdvanceInstallGameResourceAsync);
+        this.StartBackground(() => this.GameContext.AdvanceInstallGameResourceAsync(ResourceParameter));
     }
 }

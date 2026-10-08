@@ -6,253 +6,48 @@ public static class VerifyTask
 
     const long UpdateThreshold = 1048576;
 
-    /// <summary>
-    /// 检查整个文件
-    /// </summary>
-    /// <exception cref="OperationCanceledException"></exception>
-    public static async Task<bool> VaildateFullFile(
-        string md5Value,
-        string filePath,
-        DownloadState state = null,
-        CancellationTokenSource? downloadCts = default,
-        IProgress<(GameContextActionType, bool, long, string, long, long)> progress = null
-    )
+    public static Task<bool> ValidateGameFileAsync(string hash, string filePath, DownloadState state,
+        CancellationTokenSource downloadCts,
+        IProgress<(GameContextActionType, bool, long, string, long, long)>? progress = null) =>
+        ValidateGameRangeAsync(hash, filePath, 0, null, state, downloadCts, progress);
+
+    public static Task<bool> ValidateFileChunks(GameFileChunkInfo chunk, string filePath,
+        DownloadState state = null, CancellationTokenSource? downloadCts = default,
+        IProgress<(GameContextActionType, bool, long, string, long, long)>? progress = null) =>
+        ValidateGameRangeAsync(chunk.Hash, filePath, chunk.Start, chunk.End, state, downloadCts!, progress);
+
+    private static async Task<bool> ValidateGameRangeAsync(string hash, string path, long start, long? end,
+        DownloadState? state, CancellationTokenSource cts,
+        IProgress<(GameContextActionType, bool, long, string, long, long)>? progress)
     {
-        const int bufferSize = 262144;
-        using var md5 = MD5.Create();
-        var memoryPool = ArrayPool<byte>.Shared;
-        if (downloadCts == null || state?.IsStop == true)
-        {
-            throw new OperationCanceledException();
-        }
-        const long UpdateThreshold = 1048576;
+        cts.Token.ThrowIfCancellationRequested();
         try
         {
-            using (
-                var fs = new FileStream(
-                    filePath,
-                    FileMode.Open,
-                    FileAccess.Read,
-                    FileShare.Read,
-                    bufferSize: bufferSize,
-                    true
-                )
-            )
-            {
-                bool isBreak = false;
-                long accumulatedBytes = 0L;
-                long currentBytes = 0;
-                while (true)
-                {
-                    if (downloadCts.IsCancellationRequested || state?.IsStop == true)
-                    {
-                        throw new OperationCanceledException();
-                    }
-                    //暂停锁
-                    if (state != null)
-                        await state.PauseToken.WaitIfPausedAsync().ConfigureAwait(false);
-                    byte[] buffer = memoryPool.Rent(bufferSize);
-                    try
-                    {
-                        int bytesRead = await fs.ReadAsync(
-                                buffer.AsMemory(0, bufferSize),
-                                downloadCts.Token
-                            )
-                            .ConfigureAwait(false);
-                        if (bytesRead == 0)
-                        {
-                            isBreak = true;
-                            break;
-                        }
-                        md5.TransformBlock(buffer, 0, bytesRead, null, 0);
-                        accumulatedBytes += bytesRead; // 添加此行以累加字节数
-                        currentBytes += bytesRead;
-                        if (accumulatedBytes >= UpdateThreshold)
-                        {
-                            progress?.Report(
-                                (
-                                    GameContextActionType.Verify,
-                                    false,
-                                    accumulatedBytes,
-                                    filePath,
-                                    currentBytes,
-                                    fs.Length
-                                )
-                            );
-                            accumulatedBytes = 0;
-                        }
-                    }
-                    finally
-                    {
-                        memoryPool.Return(buffer);
-                    }
-                }
-                if (accumulatedBytes < UpdateThreshold)
-                {
-                    progress?.Report(
-                        (
-                            GameContextActionType.Verify,
-                            false,
-                            accumulatedBytes,
-                            filePath,
-                            currentBytes,
-                            fs.Length
-                        )
-                    );
-                }
-            }
-
-            md5.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
-            string hash = BitConverter.ToString(md5.Hash!).Replace("-", "").ToLower();
-
-            return !(hash == md5Value);
-        }
-        catch (OperationCanceledException)
-        {
-            return false;
-        }
-        catch (IOException ex)
-        {
-            return false;
-        }
-        catch (Exception ex)
-        {
-            return false;
-        }
-    }
-
-    /// <summary>
-    /// 检查单个分片
-    /// </summary>
-    public static async Task<bool> ValidateFileChunks(
-        IndexChunkInfo file,
-        string filePath,
-        DownloadState state = null,
-        CancellationTokenSource? downloadCts = default,
-        IProgress<(GameContextActionType, bool, long, string, long, long)>? progress = null
-    )
-    {
-        using (
-            var fs = new FileStream(
-                filePath,
-                FileMode.Open,
-                FileAccess.Read,
-                FileShare.Read,
-                262144,
-                true
-            )
-        )
-        {
+            await using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, MaxBufferSize, true);
+            if (end.HasValue && (end < start || stream.Length <= end.Value)) return true;
+            stream.Position = start;
+            var remaining = end.HasValue ? end.Value - start + 1 : stream.Length;
+            var total = remaining;
+            using var md5 = IncrementalHash.CreateHash(HashAlgorithmName.MD5);
+            var buffer = ArrayPool<byte>.Shared.Rent(MaxBufferSize);
             try
             {
-                var memoryPool = ArrayPool<byte>.Shared;
-                if (downloadCts == null || state?.IsStop == true)
+                while (remaining > 0)
                 {
-                    throw new OperationCanceledException();
+                    cts.Token.ThrowIfCancellationRequested();
+                    if (state is not null) await state.PauseToken.WaitIfPausedAsync();
+                    var read = await stream.ReadAsync(buffer.AsMemory(0, (int)Math.Min(remaining, buffer.Length)), cts.Token);
+                    if (read == 0) return true;
+                    md5.AppendData(buffer, 0, read);
+                    remaining -= read;
+                    progress?.Report((GameContextActionType.Verify, false, read, path, total - remaining, total));
                 }
-                long offset = file.Start;
-                long remaining = file.End - file.Start + 1;
-                long maxLength = remaining;
-                bool isValid = true;
-                fs.Seek(offset, SeekOrigin.Begin);
-                using (var md5 = MD5.Create())
-                {
-                    long accumulatedBytes = 0L;
-                    long currentBytes = 0;
-                    while (remaining > 0 && isValid)
-                    {
-                        if (state != null)
-                            await state.PauseToken.WaitIfPausedAsync();
-                        var buffer = memoryPool.Rent(MaxBufferSize);
-                        try
-                        {
-                            if (downloadCts.IsCancellationRequested || state?.IsStop == true)
-                            {
-                                throw new OperationCanceledException();
-                            }
-                            int bytesRead = await fs.ReadAsync(
-                                    buffer,
-                                    0,
-                                    MaxBufferSize,
-                                    downloadCts.Token
-                                )
-                                .ConfigureAwait(false);
-                            if (bytesRead == 0)
-                            {
-                                break;
-                            }
-                            md5.TransformBlock(buffer, 0, bytesRead, null, 0);
-                            remaining -= bytesRead;
-                            accumulatedBytes += bytesRead;
-                            currentBytes += bytesRead;
-                            if (accumulatedBytes >= UpdateThreshold)
-                            {
-                                progress?.Report(
-                                    (
-                                        GameContextActionType.Verify,
-                                        false,
-                                        accumulatedBytes,
-                                        filePath,
-                                        currentBytes,
-                                        maxLength
-                                    )
-                                );
-                                accumulatedBytes = 0;
-                            }
-                        }
-                        catch (IOException ex)
-                        {
-                            //Logger.WriteError(ex.Message);
-                        }
-                        finally
-                        {
-                            memoryPool.Return(buffer);
-                        }
-                    }
-                    if (accumulatedBytes > 0 && accumulatedBytes < UpdateThreshold)
-                    {
-                        progress?.Report(
-                            (
-                                GameContextActionType.Verify,
-                                false,
-                                accumulatedBytes,
-                                filePath,
-                                currentBytes,
-                                maxLength
-                            )
-                        );
-                    }
-                    md5.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
-                    string hash = BitConverter.ToString(md5.Hash!).Replace("-", "").ToLower();
-                    isValid = hash == file.Md5.ToLower();
-                    //Logger.WriteInfo($"分片校验结果{hash}|{file.Md5}");
-                    return !isValid;
-                }
+                return !string.Equals(Convert.ToHexString(md5.GetHashAndReset()), hash, StringComparison.OrdinalIgnoreCase);
             }
-            catch (IOException ex)
-            {
-                //Logger.WriteError(ex.Message);
-                return false;
-            }
-            catch (OperationCanceledException)
-            {
-                return false;
-            }
-            finally
-            {
-                fs.Close();
-                fs.Dispose();
-            }
+            finally { ArrayPool<byte>.Shared.Return(buffer); }
         }
+        catch (IOException) { return true; }
+        catch (UnauthorizedAccessException) { return true; }
     }
 
-    public static async Task<bool> ValidateFileChunks(
-        IndexChunkInfo file,
-        string filePath,
-        DownloadState state = null,
-        CancellationTokenSource? downloadCts = default
-    )
-    {
-        return await ValidateFileChunks(file, filePath, state, downloadCts, progress: null);
-    }
 }

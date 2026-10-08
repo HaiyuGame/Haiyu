@@ -48,12 +48,12 @@ public static class DownloadTask
         await fileStream.FlushAsync(downloadCts.Token).ConfigureAwait(false);
     }
 
-    public static async Task DownloadFileByFull(
+    public static async Task DownloadGameFileByFull(
         IHttpClientService httpClientService,
         string url,
         long size,
         string filePath,
-        IndexChunkInfo chunk,
+        GameFileChunkInfo chunk,
         DownloadState state = null,
         CancellationTokenSource? downloadCts = default,
         IProgress<(GameContextActionType, bool, long, string, long, long)> progress = null

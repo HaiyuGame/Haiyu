@@ -5,7 +5,7 @@ namespace Waves.Core.GameContext.KruoGameContextBaseV2.Common;
 /// </summary>
 public class InstallKrdiffResource:IProgressSetup,IAsyncDisposable
 {
-    private List<IndexResource> krdiffs;
+    private List<PatchGameFileInfo> krdiffs;
     private string diffFolderPath;
     private string gameBaseFolder;
 
@@ -34,7 +34,7 @@ public class InstallKrdiffResource:IProgressSetup,IAsyncDisposable
     public async Task<bool> CheckAsync()
     {
         //补丁
-        if (!Param.CheckParam<List<IndexResource>>("krdiffs", out var krdiffs))
+        if (!Param.CheckParam<List<PatchGameFileInfo>>("krdiffs", out var krdiffs))
         {
             return false;
         }
@@ -44,6 +44,7 @@ public class InstallKrdiffResource:IProgressSetup,IAsyncDisposable
             return false;
         }
         if(!Param.CheckParam<string>("gameBaseFolder",out var gameBaseFolder))
+            return false;
         this.krdiffs = krdiffs!;
         this.diffFolderPath = diffFolderPath!;
         this.gameBaseFolder = gameBaseFolder!;
@@ -52,6 +53,7 @@ public class InstallKrdiffResource:IProgressSetup,IAsyncDisposable
 
     public async Task<bool> RunAsync()
     {
+        if (!await CheckAsync()) return false;
         for (int i = 0; i < krdiffs.Count; i++)
         {
             //diffFolderPath 路径为下载补丁包路径
@@ -68,6 +70,7 @@ public class InstallKrdiffResource:IProgressSetup,IAsyncDisposable
                 return false;
             }
             var krdiffPath = BuildFileHelper.BuildFilePath(diffFolderPath, krdiffs[i]);
+            if (!File.Exists(krdiffPath)) return false;
             IProgress<(GameContextActionType, string, KrDiffDecompressResult)> progress =
                 new Progress<(GameContextActionType, string, KrDiffDecompressResult)>(
                     (s) =>
@@ -107,7 +110,7 @@ public class InstallKrdiffResource:IProgressSetup,IAsyncDisposable
                         TipMessage = $"补丁解压失败，退出码: {decompressResult}，跳过: {System.IO.Path.GetFileName(krdiffPath)}",
                     }
                 );
-                continue;
+                return false;
             }
         }
         return true;

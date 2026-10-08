@@ -1,3 +1,4 @@
+using Waves.Core.Models.Options;
 using Haiyu.Common.Contracts;
 using Haiyu.Models.Dialogs;
 using Haiyu.Plugin.Models;
@@ -17,17 +18,19 @@ public interface IDialogManager
         where T : ContentDialog, IDialog;
     public Task ShowLocalUserManagerAsync();
     public Task ShowUpdateDialog(DisplayVersionInfo info);
-    public Task<SelectDownloadFolderResult> ShowSelectGameFolderV2Async(Type type);
-    public Task<SelectDownloadFolderResult> ShowSelectDownloadFolderV2Async(Type type);
+    public Task<SelectDownloadFolderResult> ShowSelectGameFolderV2Async(Type type, GameResourceParameter? parameter = null);
+    public Task<SelectDownloadFolderResult> ShowSelectDownloadFolderV2Async(Type type, GameResourceParameter? parameter = null);
     public Task<CloseWindowResult> ShowCloseWindowResult();
     public Task<QRScanResult> GetQRLoginResultAsync();
     public Task<UpdateGameResult> ShowUpdateGameDialogAsync(
         string contextName,
-        UpdateGameType type
+        UpdateGameType type,
+        GameResourceParameter? parameter = null
     );
     public Task<UpdateGameResult> ShowUpdateGameDialogAsyncV2(
         string contextName,
-        UpdateGameType type
+        UpdateGameType type,
+        GameResourceParameter? parameter = null
     );
     public Task<LauncheNodeConfig> ShowSelectGameNodeAsync(string id);
     public Task ShowWavesCloudSettingAsync(GameType ype);

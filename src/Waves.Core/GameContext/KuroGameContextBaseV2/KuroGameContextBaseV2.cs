@@ -233,6 +233,13 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
                 DownloadState.IsStop = true;
                 DownloadState.IsActive = false;
             }
+            foreach (var state in new[] { DownloadState, ProdDownloadState })
+            {
+                if (state is null) continue;
+                state.IsStop = true;
+                state.IsActive = false;
+                if (state.CancelToken is not null) await state.CancelToken.CancelAsync();
+            }
             var cancelGen = Interlocked.Increment(ref _operationGeneration);
             GameContextOutputArgs.CurrentGeneration.Value = cancelGen;
             this.GameEventPublisher.Publish(
@@ -425,27 +432,25 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
             SystemEventPublisher.Publish(new() { Message = "网络未连接" });
             return status;
         }
-        var indexSource = await this.GetGameLauncherSourceAsync();
-        if (indexSource != null && !string.IsNullOrWhiteSpace(localVersion))
+        var indexSource = await this.GetResourceSummaryAsync(token: token);
+        localVersion = indexSource.LocalVersion;
+        if (indexSource != null)
         {
             await ClearVersion(indexSource);
-            var localV = Version.Parse(localVersion);
-            var serverVFlage = Version.TryParse(
-                indexSource.ResourceDefault.Version,
-                out var serverV
-            );
+
+
             var predownloadVFlage = Version.TryParse(
-                indexSource.Predownload != null ? indexSource.Predownload.Version : "0.0.1",
+                indexSource.PredownloadVersion ?? "0.0.1",
                 out var predownVersion
             );
             if (predownloadVFlage && predownVersion!.ToString() != "0.0.1" && ProdIsAdvance)
             {
                 status.DisplayVersion = predownVersion.ToString();
             }
-            else if (localV < serverV)
+            else if (indexSource.Update.Availability != GameResourceAvailability.AlreadyCurrent)
             {
                 status.IsUpdate = true;
-                status.DisplayVersion = indexSource.ResourceDefault.Version;
+                status.DisplayVersion = indexSource.OfficialVersion;
             }
             else
             {
@@ -461,7 +466,7 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
             }
             if (
                 (
-                    indexSource.Predownload != null
+                    indexSource.PredownloadEnabled
                     && status.IsGameExists == true
                     && status.IsGameInstalled == true
                 )
@@ -502,12 +507,9 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
         return status;
     }
 
-    private async Task ClearVersion(GameLauncherSource indexSource)
+    private async Task ClearVersion(GameResourceSummary indexSource)
     {
-        var currentVersion = await this.GameLocalConfig.GetConfigAsync(
-            GameLocalSettingName.LocalGameVersion
-        );
-        if (currentVersion == indexSource.ResourceDefault.Version)
+        if (indexSource.Update.Availability == GameResourceAvailability.AlreadyCurrent)
         {
             await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdIsAdvance, "False");
         }

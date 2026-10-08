@@ -1,3 +1,4 @@
+using Waves.Core.Models.Options;
 using System.Text.RegularExpressions;
 using Haiyu.Common.Contracts;
 using Microsoft.UI.Xaml.Shapes;
@@ -16,6 +17,7 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
         WindowManager = windowManager;
     }
 
+    public GameResourceParameter? Parameter { get; private set; }
     public IGameContextV2 GameContext { get; private set; }
 
     [ObservableProperty]
@@ -43,7 +45,7 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
     public partial double MaxValue { get; set; }
     public IPickersService PickersService { get; }
     public IWindowManager WindowManager { get; }
-    public GameLauncherSource? Launcher { get; internal set; }
+    public GameResourceSummary? Launcher { get; internal set; }
 
     [RelayCommand]
     async Task SelectGameProgram()
@@ -83,7 +85,7 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
             return;
         }
 
-        Launcher = await this.GameContext.GetGameLauncherSourceAsync(null, this.CTS.Token);
+        Launcher = await this.GameContext.GetResourceSummaryAsync(Parameter, this.CTS.Token);
         if (Launcher == null)
         {
             TipMessage = LanguageService.FormatByText(
@@ -128,25 +130,13 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
     [RelayCommand]
     async Task Loaded()
     {
-        Launcher = await this.GameContext.GetGameLauncherSourceAsync(token: this.CTS.Token);
+        Launcher = await this.GameContext.GetResourceSummaryAsync(Parameter, this.CTS.Token);
         if (Launcher == null)
         {
             return;
         }
-        var configs = Launcher.ResourceDefault.Config.PatchConfig;
-        var versions = new List<string>();
-        foreach (var item in configs)
-        {
-            string pattern = @"\d+(?:\.\d+)+";
-
-            // 提取所有匹配结果
-            MatchCollection matches = Regex.Matches(item.IndexFile, pattern);
-            var result = matches.Select(x => x.Value).Distinct().ToList();
-            if (result.Count > 1)
-                versions.Add(result[1]);
-        }
-        Versions = versions.Reverse<string>().ToObservableCollection();
-        Versions.Insert(0, Launcher.ResourceDefault.Version);
+        Versions = Launcher.HistoricalVersions.Reverse().ToObservableCollection();
+        Versions.Insert(0, Launcher.OfficialVersion);
         SelectedVersion = Versions[0];
     }
 
@@ -252,8 +242,9 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
 
     private double BytesToGigabytes(long bytes) => bytes / 1024d / 1024 / 1024;
 
-    internal void SetData(Type type)
+    internal void SetData(Type type, GameResourceParameter? parameter = null)
     {
+        Parameter = parameter;
         var name = type.Name;
         this.GameContext = Instance.Host.Services.GetRequiredKeyedService<IGameContextV2>(name);
     }

@@ -84,7 +84,7 @@
             HorizontalAlignment="Stretch"
             Command="{x:Bind ViewModel.SelectDiffPathCommand}"
             Content="{x:Bind ViewModel.DiffSavePath, Mode=OneWay}"
-            IsEnabled="False"
+            IsEnabled="True"
             ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_DownloadLocation')}" />
         <Grid
             Grid.Row="2"

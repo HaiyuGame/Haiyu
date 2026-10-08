@@ -34,7 +34,12 @@ public sealed partial class UpdateGameDialogV2 : ContentDialog,
 
     public void SetData(object data)
     {
-        if (data is Tuple<string, UpdateGameType> tuple)
+        if (data is UpdateGameDialogRequest request)
+        {
+            var context = Instance.Host.Services.GetRequiredKeyedService<IGameContextV2>(request.ContextName);
+            ViewModel.SetData(context, request.Operation, request.Parameter);
+        }
+        else if (data is Tuple<string, UpdateGameType> tuple)
         {
             if (Instance.Host.Services.GetRequiredKeyedService<IGameContextV2>(tuple.Item1) is IGameContextV2 context)
             {

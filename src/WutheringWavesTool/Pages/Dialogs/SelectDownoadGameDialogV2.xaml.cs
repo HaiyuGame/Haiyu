@@ -1,3 +1,4 @@
+using Waves.Core.Models.Options;
 using Haiyu.Common.Contracts;
 using Haiyu.Models.Dialogs;
 
@@ -20,17 +21,23 @@ public sealed partial class SelectDownoadGameDialogV2
 
     SelectDownloadFolderResult downloadResult = null;
     ContentDialogResult clickBth = ContentDialogResult.None;
+    private GameResourceParameter? Parameter;
     public IGameContextV2 GameContext { get; private set; }
 
     private DialogSession _dialogSession;
     private readonly IWindowManager _windowManager;
 
     public IPickersService Pickers { get; }
-    public GameLauncherSource Launcher { get; private set; }
+    public GameResourceSummary Launcher { get; private set; }
 
 
     public void SetData(object data)
     {
+        if (data is GameFolderDialogRequest request)
+        {
+            Parameter = request.Parameter;
+            data = request.ContextType;
+        }
         if (data is Type type)
         {
             var name = type.Name;
@@ -57,7 +64,7 @@ public sealed partial class SelectDownoadGameDialogV2
             return;
         }
 
-        var launcher = await this.GameContext.GetGameLauncherSourceAsync();
+        var launcher = await this.GameContext.GetResourceSummaryAsync(Parameter);
         if (launcher == null)
         {
             return;
@@ -67,7 +74,8 @@ public sealed partial class SelectDownoadGameDialogV2
         {
             InstallFolder = this.folderPath.Text,
             Result = clickBth,
-            Launcher = launcher,
+            Summary = launcher,
+            Parameter = Parameter,
         };
         this._dialogSession.Result = downloadResult;
         this._dialogSession.Close(_dialogSession.Result);
@@ -112,13 +120,13 @@ public sealed partial class SelectDownoadGameDialogV2
         layered.MaxValue = totalSizeMB;
         layeredGrid.Visibility = Visibility.Visible;
         layerText.Visibility = Visibility.Collapsed;
-        Launcher = await this.GameContext.GetGameLauncherSourceAsync();
+        Launcher = await this.GameContext.GetResourceSummaryAsync(Parameter);
         if (Launcher == null)
         {
             TipMessage.Text = LanguageService.GetStringByText("数据拉取失败");
             return;
         }
-        var updateSize = usedSpaceMB + Launcher.ResourceDefault.Config.Size / 1024 / 1024 / 1024;
+        var updateSize = usedSpaceMB + Launcher.Install.DownloadSize / 1024d / 1024 / 1024;
         this.layered.Values = new ObservableCollection<LayerData>()
         {
             new LayerData()
@@ -140,7 +148,7 @@ public sealed partial class SelectDownoadGameDialogV2
                 Value = updateSize,
             },
         };
-        if (updateSize > totalSizeMB)
+        if (selectedDrive.TotalFreeSpace < Launcher.Install.RequiredSpace)
         {
             TipMessage.Text = LanguageService.GetStringByText("空间不足，请清理一些文件进行下载");
             download.Fill = new SolidColorBrush(Colors.Red);
@@ -150,7 +158,7 @@ public sealed partial class SelectDownoadGameDialogV2
         else
         {
             TipMessage.Text =
-                LanguageService.FormatByText(LanguageService.GetStringByText("本次更新大小约为{0}GB"), Launcher.ResourceDefault.Config.Size / 1024 / 1024 / 1024);
+                LanguageService.FormatByText(LanguageService.GetStringByText("本次更新大小约为{0}GB"), Launcher.Install.DownloadSize / 1024d / 1024 / 1024);
             downloadBth.IsEnabled = true;
             download.Fill = new SolidColorBrush(Colors.Green);
         }

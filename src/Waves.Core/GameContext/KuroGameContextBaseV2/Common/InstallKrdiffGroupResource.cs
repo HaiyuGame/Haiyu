@@ -5,9 +5,9 @@ namespace Waves.Core.GameContext.KruoGameContextBaseV2.Common;
 /// </summary>
 public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncDisposable
 {
-    private List<IndexResource> krdiffs;
+    private List<PatchGameFileInfo> krdiffs;
     private string diffFolderPath;
-    private List<GroupFileInfo> groupFileInfos;
+    private List<PatchGameFileInfo> groupFileInfos;
     private string baseFolderPath;
     private string decompressTempFolder;
 
@@ -35,7 +35,7 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
     public async Task<bool> CheckAsync()
     {
         //补丁列表
-        if (!Param.CheckParam<List<IndexResource>>("krpdiffs", out var krdiffs))
+        if (!Param.CheckParam<List<PatchGameFileInfo>>("krpdiffs", out var krdiffs))
         {
             return false;
         }
@@ -50,7 +50,7 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
             return false;
         }
         //分组文件信息列表
-        if (!Param.CheckParam<List<GroupFileInfo>>("groupFileInfos", out var groupFileInfos))
+        if (!Param.CheckParam<List<PatchGameFileInfo>>("groupFileInfos", out var groupFileInfos))
         {
             return false;
         }
@@ -117,7 +117,7 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
                             TipMessage = $"补丁文件不存在，跳过: {System.IO.Path.GetFileName(krdiffPath)}",
                         }
                     );
-                    continue;
+                    return false;
                 }
                 IProgress<(GameContextActionType, string, KrDiffDecompressResult)> progress =
                     new Progress<(GameContextActionType, string, KrDiffDecompressResult)>(
@@ -163,7 +163,7 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
                             TipMessage = $"补丁解压失败，退出码: {decompressResult}，跳过: {System.IO.Path.GetFileName(krdiffPath)}",
                         }
                     );
-                    continue;
+                    return false;
                 }
                 for (int j = 0; j < groupFileInfos[i].SrcFiles.Count; j++)
                 {

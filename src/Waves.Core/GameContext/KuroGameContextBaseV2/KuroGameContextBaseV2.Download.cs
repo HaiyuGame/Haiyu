@@ -1,275 +1,95 @@
+using Waves.Core.Models.Options;
+
 namespace Waves.Core.GameContext;
 
 partial class KuroGameContextBaseV2
 {
-    private CancellationTokenSource _downloadCts = null;
-    private CancellationTokenSource _prodDownloadCts = null;
-    private CancellationTokenSource _installGameResourceCts = null;
+    private CancellationTokenSource _downloadCts = null!;
+    private CancellationTokenSource _prodDownloadCts = null!;
+    private CancellationTokenSource _installGameResourceCts = null!;
 
-    #region 下载方法
-
-    /// <summary>
-    /// 下载游戏接口
-    /// </summary>
-    /// <param name="folder"></param>
-    /// <param name="isDelete"></param>
-    /// <returns></returns>
-    public async Task<bool> StartDownloadTaskAsync(
-        string folder,
-        bool isDelete = false,
-        CancellationToken token = default
-    )
+    public async Task<bool> StartDownloadTaskAsync(string folder, bool isDelete = false,
+        CancellationToken token = default, GameResourceParameter? parameter = null)
     {
-        if (string.IsNullOrWhiteSpace(folder))
-            return false;
-        await GameLocalConfig.SaveConfigAsync(GameLocalSettingName.GameLauncherBassFolder, folder);
-        await GameLocalConfig.SaveConfigAsync(GameLocalSettingName.LocalGameUpdateing, "True");
-        var launcher = await this.GetGameLauncherSourceAsync(null, token);
-        if (launcher == null)
+        if (string.IsNullOrWhiteSpace(folder) || Interlocked.CompareExchange(ref _resourceOperationActive, 1, 0) != 0) return false;
+        try
         {
-            this.GameEventPublisher.Publish(
-                new GameContextOutputArgs()
+            var plan = await GetInstallGameResourceAsync(parameter, token);
+            if (!IsExecutable(plan)) { Interlocked.Exchange(ref _resourceOperationActive, 0); return false; }
+            await GameLocalConfig.SaveConfigsAsync(new Dictionary<string, string>
+            {
+                [GameLocalSettingName.GameLauncherBassFolder] = folder,
+                [GameLocalSettingName.LocalGameUpdateing] = "True"
+            }, token);
+            GameContextOutputArgs.CurrentGeneration.Value = Interlocked.Increment(ref _operationGeneration);
+            _ = Task.Run(async () =>
+            {
+                try { await StartDownloadAsync(folder, plan, isDelete, null, parameter, token); }
+                catch (OperationCanceledException) { }
+                catch (Exception ex)
                 {
-                    TipMessage = "未请求到游戏文件信息",
-                    Type = GameContextActionType.TipMessage,
+                    Logger.WriteError($"安装资源下载失败：{ex}");
+                    SystemEventPublisher.Publish(new() { Message = $"安装资源下载失败：{ex.Message}" });
                 }
-            );
-            return false;
+                finally
+                {
+                    await SetCurrentStateNull(false);
+                    Interlocked.Exchange(ref _resourceOperationActive, 0);
+                }
+            });
+            return true;
         }
-        var gen = Interlocked.Increment(ref _operationGeneration);
-        GameContextOutputArgs.CurrentGeneration.Value = gen;
-        _ = Task.Run(async () => await StartDownloadAsync(folder, launcher));
+        catch { Interlocked.Exchange(ref _resourceOperationActive, 0); throw; }
+    }
+
+    private async Task<bool> StartDownloadAsync(string folder, GameVersionInfo plan, bool deleteExtra,
+        List<string>? skip, GameResourceParameter? parameter, CancellationToken token = default)
+    {
+        if (!IsExecutable(plan)) return false;
+        if (plan.ZipResources.Count != 0 || plan.PatchResources.Count != 0)
+            return await ExecuteResourcePlanAsync(plan, InstallOption.CreateDefault(), parameter, token);
+        HttpClientService.BuildClient();
+        var state = await CreateResourceStateAsync(false, token);
+        Setups = ["下载校验", "保存数据"];
+        CurrentSetups = 0;
+        await GameEventPublisher.PublishStepAsync("下载校验", 0, Setups);
+        if (!await DownloadFilesAsync(plan.DefaultResource.Where(x => x.IsSelected), folder, state, false, "下载校验", deleteExtra, skip, cdns: plan.CdnCandidates)) return false;
+        state.CancelToken.Token.ThrowIfCancellationRequested();
+        CurrentSetups = 1;
+        await GameEventPublisher.PublishStepAsync("保存数据", 1, Setups);
+        var writer = new WriteGameResourceConfig(GameLocalConfig, plan.NewGameVersion, Config, Logger);
+        await writer.WriteDownloadComplateAsync(GameEventPublisher, true, state.CancelToken.Token);
+        state.IsActive = false;
         return true;
     }
 
-    /// <summary>
-    /// 开始下载
-    /// </summary>
-    /// <param name="folder"></param>
-    /// <param name="launcher"></param>
-    /// <param name="token"></param>
-    /// <returns></returns>
-    private async Task<bool> StartDownloadAsync(
-        string folder,
-        GameLauncherSource launcher,
-        bool isRepir = false,
-        List<string>? repirSkipFile = null
-    )
+    public async Task<bool> RepairGameAsync(bool isDelete = true, List<string>? skipFilePath = null,
+        GameResourceParameter? parameter = null)
     {
-        try
+        if (!IoCircuitBreaker.TryAcquire()) return false;
+        if (Interlocked.CompareExchange(ref _resourceOperationActive, 1, 0) != 0)
         {
-            if (_currentRunningAction != null)
-            {
-                await _currentRunningAction.DisposeAsync();
-            }
-            this.Setups = new List<string>();
-            Setups.Add("下载校验");
-            Setups.Add("保存数据");
-            var downloadMethod = new DownloadAndVerifyResource(this.Logger);
-            var resourceIndexUrl =
-                launcher.ResourceDefault.CdnList.Where(x => x.P != 0).OrderBy(x => x.P).First().Url
-                + launcher.ResourceDefault.Config.IndexFile;
-            var resource = await GetGameResourceAsync(resourceIndexUrl);
-            if (resource == null)
-                return false;
-            HttpClientService?.BuildClient();
-            _downloadCts = new CancellationTokenSource();
-            var state = await GetInitDownloadState(false);
-            state.CancelToken = _downloadCts;
-            state.IsActive = true;
-            downloadMethod = new(this.Logger);
-            downloadMethod.ProgressName = "下载校验";
-            GameEventPublisher.Publish(
-                new GameContextOutputArgs()
-                {
-                    Type = GameContextActionType.CdnSelect,
-                    TipMessage = "正在选择最优CDN",
-                    Prod = false,
-                }
-            );
-            var cdnResult = await TestCdnAsync(
-                launcher.ResourceDefault.CdnList,
-                launcher.ResourceDefault.Config.BaseUrl,
-                resource.Resource
-            );
-            if (cdnResult == null)
-            {
-                this.GameEventPublisher.Publish(
-                    new GameContextOutputArgs()
-                    {
-                        Type = GameContextActionType.TipMessage,
-                        TipMessage = "未找到可用的CDN地址，无法进行下载",
-                    }
-                );
-                return false;
-            }
-
-            var baseUrl = cdnResult.Value.url + launcher.ResourceDefault.Config.BaseUrl;
-            var param = new Dictionary<string, object>()
-            {
-                { "resource", resource.Resource },
-                { "launcher", launcher },
-                { "isDelete", isRepir },
-                { "folder", folder },
-                { "httpClient", HttpClientService! },
-                { "downloadState", DownloadState! },
-                { "baseUrl", baseUrl },
-                { "isProd", false },
-                { "skipVerifyFile", repirSkipFile! },
-            };
-            var fastVerify = await this.GameLocalConfig.GetConfigAsync(GameLocalSettingName.FastVerify);
-            if (!string.IsNullOrWhiteSpace(fastVerify) && bool.TryParse(fastVerify,out var fastVerifyFlage))
-            {
-                param.Add("fastVerify",fastVerifyFlage);
-            }
-            downloadMethod.SetParam(param, this.GameEventPublisher);
-            _currentRunningAction = downloadMethod;
-            await GameEventPublisher.PublisAsync(GameContextActionType.CdnSelect, "CDN选择完毕");
-            this.CurrentSetups = 0;
-            await this.GameEventPublisher.PublishStepAsync("下载校验", CurrentSetups, Setups);
-            var excuteResult = await downloadMethod.ExecuteAsync(true);
-            if (excuteResult is not true)
-            {
-                Logger.WriteError("游戏文件修复失败，停止写入完成配置");
-                await SetCurrentStateNull(false);
-                return false;
-            }
-            var writeConfig = new WriteGameResourceConfig(
-                this.GameLocalConfig,
-                launcher,
-                this.Config,
-                Logger
-            );
-            _currentRunningAction = writeConfig;
-            this.CurrentSetups = 1;
-            if (state.CancelToken.IsCancellationRequested)
-            {
-                if (!isRepir)
-                {
-                    await this.GameLocalConfig.SaveConfigAsync(
-                        GameLocalSettingName.GameLauncherBassFolder,
-                        ""
-                    );
-                    await this.GameLocalConfig.SaveConfigAsync(
-                        GameLocalSettingName.LocalGameVersion,
-                        ""
-                    );
-                    await this.GameLocalConfig.SaveConfigAsync(
-                        GameLocalSettingName.LocalGameUpdateing,
-                        "False"
-                    );
-
-                    await this.GameLocalConfig.SaveConfigAsync(
-                        GameLocalSettingName.GameLauncherBassProgram,
-                        ""
-                    );
-                }
-                await this.SetCurrentStateNull(false);
-                return true;
-            }
-            await this.GameEventPublisher.PublishStepAsync("写入配置", CurrentSetups, Setups);
-            await writeConfig.WriteDownloadComplateAsync(this.GameEventPublisher, true);
-            await state.CancelToken.CancelAsync();
-            state.IsActive = false;
-            await Task.Delay(200);
-            await SetCurrentStateNull(false);
-            return true;
-        }
-        catch (OperationCanceledException)
-        {
-            await SetCurrentStateNull(false);
+            IoCircuitBreaker.Release();
             return false;
         }
-        finally
-        {
-            await SetCurrentStateNull(false);
-        }
-    }
-
-    /// <summary>
-    /// 修复游戏
-    /// </summary>
-    /// <param name="token"></param>
-    /// <returns></returns>
-    public async Task<bool> RepairGameAsync(bool isDelete = true, List<string>? skipFilePath = null)
-    {
-        if (!IoCircuitBreaker.TryAcquire())
-            return false;
-
         try
         {
-            var folder = await GameLocalConfig.GetConfigAsync(
-                GameLocalSettingName.GameLauncherBassFolder
-            );
-            if (string.IsNullOrWhiteSpace(folder))
-                return false;
-            await GameLocalConfig.SaveConfigAsync(
-                GameLocalSettingName.GameLauncherBassFolder,
-                folder
-            );
+            var folder = await GameLocalConfig.GetConfigAsync(GameLocalSettingName.GameLauncherBassFolder);
+            if (string.IsNullOrWhiteSpace(folder)) return false;
+            var summary = await GetResourceSummaryAsync(parameter);
+            var plan = await GetVerificationResourceAsync(summary.OfficialVersion, parameter);
+            if (!IsExecutable(plan) || plan.ZipResources.Count != 0 || plan.PatchResources.Count != 0) return false;
             await GameLocalConfig.SaveConfigAsync(GameLocalSettingName.LocalGameUpdateing, "True");
-            var launcher = await GetGameLauncherSourceAsync(null);
-            if (launcher == null)
-            {
-                GameEventPublisher.Publish(
-                    new GameContextOutputArgs
-                    {
-                        TipMessage = "未请求到游戏文件信息",
-                        Type = GameContextActionType.TipMessage,
-                    }
-                );
-                return false;
-            }
-            var generation = Interlocked.Increment(ref _operationGeneration);
-            GameContextOutputArgs.CurrentGeneration.Value = generation;
-            await StartDownloadAsync(folder, launcher, isDelete, skipFilePath);
-            return true;
+            GameContextOutputArgs.CurrentGeneration.Value = Interlocked.Increment(ref _operationGeneration);
+            return await StartDownloadAsync(folder, plan, isDelete, skipFilePath, parameter);
         }
-        catch (OperationCanceledException)
-        {
-            return false;
-        }
-        catch (Exception ex)
-        {
-            Logger.WriteError($"校验游戏失败：{ex}");
-            return false;
-        }
+        catch (OperationCanceledException) { return false; }
+        catch (Exception ex) { Logger.WriteError($"校验游戏失败：{ex}"); return false; }
         finally
         {
+            await SetCurrentStateNull(false);
+            Interlocked.Exchange(ref _resourceOperationActive, 0);
             IoCircuitBreaker.Release();
         }
     }
-
-    /// <summary>
-    /// 测试CDN
-    /// </summary>
-    /// <param name="cdnList"></param>
-    /// <param name="baseUrl"></param>
-    /// <param name="resource"></param>
-    /// <returns></returns>
-    public async Task<CdnTestResult?> TestCdnAsync(
-        List<CdnList> cdnList,
-        string baseUrl,
-        List<IndexResource> resource
-    )
-    {
-        if (resource == null || !resource.Any())
-            return null;
-
-        const long targetTestSize = 50L * 1024 * 1024;
-
-        var item = resource.MinBy(x => Math.Abs((long)x.Size - targetTestSize));
-        item ??= resource.MinBy(x => x.Size);
-        if (item == null || string.IsNullOrWhiteSpace(item.Dest))
-        {
-            return null;
-        }
-
-        // 修复找不到文件错误：安全地拼接 URL
-        var testUrl = baseUrl.TrimEnd('/') + "/" + item.Dest.TrimStart('/');
-        var best = await CDNSpeedTester.TestAllAsync(cdnList, testUrl, TimeSpan.FromSeconds(40));
-        return best;
-    }
-
-    #endregion
 }

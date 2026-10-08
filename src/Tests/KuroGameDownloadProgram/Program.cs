@@ -1,1 +1,3 @@
-// 材质分包和默认包测试
+using KuroGameDownloadProgram.Tests;
+
+await BunleTest.StartTaskAsync();

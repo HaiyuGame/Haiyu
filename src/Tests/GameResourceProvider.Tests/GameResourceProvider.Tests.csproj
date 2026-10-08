@@ -1,0 +1,12 @@
+<Project Sdk="MSTest.Sdk/3.6.0">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Update="Fixtures/OfficialBundleConfig.json" CopyToOutputDirectory="PreserveNewest" />
+    <ProjectReference Include="../../Waves.Core/Waves.Core.csproj" />
+  </ItemGroup>
+</Project>
