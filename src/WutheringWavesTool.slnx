@@ -71,9 +71,6 @@
       <BuildType Solution="All|*" Project="Debug" />
       <Platform Solution="*|x86" Project="x86" />
     </Project>
-    <Project Path="D:/WorkSpace/Haiyu/src/Setup/Msix.WPFSetup/Msix.WPFSetup.csproj">
-      <BuildType Solution="All|*" Project="Debug" />
-    </Project>
     <Project Path="D:/WorkSpace/Haiyu/src/Setup/Project.WPFSetup/Project.WPFSetup.csproj">
       <BuildType Solution="All|*" Project="Debug" />
     </Project>

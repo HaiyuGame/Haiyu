@@ -21,7 +21,7 @@ namespace LanguageEditer.ViewModels;
 public partial class LanguageEditerViewModel : ObservableObject
 {
     private SfDataGrid _dataGrid;
-    private readonly NativePickersService _pickers = new(() => WindowNative.GetWindowHandle(App.Window));
+    private readonly NativePickersService _pickers = new();
 
     [RelayCommand]
     void CreateNewProject() { }
@@ -35,6 +35,7 @@ public partial class LanguageEditerViewModel : ObservableObject
     [RelayCommand]
     async Task OpenDocument()
     {
+        _pickers.InitWindow(WindowNative.GetWindowHandle(App.Window));
         var file = await _pickers.GetFileOpenPicker([".json"]);
         if (file is null)
             return;
