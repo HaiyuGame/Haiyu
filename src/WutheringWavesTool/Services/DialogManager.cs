@@ -120,20 +120,6 @@ public sealed class DialogManager : IDialogManager
     public async Task<SelectDownloadFolderResult> ShowSelectGameFolderV2Async(Type type, GameResourceParameter? parameter = null) =>
         await GetDialogResultAsync<SelectGameFolderDialogV2, SelectDownloadFolderResult>(new GameFolderDialogRequest(type, parameter));
 
-    /// <summary>
-    /// 显示更新游戏对话框
-    /// </summary>
-    /// <param name="contextName">游戏核心</param>
-    /// <param name="isShowUpdate">是否是更新游戏，否则是预下载</param>
-    /// <returns></returns>
-    public async Task<UpdateGameResult> ShowUpdateGameDialogAsync(
-        string contextName,
-        UpdateGameType type,
-        GameResourceParameter? parameter = null
-    ) =>
-        await GetDialogResultAsync<UpdateGameDialogV2, UpdateGameResult>(
-            new UpdateGameDialogRequest(contextName, type, parameter)
-        );
 
     public async Task<UpdateGameResult?> ShowUpdateGameDialogAsyncV2(
         string contextName,
@@ -142,6 +128,12 @@ public sealed class DialogManager : IDialogManager
     ) =>
         await GetDialogResultAsync<UpdateGameDialogV2, UpdateGameResult>(
             new UpdateGameDialogRequest(contextName, type, parameter)
+        );
+
+    public async Task<BunleResourceSize?> ShowBunleGameDialogAsync(string contextName)
+    =>
+        await GetDialogResultAsync<SelectGameBunleDialog, BunleResourceSize>(
+            new SelectGameBunleRequest(contextName)
         );
 
     public async Task<LauncheNodeConfig?> ShowSelectGameNodeAsync(string id) =>

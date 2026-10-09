@@ -19,20 +19,15 @@ public interface IDialogManager
     public Task ShowLocalUserManagerAsync();
     public Task ShowUpdateDialog(DisplayVersionInfo info);
     public Task<SelectDownloadFolderResult> ShowSelectGameFolderV2Async(Type type, GameResourceParameter? parameter = null);
-    public Task<SelectDownloadFolderResult> ShowSelectDownloadFolderV2Async(Type type, GameResourceParameter? parameter = null);
-    public Task<CloseWindowResult> ShowCloseWindowResult();
+    public Task<SelectDownloadFolderResult?> ShowSelectDownloadFolderV2Async(Type type, GameResourceParameter? parameter = null);
+    public Task<CloseWindowResult?> ShowCloseWindowResult();
     public Task<QRScanResult> GetQRLoginResultAsync();
-    public Task<UpdateGameResult> ShowUpdateGameDialogAsync(
+    public Task<UpdateGameResult?> ShowUpdateGameDialogAsyncV2(
         string contextName,
         UpdateGameType type,
         GameResourceParameter? parameter = null
     );
-    public Task<UpdateGameResult> ShowUpdateGameDialogAsyncV2(
-        string contextName,
-        UpdateGameType type,
-        GameResourceParameter? parameter = null
-    );
-    public Task<LauncheNodeConfig> ShowSelectGameNodeAsync(string id);
+    public Task<LauncheNodeConfig?> ShowSelectGameNodeAsync(string id);
     public Task ShowWavesCloudSettingAsync(GameType ype);
 
     Task ShowCloudUserManagerDialogAsync();
@@ -53,4 +48,6 @@ public interface IDialogManager
     Task ShowGameLocalTokenAsync(string contextName);
 
     Task ShowClearMemoryAsync();
+
+    Task<BunleResourceSize?> ShowBunleGameDialogAsync(string contextName);
 }

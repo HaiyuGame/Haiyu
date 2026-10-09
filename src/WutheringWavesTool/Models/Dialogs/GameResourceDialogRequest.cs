@@ -5,3 +5,5 @@ namespace Haiyu.Models.Dialogs;
 
 public sealed record UpdateGameDialogRequest(string ContextName, UpdateGameType Operation, GameResourceParameter? Parameter);
 public sealed record GameFolderDialogRequest(Type ContextType, GameResourceParameter? Parameter);
+
+public sealed record SelectGameBunleRequest(string ContextName);

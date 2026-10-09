@@ -84,6 +84,22 @@ public sealed class ResourceExecutionTests
     }
 
     [TestMethod]
+    public async Task CancelledRepairClearsUpdateFlagWithoutCommittingVersion()
+    {
+        await using var fixture = await Fixture.Create();
+        await fixture.Context.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.LocalGameUpdateing, "True");
+        fixture.Handler.DelayDownloads = true;
+        var repair = fixture.Context.RepairGameAsync(isDelete: false);
+        await fixture.Handler.DownloadStarted.Task.WaitAsync(TimeSpan.FromSeconds(8));
+        Assert.IsTrue(await fixture.Context.StopCannelTaskAsync());
+        Assert.IsFalse(await repair);
+        Assert.AreEqual("False", await fixture.Context.GameLocalConfig.GetConfigAsync(GameLocalSettingName.LocalGameUpdateing));
+        Assert.IsTrue(await fixture.VersionIs("1"));
+        Assert.IsNull(fixture.Context.DownloadState);
+        Assert.IsFalse(fixture.Context.IsResourceOperationActive);
+    }
+
+    [TestMethod]
     public async Task ExistingCacheFilesAreVerifiedAndReusedDuringUpdate()
     {
         await using var fixture = await Fixture.Create();

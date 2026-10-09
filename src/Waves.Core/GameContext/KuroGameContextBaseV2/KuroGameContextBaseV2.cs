@@ -433,10 +433,17 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
             return status;
         }
         var indexSource = await this.GetResourceSummaryAsync(token: token);
-        localVersion = indexSource.LocalVersion;
+        // 主页的更新入口只表示游戏版本升级；材质切换未完成由手动修复补齐。
+        if (!IsBunle) localVersion = indexSource.LocalVersion;
+        var gameNeedsUpdate = IsBunle
+            ? (Version.TryParse(localVersion, out var installedVersion)
+                && Version.TryParse(indexSource.OfficialVersion, out var officialVersion)
+                ? installedVersion < officialVersion
+                : !string.Equals(localVersion, indexSource.OfficialVersion, StringComparison.Ordinal))
+            : indexSource.Update.Availability != GameResourceAvailability.AlreadyCurrent;
         if (indexSource != null)
         {
-            await ClearVersion(indexSource);
+            await ClearVersion(gameNeedsUpdate);
 
 
             var predownloadVFlage = Version.TryParse(
@@ -447,7 +454,7 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
             {
                 status.DisplayVersion = predownVersion.ToString();
             }
-            else if (indexSource.Update.Availability != GameResourceAvailability.AlreadyCurrent)
+            else if (gameNeedsUpdate)
             {
                 status.IsUpdate = true;
                 status.DisplayVersion = indexSource.OfficialVersion;
@@ -462,7 +469,7 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
                 && bool.TryParse(updateing, out var updateResult)
             )
             {
-                status.IsUpdateing = updateResult;
+                status.IsUpdateing = updateResult && (!IsBunle || gameNeedsUpdate || IsResourceOperationActive);
             }
             if (
                 (
@@ -507,9 +514,9 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
         return status;
     }
 
-    private async Task ClearVersion(GameResourceSummary indexSource)
+    private async Task ClearVersion(bool gameNeedsUpdate)
     {
-        if (indexSource.Update.Availability == GameResourceAvailability.AlreadyCurrent)
+        if (!gameNeedsUpdate)
         {
             await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdIsAdvance, "False");
         }

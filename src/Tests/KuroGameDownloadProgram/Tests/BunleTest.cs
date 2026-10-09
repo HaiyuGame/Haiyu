@@ -1,9 +1,11 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Waves.Api.Models;
 using Waves.Core;
 using Waves.Core.Contracts;
 using Waves.Core.GameContext;
 using Waves.Core.GameContext.ContextsV2.Waves;
+using Waves.Core.Services.GameResourceProvider;
 using Waves.Settings;
 
 namespace KuroGameDownloadProgram.Tests
@@ -28,8 +30,11 @@ namespace KuroGameDownloadProgram.Tests
                 nameof(WavesMainGameContextV2)
             );
             await v2.InitAsync();
-            var result = await v2.GameResourceProvider.CheckUpdateAsync();
-            var install = await v2.GameResourceProvider.GetInstallGameResourceAsync();
+            Dictionary<string, Tuple<BundleResourcePack, GameLauncherBundle>> dictValue = [];
+            if(v2.GameResourceProvider is BundleGameResourceProvider pp)
+            {
+                var r = await pp.GetBunlesAsync();
+            }
 
             Console.WriteLine();
         }

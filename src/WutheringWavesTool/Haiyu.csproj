@@ -284,6 +284,9 @@
 		<None Update="Assets\HpatchzResource\hpatchz.exe">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
+		<Page Update="Pages\Dialogs\SelectGameBunleDialog.xaml">
+		  <SubType>Designer</SubType>
+		</Page>
 		<Page Update="Pages\Toolkits\MonitorSettingPage.xaml">
 		  <SubType>Designer</SubType>
 		</Page>

@@ -74,7 +74,7 @@ partial class KuroGameContextViewModelV2
                 return;
             }
         }
-        var result = await WindowManager.Shell.DialogManager.ShowUpdateGameDialogAsync(
+        var result = await WindowManager.Shell.DialogManager.ShowUpdateGameDialogAsyncV2(
             this.GameContext.ContextName,
             UpdateGameType.ProDownload, ResourceParameter
         );

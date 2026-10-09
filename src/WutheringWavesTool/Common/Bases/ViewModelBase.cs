@@ -121,7 +121,6 @@ public partial class ViewModelBase : ObservableRecipient, IDisposable
         IsDisposed = true;
         try
         {
-            IsActive = false;
             OnDisposing();
         }
         finally

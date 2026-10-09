@@ -34,8 +34,6 @@
                     FontSize="16"
                     Text="{x:Bind helper:LanguageService.GetString('WebViewEnv_ManagerHeader')}" />
                 <TextBlock Foreground="{ThemeResource SystemColorGrayTextBrush}">
-                    <Run Text="当前版本" />
-                    <Run Text=": " />
                     <Run Text="{x:Bind ViewModel.CurrentVersion, Mode=OneWay}" />
                 </TextBlock>
             </StackPanel>

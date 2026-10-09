@@ -5,7 +5,9 @@ namespace Waves.Core.Services.GameResourceProvider;
 /// <summary>分包协议：配置查询和逐包索引适配，不下载游戏文件，也不写安装状态。</summary>
 public sealed partial class BundleGameResourceProvider : IGameResourceProvider
 {
-    private static readonly HttpClient DefaultClient = new(new HttpClientHandler { AutomaticDecompression = DecompressionMethods.All });
+    private static readonly HttpClient DefaultClient = new(
+        new HttpClientHandler { AutomaticDecompression = DecompressionMethods.All }
+    );
     private readonly Func<HttpClient> _getClient;
 
     public BundleGameResourceProvider()
@@ -37,18 +39,25 @@ public sealed partial class BundleGameResourceProvider : IGameResourceProvider
         ApiConfig = apiConfig ?? throw new ArgumentNullException(nameof(apiConfig));
     }
 
-    private async Task<GameLauncherBunleSource> ReadConfigAsync(CancellationToken token)
+    public async Task<GameLauncherBunleSource> ReadConfigAsync(CancellationToken token = default)
     {
         if (LocalConfig is null || ApiConfig is null)
             throw new InvalidOperationException("请先调用 SetConfig 初始化资源管理器。");
         if (string.IsNullOrWhiteSpace(ApiConfig.BunleConfigUrl))
-            throw new InvalidOperationException("请配置 BunleConfigUrl，或读取新版启动器的 Assets/KRApp.conf。");
+            throw new InvalidOperationException(
+                "请配置 BunleConfigUrl，或读取新版启动器的 Assets/KRApp.conf。"
+            );
         _savedBundleName = await LocalConfig.GetConfigAsync(GameLocalSettingName.BunleName, token);
-        var source = await ReadJsonAsync(ConfigurationUrls(), GameLauncherBunleSourceContext.Default.GameLauncherBunleSource, token);
+        var source = await ReadJsonAsync(
+            ConfigurationUrls(),
+            GameLauncherBunleSourceContext.Default.GameLauncherBunleSource,
+            token
+        );
         if (source.Bundles.Count == 0 || source.ResourcePacks.Count == 0)
             throw new InvalidDataException("分包地址返回的配置未包含 bundles/resourcePacks。");
         return source;
     }
+
     private string GetBundleName(GameLauncherBunleSource source, GameResourceParameter? parameter)
     {
         if (!string.IsNullOrWhiteSpace(parameter?.BundleName))
@@ -97,24 +106,34 @@ public sealed partial class BundleGameResourceProvider : IGameResourceProvider
         return bundle;
     }
 
-    private async Task<Dictionary<string, string>> ReadVersionsAsync(
+    public async Task<Dictionary<string, string>> ReadVersionsAsync(
         IEnumerable<string> names,
-        CancellationToken token
+        CancellationToken token = default
     )
     {
-        var localVersion = await LocalConfig.GetConfigAsync(GameLocalSettingName.LocalGameVersion, token) ?? "";
+        var localVersion =
+            await LocalConfig.GetConfigAsync(GameLocalSettingName.LocalGameVersion, token) ?? "";
         var versions = new Dictionary<string, string>(StringComparer.Ordinal);
         var keys = names.Distinct(StringComparer.Ordinal).ToArray();
         var hasPackRecords = false;
-        foreach (var name in keys.Concat(["Common", "HD", "SD", "UHD"]).Distinct(StringComparer.Ordinal))
+        foreach (
+            var name in keys.Concat(["Common", "HD", "SD", "UHD"]).Distinct(StringComparer.Ordinal)
+        )
         {
-            var version = await LocalConfig.GetConfigAsync(GameLocalSettingName.GetBunlePackVersionKey(name), token);
+            var version = await LocalConfig.GetConfigAsync(
+                GameLocalSettingName.GetBunlePackVersionKey(name),
+                token
+            );
             hasPackRecords |= version is not null;
             versions[name] = version ?? "";
         }
-        return keys.ToDictionary(name => name,
-            name => hasPackRecords ? versions[name] : localVersion, StringComparer.Ordinal);
+        return keys.ToDictionary(
+            name => name,
+            name => hasPackRecords ? versions[name] : localVersion,
+            StringComparer.Ordinal
+        );
     }
+
     public async Task<bool> CheckUpdateAsync(
         GameResourceParameter? parameter = null,
         CancellationToken token = default
@@ -222,19 +241,28 @@ public sealed partial class BundleGameResourceProvider : IGameResourceProvider
         var bundles = source.Bundles;
         var cdns = source.CdnList;
         var bundle = SelectBundle(bundles, packs, name);
-        if (verificationVersion is not null && parameter?.TargetPackVersions is null
+        if (
+            verificationVersion is not null
+            && parameter?.TargetPackVersions is null
             && packs[bundle.ResourcePacks[0]].Version == verificationVersion
-            && source.Predownload is { } candidate && candidate.Bundles.TryGetValue(name, out var preBundle)
+            && source.Predownload is { } candidate
+            && candidate.Bundles.TryGetValue(name, out var preBundle)
             && preBundle.ResourcePacks.Count > 0
             && candidate.ResourcePacks.TryGetValue(preBundle.ResourcePacks[0], out var primary)
             && primary.Version == verificationVersion
-            && !SameTargets(packs, bundle, candidate.ResourcePacks, preBundle))
-            throw new InvalidOperationException("正式与预下载配置的主版本相同但分包目标不同，请传入清单的 TargetPackVersions。");
+            && !SameTargets(packs, bundle, candidate.ResourcePacks, preBundle)
+        )
+            throw new InvalidOperationException(
+                "正式与预下载配置的主版本相同但分包目标不同，请传入清单的 TargetPackVersions。"
+            );
         if (
             predownload
             || verificationVersion is not null
-                && (packs[bundle.ResourcePacks[0]].Version != verificationVersion
-                    || parameter?.TargetPackVersions is { } targets && !MatchesTargets(packs, bundle, targets))
+                && (
+                    packs[bundle.ResourcePacks[0]].Version != verificationVersion
+                    || parameter?.TargetPackVersions is { } targets
+                        && !MatchesTargets(packs, bundle, targets)
+                )
         )
         {
             var pre = verificationVersion is null
@@ -249,7 +277,7 @@ public sealed partial class BundleGameResourceProvider : IGameResourceProvider
                 return new GameVersionInfo
                 {
                     ResourceVersion = "2",
-            BundleName = name,
+                    BundleName = name,
                     Availability = GameResourceAvailability.NoPredownload,
                 };
             }
@@ -260,9 +288,14 @@ public sealed partial class BundleGameResourceProvider : IGameResourceProvider
                 cdns = pre.CdnList;
         }
         var target = packs[bundle.ResourcePacks[0]].Version;
-        if (verificationVersion is not null && parameter?.TargetPackVersions is { } expected
-            && !MatchesTargets(packs, bundle, expected))
-            throw new InvalidOperationException("逐包目标版本配置已失效，保留原下载清单并重新查询配置。");
+        if (
+            verificationVersion is not null
+            && parameter?.TargetPackVersions is { } expected
+            && !MatchesTargets(packs, bundle, expected)
+        )
+            throw new InvalidOperationException(
+                "逐包目标版本配置已失效，保留原下载清单并重新查询配置。"
+            );
         if (verificationVersion is not null && verificationVersion != target)
             throw new InvalidOperationException($"目标版本配置已失效：{verificationVersion}");
         var versions = await ReadVersionsAsync(bundle.ResourcePacks, token);
@@ -321,6 +354,114 @@ public sealed partial class BundleGameResourceProvider : IGameResourceProvider
         return result;
     }
 
+    public async Task<int> DeleteResourcePackFilesAsync(
+        string packName,
+        IProgress<double>? progress = null,
+        CancellationToken token = default
+    )
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(packName);
+        var source = await ReadConfigAsync(token);
+        var name =
+            source.ResourcePacks.Keys.FirstOrDefault(x =>
+                string.Equals(x, packName, StringComparison.OrdinalIgnoreCase)
+            ) ?? throw new ArgumentException($"资源包不存在：{packName}", nameof(packName));
+        var bundle = new GameLauncherBundle { ResourcePacks = [name] };
+        SelectBundle(new() { [name] = bundle }, source.ResourcePacks, name);
+        var selection = Describe(
+                source.ResourcePacks,
+                bundle,
+                new() { [name] = "" },
+                false,
+                true,
+                "default"
+            )
+            .Single();
+        var urls = OrderCdns(source.CdnList)
+            .Select(c => JoinUrl(c.Url, selection.Pack.IndexFile))
+            .Distinct()
+            .ToList();
+        var index = await ReadIndexAsync(urls, selection.Pack.IndexFileMd5, token);
+        var plan = new GameVersionInfo();
+        MapIndex(plan, index, selection, source.CdnList, "default", true);
+        var folder = await LocalConfig.GetConfigAsync(
+            GameLocalSettingName.GameLauncherBassFolder,
+            token
+        );
+        if (string.IsNullOrWhiteSpace(folder) || !Directory.Exists(folder))
+            throw new DirectoryNotFoundException("游戏目录不存在。");
+        var root = Path.GetFullPath(folder);
+        var paths = plan
+            .DefaultResource.Select(file => BuildFileHelper.ResolveFilePath(root, file.Dest))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        foreach (var path in paths)
+        {
+            token.ThrowIfCancellationRequested();
+            for (var current = path; current is not null; current = Path.GetDirectoryName(current))
+            {
+                if (
+                    (File.Exists(current) || Directory.Exists(current))
+                    && (File.GetAttributes(current) & FileAttributes.ReparsePoint) != 0
+                )
+                    throw new IOException($"资源路径包含目录或文件链接：{current}");
+                if (string.Equals(current, root, StringComparison.OrdinalIgnoreCase))
+                    break;
+            }
+        }
+        progress?.Report(0);
+        return await Task.Run(
+            async () =>
+            {
+                var deleted = 0;
+                for (var i = 0; i < paths.Length; i++)
+                {
+                    token.ThrowIfCancellationRequested();
+                    if (File.Exists(paths[i]))
+                    {
+                        File.Delete(paths[i]);
+                        deleted++;
+                    }
+                    progress?.Report((i + 1) * 100d / paths.Length);
+                }
+                if (paths.Length == 0)
+                    progress?.Report(100);
+                return deleted;
+            },
+            token
+        );
+    }
+
+    public async Task<ObservableCollection<BunleResourceSize>> GetBunlesAsync()
+    {
+        var result = new ObservableCollection<BunleResourceSize>();
+        Dictionary<string, Tuple<BundleResourcePack, GameLauncherBundle>> dictValue = [];
+        var c = await ReadConfigAsync();
+        var packs = c.ResourcePacks;
+        var common = c.ResourcePacks["common"];
+        foreach (var item in c.Bundles)
+        {
+            if (packs.TryGetValue(item.Key.ToLower(), out var resource))
+            {
+                dictValue.Add(item.Key, new(resource, item.Value));
+            }
+        }
+        foreach (var item in dictValue)
+        {
+            result.Add(
+                new BunleResourceSize(item.Value.Item1.Size + common.Size)
+                {
+                    BunleName = item.Key,
+                    GPUS = [.. item.Value.Item2.Config.RecommendGpu],
+                    ResourceCommand =
+                        item.Value.Item2.ResourcePacks[1] ?? item.Value.Item2.ResourcePacks[0],
+                    Version = item.Value.Item1.Version,
+                }
+            );
+        }
+        return result;
+    }
+
     private string ResolveApplyMethod(GameLauncherBunleSource source, GameLauncherBundle bundle)
     {
         if (!string.IsNullOrWhiteSpace(ApplyMethod))
@@ -331,16 +472,31 @@ public sealed partial class BundleGameResourceProvider : IGameResourceProvider
         return string.IsNullOrWhiteSpace(method) ? "default" : method;
     }
 
-    private static bool MatchesTargets(Dictionary<string, BundleResourcePack> packs, GameLauncherBundle bundle,
-        IReadOnlyDictionary<string, string> targets) =>
+    private static bool MatchesTargets(
+        Dictionary<string, BundleResourcePack> packs,
+        GameLauncherBundle bundle,
+        IReadOnlyDictionary<string, string> targets
+    ) =>
         bundle.ResourcePacks.Distinct(StringComparer.Ordinal).Count() == targets.Count
-        && bundle.ResourcePacks.All(name => targets.TryGetValue(name, out var version)
-            && packs.TryGetValue(name, out var pack) && pack.Version == version);
+        && bundle.ResourcePacks.All(name =>
+            targets.TryGetValue(name, out var version)
+            && packs.TryGetValue(name, out var pack)
+            && pack.Version == version
+        );
 
-    private static bool SameTargets(Dictionary<string, BundleResourcePack> packs, GameLauncherBundle bundle,
-        Dictionary<string, BundleResourcePack> otherPacks, GameLauncherBundle otherBundle) =>
-        MatchesTargets(otherPacks, otherBundle, bundle.ResourcePacks.Distinct(StringComparer.Ordinal)
-            .ToDictionary(name => name, name => packs[name].Version));
+    private static bool SameTargets(
+        Dictionary<string, BundleResourcePack> packs,
+        GameLauncherBundle bundle,
+        Dictionary<string, BundleResourcePack> otherPacks,
+        GameLauncherBundle otherBundle
+    ) =>
+        MatchesTargets(
+            otherPacks,
+            otherBundle,
+            bundle
+                .ResourcePacks.Distinct(StringComparer.Ordinal)
+                .ToDictionary(name => name, name => packs[name].Version)
+        );
 
     private sealed record Selection(
         BundleResourcePack Pack,
@@ -711,4 +867,3 @@ public sealed partial class BundleGameResourceProvider : IGameResourceProvider
         return 0;
     }
 }
-

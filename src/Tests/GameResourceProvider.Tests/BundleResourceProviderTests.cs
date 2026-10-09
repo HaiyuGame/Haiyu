@@ -22,6 +22,33 @@ public sealed class BundleResourceProviderTests
         """;
 
     [TestMethod]
+    public async Task DeleteOnePackReportsProgressAndPreservesOtherFilesAndSettings()
+    {
+        using var f = await Fixture.Create();
+        f.Handler.Indexes["/HD-full-index"] = "{\"resource\":[{\"dest\":\"hd.bin\",\"size\":1},{\"dest\":\"missing.bin\",\"size\":1}]}";
+        // 使用 fixture 的实际索引地址。
+        f.Handler.Config.ResourcePacks["HD"].IndexFile = "/HD-full-index";
+        await f.Local.SaveConfigAsync(GameLocalSettingName.GameLauncherBassFolder, f.Game);
+        var hd = Path.Combine(f.Game, "hd.bin");
+        var common = Path.Combine(f.Game, "common.bin");
+        await File.WriteAllTextAsync(hd, "hd");
+        await File.WriteAllTextAsync(common, "common");
+        var values = new List<double>();
+        Assert.AreEqual(1, await f.Provider.DeleteResourcePackFilesAsync("hd", new InlineProgress(values)));
+        Assert.IsFalse(File.Exists(hd));
+        Assert.IsTrue(File.Exists(common));
+        Assert.AreEqual(0d, values.First());
+        Assert.AreEqual(100d, values.Last());
+        Assert.AreEqual("6", await f.Local.GetConfigAsync(GameLocalSettingName.BunlePackVersion_HD));
+        Assert.AreEqual(2, f.Handler.Requests.Count);
+    }
+
+    private sealed class InlineProgress(List<double> values) : IProgress<double>
+    {
+        public void Report(double value) => values.Add(value);
+    }
+
+    [TestMethod]
     public async Task SummaryReadsOnlyConfigAndSumsSelectedPacks()
     {
         using var f = await Fixture.Create();

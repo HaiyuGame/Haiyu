@@ -79,7 +79,7 @@ partial class KuroGameContextBaseV2
             var summary = await GetResourceSummaryAsync(parameter);
             var plan = await GetVerificationResourceAsync(summary.OfficialVersion, parameter);
             if (!IsExecutable(plan) || plan.ZipResources.Count != 0 || plan.PatchResources.Count != 0) return false;
-            await GameLocalConfig.SaveConfigAsync(GameLocalSettingName.LocalGameUpdateing, "True");
+            // 修复（包括材质切换）不是版本更新，不设置更新续传标记。
             GameContextOutputArgs.CurrentGeneration.Value = Interlocked.Increment(ref _operationGeneration);
             return await StartDownloadAsync(folder, plan, isDelete, skipFilePath, parameter);
         }
@@ -87,9 +87,17 @@ partial class KuroGameContextBaseV2
         catch (Exception ex) { Logger.WriteError($"校验游戏失败：{ex}"); return false; }
         finally
         {
-            await SetCurrentStateNull(false);
-            Interlocked.Exchange(ref _resourceOperationActive, 0);
-            IoCircuitBreaker.Release();
+            try
+            {
+                // 成功、取消和失败都结束修复状态；不写入目标版本或安装成功状态。
+                await GameLocalConfig.SaveConfigAsync(GameLocalSettingName.LocalGameUpdateing, "False");
+                await SetCurrentStateNull(false);
+            }
+            finally
+            {
+                Interlocked.Exchange(ref _resourceOperationActive, 0);
+                IoCircuitBreaker.Release();
+            }
         }
     }
 }
