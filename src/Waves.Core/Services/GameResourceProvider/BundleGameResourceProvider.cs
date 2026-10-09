@@ -409,6 +409,11 @@ public sealed partial class BundleGameResourceProvider : IGameResourceProvider
                     break;
             }
         }
+        token.ThrowIfCancellationRequested();
+        // 空记录明确表示未安装，避免移除键后回退到 LocalGameVersion。
+        // 删除中途取消或失败也不再保留“该包完整安装”的版本记录。
+        if (!await LocalConfig.SaveConfigAsync(GameLocalSettingName.GetBunlePackVersionKey(name), "", token))
+            throw new IOException($"清空资源包版本记录失败：{name}");
         progress?.Report(0);
         return await Task.Run(
             async () =>

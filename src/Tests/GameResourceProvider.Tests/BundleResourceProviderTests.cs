@@ -22,7 +22,7 @@ public sealed class BundleResourceProviderTests
         """;
 
     [TestMethod]
-    public async Task DeleteOnePackReportsProgressAndPreservesOtherFilesAndSettings()
+    public async Task DeleteOnePackReportsProgressAndClearsOnlyItsVersion()
     {
         using var f = await Fixture.Create();
         f.Handler.Indexes["/HD-full-index"] = "{\"resource\":[{\"dest\":\"hd.bin\",\"size\":1},{\"dest\":\"missing.bin\",\"size\":1}]}";
@@ -39,7 +39,8 @@ public sealed class BundleResourceProviderTests
         Assert.IsTrue(File.Exists(common));
         Assert.AreEqual(0d, values.First());
         Assert.AreEqual(100d, values.Last());
-        Assert.AreEqual("6", await f.Local.GetConfigAsync(GameLocalSettingName.BunlePackVersion_HD));
+        Assert.AreEqual("", await f.Local.GetConfigAsync(GameLocalSettingName.BunlePackVersion_HD));
+        Assert.AreEqual("1", await f.Local.GetConfigAsync(GameLocalSettingName.BunlePackVersion_Common));
         Assert.AreEqual(2, f.Handler.Requests.Count);
     }
 

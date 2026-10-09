@@ -273,6 +273,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
                     }
                     UpdateTransferProgressDisplay(tracker, args, status);
                     ShowGameDownloadingBth(status);
+                    this.BunleBthEnable = false;
                 }
                 if (actionType == Waves.Core.Models.Enums.GameContextActionType.BottomText)
                 {
@@ -280,12 +281,14 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
                     this.MaxProgressValue = args.FileTotal;
                     this.CurrentProgressValue = args.CurrentFile;
                     PauseStartEnable = false;
+                    this.BunleBthEnable = false;
                 }
 
                 if (actionType == Waves.Core.Models.Enums.GameContextActionType.CdnSelect)
                 {
                     ShowGameDownloadingBth(status);
                     PauseStartEnable = false;
+                    this.BunleBthEnable = false;
                 }
             }
             else
@@ -296,6 +299,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
                     || args.Type == GameContextActionType.Decompress
                 )
                 {
+                    this.BunleBthEnable = false;
                     if (GameContext.IsDownloadTaskCancel())
                     {
                         return;
@@ -355,6 +359,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
                 || tracker.IsCancel
             )
             {
+                this.BunleBthEnable = this.GameContext.IsBunle;
                 if (args.Prod)
                 {
                     PauseStartEnable = true;

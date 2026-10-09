@@ -107,10 +107,31 @@ public partial class SelectGameBunleViewModel : DialogViewModelBase
             await this.CloseAsync(null);
             return;
         }
+        var arguments =
+            await GameContext.GameLocalConfig.GetConfigAsync(
+                GameLocalSettingName.StartGameArguments
+            ) ?? "";
+        arguments = System
+            .Text.RegularExpressions.Regex.Replace(
+                arguments,
+                @"(?<!\S)-krqlv=(?:""[^""]*""|\S+)",
+                "",
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase
+            )
+            .Trim();
+        var quality = string.IsNullOrWhiteSpace(select.ResourceCommand)
+            ? select.BunleName.ToLowerInvariant()
+            : select.ResourceCommand.ToLowerInvariant();
+        arguments = string.IsNullOrWhiteSpace(arguments)
+            ? $"-krqlv={quality}"
+            : $"{arguments} -krqlv={quality}";
         if (
-            !await GameContext.GameLocalConfig.SaveConfigAsync(
-                GameLocalSettingName.BunleName,
-                select.BunleName
+            !await GameContext.GameLocalConfig.SaveConfigsAsync(
+                new Dictionary<string, string>
+                {
+                    [GameLocalSettingName.BunleName] = select.BunleName,
+                    [GameLocalSettingName.StartGameArguments] = arguments,
+                }
             )
         )
             return;
