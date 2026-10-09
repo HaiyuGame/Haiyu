@@ -64,7 +64,7 @@
                                 VerticalAlignment="Center"
                                 Orientation="Horizontal"
                                 Spacing="5">
-                                <Button Command="{x:Bind SendDeleteCommand}">
+                                <Button Command="{x:Bind SendDeleteCommand}" Visibility="{x:Bind IsSelect, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}">
                                     <FontIcon
                                         FontFamily="Segoe Fluent Icons"
                                         FontSize="15"
