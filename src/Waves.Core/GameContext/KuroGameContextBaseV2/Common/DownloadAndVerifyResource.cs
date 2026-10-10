@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Waves.Core.GameContext.KruoGameContextBaseV2.Common;
@@ -19,14 +20,16 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
     private long _totalProgressSize;
     private long _totalProgressTotal;
     private long _totalVerifiedBytes;
-    private long _lastSpeedBytes;
-    private DateTime _lastSpeedUpdateTime;
     private double _downloadSpeed;
     private double _verifySpeed;
     private long _totalfileSize;
     private int _totalFileTotal;
     private volatile bool _disposed;
     private long _generation;
+    private readonly object _progressGate = new();
+    private long _speedSampleTimestamp;
+    private double _smoothedDownloadSpeed;
+    private double _smoothedVerifySpeed;
     #endregion
 
     private DownloadState _downloadState;
@@ -90,6 +93,9 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
         _totalProgressTotal = 0L;
         _totalVerifiedBytes = 0;
         _totalDownloadedBytes = 0;
+        _downloadSpeed = _verifySpeed = 0;
+        _smoothedDownloadSpeed = _smoothedVerifySpeed = 0;
+        _speedSampleTimestamp = Stopwatch.GetTimestamp();
     }
 
     public async Task<bool> CheckAsync()
@@ -498,7 +504,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
         throw new IOException($"下载失败：{item.Dest}", lastError);
     }
 
-    private GameContextOutputArgs UpdateFileProgress(
+    internal GameContextOutputArgs UpdateFileProgress(
         GameContextActionType type,
         long fileSize,
         bool isAdd = true,
@@ -508,49 +514,67 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
         long fileMaxSize = 0
     )
     {
-        if (type == GameContextActionType.Download)
+        lock (_progressGate)
         {
-            Interlocked.Add(ref _totalDownloadedBytes, fileSize);
-            if (isAdd)
-                Interlocked.Add(ref _totalProgressSize, fileSize);
+            if (type == GameContextActionType.Download)
+            {
+                Interlocked.Add(ref _totalDownloadedBytes, fileSize);
+                if (isAdd)
+                    Interlocked.Add(ref _totalProgressSize, fileSize);
+            }
+            else if (type == GameContextActionType.Verify)
+            {
+                if (!isAdd)
+                    Interlocked.Add(ref _totalVerifiedBytes, fileSize);
+                if (isAdd)
+                    Interlocked.Add(ref _totalProgressSize, fileSize);
+            }
+            var elapsed = Stopwatch.GetElapsedTime(_speedSampleTimestamp).TotalSeconds;
+            if (elapsed >= 1)
+            {
+                _downloadSpeed = Interlocked.Exchange(ref _totalDownloadedBytes, 0) / elapsed;
+                _verifySpeed = Interlocked.Exchange(ref _totalVerifiedBytes, 0) / elapsed;
+                _smoothedDownloadSpeed = _downloadSpeed > 0
+                    ? (_smoothedDownloadSpeed > 0 ? 0.3 * _downloadSpeed + 0.7 * _smoothedDownloadSpeed : _downloadSpeed) : 0;
+                _smoothedVerifySpeed = _verifySpeed > 0
+                    ? (_smoothedVerifySpeed > 0 ? 0.3 * _verifySpeed + 0.7 * _smoothedVerifySpeed : _verifySpeed) : 0;
+                _speedSampleTimestamp = Stopwatch.GetTimestamp();
+            }
+            // 下载/校验共用任务进度，但速率独立；校验读取字节不重复累加到完成进度。
+            var speed = type == GameContextActionType.Download ? _smoothedDownloadSpeed : _smoothedVerifySpeed;
+            var remainingBytes = Math.Max(0, _totalfileSize - _totalProgressSize);
+            TimeSpan? remainingTime = null;
+            if (!_downloadState.IsPaused && !_downloadState.CancelToken.IsCancellationRequested && _totalfileSize > 0)
+            {
+                if (remainingBytes == 0) remainingTime = TimeSpan.Zero;
+                else if (speed > 0)
+                {
+                    var seconds = remainingBytes / speed;
+                    if (double.IsFinite(seconds) && seconds < TimeSpan.MaxValue.TotalSeconds)
+                        remainingTime = TimeSpan.FromSeconds(Math.Ceiling(seconds));
+                }
+            }
+            var args = new GameContextOutputArgs
+            {
+                Generation = _generation,
+                RemainingTime = remainingTime,
+                Type = type,
+                CurrentSize = _totalProgressSize,
+                TotalSize = _totalfileSize,
+                FileTotal = _totalFileTotal,
+                DownloadSpeed = _downloadSpeed,
+                FilePath = filePath,
+                FileCurrentSize = currentFileSize,
+                FileTotalSize = fileMaxSize,
+                Prod = _isProd,
+                IsCancel = this._downloadState.CancelToken.IsCancellationRequested,
+                VerifySpeed = _verifySpeed,
+                IsAction = this._downloadState?.IsActive ?? false,
+                IsPause = _downloadState?.IsPaused ?? false,
+                TipMessage = tip,
+            };
+            return args;
         }
-        else if (type == GameContextActionType.Verify)
-        {
-            if (!isAdd)
-                Interlocked.Add(ref _totalVerifiedBytes, fileSize);
-            if (isAdd)
-                Interlocked.Add(ref _totalProgressSize, fileSize);
-        }
-        var elapsed = (DateTime.Now - _lastSpeedUpdateTime).TotalSeconds;
-        if (elapsed >= 1)
-        {
-            _downloadSpeed = _totalDownloadedBytes / elapsed;
-            _verifySpeed = _totalVerifiedBytes / elapsed;
-            Interlocked.Exchange(ref _totalDownloadedBytes, 0);
-            Interlocked.Exchange(ref _totalVerifiedBytes, 0);
-            var currentBytes = Interlocked.Read(ref _totalDownloadedBytes);
-            _lastSpeedBytes = currentBytes;
-            _lastSpeedUpdateTime = DateTime.Now;
-        }
-        var args = new GameContextOutputArgs
-        {
-            Generation = _generation,
-            Type = type,
-            CurrentSize = _totalProgressSize,
-            TotalSize = _totalfileSize,
-            FileTotal = _totalFileTotal,
-            DownloadSpeed = _downloadSpeed,
-            FilePath = filePath,
-            FileCurrentSize = currentFileSize,
-            FileTotalSize = fileMaxSize,
-            Prod = _isProd,
-            IsCancel = this._downloadState.CancelToken.IsCancellationRequested,
-            VerifySpeed = _verifySpeed,
-            IsAction = this._downloadState?.IsActive ?? false,
-            IsPause = _downloadState?.IsPaused ?? false,
-            TipMessage = tip,
-        };
-        return args;
     }
 
     public async Task<bool> CancelAsync()

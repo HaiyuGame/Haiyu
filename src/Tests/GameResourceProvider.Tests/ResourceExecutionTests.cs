@@ -22,6 +22,39 @@ namespace Project.Test;
 public sealed class ResourceExecutionTests
 {
     [TestMethod]
+    public async Task TrackerForwardsRemainingTimeAndResetsBetweenStages()
+    {
+        var tracker = new GameProgressTracker();
+        Assert.AreEqual("----", tracker.RemainingTimeText);
+        await tracker.HandleEventAsync(new() { Generation = 1, Type = GameContextActionType.Download, RemainingTime = TimeSpan.FromSeconds(65) });
+        Assert.AreEqual("00:01:05", tracker.RemainingTimeText);
+        await tracker.HandleEventAsync(new() { Generation = 1, Type = GameContextActionType.Verify, RemainingTime = TimeSpan.FromSeconds(10) });
+        Assert.AreEqual("00:00:10", tracker.RemainingTimeText);
+        await tracker.HandleEventAsync(new() { Generation = 1, Type = GameContextActionType.Verify, IsPause = true, RemainingTime = TimeSpan.FromSeconds(10) });
+        Assert.AreEqual("----", tracker.RemainingTimeText);
+        await tracker.HandleEventAsync(new() { Generation = 1, Type = GameContextActionType.PublishStep });
+        Assert.AreEqual("----", tracker.RemainingTimeText);
+        await tracker.HandleEventAsync(new() { Generation = 1, Type = GameContextActionType.None });
+        Assert.AreEqual("----", tracker.RemainingTimeText);
+    }
+
+    [TestMethod]
+    public void RemainingTimeDisplaysPlaceholderUntilEstimated()
+    {
+        var args = new GameContextOutputArgs();
+        Assert.IsNull(args.RemainingTime);
+        Assert.AreEqual("----", args.RemainingTimeText);
+        args.RemainingTime = TimeSpan.FromSeconds(3661);
+        Assert.AreEqual("01:01:01", args.RemainingTimeText);
+        args.RemainingTime = TimeSpan.Zero;
+        Assert.AreEqual("00:00:00", args.RemainingTimeText);
+        args.RemainingTime = TimeSpan.FromHours(25);
+        Assert.AreEqual("25:00:00", args.RemainingTimeText);
+        args.RemainingTime = null;
+        Assert.AreEqual("----", args.RemainingTimeText);
+    }
+
+    [TestMethod]
     public async Task CompletionResetsProgressAndRejectsLateCallbacks()
     {
         var tracker = new GameProgressTracker();
@@ -29,6 +62,7 @@ public sealed class ResourceExecutionTests
             IsAction = true, TotalSize = 100, CurrentSize = 100, IsStepUpdate = true,
             AllSteps = ["校验", "保存"], StepName = "校验", TotalSteps = 2 });
         await tracker.HandleEventAsync(new() { Generation = 1, Type = GameContextActionType.None, Prod = true });
+        await tracker.HandleEventAsync(new() { Type = GameContextActionType.TipMessage, TipMessage = "迟到提示" });
         foreach (var generation in new long[] { 0, 1 })
             await tracker.HandleEventAsync(new() { Generation = generation, Type = GameContextActionType.Verify, IsAction = true, TotalSize = 100 });
         Assert.AreEqual(GameContextActionType.None, tracker.CurrentAction);
@@ -44,6 +78,31 @@ public sealed class ResourceExecutionTests
     }
 
     [TestMethod]
+    public async Task CompletionBarrierAlsoCoversUnnumberedResetAndRepeatedPageReplay()
+    {
+        foreach (var generation in new long[] { 0, 5 })
+        foreach (var prod in new[] { false, true })
+        {
+            var tracker = new GameProgressTracker();
+            await tracker.HandleEventAsync(new() { Generation = generation, Type = GameContextActionType.Download, IsAction = true });
+            await tracker.HandleEventAsync(new() { Generation = 0, Type = GameContextActionType.None, Prod = prod });
+            // 页面重建重发最后的结束消息，仍保持屏障。
+            await tracker.HandleEventAsync(tracker.LastArgs);
+            foreach (var type in new[] { GameContextActionType.Download, GameContextActionType.Verify,
+                GameContextActionType.ZipDecompress, GameContextActionType.Decompress,
+                GameContextActionType.BottomText, GameContextActionType.PublishStep })
+            {
+                await tracker.HandleEventAsync(new() { Generation = generation, Type = type, IsAction = true });
+                Assert.AreEqual(GameContextActionType.None, tracker.CurrentAction);
+                Assert.IsFalse(tracker.IsActive);
+                Assert.AreEqual(0, tracker.TotalBytes);
+            }
+            await tracker.HandleEventAsync(new() { Generation = generation + 1, Type = GameContextActionType.Download, IsAction = true });
+            Assert.IsTrue(tracker.IsActive);
+        }
+    }
+
+    [TestMethod]
     public async Task FullInstallationConsumesUnifiedZipPlanAndVerifiesExtractedFiles()
     {
         await using var fixture = await Fixture.Create();
@@ -52,6 +111,7 @@ public sealed class ResourceExecutionTests
         await fixture.WaitUntil(() => fixture.VersionIs("2"));
         await fixture.WaitUntil(() => Task.FromResult(!fixture.Context.IsResourceOperationActive));
         CollectionAssert.AreEqual(Handler.Payload, await File.ReadAllBytesAsync(Path.Combine(fixture.Game, "game.bin")));
+        await fixture.AssertProgressTerminated();
     }
 
     [TestMethod]
@@ -147,6 +207,7 @@ public sealed class ResourceExecutionTests
         await fixture.WaitUntil(() => fixture.VersionIs("3"));
         Assert.IsTrue(fixture.Handler.Paths.Contains("/next-index"));
         Assert.IsFalse(fixture.Handler.Paths.Contains("/full-index"));
+        await fixture.AssertProgressTerminated();
     }
 
     [TestMethod]
@@ -161,6 +222,7 @@ public sealed class ResourceExecutionTests
         await fixture.WaitUntil(() => Task.FromResult(fixture.Context.DownloadState is null && !fixture.Context.IsResourceOperationActive));
         Assert.IsTrue(await fixture.VersionIs("1"));
         Assert.IsTrue(File.Exists(Path.Combine(fixture.Game, "obsolete.bin")));
+        await fixture.AssertProgressTerminated();
     }
 
     [TestMethod]
@@ -325,6 +387,16 @@ public sealed class ResourceExecutionTests
             return fixture;
         }
         public async Task<bool> VersionIs(string version) => await Context.GameLocalConfig.GetConfigAsync(GameLocalSettingName.LocalGameVersion) == version;
+        public async Task AssertProgressTerminated()
+        {
+            await WaitUntil(() => Task.FromResult(!Context.IsResourceOperationActive
+                && Context.ProgressState.LastArgs?.Type == GameContextActionType.None));
+            Assert.IsNull(Context.DownloadState);
+            Assert.IsNull(Context.ProdDownloadState);
+            Assert.IsFalse(Context.ProgressState.IsActive);
+            Assert.AreEqual(0, Context.ProgressState.AllSteps.Count);
+            Assert.AreEqual(0, Context.ProgressState.ActiveFiles.Count);
+        }
         public async Task WaitUntil(Func<Task<bool>> predicate)
         {
             var timeout = Stopwatch.StartNew();

@@ -90,8 +90,15 @@ partial class KuroGameContextBaseV2
             try
             {
                 // 成功、取消和失败都结束修复状态；不写入目标版本或安装成功状态。
-                await GameLocalConfig.SaveConfigAsync(GameLocalSettingName.LocalGameUpdateing, "False");
-                await SetCurrentStateNull(false);
+                try
+                {
+                    await GameLocalConfig.SaveConfigAsync(GameLocalSettingName.LocalGameUpdateing, "False");
+                }
+                finally
+                {
+                    // 配置写入失败也要发送结束事件，释放下载卡片和任务状态。
+                    await SetCurrentStateNull(false);
+                }
             }
             finally
             {

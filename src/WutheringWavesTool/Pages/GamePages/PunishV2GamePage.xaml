@@ -172,6 +172,9 @@
                             FontFamily="{ThemeResource DefaultFont}"
                             FontSize="12">
                             <Run Text="{x:Bind ViewModel.CurrentStepText, Mode=OneWay}" />
+                            <Run Text="(" />
+                            <Run Text="{x:Bind ViewModel.RemainingTimeText, Mode=OneWay}" />
+                            <Run Text=")"/>
                         </TextBlock>
                         <TextBlock
                             Grid.Row="2"

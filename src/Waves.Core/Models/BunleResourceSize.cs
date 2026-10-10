@@ -34,4 +34,9 @@ public sealed partial class BunleResourceSize : ObservableObject
     [ObservableProperty]
     public partial string ResourceCommand { get; set; }
     public long Size { get; }
+    /// <summary>
+    /// 删除按钮显示
+    /// </summary>
+    [ObservableProperty]
+    public partial bool Select { get; set; }
 }

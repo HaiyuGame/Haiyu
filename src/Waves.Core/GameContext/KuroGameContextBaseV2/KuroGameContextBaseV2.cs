@@ -417,23 +417,7 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
         {
             status.IsLauncher = true;
         }
-        var ping = (
-            await NetworkCheck.PingHostsAsync(
-                [
-                    KuroGameApiConfig.BaseAddress[0],
-                    "https://pc-launcher-sdk-api.kurogame.com",
-                    "https://baidu.com",
-                ],
-                token
-            )
-        );
-        if (!ping)
-        {
-            SystemEventPublisher.Publish(new() { Message = "网络未连接" });
-            return status;
-        }
         var indexSource = await this.GetResourceSummaryAsync(token: token);
-        // 主页的更新入口只表示游戏版本升级；材质切换未完成由手动修复补齐。
         if (!IsBunle) localVersion = indexSource.LocalVersion;
         var gameNeedsUpdate = IsBunle
             ? (Version.TryParse(localVersion, out var installedVersion)

@@ -89,6 +89,7 @@ public partial class SelectGameBunleViewModel : DialogViewModelBase
             if (selectQuality == item.BunleName)
             {
                 item.IsSelect = true;
+                item.Select = true;
             }
         }
     }

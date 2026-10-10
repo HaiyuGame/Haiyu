@@ -15,6 +15,66 @@ namespace Project.Test;
 public sealed class ResourceDownloadTests
 {
     [TestMethod]
+    public async Task ZipEstimatesRemainingTimeAndResetsForNextArchive()
+    {
+        using var cts = new CancellationTokenSource();
+        await using var events = new GameEventPublisher();
+        var state = new DownloadState { CancelToken = cts, IsActive = true };
+        var zip = new InstallKrZipResource(new LoggerService());
+        zip.SetParam(new Dictionary<string, object>
+        {
+            ["zipInfos"] = new List<PatchGameFileInfo>(), ["baseGamePath"] = Path.GetTempPath(),
+            ["zipDownFolder"] = Path.GetTempPath(), ["downloadState"] = state
+        }, events);
+        Assert.IsTrue(zip.Check());
+        zip.InitZipProgress(1000);
+        Assert.AreEqual("----", zip.UpdateFileProgress(Waves.Core.Models.Enums.GameContextActionType.ZipDecompress, 100).RemainingTimeText);
+        await Task.Delay(1100);
+        Assert.IsTrue(zip.UpdateFileProgress(Waves.Core.Models.Enums.GameContextActionType.Decompress, 100).RemainingTime > TimeSpan.Zero);
+        await state.PauseAsync();
+        Assert.IsNull(zip.UpdateFileProgress(Waves.Core.Models.Enums.GameContextActionType.ZipDecompress, 0).RemainingTime);
+        await state.ResumeAsync();
+        Assert.AreEqual(TimeSpan.Zero, zip.UpdateFileProgress(Waves.Core.Models.Enums.GameContextActionType.ZipDecompress, 800).RemainingTime);
+        zip.InitZipProgress(500);
+        Assert.AreEqual("----", zip.UpdateFileProgress(Waves.Core.Models.Enums.GameContextActionType.ZipDecompress, 100).RemainingTimeText);
+        cts.Cancel();
+        Assert.IsNull(zip.UpdateFileProgress(Waves.Core.Models.Enums.GameContextActionType.ZipDecompress, 0).RemainingTime);
+    }
+
+    [TestMethod]
+    public async Task DownloadAndVerificationEstimateTimeAfterSpeedSampling()
+    {
+        foreach (var type in new[] { Waves.Core.Models.Enums.GameContextActionType.Download, Waves.Core.Models.Enums.GameContextActionType.Verify })
+        {
+            using var client = new HttpClient();
+            using var cts = new CancellationTokenSource();
+            await using var events = new GameEventPublisher();
+            var state = new DownloadState { CancelToken = cts, IsActive = true };
+            var action = new DownloadAndVerifyResource(new LoggerService());
+            action.SetParam(new Dictionary<string, object>
+            {
+                ["resource"] = new[] { new GameFileInfo { Dest = "test.bin", Size = 1000 } },
+                ["isDelete"] = false, ["folder"] = Path.GetTempPath(),
+                ["httpClient"] = new Service(client), ["downloadState"] = state, ["isProd"] = false
+            }, events);
+            Assert.IsTrue(await action.CheckAsync());
+            var isAdd = type == Waves.Core.Models.Enums.GameContextActionType.Download;
+            Assert.AreEqual("----", action.UpdateFileProgress(type, 100, isAdd).RemainingTimeText);
+            await Task.Delay(1100);
+            var sampled = action.UpdateFileProgress(type, 100, isAdd);
+            Assert.IsTrue(sampled.RemainingTime > TimeSpan.Zero);
+            Assert.AreEqual(isAdd ? 200L : 0L, sampled.CurrentSize);
+            await state.PauseAsync();
+            Assert.IsNull(action.UpdateFileProgress(type, 0, isAdd).RemainingTime);
+            await state.ResumeAsync();
+            var completed = action.UpdateFileProgress(Waves.Core.Models.Enums.GameContextActionType.Verify, isAdd ? 800 : 1000, true);
+            Assert.AreEqual(TimeSpan.Zero, completed.RemainingTime);
+            cts.Cancel();
+            Assert.IsNull(action.UpdateFileProgress(type, 0, isAdd).RemainingTime);
+        }
+    }
+
+    [TestMethod]
     public async Task ChunkValidationReadsOnlyRequestedRange()
     {
         var path = Path.GetTempFileName();
