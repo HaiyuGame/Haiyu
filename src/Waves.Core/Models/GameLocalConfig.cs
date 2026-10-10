@@ -24,6 +24,27 @@ public class GameLocalSettingName
     /// </summary>
     public const string LocalGameVersion = nameof(LocalGameVersion);
 
+    /// <summary>Haiyu 自己保存的独立资源包安装版本；不读取或兼容官方安装记录。</summary>
+    public const string BunleName = nameof(BunleName);
+
+    public const string BunlePackVersion_Common = nameof(BunlePackVersion_Common);
+    public const string BunlePackVersion_HD = nameof(BunlePackVersion_HD);
+    public const string BunlePackVersion_SD = nameof(BunlePackVersion_SD);
+    public const string BunlePackVersion_UHD = nameof(BunlePackVersion_UHD);
+
+    public static string GetBunlePackVersionKey(string packName)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(packName);
+        return packName.ToUpperInvariant() switch
+        {
+            "COMMON" => BunlePackVersion_Common,
+            "HD" => BunlePackVersion_HD,
+            "SD" => BunlePackVersion_SD,
+            "UHD" => BunlePackVersion_UHD,
+            _ => "BunlePackVersion_" + char.ToUpperInvariant(packName[0]) + packName[1..]
+        };
+    }
+
     public const string LocalGameUpdateing = nameof(LocalGameUpdateing);
 
     /// <summary>
@@ -63,6 +84,11 @@ public class GameLocalSettingName
     /// 是否已经安装了ProdIsAdvance版本
     /// </summary>
     public const string ProdIsAdvance = nameof(ProdIsAdvance);
+
+    /// <summary>
+    /// 快速校验
+    /// </summary>
+    public const string FastVerify = nameof(FastVerify);
 
     public const string GameTime = nameof(GameTime);
 }

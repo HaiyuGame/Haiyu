@@ -29,6 +29,7 @@ public class GameContextOutputArgs
     public bool IsStepUpdate { get; set; }
     public string StepName { get; set; }
     public int TotalSteps { get; set; }
+
     /// <summary>
     /// 当更新大步骤时，提供整个步骤的名称列表，以便UI初始化生成侧边栏/步骤条
     /// </summary>
@@ -47,7 +48,6 @@ public class GameContextOutputArgs
     public long CurrentSize { get; set; }
     public long TotalSize { get; set; }
 
-
     public long CurrentDecompressCount { get; set; }
 
     public long MaxDecompressValue { get; set; }
@@ -56,8 +56,12 @@ public class GameContextOutputArgs
 
     public double VerifySpeed { get; set; }
 
-    [Obsolete("Use RemainingTime instead.")]
-    public TimeSpan RemainingTime { get; set; }
+    public TimeSpan? RemainingTime { get; set; }
+
+    public string RemainingTimeText =>
+        RemainingTime is { } remaining && remaining >= TimeSpan.Zero
+            ? $"{(long)remaining.TotalHours:00}:{remaining.Minutes:00}:{remaining.Seconds:00}"
+            : "----";
     #endregion
 
     public bool IsAction { get; set; }
@@ -77,6 +81,7 @@ public class GameContextOutputArgs
         TotalSize > 0 ? Math.Round((CurrentSize * 100.0) / TotalSize, 2) : 0;
 
     public int CurrentStepIndex { get; internal set; }
+
     /// <summary>
     /// 是否为预下载
     /// </summary>

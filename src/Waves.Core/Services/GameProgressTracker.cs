@@ -105,16 +105,24 @@ public sealed class GameProgressTracker : TrackerBase<GameProgressTracker, GameC
     public string StepName { get; private set; }
     public bool IsCancel { get; private set; }
     public double DiffSpeed { get; set; }
+    public string RemainingTimeText { get; private set; } = "----";
 
     private GameContextOutputArgs _lastArgs;
     private DateTime? lastTime;
     private bool _isTerminated;
     private long _terminationGeneration;
+    private long _latestGeneration;
 
     public override ValueTask HandleEventAsync(GameContextOutputArgs args)
     {
         if (args == null)
             return default;
+
+        if (args.Generation > 0)
+        {
+            if (args.Generation < _latestGeneration) return default;
+            _latestGeneration = args.Generation;
+        }
 
         if (args.Type == GameContextActionType.None)
         {
@@ -134,13 +142,16 @@ public sealed class GameProgressTracker : TrackerBase<GameProgressTracker, GameC
             FileCurrentSize = 0;
             FileTotalSize = 0;
             CurrentStepTip = string.Empty;
+            StepName = string.Empty;
+            CurrentStepIndex = 0;
+            TotalSteps = 0;
+            AllSteps = [];
+            Prod = args.Prod;
+            RemainingTimeText = args.RemainingTimeText;
             ActiveFiles.Clear();
             Interlocked.Increment(ref _activeFilesVersion);
-            if (args.Generation > _terminationGeneration)
-            {
-                _terminationGeneration = args.Generation;
-                _isTerminated = true;
-            }
+            _terminationGeneration = Math.Max(_latestGeneration, _terminationGeneration);
+            _isTerminated = true;
             this.lastTime = args.CreateTime;
             this._lastArgs = args;
             _isDirty = true;
@@ -149,9 +160,9 @@ public sealed class GameProgressTracker : TrackerBase<GameProgressTracker, GameC
 
         if (_isTerminated)
         {
-            if (args.Generation > 0 && args.Generation <= _terminationGeneration)
+            if (args.Generation <= _terminationGeneration && args.Type != GameContextActionType.GameExit)
                 return default;
-            _isTerminated = false;
+            if (args.Generation > _terminationGeneration) _isTerminated = false;
         }
 
         if (this.lastTime == null || this.lastTime == DateTime.MinValue)
@@ -219,6 +230,7 @@ public sealed class GameProgressTracker : TrackerBase<GameProgressTracker, GameC
         {
             CurrentStepTip = args.TipMessage;
         }
+        RemainingTimeText = args.IsPause || args.IsCancel ? "----" : args.RemainingTimeText;
         this._lastArgs = args;
         _isDirty = true;
 

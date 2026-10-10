@@ -8,4 +8,7 @@ public class WavesMainGameContextV2: KuroGameContextBaseV2
 
     public override Type ContextType => typeof(WavesMainGameContextV2);
     public override GameType GameType => GameType.Waves;
+
+
+    public override bool IsBunle => true;
 }

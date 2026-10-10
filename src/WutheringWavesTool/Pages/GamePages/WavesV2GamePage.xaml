@@ -54,10 +54,12 @@
         <ComboBox
             Margin="10,10,0,0"
             Padding="10,5"
-            CornerRadius="15"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            CornerRadius="10"
             ItemsSource="{x:Bind ViewModel.Servers, Mode=OneWay}"
             SelectedItem="{x:Bind ViewModel.SelectServer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-            Style="{ThemeResource AcrylicComboBoxStyle}">
+            Style="{ThemeResource TitleBarComboBoxStyle}">
             <ComboBox.ItemTemplate>
                 <DataTemplate x:DataType="m:ServerDisplay">
                     <Border CornerRadius="5">
@@ -70,6 +72,28 @@
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
+        <StackPanel
+            Grid.ColumnSpan="2"
+            Margin="0,5,10,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            Orientation="Horizontal">
+            <Button Padding="8" Style="{ThemeResource TitleBarButtonStyle}">
+                <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE712;" />
+                <Button.Flyout>
+                    <MenuFlyout Placement="Bottom">
+                        <MenuFlyoutItem
+                            Command="{x:Bind ViewModel.ShowSelectGameBunleCommand}"
+                            IsEnabled="{x:Bind ViewModel.BunleBthEnable, Mode=OneWay}"
+                            Text="切换材质">
+                            <MenuFlyoutItem.Icon>
+                                <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8AB;" />
+                            </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
+                    </MenuFlyout>
+                </Button.Flyout>
+            </Button>
+        </StackPanel>
         <!--  下载游戏  -->
         <Grid
             Grid.Row="0"

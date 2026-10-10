@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog
+    x:Class="Haiyu.Pages.Dialogs.SelectGameBunleDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="using:Waves.Core.Models"
+    xmlns:control="using:Haiyu.Controls"
+    xmlns:cui="using:CommunityToolkit.WinUI.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:h="using:Haiyu.Helpers"
+    xmlns:helper="using:Haiyu.Helpers"
+    xmlns:i="using:Microsoft.Xaml.Interactivity"
+    xmlns:local="using:Haiyu.Pages.Dialogs"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Background="{ThemeResource AcrylicBackgroundFillColorBaseBrush}"
+    CornerRadius="5"
+    mc:Ignorable="d">
+    <i:Interaction.Behaviors>
+        <i:EventTriggerBehavior EventName="Loaded">
+            <i:InvokeCommandAction Command="{x:Bind ViewModel.LoadedCommand}" />
+        </i:EventTriggerBehavior>
+    </i:Interaction.Behaviors>
+    <Grid RowSpacing="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <ProgressBar
+            Grid.Row="1"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Top"
+            Background="Transparent"
+            Maximum="100"
+            Value="{x:Bind ViewModel.Progress, Mode=OneWay}" />
+        <TextBlock
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            FontFamily="{ThemeResource DefaultFont}"
+            FontSize="16"
+            Text="材质包选择" />
+        <ItemsView
+            Grid.Row="2"
+            IsEnabled="{x:Bind ViewModel.InvokeEnable, Mode=OneWay}"
+            ItemsSource="{x:Bind ViewModel.Bunles, Mode=OneWay}"
+            Visibility="{x:Bind ViewModel.NullEnable, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}">
+            <ItemsView.ItemTemplate>
+                <DataTemplate x:DataType="c:BunleResourceSize">
+                    <ItemContainer IsSelected="{x:Bind IsSelect, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <Grid
+                            Padding="10"
+                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            CornerRadius="5">
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <TextBlock VerticalAlignment="Center" Text="{x:Bind BunleName, Mode=OneWay}" />
+                            <TextBlock Grid.Row="1" Text="{x:Bind BunleSize, Mode=OneWay}" />
+                            <StackPanel
+                                Grid.RowSpan="2"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Orientation="Horizontal"
+                                Spacing="5">
+                                <Button Command="{x:Bind SendDeleteCommand}" Visibility="{x:Bind Select, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}">
+                                    <FontIcon
+                                        FontFamily="Segoe Fluent Icons"
+                                        FontSize="15"
+                                        Glyph="&#xE74D;" />
+                                </Button>
+                                <Button FontSize="16">
+                                    <FontIcon
+                                        FontFamily="Segoe Fluent Icons"
+                                        FontSize="15"
+                                        Glyph="&#xE70C;" />
+                                    <Button.Flyout>
+                                        <Flyout>
+                                            <ListView ItemsSource="{x:Bind GPUS, Mode=OneWay}" />
+                                        </Flyout>
+                                    </Button.Flyout>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </ItemContainer>
+                </DataTemplate>
+            </ItemsView.ItemTemplate>
+            <ItemsView.Layout>
+                <StackLayout Orientation="Vertical" Spacing="10" />
+            </ItemsView.Layout>
+        </ItemsView>
+        <TextBlock
+            Grid.Row="2"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Text="当前游戏类型不支持材质包分级！"
+            Visibility="{x:Bind ViewModel.NullEnable, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+        <StackPanel
+            Grid.Row="3"
+            HorizontalAlignment="Center"
+            Orientation="Horizontal"
+            Spacing="5">
+            <Button
+                Padding="15,8"
+                Command="{x:Bind ViewModel.InvokeCommand}"
+                Content="{x:Bind helper:LanguageService.GetString('Display_Apply')}"
+                CornerRadius="5"
+                IsEnabled="{x:Bind ViewModel.InvokeEnable, Mode=OneWay}"
+                Style="{ThemeResource AccentButtonStyle}" />
+            <Button
+                Padding="15,8"
+                Command="{x:Bind ViewModel.CloseCommand}"
+                Content="{x:Bind helper:LanguageService.GetString('Display_SDecline')}"
+                CornerRadius="5"
+                IsEnabled="{x:Bind ViewModel.InvokeEnable, Mode=OneWay}" />
+        </StackPanel>
+    </Grid>
+</ContentDialog>

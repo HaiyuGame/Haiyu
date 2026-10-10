@@ -1,5 +1,6 @@
 using System.Globalization;
 using Haiyu.Helpers;
+using Haiyu.Plugin.Common.LegacyMessageBox;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Windows.ApplicationModel.Resources;
 using Microsoft.Windows.AppLifecycle;
@@ -21,7 +22,7 @@ public partial class App : ClientApplication
     private const int PROCESS_PER_MONITOR_DPI_AWARE = 2;
     private AppInstance mainInstance;
 
-    public static string AppVersion => "1.4.1";
+    public static string AppVersion => "1.4.2";
 
     public AppSettings AppSettings { get; private set; }
 
@@ -79,11 +80,7 @@ public partial class App : ClientApplication
             Instance
                 .Host.Services.GetRequiredKeyedService<LoggerService>("AppLog")
                 .WriteError($"{e.Exception}\n{e.Exception.StackTrace}");
-
-            var windowManager = Instance.Host.Services.GetRequiredService<IWindowManager>();
-            windowManager
-                .GetWindowContext(IWindowManager.ShellKey)
-                ?.TipShow.ShowMessage(e.Message, Symbol.Clear);
+            LegacyMessageBox.ShowError(e.Message + e.Exception.StackTrace,"错误警告");
         }
         catch (Exception ex)
         {

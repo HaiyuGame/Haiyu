@@ -147,6 +147,8 @@ public static class InstanceBuilderExtensions
                     .AddTransient<WebGameViewModel>()
                     .AddTransient<SelectGameFolderDialogV2>()
                     .AddTransient<SelectGameFolderViewModelV2>()
+                    .AddTransient<SelectGameBunleDialog>()
+                    .AddTransient<SelectGameBunleViewModel>()
                     .AddTransient<CloseDialog>()
                     .AddTransient<SelectDownoadGameDialogV2>()
                     .AddTransient<QRLoginDialog>()

@@ -96,21 +96,21 @@
 		<PackageReference Include="CommunityToolkit.WinUI.Helpers" Version="8.3.260402-preview2" />
 		<PackageReference Include="CommunityToolkit.WinUI.Media" Version="8.3.260402-preview2" />
 		<PackageReference Include="MemoryPack" Version="1.21.4" />
-		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.9" />
-		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4129.50" />
-		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.1839" />
-		<PackageReference Include="Microsoft.WindowsAppSDK.Runtime" Version="2.3.1" />
-		<PackageReference Include="Microsoft.WindowsAppSDK.WinUI" Version="2.3.2" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.12" />
+		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4258.31" />
+		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2705" />
+		<PackageReference Include="Microsoft.WindowsAppSDK.Runtime" Version="2.5.1" />
+		<PackageReference Include="Microsoft.WindowsAppSDK.WinUI" Version="2.3.9" />
 		<PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="3.0.1" />
-		<PackageReference Include="Serilog" Version="4.3.1" />
+		<PackageReference Include="Serilog" Version="4.4.0" />
 		<PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
 		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
 		<PackageReference Include="WinUIEx" Version="2.9.3" />
 		<PackageReference Include="ZLinq" Version="1.5.6" />
 		<PackageReference Include="ZXing.Net" Version="0.16.11" />
-		<PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.298">
+		<PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.360">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
@@ -284,6 +284,9 @@
 		<None Update="Assets\HpatchzResource\hpatchz.exe">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
+		<Page Update="Pages\Dialogs\SelectGameBunleDialog.xaml">
+		  <SubType>Designer</SubType>
+		</Page>
 		<Page Update="Pages\Toolkits\MonitorSettingPage.xaml">
 		  <SubType>Designer</SubType>
 		</Page>

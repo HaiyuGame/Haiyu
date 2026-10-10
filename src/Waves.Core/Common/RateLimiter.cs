@@ -59,15 +59,3 @@ public class SpeedLimiter
         }
     }
 }
-
-/// <summary>
-/// 速度转换
-/// </summary>
-public static class SpeedExtensions
-{
-    public static long UnitKB(this long value) => value * 1024;
-
-    public static long UnitMB(this long value) => value * 1024 * 1024;
-
-    public static long UnitGB(this long value) => value * 1024 * 1024 * 1024;
-}

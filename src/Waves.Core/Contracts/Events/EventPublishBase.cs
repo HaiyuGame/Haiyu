@@ -55,16 +55,16 @@ namespace Waves.Core.Contracts.Events
                 await foreach (var @event in Channel.Reader.ReadAllAsync(CTS.Token))
                 {
                     // 获取活跃订阅者快照
-                    SubscriberEntry[] subscribersSnapshot;
+                    (Func<EventArgs, ValueTask> Handler, CancellationToken Token)[] subscribersSnapshot;
                     lock (_subscribers)
                     {
-                        subscribersSnapshot = _subscribers.Where(s => !s.IsDisposed).ToArray();
+                        subscribersSnapshot = _subscribers.Where(s => !s.IsDisposed).Select(s => (s.Handler, s.Cts.Token)).ToArray();
                     }
                     // 并行处理所有订阅者
                     if (subscribersSnapshot.Length > 0)
                     {
                         var tasks = subscribersSnapshot
-                            .Select(s => SafelyHandleEvent(s.Handler, @event, s.Cts.Token))
+                            .Select(s => SafelyHandleEvent(s.Handler, @event, s.Token))
                             .Select(x => x.AsTask())
                             .ToArray();
                         await Task.WhenAll(tasks);
@@ -158,8 +158,6 @@ namespace Waves.Core.Contracts.Events
             if (_isDisposed)
                 return;
             _isDisposed = true;
-            _cts.Cancel();
-            _cts.Dispose();
             _publisher.Unsubscribe(_id);
         }
     }

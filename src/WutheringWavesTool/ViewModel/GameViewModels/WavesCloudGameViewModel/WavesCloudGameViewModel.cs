@@ -27,6 +27,7 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
     [ObservableProperty]
     public partial bool IsRefreshing { get; set; }
 
+
     [ObservableProperty]
     public partial WallDataWrapper WallData { get; set; } = CreateEmptyWallData();
 

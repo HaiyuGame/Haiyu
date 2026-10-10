@@ -14,6 +14,9 @@ partial class KuroGameContextViewModelV2
     public partial string CurrentStepText { get; set; }
 
     [ObservableProperty]
+    public partial string RemainingTimeText { get; set; } = "----";
+
+    [ObservableProperty]
     public partial int MaxStep { get; set; }
 
     [ObservableProperty]

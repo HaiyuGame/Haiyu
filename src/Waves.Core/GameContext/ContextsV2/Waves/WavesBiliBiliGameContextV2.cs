@@ -8,4 +8,7 @@ public class WavesBiliBiliGameContextV2 : KuroGameContextBaseV2
 
     public override Type ContextType => typeof(WavesBiliBiliGameContextV2);
     public override GameType GameType => Models.Enums.GameType.Waves;
+
+
+    public override bool IsBunle => false;
 }

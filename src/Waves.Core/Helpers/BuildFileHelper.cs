@@ -2,37 +2,20 @@ namespace Waves.Core.Helpers;
 
 public static class BuildFileHelper
 {
-    public static string BuildFilePath(string folder, IndexResource file)
-    {
-        var path = Path.Combine(folder, file.Dest.Replace('/', Path.DirectorySeparatorChar));
-        Directory.CreateDirectory(
-            Path.GetDirectoryName(path) ?? throw new Exception($"文件{file.Dest}创建失败")
-        );
-        return path;
-    }
+    public static string BuildFilePath(string folder, GameFileInfo file) => BuildFilePath(folder, file.Dest);
 
-
-    public static string BuildFilePath(string folder, PatchInfo item)
+    public static string ResolveFilePath(string folder, string relativePath)
     {
-        var path = Path.Combine(folder, item.Dest.Replace('/', Path.DirectorySeparatorChar));
-        Directory.CreateDirectory(
-            Path.GetDirectoryName(path) ?? throw new Exception($"文件{item.Dest}创建失败")
-        );
-        return path;
-    }
-
-    public static string BuildFilePath(string folder, GroupFileInfo item)
-    {
-        var path = Path.Combine(folder, item.Dest.Replace('/', Path.DirectorySeparatorChar));
-        Directory.CreateDirectory(
-            Path.GetDirectoryName(path) ?? throw new Exception($"文件{item.Dest}创建失败")
-        );
+        var root = Path.GetFullPath(folder).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+        var path = Path.GetFullPath(Path.Combine(root, relativePath.Replace('/', Path.DirectorySeparatorChar)));
+        if (!path.StartsWith(root, StringComparison.OrdinalIgnoreCase))
+            throw new InvalidDataException($"资源路径超出目标目录：{relativePath}");
         return path;
     }
 
     public static string BuildFilePath(string folder, string item)
     {
-        var path = Path.Combine(folder, item.Replace('/', Path.DirectorySeparatorChar));
+        var path = ResolveFilePath(folder, item);
         try
         {
             Directory.CreateDirectory(
@@ -82,5 +65,17 @@ public static class BuildFileHelper
         {
             return Task.FromResult(0L);
         }
+    }
+
+    public static bool GetFileLength(string path,out long size)
+    {
+        if (File.Exists(path))
+        {
+            FileInfo info = new FileInfo(path);
+            size = info.Length;
+            return true;
+        }
+        size = 0;
+        return false;
     }
 }

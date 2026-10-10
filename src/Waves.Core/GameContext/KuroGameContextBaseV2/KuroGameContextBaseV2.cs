@@ -1,3 +1,5 @@
+using Waves.Core.Services.GameResourceProvider;
+
 namespace Waves.Core.GameContext;
 
 /// <summary>
@@ -21,6 +23,8 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
     /// Http 请求服务，包含下载Client与配置Client
     /// </summary>
     public IHttpClientService HttpClientService { get; set; }
+
+    public abstract bool IsBunle { get; }
 
     /// <summary>
     /// CDN测试工具
@@ -80,6 +84,7 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
 
     public string DisplayName { get; }
     public IIoCircuitBreaker IoCircuitBreaker { get; }
+    public IGameResourceProvider GameResourceProvider { get; private set; }
 
     /// <summary>
     /// CDN测速工具
@@ -102,6 +107,14 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
         ContextName = contextName;
         this.DisplayName = display;
         IoCircuitBreaker = ioCircuitBreaker;
+        if (this.IsBunle)
+        {
+            this.GameResourceProvider = new BundleGameResourceProvider();
+        }
+        else
+        {
+            this.GameResourceProvider = new LegacyGameResourceProvider();
+        }
     }
 
     /// <summary>
@@ -113,6 +126,9 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
         this.HttpClientService.BuildClient();
         Directory.CreateDirectory(GamerConfigPath);
         this.GameLocalConfig = new GameLocalConfig(GamerConfigPath + "\\Settings.bat");
+        if (GameResourceProvider is LegacyGameResourceProvider)
+            GameResourceProvider = new LegacyGameResourceProvider(HttpClientService);
+        GameResourceProvider.SetConfig(GameLocalConfig, Config);
         var logPath = GamerConfigPath + "\\logs\\log.log";
         Logger.InitLogger(logPath, Serilog.RollingInterval.Day);
         CDNSpeedTester = new CDNSpeedTester();
@@ -216,6 +232,13 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
             {
                 DownloadState.IsStop = true;
                 DownloadState.IsActive = false;
+            }
+            foreach (var state in new[] { DownloadState, ProdDownloadState })
+            {
+                if (state is null) continue;
+                state.IsStop = true;
+                state.IsActive = false;
+                if (state.CancelToken is not null) await state.CancelToken.CancelAsync();
             }
             var cancelGen = Interlocked.Increment(ref _operationGeneration);
             GameContextOutputArgs.CurrentGeneration.Value = cancelGen;
@@ -394,42 +417,31 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
         {
             status.IsLauncher = true;
         }
-        var ping = (
-            await NetworkCheck.PingHostsAsync(
-                [
-                    KuroGameApiConfig.BaseAddress[0],
-                    "https://pc-launcher-sdk-api.kurogame.com",
-                    "https://baidu.com",
-                ],
-                token
-            )
-        );
-        if (!ping)
+        var indexSource = await this.GetResourceSummaryAsync(token: token);
+        if (!IsBunle) localVersion = indexSource.LocalVersion;
+        var gameNeedsUpdate = IsBunle
+            ? (Version.TryParse(localVersion, out var installedVersion)
+                && Version.TryParse(indexSource.OfficialVersion, out var officialVersion)
+                ? installedVersion < officialVersion
+                : !string.Equals(localVersion, indexSource.OfficialVersion, StringComparison.Ordinal))
+            : indexSource.Update.Availability != GameResourceAvailability.AlreadyCurrent;
+        if (indexSource != null)
         {
-            SystemEventPublisher.Publish(new() { Message = "网络未连接" });
-            return status;
-        }
-        var indexSource = await this.GetGameLauncherSourceAsync();
-        if (indexSource != null && !string.IsNullOrWhiteSpace(localVersion))
-        {
-            await ClearVersion(indexSource);
-            var localV = Version.Parse(localVersion);
-            var serverVFlage = Version.TryParse(
-                indexSource.ResourceDefault.Version,
-                out var serverV
-            );
+            await ClearVersion(gameNeedsUpdate);
+
+
             var predownloadVFlage = Version.TryParse(
-                indexSource.Predownload != null ? indexSource.Predownload.Version : "0.0.1",
+                indexSource.PredownloadVersion ?? "0.0.1",
                 out var predownVersion
             );
             if (predownloadVFlage && predownVersion!.ToString() != "0.0.1" && ProdIsAdvance)
             {
                 status.DisplayVersion = predownVersion.ToString();
             }
-            else if (localV < serverV)
+            else if (gameNeedsUpdate)
             {
                 status.IsUpdate = true;
-                status.DisplayVersion = indexSource.ResourceDefault.Version;
+                status.DisplayVersion = indexSource.OfficialVersion;
             }
             else
             {
@@ -441,11 +453,11 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
                 && bool.TryParse(updateing, out var updateResult)
             )
             {
-                status.IsUpdateing = updateResult;
+                status.IsUpdateing = updateResult && (!IsBunle || gameNeedsUpdate || IsResourceOperationActive);
             }
             if (
                 (
-                    indexSource.Predownload != null
+                    indexSource.PredownloadEnabled
                     && status.IsGameExists == true
                     && status.IsGameInstalled == true
                 )
@@ -486,12 +498,9 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
         return status;
     }
 
-    private async Task ClearVersion(GameLauncherSource indexSource)
+    private async Task ClearVersion(bool gameNeedsUpdate)
     {
-        var currentVersion = await this.GameLocalConfig.GetConfigAsync(
-            GameLocalSettingName.LocalGameVersion
-        );
-        if (currentVersion == indexSource.ResourceDefault.Version)
+        if (!gameNeedsUpdate)
         {
             await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdIsAdvance, "False");
         }
@@ -522,17 +531,20 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
             // 枚举目录本身可能耗时较长，此阶段总量未知，通知 UI 显示不确定进度。
             progress.Report((0, 0));
             var (allFiles, allDirectories) = await Task.Run(() =>
-            {
-                var files = Directory
-                    .EnumerateFiles(rootFolder, "*", SearchOption.AllDirectories)
-                    .ToList();
-                var directories = Directory
-                    .EnumerateDirectories(rootFolder, "*", SearchOption.AllDirectories)
-                    .OrderByDescending(path => path.Count(c => c == Path.DirectorySeparatorChar))
-                    .ToList();
-                directories.Add(rootFolder);
-                return (files, directories);
-            }).ConfigureAwait(false);
+                {
+                    var files = Directory
+                        .EnumerateFiles(rootFolder, "*", SearchOption.AllDirectories)
+                        .ToList();
+                    var directories = Directory
+                        .EnumerateDirectories(rootFolder, "*", SearchOption.AllDirectories)
+                        .OrderByDescending(path =>
+                            path.Count(c => c == Path.DirectorySeparatorChar)
+                        )
+                        .ToList();
+                    directories.Add(rootFolder);
+                    return (files, directories);
+                })
+                .ConfigureAwait(false);
 
             long totalItemCount = allFiles.Count + allDirectories.Count;
             long processedItemCount = 0;
@@ -548,32 +560,34 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
 
             var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 8 };
 
-            await Parallel.ForEachAsync(
-                allFiles,
-                parallelOptions,
-                (filePath, token) =>
-                {
-                    try
+            await Parallel
+                .ForEachAsync(
+                    allFiles,
+                    parallelOptions,
+                    (filePath, token) =>
                     {
-                        File.Delete(filePath);
-                    }
-                    catch (Exception ex)
-                    {
-                        var message = $"删除文件失败：{filePath}，错误：{ex.Message}";
-                        SystemEventPublisher.Publish(
-                            new()
-                            {
-                                Message = message,
-                                Delay = TimeSpan.FromMinutes(1).TotalSeconds,
-                            }
-                        );
-                    }
+                        try
+                        {
+                            File.Delete(filePath);
+                        }
+                        catch (Exception ex)
+                        {
+                            var message = $"删除文件失败：{filePath}，错误：{ex.Message}";
+                            SystemEventPublisher.Publish(
+                                new()
+                                {
+                                    Message = message,
+                                    Delay = TimeSpan.FromMinutes(1).TotalSeconds,
+                                }
+                            );
+                        }
 
-                    var current = Interlocked.Increment(ref processedItemCount);
-                    progress.Report((current, totalItemCount));
-                    return ValueTask.CompletedTask;
-                }
-            ).ConfigureAwait(false);
+                        var current = Interlocked.Increment(ref processedItemCount);
+                        progress.Report((current, totalItemCount));
+                        return ValueTask.CompletedTask;
+                    }
+                )
+                .ConfigureAwait(false);
 
             // 文件夹也属于删除工作量；从最深层开始删除，避免尾部清理长时间没有进度。
             foreach (var directory in allDirectories)

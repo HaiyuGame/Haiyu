@@ -2,6 +2,21 @@ namespace Waves.Core.Models.CoreApi
 {
     public class KuroGameApiConfig:IGameAPIConfig
     {
+        /// <summary>分包协议专用地址，与旧服 ConfigUrl 分离。</summary>
+        public string? BunleConfigUrl { get; set; }
+        public string? BunleBackUpConfigUrl { get; set; }
+        public string? BunleDefaultBundleName { get; set; }
+        public string? BunleAppKey { get; set; }
+        public string? BunleServerCode { get; set; }
+        public string? BunleLauncherAppId { get; set; }
+        public string? BunleLauncherAppKey { get; set; }
+        public string? BunleLauncherConfigUrl { get; set; }
+        public string? BunleLauncherBackUpConfigUrl { get; set; }
+        /// <summary>
+        /// 版本
+        /// </summary>
+        public string BunleVersion { get; set;  }
+
         public static string[] BaseAddress =
         [
             "https://prod-cn-alicdn-gamestarter.kurogame.com",
@@ -18,6 +33,8 @@ namespace Waves.Core.Models.CoreApi
         public string AppId { get; set; }
 
         public string AppKey { get; set; }
+
+        public string AppKeyV2 { get; set;  }
 
         public string GameIdentity { get; set; }
 
@@ -36,6 +53,16 @@ namespace Waves.Core.Models.CoreApi
                 AppId = "10003",
                 GameID = "G152",
                 AppKey = "Y8xXrXk65DqFHEDgApn3cpK5lfczpFx5",
+                AppKeyV2 = "oLNgHF1CESo51DGHN2odtp40e3oI1HfZ",
+                BunleConfigUrl = "https://prod-cn-alicdn-gamestarter.kurogame.com/launcher/game/10003_oLNgHF1CESo51DGHN2odtp40e3oI1HfZ/G152/official/index.json",
+                BunleBackUpConfigUrl = "https://prod-volcdn-gamestarter.kurogame.xyz/launcher/game/10003_oLNgHF1CESo51DGHN2odtp40e3oI1HfZ/G152/official/index.json",
+                BunleDefaultBundleName = "HD",
+                BunleAppKey = "oLNgHF1CESo51DGHN2odtp40e3oI1HfZ",
+                BunleServerCode = "official",
+                BunleLauncherAppId = "10003",
+                BunleLauncherAppKey = "oLNgHF1CESo51DGHN2odtp40e3oI1HfZ",
+                BunleLauncherConfigUrl = "https://prod-cn-alicdn-gamestarter.kurogame.com/launcher/app/10003_oLNgHF1CESo51DGHN2odtp40e3oI1HfZ/index.json",
+                BunleLauncherBackUpConfigUrl = "https://prod-volcdn-gamestarter.kurogame.xyz/launcher/app/10003_oLNgHF1CESo51DGHN2odtp40e3oI1HfZ/index.json",
                 GameIdentity = "Aki",
                 GameExeName = "Wuthering Waves.exe",
                 ConfigUrl =

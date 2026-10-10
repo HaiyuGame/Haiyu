@@ -4,175 +4,290 @@ namespace Waves.Core.GameContext;
 
 partial class KuroGameContextBaseV2
 {
-    #region 更新方法
-    public async Task<bool> UpdateGameResourceAsync()
+    private int _resourceOperationActive;
+    internal bool IsResourceOperationActive => Volatile.Read(ref _resourceOperationActive) != 0;
+
+    public Task<bool> UpdateGameResourceAsync(string? downloadFolder = null, GameResourceParameter? parameter = null) =>
+        QueueResourceOperationAsync(() => GetUpdateGameResourceAsync(parameter),
+            new InstallOption { DownloadFolder = downloadFolder }, parameter);
+
+    public Task<bool> StartProdDownloadGameResourceAsync(string? downloadFolder = null, GameResourceParameter? parameter = null) =>
+        QueueResourceOperationAsync(() => GetGameProdownloadResourceAsync(parameter),
+            new InstallOption { IsProd = true, DownloadFolder = downloadFolder }, parameter);
+
+    private bool IsExecutable(GameVersionInfo plan) => plan.Availability == GameResourceAvailability.Ready
+        && !string.IsNullOrWhiteSpace(plan.NewGameVersion)
+        && (plan.DefaultResource.Any(x => x.IsSelected) || plan.ZipResources.Any(x => x.IsSelected) || plan.PatchResources.Any(x => x.IsSelected));
+
+    private async Task<bool> QueueResourceOperationAsync(Func<Task<GameVersionInfo>> query,
+        InstallOption option, GameResourceParameter? parameter)
     {
-        var _launcher = await this.GetGameLauncherSourceAsync();
-        var currentVersion = await GameLocalConfig.GetConfigAsync(
-            GameLocalSettingName.LocalGameVersion
-        );
-
-        #region 获取配置
-        DownloadState = new DownloadState();
-        DownloadState.IsActive = true;
-        if (_launcher == null || string.IsNullOrWhiteSpace(currentVersion))
+        if (Interlocked.CompareExchange(ref _resourceOperationActive, 1, 0) != 0) return false;
+        try
         {
-            GameEventPublisher.Publish(
-                new GameContextOutputArgs()
+            var plan = await query();
+            if (!IsExecutable(plan))
+            {
+                Interlocked.Exchange(ref _resourceOperationActive, 0);
+                return false;
+            }
+            var baseFolder = await GameLocalConfig.GetConfigAsync(GameLocalSettingName.GameLauncherBassFolder);
+            if (string.IsNullOrWhiteSpace(baseFolder))
+            {
+                Interlocked.Exchange(ref _resourceOperationActive, 0);
+                return false;
+            }
+            await ResolveDownloadFolderAsync(option);
+            option.DownloadFolder = option.ResolveDownloadFolder(baseFolder);
+            var generation = Interlocked.Increment(ref _operationGeneration);
+            GameContextOutputArgs.CurrentGeneration.Value = generation;
+            _ = Task.Run(async () =>
+            {
+                try { await ExecuteResourcePlanAsync(plan, option, parameter); }
+                catch (OperationCanceledException) { }
+                catch (Exception ex)
                 {
-                    Type = Models.Enums.GameContextActionType.TipMessage,
-                    TipMessage = "未找到更新配置文件，无法进行下载",
+                    Logger.WriteError($"资源任务失败：{ex}");
+                    SystemEventPublisher.Publish(new() { Message = $"资源任务失败：{ex.Message}" });
                 }
-            );
-            return false;
+                finally
+                {
+                    await SetCurrentStateNull(option.IsProd);
+                    Interlocked.Exchange(ref _resourceOperationActive, 0);
+                }
+            });
+            return true;
         }
-
-        var previous = _launcher.ResourceDefault.Config.PatchConfig.FirstOrDefault(x =>
-            x.Version == currentVersion
-        );
-        if (previous == null)
+        catch
         {
-            GameEventPublisher.Publish(
-                new GameContextOutputArgs()
-                {
-                    Type = Models.Enums.GameContextActionType.TipMessage,
-                    TipMessage = "未找到更新配置文件，无法进行下载",
-                }
-            );
-            return false;
+            Interlocked.Exchange(ref _resourceOperationActive, 0);
+            throw;
         }
-        var cdnUrl =
-            _launcher
-                .ResourceDefault.CdnList.Where(x => x.P != 0)
-                .OrderBy(x => x.P)
-                .FirstOrDefault()
-            ?? null;
-        if (cdnUrl == null)
-        {
-            GameEventPublisher.Publish(
-                new GameContextOutputArgs()
-                {
-                    Type = Models.Enums.GameContextActionType.TipMessage,
-                    TipMessage = "未找到更新配置文件，无法进行下载",
-                }
-            );
-            return false;
-        }
-        var _patch = await GetPatchGameResourceAsync(cdnUrl.Url + previous.IndexFile);
-        if (_patch == null)
-        {
-            GameEventPublisher.Publish(
-                new GameContextOutputArgs()
-                {
-                    Type = Models.Enums.GameContextActionType.TipMessage,
-                    TipMessage = "未找到更新配置文件，无法进行下载",
-                }
-            );
-            return false;
-        }
-        #endregion
-        var gen = Interlocked.Increment(ref _operationGeneration);
-        GameContextOutputArgs.CurrentGeneration.Value = gen;
-        _ = Task.Run(async () =>
-            await StartDownloadUpdateGameResourceAsync(
-                _launcher,
-                currentVersion,
-                previous,
-                _patch,
-                InstallOption.CreateDefault()
-            )
-        );
-        return true;
     }
 
-    /// <summary>
-    /// 预下载
-    /// </summary>
-    /// <returns></returns>
-    public async Task<bool> StartProdDownloadGameResourceAsync()
+    private async Task<DownloadState> CreateResourceStateAsync(bool isProd, CancellationToken token = default)
     {
-        var _launcher = await this.GetGameLauncherSourceAsync();
-        var currentVersion = await GameLocalConfig.GetConfigAsync(
-            GameLocalSettingName.LocalGameVersion
-        );
-        if (_launcher == null || currentVersion == null)
+        _downloadCts = CancellationTokenSource.CreateLinkedTokenSource(token);
+        var state = await GetInitDownloadState(isProd);
+        if (isProd)
         {
-            Logger.WriteError("启动预下载失败，游戏配置错误");
-            SystemEventPublisher.Publish(new() { Message = "启动预下载失败，游戏配置错误" });
-            return false;
+            _prodDownloadCts = CancellationTokenSource.CreateLinkedTokenSource(token);
+            state.CancelToken = _prodDownloadCts;
         }
-        var gen = Interlocked.Increment(ref _operationGeneration);
-        GameContextOutputArgs.CurrentGeneration.Value = gen;
-        _ = Task.Run(async () =>
+        else state.CancelToken = _downloadCts;
+        state.IsActive = true;
+        return state;
+    }
+
+    private async Task<bool> ExecuteResourcePlanAsync(GameVersionInfo plan, InstallOption option,
+        GameResourceParameter? parameter, CancellationToken token = default)
+    {
+        if (!IsExecutable(plan)) return false;
+        var baseFolder = await GameLocalConfig.GetConfigAsync(GameLocalSettingName.GameLauncherBassFolder, token);
+        if (string.IsNullOrWhiteSpace(baseFolder)) return false;
+        await ResolveDownloadFolderAsync(option);
+        var cache = option.ResolveDownloadFolder(baseFolder);
+        option.DownloadFolder = cache;
+        var state = await CreateResourceStateAsync(option.IsProd, token);
+        HttpClientService.BuildClient();
+        if (option.IsProd)
+            await GameLocalConfig.SaveConfigsAsync(new Dictionary<string, string>
+            {
+                [GameLocalSettingName.ProdDownloadPath] = cache,
+                [GameLocalSettingName.ProdDownloadVersion] = plan.NewGameVersion,
+                [GameLocalSettingName.ProdDownloadFolderDone] = "False"
+            });
+        else await GameLocalConfig.SaveConfigAsync(GameLocalSettingName.LocalGameUpdateing, "True");
+
+        var tasks = new List<(IEnumerable<GameFileInfo> Files, string Name, string Folder)>();
+        var patches = plan.PatchResources.Where(x => x.IsSelected && !x.IsGroup).ToList();
+        var groups = plan.PatchResources.Where(x => x.IsSelected && x.IsGroup).ToList();
+        if (patches.Count != 0) tasks.Add((patches, "下载补丁文件", Path.Combine(cache, "patchs")));
+        if (groups.Count != 0) tasks.Add((groups, "下载补丁组文件", Path.Combine(cache, "patchGroup")));
+        if (plan.ZipResources.Count != 0) tasks.Add((plan.ZipResources.Where(x => x.IsSelected), "下载压缩包更新文件", Path.Combine(cache, "zips")));
+        if (plan.DefaultResource.Count != 0) tasks.Add((plan.DefaultResource.Where(x => x.IsSelected), "下载更新文件", Path.Combine(cache, "resources")));
+        Setups = tasks.Select(x => x.Name).ToList();
+        for (var i = 0; i < tasks.Count; i++)
         {
-            await StartProdDownloadGameResourceAsync(_launcher, currentVersion);
+            state.CancelToken.Token.ThrowIfCancellationRequested();
+            CurrentSetups = i;
+            await GameEventPublisher.PublishStepAsync(tasks[i].Name, i, Setups, isProd: option.IsProd);
+            if (!await DownloadFilesAsync(tasks[i].Files, tasks[i].Folder, state, option.IsProd, tasks[i].Name, cdns: plan.CdnCandidates)) return false;
+        }
+        state.CancelToken.Token.ThrowIfCancellationRequested();
+        if (option.IsProd)
+        {
+            await GameLocalConfig.SaveConfigsAsync(new Dictionary<string, string>
+            {
+                [GameLocalSettingName.ProdDownloadFolderDone] = "True",
+                [GameLocalSettingName.ProdDownloadVersion] = plan.NewGameVersion,
+                [GameLocalSettingName.ProdDownloadPath] = cache
+            }, state.CancelToken.Token);
+            return true;
+        }
+        return await InstallResourcePlanAsync(plan, option, parameter, state);
+    }
+
+    private async Task<bool> DownloadFilesAsync(IEnumerable<GameFileInfo> files, string folder,
+        DownloadState state, bool isProd, string name, bool deleteExtra = false, List<string>? skip = null, bool forceFullVerify = false, IEnumerable<GameResourceCdn>? cdns = null)
+    {
+        _currentRunningAction = null;
+        var list = files.ToList();
+        if (list.Count == 0) return false;
+        // 对真实的每文件候选 URL 测速，保留不同 FromFolder 和失败后的 CDN 重试。
+        var sample = list.MinBy(x => Math.Abs(x.Size - 50L * 1024 * 1024))!;
+        GameEventPublisher.Publish(new() { Type = GameContextActionType.CdnSelect, Prod = isProd, TipMessage = "正在选择最优CDN" });
+        var preferred = await CDNSpeedTester.SelectResourceUrlAsync(sample.UrlCandidates.Count == 0 ? [sample.Url] : sample.UrlCandidates,
+            TimeSpan.FromSeconds(40), state.CancelToken.Token, cdns);
+        if (preferred is not null)
+        {
+            var authority = new Uri(preferred).GetLeftPart(UriPartial.Authority);
+            foreach (var file in list)
+                file.Url = file.UrlCandidates.FirstOrDefault(x => new Uri(x).GetLeftPart(UriPartial.Authority) == authority) ?? file.Url;
+        }
+        var fast = await GameLocalConfig.GetConfigAsync(GameLocalSettingName.FastVerify, state.CancelToken.Token);
+        var action = new DownloadAndVerifyResource(Logger) { ProgressName = name };
+        action.SetParam(new Dictionary<string, object>
+        {
+            ["resource"] = list, ["isDelete"] = deleteExtra, ["folder"] = folder,
+            ["httpClient"] = HttpClientService, ["downloadState"] = state, ["isProd"] = isProd,
+            ["fastVerify"] = !forceFullVerify && bool.TryParse(fast, out var enabled) && enabled,
+            ["skipVerifyFile"] = skip ?? []
+        }, GameEventPublisher);
+        _currentRunningAction = action;
+        return await action.ExecuteAsync(true) is true && !state.CancelToken.IsCancellationRequested;
+    }
+
+    public async Task StartInstallGameResource(GameVersionInfo plan, InstallOption option, GameResourceParameter? parameter = null)
+    {
+        if (Interlocked.CompareExchange(ref _resourceOperationActive, 1, 0) != 0) return;
+        try
+        {
+            if (!IsExecutable(plan)) return;
+            GameContextOutputArgs.CurrentGeneration.Value = Interlocked.Increment(ref _operationGeneration);
+            await ResolveDownloadFolderAsync(option);
+            var state = await CreateResourceStateAsync(false);
+            _installGameResourceCts = state.CancelToken;
+            await InstallResourcePlanAsync(plan, option, parameter, state);
+        }
+        catch (OperationCanceledException) { }
+        catch (Exception ex)
+        {
+            Logger.WriteError($"安装失败：{ex}");
+            SystemEventPublisher.Publish(new() { Message = $"安装失败：{ex.Message}" });
+        }
+        finally
+        {
+            await SetCurrentStateNull(false);
+            Interlocked.Exchange(ref _resourceOperationActive, 0);
+        }
+    }
+
+    private async Task<bool> InstallResourcePlanAsync(GameVersionInfo plan, InstallOption option,
+        GameResourceParameter? parameter, DownloadState state)
+    {
+        if (!IsExecutable(plan)) return false;
+        var baseFolder = await GameLocalConfig.GetConfigAsync(GameLocalSettingName.GameLauncherBassFolder, state.CancelToken.Token);
+        if (string.IsNullOrWhiteSpace(baseFolder)) return false;
+        var current = await GameLocalConfig.GetConfigAsync(GameLocalSettingName.LocalGameVersion, state.CancelToken.Token) ?? "";
+        if (!string.IsNullOrEmpty(plan.OldGameVersion) && current != plan.OldGameVersion) return false;
+        await ResolveDownloadFolderAsync(option);
+        var cache = option.ResolveDownloadFolder(baseFolder);
+        _installGameResourceCts = state.CancelToken;
+        // 提前安装和普通更新始终按清单目标版本获取完整校验索引，缺失时停止安装。
+        var verification = await GetVerificationResourceAsync(plan.NewGameVersion, parameter, state.CancelToken.Token);
+        if (!IsExecutable(verification) || verification.ZipResources.Count != 0 || verification.PatchResources.Count != 0) return false;
+        var steps = new List<(IProgressSetup Action, string Name)>();
+        void Add(IProgressSetup action, string name, Dictionary<string, object> args)
+        {
+            action.SetParam(args, GameEventPublisher);
+            steps.Add((action, name));
+        }
+        var patches = plan.PatchResources.Where(x => x.IsSelected && !x.IsGroup).ToList();
+        var groups = plan.PatchResources.Where(x => x.IsSelected && x.IsGroup).ToList();
+        if (patches.Count != 0) Add(new InstallKrdiffResource(Logger), "安装补丁文件", new()
+        {
+            ["krdiffs"] = patches, ["diffFolderPath"] = Path.Combine(cache, "patchs"), ["gameBaseFolder"] = baseFolder
         });
+        if (groups.Count != 0) Add(new InstallKrdiffGroupResource(Logger), "安装补丁组文件", new()
+        {
+            ["krpdiffs"] = groups, ["groupFileInfos"] = groups,
+            ["diffFolderPath"] = Path.Combine(cache, "patchGroup"), ["baseFolderPath"] = baseFolder,
+            ["decompressTempFolder"] = Path.Combine(baseFolder, "decompressFolder")
+        });
+        if (plan.ZipResources.Count != 0) Add(new InstallKrZipResource(Logger), "安装压缩包", new()
+        {
+            ["zipInfos"] = plan.ZipResources.Where(x => x.IsSelected).ToList(), ["zipDownFolder"] = Path.Combine(cache, "zips"),
+            ["baseGamePath"] = baseFolder, ["downloadState"] = state
+        });
+        if (plan.DefaultResource.Count != 0) Add(new MoveFileResource(Logger), "移动更新文件", new()
+        {
+            ["files"] = plan.DefaultResource.Where(x => x.IsSelected).ToDictionary(x => BuildFileHelper.ResolveFilePath(Path.Combine(cache, "resources"), x.Dest),
+                x => BuildFileHelper.ResolveFilePath(baseFolder, x.Dest))
+        });
+        Setups = steps.Select(x => x.Name).Append("重新校验文件").ToList();
+        for (var i = 0; i < steps.Count; i++)
+        {
+            state.CancelToken.Token.ThrowIfCancellationRequested();
+            CurrentSetups = i;
+            await GameEventPublisher.PublishStepAsync(steps[i].Name, i, Setups, isProd: false);
+            _currentRunningAction = (IAsyncDisposable)steps[i].Action;
+            if (await steps[i].Action.ExecuteAsync(true) is not true) return false;
+        }
+        state.CancelToken.Token.ThrowIfCancellationRequested();
+        CurrentSetups = steps.Count;
+        await GameEventPublisher.PublishStepAsync("重新校验文件", CurrentSetups, Setups, isProd: false);
+        if (!await DownloadFilesAsync(verification.DefaultResource.Where(x => x.IsSelected), baseFolder, state, false, "重新校验文件", forceFullVerify: true, cdns: verification.CdnCandidates)) return false;
+        state.CancelToken.Token.ThrowIfCancellationRequested();
+        foreach (var dest in plan.DeleteFiles)
+        {
+            var path = BuildFileHelper.ResolveFilePath(baseFolder, dest);
+            if (File.Exists(path)) File.Delete(path);
+        }
+        state.CancelToken.Token.ThrowIfCancellationRequested();
+        var writer = new WriteGameResourceConfig(GameLocalConfig, plan.NewGameVersion, Config, Logger);
+        await writer.WriteDownloadAndUpDateResultAsync(option, state.CancelToken.Token);
+        foreach (var (files, child) in new[] {
+            (plan.PatchResources.Where(x => x.IsSelected && !x.IsGroup).Cast<GameFileInfo>(), "patchs"),
+            (plan.PatchResources.Where(x => x.IsSelected && x.IsGroup).Cast<GameFileInfo>(), "patchGroup"),
+            (plan.ZipResources.Cast<GameFileInfo>(), "zips"), (plan.DefaultResource.AsEnumerable(), "resources") })
+            foreach (var file in files)
+            {
+                var path = BuildFileHelper.ResolveFilePath(Path.Combine(cache, child), file.Dest);
+                if (File.Exists(path)) File.Delete(path);
+            }
+        state.IsActive = false;
+        Logger.WriteInfo("安装完成");
         return true;
     }
 
-    private async Task<bool> StartProdDownloadGameResourceAsync(
-        GameLauncherSource _launcher,
-        string currentVersion
-    )
+    public async Task AdvanceInstallGameResourceAsync(GameResourceParameter? parameter = null)
     {
-        var previous = _launcher
-            .Predownload.Config.PatchConfig.Where(x => x.Version == currentVersion)
-            .FirstOrDefault();
-        if (previous == null)
-        {
-            return false;
-        }
-        if (previous == null)
-        {
-            GameEventPublisher.Publish(
-                new GameContextOutputArgs()
-                {
-                    Type = Models.Enums.GameContextActionType.TipMessage,
-                    TipMessage = "未找到更新配置文件，无法进行下载",
-                }
-            );
-            return false;
-        }
-        var cdnUrl =
-            _launcher
-                .ResourceDefault.CdnList.Where(x => x.P != 0)
-                .OrderBy(x => x.P)
-                .FirstOrDefault()
-            ?? null;
-        if (cdnUrl == null)
-        {
-            GameEventPublisher.Publish(
-                new GameContextOutputArgs()
-                {
-                    Type = Models.Enums.GameContextActionType.TipMessage,
-                    TipMessage = "未找到更新配置文件，无法进行下载",
-                }
-            );
-            return false;
-        }
-        var _patch = await GetPatchGameResourceAsync(cdnUrl.Url + previous.IndexFile);
-        if (_patch == null)
-        {
-            GameEventPublisher.Publish(
-                new GameContextOutputArgs()
-                {
-                    Type = Models.Enums.GameContextActionType.TipMessage,
-                    TipMessage = "未找到更新配置文件，无法进行下载",
-                }
-            );
-            return false;
-        }
-        _ = Task.Run(async () =>
-            await StartDownloadUpdateGameResourceAsync(
-                _launcher,
-                currentVersion,
-                previous,
-                _patch,
-                InstallOption.CreateProdownlad()
-            )
-        );
-        return true;
+        var summary = await GetResourceSummaryAsync(parameter);
+        var local = await GameLocalConfig.GetConfigAsync(GameLocalSettingName.LocalGameVersion);
+        if (local != summary.OfficialVersion || summary.Predownload.Availability != GameResourceAvailability.Ready) return;
+        await QueueResourceOperationAsync(() => GetGameProdownloadResourceAsync(parameter),
+            new InstallOption { IsAdvance = true }, parameter);
     }
+
+    public async Task StartInstallGameResource(InstallOption option, GameResourceParameter? parameter = null)
+    {
+        var summary = await GetResourceSummaryAsync(parameter);
+        var recorded = await GameLocalConfig.GetConfigAsync(GameLocalSettingName.ProdDownloadVersion);
+        var done = await GameLocalConfig.GetConfigAsync(GameLocalSettingName.ProdDownloadFolderDone);
+        if ((option.IsProd || option.IsAdvance) && (!bool.TryParse(done, out var completed) || !completed
+            || recorded != (option.IsAdvance ? summary.PredownloadVersion : summary.OfficialVersion))) return;
+        var plan = option.IsAdvance ? await GetGameProdownloadResourceAsync(parameter) : await GetUpdateGameResourceAsync(parameter);
+        await StartInstallGameResource(plan, option, parameter);
+    }
+
+    private async Task ResolveDownloadFolderAsync(InstallOption option)
+    {
+        if (string.IsNullOrWhiteSpace(option.DownloadFolder) && (option.IsProd || option.IsAdvance))
+            option.DownloadFolder = await GameLocalConfig.GetConfigAsync(GameLocalSettingName.ProdDownloadPath);
+    }
+
+    public string BuildInstallOptionFolder(InstallOption option, string baseFolder) => option.ResolveDownloadFolder(baseFolder);
 
     public async Task<DownloadState> GetInitDownloadState(bool isProd = false)
     {
@@ -209,874 +324,42 @@ partial class KuroGameContextBaseV2
         }
     }
 
-    public string BuildInstallOptionFolder(InstallOption option, string baseFolder)
-    {
-        if (option.IsProd)
-        {
-            return Path.Combine(baseFolder, "prodDownloads");
-        }
-        else if (option.IsAdvance)
-        {
-            return Path.Combine(baseFolder, "prodDownloads");
-        }
-        else
-        {
-            return Path.Combine(baseFolder, "downloads");
-        }
-        return "";
-    }
-
-    /// <summary>
-    /// 更新游戏
-    /// </summary>
-    /// <param name="_launcher"></param>
-    /// <param name="currentVersion"></param>
-    /// <param name="isProd"></param>
-    /// <param name="isAdvance">提前安装</param>
-    /// <returns></returns>
-    private async Task<bool> StartDownloadUpdateGameResourceAsync(
-        GameLauncherSource _launcher,
-        string currentVersion,
-        PatchConfig previous,
-        PatchIndexGameResource _patch,
-        InstallOption option
-    )
-    {
-        try
-        {
-            #region 初始化资源
-            this.Setups.Clear();
-            this.CurrentSetups = 0;
-            var baseFolder = await this.GameLocalConfig.GetConfigAsync(
-                GameLocalSettingName.GameLauncherBassFolder
-            );
-            this._downloadCts = new();
-            var state = await GetInitDownloadState(option.IsProd);
-            state.IsActive = true;
-            if (option.IsProd)
-            {
-                _prodDownloadCts = new CancellationTokenSource();
-                state.CancelToken = _prodDownloadCts;
-            }
-            else
-            {
-                _downloadCts = new CancellationTokenSource();
-                state.CancelToken = _downloadCts;
-            }
-            var downloadResource = new List<IndexResource>();
-            var patchResource = new List<IndexResource>();
-            var groupResource = new List<IndexResource>();
-            var zipResource = new List<IndexResource>();
-
-            foreach (var x in _patch.Resource)
-            {
-                if (x.Dest.Contains("krdiff"))
-                    patchResource.Add(x);
-                else if (x.Dest.Contains("krpdiff"))
-                    groupResource.Add(x);
-                else if (x.Dest.Contains("krzip"))
-                    zipResource.Add(x);
-                else
-                    downloadResource.Add(x);
-            }
-            if (baseFolder == null)
-            {
-                await SetCurrentStateNull(option.IsProd);
-                SystemEventPublisher.Publish(new() { Message = "未找到游戏安装文件" });
-                return false;
-            }
-            string downloadBaseFolder = this.BuildInstallOptionFolder(option, baseFolder);
-            if (option.IsProd)
-            {
-                await this.GameLocalConfig.SaveConfigAsync(
-                    GameLocalSettingName.ProdDownloadPath,
-                    downloadBaseFolder
-                );
-                await this.GameLocalConfig.SaveConfigAsync(
-                    GameLocalSettingName.ProdDownloadFolderDone,
-                    "False"
-                );
-                await this.GameLocalConfig.SaveConfigAsync(
-                    GameLocalSettingName.ProdDownloadVersion,
-                    previous.Version
-                );
-            }
-            DownloadUpdateFolderConfig folderConfig = new();
-            #endregion
-
-            #region 初始化步骤显示
-            var downloadTasks =
-                new List<(
-                    IEnumerable<IndexResource> Items,
-                    string Name,
-                    string Folder,
-                    string baseUrl,
-                    bool isResource
-                )>();
-            if (patchResource.Any())
-            {
-                this.Setups.Add("下载补丁文件");
-                folderConfig.PatchFolder = Path.Combine(downloadBaseFolder, "patchs");
-                downloadTasks.Add(
-                    (
-                        patchResource,
-                        "下载补丁文件",
-                        folderConfig.PatchFolder,
-                        previous.BaseUrl,
-                        false
-                    )
-                );
-            }
-            if (groupResource.Any())
-            {
-                this.Setups.Add("下载补丁组文件");
-                folderConfig.PatchGroupFolder = Path.Combine(downloadBaseFolder, "patchGroup");
-                downloadTasks.Add(
-                    (
-                        groupResource,
-                        "下载补丁组文件",
-                        folderConfig.PatchGroupFolder,
-                        previous.BaseUrl,
-                        false
-                    )
-                );
-            }
-            if (zipResource.Any())
-            {
-                this.Setups.Add("下载压缩包更新文件");
-                folderConfig.ZipFolder = Path.Combine(downloadBaseFolder, "zips");
-                downloadTasks.Add(
-                    (
-                        zipResource,
-                        "下载压缩包更新文件",
-                        folderConfig.ZipFolder,
-                        previous.BaseUrl,
-                        false
-                    )
-                );
-            }
-            if (downloadResource.Any())
-            {
-                this.Setups.Add("下载更新文件");
-                folderConfig.DownloadFolder = Path.Combine(downloadBaseFolder, "resources");
-                downloadTasks.Add(
-                    (
-                        downloadResource,
-                        "下载更新文件",
-                        folderConfig.DownloadFolder,
-                        _launcher.ResourceDefault.ResourcesBasePath,
-                        true
-                    )
-                );
-            }
-            #endregion
-
-
-            #region  下载资源
-            for (int i = 0; i < downloadTasks.Count; i++)
-            {
-                if (state.CancelToken.IsCancellationRequested)
-                {
-                    this.GameEventPublisher.Publish(new() { Type = GameContextActionType.None });
-                    state.IsActive = false;
-                    state.IsStop = true;
-                    return false;
-                }
-                var downloadMethod = new DownloadAndVerifyResource(this.Logger)
-                {
-                    ProgressName = downloadTasks[i].Name,
-                };
-                GameEventPublisher.Publish(
-                    new GameContextOutputArgs()
-                    {
-                        Type = GameContextActionType.CdnSelect,
-                        TipMessage = "正在选择最优CDN",
-                        Prod = option.IsProd,
-                    }
-                );
-                var cdn = await GetBaseUrl(
-                    _launcher,
-                    _launcher.ResourceDefault.ResourcesBasePath,
-                    previous.BaseUrl,
-                    downloadTasks[i].Items.ToList(),
-                    option,
-                    downloadTasks[i].isResource
-                );
-                if (string.IsNullOrWhiteSpace(cdn))
-                {
-                    this.GameEventPublisher.Publish(
-                        new GameContextOutputArgs()
-                        {
-                            Type = GameContextActionType.TipMessage,
-                            TipMessage = "未找到可用的CDN地址，无法进行下载",
-                        }
-                    );
-                    return false;
-                }
-                downloadMethod.SetParam(
-                    new Dictionary<string, object>()
-                    {
-                        { "resource", downloadTasks[i].Items },
-                        { "launcher", _launcher },
-                        { "isDelete", false },
-                        { "folder", downloadTasks[i].Folder },
-                        { "httpClient", HttpClientService! },
-                        { "downloadState", state },
-                        { "baseUrl", cdn },
-                        { "isProd", option.IsProd },
-                    },
-                    this.GameEventPublisher
-                );
-                this._currentRunningAction = downloadMethod;
-                CurrentSetups = i;
-                await this.GameEventPublisher.PublishStepAsync(
-                    downloadTasks[i].Name,
-                    CurrentSetups,
-                    Setups,
-                    isProd: option.IsProd
-                );
-                await Task.Delay(100);
-                await downloadMethod.ExecuteAsync(true);
-            }
-            #endregion
-
-            #region 安装资源
-            if (option.IsProd)
-            {
-                await this.GameLocalConfig.SaveConfigAsync(
-                    GameLocalSettingName.ProdDownloadFolderDone,
-                    "True"
-                );
-                await this.GameLocalConfig.SaveConfigAsync(
-                    GameLocalSettingName.ProdDownloadVersion,
-                    _launcher.Predownload.Version
-                );
-                await this.GameLocalConfig.SaveConfigAsync(
-                    GameLocalSettingName.ProdDownloadPath,
-                    downloadBaseFolder
-                );
-                await this.SetCurrentStateNull(true);
-            }
-            else
-            {
-                await this.StartInstallGameResource(_launcher, previous, _patch, option);
-            }
-            #endregion
-            return true;
-        }
-        catch (TaskCanceledException)
-        {
-            await SetCurrentStateNull(option.IsProd);
-            return false;
-        }
-        catch (Exception)
-        {
-            await SetCurrentStateNull(option.IsProd);
-            return false;
-        }
-    }
-
-    public async Task<string?> GetBaseUrl(
-        GameLauncherSource _launcher,
-        string resourceUrl,
-        string preiveResource,
-        List<IndexResource> resources,
-        InstallOption option,
-        bool isResource = false
-    )
-    {
-        try
-        {
-            GameEventPublisher.Publish(
-                new GameContextOutputArgs()
-                {
-                    Type = GameContextActionType.CdnSelect,
-                    TipMessage = "正在选择最优CDN",
-                    Prod = option.IsProd,
-                }
-            );
-            if (resources == null || resources.Count == 0)
-            {
-                return _launcher.ResourceDefault.CdnList.FirstOrDefault()?.Url + resourceUrl;
-            }
-            var firstResource = resources.FirstOrDefault();
-            string baseUrl = "";
-            if (firstResource != null && !string.IsNullOrWhiteSpace(firstResource.FromFolder))
-            {
-                baseUrl = firstResource.FromFolder;
-            }
-            else
-            {
-                baseUrl = preiveResource;
-            }
-            var cdnResult = await TestCdnAsync(
-                _launcher.ResourceDefault.CdnList,
-                baseUrl,
-                resources
-            );
-            if (cdnResult == null || !cdnResult.Value.Success)
-            {
-                this.GameEventPublisher.Publish(
-                    new GameContextOutputArgs()
-                    {
-                        Type = GameContextActionType.TipMessage,
-                        TipMessage = "未找到可用的CDN地址，默认使用第一个CDN",
-                        Prod = option.IsProd,
-                    }
-                );
-                return _launcher.ResourceDefault.CdnList.FirstOrDefault()?.Url + resourceUrl;
-            }
-            var valueUrl = cdnResult!.Value.Url + baseUrl;
-            return valueUrl;
-        }
-        catch (Exception)
-        {
-            return null;
-        }
-    }
-
-    /// <summary>
-    /// 开始安装游戏资源
-    /// </summary>
-    /// <param name="launcher"></param>
-    /// <param name="previous"></param>
-    /// <param name="patch"></param>
-    /// <param name="isProd"></param>
-    /// <returns></returns>
-    public async Task StartInstallGameResource(
-        GameLauncherSource launcher,
-        PatchConfig previous,
-        PatchIndexGameResource patch,
-        InstallOption option
-    )
-    {
-        var gen = Interlocked.Increment(ref _operationGeneration);
-        GameContextOutputArgs.CurrentGeneration.Value = gen;
-        #region 获取资源
-        var baseFolder = await this.GameLocalConfig.GetConfigAsync(
-            GameLocalSettingName.GameLauncherBassFolder
-        );
-        if (baseFolder == null)
-        {
-            GameEventPublisher.Publish(
-                new GameContextOutputArgs()
-                {
-                    Type = Models.Enums.GameContextActionType.TipMessage,
-                    TipMessage = "未找到游戏安装路径，无法进行安装",
-                }
-            );
-            GameEventPublisher.Publish(
-                new GameContextOutputArgs() { Type = Models.Enums.GameContextActionType.None }
-            );
-
-            return;
-        }
-        #endregion
-
-        DownloadUpdateFolderConfig folderConfig = new();
-        #region 初始化资源
-        this._downloadCts = new();
-        var state = await GetInitDownloadState(false); //安装更新不要用预下载状态
-        this._installGameResourceCts = new CancellationTokenSource();
-        state.CancelToken = _installGameResourceCts;
-        var downloadResource = new List<IndexResource>();
-        var patchResource = new List<IndexResource>();
-        var groupResource = new List<IndexResource>();
-        var zipResource = new List<IndexResource>();
-        foreach (var x in patch.Resource)
-        {
-            if (x.Dest.Contains("krdiff"))
-                patchResource.Add(x);
-            else if (x.Dest.Contains("krpdiff"))
-                groupResource.Add(x);
-            else if (x.Dest.Contains("krzip"))
-                zipResource.Add(x);
-            else
-                downloadResource.Add(x);
-        }
-        string downloadBaseFolder = this.BuildInstallOptionFolder(option, baseFolder);
-
-        GameEventPublisher.Publish(
-            new GameContextOutputArgs()
-            {
-                Type = GameContextActionType.CdnSelect,
-                TipMessage = "正在选择最优CDN",
-                Prod = false,
-            }
-        );
-        #endregion
-        Setups.Clear();
-        #region 初始化步骤显示
-        var installTasks =
-            new List<(
-                IEnumerable<IndexResource> Items,
-                string Name,
-                string Folder,
-                InstallGameResourceType,
-                string baseUrl
-            )>();
-        if (patchResource.Any())
-        {
-            this.Setups.Add("安装补丁文件");
-            folderConfig.PatchFolder = Path.Combine(downloadBaseFolder, "patchs");
-            installTasks.Add(
-                (
-                    patchResource,
-                    "安装补丁文件",
-                    folderConfig.PatchFolder,
-                    InstallGameResourceType.Krdiff,
-                    previous.BaseUrl
-                )
-            );
-        }
-        if (groupResource.Any())
-        {
-            this.Setups.Add("安装补丁组文件");
-            folderConfig.PatchGroupFolder = Path.Combine(downloadBaseFolder, "patchGroup");
-            installTasks.Add(
-                (
-                    groupResource,
-                    "安装补丁组文件",
-                    folderConfig.PatchGroupFolder,
-                    InstallGameResourceType.KrdiffGroup,
-                    previous.BaseUrl
-                )
-            );
-        }
-        if (zipResource.Any())
-        {
-            this.Setups.Add("安装压缩包");
-            folderConfig.ZipFolder = Path.Combine(downloadBaseFolder, "zips");
-            installTasks.Add(
-                (
-                    zipResource,
-                    "安装压缩包",
-                    folderConfig.ZipFolder,
-                    InstallGameResourceType.KrZip,
-                    previous.BaseUrl
-                )
-            );
-        }
-        if (downloadResource.Any())
-        {
-            this.Setups.Add("移动更新文件");
-            folderConfig.DownloadFolder = Path.Combine(downloadBaseFolder, "resources");
-            installTasks.Add(
-                (
-                    downloadResource,
-                    "移动更新文件",
-                    folderConfig.DownloadFolder,
-                    InstallGameResourceType.MoveFile,
-                    previous.BaseUrl
-                )
-            );
-        }
-        this.Setups.Add("重新校验文件");
-        folderConfig.DownloadFolder = baseFolder;
-        IndexGameResource? resource = new();
-        string checkBaseUrl = "";
-        if (option.IsAdvance)
-        {
-            var cdnUrl =
-                launcher
-                    .ResourceDefault.CdnList.Where(x => x.P != 0)
-                    .OrderBy(x => x.P)
-                    .FirstOrDefault()
-                ?? null;
-            if (cdnUrl == null)
-            {
-                Logger.WriteError("CDN地址配置错误，无法更新游戏");
-                SystemEventPublisher.Publish(new() { Message = "CDN地址配置错误，无法更新游戏" });
-                return;
-            }
-            var resourceIndexUrl =
-               launcher.ResourceDefault.CdnList.Where(x => x.P != 0).OrderBy(x => x.P).First().Url
-               + launcher.Predownload.Config.IndexFile;
-            checkBaseUrl = launcher.Predownload.Config.BaseUrl;
-            resource = await this.GetGameResourceAsync(resourceIndexUrl);
-        }
-        else
-        {
-            var resourceIndexUrl =
-                launcher.ResourceDefault.CdnList.Where(x => x.P != 0).OrderBy(x => x.P).First().Url
-                + launcher.ResourceDefault.Config.IndexFile;
-            checkBaseUrl = launcher.ResourceDefault.ResourcesBasePath;
-            resource = await this.GetGameResourceAsync(resourceIndexUrl);
-        }
-        if (resource != null)
-        {
-            installTasks.Add(
-                (
-                    resource!.Resource,
-                    "校验全部文件",
-                    baseFolder,
-                    InstallGameResourceType.CheckAllFiles,
-                    checkBaseUrl
-                )
-            );
-        }
-        else
-        {
-            Logger.WriteError("获取资源信息失败，最终校验启动失败，跳过此校验");
-            SystemEventPublisher.Publish(
-                new() { Message = "获取资源信息失败，最终校验启动失败，跳过此校验" }
-            );
-        }
-        bool? runValue = true;
-        for (int i = 0; i < installTasks.Count; i++)
-        {
-            if (state.CancelToken.IsCancellationRequested)
-            {
-                this.GameEventPublisher.Publish(new() { Type = GameContextActionType.None });
-                state.IsActive = false;
-                state.IsStop = true;
-            }
-            CurrentSetups = i;
-            await this.GameEventPublisher.PublishStepAsync(
-                installTasks[i].Name,
-                CurrentSetups,
-                Setups,
-                isProd: false
-            );
-            await this.GameEventPublisher.PublishStepAsync(
-                installTasks[i].Name,
-                CurrentSetups,
-                Setups,
-                isProd: false
-            );
-            if (installTasks[i].Item4 == InstallGameResourceType.Krdiff)
-            {
-                InstallKrdiffResource installMethod = new InstallKrdiffResource(this.Logger);
-                installMethod.SetParam(
-                    new()
-                    {
-                        { "krdiffs", patchResource },
-                        { "diffFolderPath", installTasks[i].Folder },
-                        { "gameBaseFolder", baseFolder },
-                    },
-                    this.GameEventPublisher
-                );
-                this._currentRunningAction = installMethod;
-                runValue = (bool?)await installMethod.ExecuteAsync(true);
-                if (runValue is bool boolValue && boolValue == false)
-                {
-                    Logger.WriteError("安装补丁文件失败");
-                    SystemEventPublisher.Publish(new() { Message = "安装补丁文件失败" });
-                    await SetCurrentStateNull(false);
-                    GameEventPublisher.Publish(
-                        new() { Type = GameContextActionType.None, Prod = false }
-                    );
-                    return;
-                }
-            }
-            if (installTasks[i].Item4 == InstallGameResourceType.KrdiffGroup)
-            {
-                InstallKrdiffGroupResource installgroupMethod = new InstallKrdiffGroupResource(
-                    this.Logger
-                );
-                var decompressTempFolder = Path.Combine(baseFolder, "decompressFolder");
-                installgroupMethod.SetParam(
-                    new()
-                    {
-                        { "krpdiffs", groupResource },
-                        { "diffFolderPath", installTasks[i].Folder },
-                        { "baseFolderPath", baseFolder },
-                        { "groupFileInfos", patch.GroupInfos },
-                        { "decompressTempFolder", decompressTempFolder },
-                    },
-                    this.GameEventPublisher
-                );
-                this._currentRunningAction = installgroupMethod;
-                runValue = (bool?)await installgroupMethod.ExecuteAsync(true);
-                //无论执行结果，直接删除临时解压目录
-                Directory.Delete(decompressTempFolder, true);
-                if (runValue is bool boolValue && boolValue == false)
-                {
-                    Logger.WriteError("安装补丁组文件失败");
-                    SystemEventPublisher.Publish(new() { Message = "安装补丁组文件失败" });
-                    await SetCurrentStateNull(false);
-                    Directory.Delete(downloadBaseFolder);
-                    GameEventPublisher.Publish(
-                        new() { Type = GameContextActionType.None, Prod = false }
-                    );
-                    return;
-                }
-            }
-            if (installTasks[i].Item4 == InstallGameResourceType.KrZip)
-            {
-                InstallKrZipResource installZipMethod = new InstallKrZipResource(Logger)
-                {
-                    ProgressName = "安装压缩包",
-                };
-                await GameEventPublisher.PublisAsync(
-                    GameContextActionType.BottomText,
-                    "准备开始解压压缩包",
-                    option.IsProd
-                );
-                installZipMethod.SetParam(
-                    new Dictionary<string, object>()
-                    {
-                        { "zipInfos", installTasks[i].Items.ToList() },
-                        { "zipDownFolder", installTasks[i].Folder },
-                        { "baseGamePath", baseFolder },
-                        { "downloadState", state },
-                    },
-                    this.GameEventPublisher
-                );
-                this._currentRunningAction = installZipMethod;
-                runValue = (bool?)await installZipMethod.ExecuteAsync(true);
-                if (runValue is bool boolValue && boolValue == false)
-                {
-                    Logger.WriteError("安装解压包失败");
-                    SystemEventPublisher.Publish(new() { Message = "安装解压包失败" });
-                    await SetCurrentStateNull(false);
-                    GameEventPublisher.Publish(
-                        new() { Type = GameContextActionType.None, Prod = false }
-                    );
-                    return;
-                }
-            }
-            if (installTasks[i].Item4 == InstallGameResourceType.MoveFile)
-            {
-                MoveFileResource moveFileMethod = new MoveFileResource(Logger)
-                {
-                    ProgressName = "移动文件",
-                };
-                Dictionary<string, string> files = new Dictionary<string, string>();
-                files = installTasks[i]
-                    .Items.ToDictionary(
-                        x => Path.Combine(installTasks[i].Folder, x.Dest),
-                        x => Path.Combine(baseFolder, x.Dest)
-                    );
-                moveFileMethod.SetParam(
-                    new Dictionary<string, object>() { { "files", files } },
-                    this.GameEventPublisher
-                );
-                this._currentRunningAction = moveFileMethod;
-                await moveFileMethod.ExecuteAsync(true);
-            }
-            if (installTasks[i].Item4 == InstallGameResourceType.CheckAllFiles)
-            {
-                var checkAllResource = installTasks[i].Items;
-
-                var downloadMethod = new DownloadAndVerifyResource(this.Logger)
-                {
-                    ProgressName = "重新校验文件",
-                };
-                GameEventPublisher.Publish(
-                    new GameContextOutputArgs()
-                    {
-                        Type = GameContextActionType.CdnSelect,
-                        TipMessage = "正在选择最优CDN",
-                        Prod = option.IsProd,
-                    }
-                );
-                CdnTestResult? cdnResult = null;
-                cdnResult = await TestCdnAsync(
-                       launcher.ResourceDefault.CdnList,
-                       installTasks[i].baseUrl,
-                       checkAllResource.ToList()
-                   );
-                if (cdnResult == null)
-                {
-                    Logger.WriteError("获取资源信息失败，最终校验启动失败，跳过此校验");
-                    SystemEventPublisher.Publish(
-                        new() { Message = "获取资源信息失败，最终校验启动失败，跳过此校验" }
-                    );
-                    this.GameEventPublisher.Publish(
-                        new GameContextOutputArgs() { Type = GameContextActionType.None }
-                    );
-                    return;
-                }
-                string baseUrl = Path.Combine(cdnResult.Value.Url,installTasks[i].baseUrl);
-                
-                downloadMethod.SetParam(
-                    new Dictionary<string, object>()
-                    {
-                        { "resource", installTasks[i].Items.ToList() },
-                        { "launcher", launcher },
-                        { "isDelete", false },
-                        { "folder", installTasks[i].Folder },
-                        { "httpClient", HttpClientService! },
-                        { "downloadState", state },
-                        { "baseUrl", baseUrl },
-                        { "isProd", option.IsProd },
-                    },
-                    this.GameEventPublisher
-                );
-                this._currentRunningAction = downloadMethod;
-                await downloadMethod.ExecuteAsync(true);
-            }
-        }
-        for (int i = 0; i < patch.DeleteFiles.Count; i++)
-        {
-            var localFile = $"{baseFolder}\\{patch.DeleteFiles[i]}".Replace('/', '\\');
-            if (File.Exists(localFile))
-            {
-                File.Delete(localFile);
-            }
-            Logger.WriteInfo($"删除旧文件{System.IO.Path.GetFileName(localFile)}");
-        }
-        var writeConfig = new WriteGameResourceConfig(
-            this.GameLocalConfig,
-            launcher,
-            this.Config,
-            Logger
-        );
-        await writeConfig.WriteDownloadAndUpDateResultAsync(launcher, option);
-        await Task.Delay(100);
-        if (option.IsProd)
-        {
-            await this.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.ProdDownloadPath, "");
-            await this.GameLocalConfig.SaveConfigAsync(
-                GameLocalSettingName.ProdDownloadFolderDone,
-                "False"
-            );
-            await this.GameLocalConfig.SaveConfigAsync(
-                GameLocalSettingName.ProdDownloadVersion,
-                ""
-            );
-        }
-        if (!string.IsNullOrWhiteSpace(downloadBaseFolder))
-            Directory.Delete(downloadBaseFolder, true);
-        await state.CancelToken.CancelAsync();
-        state.IsActive = false;
-        await SetCurrentStateNull(false);
-        Logger.WriteInfo($"安装完成");
-        #endregion
-    }
-
-    /// <summary>
-    /// 提前安装游戏资源
-    /// </summary>
-    /// <returns></returns>
-    public async Task AdvanceInstallGameResourceAsync()
-    {
-        var launcher = await this.GetGameLauncherSourceAsync();
-        var currentVersion = await this.GameLocalConfig.GetConfigAsync(
-            GameLocalSettingName.LocalGameVersion
-        );
-        if (launcher == null)
-        {
-            SystemEventPublisher.Publish(new() { Message = "未拉取到游戏数据，请检查网络" });
-            return;
-        }
-        if (currentVersion != launcher.ResourceDefault.Version)
-        {
-            SystemEventPublisher.Publish(
-                new() { Message = "本地版本与服务器版本不匹配，无法安装预下载" }
-            );
-            return;
-        }
-        var previous = launcher.Predownload.Config.PatchConfig.FirstOrDefault(x =>
-            x.Version == currentVersion
-        );
-        #region 预下载情况校验
-
-        #endregion
-        #region 资源校验
-        if (previous == null)
-        {
-            SystemEventPublisher.Publish(new() { Message = "未从预下载的数据中拉取到正确版本" });
-            return;
-        }
-        var cdnUrl =
-            launcher.ResourceDefault.CdnList.Where(x => x.P != 0).OrderBy(x => x.P).FirstOrDefault()
-            ?? null;
-        if (cdnUrl == null)
-        {
-            Logger.WriteError("CDN地址配置错误，无法更新游戏");
-            SystemEventPublisher.Publish(new() { Message = "CDN地址配置错误，无法更新游戏" });
-            return;
-        }
-        var _patch = await GetPatchGameResourceAsync(cdnUrl.Url + previous.IndexFile);
-        if (_patch == null)
-        {
-            SystemEventPublisher.Publish(new() { Message = "预下载资源文件拉去错误" });
-            return;
-        }
-        #endregion
-        await StartDownloadUpdateGameResourceAsync(
-            launcher,
-            currentVersion,
-            previous,
-            _patch,
-            InstallOption.CreateAdvance()
-        );
-        SystemEventPublisher.Publish(new() { Message = "预下载文件校验完毕，开始直接安装游戏" });
-    }
-
-    /// <summary>
-    /// 退出下载任务
-    /// </summary>
-    /// <param name="isProd"></param>
-    /// <returns></returns>
     private async Task SetCurrentStateNull(bool? isProd)
     {
-        if (isProd == null)
+        var generation = Volatile.Read(ref _operationGeneration);
+        var action = _currentRunningAction;
+        _currentRunningAction = null;
+        var states = new[] { isProd != true ? DownloadState : null, isProd != false ? ProdDownloadState : null };
+        try
         {
-            this.ProdDownloadState = null;
-            this.DownloadState = null;
+            foreach (var state in states)
+            {
+                if (state is null) continue;
+                state.IsActive = false;
+                if (state.CancelToken is not null) await state.CancelToken.CancelAsync();
+            }
+            if (action is not null) await action.DisposeAsync();
         }
-        else if (isProd.Value)
+        catch (Exception ex)
         {
-            this.ProdDownloadState = null;
+            Logger.WriteError($"任务收尾失败：{ex}");
         }
-        else
+        finally
         {
-            this.DownloadState = null;
+            if (isProd != true) DownloadState = null;
+            if (isProd != false) ProdDownloadState = null;
+            Setups = [];
+            CurrentSetups = 0;
+            ProgressState.ActiveFiles.Clear();
+            GameEventPublisher.Publish(new()
+            {
+                Type = GameContextActionType.None,
+                Generation = generation,
+                Prod = isProd == true,
+                IsAction = false,
+                IsPause = false
+            });
         }
-        foreach (var item in this.ProgressState.ActiveFiles)
-        {
-            ProgressState.ActiveFiles.TryRemove(item);
-        }
-        await Task.Delay(100);
-        this.GameEventPublisher.Publish(new() { Type = GameContextActionType.None });
     }
 
-    public async Task StartInstallGameResource(InstallOption option)
-    {
-        var currentVersion = await this.GameLocalConfig.GetConfigAsync(
-            GameLocalSettingName.LocalGameVersion
-        );
-        var launcher = await this.GetGameLauncherSourceAsync();
-        var previous = launcher
-            .ResourceDefault.Config.PatchConfig.Where(x => x.Version == currentVersion)
-            .FirstOrDefault();
-        if (previous == null)
-        {
-            GameEventPublisher.Publish(
-                new GameContextOutputArgs()
-                {
-                    Type = Models.Enums.GameContextActionType.TipMessage,
-                    TipMessage = "未找到更新配置文件，无法进行下载",
-                }
-            );
-            return;
-        }
-        var cdnUrl =
-            launcher.ResourceDefault.CdnList.Where(x => x.P != 0).OrderBy(x => x.P).FirstOrDefault()
-            ?? null;
-        if (cdnUrl == null)
-        {
-            Logger.WriteError("CDN地址配置错误，无法更新游戏");
-            SystemEventPublisher.Publish(new() { Message = "CDN地址配置错误，无法更新游戏" });
-            return;
-        }
-        var _patch = await GetPatchGameResourceAsync(cdnUrl.Url + previous.IndexFile);
-        if (_patch == null)
-        {
-            GameEventPublisher.Publish(
-                new GameContextOutputArgs()
-                {
-                    Type = Models.Enums.GameContextActionType.TipMessage,
-                    TipMessage = "未找到更新配置文件，无法进行下载",
-                }
-            );
-            return;
-        }
-        await StartInstallGameResource(launcher, previous, _patch, option);
-    }
-
-    #endregion
 }

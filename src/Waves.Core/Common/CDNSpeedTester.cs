@@ -25,7 +25,7 @@ public class CDNSpeedTester : IDisposable
     }
 
     public async Task<CdnTestResult> TestAsync(
-        CdnList config,
+        GameResourceCdn config,
         string url,
         TimeSpan sampleDuration,
         long maxBytes = 2 * 1024 * 1024,
@@ -82,7 +82,7 @@ public class CDNSpeedTester : IDisposable
 
         long elapsed = Math.Max(1, sw.ElapsedMilliseconds);
         double speed = totalBytes * 1000.0 / elapsed;
-        double score = speed * config.K1 - config.P * config.K2;
+        double score = speed * config.SpeedWeight - config.Priority * config.PriorityWeight;
 
         return new CdnTestResult(
             config.Url,
@@ -95,64 +95,20 @@ public class CDNSpeedTester : IDisposable
         );
     }
 
-    public async Task<IReadOnlyList<CdnTestResult>> TestAllAsync(
-        IEnumerable<CdnList> configs,
-        string url,
-        IndexResource resource,
-        TimeSpan sampleDuration,
-        long maxBytes = 2 * 1024 * 1024,
-        CancellationToken cancellationToken = default
-    )
+    /// <summary>协议无关的完整 URL 候选测速。失败时下载器仍可重试全部候选。</summary>
+    public async Task<string?> SelectResourceUrlAsync(IEnumerable<string> urls, TimeSpan duration, CancellationToken token = default, IEnumerable<GameResourceCdn>? cdns = null)
     {
-        if (configs == null)
-            throw new ArgumentNullException(nameof(configs));
-
-        var results = new List<CdnTestResult>();
-        foreach (var cfg in configs)
+        var results = new List<(string Url, CdnTestResult Result)>();
+        foreach (var url in urls.Distinct())
         {
-            string url2 = cfg.Url + url + resource.Dest;
-            cancellationToken.ThrowIfCancellationRequested();
-            var result = await TestAsync(cfg, url2, sampleDuration, maxBytes, cancellationToken)
-                .ConfigureAwait(false);
-            results.Add(result);
+            token.ThrowIfCancellationRequested();
+            var cdn = cdns?.FirstOrDefault(x => url.StartsWith(x.Url.TrimEnd('/') + "/", StringComparison.OrdinalIgnoreCase));
+            var result = await TestAsync(new GameResourceCdn { Url = url, SpeedWeight = cdn?.SpeedWeight ?? 1,
+                PriorityWeight = cdn?.PriorityWeight ?? 0, Priority = cdn?.Priority ?? 0 }, url, duration, cancellationToken: token);
+            if (result.Success && result.DownloadBytes > 0) results.Add((url, result));
         }
-        return results;
-    }
-
-    public async Task<CdnTestResult> TestAllAsync(
-        IEnumerable<CdnList> config,
-        string allUrl,
-        TimeSpan duration,
-        long maxBytes = 2 * 1024 * 1024,
-        CancellationToken token = default
-    )
-    {
-        if(config == null)
-        {
-            throw new ArgumentException(nameof(config));
-        }
-        var result = new List<CdnTestResult>();
-        foreach (var item in config)
-        {
-            try
-            {
-                token.ThrowIfCancellationRequested();
-                var url = item.Url + allUrl;
-                var testResult = await TestAsync(item, url, duration, maxBytes, token)
-                    .ConfigureAwait(false);
-                result.Add(testResult);
-            }
-            catch (Exception)
-            {
-                continue;
-            }
-        }
-        var best = result
-                .Where(r => r.Success && r.DownloadBytes > 0)
-                .OrderByDescending(r => r.Score)
-                .ThenByDescending(r => r.BytesPerSecond)
-                .FirstOrDefault();
-        return best;
+        token.ThrowIfCancellationRequested();
+        return results.OrderByDescending(x => x.Result.Score).ThenByDescending(x => x.Result.BytesPerSecond).Select(x => x.Url).FirstOrDefault();
     }
 
     public void Dispose()

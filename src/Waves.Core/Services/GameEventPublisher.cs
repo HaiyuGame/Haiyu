@@ -57,8 +57,6 @@ public sealed class SubscriptionToken<Publisher> : IGameEventSubscription
         if (_isDisposed)
             return;
         _isDisposed = true;
-        _cts.Cancel();
-        _cts.Dispose();
         _publisher.Unsubscribe(_id);
     }
 }

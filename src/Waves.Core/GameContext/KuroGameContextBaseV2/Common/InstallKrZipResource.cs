@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace Waves.Core.GameContext.KruoGameContextBaseV2.Common;
 
 /// <summary>
@@ -5,7 +7,8 @@ namespace Waves.Core.GameContext.KruoGameContextBaseV2.Common;
 /// </summary>
 public class InstallKrZipResource : IProgressSetup,IAsyncDisposable
 {
-    private List<IndexResource> zipInfos;
+    private long _generation;
+    private List<PatchGameFileInfo> zipInfos;
 
     private string baseGamePath;
 
@@ -17,8 +20,9 @@ public class InstallKrZipResource : IProgressSetup,IAsyncDisposable
     private CancellationTokenSource cts;
     private long _totalDownloadedBytes;
     private long _totalProgressSize;
-    private long _lastSpeedBytes;
-    private DateTime _lastSpeedUpdateTime;
+    private readonly object _progressGate = new();
+    private long _speedSampleTimestamp;
+    private double _smoothedZipSpeed;
     private double _zipSpeed;
     private long _currentZipMaxSize;
 
@@ -41,13 +45,14 @@ public class InstallKrZipResource : IProgressSetup,IAsyncDisposable
 
     public void SetParam(Dictionary<string, object> param, IGameEventPublisher<GameContextOutputArgs> gameEventPublisher)
     {
+        _generation = GameContextOutputArgs.CurrentGeneration.Value;
         this.GameEventPublisher = gameEventPublisher;
         this.Param = param;
     }
 
     public bool Check()
     {
-        if (!Param.CheckParam<List<IndexResource>>("zipInfos", out var zipInfos))
+        if (!Param.CheckParam<List<PatchGameFileInfo>>("zipInfos", out var zipInfos))
         {
             return false;
         }
@@ -77,6 +82,7 @@ public class InstallKrZipResource : IProgressSetup,IAsyncDisposable
             this.GameEventPublisher.Publish(
                 new GameContextOutputArgs()
                 {
+            Generation = _generation,
                     Type = Models.Enums.GameContextActionType.TipMessage,
                     TipMessage = "参数不正确，无法解压",
                 }
@@ -96,17 +102,16 @@ public class InstallKrZipResource : IProgressSetup,IAsyncDisposable
             {
                 GameEventPublisher.Publish(new GameContextOutputArgs()
                 {
+            Generation = _generation,
                     Type = GameContextActionType.TipMessage,
                     TipMessage = "解压文件不存在，无法解压，请直接修复游戏",
                 });
                 return false;
             }
-            var fileSize = await UnZipTask.GetZipEntriesSizeAsync(item.Key);
-            _currentZipMaxSize = fileSize;
-            Interlocked.Exchange(ref _totalProgressSize, 0);
-            Interlocked.Exchange(ref _totalDownloadedBytes, 0);
+            var fileSize = item.Value;
+            InitZipProgress(fileSize);
             IProgress<(GameContextActionType, bool, long, string, long, long)> progress =
-                new Progress<(GameContextActionType, bool, long, string, long, long)>(tuple =>
+                new ZipProgress(tuple =>
                 {
                     var args = UpdateFileProgress(
                         tuple.Item1,
@@ -126,12 +131,30 @@ public class InstallKrZipResource : IProgressSetup,IAsyncDisposable
                 progress,
                 Logger
             );
+            if (!unzipResult || downloadState.CancelToken.IsCancellationRequested) return false;
             File.Delete(item.Key);
         }
         return true;
     }
 
-    private GameContextOutputArgs UpdateFileProgress(
+    private sealed class ZipProgress(Action<(GameContextActionType, bool, long, string, long, long)> report)
+        : IProgress<(GameContextActionType, bool, long, string, long, long)>
+    {
+        public void Report((GameContextActionType, bool, long, string, long, long) value) => report(value);
+    }
+
+    internal void InitZipProgress(long size)
+    {
+        lock (_progressGate)
+        {
+            _currentZipMaxSize = size;
+            _totalProgressSize = _totalDownloadedBytes = 0;
+            _zipSpeed = _smoothedZipSpeed = 0;
+            _speedSampleTimestamp = Stopwatch.GetTimestamp();
+        }
+    }
+
+    internal GameContextOutputArgs UpdateFileProgress(
         GameContextActionType type,
         long fileSize,
         bool isAdd = true,
@@ -141,39 +164,57 @@ public class InstallKrZipResource : IProgressSetup,IAsyncDisposable
         long fileMaxSize = 0
     )
     {
-        if (type == GameContextActionType.ZipDecompress || type == GameContextActionType.Decompress)
+        lock (_progressGate)
         {
-            Interlocked.Add(ref _totalDownloadedBytes, fileSize);
-            if (isAdd)
-                Interlocked.Add(ref _totalProgressSize, fileSize);
+            if (type == GameContextActionType.ZipDecompress || type == GameContextActionType.Decompress)
+            {
+                Interlocked.Add(ref _totalDownloadedBytes, fileSize);
+                if (isAdd)
+                    Interlocked.Add(ref _totalProgressSize, fileSize);
+            }
+            var elapsed = Stopwatch.GetElapsedTime(_speedSampleTimestamp).TotalSeconds;
+            if (elapsed >= 1)
+            {
+                _zipSpeed = Interlocked.Exchange(ref _totalDownloadedBytes, 0) / elapsed;
+                _smoothedZipSpeed = _zipSpeed > 0
+                    ? (_smoothedZipSpeed > 0 ? 0.3 * _zipSpeed + 0.7 * _smoothedZipSpeed : _zipSpeed) : 0;
+                _speedSampleTimestamp = Stopwatch.GetTimestamp();
+            }
+            var total = _currentZipMaxSize > 0 ? _currentZipMaxSize : fileMaxSize;
+            var remaining = Math.Max(0, total - _totalProgressSize);
+            TimeSpan? remainingTime = null;
+            if (downloadState is not null && !downloadState.IsPaused
+                && !downloadState.CancelToken.IsCancellationRequested && total > 0)
+            {
+                if (remaining == 0) remainingTime = TimeSpan.Zero;
+                else if (_smoothedZipSpeed > 0)
+                {
+                    var seconds = remaining / _smoothedZipSpeed;
+                    if (double.IsFinite(seconds) && seconds < TimeSpan.MaxValue.TotalSeconds)
+                        remainingTime = TimeSpan.FromSeconds(Math.Ceiling(seconds));
+                }
+            }
+            var args = new GameContextOutputArgs
+            {
+                Generation = _generation,
+                RemainingTime = remainingTime,
+                Type = type,
+                CurrentSize = _totalProgressSize,
+                TotalSize = _currentZipMaxSize > 0 ? _currentZipMaxSize : fileMaxSize,
+                FileTotal = this.zipInfos?.Count ?? 0,
+                ZipSpeed = _zipSpeed,
+                FilePath = filePath,
+                FileCurrentSize = currentFileSize,
+                FileTotalSize = fileMaxSize,
+                CurrentDecompressCount = currentFileSize,
+                MaxDecompressValue = fileMaxSize,
+                Prod = false,
+                IsAction = this.downloadState?.IsActive ?? false,
+                IsPause = downloadState?.IsPaused ?? false,
+                TipMessage = tip,
+            };
+            return args;
         }
-        var elapsed = (DateTime.Now - _lastSpeedUpdateTime).TotalSeconds;
-        if (elapsed >= 1)
-        {
-            _zipSpeed = _totalDownloadedBytes / elapsed;
-            Interlocked.Exchange(ref _totalDownloadedBytes, 0);
-            var currentBytes = Interlocked.Read(ref _totalDownloadedBytes);
-            _lastSpeedBytes = currentBytes;
-            _lastSpeedUpdateTime = DateTime.Now;
-        }
-        var args = new GameContextOutputArgs
-        {
-            Type = type,
-            CurrentSize = _totalProgressSize,
-            TotalSize = _currentZipMaxSize > 0 ? _currentZipMaxSize : fileMaxSize,
-            FileTotal = this.zipInfos?.Count ?? 0,
-            ZipSpeed = _zipSpeed,
-            FilePath = filePath,
-            FileCurrentSize = currentFileSize,
-            FileTotalSize = fileMaxSize,
-            CurrentDecompressCount = currentFileSize,
-            MaxDecompressValue = fileMaxSize,
-            Prod = false,
-            IsAction = this.downloadState?.IsActive ?? false,
-            IsPause = downloadState?.IsPaused ?? false,
-            TipMessage = tip,
-        };
-        return args;
     }
 
     public async Task<object?> ExecuteAsync(bool isSync = false)
