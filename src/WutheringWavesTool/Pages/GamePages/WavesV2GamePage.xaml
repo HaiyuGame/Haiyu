@@ -85,7 +85,7 @@
                         <MenuFlyoutItem
                             Command="{x:Bind ViewModel.ShowSelectGameBunleCommand}"
                             IsEnabled="{x:Bind ViewModel.BunleBthEnable, Mode=OneWay}"
-                            Text="切换材质">
+                            Text="{x:Bind helper:LanguageService.GetString('GameBunleSwitch')}">
                             <MenuFlyoutItem.Icon>
                                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8AB;" />
                             </MenuFlyoutItem.Icon>

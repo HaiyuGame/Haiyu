@@ -453,6 +453,7 @@ public sealed partial class BundleGameResourceProvider : IGameResourceProvider
         }
         foreach (var item in dictValue)
         {
+            var install = await this.LocalConfig.GetConfigAsync($"BunlePackVersion_{item.Key.ToUpper()}");
             result.Add(
                 new BunleResourceSize(item.Value.Item1.Size + common.Size)
                 {
@@ -461,6 +462,7 @@ public sealed partial class BundleGameResourceProvider : IGameResourceProvider
                     ResourceCommand =
                         item.Value.Item2.ResourcePacks[1] ?? item.Value.Item2.ResourcePacks[0],
                     Version = item.Value.Item1.Version,
+                    Install = !string.IsNullOrWhiteSpace(install)
                 }
             );
         }
