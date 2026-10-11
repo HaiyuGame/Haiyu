@@ -1,5 +1,3 @@
-
-
 namespace Waves.Core.Services;
 
 public class KuroCloudGameContext : IKuroCloudGameContext
@@ -18,7 +16,6 @@ public class KuroCloudGameContext : IKuroCloudGameContext
     /// 正在运行的游戏窗口标题
     /// </summary>
     private string? GameTitleKey { get; set; }
-
 
     public IGameEventPublisher<CloudMessageArgs> CloudGameEventPublisher { get; internal set; }
 
@@ -78,13 +75,12 @@ public class KuroCloudGameContext : IKuroCloudGameContext
             node
         );
         this.CurrentPayType = payType;
-        var invokeResult =
-            await this.WavesCloudGameService.CommonStartGameAsync(
-                http,
-                session,
-                paramData,
-                payType
-            );
+        var invokeResult = await this.WavesCloudGameService.CommonStartGameAsync(
+            http,
+            session,
+            paramData,
+            payType
+        );
         if (invokeResult == null)
         {
             CloudGameEventPublisher.Publish(
@@ -207,11 +203,10 @@ public class KuroCloudGameContext : IKuroCloudGameContext
                     return;
                 }
                 var http = CloudGameDataHelper.CreateWebCloudClient(session);
-                var queueResult =
-                    await this.WavesCloudGameService.CommonQueueInfoAsync(
-                        http,
-                        session
-                    );
+                var queueResult = await this.WavesCloudGameService.CommonQueueInfoAsync(
+                    http,
+                    session
+                );
                 if (queueResult == null)
                 {
                     errCount++;
@@ -308,17 +303,19 @@ public class KuroCloudGameContext : IKuroCloudGameContext
     {
         try
         {
-            var quality = await this.GameLocalConfig.GetConfigAsync(
-                CloudGameLocalSettingName.QualityType
-            );
+            var quality =
+                await this.GameLocalConfig.GetConfigAsync(CloudGameLocalSettingName.QualityType)
+                ?? "Clarity";
             var fps = await this.GameLocalConfig.GetConfigAsync(CloudGameLocalSettingName.Fps);
-            if (!int.TryParse(fps, out var targetFps))
+            int targetFps = 0;
+            if (!int.TryParse(fps, out targetFps))
             {
-                return null;
+                targetFps = 60;
             }
-            var enable = await this.GameLocalConfig.GetConfigAsync(
-                CloudGameLocalSettingName.EnableImageEnhancement
-            );
+            var enable =
+                await this.GameLocalConfig.GetConfigAsync(
+                    CloudGameLocalSettingName.EnableImageEnhancement
+                ) ?? "true";
             if (
                 bool.TryParse(enable, out var enableImage)
                 && Enum.TryParse<CloudQualityType>(quality, out var quEnum)
