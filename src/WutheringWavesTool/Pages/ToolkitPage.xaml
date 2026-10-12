@@ -129,6 +129,26 @@
                     </StackPanel>
                 </Button>
             </cui:SettingsCard>
+            <cui:SettingsCard Description="{x:Bind helper:LanguageService.GetString('Toolkit_LogDecryptDescription')}" Header="{x:Bind helper:LanguageService.GetString('Toolkit_LogDecryptHeader')}">
+                <cui:SettingsCard.HeaderIcon>
+                    <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xEC87;" />
+                </cui:SettingsCard.HeaderIcon>
+                <Button
+                    Grid.Row="2"
+                    Grid.Column="2"
+                    Padding="12,8"
+                    HorizontalAlignment="Right"
+                    Command="{x:Bind ViewModel.DecryptGameLogsCommand}"
+                    Style="{ThemeResource TitleBarButtonStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <FontIcon
+                            FontFamily="Segoe Fluent Icons"
+                            FontSize="13"
+                            Glyph="&#xE8A7;" />
+                        <TextBlock FontSize="13" Text="{x:Bind helper:LanguageService.GetString('Toolkit_LogDecryptAction')}" />
+                    </StackPanel>
+                </Button>
+            </cui:SettingsCard>
             <Grid Margin="0,15,0,0" VerticalAlignment="Center">
                 <TextBlock
                     VerticalAlignment="Center"
