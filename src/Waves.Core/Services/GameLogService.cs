@@ -85,26 +85,44 @@ public class GameLogService : IGameLogService
         var decryptedCount = 0;
         var copiedCount = 0;
         var failedCount = 0;
+        var keyMismatchCount = 0;
         foreach (var logFile in logFiles)
         {
             token.ThrowIfCancellationRequested();
             try
             {
                 var input = await File.ReadAllBytesAsync(logFile, token);
-                var outputPath = Path.Combine(
+
+                // UTF-8 BOM 开头即未加密的明文日志，原样复制；否则按 ELog 双 key 异或解密
+                if (!KrKeyHelper.IsELogEncrypted(input))
+                {
+                    var copiedPath = Path.Combine(
+                        outputFolder,
+                        Path.GetFileName(logFile) + DecryptedSuffix
+                    );
+                    await File.WriteAllBytesAsync(copiedPath, input, token);
+                    copiedCount++;
+                    continue;
+                }
+
+                var decrypted = KrKeyHelper.TransformELog(input);
+
+                // 有效性校验：key 变更后解密结果是乱码而非明文，不导出、单独计数提示
+                if (!KrKeyHelper.IsValidDecryptedLog(decrypted))
+                {
+                    keyMismatchCount++;
+                    LoggerService.WriteError(
+                        $"日志解密校验未通过（游戏可能已更换加密key，请更新 KrKeyHelper 中的 ELog key）: {Path.GetFileName(logFile)}"
+                    );
+                    continue;
+                }
+
+                var decryptedPath = Path.Combine(
                     outputFolder,
                     Path.GetFileName(logFile) + DecryptedSuffix
                 );
-
-                // UTF-8 BOM 开头即明文（-closeELog 生效时生成），原样复制；否则按 ELog 双 key 异或解密
-                var encrypted = KrKeyHelper.IsELogEncrypted(input);
-                var output = encrypted ? KrKeyHelper.TransformELog(input) : input;
-                await File.WriteAllBytesAsync(outputPath, output, token);
-
-                if (encrypted)
-                    decryptedCount++;
-                else
-                    copiedCount++;
+                await File.WriteAllBytesAsync(decryptedPath, decrypted, token);
+                decryptedCount++;
             }
             catch (OperationCanceledException)
             {
@@ -121,6 +139,7 @@ public class GameLogService : IGameLogService
             DecryptedCount = decryptedCount,
             CopiedCount = copiedCount,
             FailedCount = failedCount,
+            KeyMismatchCount = keyMismatchCount,
         };
     }
 }

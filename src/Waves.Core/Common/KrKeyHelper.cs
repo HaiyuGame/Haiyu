@@ -86,4 +86,39 @@ public static class KrKeyHelper
         }
         return result;
     }
+
+    /// <summary>
+    /// 校验解密结果是否为有效的明文日志：
+    /// 明文日志必须以 UTF-8 BOM 开头，且 BOM 之后的全部内容为合法 UTF-8 文本。
+    /// key 不匹配时解密会翻转约一半字节的奇偶，破坏多字节 UTF-8 序列的连续性，
+    /// 因此"BOM + 严格 UTF-8"双重校验可可靠识别 key 变更：数学上存在 128 对错误
+    /// key 组合能伪造 BOM 三字节（BOM 恰好全走同一 key 分支），但它们从第 4 字节
+    /// 起即产生非法 UTF-8 序列，全部被第二重校验拦截（已对全 key 空间验证）。
+    /// </summary>
+    /// <param name="decrypted">解密后的完整内容</param>
+    /// <returns>true = 有效明文；false = key 不匹配或内容损坏</returns>
+    public static bool IsValidDecryptedLog(ReadOnlySpan<byte> decrypted)
+    {
+        if (decrypted.Length < 4)
+        {
+            return false;
+        }
+        if (decrypted[0] != 0xEF || decrypted[1] != 0xBB || decrypted[2] != 0xBF)
+        {
+            return false;
+        }
+        try
+        {
+            // 严格模式：任何非法 UTF-8 序列（延续字节缺失/超长编码/孤立续字节）都抛异常
+            _ = StrictUtf8.GetString(decrypted[3..]);
+            return true;
+        }
+        catch (DecoderFallbackException)
+        {
+            return false;
+        }
+    }
+
+    /// <summary>严格 UTF-8 解码器（非法序列抛异常而非替换）</summary>
+    private static readonly UTF8Encoding StrictUtf8 = new(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
 }

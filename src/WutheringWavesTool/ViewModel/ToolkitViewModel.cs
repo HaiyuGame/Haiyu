@@ -212,7 +212,18 @@ public sealed partial class ToolkitViewModel : ViewModelBase
             this.CTS.Token
         );
 
-        if (result.HasFailed)
+        if (result.HasKeyMismatch)
+        {
+            // key 不匹配：解密结果不是有效明文，已拦截未导出
+            await tipShow.ShowMessageAsync(
+                LanguageService.FormatByText(
+                    LanguageService.GetStringByText("解密校验未通过：游戏可能已更换加密方式，{0} 个文件未导出，请更新启动器后重试"),
+                    result.KeyMismatchCount
+                ),
+                Symbol.Clear
+            );
+        }
+        else if (result.HasFailed)
         {
             await tipShow.ShowMessageAsync(
                 LanguageService.FormatByText(

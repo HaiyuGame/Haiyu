@@ -14,7 +14,7 @@ public interface IGameLogService
     Task<GameLogLocateResult> LocateGameLogsAsync(CancellationToken token = default);
 
     /// <summary>
-    /// 解密日志并导出到输出目录：ELog 加密内容解密，已是明文的文件（-closeELog 生效时生成）原样复制；
+    /// 解密日志并导出到输出目录：ELog 加密内容解密，已是明文的文件原样复制；
     /// 输出命名为 原名 + ".decrypted.log"。单个文件失败只记录日志，不中断其余文件。
     /// </summary>
     /// <param name="logFiles">日志文件完整路径列表</param>
