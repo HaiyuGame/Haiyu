@@ -114,3 +114,8 @@ src/
 - [游戏上下文 V2 生命周期与状态机](https://zread.ai/BlameTwo/Haiyu/8-game-context-v2-lifecycle-and-state-machine)
 
 ---
+
+
+### 提交规范
+`Master`分支仅接受发版前后的大版本更新合并，日常提交需提交到`development`
+也就是最新`release`中，必须和`master`分支打包结果一致
