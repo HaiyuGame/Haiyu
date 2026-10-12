@@ -63,6 +63,17 @@ namespace Waves.Core.GameContext
                     return false;
                 }
 
+                if (this.GameType == GameType.Waves)
+                {
+                    var cleanLogs = await GameLocalConfig.GetConfigAsync(
+                        GameLocalSettingName.CleanGameLogsOnStart
+                    );
+                    if (bool.TryParse(cleanLogs, out var cleanLogsValue) && cleanLogsValue)
+                    {
+                        await CleanGameLogsAsync(gameFolder);
+                    }
+                }
+
                 var executablePath = ResolveStartGameExecutablePath(gameFolder, option);
                 if (string.IsNullOrWhiteSpace(executablePath))
                 {
@@ -190,6 +201,41 @@ namespace Waves.Core.GameContext
             Logger.WriteInfo("退出游戏……");
             this._isStarting = false;
             this.GameEventPublisher.Publish(new GameContextOutputArgs { Type = GameContextActionType.GameExit });
+        }
+
+        /// <summary>
+        /// 启动游戏前清空鸣潮日志/崩溃转储目录，清空内容但保留目录本身；
+        /// 单个目录清理失败只记录日志，不阻断启动
+        /// </summary>
+        /// <param name="gameFolder">游戏根目录</param>
+        private async Task CleanGameLogsAsync(string gameFolder)
+        {
+            var cleaned = 0;
+            foreach (var relative in StartGameOption.WavesLogFolders)
+            {
+                var target = Path.Combine(gameFolder, relative);
+                if (!Directory.Exists(target))
+                    continue;
+                try
+                {
+                    await Task.Run(() =>
+                    {
+                        foreach (var dir in Directory.EnumerateDirectories(target))
+                            Directory.Delete(dir, true);
+                        foreach (var file in Directory.EnumerateFiles(target))
+                            File.Delete(file);
+                    });
+                    cleaned++;
+                }
+                catch (Exception ex)
+                {
+                    Logger.WriteWarning($"清理游戏日志目录失败：{target}，{ex.Message}");
+                }
+            }
+            if (cleaned > 0)
+            {
+                Logger.WriteInfo($"已清理 {cleaned} 个游戏日志目录");
+            }
         }
 
         private static string? ResolveStartGameExecutablePath(string gameFolder, StartGameOption option)

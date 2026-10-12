@@ -70,12 +70,15 @@
             <ani:Implicit.HideAnimations>
                 <ani:OpacityAnimation To="1" Duration="0:0:0.5" />
             </ani:Implicit.HideAnimations>
-            <Grid ColumnSpacing="24">
+            <Grid ColumnSpacing="24" RowSpacing="8">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                </Grid.RowDefinitions>
                 <CheckBox
                     VerticalAlignment="Center"
                     Content="Directx11"
@@ -86,10 +89,16 @@
                     Content="{x:Bind helper:LanguageService.GetString('Display_DisableDlss')}"
                     IsChecked="{x:Bind ViewModel.DlssEnable, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 <CheckBox
-                    Grid.Column="2"
+                    Grid.Row="1"
                     VerticalAlignment="Center"
                     Content="快速校验"
                     IsChecked="{x:Bind ViewModel.FastVerify, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <CheckBox
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    Content="{x:Bind helper:LanguageService.GetString('Display_CleanGameLogsOnStart')}"
+                    IsChecked="{x:Bind ViewModel.CleanLogsOnStart, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             </Grid>
         </Border>
         <Border
