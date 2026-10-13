@@ -196,6 +196,7 @@ public static class InstanceBuilderExtensions
                     .AddTransient<IViewFactorys, ViewFactorys>()
                     .AddSingleton<IThemeService, ThemeService>()
                     .AddSingleton<IKuroAccountService, KuroAccountService>()
+                    .AddSingleton<IGameLogService, GameLogService>()
                     .AddSingleton<AutoKuroGameSignService>()
                     .AddSingleton<AutoKuroClientSignService>()
                     .AddSingleton<ITaskManager, TaskManager>(s => CreateTask(s))
