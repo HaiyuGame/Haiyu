@@ -12,6 +12,24 @@ public class StartGameOption
     ];
     public static IReadOnlyCollection<string> GetPunishExes = ["PGR.exe"];
 
+    /// <summary>
+    /// 鸣潮客户端运行期产生的日志/崩溃转储目录（相对游戏根目录），
+    /// 与启动前清理脚本保持一致的清单
+    /// </summary>
+    public static readonly IReadOnlyCollection<string> WavesLogFolders =
+    [
+        "Client\\Binaries\\Win64\\wesight\\crashsight_data",
+        "Client\\Binaries\\Win64\\TQM64\\dump",
+        "Client\\Binaries\\Win64\\pipe_client",
+        "Client\\Binaries\\Win64\\CrashSight64\\dump",
+        "Client\\Binaries\\Win64\\CrashSightLog",
+        "Client\\Binaries\\Win64\\attachment",
+        "Client\\Saved\\Crashes",
+        "Client\\Saved\\Logs",
+        "Client\\Saved\\Config\\CrashReportClient",
+        "Client\\Binaries\\Win64\\.quality\\performance",
+    ];
+
     public required GameType Type { get; init; }
 
     public WavesLauncheOption? WavesOption { get; internal set; }

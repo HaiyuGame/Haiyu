@@ -67,6 +67,14 @@ public sealed partial class KuroGameSettingViewModel : DialogViewModelBase
             {
                 Directx11Enable = dx11Value;
             }
+
+            var cleanLogs = await this.GameContext.GameLocalConfig.GetConfigAsync(
+                GameLocalSettingName.CleanGameLogsOnStart
+            );
+            if (bool.TryParse(cleanLogs, out var cleanLogsValue))
+            {
+                CleanLogsOnStart = cleanLogsValue;
+            }
         }
     }
 
@@ -102,6 +110,9 @@ public sealed partial class KuroGameSettingViewModel : DialogViewModelBase
     [ObservableProperty]
     public partial bool Directx11Enable { get; set; }
 
+    [ObservableProperty]
+    public partial bool CleanLogsOnStart { get; set; }
+
     public override async Task BeforeCloseAsync()
     {
         await this.GameContext.SetDownloadSpeedAsync((long)DownloadSpeedLimit);
@@ -115,7 +126,10 @@ public sealed partial class KuroGameSettingViewModel : DialogViewModelBase
                     [GameLocalSettingName.StartGameArguments] = Arguments ?? string.Empty,
                     [GameLocalSettingName.StartGameExeName] =
                         LauncheExeName ?? LuancheExeNames?.FirstOrDefault() ?? string.Empty,
-                    [GameLocalSettingName.FastVerify] = this.FastVerify.ToString()
+                    [GameLocalSettingName.FastVerify] = this.FastVerify.ToString(),
+                    [GameLocalSettingName.CleanGameLogsOnStart] = CleanLogsOnStart
+                        ? "true"
+                        : "false"
                 }
             );
         }
