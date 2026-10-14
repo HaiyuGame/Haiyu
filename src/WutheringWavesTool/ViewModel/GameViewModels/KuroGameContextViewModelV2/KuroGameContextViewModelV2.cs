@@ -618,9 +618,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
             var context = GameContext;
             var status = await context.GetGameContextStatusAsync(token);
             var hasAdvanceInstalled = await HasAdvanceInstalledAsync(status);
-            if (!IsCurrentProgressRender(renderVersion, context)) return;
             _lastGameStatus = status;
-
             if (!status.IsGameExists)
             {
                 ShowSelectInstallBth(status);
