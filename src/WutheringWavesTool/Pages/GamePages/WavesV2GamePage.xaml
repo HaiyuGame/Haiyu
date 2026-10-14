@@ -1231,6 +1231,8 @@
                                     <ItemsRepeater.ItemTemplate>
                                         <DataTemplate x:DataType="launcheModel:Content">
                                             <HyperlinkButton
+                                                Margin="5,0"
+                                                Padding="5,5"
                                                 HorizontalAlignment="Stretch"
                                                 HorizontalContentAlignment="Left"
                                                 FontSize="12"

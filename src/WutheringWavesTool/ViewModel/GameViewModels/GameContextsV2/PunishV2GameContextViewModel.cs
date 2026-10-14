@@ -215,9 +215,7 @@ public partial class PunishV2GameContextViewModel : KuroGameContextViewModelV2
 
     [ObservableProperty]
     public partial ObservableCollection<Slideshow> SlideShows { get; set; }
-
-    [ObservableProperty]
-    public partial ObservableCollection<string> Tabs { get; set; } =
+    public ObservableCollection<string> GetTabs() =>
         new ObservableCollection<string>()
         {
             LanguageService.GetStringByText("活动"),
@@ -226,7 +224,10 @@ public partial class PunishV2GameContextViewModel : KuroGameContextViewModelV2
         };
 
     [ObservableProperty]
-    public partial string SelectTab { get; set; }
+    public partial ObservableCollection<string> Tabs { get; set; }
+
+    [ObservableProperty]
+    public partial string? SelectTab { get; set; }
 
     partial void OnSelectTabChanged(string value)
     {
@@ -235,19 +236,19 @@ public partial class PunishV2GameContextViewModel : KuroGameContextViewModelV2
             Contents.Clear();
             return;
         }
-        if (value == Tabs[0])
+        if (value == LanguageService.GetStringByText("活动"))
         {
             if (Contents == null)
                 return;
             Contents = Activity.Contents.ToObservableCollection();
         }
-        else if (value == Tabs[1])
+        else if (value == LanguageService.GetStringByText("公告"))
         {
             if (Notice == null)
                 return;
             Contents = Notice.Contents.ToObservableCollection();
         }
-        else if (value == Tabs[2])
+        else if (value == LanguageService.GetStringByText("新闻"))
         {
             if (Contents == null)
                 return;
@@ -293,9 +294,26 @@ public partial class PunishV2GameContextViewModel : KuroGameContextViewModelV2
                 this.Notice = starter.Result.Guidance.Notice;
                 this.News = starter.Result.Guidance.News;
                 this.Activity = starter.Result.Guidance.Activity;
+                var tags = this.GetTabs();
+                if (Notice == null || Notice.Contents == null || Notice.Contents.Count == 0)
+                {
+                    tags.Remove(LanguageService.GetStringByText("公告"));
+                }
+                else if (Activity == null || Activity.Contents == null || Activity.Contents.Count == 0)
+                {
+                    tags.Remove(LanguageService.GetStringByText("活动"));
+                }
+                else if (News == null || News.Contents == null || News.Contents.Count == 0)
+                {
+                    tags.Remove(LanguageService.GetStringByText("新闻"));
+                }
+                Tabs = tags;
                 PlayerCardVisibility = Visibility.Visible;
                 this.SelectTab = null;
-                this.SelectTab = Tabs[0];
+                if (Tabs.Count != 0)
+                {
+                    this.SelectTab = Tabs[0];
+                }
             }
             await RefreshLocalGameUser(null,false);
         }

@@ -49,6 +49,9 @@
     <Project Path="D:/WorkSpace/Haiyu/src/KuroAndroidMonitoring/ChromeCDPSharp.csproj">
       <BuildType Solution="All|*" Project="Debug" />
     </Project>
+    <Project Path="Extensions/ProxyExtensions/ProxyExtensions.csproj">
+      <BuildType Solution="All|*" Project="Debug" />
+    </Project>
   </Folder>
   <Folder Name="/Extensions/ABI/">
     <Project Path="D:/WorkSpace/Haiyu/src/Extensions/ABI/ABI.Models/ABI.Models.csproj" Id="ed8e98fa-4c2b-4955-b495-4e5c5f837a84">
