@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentDialog
-    x:Class="Haiyu.Pages.Dialogs.SelectDownoadGameDialogV2"
+    x:Class="Haiyu.Pages.Dialogs.SelectDownloadGameDialogV2"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:helper="using:Haiyu.Helpers"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:helper="using:Haiyu.Helpers"
     xmlns:local="using:Haiyu.Pages.Dialogs"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:md="using:Waves.Core.Models"
     xmlns:ui="using:Haiyu.Controls"
     Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+    CornerRadius="5"
+    Loaded="ContentDialog_Loaded"
     mc:Ignorable="d">
 
     <Grid Width="470" Height="300">
@@ -81,12 +84,25 @@
             </ui:LayeredProgressBar>
             <StackPanel
                 Grid.Row="1"
-                Margin="0,30,0,0"
-                Orientation="Vertical">
+                Margin="0,20,0,0"
+                Orientation="Vertical"
+                Spacing="10">
                 <TextBlock
                     x:Name="TipMessage"
                     Margin="0,5,0,0"
                     FontFamily="{ThemeResource DefaultFont}" />
+                <ComboBox x:Name="SelectBunleBox" Header="选择清晰度">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="md:BunleResourceSize">
+                            <TextBlock>
+                                <Run Text="{x:Bind BunleName, Mode=OneWay}" />
+                                <Run Text="(" />
+                                <Run Text="{x:Bind BunleSize, Mode=OneWay}" />
+                                <Run Text=")" />
+                            </TextBlock>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
             </StackPanel>
             <Path
                 x:Name="download"
@@ -110,6 +126,7 @@
             FontSize="18"
             Text="{x:Bind helper:LanguageService.GetString('Display_ViewInformation')}"
             Visibility="Visible" />
+
         <Grid Grid.Row="3">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />

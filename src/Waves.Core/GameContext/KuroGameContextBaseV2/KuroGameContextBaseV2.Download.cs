@@ -28,14 +28,23 @@ partial class KuroGameContextBaseV2
                 Interlocked.Exchange(ref _resourceOperationActive, 0);
                 return false;
             }
-            await GameLocalConfig.SaveConfigsAsync(
-                new Dictionary<string, string>
-                {
-                    [GameLocalSettingName.GameLauncherBassFolder] = folder,
-                    [GameLocalSettingName.LocalGameUpdateing] = "True",
-                },
-                token
-            );
+            var saveConfig = new Dictionary<string, string>
+            {
+                [GameLocalSettingName.GameLauncherBassFolder] = folder,
+                [GameLocalSettingName.LocalGameUpdateing] = "True",
+            };
+            if (this.IsBunle)
+            {
+                var key = parameter == null ? "" : parameter.BundleName ?? "HD";
+
+                var bunlePackKey =
+                    parameter == null ? plan.NewGameVersion
+                    : parameter.TargetPackVersions == null ? plan.NewGameVersion
+                    : parameter.TargetPackVersions[key];
+                saveConfig.Add(GameLocalSettingName.BunleName, key);
+                saveConfig.Add($"BunlePackVersion_{key}", bunlePackKey);
+            }
+            await GameLocalConfig.SaveConfigsAsync(saveConfig, token);
             GameContextOutputArgs.CurrentGeneration.Value = Interlocked.Increment(
                 ref _operationGeneration
             );

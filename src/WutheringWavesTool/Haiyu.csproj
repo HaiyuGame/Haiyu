@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
 		<TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
@@ -335,7 +335,7 @@
 		<Page Update="Pages\Dialogs\SelectGameFolderDialogV2.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
-		<Page Update="Pages\Dialogs\SelectDownoadGameDialogV2.xaml">
+		<Page Update="Pages\Dialogs\SelectDownloadGameDialogV2.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
 		<Page Update="Pages\GamePages\PunishV2GamePage.xaml">

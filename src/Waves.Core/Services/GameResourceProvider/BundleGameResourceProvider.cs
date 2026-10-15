@@ -412,7 +412,13 @@ public sealed partial class BundleGameResourceProvider : IGameResourceProvider
         token.ThrowIfCancellationRequested();
         // 空记录明确表示未安装，避免移除键后回退到 LocalGameVersion。
         // 删除中途取消或失败也不再保留“该包完整安装”的版本记录。
-        if (!await LocalConfig.SaveConfigAsync(GameLocalSettingName.GetBunlePackVersionKey(name), "", token))
+        if (
+            !await LocalConfig.SaveConfigAsync(
+                GameLocalSettingName.GetBunlePackVersionKey(name),
+                "",
+                token
+            )
+        )
             throw new IOException($"清空资源包版本记录失败：{name}");
         progress?.Report(0);
         return await Task.Run(
@@ -453,7 +459,9 @@ public sealed partial class BundleGameResourceProvider : IGameResourceProvider
         }
         foreach (var item in dictValue)
         {
-            var install = await this.LocalConfig.GetConfigAsync($"BunlePackVersion_{item.Key.ToUpper()}");
+            var install = await this.LocalConfig.GetConfigAsync(
+                $"BunlePackVersion_{item.Key.ToUpper()}"
+            );
             result.Add(
                 new BunleResourceSize(item.Value.Item1.Size + common.Size)
                 {
@@ -462,11 +470,23 @@ public sealed partial class BundleGameResourceProvider : IGameResourceProvider
                     ResourceCommand =
                         item.Value.Item2.ResourcePacks[1] ?? item.Value.Item2.ResourcePacks[0],
                     Version = item.Value.Item1.Version,
-                    Install = !string.IsNullOrWhiteSpace(install)
+                    Install = !string.IsNullOrWhiteSpace(install),
                 }
             );
         }
         return result;
+    }
+
+    public async Task<GameResourceParameter> GetLocalGameReosurceParamter()
+    {
+        return new GameResourceParameter()
+        {
+            BundleName = await LocalConfig.GetConfigAsync(GameLocalSettingName.BunleName),
+            TargetPackVersions = (await GetBunlesAsync()).ToDictionary(
+                x => x.BunleName,
+                x => x.Version
+            ),
+        };
     }
 
     private string ResolveApplyMethod(GameLauncherBunleSource source, GameLauncherBundle bundle)

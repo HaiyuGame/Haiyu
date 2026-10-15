@@ -1,14 +1,13 @@
-using Waves.Core.Models.Options;
 using Haiyu.Common.Contracts;
 using Haiyu.Models.Dialogs;
+using Waves.Core.Models.Options;
+using Waves.Core.Services.GameResourceProvider;
 
 namespace Haiyu.Pages.Dialogs;
 
-public sealed partial class SelectDownoadGameDialogV2
-    : ContentDialog,
-        IDialog
+public sealed partial class SelectDownloadGameDialogV2 : ContentDialog, IDialog
 {
-    public SelectDownoadGameDialogV2(DialogSession dialogSession,IWindowManager windowManager)
+    public SelectDownloadGameDialogV2(DialogSession dialogSession, IWindowManager windowManager)
     {
         InitializeComponent();
         this._dialogSession = dialogSession;
@@ -29,7 +28,6 @@ public sealed partial class SelectDownoadGameDialogV2
 
     public IPickersService Pickers { get; }
     public GameResourceSummary Launcher { get; private set; }
-
 
     public void SetData(object data)
     {
@@ -58,12 +56,22 @@ public sealed partial class SelectDownoadGameDialogV2
 
     private async void Download_Click(object sender, RoutedEventArgs e)
     {
+        if (
+            this.SelectBunleBox.SelectedItem is BunleResourceSize size
+            && this.SelectBunleBox.ItemsSource is ObservableCollection<BunleResourceSize> bunles
+        )
+        {
+            this.Parameter = new GameResourceParameter()
+            {
+                BundleName = size.BunleName,
+                TargetPackVersions = bunles.ToDictionary(x => x.BunleName, x => x.Version),
+            };
+        }
         await RefreshDiskAsync();
         if (!downloadBth.IsEnabled)
         {
             return;
         }
-
         var launcher = await this.GameContext.GetResourceSummaryAsync(Parameter);
         if (launcher == null)
         {
@@ -114,8 +122,8 @@ public sealed partial class SelectDownoadGameDialogV2
         }
         if (selectedDrive == null)
             return;
-        double totalSizeMB = (double) selectedDrive.TotalSize / (1024 * 1024 * 1024);
-        double freeSpaceMB = (double) selectedDrive.TotalFreeSpace / (1024 * 1024 * 1024);
+        double totalSizeMB = (double)selectedDrive.TotalSize / (1024 * 1024 * 1024);
+        double freeSpaceMB = (double)selectedDrive.TotalFreeSpace / (1024 * 1024 * 1024);
         double usedSpaceMB = totalSizeMB - freeSpaceMB;
         layered.MaxValue = totalSizeMB;
         layeredGrid.Visibility = Visibility.Visible;
@@ -157,8 +165,10 @@ public sealed partial class SelectDownoadGameDialogV2
         }
         else
         {
-            TipMessage.Text =
-                LanguageService.FormatByText(LanguageService.GetStringByText("本次更新大小约为{0}GB"), Launcher.Install.DownloadSize / 1024d / 1024 / 1024);
+            TipMessage.Text = LanguageService.FormatByText(
+                LanguageService.GetStringByText("本次更新大小约为{0}GB"),
+                Math.Round(Launcher.Install.DownloadSize / 1024d / 1024 / 1024, 2)
+            );
             downloadBth.IsEnabled = true;
             download.Fill = new SolidColorBrush(Colors.Green);
         }
@@ -188,13 +198,28 @@ public sealed partial class SelectDownoadGameDialogV2
                 )
                 && Directory.Exists(fullPath);
         }
-        catch (Exception exception) when (
-            exception is ArgumentException
-                or NotSupportedException
-                or PathTooLongException
-        )
+        catch (Exception exception)
+            when (exception is ArgumentException or NotSupportedException or PathTooLongException)
         {
             return false;
         }
+    }
+
+    private async void ContentDialog_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (
+            !this.GameContext.IsBunle
+            || this.GameContext.GameResourceProvider is not BundleGameResourceProvider p
+        )
+        {
+            SelectBunleBox.Visibility = Visibility.Collapsed;
+            return;
+        }
+        var bunleNames = await p.GetBunlesAsync();
+        SelectBunleBox.ItemsSource = bunleNames;
+        this.Parameter = await p.GetLocalGameReosurceParamter();
+        SelectBunleBox.SelectedIndex = bunleNames
+            .Index()
+            .FirstOrDefault(x => x.Item.BunleName == Parameter.BundleName).Index;
     }
 }
