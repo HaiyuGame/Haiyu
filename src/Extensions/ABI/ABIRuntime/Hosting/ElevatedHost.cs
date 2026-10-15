@@ -154,13 +154,7 @@ public static class ElevatedHost
             }
             catch (OperationCanceledException) when (linkedCancellation.IsCancellationRequested)
             {
-                if (pipe.IsConnected)
-                {
-                    await PipeProtocol.WriteAsync(pipe,
-                        new PipeMessage(PipeMessageKind.Cancelled, request.RequestId,
-                            request.Version, request.Operation, Array.Empty<byte>(),
-                            0, "操作已取消"), CancellationToken.None).ConfigureAwait(false);
-                }
+                //不抓这个错误
             }
             finally
             {

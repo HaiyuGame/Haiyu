@@ -63,7 +63,6 @@ public partial class ClearMemoryViewModel : DialogViewModelBase
         );
         if (!initialized || AppContext.ABIRuntimeService.Runtime is null || !IsAlive)
         {
-            Debug.WriteLine("监控运行时初始化失败。");
             return;
         }
         _cleanProgress = new Progress<IPrivilegedProgress<CleanMemoryProgress>>(
@@ -142,22 +141,17 @@ public partial class ClearMemoryViewModel : DialogViewModelBase
             {
                 this.AppContext.WindowManager.Shell.TryInvoke(() =>
                 {
-                    this.AppContext.WindowManager.Shell.TipShow.ShowMessageAsync(
-                        $"监控异常：0x{result.StatusCode:X8} {result.Message}",
-                        Symbol.Message
-                    );
+
+                    Logger.WriteError(result.Message+result.IsSuccess);
                 });
             }
         }
         catch (OperationCanceledException) when (token.Token.IsCancellationRequested) { }
-        catch (Exception exception)
+        catch (System.Exception exception)
         {
             this.AppContext.WindowManager.Shell.TryInvoke(() =>
             {
-                this.AppContext.WindowManager.Shell.TipShow.ShowMessageAsync(
-                    $"{exception.Message}",
-                    Symbol.Message
-                );
+                Logger.WriteError(exception.Message);
             });
         }
     }

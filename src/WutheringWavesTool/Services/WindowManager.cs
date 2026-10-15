@@ -1,5 +1,6 @@
 using Haiyu.Common.Contracts;
 using Haiyu.Common.WindowContext;
+using Haiyu.Controls.Commons;
 using Haiyu.Models.Options;
 
 namespace Haiyu.Services;
@@ -85,7 +86,6 @@ public sealed class WindowManager : IWindowManager
                 );
         }
         #endregion
-
         winEx.Activate();
     }
 
