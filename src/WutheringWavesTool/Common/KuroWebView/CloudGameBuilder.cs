@@ -740,7 +740,7 @@ public static class CloudGameBuilder
 
                 lastReconnectAt = Date.now();
                 reconnectPromise = (async () => {
-                    setMessage({{ToJavaScriptString(LanguageService.GetStringByText("云游戏连接中断，正在重新连接……"))}});
+                    setMessage({{ToJavaScriptString(LanguageService.GetString("CloudGame_Reconnect"))}});
                     try {
                         if (typeof sdk?.reconnectServer === "function") {
                             await sdk.reconnectServer();
@@ -765,7 +765,7 @@ public static class CloudGameBuilder
             };
 
             const recoverGameVideo = async (reason) => {
-                setMessage({{ToJavaScriptString(LanguageService.GetStringByText("游戏画面启动失败，正在恢复……"))}});
+                setMessage({{ToJavaScriptString(LanguageService.GetString("CloudGame_RestoreStream"))}});
                 try {
                     if (typeof sdk?.tryPlayGameVideo === "function") {
                         await sdk.tryPlayGameVideo();
@@ -1439,7 +1439,7 @@ public static class CloudGameBuilder
                         if (detail?.state === 0) {
                             firstFramePresented = false;
                             overlay?.classList?.remove("hidden");
-                            setMessage({{ToJavaScriptString(LanguageService.GetStringByText("云端游戏正在重启，正在恢复连接……"))}});
+                            setMessage({{ToJavaScriptString(LanguageService.GetString("CloudGame_RestoreConnection"))}});
                             reconnectStream("sdk-6089");
                         }
                         break;
@@ -1968,7 +1968,7 @@ html,body,#kuro-stream-surface{width:100%;height:100%;margin:0;overflow:hidden;b
 #bridge-overlay{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:#05080d;color:#eaf4ff;font:22px/1.5 "Segoe UI",sans-serif}
 #bridge-overlay.hidden{display:none}
 </style></head><body>
-<div id="kuro-stream-surface" tabindex="0"></div><div id="bridge-overlay">正在连接腾讯云游戏实例……</div>
+<div id="kuro-stream-surface" tabindex="0"></div><div id="bridge-overlay">{{{System.Net.WebUtility.HtmlEncode(LanguageService.GetString("CloudGame_ConnectInstance"))}}}</div>
 <script>
 (()=>{
  const nativeRequestPointerLock=Element.prototype.requestPointerLock;

@@ -131,7 +131,7 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
         {
             _resourceReady = false;
             EnableContinue = false;
-            if (IsAlive) ShowLoadError($"加载资源信息失败：{ex.Message}");
+            if (IsAlive) ShowLoadError(string.Format(LanguageService.GetString("GameUpdate_LoadResourcesFailed"), ex.Message));
         }
     }
 
@@ -139,7 +139,7 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
     {
         Logger.WriteError($"{GameContext?.ContextName} / {InvokeType}: {message}");
         var hwnd = Win32Interop.GetWindowFromWindowId(App.WindowManager.Shell.GetWindow().AppWindow.Id);
-        LegacyMessageBox.ShowInformation(hwnd, message, LanguageService.GetStringByText("提示"));
+        LegacyMessageBox.ShowInformation(hwnd, message, LanguageService.GetString("Dialog_ShowInformation"));
     }
 
     private async Task LoadDetailsAsync(CancellationToken token)
@@ -154,12 +154,12 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
         {
             var reason = resourceSize.Availability switch
             {
-                global::Waves.Core.Models.GameResourceAvailability.AlreadyCurrent => "当前已是目标版本。",
-                global::Waves.Core.Models.GameResourceAvailability.MissingPatch => "当前安装版本没有匹配的增量补丁，任务已跳过。",
-                global::Waves.Core.Models.GameResourceAvailability.NoPredownload => "当前没有预下载资源。",
-                _ => "资源状态尚未就绪。"
+                global::Waves.Core.Models.GameResourceAvailability.AlreadyCurrent => LanguageService.GetString("GameUpdate_AlreadyCurrent"),
+                global::Waves.Core.Models.GameResourceAvailability.MissingPatch => LanguageService.GetString("GameUpdate_MissingPatch"),
+                global::Waves.Core.Models.GameResourceAvailability.NoPredownload => LanguageService.GetString("GameUpdate_NoPredownload"),
+                _ => LanguageService.GetString("GameUpdate_ResourcesNotReady")
             };
-            ShowLoadError($"{reason}\r\n本地版本：{LocalVersion}，目标版本：{NewVersion}\r\n可使用刷新按钮重新查询。资源状态：{resourceSize.Availability}");
+            ShowLoadError(string.Format(LanguageService.GetString("GameUpdate_ShowResourceStatus"), reason, LocalVersion, NewVersion, resourceSize.Availability));
             return;
         }
         _localPath = await this.GameContext.GameLocalConfig.GetConfigAsync(
@@ -179,7 +179,7 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
         }
         if (string.IsNullOrWhiteSpace(_localPath) || !Directory.Exists(_localPath))
         {
-            ShowLoadError("游戏目录不存在，请检查已选择的游戏目录。");
+            ShowLoadError(LanguageService.GetString("GameUpdate_GameFolderMissing"));
             return;
         }
         LocalVersion = localVersion;
@@ -202,7 +202,7 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
             .FirstOrDefault(d => d.Name.Equals(driveLetter, StringComparison.OrdinalIgnoreCase));
         if (driveInfo == null || !driveInfo.IsReady)
         {
-            ShowLoadError("缓存目录所在磁盘尚未就绪，请选择其他目录。");
+            ShowLoadError(LanguageService.GetString("GameUpdate_CacheDiskNotReady"));
             return;
         }
         double totalSizeGB = ByteConversion.BytesToGigabytes(driveInfo.TotalSize, 2);

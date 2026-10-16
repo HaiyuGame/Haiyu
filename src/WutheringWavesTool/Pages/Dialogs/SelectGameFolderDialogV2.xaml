@@ -48,10 +48,10 @@
                     Glyph="&#xE8E5;" />
             </Border>
             <StackPanel Grid.Column="1" Spacing="4">
-                <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind helper:LanguageService.GetStringByText('添加本地游戏')}" />
+                <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind helper:LanguageService.GetString('GameImport_AddLocalGame')}" />
                 <TextBlock
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    Text="{x:Bind helper:LanguageService.GetStringByText('定位已安装的游戏，选择版本并完成导入。')}"
+                    Text="{x:Bind helper:LanguageService.GetString('GameImport_ShowInstructions')}"
                     TextWrapping="Wrap" />
             </StackPanel>
         </Grid>
@@ -71,8 +71,8 @@
                     </Grid.ColumnDefinitions>
                     <TextBox
                         AutomationProperties.AutomationId="SelectGameFolderDialogV2_PathInput"
-                        Header="{x:Bind helper:LanguageService.GetStringByText('游戏主程序')}"
-                        PlaceholderText="{x:Bind helper:LanguageService.GetStringByText('选择或输入完整路径')}"
+                        Header="{x:Bind helper:LanguageService.GetString('GameImport_SelectExecutable')}"
+                        PlaceholderText="{x:Bind helper:LanguageService.GetString('GameInstall_EnterFullPath')}"
                         Text="{x:Bind ViewModel.ExePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     <StackPanel Grid.Column="1" VerticalAlignment="Bottom">
                         <Button
@@ -88,9 +88,9 @@
                         <Button
                             VerticalAlignment="Bottom"
                             AutomationProperties.AutomationId="SelectGameFolderDialogV2_Refresh"
-                            AutomationProperties.Name="{x:Bind helper:LanguageService.GetStringByText('刷新磁盘信息')}"
+                            AutomationProperties.Name="{x:Bind helper:LanguageService.GetString('GameInstall_RefreshDiskInfo')}"
                             Command="{x:Bind ViewModel.RefreshDiskCommand}"
-                            ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetStringByText('刷新磁盘信息')}">
+                            ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('GameInstall_RefreshDiskInfo')}">
                             <FontIcon FontSize="16" Glyph="&#xE72C;" />
                         </Button>
                     </StackPanel>
@@ -103,12 +103,12 @@
                         Width="18"
                         Height="18"
                         IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" />
-                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind helper:LanguageService.GetStringByText('正在读取游戏和磁盘信息…')}" />
+                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind helper:LanguageService.GetString('GameInstall_LoadDiskInfo')}" />
                 </StackPanel>
                 <StackPanel Spacing="16">
                     <Border Style="{StaticResource SectionCardStyle}" Visibility="{x:Bind ViewModel.IsVerify, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                         <StackPanel Spacing="12">
-                            <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind helper:LanguageService.GetStringByText('磁盘空间')}" />
+                            <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind helper:LanguageService.GetString('GameInstall_ShowDiskSpace')}" />
                             <TextBlock
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                 Text="{x:Bind ViewModel.DiskSpaceText, Mode=OneWay}"
@@ -146,7 +146,7 @@
                     <ComboBox
                         HorizontalAlignment="Stretch"
                         AutomationProperties.AutomationId="SelectGameFolderDialogV2_MaterialSelection"
-                        Header="{x:Bind helper:LanguageService.GetStringByText('材质清晰度')}"
+                        Header="{x:Bind helper:LanguageService.GetString('GameImport_SelectTextureQuality')}"
                         ItemsSource="{x:Bind ViewModel.Bundles, Mode=OneWay}"
                         SelectedItem="{x:Bind ViewModel.SelectedBundle, Mode=TwoWay}"
                         Visibility="{x:Bind ViewModel.HasBundleSelection, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -190,11 +190,11 @@
                 <Button
                     AutomationProperties.AutomationId="SelectGameFolderDialogV2_PrimaryAction"
                     Command="{x:Bind ViewModel.SelectVersionCommand}"
-                    Content="{x:Bind helper:LanguageService.GetStringByText('直接导入')}" />
+                    Content="{x:Bind helper:LanguageService.GetString('GameImport_ImportDirectly')}" />
                 <Button
                     AutomationProperties.AutomationId="SelectGameFolderDialogV2_Verify"
                     Command="{x:Bind ViewModel.StartVerifyCommand}"
-                    Content="{x:Bind helper:LanguageService.GetStringByText('校验并导入')}"
+                    Content="{x:Bind helper:LanguageService.GetString('GameImport_VerifyAndImport')}"
                     Style="{ThemeResource AccentButtonStyle}" />
             </StackPanel>
         </Border>

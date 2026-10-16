@@ -34,10 +34,7 @@ public sealed partial class SettingPage : Page, IPage
             return;
         await ViewModel.WindowManager.Shell.DialogManager.ShowMessageDialog(new ShowDialogOption()
         {
-            Context = LanguageService.GetStringByText(
-                "Mirror酱是一个第三方应用分发平台，Haiyu通过此平台避开Github的访问问题以提供国内高速下载。\n"
-                + "此下载方式为付费下载，可在Mirror官网了解整个分发服务原理，定价与解释权由Mirror官方提供。"
-            ),
+            Context = LanguageService.GetString("Settings_ExplainMirror"),
             CloseText  = LanguageService.GetStringByText("确定"),
              ShowPrimaryButton = false,
         });

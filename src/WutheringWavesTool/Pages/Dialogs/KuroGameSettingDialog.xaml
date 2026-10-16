@@ -91,7 +91,7 @@
                 <CheckBox
                     Grid.Row="1"
                     VerticalAlignment="Center"
-                    Content="快速校验"
+                    Content="{x:Bind helper:LanguageService.GetString('GameSettings_QuickVerify')}"
                     IsChecked="{x:Bind ViewModel.FastVerify, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 <CheckBox
                     Grid.Row="1"

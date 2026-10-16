@@ -212,7 +212,7 @@ public sealed partial class WavesCloudGameService : IWavesCloudGameService
         return query;
     }
 
-    public async Task<CloudApiResponse<bool?>?> FetchMesageAsync(
+    public async Task<CloudApiResponse<object>?> FetchMesageAsync(
         CloudGameLoginSession session,
         CancellationToken ct = default
     )
@@ -220,9 +220,9 @@ public sealed partial class WavesCloudGameService : IWavesCloudGameService
         using var client = BuildClientData(session, "Message/FetchMessage", method: HttpMethod.Get);
         var result = await _cloudClient.SendAsync(client, ct);
         var str = await result.Content.ReadAsStringAsync();
-        return JsonSerializer.Deserialize<CloudApiResponse<bool?>>(
+        return JsonSerializer.Deserialize<CloudApiResponse<object>>(
             str,
-            CloudGameContext.Default.CloudApiResponseNullableBoolean
+            CloudGameContext.Default.CloudApiResponseObject
         );
     }
 

@@ -46,7 +46,7 @@ partial class SettingViewModel
     private async Task LoadWebViewRuntimeModeAsync()
     {
         var mode = await AppSettings.GetWebViewRuntimeModeAsync(CTS.Token) ?? "Evergreen";
-        var evergreen = CoreWebView2Environment.GetAvailableBrowserVersionString() ?? "未安装";
+        var evergreen = CoreWebView2Environment.GetAvailableBrowserVersionString() ?? LanguageService.GetString("WebViewEnv_NotInstalled");
 
         var options = new ObservableCollection<WebViewRuntimeWrapper>
         {

@@ -48,7 +48,7 @@
                     Title="{x:Bind helper:LanguageService.GetString('Display_PREPARATION')}"
                     IsClosable="False"
                     IsOpen="True"
-                    Message="请先在安卓设备上开启 USB 调试，并连接到PC上，并根据提示允许本机进行USB调试，随后打开库街区的数据面板页面"
+                    Message="{x:Bind helper:LanguageService.GetString('KuroToken_ShowUsbInstructions')}"
                     Severity="Informational" />
                 <Grid Grid.Row="1" ColumnSpacing="12">
                     <Grid.ColumnDefinitions>

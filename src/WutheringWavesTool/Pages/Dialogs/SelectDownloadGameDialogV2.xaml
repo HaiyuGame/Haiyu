@@ -48,7 +48,7 @@
                 <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind helper:LanguageService.GetStringByText('下载游戏')}" />
                 <TextBlock
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    Text="{x:Bind helper:LanguageService.GetStringByText('选择安装位置，检查可用空间后开始下载。')}"
+                    Text="{x:Bind helper:LanguageService.GetString('GameDownload_ShowInstructions')}"
                     TextWrapping="Wrap" />
             </StackPanel>
         </Grid>
@@ -68,8 +68,8 @@
                     </Grid.ColumnDefinitions>
                     <TextBox
                         AutomationProperties.AutomationId="SelectDownloadGameDialogV2_PathInput"
-                        Header="{x:Bind helper:LanguageService.GetStringByText('安装位置')}"
-                        PlaceholderText="{x:Bind helper:LanguageService.GetStringByText('选择或输入完整路径')}"
+                        Header="{x:Bind helper:LanguageService.GetString('GameDownload_SelectInstallLocation')}"
+                        PlaceholderText="{x:Bind helper:LanguageService.GetString('GameInstall_EnterFullPath')}"
                         Text="{x:Bind ViewModel.FolderPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     <StackPanel Grid.Column="1" VerticalAlignment="Bottom">
                         <Button
@@ -85,9 +85,9 @@
                         <Button
                             VerticalAlignment="Bottom"
                             AutomationProperties.AutomationId="SelectDownloadGameDialogV2_Refresh"
-                            AutomationProperties.Name="{x:Bind helper:LanguageService.GetStringByText('刷新磁盘信息')}"
+                            AutomationProperties.Name="{x:Bind helper:LanguageService.GetString('GameInstall_RefreshDiskInfo')}"
                             Command="{x:Bind ViewModel.RefreshDiskCommand}"
-                            ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetStringByText('刷新磁盘信息')}">
+                            ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('GameInstall_RefreshDiskInfo')}">
                             <FontIcon FontSize="16" Glyph="&#xE72C;" />
                         </Button>
                     </StackPanel>
@@ -100,12 +100,12 @@
                         Width="18"
                         Height="18"
                         IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" />
-                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind helper:LanguageService.GetStringByText('正在读取游戏和磁盘信息…')}" />
+                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind helper:LanguageService.GetString('GameInstall_LoadDiskInfo')}" />
                 </StackPanel>
                 <StackPanel Spacing="16">
                     <Border Style="{StaticResource SectionCardStyle}" Visibility="{x:Bind ViewModel.DiskVisibility, Mode=OneWay}">
                         <StackPanel Spacing="12">
-                            <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind helper:LanguageService.GetStringByText('磁盘空间')}" />
+                            <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind helper:LanguageService.GetString('GameInstall_ShowDiskSpace')}" />
                             <TextBlock
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                 Text="{x:Bind ViewModel.DiskSpaceText, Mode=OneWay}"
@@ -137,7 +137,7 @@
                     <ComboBox
                         HorizontalAlignment="Stretch"
                         AutomationProperties.AutomationId="SelectDownloadGameDialogV2_ResourceSelection"
-                        Header="{x:Bind helper:LanguageService.GetStringByText('资源清晰度')}"
+                        Header="{x:Bind helper:LanguageService.GetString('GameDownload_SelectResourceQuality')}"
                         ItemsSource="{x:Bind ViewModel.Bundles, Mode=OneWay}"
                         SelectedItem="{x:Bind ViewModel.SelectedBundle, Mode=TwoWay}"
                         Visibility="{x:Bind ViewModel.BundleVisibility, Mode=OneWay}">
@@ -176,7 +176,7 @@
                     MinWidth="120"
                     AutomationProperties.AutomationId="SelectDownloadGameDialogV2_PrimaryAction"
                     Command="{x:Bind ViewModel.DownloadCommand}"
-                    Content="{x:Bind helper:LanguageService.GetStringByText('开始下载')}"
+                    Content="{x:Bind helper:LanguageService.GetString('GameDownload_StartDownload')}"
                     Style="{ThemeResource AccentButtonStyle}" />
             </StackPanel>
         </Border>

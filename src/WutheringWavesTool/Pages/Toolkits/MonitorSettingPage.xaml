@@ -19,7 +19,7 @@
             <RowDefinition Height="auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
-        <TitleBar Title="PC Moniter" />
+        <TitleBar Title="{x:Bind h:LanguageService.GetString('MonitorSettings_ShowTitle')}" />
         <Grid Grid.Row="1">
             <ProgressBar
                 VerticalAlignment="Top"

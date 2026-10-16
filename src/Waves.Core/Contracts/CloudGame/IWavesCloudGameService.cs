@@ -48,7 +48,7 @@ public interface IWavesCloudGameService
     /// <param name="session"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    Task<CloudApiResponse<bool?>> FetchMesageAsync(
+    Task<CloudApiResponse<object>> FetchMesageAsync(
         CloudGameLoginSession session,
         CancellationToken ct = default
     );

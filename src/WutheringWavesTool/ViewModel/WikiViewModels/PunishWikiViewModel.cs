@@ -50,9 +50,7 @@ public partial class PunishWikiViewModel : WikiViewModelBase
             else
             {
                 _windowManager.Shell.TipShow.ShowMessage(
-                    LanguageService.FormatByText(
-                        LanguageService.GetStringByText("获取数据失败，请检查网络或重启应用")
-                    ),
+                    string.Format(LanguageService.GetString("Wiki_LoadDataFailed")),
                     Symbol.Clear
                 );
             }

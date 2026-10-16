@@ -38,7 +38,7 @@ public sealed partial class SelectDownloadGameViewModelV2 : DialogViewModelBase
                 return true;
             });
             if (result.Code == -2)
-                TipMessage = result.Message ?? LanguageService.GetStringByText("读取失败，请重试");
+                TipMessage = result.Message ?? LanguageService.GetString("GameInstall_ReadFailed");
         }
         finally
         {
@@ -50,7 +50,7 @@ public sealed partial class SelectDownloadGameViewModelV2 : DialogViewModelBase
     public partial string FolderPath { get; set; } = string.Empty;
 
     [ObservableProperty]
-    public partial string TipMessage { get; set; } = LanguageService.GetStringByText("选择安装文件夹后，检查磁盘空间");
+    public partial string TipMessage { get; set; } = LanguageService.GetString("GameDownload_CheckDiskSpace");
 
     private bool CanStartDownload() => CanDownload && !IsBusy;
 
@@ -167,13 +167,13 @@ public sealed partial class SelectDownloadGameViewModelV2 : DialogViewModelBase
         }
         if (selectedDrive == null || !selectedDrive.IsReady)
         {
-            TipMessage = LanguageService.GetStringByText("请选择可用的本地文件夹");
+            TipMessage = LanguageService.GetString("GameDownload_SelectValidFolder");
             return;
         }
         double totalSizeMB = (double)selectedDrive.TotalSize / (1024 * 1024 * 1024);
         double freeSpaceMB = (double)selectedDrive.TotalFreeSpace / (1024 * 1024 * 1024);
         double usedSpaceMB = totalSizeMB - freeSpaceMB;
-        DiskSpaceText = LanguageService.FormatByText("可用 {0:F1} GB / 总计 {1:F1} GB", freeSpaceMB, totalSizeMB);
+        DiskSpaceText = string.Format(LanguageService.GetString("GameInstall_ShowAvailableSpace"), freeSpaceMB, totalSizeMB);
         MaxValue = totalSizeMB;
         var checkedPath = FolderPath;
         var checkedBundle = SelectedBundle;

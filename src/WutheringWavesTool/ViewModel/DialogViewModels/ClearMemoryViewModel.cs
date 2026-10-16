@@ -101,7 +101,7 @@ public partial class ClearMemoryViewModel : DialogViewModelBase
                 this.AppContext.WindowManager.Shell.TryInvoke(() =>
                 {
                     this.AppContext.WindowManager.Shell.TipShow.ShowMessageAsync(
-                        $"清理失败：0x{result.StatusCode:X8} {result.Message}",
+                        string.Format(LanguageService.GetString("MemoryClean_ShowFailure"), result.StatusCode, result.Message),
                         Symbol.Message
                     );
                 });

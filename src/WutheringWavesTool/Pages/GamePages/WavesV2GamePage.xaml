@@ -1059,7 +1059,7 @@
                                                 FontFamily="{ThemeResource DefaultFont}"
                                                 FontSize="10"
                                                 Visibility="{x:Bind ViewModel.BattlePass.IsUnlock, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                                                <Run Text="Lv:" />
+                                                <Run Text="{x:Bind helper:LanguageService.GetString('GameRole_ShowLevel')}" />
                                                 <Run Text="{x:Bind ViewModel.BattlePass.Level, Mode=OneWay}" />
                                             </TextBlock>
                                             <FontIcon

@@ -121,7 +121,7 @@ public partial class WebViewCabManagerViewModel : DialogViewModelBase
             TryDeleteDirectory(extractRoot);
             Logger.WriteError($"导入 WebView 固定运行时失败: {ex}");
             await AppContext.WindowManager.Shell.TipShow.ShowMessageAsync(
-                LanguageService.FormatByText("导入失败: {0}", ex.Message),
+                string.Format(LanguageService.GetString("WebViewEnv_ImportFailed"), ex.Message),
                 Symbol.Clear
             );
         }
@@ -139,7 +139,7 @@ public partial class WebViewCabManagerViewModel : DialogViewModelBase
         if (selected is null)
         {
             await AppContext.WindowManager.Shell.TipShow.ShowMessageAsync(
-                LanguageService.GetString("请先选择一个 WebView 运行时"),
+                LanguageService.GetString("WebViewEnv_SelectExeTip"),
                 Symbol.Clear
             );
             return;
@@ -206,7 +206,7 @@ public partial class WebViewCabManagerViewModel : DialogViewModelBase
         {
             Logger.WriteError($"删除 WebView 固定运行时失败: {ex}");
             await AppContext.WindowManager.Shell.TipShow.ShowMessageAsync(
-                LanguageService.FormatByText("WebViewEnv_DeleteError", ex.Message),
+                LanguageService.GetString("WebViewEnv_DeleteError") + ": " + ex.Message,
                 Symbol.Clear
             );
         }
@@ -216,7 +216,7 @@ public partial class WebViewCabManagerViewModel : DialogViewModelBase
     {
         var selectedMode = await AppSettings.GetWebViewRuntimeModeAsync(CTS.Token) ?? "Evergreen";
         var evergreenVersion =
-            CoreWebView2Environment.GetAvailableBrowserVersionString() ?? "未安装";
+            CoreWebView2Environment.GetAvailableBrowserVersionString() ?? LanguageService.GetString("WebViewEnv_NotInstalled");
 
         var items = new ObservableCollection<WebViewRuntimeWrapper>
         {

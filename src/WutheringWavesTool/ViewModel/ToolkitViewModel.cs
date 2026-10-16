@@ -181,19 +181,19 @@ public sealed partial class ToolkitViewModel : ViewModelBase
         {
             case GameLogLocateState.GameFolderMissing:
                 await tipShow.ShowMessageAsync(
-                    LanguageService.GetStringByText("游戏目录未设置，请先在游戏页选择游戏目录"),
+                    LanguageService.GetString("LogDecrypt_SelectGameFolder"),
                     Symbol.Clear
                 );
                 return;
             case GameLogLocateState.LogsFolderMissing:
                 await tipShow.ShowMessageAsync(
-                    LanguageService.GetStringByText("日志文件夹不存在"),
+                    LanguageService.GetString("LogDecrypt_LogFolderMissing"),
                     Symbol.Clear
                 );
                 return;
             case GameLogLocateState.NoLogFiles:
                 await tipShow.ShowMessageAsync(
-                    LanguageService.GetStringByText("日志文件不存在"),
+                    LanguageService.GetString("LogDecrypt_LogFileMissing"),
                     Symbol.Clear
                 );
                 return;
@@ -216,8 +216,7 @@ public sealed partial class ToolkitViewModel : ViewModelBase
         {
             // key 不匹配：解密结果不是有效明文，已拦截未导出
             await tipShow.ShowMessageAsync(
-                LanguageService.FormatByText(
-                    LanguageService.GetStringByText("解密校验未通过：游戏可能已更换加密方式，{0} 个文件未导出，请更新启动器后重试"),
+                string.Format(LanguageService.GetString("LogDecrypt_VerificationFailed"),
                     result.KeyMismatchCount
                 ),
                 Symbol.Clear
@@ -226,8 +225,7 @@ public sealed partial class ToolkitViewModel : ViewModelBase
         else if (result.HasFailed)
         {
             await tipShow.ShowMessageAsync(
-                LanguageService.FormatByText(
-                    LanguageService.GetStringByText("解密完成，{0} 个文件失败，详见日志"),
+                string.Format(LanguageService.GetString("LogDecrypt_CompletedWithErrors"),
                     result.FailedCount
                 ),
                 Symbol.Clear
@@ -236,8 +234,7 @@ public sealed partial class ToolkitViewModel : ViewModelBase
         else
         {
             await tipShow.ShowMessageAsync(
-                LanguageService.FormatByText(
-                    LanguageService.GetStringByText("解密完成：解密{0}个，明文复制{1}个"),
+                string.Format(LanguageService.GetString("LogDecrypt_ShowCompletion"),
                     result.DecryptedCount,
                     result.CopiedCount
                 ),

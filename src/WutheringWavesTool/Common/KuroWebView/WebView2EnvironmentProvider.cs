@@ -25,7 +25,7 @@ public static class WebView2EnvironmentProvider
                 ?? Path.GetFileName(fixedFolder);
         }
 
-        return CoreWebView2Environment.GetAvailableBrowserVersionString() ?? "未安装";
+        return CoreWebView2Environment.GetAvailableBrowserVersionString() ?? LanguageService.GetString("WebViewEnv_NotInstalled");
     }
 
     public static ObservableCollection<WebViewRuntimeWrapper> GetFixedRuntimeFolders()

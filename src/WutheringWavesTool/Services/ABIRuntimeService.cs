@@ -27,7 +27,7 @@ public sealed class ABIRuntimeService
             string corePath = Path.Combine(baseDirectory,"Haiyu.ABI.dll");
             if (!File.Exists(corePath))
             {
-                throw new Exception("资源包未安装！");
+                throw new Exception(LanguageService.GetString("AbiRuntime_PackageMissing"));
             }
             try
             {
@@ -56,8 +56,8 @@ public sealed class ABIRuntimeService
             catch (Exception)
             {
                 LegacyMessageBox.ShowError(
-                    "初始化后台ABI运行时失败，请确保 Haiyu.ABI.dll 存在于 Haiyu.ABI 文件夹中。",
-                    "错误"
+                    LanguageService.GetString("AbiRuntime_InitializeFailed"),
+                    LanguageService.GetString("Dialog_ShowError")
                 );
                 return false;
             }

@@ -63,7 +63,7 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
                 return true;
             });
             if (result.Code == -2)
-                TipMessage = result.Message ?? LanguageService.GetStringByText("读取失败，请重试");
+                TipMessage = result.Message ?? LanguageService.GetString("GameInstall_ReadFailed");
         }
         finally
         {
@@ -132,7 +132,7 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
         if (!File.Exists(ExePath)
             || !string.Equals(Path.GetFileName(ExePath), GameContext.Config.GameExeName, StringComparison.OrdinalIgnoreCase))
         {
-            TipMessage = LanguageService.GetStringByText("请选择有效的游戏主程序");
+            TipMessage = LanguageService.GetString("GameImport_SelectValidExecutable");
             return;
         }
         var checkedPath = ExePath;
@@ -165,7 +165,7 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
 
         var totalSpaceGB = BytesToGigabytes(driveInfo.TotalSize);
         var freeSpaceGB = BytesToGigabytes(driveInfo.TotalFreeSpace);
-        DiskSpaceText = LanguageService.FormatByText("可用 {0:F1} GB / 总计 {1:F1} GB", freeSpaceGB, totalSpaceGB);
+        DiskSpaceText = string.Format(LanguageService.GetString("GameInstall_ShowAvailableSpace"), freeSpaceGB, totalSpaceGB);
         this.MaxValue = totalSpaceGB;
         this.BarValues = new ObservableCollection<LayerData>([
             new LayerData()
@@ -187,7 +187,7 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
                 Value = totalSpaceGB - freeSpaceGB - folderSizeGB,
             },
         ]);
-        TipMessage = LanguageService.GetStringByText("已识别游戏文件，可选择校验或直接导入");
+        TipMessage = LanguageService.GetString("GameImport_GameDetected");
         IsVerify = true;
     }
 
@@ -200,7 +200,7 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
         if (bundleConfig.Count > 0
             && !await GameContext.GameLocalConfig.SaveConfigsAsync(bundleConfig, CTS.Token))
         {
-            TipMessage = LanguageService.GetStringByText("保存材质配置失败，请重试");
+            TipMessage = LanguageService.GetString("GameImport_SaveTextureFailed");
             return;
         }
         await CloseAsync(new SelectDownloadFolderResult
@@ -229,7 +229,7 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
                 ?? Bundles.FirstOrDefault();
             if (SelectedBundle is null)
             {
-                TipMessage = LanguageService.GetStringByText("未获取到材质选项，请重试");
+                TipMessage = LanguageService.GetString("GameImport_LoadTextureFailed");
                 return;
             }
         }
@@ -269,7 +269,7 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
         config[GameLocalSettingName.GameLauncherBassProgram] = ExePath;
         if (!await GameContext.GameLocalConfig.SaveConfigsAsync(config, CTS.Token))
         {
-            TipMessage = LanguageService.GetStringByText("保存导入配置失败，请重试");
+            TipMessage = LanguageService.GetString("GameImport_SaveConfigFailed");
             return;
         }
         this.GameContext.GameEventPublisher.Publish(
@@ -287,9 +287,9 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
         if (!HasBundleSelection)
             return config;
         var bundle = SelectedBundle
-            ?? throw new InvalidOperationException(LanguageService.GetStringByText("请先选择材质"));
+            ?? throw new InvalidOperationException(LanguageService.GetString("GameImport_RequireTexture"));
         if (string.IsNullOrWhiteSpace(bundle.Version))
-            throw new InvalidOperationException(LanguageService.GetStringByText("材质版本为空，请重新加载"));
+            throw new InvalidOperationException(LanguageService.GetString("GameImport_ReloadTextureVersion"));
 
         var arguments = await GameContext.GameLocalConfig.GetConfigAsync(
             GameLocalSettingName.StartGameArguments, CTS.Token) ?? string.Empty;

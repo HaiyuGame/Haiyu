@@ -66,7 +66,7 @@
                         </ui:SettingsCard.HeaderIcon>
                         <ui:SettingsCard.Description>
                             <TextBlock>
-                                <Run Text="Version:" />
+                                <Run Text="{x:Bind helper:LanguageService.GetString('GameResource_ShowVersion')}" />
                                 <Run Text="{x:Bind ViewModel.Dlss.Version, Mode=OneWay}" />
                             </TextBlock>
                         </ui:SettingsCard.Description>
@@ -77,7 +77,7 @@
                         </ui:SettingsCard.HeaderIcon>
                         <ui:SettingsCard.Description>
                             <TextBlock>
-                                <Run Text="Version:" />
+                                <Run Text="{x:Bind helper:LanguageService.GetString('GameResource_ShowVersion')}" />
                                 <Run Text="{x:Bind ViewModel.DlssG.Version, Mode=OneWay}" />
                             </TextBlock>
                         </ui:SettingsCard.Description>
@@ -88,7 +88,7 @@
                         </ui:SettingsCard.HeaderIcon>
                         <ui:SettingsCard.Description>
                             <TextBlock>
-                                <Run Text="Version:" />
+                                <Run Text="{x:Bind helper:LanguageService.GetString('GameResource_ShowVersion')}" />
                                 <Run Text="{x:Bind ViewModel.Xess.Version, Mode=OneWay}" />
                             </TextBlock>
                         </ui:SettingsCard.Description>

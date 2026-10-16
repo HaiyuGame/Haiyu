@@ -78,9 +78,7 @@ public sealed partial class UpdateAppViewModel : DialogViewModelBase
         if (path == null)
         {
             LegacyMessageBox.ShowError(
-                LanguageService.GetStringByText(
-                    "下载失败！请检查网络，如果是Mirror模式下载，请检查Key是否可用"
-                )
+                LanguageService.GetString("AppUpdate_DownloadFailed")
             );
             return;
         }

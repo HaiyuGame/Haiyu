@@ -728,9 +728,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
                     this.PreProgress = 100;
                     this.PredDownloadingVisibility = Visibility.Collapsed;
                     PreAdvanceVisiblity = Visibility.Visible;
-                    PreSetupHeaderText = LanguageService.GetStringByText(
-                        "预下载完成，按下可以开始校验预下载内容"
-                    );
+                    PreSetupHeaderText = LanguageService.GetString("GamePredownload_VerifyReady");
                     ShowAdvanceInstallBth(status);
                 }
             }
@@ -999,9 +997,9 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
             new()
             {
                 ShowPrimaryButton = true,
-                CloseText = "取消",
-                Context = "是否重新选择游戏路径？",
-                PrimaryText = "确定",
+                CloseText = LanguageService.GetString("Display_SDecline"),
+                Context = LanguageService.GetString("GameInstall_ReselectPath"),
+                PrimaryText = LanguageService.GetString("Display_Confirm"),
             }
         );
         if (result != ContentDialogResult.Primary)
@@ -1145,9 +1143,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
                 await WindowManager.Shell.DialogManager.ShowMessageDialog(
                     new ShowDialogOption()
                     {
-                        Context = LanguageService.GetStringByText(
-                            "修复游戏会将游戏缓存全部删除，保持与服务器最新文件保持一致\r\n（包含画面设置、滤镜设置、预下载等内容)"
-                        ),
+                        Context = LanguageService.GetString("GameRepair_ShowCacheWarning"),
                         CloseText = LanguageService.GetStringByText("取消"),
                         PrimaryText = LanguageService.GetStringByText("确认修复"),
                         ShowPrimaryButton = true,
@@ -1254,7 +1250,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
                     if (!result)
                     {
                         await WindowManager.Shell.TipShow.ShowMessageAsync(
-                            "任务执行失败，请检查是否重复执行或者重启程序再次执行",
+                            LanguageService.GetString("GameTask_ExecutionFailed"),
                             Symbol.Clear
                         );
                     }
