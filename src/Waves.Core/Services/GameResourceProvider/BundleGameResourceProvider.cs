@@ -241,39 +241,16 @@ public sealed partial class BundleGameResourceProvider : IGameResourceProvider
         var bundles = source.Bundles;
         var cdns = source.CdnList;
         var bundle = SelectBundle(bundles, packs, name);
-        if (
-            verificationVersion is not null
-            && parameter?.TargetPackVersions is null
-            && packs[bundle.ResourcePacks[0]].Version == verificationVersion
-            && source.Predownload is { } candidate
-            && candidate.Bundles.TryGetValue(name, out var preBundle)
-            && preBundle.ResourcePacks.Count > 0
-            && candidate.ResourcePacks.TryGetValue(preBundle.ResourcePacks[0], out var primary)
-            && primary.Version == verificationVersion
-            && !SameTargets(packs, bundle, candidate.ResourcePacks, preBundle)
-        )
-            throw new InvalidOperationException(
-                "正式与预下载配置的主版本相同但分包目标不同，请传入清单的 TargetPackVersions。"
-            );
-        if (
-            predownload
-            || verificationVersion is not null
-                && (
-                    packs[bundle.ResourcePacks[0]].Version != verificationVersion
-                    || parameter?.TargetPackVersions is { } targets
-                        && !MatchesTargets(packs, bundle, targets)
-                )
-        )
+        // 下载类型或显式校验来源决定配置；版本匹配失败绝不切换来源。
+        var usePredownload = predownload || verificationVersion is not null
+            && parameter?.VerificationSource == GameVerificationSource.Predownload;
+        if (usePredownload)
         {
-            var pre = verificationVersion is null
-                ? GetPredownload(source, name)
-                : source.Predownload;
+            var pre = verificationVersion is null ? GetPredownload(source, name) : source.Predownload;
             if (pre is null || !pre.Bundles.ContainsKey(name))
             {
                 if (verificationVersion is not null)
-                    throw new InvalidOperationException(
-                        $"目标版本配置已失效：{verificationVersion}"
-                    );
+                    throw new InvalidOperationException($"预下载校验配置不存在：{verificationVersion}，资源组合：{name}");
                 return new GameVersionInfo
                 {
                     ResourceVersion = "2",
@@ -290,7 +267,7 @@ public sealed partial class BundleGameResourceProvider : IGameResourceProvider
         var target = packs[bundle.ResourcePacks[0]].Version;
         if (
             verificationVersion is not null
-            && parameter?.TargetPackVersions is { } expected
+            && parameter?.VerificationPackVersions is { } expected
             && !MatchesTargets(packs, bundle, expected)
         )
             throw new InvalidOperationException(

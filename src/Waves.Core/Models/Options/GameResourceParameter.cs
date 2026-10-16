@@ -11,6 +11,19 @@ public sealed class GameResourceParameter
     /// </summary>
     public string? BundleName { get; init; }
 
-    /// <summary>校验时锁定清单的逐包目标版本；主包版本相同但材质包版本不同时用于消除歧义。</summary>
+    /// <summary>完整校验索引的明确来源；正式更新不回退到预下载配置。</summary>
+    public GameVerificationSource VerificationSource { get; init; } = GameVerificationSource.Official;
+
+    /// <summary>界面资源组合的版本信息，键可能是 HD/SD/UHD；不是已下载清单的逐包校验快照。</summary>
     public IReadOnlyDictionary<string, string>? TargetPackVersions { get; init; }
+
+    /// <summary>仅由安装清单生成的真实分包名与目标版本（含 Common）；修复游戏不设置此约束。</summary>
+    public IReadOnlyDictionary<string, string>? VerificationPackVersions { get; init; }
+}
+
+/// <summary>校验目标配置来源，与主版本号是否相同无关。</summary>
+public enum GameVerificationSource
+{
+    Official,
+    Predownload
 }

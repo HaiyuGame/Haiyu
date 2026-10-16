@@ -88,7 +88,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
     public void InitProgress()
     {
         _totalfileSize = this._resource.Sum(x => x.Size);
-        _totalFileTotal = _resource.Count - 1;
+        _totalFileTotal = _resource.Count;
         _totalProgressSize = 0L;
         _totalProgressTotal = 0L;
         _totalVerifiedBytes = 0;
@@ -237,7 +237,7 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
                         return;
                     }
                     IProgress<(GameContextActionType, bool, long, string, long, long)> progress =
-                        new Progress<(GameContextActionType, bool, long, string, long, long)>(
+                        new TransferProgress(
                             value =>
                             {
                                 if (
@@ -249,7 +249,8 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
                                 var args = UpdateFileProgress(
                                     value.Item1,
                                     value.Item3,
-                                    value.Item2,
+                                    // 真实读写字节只计速率；验证成功后再确认完成量，重试不重复累加。
+                                    false,
                                     filePath: value.Item4,
                                     currentFileSize: value.Item5,
                                     fileMaxSize: value.Item6
@@ -279,10 +280,12 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
                         return;
                     }
                     if (item.Size == 0 && !File.Exists(filePath)) await File.WriteAllBytesAsync(filePath, [], token);
-                    var downloadUrl = item.Url;
+                    var useChunks = HasCompleteChunkCoverage(item);
+                    if (item.Chunks.Count > 0 && !useChunks && string.IsNullOrWhiteSpace(item.Hash))
+                        throw new InvalidDataException($"分片未完整覆盖文件且缺少整文件哈希：{item.Dest}");
                     if (File.Exists(filePath))
                     {
-                        if (item.Chunks.Count == 0)
+                        if (!useChunks)
                         {
                             var checkResult = !BuildFileHelper.GetFileLength(filePath, out var size) || size != item.Size
                                 || (!string.IsNullOrWhiteSpace(item.Hash) && await VerifyTask.ValidateGameFileAsync(
@@ -304,7 +307,8 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
                                     downloadState,
                                     _downloadState.CancelToken,
                                     progress: progress
-                                ), () => NeedsDownloadAsync(item, filePath));
+                                ), () => NeedsDownloadAsync(item, filePath, progress));
+                                PublishCompletedBytes(item.Size, filePath, item.Size);
                             }
                             else
                             {
@@ -416,6 +420,8 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
                                             progress: progress
                                         ), () => VerifyTask.ValidateFileChunks(item.Chunks[i], filePath, _downloadState, _downloadState.CancelToken));
                                     }
+                                    PublishCompletedBytes(item.Chunks[i].End - item.Chunks[i].Start + 1,
+                                        filePath, item.Size);
                                 }
                                 else
                                 {
@@ -427,12 +433,17 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
                                     {
                                         var args = UpdateFileProgress(
                                             GameContextActionType.Verify,
-                                            item.Chunks[i].End - item.Chunks[i].Start,
+                                            item.Chunks[i].End - item.Chunks[i].Start + 1,
                                             true
                                         );
                                         GameEventPublisher.Publish(args);
                                     }
                                 }
+                            }
+                            if (BuildFileHelper.GetFileLength(filePath, out var existingSize) && existingSize > item.Size)
+                            {
+                                using var truncate = new FileStream(filePath, FileMode.Open, FileAccess.Write, FileShare.None);
+                                truncate.SetLength(item.Size);
                             }
                         }
                     }
@@ -453,13 +464,19 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
                             downloadState,
                             _downloadState.CancelToken,
                             progress: progress
-                        ), () => NeedsDownloadAsync(item, filePath));
+                        ), () => NeedsDownloadAsync(item, filePath, progress));
+                        PublishCompletedBytes(item.Size, filePath, item.Size);
                     }
-                    if (await NeedsDownloadAsync(item, filePath))
-                        throw new InvalidDataException($"文件校验失败：{item.Dest}");
+                    // 完整覆盖的分片已经逐片校验（修复的分片也单独复验），不再扫描整文件。
+                    if (!BuildFileHelper.GetFileLength(filePath, out var finalSize) || finalSize != item.Size)
+                        throw new InvalidDataException($"文件大小校验失败：{item.Dest}");
                 }
             );
             return true;
+        }
+        catch (OperationCanceledException) when (_downloadState.CancelToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -475,13 +492,43 @@ public sealed class DownloadAndVerifyResource : IProgressSetup, IAsyncDisposable
         }
     }
 
-    private async Task<bool> NeedsDownloadAsync(GameFileInfo item, string path)
+    // Inline reporting avoids a ThreadPool callback for every disk-read notification and
+    // prevents queued old progress from overwriting a later stage/completion event.
+    private sealed class TransferProgress(Action<(GameContextActionType, bool, long, string, long, long)> report)
+        : IProgress<(GameContextActionType, bool, long, string, long, long)>
+    {
+        public void Report((GameContextActionType, bool, long, string, long, long) value) => report(value);
+    }
+
+    private void PublishCompletedBytes(long size, string filePath, long fileTotal)
+    {
+        if (_disposed || _downloadState.CancelToken.IsCancellationRequested || !_downloadState.IsActive)
+            return;
+        GameEventPublisher.Publish(UpdateFileProgress(GameContextActionType.Verify, size, true,
+            filePath: filePath, currentFileSize: fileTotal, fileMaxSize: fileTotal));
+    }
+
+    private static bool HasCompleteChunkCoverage(GameFileInfo item)
+    {
+        if (item.Chunks.Count == 0 || item.Size <= 0) return false;
+        long next = 0;
+        foreach (var chunk in item.Chunks.OrderBy(x => x.Start))
+        {
+            if (chunk.Start != next || chunk.End < chunk.Start || chunk.End >= item.Size
+                || string.IsNullOrWhiteSpace(chunk.Hash)) return false;
+            next = chunk.End + 1;
+        }
+        return next == item.Size;
+    }
+
+    private async Task<bool> NeedsDownloadAsync(GameFileInfo item, string path,
+        IProgress<(GameContextActionType, bool, long, string, long, long)>? progress = null)
     {
         if (!BuildFileHelper.GetFileLength(path, out var size) || size != item.Size) return true;
         if (!string.IsNullOrWhiteSpace(item.Hash))
-            return await VerifyTask.ValidateGameFileAsync(item.Hash, path, _downloadState, _downloadState.CancelToken);
+            return await VerifyTask.ValidateGameFileAsync(item.Hash, path, _downloadState, _downloadState.CancelToken, progress);
         foreach (var chunk in item.Chunks)
-            if (await VerifyTask.ValidateFileChunks(chunk, path, _downloadState, _downloadState.CancelToken)) return true;
+            if (await VerifyTask.ValidateFileChunks(chunk, path, _downloadState, _downloadState.CancelToken, progress)) return true;
         return false;
     }
 

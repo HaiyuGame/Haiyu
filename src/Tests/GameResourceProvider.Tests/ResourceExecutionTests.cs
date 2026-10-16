@@ -9,6 +9,7 @@ using System.Text.Json;
 using Waves.Core.Common;
 using Waves.Core.Contracts;
 using Waves.Core.GameContext;
+using Waves.Core.GameContext.KruoGameContextBaseV2.Common;
 using Waves.Core.Models;
 using Waves.Core.Models.CoreApi;
 using Waves.Core.Models.Enums;
@@ -21,6 +22,151 @@ namespace Project.Test;
 [TestClass]
 public sealed class ResourceExecutionTests
 {
+    [DataTestMethod]
+    [DataRow("stale-summary", "1")]
+    [DataRow("2", "2")] // Material-only update: the main version does not change.
+    public async Task SharedInstallCommitsMainCommonAndMaterialVersionsTogether(string summaryVersion, string commonVersion)
+    {
+        await using var fixture = await Fixture.Create();
+        await fixture.Context.GameLocalConfig.SaveConfigsAsync(new Dictionary<string, string>
+        {
+            // The summary version is deliberately stale: the merged plan records each pack's source.
+            [GameLocalSettingName.LocalGameVersion] = summaryVersion,
+            [GameLocalSettingName.BunlePackVersion_Common] = commonVersion,
+            [GameLocalSettingName.BunlePackVersion_UHD] = "6",
+            [GameLocalSettingName.BunlePackVersion_HD] = "keep-HD",
+            [GameLocalSettingName.LocalGameUpdateing] = "True"
+        });
+        var cached = Path.Combine(fixture.Cache, "resources", "game.bin");
+        Directory.CreateDirectory(Path.GetDirectoryName(cached)!);
+        await File.WriteAllBytesAsync(cached, Handler.Payload);
+        var plan = new GameVersionInfo
+        {
+            ResourceVersion = "2", BundleName = "UHD", OldGameVersion = commonVersion, NewGameVersion = "2",
+            ResourcePacks =
+            [
+                new() { Name = "Common", LocalVersion = commonVersion, TargetVersion = "2" },
+                new() { Name = "UHD", LocalVersion = "6", TargetVersion = "8" }
+            ],
+            DefaultResource = [new() { Dest = "game.bin", Size = Handler.Payload.Length,
+                Hash = Convert.ToHexString(MD5.HashData(Handler.Payload)) }]
+        };
+        // Both protocols feed this same installer with their normalized manifests.
+        await fixture.Context.StartInstallGameResource(plan, new() { DownloadFolder = fixture.Cache });
+        await fixture.AssertProgressTerminated();
+        Assert.IsTrue(await fixture.VersionIs("2"));
+        Assert.AreEqual("2", await fixture.Context.GameLocalConfig.GetConfigAsync(GameLocalSettingName.BunlePackVersion_Common));
+        Assert.AreEqual("8", await fixture.Context.GameLocalConfig.GetConfigAsync(GameLocalSettingName.BunlePackVersion_UHD));
+        Assert.AreEqual("keep-HD", await fixture.Context.GameLocalConfig.GetConfigAsync(GameLocalSettingName.BunlePackVersion_HD));
+        Assert.AreEqual("UHD", await fixture.Context.GameLocalConfig.GetConfigAsync(GameLocalSettingName.BunleName));
+        Assert.AreEqual("False", await fixture.Context.GameLocalConfig.GetConfigAsync(GameLocalSettingName.LocalGameUpdateing));
+        Assert.AreEqual(Path.Combine(fixture.Game, "game.bin"), await fixture.Context.GameLocalConfig.GetConfigAsync(GameLocalSettingName.GameLauncherBassProgram));
+    }
+
+    [TestMethod]
+    public async Task ConfigCommitFailureThrowsAndPreservesAllRecordedVersions()
+    {
+        await using var fixture = await Fixture.Create();
+        await fixture.Context.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.BunlePackVersion_UHD, "old-material");
+        var plan = new GameVersionInfo
+        {
+            ResourceVersion = "2", BundleName = "UHD", NewGameVersion = "2",
+            ResourcePacks = [new() { Name = "Common", TargetVersion = "2" }, new() { Name = "UHD", TargetVersion = "8" }]
+        };
+        var writer = new WriteGameResourceConfig(fixture.Context.GameLocalConfig, "2", fixture.Context.Config, fixture.Context.Logger);
+        // Windows denies the atomic replacement while the destination lacks delete sharing.
+        using (var locked = new FileStream(fixture.Context.GameLocalConfig.SettingPath,
+            FileMode.Open, FileAccess.Read, FileShare.Read))
+        {
+            await Assert.ThrowsExceptionAsync<IOException>(() => writer.WriteDownloadAndUpDateResultAsync(new(), plan: plan));
+        }
+        var persisted = new GameLocalConfig(fixture.Context.GameLocalConfig.SettingPath);
+        Assert.AreEqual("1", await persisted.GetConfigAsync(GameLocalSettingName.LocalGameVersion));
+        Assert.AreEqual("old-material", await persisted.GetConfigAsync(GameLocalSettingName.BunlePackVersion_UHD));
+        Assert.IsNull(await persisted.GetConfigAsync(GameLocalSettingName.BunlePackVersion_Common));
+    }
+
+    [TestMethod]
+    public async Task MissingMaterialTargetRejectsEntireConfigCommit()
+    {
+        await using var fixture = await Fixture.Create();
+        var writer = new WriteGameResourceConfig(fixture.Context.GameLocalConfig, "2", fixture.Context.Config, fixture.Context.Logger);
+        var plan = new GameVersionInfo
+        {
+            ResourceVersion = "2", BundleName = "UHD", NewGameVersion = "2",
+            ResourcePacks = [new() { Name = "Common", TargetVersion = "2" }, new() { Name = "UHD", TargetVersion = "" }]
+        };
+        await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => writer.WriteDownloadAndUpDateResultAsync(new(), plan: plan));
+        Assert.IsTrue(await fixture.VersionIs("1"));
+        Assert.IsNull(await fixture.Context.GameLocalConfig.GetConfigAsync(GameLocalSettingName.BunlePackVersion_Common));
+    }
+
+    [TestMethod]
+    public async Task SlowResourceDiscoveryPublishesRetainedPreparationBeforeDownloaderExists()
+    {
+        await using var fixture = await Fixture.Create();
+        fixture.Handler.ManifestGate = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        var start = fixture.Context.StartDownloadTaskAsync(fixture.Game);
+        try
+        {
+            await fixture.Handler.ManifestStarted.Task.WaitAsync(TimeSpan.FromSeconds(10));
+            await fixture.WaitUntil(() => Task.FromResult(
+                fixture.Context.ProgressState.CurrentAction == GameContextActionType.Preparing));
+            Assert.IsFalse(start.IsCompleted);
+            Assert.IsTrue(fixture.Context.ProgressState.IsActive);
+            Assert.IsNull(fixture.Context.DownloadState);
+            Assert.AreEqual("正在获取资源列表…", fixture.Context.ProgressState.LastArgs.TipMessage);
+            Assert.IsFalse(await fixture.Context.StartDownloadTaskAsync(fixture.Game));
+            // Page replay needs no additional response from the stalled manifest request.
+            await fixture.Context.ReEmitLastOutputAsync();
+            Assert.AreEqual(GameContextActionType.Preparing, fixture.Context.ProgressState.CurrentAction);
+        }
+        finally
+        {
+            fixture.Handler.ManifestGate.TrySetResult();
+            await start;
+        }
+        await fixture.AssertProgressTerminated();
+    }
+
+    [TestMethod]
+    public async Task CancelledResourceDiscoveryClearsPreparationAndOperationLock()
+    {
+        await using var fixture = await Fixture.Create();
+        fixture.Handler.ManifestGate = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        using var cancellation = new CancellationTokenSource();
+        var start = fixture.Context.StartDownloadTaskAsync(fixture.Game, token: cancellation.Token);
+        try
+        {
+            await fixture.Handler.ManifestStarted.Task.WaitAsync(TimeSpan.FromSeconds(10));
+            cancellation.Cancel();
+            try
+            {
+                Assert.IsFalse(await start.WaitAsync(TimeSpan.FromSeconds(10)));
+            }
+            catch (OperationCanceledException) { }
+        }
+        finally
+        {
+            fixture.Handler.ManifestGate.TrySetResult();
+        }
+        await fixture.AssertProgressTerminated();
+    }
+
+    [TestMethod]
+    public async Task PreparingStartsNewGenerationAndRejectsOldCompletion()
+    {
+        var tracker = new GameProgressTracker();
+        await tracker.HandleEventAsync(new() { Generation = 1, Type = GameContextActionType.None });
+        await tracker.HandleEventAsync(new() { Generation = 2, Type = GameContextActionType.Preparing,
+            IsAction = true, TipMessage = "正在获取资源列表…" });
+        await tracker.HandleEventAsync(new() { Generation = 1, Type = GameContextActionType.None });
+        Assert.IsTrue(tracker.IsActive);
+        Assert.AreEqual(GameContextActionType.Preparing, tracker.CurrentAction);
+        await tracker.HandleEventAsync(new() { Generation = 2, Type = GameContextActionType.None });
+        Assert.IsFalse(tracker.IsActive);
+    }
+
     [TestMethod]
     public async Task TrackerForwardsRemainingTimeAndResetsBetweenStages()
     {
@@ -180,10 +326,12 @@ public sealed class ResourceExecutionTests
     public async Task PredownloadAndStandaloneInstallShareSelectedCache()
     {
         await using var fixture = await Fixture.Create();
+        await fixture.Context.GameLocalConfig.SaveConfigAsync(GameLocalSettingName.BunlePackVersion_UHD, "installed-material");
         Assert.IsTrue(await fixture.Context.StartProdDownloadGameResourceAsync(fixture.Cache));
         await fixture.WaitUntil(async () => await fixture.Context.GameLocalConfig.GetConfigAsync(GameLocalSettingName.ProdDownloadFolderDone) == "True");
         await fixture.WaitUntil(() => Task.FromResult(fixture.Context.ProdDownloadState is null && !fixture.Context.IsResourceOperationActive));
         Assert.IsTrue(await fixture.VersionIs("1"));
+        Assert.AreEqual("installed-material", await fixture.Context.GameLocalConfig.GetConfigAsync(GameLocalSettingName.BunlePackVersion_UHD));
         Assert.AreEqual(fixture.Cache, await fixture.Context.GameLocalConfig.GetConfigAsync(GameLocalSettingName.ProdDownloadPath));
         await fixture.WaitUntil(() => Task.FromResult(fixture.Context.ProgressState.LastArgs.Type == GameContextActionType.None));
         Assert.IsTrue(fixture.Context.ProgressState.LastArgs.Prod);
@@ -317,11 +465,18 @@ public sealed class ResourceExecutionTests
         public bool DeleteObsolete { get; set; }
         private static readonly byte[] ZipPayload = CreateZip();
         public TaskCompletionSource DownloadStarted { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource? ManifestGate;
+        public TaskCompletionSource ManifestStarted { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
         public int FileDownloads;
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken token)
         {
             var path = request.RequestUri!.AbsolutePath;
             Paths.Add(path);
+            if (path == "/full-index" && ManifestGate is { } gate)
+            {
+                ManifestStarted.TrySetResult();
+                await gate.Task.WaitAsync(token);
+            }
             if (path == "/config")
             {
                 var pre = HasPredownload ? ",\"predownload\":{\"version\":\"3\",\"resourcesBasePath\":\"/next/\",\"config\":{\"size\":11,\"unCompressSize\":11,\"baseUrl\":\"/next/\",\"indexFile\":\"/next-index\",\"patchConfig\":[{\"version\":\"1\",\"size\":11,\"baseUrl\":\"/diff/\",\"indexFile\":\"/next-patch\"},{\"version\":\"2\",\"size\":11,\"baseUrl\":\"/diff/\",\"indexFile\":\"/next-patch\"}]}}" : "";
