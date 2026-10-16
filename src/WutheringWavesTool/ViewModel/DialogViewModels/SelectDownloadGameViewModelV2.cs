@@ -82,7 +82,7 @@ public sealed partial class SelectDownloadGameViewModelV2 : DialogViewModelBase
         DiskVisibility = Visibility.Collapsed;
     }
 
-    partial void OnSelectedBundleChanged(BunleResourceSize? value) => CanDownload = false;
+    partial void OnSelectedBundleChanged(BunleResourceSize? value) => CanDownload = true;
 
     internal void SetData(object data)
     {

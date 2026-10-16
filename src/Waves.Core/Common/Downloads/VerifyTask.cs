@@ -2,7 +2,7 @@ namespace Waves.Core.Common.Downloads;
 
 public static class VerifyTask
 {
-    const int MaxBufferSize = 65536;
+    const int MaxBufferSize = 262144;
 
     const long UpdateThreshold = 1048576;
 
@@ -23,7 +23,7 @@ public static class VerifyTask
         cts.Token.ThrowIfCancellationRequested();
         try
         {
-            await using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, MaxBufferSize, true);
+            await using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, MaxBufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan);
             if (end.HasValue && (end < start || stream.Length <= end.Value)) return true;
             stream.Position = start;
             var remaining = end.HasValue ? end.Value - start + 1 : stream.Length;
@@ -32,17 +32,26 @@ public static class VerifyTask
             var buffer = ArrayPool<byte>.Shared.Rent(MaxBufferSize);
             try
             {
+                long accumulatedBytes = 0;
                 while (remaining > 0)
                 {
                     cts.Token.ThrowIfCancellationRequested();
-                    if (state is not null) await state.PauseToken.WaitIfPausedAsync();
-                    var read = await stream.ReadAsync(buffer.AsMemory(0, (int)Math.Min(remaining, buffer.Length)), cts.Token);
+                    if (state is not null) await state.PauseToken.WaitIfPausedAsync().ConfigureAwait(false);
+                    var read = await stream.ReadAsync(buffer.AsMemory(0, (int)Math.Min(remaining, MaxBufferSize)), cts.Token).ConfigureAwait(false);
                     if (read == 0) return true;
                     md5.AppendData(buffer, 0, read);
                     remaining -= read;
-                    progress?.Report((GameContextActionType.Verify, false, read, path, total - remaining, total));
+                    accumulatedBytes += read;
+                    if (accumulatedBytes >= UpdateThreshold)
+                    {
+                        progress?.Report((GameContextActionType.Verify, false, accumulatedBytes, path, total - remaining, total));
+                        accumulatedBytes = 0;
+                    }
                 }
-                return !string.Equals(Convert.ToHexString(md5.GetHashAndReset()), hash, StringComparison.OrdinalIgnoreCase);
+                var mismatch = !string.Equals(Convert.ToHexString(md5.GetHashAndReset()), hash, StringComparison.OrdinalIgnoreCase);
+                if (accumulatedBytes > 0)
+                    progress?.Report((GameContextActionType.Verify, false, accumulatedBytes, path, total, total));
+                return mismatch;
             }
             finally { ArrayPool<byte>.Shared.Return(buffer); }
         }

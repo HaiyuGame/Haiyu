@@ -20,6 +20,9 @@ partial class KuroGameContextBaseV2
             || Interlocked.CompareExchange(ref _resourceOperationActive, 1, 0) != 0
         )
             return false;
+        var queued = false;
+        GameContextOutputArgs.CurrentGeneration.Value = Interlocked.Increment(ref _operationGeneration);
+        GameEventPublisher.Publish(new() { Type = GameContextActionType.Preparing, IsAction = true, TipMessage = "正在获取资源列表…" });
         try
         {
             var plan = await GetInstallGameResourceAsync(parameter, token);
@@ -33,21 +36,9 @@ partial class KuroGameContextBaseV2
                 [GameLocalSettingName.GameLauncherBassFolder] = folder,
                 [GameLocalSettingName.LocalGameUpdateing] = "True",
             };
-            if (this.IsBunle)
-            {
-                var key = parameter == null ? "" : parameter.BundleName ?? "HD";
-
-                var bunlePackKey =
-                    parameter == null ? plan.NewGameVersion
-                    : parameter.TargetPackVersions == null ? plan.NewGameVersion
-                    : parameter.TargetPackVersions[key];
-                saveConfig.Add(GameLocalSettingName.BunleName, key);
-                saveConfig.Add($"BunlePackVersion_{key}", bunlePackKey);
-            }
-            await GameLocalConfig.SaveConfigsAsync(saveConfig, token);
-            GameContextOutputArgs.CurrentGeneration.Value = Interlocked.Increment(
-                ref _operationGeneration
-            );
+            // 下载前只记录路径和进行中状态；分包版本必须等安装校验成功后统一提交。
+            if (!await GameLocalConfig.SaveConfigsAsync(saveConfig, token))
+                throw new IOException("安装准备配置保存失败，未启动下载。");
             _ = Task.Run(async () =>
             {
                 try
@@ -68,12 +59,18 @@ partial class KuroGameContextBaseV2
                     Interlocked.Exchange(ref _resourceOperationActive, 0);
                 }
             });
+            queued = true;
             return true;
         }
         catch
         {
             Interlocked.Exchange(ref _resourceOperationActive, 0);
             throw;
+        }
+        finally
+        {
+            if (!queued)
+                GameEventPublisher.Publish(new() { Type = GameContextActionType.None });
         }
     }
 
@@ -122,7 +119,7 @@ partial class KuroGameContextBaseV2
             Config,
             Logger
         );
-        await writer.WriteDownloadComplateAsync(GameEventPublisher, true, state.CancelToken.Token);
+        await writer.WriteDownloadComplateAsync(GameEventPublisher, true, state.CancelToken.Token, plan);
         state.IsActive = false;
         return true;
     }
@@ -147,8 +144,14 @@ partial class KuroGameContextBaseV2
             );
             if (string.IsNullOrWhiteSpace(folder))
                 return false;
-            var summary = await GetResourceSummaryAsync(parameter);
-            var plan = await GetVerificationResourceAsync(summary.OfficialVersion, parameter);
+            // 修复面向所选组合的当前正式资源，不以界面版本字典锁定旧目标或预下载目标。
+            var repairParameter = new GameResourceParameter
+            {
+                BundleName = parameter?.BundleName,
+                VerificationSource = GameVerificationSource.Official
+            };
+            var summary = await GetResourceSummaryAsync(repairParameter);
+            var plan = await GetVerificationResourceAsync(summary.OfficialVersion, repairParameter);
             if (
                 !IsExecutable(plan)
                 || plan.ZipResources.Count != 0
@@ -159,7 +162,7 @@ partial class KuroGameContextBaseV2
             GameContextOutputArgs.CurrentGeneration.Value = Interlocked.Increment(
                 ref _operationGeneration
             );
-            return await StartDownloadAsync(folder, plan, isDelete, skipFilePath, parameter);
+            return await StartDownloadAsync(folder, plan, isDelete, skipFilePath, repairParameter);
         }
         catch (OperationCanceledException)
         {

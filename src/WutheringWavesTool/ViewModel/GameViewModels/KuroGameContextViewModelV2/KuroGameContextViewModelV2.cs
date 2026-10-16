@@ -23,6 +23,15 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
     private long _progressRenderVersion;
     private GameContextStatus? _lastGameStatus;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanChangeResources))]
+    [NotifyPropertyChangedFor(nameof(CanManageGameResources))]
+    [NotifyPropertyChangedFor(nameof(IsActivityIndicatorActive))]
+    public partial bool IsTransferPreparing { get; set; }
+    public bool CanChangeResources => !IsTransferPreparing;
+    public bool CanManageGameResources => EnableStartGameBth && !IsTransferPreparing;
+    public bool IsActivityIndicatorActive => ProcessAction || IsTransferPreparing;
+
     public LoggerService Logger { get; }
     public GameResourceParameter ResourceParameter { get; set; } = new();
     public IGameContextV2 GameContext { get; private set; }
@@ -146,6 +155,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
     public partial string BottomBarContent { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanManageGameResources))]
     public partial bool EnableStartGameBth { get; set; } = false;
 
     [ObservableProperty]
@@ -155,6 +165,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
     public partial ServerDisplay SelectServer { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsActivityIndicatorActive))]
     public partial bool ProcessAction { get; set; } = false;
 
     public abstract GameType GameType { get; }
@@ -174,6 +185,8 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
             return;
 
         DetachProgress();
+        IsTransferPreparing = false;
+        _lastGameStatus = null;
         var token = RestartLifetime();
         try
         {
@@ -181,12 +194,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
             this.GameContext = Instance.Host.Services.GetRequiredKeyedService<IGameContextV2>(name);
             GameContext.ProgressState.OnProgressChanged += ProgressState_OnProgressChanged;
             CurrentProgressValue = 0;
-            await this.GameContext.ReEmitLastOutputAsync(true);
-            var status = await this.GameContext.GetGameContextStatusAsync(token);
-            if (!status.PredownloaAcion)
-            {
-                await this.GameContext.ReEmitLastOutputAsync(false);
-            }
+            ProgressState_OnProgressChanged(GameContext.ProgressState);
             var dx11 = await GameContext.GameLocalConfig.GetConfigAsync(
                 GameLocalSettingName.IsDx11
             );
@@ -236,12 +244,43 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
         var renderVersion = Interlocked.Increment(ref _progressRenderVersion);
         var context = GameContext;
         var args = tracker.LastArgs;
+        if (args is null)
+            return;
 
         await WindowManager.Shell.TryInvokeAsync(async () =>
         {
             if (!IsCurrentProgressRender(renderVersion, context))
                 return;
             var actionType = args.Type;
+            IsTransferPreparing = actionType is GameContextActionType.Preparing or GameContextActionType.CdnSelect;
+            if (IsTransferPreparing)
+            {
+                BunleBthEnable = false;
+                PauseStartEnable = false;
+                RemainingTimeText = "----";
+                CurrentStepText = LanguageService.GetStringByText(string.IsNullOrWhiteSpace(args.TipMessage)
+                    ? (actionType == GameContextActionType.CdnSelect ? "正在选择下载节点…" : "正在获取资源列表…")
+                    : args.TipMessage);
+                SpeedText = "----";
+                CurrentProgressValue = 0;
+                MaxProgressValue = 100;
+                CurrentStep = 0;
+                MaxStep = 0;
+                CurrentByteText = "----";
+                MaxByteText = "----";
+                if (args.Prod)
+                {
+                    PredCardVisibility = Visibility.Visible;
+                    PredDownloadingVisibility = Visibility.Visible;
+                    PredDownloadBthVisibility = Visibility.Collapsed;
+                    PredDownloadDoneVisibility = Visibility.Collapsed;
+                    PreSetupHeaderText = CurrentStepText;
+                    PreSetupText = CurrentStepText;
+                }
+                else
+                    ShowGameDownloadingBth(_lastGameStatus ?? new GameContextStatus());
+                return;
+            }
             var terminal =
                 actionType is GameContextActionType.None or GameContextActionType.GameExit
                 || tracker.IsCancel;
@@ -626,14 +665,25 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
         lastPointTime = now;
         points.Add(new DateTimeChartPoint(now, value));
     }
-
     private ButtonActionType _buttonAction = ButtonActionType.None;
     private bool disposedValue;
 
     async Task RefreshCoreAsync(bool showCard = true, bool isRefreshBackground = true)
     {
+        var refreshContext = GameContext;
+        var refreshToken = LifetimeToken;
+        var loadAfterInvoked = false;
         try
         {
+            if (GameContext.ProgressState.LastArgs is { } snapshot
+                && (snapshot.Type is GameContextActionType.Preparing or GameContextActionType.CdnSelect
+                    || GameContext.DownloadState != null || GameContext.ProdDownloadState != null))
+            {
+                ProgressState_OnProgressChanged(GameContext.ProgressState);
+                loadAfterInvoked = true;
+                await LoadAfter();
+                return;
+            }
             ProcessAction = true;
             var token = LifetimeToken;
             this.BunleBthEnable = false;
@@ -641,7 +691,11 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
             var context = GameContext;
             var status = await context.GetGameContextStatusAsync(token);
             var hasAdvanceInstalled = await HasAdvanceInstalledAsync(status);
+            if (!IsCurrentProgressRender(renderVersion, context))
+                return;
             _lastGameStatus = status;
+            if (IsTransferPreparing || context.ProgressState.IsActive)
+                return;
             if (!status.IsGameExists)
             {
                 ShowSelectInstallBth(status);
@@ -682,6 +736,8 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
                 token
             );
             var wallpaperType = await AppSettings.GetWallpaperTypeAsync(token);
+            if (!IsCurrentProgressRender(renderVersion, context))
+                return;
 
             if (status.IsPredownloaded && !hasAdvanceInstalled)
             {
@@ -767,7 +823,10 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
                 this.VersionLogo = new BitmapImage(new(background.Slogan));
                 var coreConfig = await GameContext.ReadContextConfigAsync(token);
                 this.DownloadSpeedValue = coreConfig.LimitSpeed / 1000 / 1000;
-                await Task.WhenAll(ShowCardAsync(showCard), LoadAfter());
+                // 保留页面初始化钩子，与卡片刷新并行；不依赖后续进度消息触发。
+                loadAfterInvoked = true;
+                var loadAfterTask = LoadAfter();
+                await Task.WhenAll(ShowCardAsync(showCard), loadAfterTask);
             }
             this.DecompressSpeedPoints?.Clear();
             this.DownloadSpeedPoints?.Clear();
@@ -785,8 +844,26 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
         }
         finally
         {
-            if (IsAlive)
-                ProcessAction = false;
+            // 状态刷新提前返回、背景为空或网络刷新失败，也不能跳过当前页面的初始化。
+            // 保留上面的既有调用时机；仅在尚未调用时兜底执行一次。
+            try
+            {
+                if (!loadAfterInvoked && IsAlive && !refreshToken.IsCancellationRequested
+                    && ReferenceEquals(GameContext, refreshContext))
+                {
+                    await LoadAfter();
+                }
+            }
+            catch (OperationCanceledException) when (refreshToken.IsCancellationRequested) { }
+            catch (Exception ex)
+            {
+                Logger.WriteError($"LoadAfter 初始化失败：{ex}");
+            }
+            finally
+            {
+                if (IsAlive && ReferenceEquals(GameContext, refreshContext))
+                    ProcessAction = false;
+            }
         }
     }
 
@@ -927,10 +1004,6 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
         else
         {
             Logger.WriteInfo($"继续更新触发");
-            var launcher = await GameContext.GetResourceSummaryAsync(
-                ResourceParameter,
-                this.CTS.Token
-            );
             var folder = await GameContext.GameLocalConfig.GetConfigAsync(
                 GameLocalSettingName.GameLauncherBassFolder
             );
@@ -975,10 +1048,6 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
         else
         {
             Logger.WriteInfo($"继续进行下载");
-            var launcher = await GameContext.GetResourceSummaryAsync(
-                ResourceParameter,
-                this.CTS.Token
-            );
             this.PauseIcon = "\uE769";
             var folder =
                 await GameContext.GameLocalConfig.GetConfigAsync(
@@ -1051,7 +1120,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
     private void ShowGameDownloadingBth(GameContextStatus status)
     {
         // 较早的异步状态查询可能晚于完成通知返回，不能重新打开已结束的任务面板。
-        if (GameContext.DownloadState is null && GameContext.ProdDownloadState is null)
+        if (!IsTransferPreparing && GameContext.DownloadState is null && GameContext.ProdDownloadState is null)
             return;
         Logger.WriteInfo($"游戏正在下载中");
         _buttonAction = ButtonActionType.Downloading;

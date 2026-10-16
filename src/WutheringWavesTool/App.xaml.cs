@@ -22,7 +22,7 @@ public partial class App : ClientApplication
     private const int PROCESS_PER_MONITOR_DPI_AWARE = 2;
     private AppInstance mainInstance;
 
-    public static string AppVersion => "1.4.4";
+    public static string AppVersion => "1.4.5";
 
     public AppSettings AppSettings { get; private set; }
 

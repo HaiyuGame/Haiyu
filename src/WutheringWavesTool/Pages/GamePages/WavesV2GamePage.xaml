@@ -50,7 +50,7 @@
             HorizontalAlignment="Stretch"
             VerticalAlignment="Top"
             Background="Transparent"
-            IsIndeterminate="{x:Bind ViewModel.ProcessAction, Mode=OneWay}" />
+            IsIndeterminate="{x:Bind ViewModel.IsActivityIndicatorActive, Mode=OneWay}" />
         <ComboBox
             Margin="10,10,0,0"
             Padding="10,5"
@@ -315,6 +315,7 @@
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
                         Background="Transparent"
+                        IsIndeterminate="{x:Bind ViewModel.IsTransferPreparing, Mode=OneWay}"
                         Maximum="{x:Bind ViewModel.MaxProgressValue, Mode=OneWay}"
                         Style="{ThemeResource FillHeightProgressBar}"
                         Value="{x:Bind ViewModel.CurrentProgressValue, Mode=OneWay}">
@@ -571,7 +572,7 @@
                                             ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_ToggleStartupMode')}" />
                                         <MenuFlyoutItem
                                             Command="{x:Bind ViewModel.RepirGameCommand}"
-                                            IsEnabled="{x:Bind ViewModel.EnableStartGameBth, Mode=OneWay}"
+                                            IsEnabled="{x:Bind ViewModel.CanManageGameResources, Mode=OneWay}"
                                             Text="{x:Bind helper:LanguageService.GetString('Display_FixTheGame')}"
                                             ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_ModResources')}">
                                             <MenuFlyoutItem.Icon>
@@ -580,7 +581,7 @@
                                         </MenuFlyoutItem>
                                         <MenuFlyoutItem
                                             Command="{x:Bind ViewModel.ResetGameFolderCommand}"
-                                            IsEnabled="{x:Bind ViewModel.EnableStartGameBth, Mode=OneWay}"
+                                            IsEnabled="{x:Bind ViewModel.CanManageGameResources, Mode=OneWay}"
                                             Text="{x:Bind helper:LanguageService.GetString('WavesGame_ReselectGameFolder')}">
                                             <MenuFlyoutItem.Icon>
                                                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE838;" />
@@ -609,7 +610,7 @@
                                         <MenuFlyoutSeparator />
                                         <MenuFlyoutItem
                                             Command="{x:Bind ViewModel.DeleteGameResourceCommand}"
-                                            IsEnabled="{x:Bind ViewModel.EnableStartGameBth, Mode=OneWay}"
+                                            IsEnabled="{x:Bind ViewModel.CanManageGameResources, Mode=OneWay}"
                                             Text="{x:Bind helper:LanguageService.GetString('Display_UninstallGame')}"
                                             ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_FolderDirectly')}">
                                             <MenuFlyoutItem.Icon>
@@ -641,6 +642,7 @@
                             Margin="0"
                             Padding="0"
                             Command="{x:Bind ViewModel.StartPreDownloadGameCommand}"
+                            IsEnabled="{x:Bind ViewModel.CanChangeResources, Mode=OneWay}"
                             CornerRadius="70"
                             Style="{ThemeResource TitleBarButtonStyle}">
                             <ToolTipService.ToolTip>

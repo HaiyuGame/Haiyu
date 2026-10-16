@@ -192,7 +192,7 @@ public sealed class BundleResourceProviderTests
     {
         using var f = await Fixture.Create(); f.EnablePredownload();
         f.Handler.Config.Predownload!.ResourcePacks["Common"].ZipConfig = Patch("", "/zip-index", "/zip", "assets", 40);
-        var plan = await f.Provider.GetVerificationResourceAsync("3", new() { BundleName = "HD" });
+        var plan = await f.Provider.GetVerificationResourceAsync("3", new() { BundleName = "HD", VerificationSource = GameVerificationSource.Predownload });
         Assert.AreEqual("/next-Common-index", f.Handler.Requests[1].AbsolutePath);
         Assert.AreEqual("https://pre.example/next/common/game.bin", plan.DefaultResource[0].Url);
         Assert.AreEqual(0, plan.ZipResources.Count);
@@ -405,14 +405,38 @@ public sealed class BundleResourceProviderTests
         Assert.AreEqual(2, f.Handler.Requests.Count(x => x.Host == "two.example"));
     }
     [TestMethod]
-    public async Task SamePrimaryVersionRequiresPackSnapshotForUnambiguousVerification()
+    public async Task RepairSelectionVersionsDoNotConstrainOfficialVerificationTargets()
+    {
+        using var f = await Fixture.Create();
+        f.Record("Common", "1"); f.Record("HD", "6");
+        var selection = new GameResourceParameter
+        {
+            BundleName = "HD",
+            // Matches the UI shape: multiple material choices, no Common entry, old local versions.
+            TargetPackVersions = new Dictionary<string, string> { ["HD"] = "6", ["SD"] = "old-SD", ["UHD"] = "old-UHD" }
+        };
+        var summary = await f.Provider.GetResourceSummaryAsync(selection);
+        var plan = await f.Provider.GetVerificationResourceAsync(summary.OfficialVersion, selection);
+        Assert.AreEqual("2", plan.ResourcePacks.Single(x => x.Name == "Common").TargetVersion);
+        Assert.AreEqual("7", plan.ResourcePacks.Single(x => x.Name == "HD").TargetVersion);
+        Assert.IsTrue(plan.DefaultResource.Count > 0);
+    }
+
+    [TestMethod]
+    public async Task SamePrimaryVersionUsesExplicitSourceWithoutFallback()
     {
         using var f = await Fixture.Create(); f.EnablePredownload();
         f.Handler.Config.Predownload!.ResourcePacks["Common"].Version = "2";
-        await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => f.Provider.GetVerificationResourceAsync("2", new() { BundleName = "HD" }));
+        var official = await f.Provider.GetVerificationResourceAsync("2", new() { BundleName = "HD" });
+        Assert.AreEqual("7", official.ResourcePacks[1].TargetVersion);
+        await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => f.Provider.GetVerificationResourceAsync("2", new()
+        {
+            BundleName = "HD", VerificationPackVersions = new Dictionary<string, string> { ["Common"] = "2", ["HD"] = "8" }
+        }));
         var plan = await f.Provider.GetVerificationResourceAsync("2", new()
         {
-            BundleName = "HD", TargetPackVersions = new Dictionary<string, string> { ["Common"] = "2", ["HD"] = "8" }
+            BundleName = "HD", VerificationSource = GameVerificationSource.Predownload,
+            VerificationPackVersions = new Dictionary<string, string> { ["Common"] = "2", ["HD"] = "8" }
         });
         Assert.AreEqual("8", plan.ResourcePacks[1].TargetVersion);
         Assert.AreEqual("pre.example", new Uri(plan.DefaultResource[0].Url).Host);
@@ -424,7 +448,8 @@ public sealed class BundleResourceProviderTests
         using var f = await Fixture.Create(); f.EnablePredownload();
         await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => f.Provider.GetVerificationResourceAsync("3", new()
         {
-            BundleName = "HD", TargetPackVersions = new Dictionary<string, string> { ["Common"] = "3", ["HD"] = "99" }
+            BundleName = "HD", VerificationSource = GameVerificationSource.Predownload,
+            VerificationPackVersions = new Dictionary<string, string> { ["Common"] = "3", ["HD"] = "99" }
         }));
         Assert.AreEqual(1, f.Handler.Requests.Count);
     }
