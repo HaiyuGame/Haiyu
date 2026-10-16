@@ -85,7 +85,6 @@ public sealed class WindowManager : IWindowManager
                 );
         }
         #endregion
-
         winEx.Activate();
     }
 

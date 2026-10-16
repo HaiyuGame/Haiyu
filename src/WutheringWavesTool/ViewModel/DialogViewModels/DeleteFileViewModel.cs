@@ -51,7 +51,7 @@ public sealed partial class DeleteFileViewModel : DialogViewModelBase
         if (state.IsPredownloaded && state.PredownloaAcion)
         {
             await _windowManager.Shell.TipShow.ShowMessageAsync(
-                LanguageService.GetStringByText("预下载期间禁止删除游戏"),
+                LanguageService.GetString("GameDelete_BlockDuringPredownload"),
                 Symbol.Clear
             );
             return;

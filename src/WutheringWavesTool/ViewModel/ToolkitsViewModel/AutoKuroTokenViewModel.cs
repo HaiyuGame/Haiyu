@@ -361,9 +361,7 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
         if (string.IsNullOrWhiteSpace(_lastReadableResponseRequestId))
         {
             AppendLog(
-                LanguageService.GetStringByText(
-                    "还没有已完成的响应体，请先触发目标请求并等待 loadingFinished。"
-                )
+                LanguageService.GetString("KuroToken_WaitForResponse")
             );
             return;
         }

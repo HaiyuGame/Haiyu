@@ -1,4 +1,4 @@
-﻿using Haiyu.Models;
+using Haiyu.Models;
 using System.Text.Json.Serialization;
 using Waves.Api.Models.CloudGame;
 
@@ -15,6 +15,7 @@ namespace Waves.Api.Models;
 [JsonSerializable(typeof(CloudApiResponse<List<CloudGameNode>>))]
 [JsonSerializable(typeof(CloudApiResponse<bool>))]
 [JsonSerializable(typeof(CloudApiResponse<bool?>))]
+[JsonSerializable(typeof(CloudApiResponse<object?>))]
 [JsonSerializable(typeof(EndLoginData))]
 [JsonSerializable(typeof(EndLoginRequest))]
 [JsonSerializable(typeof(ExperienceCardInfo))]

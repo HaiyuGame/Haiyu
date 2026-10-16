@@ -90,6 +90,11 @@ public class GameLocalSettingName
     /// </summary>
     public const string FastVerify = nameof(FastVerify);
 
+    /// <summary>
+    /// 启动游戏前删除游戏日志（鸣潮）
+    /// </summary>
+    public const string CleanGameLogsOnStart = nameof(CleanGameLogsOnStart);
+
     public const string GameTime = nameof(GameTime);
 }
 

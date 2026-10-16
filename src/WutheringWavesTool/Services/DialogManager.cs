@@ -143,7 +143,7 @@ public sealed class DialogManager : IDialogManager
         await ShowDialogAsync<DeleteFileDialog>(contentName);
 
     public async Task<SelectDownloadFolderResult?> ShowSelectDownloadFolderV2Async(Type type, GameResourceParameter? parameter = null) =>
-        await GetDialogResultAsync<SelectDownoadGameDialogV2, SelectDownloadFolderResult>(new GameFolderDialogRequest(type, parameter));
+        await GetDialogResultAsync<SelectDownloadGameDialogV2, SelectDownloadFolderResult>(new GameFolderDialogRequest(type, parameter));
 
     public async Task<CloseWindowResult?> ShowCloseWindowResult() =>
         await GetDialogResultAsync<CloseDialog, CloseWindowResult>(null);

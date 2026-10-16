@@ -85,7 +85,7 @@
                         <MenuFlyoutItem
                             Command="{x:Bind ViewModel.ShowSelectGameBunleCommand}"
                             IsEnabled="{x:Bind ViewModel.BunleBthEnable, Mode=OneWay}"
-                            Text="切换材质">
+                            Text="{x:Bind helper:LanguageService.GetString('GameBunleSwitch')}">
                             <MenuFlyoutItem.Icon>
                                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8AB;" />
                             </MenuFlyoutItem.Icon>
@@ -196,6 +196,9 @@
                             FontFamily="{ThemeResource DefaultFont}"
                             FontSize="12">
                             <Run Text="{x:Bind ViewModel.CurrentStepText, Mode=OneWay}" />
+                            <Run Text="(" />
+                            <Run Text="{x:Bind ViewModel.RemainingTimeText, Mode=OneWay}" />
+                            <Run Text=")" />
                         </TextBlock>
                         <TextBlock
                             Grid.Row="2"
@@ -1056,7 +1059,7 @@
                                                 FontFamily="{ThemeResource DefaultFont}"
                                                 FontSize="10"
                                                 Visibility="{x:Bind ViewModel.BattlePass.IsUnlock, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                                                <Run Text="Lv:" />
+                                                <Run Text="{x:Bind helper:LanguageService.GetString('GameRole_ShowLevel')}" />
                                                 <Run Text="{x:Bind ViewModel.BattlePass.Level, Mode=OneWay}" />
                                             </TextBlock>
                                             <FontIcon
@@ -1228,6 +1231,8 @@
                                     <ItemsRepeater.ItemTemplate>
                                         <DataTemplate x:DataType="launcheModel:Content">
                                             <HyperlinkButton
+                                                Margin="5,0"
+                                                Padding="5,5"
                                                 HorizontalAlignment="Stretch"
                                                 HorizontalContentAlignment="Left"
                                                 FontSize="12"

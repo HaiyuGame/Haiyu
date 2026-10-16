@@ -16,6 +16,10 @@ public sealed partial class BunleResourceSize : ObservableObject
     [ObservableProperty]
     public partial string BunleName { get; set; }
 
+
+    [ObservableProperty]
+    public partial bool Install { get; set; }
+
     [ObservableProperty]
     public partial string BunleSize { get; set; }
 

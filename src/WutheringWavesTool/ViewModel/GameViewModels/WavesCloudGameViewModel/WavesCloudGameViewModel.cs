@@ -283,10 +283,14 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
 
     public uint GetDefaultPayType(WalletData walletInfo)
     {
-        var timeCardinfo =
-            DateTimeOffset.FromUnixTimeSeconds(walletInfo.TimeCardInfo.ExpireTimeSeconds)
-            - DateTime.Now;
-        if (walletInfo.TimeCardInfo is not null && (timeCardinfo.TotalSeconds > 0))
+        // 先判空再取值
+        if (
+            walletInfo.TimeCardInfo is not null
+            && (
+                DateTimeOffset.FromUnixTimeSeconds(walletInfo.TimeCardInfo.ExpireTimeSeconds)
+                - DateTime.Now
+            ).TotalSeconds > 0
+        )
         {
             return (uint)CloudPayType.Pay;
         }

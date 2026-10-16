@@ -7,6 +7,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Update="Fixtures/OfficialBundleConfig.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Fixtures/OfficialGlobalBundleConfig.json" CopyToOutputDirectory="PreserveNewest" />
     <ProjectReference Include="../../Waves.Core/Waves.Core.csproj" />
   </ItemGroup>
 </Project>

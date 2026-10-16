@@ -22,7 +22,7 @@ public partial class App : ClientApplication
     private const int PROCESS_PER_MONITOR_DPI_AWARE = 2;
     private AppInstance mainInstance;
 
-    public static string AppVersion => "1.4.2";
+    public static string AppVersion => "1.4.4";
 
     public AppSettings AppSettings { get; private set; }
 
@@ -80,7 +80,7 @@ public partial class App : ClientApplication
             Instance
                 .Host.Services.GetRequiredKeyedService<LoggerService>("AppLog")
                 .WriteError($"{e.Exception}\n{e.Exception.StackTrace}");
-            LegacyMessageBox.ShowError(e.Message + e.Exception.StackTrace,"错误警告");
+            LegacyMessageBox.ShowError(e.Message + e.Exception.StackTrace,LanguageService.GetString("App_ShowErrorWarning"));
         }
         catch (Exception ex)
         {

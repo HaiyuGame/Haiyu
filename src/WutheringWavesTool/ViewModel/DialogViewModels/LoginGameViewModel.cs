@@ -128,7 +128,7 @@ public sealed partial class LoginGameViewModel : DialogViewModelBase
             var login = await WavesClient.LoginAsync(mobile: Phone, code: Code, IdV2);
             if (login == null || !login.Success)
             {
-                TipMessage = login == null ? "错误" : login.Msg;
+                TipMessage = login == null ? LanguageService.GetString("Dialog_ShowError") : login.Msg;
                 await Task.Delay(2000);
                 return;
             }

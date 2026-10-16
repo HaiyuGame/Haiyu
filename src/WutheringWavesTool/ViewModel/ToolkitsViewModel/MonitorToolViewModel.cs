@@ -339,7 +339,7 @@ public sealed partial class MonitorToolViewModel : ViewModelBase
                         new()
                         {
                             Delay = TimeSpan.FromSeconds(20).TotalSeconds,
-                            Message = $"硬件监控异常{exception.Message}",
+                            Message = string.Format(LanguageService.GetString("Monitor_ShowHardwareError"), exception.Message),
                         }
                     );
                     Logger.WriteError($"硬件监控异常{exception.Message}{exception.StackTrace}");

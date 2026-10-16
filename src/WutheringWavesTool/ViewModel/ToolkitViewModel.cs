@@ -2,16 +2,22 @@ using System;
 using System.Collections.Generic;
 using System.IO.Compression;
 using System.Text;
+using Waves.Core.Models.Enums;
 using Waves.Core.Models.Tasks;
 
 namespace Haiyu.ViewModel;
 
 public sealed partial class ToolkitViewModel : ViewModelBase
 {
-    public ToolkitViewModel(IViewFactorys viewFactorys, ITaskManager taskManager)
+    public ToolkitViewModel(
+        IViewFactorys viewFactorys,
+        ITaskManager taskManager,
+        IGameLogService gameLogService
+    )
     {
         ViewFactorys = viewFactorys;
         TaskManager = taskManager;
+        GameLogService = gameLogService;
         ReisterMessager();
     }
 
@@ -23,6 +29,8 @@ public sealed partial class ToolkitViewModel : ViewModelBase
     public IViewFactorys ViewFactorys { get; }
 
     public ITaskManager TaskManager { get; }
+
+    public IGameLogService GameLogService { get; }
 
     [ObservableProperty]
     public partial ObservableCollection<TaskWrapper> Tasks { get; set; }
@@ -157,6 +165,92 @@ public sealed partial class ToolkitViewModel : ViewModelBase
     void ShowMoniterSetting()
     {
         ViewFactorys.ShowMoniterSettingWindow();
+    }
+
+    /// <summary>
+    /// 鸣潮日志解密工具：定位 Saved\Logs 下所有 Client*.log，
+    /// 解密 ELog 加密内容（明文原样复制）输出到用户选择的目录。
+    /// </summary>
+    [RelayCommand]
+    async Task DecryptGameLogs()
+    {
+        // 核心层定位日志文件，按状态给出提示
+        var locate = await GameLogService.LocateGameLogsAsync(this.CTS.Token);
+        var tipShow = this.AppContext.WindowManager.Shell.TipShow;
+        switch (locate.State)
+        {
+            case GameLogLocateState.GameFolderMissing:
+                await tipShow.ShowMessageAsync(
+                    LanguageService.GetString("LogDecrypt_SelectGameFolder"),
+                    Symbol.Clear
+                );
+                return;
+            case GameLogLocateState.LogsFolderMissing:
+                await tipShow.ShowMessageAsync(
+                    LanguageService.GetString("LogDecrypt_LogFolderMissing"),
+                    Symbol.Clear
+                );
+                return;
+            case GameLogLocateState.NoLogFiles:
+                await tipShow.ShowMessageAsync(
+                    LanguageService.GetString("LogDecrypt_LogFileMissing"),
+                    Symbol.Clear
+                );
+                return;
+        }
+
+        // 让用户选择解密结果输出目录
+        var outputFolder = await this.AppContext.WindowManager.Shell.PickersService.GetFolderPicker();
+        if (outputFolder == null || string.IsNullOrWhiteSpace(outputFolder.Path))
+        {
+            return;
+        }
+
+        var result = await GameLogService.DecryptGameLogsAsync(
+            locate.LogFiles,
+            outputFolder.Path,
+            this.CTS.Token
+        );
+
+        if (result.HasKeyMismatch)
+        {
+            // key 不匹配：解密结果不是有效明文，已拦截未导出
+            await tipShow.ShowMessageAsync(
+                string.Format(LanguageService.GetString("LogDecrypt_VerificationFailed"),
+                    result.KeyMismatchCount
+                ),
+                Symbol.Clear
+            );
+        }
+        else if (result.HasFailed)
+        {
+            await tipShow.ShowMessageAsync(
+                string.Format(LanguageService.GetString("LogDecrypt_CompletedWithErrors"),
+                    result.FailedCount
+                ),
+                Symbol.Clear
+            );
+        }
+        else
+        {
+            await tipShow.ShowMessageAsync(
+                string.Format(LanguageService.GetString("LogDecrypt_ShowCompletion"),
+                    result.DecryptedCount,
+                    result.CopiedCount
+                ),
+                Symbol.Accept
+            );
+        }
+
+        // 完成后打开输出目录（Windows 资源管理器）
+        WindowExtension.ShellExecute(
+            IntPtr.Zero,
+            "open",
+            outputFolder.Path,
+            null,
+            null,
+            WindowExtension.SW_SHOWNORMAL
+        );
     }
 
     private void SendTaskMethod(object recipient, SendTaskMessager message)

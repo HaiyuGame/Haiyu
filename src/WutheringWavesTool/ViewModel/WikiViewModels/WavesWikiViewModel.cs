@@ -136,9 +136,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase, IHaiyuCacheOwner
                     else
                     {
                         AppContext.WindowManager.Shell.TipShow.ShowMessage(
-                            LanguageService.GetStringByText(
-                                "获取卡池信息出现了不可预料的情况，请确认官方Wiki显示是否正常"
-                            ),
+                            LanguageService.GetString("Wiki_LoadBannerFailed"),
                             Symbol.Clear
                         );
                     }
@@ -146,11 +144,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase, IHaiyuCacheOwner
                 else
                 {
                     AppContext.WindowManager.Shell.TipShow.ShowMessage(
-                        LanguageService.FormatByText(
-                            LanguageService.GetStringByText(
-                                "获取数据失败，请检查网络或重启应用"
-                            )
-                        ),
+                        string.Format(LanguageService.GetString("Wiki_LoadDataFailed")),
                         Symbol.Clear
                     );
                 }
@@ -282,9 +276,7 @@ public partial class WavesWikiViewModel : WikiViewModelBase, IHaiyuCacheOwner
                 if (result.Code != 0 || result.Result == null)
                 {
                     AppContext.WindowManager.Shell.TipShow.ShowMessage(
-                        LanguageService.FormatByText(
-                            LanguageService.GetStringByText("获取数据失败，请检查网络或重启应用")
-                        ),
+                        string.Format(LanguageService.GetString("Wiki_LoadDataFailed")),
                         Symbol.Clear
                     );
                     return;

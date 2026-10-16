@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog
+    x:Class="Haiyu.Pages.Dialogs.SelectDownloadGameDialogV2"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helper="using:Haiyu.Helpers"
+    xmlns:i="using:Microsoft.Xaml.Interactivity"
+    xmlns:md="using:Waves.Core.Models"
+    xmlns:ui="using:Haiyu.Controls"
+    CornerRadius="12">
+    <ContentDialog.Resources>
+        <Style x:Key="SectionCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+            <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="16" />
+        </Style>
+    </ContentDialog.Resources>
+    <i:Interaction.Behaviors>
+        <i:EventTriggerBehavior EventName="Loaded">
+            <i:InvokeCommandAction Command="{x:Bind ViewModel.LoadedCommand}" />
+        </i:EventTriggerBehavior>
+    </i:Interaction.Behaviors>
+    <Grid Width="480" RowSpacing="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid ColumnSpacing="16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="48" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Border
+                Width="48"
+                Height="48"
+                VerticalAlignment="Top"
+                Background="{ThemeResource AccentFillColorDefaultBrush}"
+                CornerRadius="12">
+                <FontIcon
+                    FontSize="22"
+                    Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                    Glyph="&#xE896;" />
+            </Border>
+            <StackPanel Grid.Column="1" Spacing="4">
+                <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind helper:LanguageService.GetStringByText('下载游戏')}" />
+                <TextBlock
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Text="{x:Bind helper:LanguageService.GetString('GameDownload_ShowInstructions')}"
+                    TextWrapping="Wrap" />
+            </StackPanel>
+        </Grid>
+        <ScrollViewer
+            Grid.Row="1"
+            MaxHeight="460"
+            Padding="10,0"
+            HorizontalScrollBarVisibility="Disabled"
+            IsEnabled="{x:Bind ViewModel.IsBusy, Mode=OneWay, Converter={StaticResource BoolReversalConvert}}"
+            VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="20">
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox
+                        AutomationProperties.AutomationId="SelectDownloadGameDialogV2_PathInput"
+                        Header="{x:Bind helper:LanguageService.GetString('GameDownload_SelectInstallLocation')}"
+                        PlaceholderText="{x:Bind helper:LanguageService.GetString('GameInstall_EnterFullPath')}"
+                        Text="{x:Bind ViewModel.FolderPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <StackPanel Grid.Column="1" VerticalAlignment="Bottom">
+                        <Button
+                            VerticalAlignment="Bottom"
+                            AutomationProperties.AutomationId="SelectDownloadGameDialogV2_Browse"
+                            AutomationProperties.Name="{x:Bind helper:LanguageService.GetStringByText('浏览')}"
+                            Command="{x:Bind ViewModel.SelectFolderCommand}"
+                            ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetStringByText('浏览')}">
+                            <FontIcon FontSize="16" Glyph="&#xE8B7;" />
+                        </Button>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" VerticalAlignment="Bottom">
+                        <Button
+                            VerticalAlignment="Bottom"
+                            AutomationProperties.AutomationId="SelectDownloadGameDialogV2_Refresh"
+                            AutomationProperties.Name="{x:Bind helper:LanguageService.GetString('GameInstall_RefreshDiskInfo')}"
+                            Command="{x:Bind ViewModel.RefreshDiskCommand}"
+                            ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('GameInstall_RefreshDiskInfo')}">
+                            <FontIcon FontSize="16" Glyph="&#xE72C;" />
+                        </Button>
+                    </StackPanel>
+                </Grid>
+                <StackPanel
+                    Orientation="Horizontal"
+                    Spacing="10"
+                    Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <ProgressRing
+                        Width="18"
+                        Height="18"
+                        IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" />
+                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind helper:LanguageService.GetString('GameInstall_LoadDiskInfo')}" />
+                </StackPanel>
+                <StackPanel Spacing="16">
+                    <Border Style="{StaticResource SectionCardStyle}" Visibility="{x:Bind ViewModel.DiskVisibility, Mode=OneWay}">
+                        <StackPanel Spacing="12">
+                            <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind helper:LanguageService.GetString('GameInstall_ShowDiskSpace')}" />
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="{x:Bind ViewModel.DiskSpaceText, Mode=OneWay}"
+                                TextWrapping="Wrap" />
+                            <ui:LayeredProgressBar
+                                Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                                BarHeight="8"
+                                CornerRadius="4"
+                                MaxValue="{x:Bind ViewModel.MaxValue, Mode=OneWay}"
+                                Style="{ThemeResource DefaultLayeredProgressBarValue}"
+                                Values="{x:Bind ViewModel.BarValues, Mode=OneWay}">
+                                <ui:LayeredProgressBar.ItemTemplate>
+                                    <DataTemplate x:DataType="ui:LayerData">
+                                        <StackPanel
+                                            Margin="0,4,12,0"
+                                            Orientation="Horizontal"
+                                            Spacing="6">
+                                            <Ellipse
+                                                Width="8"
+                                                Height="8"
+                                                Fill="{x:Bind Color, Mode=OneWay}" />
+                                            <TextBlock Style="{ThemeResource CaptionTextBlockStyle}" Text="{x:Bind Label, Mode=OneWay}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ui:LayeredProgressBar.ItemTemplate>
+                            </ui:LayeredProgressBar>
+                        </StackPanel>
+                    </Border>
+                    <ComboBox
+                        HorizontalAlignment="Stretch"
+                        AutomationProperties.AutomationId="SelectDownloadGameDialogV2_ResourceSelection"
+                        Header="{x:Bind helper:LanguageService.GetString('GameDownload_SelectResourceQuality')}"
+                        ItemsSource="{x:Bind ViewModel.Bundles, Mode=OneWay}"
+                        SelectedItem="{x:Bind ViewModel.SelectedBundle, Mode=TwoWay}"
+                        Visibility="{x:Bind ViewModel.BundleVisibility, Mode=OneWay}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="md:BunleResourceSize">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="{x:Bind BunleName}" />
+                                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind BunleSize}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <InfoBar
+                        IsClosable="False"
+                        IsOpen="True"
+                        Message="{x:Bind ViewModel.TipMessage, Mode=OneWay}"
+                        Severity="Informational" />
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+        <Border
+            Grid.Row="2"
+            Padding="0,16,0,0"
+            BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+            BorderThickness="0,1,0,0">
+            <StackPanel
+                HorizontalAlignment="Right"
+                Orientation="Horizontal"
+                Spacing="8">
+                <Button
+                    MinWidth="100"
+                    AutomationProperties.AutomationId="SelectDownloadGameDialogV2_Cancel"
+                    Command="{x:Bind ViewModel.CancelCommand}"
+                    Content="{x:Bind helper:LanguageService.GetStringByText('取消')}" />
+                <Button
+                    MinWidth="120"
+                    AutomationProperties.AutomationId="SelectDownloadGameDialogV2_PrimaryAction"
+                    Command="{x:Bind ViewModel.DownloadCommand}"
+                    Content="{x:Bind helper:LanguageService.GetString('GameDownload_StartDownload')}"
+                    Style="{ThemeResource AccentButtonStyle}" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</ContentDialog>

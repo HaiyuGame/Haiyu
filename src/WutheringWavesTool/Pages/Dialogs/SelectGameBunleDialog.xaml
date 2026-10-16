@@ -5,16 +5,24 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:c="using:Waves.Core.Models"
     xmlns:control="using:Haiyu.Controls"
+    xmlns:converter="using:Haiyu.Converter"
     xmlns:cui="using:CommunityToolkit.WinUI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:h="using:Haiyu.Helpers"
     xmlns:helper="using:Haiyu.Helpers"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
+    xmlns:l="using:Haiyu.Helpers"
     xmlns:local="using:Haiyu.Pages.Dialogs"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Background="{ThemeResource AcrylicBackgroundFillColorBaseBrush}"
     CornerRadius="5"
     mc:Ignorable="d">
+    <ContentDialog.Resources>
+        <converter:BoolToLanguageConverter
+            x:Key="BoolToLanguageConverter"
+            FalseTextKey="GameBunleUninstall"
+            TrueTextKey="GameBunleInstall" />
+    </ContentDialog.Resources>
     <i:Interaction.Behaviors>
         <i:EventTriggerBehavior EventName="Loaded">
             <i:InvokeCommandAction Command="{x:Bind ViewModel.LoadedCommand}" />
@@ -39,7 +47,7 @@
             VerticalAlignment="Center"
             FontFamily="{ThemeResource DefaultFont}"
             FontSize="16"
-            Text="材质包选择" />
+            Text="{x:Bind h:LanguageService.GetString('GameBunleSelect')}" />
         <ItemsView
             Grid.Row="2"
             IsEnabled="{x:Bind ViewModel.InvokeEnable, Mode=OneWay}"
@@ -56,7 +64,15 @@
                                 <RowDefinition />
                                 <RowDefinition />
                             </Grid.RowDefinitions>
-                            <TextBlock VerticalAlignment="Center" Text="{x:Bind BunleName, Mode=OneWay}" />
+                            <TextBlock VerticalAlignment="Center">
+                                <Run
+                                    FontWeight="Bold"
+                                    Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"
+                                    Text="{x:Bind BunleName, Mode=OneWay}" />
+                                <Run Text="(" />
+                                <Run Text="{x:Bind Install, Mode=OneWay, Converter={StaticResource BoolToLanguageConverter}}" />
+                                <Run Text=")" />
+                            </TextBlock>
                             <TextBlock Grid.Row="1" Text="{x:Bind BunleSize, Mode=OneWay}" />
                             <StackPanel
                                 Grid.RowSpan="2"
@@ -94,7 +110,7 @@
             Grid.Row="2"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Text="当前游戏类型不支持材质包分级！"
+            Text="{x:Bind h:LanguageService.GetString('GameContextBunleError')}"
             Visibility="{x:Bind ViewModel.NullEnable, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
         <StackPanel
             Grid.Row="3"

@@ -79,9 +79,7 @@ public class AppContext<T> : IAppContext<T>
             LoggerService.WriteError(ex.Message);
             WindowExtension.MessageBox(
                 IntPtr.Zero,
-                LanguageService.GetStringByText(
-                    "出现故障性错误，请检查网络连接和日志！关闭当前消息自动打开日志文件夹"
-                ),
+                LanguageService.GetString("App_ShowFatalError"),
                 "Haiyu",
                 0
             );
@@ -115,7 +113,7 @@ public class AppContext<T> : IAppContext<T>
                 },
                 new()
                 {
-                    Header = LanguageService.GetStringByText("关闭主窗口"),
+                    Header = LanguageService.GetString("Window_CloseMainWindow"),
                     Command = this.LowPowerModeCommand,
                 },
                 new()

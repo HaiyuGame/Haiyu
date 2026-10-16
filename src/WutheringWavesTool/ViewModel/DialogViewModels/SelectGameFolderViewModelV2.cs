@@ -1,7 +1,8 @@
-using Waves.Core.Models.Options;
 using System.Text.RegularExpressions;
 using Haiyu.Common.Contracts;
-using Microsoft.UI.Xaml.Shapes;
+using Haiyu.Models.Dialogs;
+using Waves.Core.Models.Options;
+using Waves.Core.Services.GameResourceProvider;
 
 namespace Haiyu.ViewModel.DialogViewModels;
 
@@ -21,25 +22,83 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
     public IGameContextV2 GameContext { get; private set; }
 
     [ObservableProperty]
-    public partial string ExePath { get; set; }
+    [NotifyCanExecuteChangedFor(nameof(StartVerifyCommand), nameof(SelectVersionCommand))]
+    public partial bool HasBundleSelection { get; set; }
+
+    [ObservableProperty]
+    public partial ObservableCollection<BunleResourceSize> Bundles { get; set; } = new();
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(StartVerifyCommand), nameof(SelectVersionCommand))]
+    public partial BunleResourceSize? SelectedBundle { get; set; }
+
+    partial void OnSelectedBundleChanged(BunleResourceSize? value)
+    {
+        if (value is null)
+            return;
+        Parameter = new GameResourceParameter
+        {
+            BundleName = value.BunleName,
+            TargetPackVersions = Bundles.ToDictionary(x => x.BunleName, x => x.Version),
+        };
+    }
+
+    [ObservableProperty]
+    public partial string DiskSpaceText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(StartVerifyCommand), nameof(SelectVersionCommand))]
+    public partial bool IsBusy { get; set; }
+
+    private async Task RunBusyAsync(Func<Task> operation)
+    {
+        if (IsBusy)
+            return;
+        IsBusy = true;
+        try
+        {
+            var result = await TryInvokeAsync(async () =>
+            {
+                await operation();
+                return true;
+            });
+            if (result.Code == -2)
+                TipMessage = result.Message ?? LanguageService.GetString("GameInstall_ReadFailed");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [ObservableProperty]
+    public partial string ExePath { get; set; } = string.Empty;
 
     [ObservableProperty]
     public partial string TipMessage { get; set; } =
         LanguageService.GetStringByText("选择目标程序，以查看驱动器详情");
 
+    private bool CanImport() => IsVerify && !IsBusy
+        && !string.IsNullOrWhiteSpace(SelectedVersion)
+        && (!HasBundleSelection || SelectedBundle is not null);
+
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(StartVerifyCommand), nameof(SelectVersionCommand))]
     public partial bool IsVerify { get; set; }
+
+    partial void OnExePathChanged(string value) => IsVerify = false;
 
     public bool GetIsVerify() => IsVerify;
 
     [ObservableProperty]
-    public partial ObservableCollection<LayerData> BarValues { get; set; }
+    public partial ObservableCollection<LayerData> BarValues { get; set; } = new();
 
     [ObservableProperty]
     public partial ObservableCollection<string> Versions { get; set; } = new();
 
     [ObservableProperty]
-    public partial string SelectedVersion { get; set; }
+    [NotifyCanExecuteChangedFor(nameof(StartVerifyCommand), nameof(SelectVersionCommand))]
+    public partial string SelectedVersion { get; set; } = string.Empty;
 
     [ObservableProperty]
     public partial double MaxValue { get; set; }
@@ -65,10 +124,18 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
     }
 
     [RelayCommand]
-    async Task RefreshDiskAsync()
+    Task RefreshDiskAsync() => RunBusyAsync(RefreshDiskCoreAsync);
+
+    private async Task RefreshDiskCoreAsync()
     {
-        if (!File.Exists(ExePath))
+        IsVerify = false;
+        if (!File.Exists(ExePath)
+            || !string.Equals(Path.GetFileName(ExePath), GameContext.Config.GameExeName, StringComparison.OrdinalIgnoreCase))
+        {
+            TipMessage = LanguageService.GetString("GameImport_SelectValidExecutable");
             return;
+        }
+        var checkedPath = ExePath;
         var folderPath = System.IO.Path.GetDirectoryName(ExePath);
         var directoryInfo = new DirectoryInfo(folderPath);
         var folderSizeBytes = await CalculateFolderSizeAsync(directoryInfo);
@@ -86,6 +153,8 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
         }
 
         Launcher = await this.GameContext.GetResourceSummaryAsync(Parameter, this.CTS.Token);
+        if (IsDisposed || checkedPath != ExePath)
+            return;
         if (Launcher == null)
         {
             TipMessage = LanguageService.FormatByText(
@@ -96,6 +165,7 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
 
         var totalSpaceGB = BytesToGigabytes(driveInfo.TotalSize);
         var freeSpaceGB = BytesToGigabytes(driveInfo.TotalFreeSpace);
+        DiskSpaceText = string.Format(LanguageService.GetString("GameInstall_ShowAvailableSpace"), freeSpaceGB, totalSpaceGB);
         this.MaxValue = totalSpaceGB;
         this.BarValues = new ObservableCollection<LayerData>([
             new LayerData()
@@ -117,19 +187,52 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
                 Value = totalSpaceGB - freeSpaceGB - folderSizeGB,
             },
         ]);
+        TipMessage = LanguageService.GetString("GameImport_GameDetected");
         IsVerify = true;
     }
 
-    [RelayCommand]
-    async Task StartVerify()
+    [RelayCommand(CanExecute = nameof(CanImport))]
+    Task StartVerify() => RunBusyAsync(async () =>
     {
-        this.Result = ContentDialogResult.Primary;
-        await this.Close();
-    }
+        if (!IsVerify)
+            return;
+        var bundleConfig = await GetBundleConfigAsync();
+        if (bundleConfig.Count > 0
+            && !await GameContext.GameLocalConfig.SaveConfigsAsync(bundleConfig, CTS.Token))
+        {
+            TipMessage = LanguageService.GetString("GameImport_SaveTextureFailed");
+            return;
+        }
+        await CloseAsync(new SelectDownloadFolderResult
+        {
+            InstallFolder = Path.GetDirectoryName(ExePath)!,
+            Result = ContentDialogResult.Primary,
+            Summary = Launcher,
+            Parameter = Parameter,
+        });
+    });
 
     [RelayCommand]
-    async Task Loaded()
+    Task Loaded() => RunBusyAsync(LoadCoreAsync);
+
+    private async Task LoadCoreAsync()
     {
+        HasBundleSelection = GameContext.IsBunle
+            && GameContext.GameResourceProvider is BundleGameResourceProvider;
+        if (HasBundleSelection && GameContext.GameResourceProvider is BundleGameResourceProvider provider)
+        {
+            Bundles = await provider.GetBunlesAsync();
+            var bundleName = Parameter?.BundleName
+                ?? await GameContext.GameLocalConfig.GetConfigAsync(GameLocalSettingName.BunleName, CTS.Token)
+                ?? GameContext.Config.BunleDefaultBundleName;
+            SelectedBundle = Bundles.FirstOrDefault(x => string.Equals(x.BunleName, bundleName, StringComparison.OrdinalIgnoreCase))
+                ?? Bundles.FirstOrDefault();
+            if (SelectedBundle is null)
+            {
+                TipMessage = LanguageService.GetString("GameImport_LoadTextureFailed");
+                return;
+            }
+        }
         Launcher = await this.GameContext.GetResourceSummaryAsync(Parameter, this.CTS.Token);
         if (Launcher == null)
         {
@@ -145,9 +248,13 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
         this.StartVerifyCommand.NotifyCanExecuteChanged();
     }
 
-    [RelayCommand]
-    async Task SelectVersion()
+    [RelayCommand(CanExecute = nameof(CanImport))]
+    Task SelectVersion() => RunBusyAsync(SelectVersionCoreAsync);
+
+    private async Task SelectVersionCoreAsync()
     {
+        if (!IsVerify)
+            return;
         var folder = System.IO.Path.GetDirectoryName(this.ExePath);
         if (
             string.IsNullOrWhiteSpace(this.SelectedVersion)
@@ -155,22 +262,16 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
             || string.IsNullOrWhiteSpace(folder)
         )
             return;
-        await this.GameContext.GameLocalConfig.SaveConfigAsync(
-            GameLocalSettingName.LocalGameVersion,
-            SelectedVersion
-        );
-        await this.GameContext.GameLocalConfig.SaveConfigAsync(
-            GameLocalSettingName.GameLauncherBassFolder,
-            folder
-        );
-        await this.GameContext.GameLocalConfig.SaveConfigAsync(
-            GameLocalSettingName.LocalGameUpdateing,
-            "False"
-        );
-        await this.GameContext.GameLocalConfig.SaveConfigAsync(
-            GameLocalSettingName.GameLauncherBassProgram,
-            ExePath
-        );
+        var config = await GetBundleConfigAsync();
+        config[GameLocalSettingName.LocalGameVersion] = SelectedVersion;
+        config[GameLocalSettingName.GameLauncherBassFolder] = folder;
+        config[GameLocalSettingName.LocalGameUpdateing] = "False";
+        config[GameLocalSettingName.GameLauncherBassProgram] = ExePath;
+        if (!await GameContext.GameLocalConfig.SaveConfigsAsync(config, CTS.Token))
+        {
+            TipMessage = LanguageService.GetString("GameImport_SaveConfigFailed");
+            return;
+        }
         this.GameContext.GameEventPublisher.Publish(
             new GameContextOutputArgs()
             {
@@ -178,6 +279,31 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
             }
         );
         await this.Close();
+    }
+
+    private async Task<Dictionary<string, string>> GetBundleConfigAsync()
+    {
+        var config = new Dictionary<string, string>();
+        if (!HasBundleSelection)
+            return config;
+        var bundle = SelectedBundle
+            ?? throw new InvalidOperationException(LanguageService.GetString("GameImport_RequireTexture"));
+        if (string.IsNullOrWhiteSpace(bundle.Version))
+            throw new InvalidOperationException(LanguageService.GetString("GameImport_ReloadTextureVersion"));
+
+        var arguments = await GameContext.GameLocalConfig.GetConfigAsync(
+            GameLocalSettingName.StartGameArguments, CTS.Token) ?? string.Empty;
+        arguments = Regex.Replace(arguments, @"(?<!\S)-krqlv=(?:""[^""]*""|\S+)", "", RegexOptions.IgnoreCase).Trim();
+        var quality = string.IsNullOrWhiteSpace(bundle.ResourceCommand)
+            ? bundle.BunleName.ToLowerInvariant()
+            : bundle.ResourceCommand.ToLowerInvariant();
+        config[GameLocalSettingName.BunleName] = bundle.BunleName;
+        config[GameLocalSettingName.GetBunlePackVersionKey(bundle.BunleName)] = bundle.Version;
+        config[GameLocalSettingName.BunlePackVersion_Common] = SelectedVersion;
+        config[GameLocalSettingName.StartGameArguments] = string.IsNullOrWhiteSpace(arguments)
+            ? $"-krqlv={quality}"
+            : $"{arguments} -krqlv={quality}";
+        return config;
     }
 
     private async Task<long> CalculateFolderSizeAsync(DirectoryInfo directory)
