@@ -149,6 +149,39 @@
                     </StackPanel>
                 </Button>
             </cui:SettingsCard>
+            <cui:SettingsCard Description="{x:Bind helper:LanguageService.GetString('Toolkit_OfficialRecordDescription')}" Header="{x:Bind helper:LanguageService.GetString('Toolkit_OfficialRecordHeader')}">
+                <cui:SettingsCard.HeaderIcon>
+                    <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8F1;" />
+                </cui:SettingsCard.HeaderIcon>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button
+                        Padding="12,8"
+                        HorizontalAlignment="Right"
+                        Command="{x:Bind ViewModel.WriteOfficialInstallRecordCommand}"
+                        Style="{ThemeResource TitleBarButtonStyle}">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <FontIcon
+                                FontFamily="Segoe Fluent Icons"
+                                FontSize="13"
+                                Glyph="&#xE898;" />
+                            <TextBlock FontSize="13" Text="{x:Bind helper:LanguageService.GetString('Toolkit_OfficialRecordWriteAction')}" />
+                        </StackPanel>
+                    </Button>
+                    <Button
+                        Padding="12,8"
+                        HorizontalAlignment="Right"
+                        Command="{x:Bind ViewModel.RemoveOfficialInstallRecordCommand}"
+                        Style="{ThemeResource TitleBarButtonStyle}">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <FontIcon
+                                FontFamily="Segoe Fluent Icons"
+                                FontSize="13"
+                                Glyph="&#xE74D;" />
+                            <TextBlock FontSize="13" Text="{x:Bind helper:LanguageService.GetString('Toolkit_OfficialRecordRemoveAction')}" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </cui:SettingsCard>
             <Grid Margin="0,15,0,0" VerticalAlignment="Center">
                 <TextBlock
                     VerticalAlignment="Center"
