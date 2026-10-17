@@ -63,6 +63,12 @@ public class GameLocalSettingName
 
     public const string StartGameExeName = nameof(StartGameExeName);
 
+    public const string CustomLauncherEnabled = nameof(CustomLauncherEnabled);
+
+    public const string CustomLauncherPath = nameof(CustomLauncherPath);
+
+    public const string CustomLauncherArguments = nameof(CustomLauncherArguments);
+
     public const string GameRunTotalTime = nameof(GameRunTotalTime);
 
     /// <summary>
