@@ -68,8 +68,7 @@ public sealed partial class KuroGameSettingViewModel : DialogViewModelBase
     [RelayCommand]
     void ValidateCustomLauncher()
     {
-        var error = GetCustomLauncher().Validate();
-        CustomLaunchError = error is null ? string.Empty : LanguageService.GetStringByText(error);
+        CustomLaunchError = GetCustomLauncher().Validate() ?? string.Empty;
         HasCustomLaunchError = CustomLaunchError.Length > 0;
     }
 
