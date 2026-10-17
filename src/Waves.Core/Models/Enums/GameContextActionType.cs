@@ -28,5 +28,8 @@ public enum GameContextActionType:uint
     TipMessage,
     CdnSelect,
     ZipDecompress,
-    PublishStep
+    PublishStep,
+
+    // Resource discovery is active before a downloader exists.
+    Preparing
 }

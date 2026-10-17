@@ -94,7 +94,8 @@ public sealed class LegacyResourceProviderTests
     public async Task VerificationUsesPredownloadTarget()
     {
         using var fixture = await Fixture.Create("1");
-        var plan = await fixture.Provider.GetVerificationResourceAsync("3");
+        await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => fixture.Provider.GetVerificationResourceAsync("3"));
+        var plan = await fixture.Provider.GetVerificationResourceAsync("3", new() { VerificationSource = GameVerificationSource.Predownload });
         Assert.AreEqual("3", plan.NewGameVersion);
         Assert.AreEqual("/next-index", fixture.Handler.Requests.Last().AbsolutePath);
         Assert.AreEqual("1", await fixture.Local.GetConfigAsync(GameLocalSettingName.LocalGameVersion));

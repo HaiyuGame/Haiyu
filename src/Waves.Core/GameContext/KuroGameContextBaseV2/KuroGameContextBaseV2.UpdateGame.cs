@@ -23,6 +23,9 @@ partial class KuroGameContextBaseV2
         InstallOption option, GameResourceParameter? parameter)
     {
         if (Interlocked.CompareExchange(ref _resourceOperationActive, 1, 0) != 0) return false;
+        var queued = false;
+        GameContextOutputArgs.CurrentGeneration.Value = Interlocked.Increment(ref _operationGeneration);
+        GameEventPublisher.Publish(new() { Type = GameContextActionType.Preparing, IsAction = true, Prod = option.IsProd, TipMessage = "正在获取资源列表…" });
         try
         {
             var plan = await query();
@@ -39,11 +42,16 @@ partial class KuroGameContextBaseV2
             }
             await ResolveDownloadFolderAsync(option);
             option.DownloadFolder = option.ResolveDownloadFolder(baseFolder);
-            var generation = Interlocked.Increment(ref _operationGeneration);
-            GameContextOutputArgs.CurrentGeneration.Value = generation;
             _ = Task.Run(async () =>
             {
-                try { await ExecuteResourcePlanAsync(plan, option, parameter); }
+                try
+                {
+                    if (!await ExecuteResourcePlanAsync(plan, option, parameter))
+                    {
+                        Logger.WriteError("资源任务未完成，未确认安装成功；保留当前版本记录。");
+                        SystemEventPublisher.Publish(new() { Message = "资源任务未完成，请查看日志后重试。" });
+                    }
+                }
                 catch (OperationCanceledException) { }
                 catch (Exception ex)
                 {
@@ -56,12 +64,18 @@ partial class KuroGameContextBaseV2
                     Interlocked.Exchange(ref _resourceOperationActive, 0);
                 }
             });
+            queued = true;
             return true;
         }
         catch
         {
             Interlocked.Exchange(ref _resourceOperationActive, 0);
             throw;
+        }
+        finally
+        {
+            if (!queued)
+                GameEventPublisher.Publish(new() { Type = GameContextActionType.None, Prod = option.IsProd });
         }
     }
 
@@ -104,8 +118,8 @@ partial class KuroGameContextBaseV2
         var groups = plan.PatchResources.Where(x => x.IsSelected && x.IsGroup).ToList();
         if (patches.Count != 0) tasks.Add((patches, "下载补丁文件", Path.Combine(cache, "patchs")));
         if (groups.Count != 0) tasks.Add((groups, "下载补丁组文件", Path.Combine(cache, "patchGroup")));
-        if (plan.ZipResources.Count != 0) tasks.Add((plan.ZipResources.Where(x => x.IsSelected), "下载压缩包更新文件", Path.Combine(cache, "zips")));
-        if (plan.DefaultResource.Count != 0) tasks.Add((plan.DefaultResource.Where(x => x.IsSelected), "下载更新文件", Path.Combine(cache, "resources")));
+        if (plan.ZipResources.Any(x => x.IsSelected)) tasks.Add((plan.ZipResources.Where(x => x.IsSelected), "下载压缩包更新文件", Path.Combine(cache, "zips")));
+        if (plan.DefaultResource.Any(x => x.IsSelected)) tasks.Add((plan.DefaultResource.Where(x => x.IsSelected), "下载更新文件", Path.Combine(cache, "resources")));
         Setups = tasks.Select(x => x.Name).ToList();
         for (var i = 0; i < tasks.Count; i++)
         {
@@ -129,7 +143,7 @@ partial class KuroGameContextBaseV2
     }
 
     private async Task<bool> DownloadFilesAsync(IEnumerable<GameFileInfo> files, string folder,
-        DownloadState state, bool isProd, string name, bool deleteExtra = false, List<string>? skip = null, bool forceFullVerify = false, IEnumerable<GameResourceCdn>? cdns = null)
+        DownloadState state, bool isProd, string name, bool deleteExtra = false, List<string>? skip = null, IEnumerable<GameResourceCdn>? cdns = null)
     {
         _currentRunningAction = null;
         var list = files.ToList();
@@ -151,7 +165,7 @@ partial class KuroGameContextBaseV2
         {
             ["resource"] = list, ["isDelete"] = deleteExtra, ["folder"] = folder,
             ["httpClient"] = HttpClientService, ["downloadState"] = state, ["isProd"] = isProd,
-            ["fastVerify"] = !forceFullVerify && bool.TryParse(fast, out var enabled) && enabled,
+            ["fastVerify"] = bool.TryParse(fast, out var enabled) && enabled,
             ["skipVerifyFile"] = skip ?? []
         }, GameEventPublisher);
         _currentRunningAction = action;
@@ -168,7 +182,11 @@ partial class KuroGameContextBaseV2
             await ResolveDownloadFolderAsync(option);
             var state = await CreateResourceStateAsync(false);
             _installGameResourceCts = state.CancelToken;
-            await InstallResourcePlanAsync(plan, option, parameter, state);
+            if (!await InstallResourcePlanAsync(plan, option, parameter, state))
+            {
+                state.CancelToken.Token.ThrowIfCancellationRequested();
+                throw new InvalidOperationException("安装或校验未完成，未提交目标版本配置。");
+            }
         }
         catch (OperationCanceledException) { }
         catch (Exception ex)
@@ -190,12 +208,42 @@ partial class KuroGameContextBaseV2
         var baseFolder = await GameLocalConfig.GetConfigAsync(GameLocalSettingName.GameLauncherBassFolder, state.CancelToken.Token);
         if (string.IsNullOrWhiteSpace(baseFolder)) return false;
         var current = await GameLocalConfig.GetConfigAsync(GameLocalSettingName.LocalGameVersion, state.CancelToken.Token) ?? "";
-        if (!string.IsNullOrEmpty(plan.OldGameVersion) && current != plan.OldGameVersion) return false;
+        if (plan.ResourceVersion == "2")
+        {
+            // 分包计划的主包版本不一定等于汇总主版本；逐包核对计划生成时的本地快照。
+            var recorded = new Dictionary<string, string?>();
+            foreach (var name in plan.ResourcePacks.Select(x => x.Name)
+                .Concat(["Common", "HD", "SD", "UHD"]).Distinct(StringComparer.Ordinal))
+                recorded[name] = await GameLocalConfig.GetConfigAsync(
+                    GameLocalSettingName.GetBunlePackVersionKey(name), state.CancelToken.Token);
+            var hasPackRecords = recorded.Values.Any(x => x is not null);
+            foreach (var pack in plan.ResourcePacks)
+            {
+                var local = hasPackRecords ? recorded[pack.Name] ?? "" : current;
+                if (local != pack.LocalVersion)
+                    throw new InvalidOperationException($"分包 {pack.Name} 的本地版本已变化：计划 {pack.LocalVersion}，当前 {local}。请重新获取更新清单。");
+            }
+        }
+        else if (!string.IsNullOrEmpty(plan.OldGameVersion) && current != plan.OldGameVersion)
+            throw new InvalidOperationException($"本地版本已变化：计划 {plan.OldGameVersion}，当前 {current}。请重新获取更新清单。");
         await ResolveDownloadFolderAsync(option);
         var cache = option.ResolveDownloadFolder(baseFolder);
         _installGameResourceCts = state.CancelToken;
         // 提前安装和普通更新始终按清单目标版本获取完整校验索引，缺失时停止安装。
-        var verification = await GetVerificationResourceAsync(plan.NewGameVersion, parameter, state.CancelToken.Token);
+        // 校验锁定本次下载清单的逐包目标，避免沿用界面中的本地版本而误选预下载配置。
+        var verificationParameter = new GameResourceParameter
+        {
+            BundleName = plan.BundleName ?? parameter?.BundleName,
+            VerificationPackVersions = plan.ResourceVersion == "2"
+                ? plan.ResourcePacks.ToDictionary(x => x.Name, x => x.TargetVersion)
+                : null,
+            // 预下载只下载；普通更新和预下载发布后的安装使用正式配置。
+            // 只有提前安装仍未发布的版本才使用预下载配置。
+            VerificationSource = option.IsAdvance
+                ? GameVerificationSource.Predownload
+                : GameVerificationSource.Official
+        };
+        var verification = await GetVerificationResourceAsync(plan.NewGameVersion, verificationParameter, state.CancelToken.Token);
         if (!IsExecutable(verification) || verification.ZipResources.Count != 0 || verification.PatchResources.Count != 0) return false;
         var steps = new List<(IProgressSetup Action, string Name)>();
         void Add(IProgressSetup action, string name, Dictionary<string, object> args)
@@ -215,17 +263,17 @@ partial class KuroGameContextBaseV2
             ["diffFolderPath"] = Path.Combine(cache, "patchGroup"), ["baseFolderPath"] = baseFolder,
             ["decompressTempFolder"] = Path.Combine(baseFolder, "decompressFolder")
         });
-        if (plan.ZipResources.Count != 0) Add(new InstallKrZipResource(Logger), "安装压缩包", new()
+        if (plan.ZipResources.Any(x => x.IsSelected)) Add(new InstallKrZipResource(Logger), "安装压缩包", new()
         {
             ["zipInfos"] = plan.ZipResources.Where(x => x.IsSelected).ToList(), ["zipDownFolder"] = Path.Combine(cache, "zips"),
             ["baseGamePath"] = baseFolder, ["downloadState"] = state
         });
-        if (plan.DefaultResource.Count != 0) Add(new MoveFileResource(Logger), "移动更新文件", new()
+        if (plan.DefaultResource.Any(x => x.IsSelected)) Add(new MoveFileResource(Logger), "移动更新文件", new()
         {
             ["files"] = plan.DefaultResource.Where(x => x.IsSelected).ToDictionary(x => BuildFileHelper.ResolveFilePath(Path.Combine(cache, "resources"), x.Dest),
                 x => BuildFileHelper.ResolveFilePath(baseFolder, x.Dest))
         });
-        Setups = steps.Select(x => x.Name).Append("重新校验文件").ToList();
+        Setups = steps.Select(x => x.Name).Append("重新校验文件").Append("写入配置文件").ToList();
         for (var i = 0; i < steps.Count; i++)
         {
             state.CancelToken.Token.ThrowIfCancellationRequested();
@@ -237,7 +285,7 @@ partial class KuroGameContextBaseV2
         state.CancelToken.Token.ThrowIfCancellationRequested();
         CurrentSetups = steps.Count;
         await GameEventPublisher.PublishStepAsync("重新校验文件", CurrentSetups, Setups, isProd: false);
-        if (!await DownloadFilesAsync(verification.DefaultResource.Where(x => x.IsSelected), baseFolder, state, false, "重新校验文件", forceFullVerify: true, cdns: verification.CdnCandidates)) return false;
+        if (!await DownloadFilesAsync(verification.DefaultResource.Where(x => x.IsSelected), baseFolder, state, false, "重新校验文件", cdns: verification.CdnCandidates)) return false;
         state.CancelToken.Token.ThrowIfCancellationRequested();
         foreach (var dest in plan.DeleteFiles)
         {
@@ -245,8 +293,10 @@ partial class KuroGameContextBaseV2
             if (File.Exists(path)) File.Delete(path);
         }
         state.CancelToken.Token.ThrowIfCancellationRequested();
+        CurrentSetups = steps.Count + 1;
+        await GameEventPublisher.PublishStepAsync("写入配置文件", CurrentSetups, Setups, isProd: false);
         var writer = new WriteGameResourceConfig(GameLocalConfig, plan.NewGameVersion, Config, Logger);
-        await writer.WriteDownloadAndUpDateResultAsync(option, state.CancelToken.Token);
+        await writer.WriteDownloadAndUpDateResultAsync(option, state.CancelToken.Token, plan);
         foreach (var (files, child) in new[] {
             (plan.PatchResources.Where(x => x.IsSelected && !x.IsGroup).Cast<GameFileInfo>(), "patchs"),
             (plan.PatchResources.Where(x => x.IsSelected && x.IsGroup).Cast<GameFileInfo>(), "patchGroup"),
@@ -254,7 +304,14 @@ partial class KuroGameContextBaseV2
             foreach (var file in files)
             {
                 var path = BuildFileHelper.ResolveFilePath(Path.Combine(cache, child), file.Dest);
-                if (File.Exists(path)) File.Delete(path);
+                try
+                {
+                    if (File.Exists(path)) File.Delete(path);
+                }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                {
+                    Logger.WriteError($"安装已完成，缓存清理失败：{path}；{ex.Message}");
+                }
             }
         state.IsActive = false;
         Logger.WriteInfo("安装完成");

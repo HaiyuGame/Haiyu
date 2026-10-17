@@ -198,6 +198,7 @@ public static class InstanceBuilderExtensions
                     .AddSingleton<IThemeService, ThemeService>()
                     .AddSingleton<IKuroAccountService, KuroAccountService>()
                     .AddSingleton<IGameLogService, GameLogService>()
+                    .AddSingleton<IOfficialLauncherRecordService, OfficialLauncherRecordService>()
                     .AddSingleton<AutoKuroGameSignService>()
                     .AddSingleton<AutoKuroClientSignService>()
                     .AddSingleton<ITaskManager, TaskManager>(s => CreateTask(s))

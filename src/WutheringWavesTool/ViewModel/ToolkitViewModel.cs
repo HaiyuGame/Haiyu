@@ -12,12 +12,14 @@ public sealed partial class ToolkitViewModel : ViewModelBase
     public ToolkitViewModel(
         IViewFactorys viewFactorys,
         ITaskManager taskManager,
-        IGameLogService gameLogService
+        IGameLogService gameLogService,
+        IOfficialLauncherRecordService officialLauncherRecordService
     )
     {
         ViewFactorys = viewFactorys;
         TaskManager = taskManager;
         GameLogService = gameLogService;
+        OfficialLauncherRecordService = officialLauncherRecordService;
         ReisterMessager();
     }
 
@@ -31,6 +33,8 @@ public sealed partial class ToolkitViewModel : ViewModelBase
     public ITaskManager TaskManager { get; }
 
     public IGameLogService GameLogService { get; }
+
+    public IOfficialLauncherRecordService OfficialLauncherRecordService { get; }
 
     [ObservableProperty]
     public partial ObservableCollection<TaskWrapper> Tasks { get; set; }
@@ -250,6 +254,162 @@ public sealed partial class ToolkitViewModel : ViewModelBase
             null,
             null,
             WindowExtension.SW_SHOWNORMAL
+        );
+    }
+
+    /// <summary>
+    /// 官方启动器安装记录工具：向游戏目录写入官方格式的安装记录，
+    /// 使官方启动器"定位游戏目录"时识别为已安装，避免触发全量重下。
+    /// </summary>
+    [RelayCommand]
+    async Task WriteOfficialInstallRecord()
+    {
+        var tipShow = this.AppContext.WindowManager.Shell.TipShow;
+        var locate = await OfficialLauncherRecordService.LocateGameFolderAsync(this.CTS.Token);
+        switch (locate.State)
+        {
+            case OfficialRecordLocateState.NotWavesGame:
+                await tipShow.ShowMessageAsync(
+                    LanguageService.GetString("OfficialRecord_NotWavesGame"),
+                    Symbol.Clear
+                );
+                return;
+            case OfficialRecordLocateState.GameFolderMissing:
+                await tipShow.ShowMessageAsync(
+                    LanguageService.GetString("OfficialRecord_SelectGameFolder"),
+                    Symbol.Clear
+                );
+                return;
+            case OfficialRecordLocateState.GameFolderEmpty:
+                await tipShow.ShowMessageAsync(
+                    LanguageService.GetString("OfficialRecord_FolderEmpty"),
+                    Symbol.Clear
+                );
+                return;
+            case OfficialRecordLocateState.GameExeMissing:
+                await tipShow.ShowMessageAsync(
+                    LanguageService.GetString("OfficialRecord_GameExeMissing"),
+                    Symbol.Clear
+                );
+                return;
+        }
+
+        // 组装安装记录（逐包版本取服务器当前配置）。
+        var record = await OfficialLauncherRecordService.BuildInstallRecordAsync(this.CTS.Token);
+        if (record is null)
+        {
+            await tipShow.ShowMessageAsync(
+                LanguageService.GetString("OfficialRecord_BuildFailed"),
+                Symbol.Clear
+            );
+            return;
+        }
+
+        var installResult = await OfficialLauncherRecordService.WriteInstallRecordAsync(
+            locate.GameFolder,
+            record,
+            this.CTS.Token
+        );
+        if (installResult.HasFailed)
+        {
+            await tipShow.ShowMessageAsync(
+                string.Format(
+                    LanguageService.GetString("OfficialRecord_WriteFailed"),
+                    installResult.FailedFiles.Count
+                ),
+                Symbol.Clear
+            );
+            return;
+        }
+
+        // 资源清单体积较大且非判定必需，拉取失败不回滚已写入的安装记录。
+        var indexResult = await OfficialLauncherRecordService.WriteResourceIndexAsync(
+            locate.GameFolder,
+            record,
+            this.CTS.Token
+        );
+        if (indexResult.HasFailed)
+        {
+            await tipShow.ShowMessageAsync(
+                string.Format(
+                    LanguageService.GetString("OfficialRecord_IndexWriteFailed"),
+                    installResult.WrittenCount,
+                    indexResult.FailedFiles.Count
+                ),
+                Symbol.Message
+            );
+            return;
+        }
+        await tipShow.ShowMessageAsync(
+            string.Format(
+                LanguageService.GetString("OfficialRecord_Completed"),
+                installResult.WrittenCount + indexResult.WrittenCount
+            ),
+            Symbol.Accept
+        );
+    }
+
+    /// <summary>
+    /// 官方启动器安装记录工具：移除本工具写入的官方记录文件。
+    /// </summary>
+    [RelayCommand]
+    async Task RemoveOfficialInstallRecord()
+    {
+        var tipShow = this.AppContext.WindowManager.Shell.TipShow;
+        var locate = await OfficialLauncherRecordService.LocateGameFolderAsync(this.CTS.Token);
+        switch (locate.State)
+        {
+            case OfficialRecordLocateState.NotWavesGame:
+                await tipShow.ShowMessageAsync(
+                    LanguageService.GetString("OfficialRecord_NotWavesGame"),
+                    Symbol.Clear
+                );
+                return;
+            case OfficialRecordLocateState.GameFolderMissing:
+                await tipShow.ShowMessageAsync(
+                    LanguageService.GetString("OfficialRecord_SelectGameFolder"),
+                    Symbol.Clear
+                );
+                return;
+            case OfficialRecordLocateState.GameFolderEmpty:
+                await tipShow.ShowMessageAsync(
+                    LanguageService.GetString("OfficialRecord_FolderEmpty"),
+                    Symbol.Clear
+                );
+                return;
+            case OfficialRecordLocateState.GameExeMissing:
+                await tipShow.ShowMessageAsync(
+                    LanguageService.GetString("OfficialRecord_GameExeMissing"),
+                    Symbol.Clear
+                );
+                return;
+        }
+        if (!await OfficialLauncherRecordService.HasAnyRecordAsync(locate.GameFolder, this.CTS.Token))
+        {
+            await tipShow.ShowMessageAsync(
+                LanguageService.GetString("OfficialRecord_NothingToRemove"),
+                Symbol.Clear
+            );
+            return;
+        }
+        var result = await OfficialLauncherRecordService.RemoveRecordsAsync(locate.GameFolder, this.CTS.Token);
+        if (result.HasFailed)
+        {
+            await tipShow.ShowMessageAsync(
+                string.Format(
+                    LanguageService.GetString("OfficialRecord_RemoveFailed"),
+                    result.FailedFiles.Count
+                ),
+                Symbol.Clear
+            );
+            return;
+        }
+        await tipShow.ShowMessageAsync(
+            string.Format(
+                LanguageService.GetString("OfficialRecord_Removed"),
+                result.RemovedEntries.Count
+            ),
+            Symbol.Accept
         );
     }
 

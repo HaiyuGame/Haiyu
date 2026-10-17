@@ -419,12 +419,8 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
         }
         var indexSource = await this.GetResourceSummaryAsync(token: token);
         if (!IsBunle) localVersion = indexSource.LocalVersion;
-        var gameNeedsUpdate = IsBunle
-            ? (Version.TryParse(localVersion, out var installedVersion)
-                && Version.TryParse(indexSource.OfficialVersion, out var officialVersion)
-                ? installedVersion < officialVersion
-                : !string.Equals(localVersion, indexSource.OfficialVersion, StringComparison.Ordinal))
-            : indexSource.Update.Availability != GameResourceAvailability.AlreadyCurrent;
+        // 两种 Provider 均已计算更新状态；分包更新还可能只有材质包变更。
+        var gameNeedsUpdate = indexSource.Update.Availability != GameResourceAvailability.AlreadyCurrent;
         if (indexSource != null)
         {
             await ClearVersion(gameNeedsUpdate);

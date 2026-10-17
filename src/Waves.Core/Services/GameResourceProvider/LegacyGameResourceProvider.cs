@@ -347,18 +347,20 @@ public sealed partial class LegacyGameResourceProvider : IGameResourceProvider
         var source = await GetGameLauncherSourceAsync(token);
         global::Waves.Api.Models.Config config;
         string resourcesBasePath;
-        if (source.ResourceDefault.Version == targetVersion)
+        if (parameter?.VerificationSource == GameVerificationSource.Predownload)
         {
-            config = source.ResourceDefault.Config;
-            resourcesBasePath = source.ResourceDefault.ResourcesBasePath;
-        }
-        else if (source.Predownload?.Version == targetVersion)
-        {
+            if (source.Predownload?.Version != targetVersion)
+                throw new InvalidOperationException($"预下载校验目标不匹配：{targetVersion}");
             config = source.Predownload.Config;
             resourcesBasePath = source.Predownload.ResourcesBasePath;
         }
         else
-            throw new InvalidOperationException($"目标版本配置已失效：{targetVersion}");
+        {
+            if (source.ResourceDefault.Version != targetVersion)
+                throw new InvalidOperationException($"正式校验目标不匹配：{targetVersion}，当前正式版本：{source.ResourceDefault.Version}");
+            config = source.ResourceDefault.Config;
+            resourcesBasePath = source.ResourceDefault.ResourcesBasePath;
+        }
         var result = await BuildAsync(
             config,
             source.ResourceDefault.CdnList,

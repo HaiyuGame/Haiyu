@@ -7,6 +7,7 @@ using Waves.Core.Common.Downloads;
 using Waves.Core.Contracts;
 using Waves.Core.GameContext.KruoGameContextBaseV2.Common;
 using Waves.Core.Models;
+using Waves.Core.Models.Enums;
 using Waves.Core.Services;
 
 namespace Project.Test;
@@ -89,6 +90,74 @@ public sealed class ResourceDownloadTests
     }
 
     [TestMethod]
+    public async Task CompleteChunkHashesDoNotTriggerAnotherWholeFileHashScan()
+    {
+        var folder = Path.Combine(Path.GetTempPath(), "haiyu-chunk-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(folder);
+        var payload = Encoding.UTF8.GetBytes("good");
+        await File.WriteAllBytesAsync(Path.Combine(folder, "data.bin"), payload);
+        var handler = new Handler();
+        using var client = new HttpClient(handler);
+        using var cts = new CancellationTokenSource();
+        var logger = new LoggerService();
+        logger.InitLogger(Path.Combine(folder, "log.txt"), Serilog.RollingInterval.Infinite);
+        await using var events = new GameEventPublisher();
+        var file = new GameFileInfo
+        {
+            Dest = "data.bin", Size = 4,
+            // Full coverage must be validated by the chunk hashes, not this extra whole-file field.
+            Hash = "not-used-by-chunk-verification",
+            Chunks =
+            [
+                new() { Start = 0, End = 1, Hash = Convert.ToHexString(MD5.HashData(payload[..2])) },
+                new() { Start = 2, End = 3, Hash = Convert.ToHexString(MD5.HashData(payload[2..])) }
+            ]
+        };
+        var action = new DownloadAndVerifyResource(logger);
+        action.SetParam(new Dictionary<string, object>
+        {
+            ["resource"] = new[] { file }, ["isDelete"] = false, ["folder"] = folder,
+            ["httpClient"] = new Service(client), ["downloadState"] = new DownloadState { CancelToken = cts },
+            ["isProd"] = false, ["fastVerify"] = false
+        }, events);
+        try
+        {
+            Assert.IsTrue(await action.ExecuteAsync(true) is true);
+            Assert.AreEqual(0, handler.Hosts.Count);
+            var final = action.UpdateFileProgress(GameContextActionType.Verify, 0, false);
+            Assert.AreEqual(4L, final.CurrentSize);
+            Assert.AreEqual(4L, final.TotalSize);
+            Assert.AreEqual(1, final.FileTotal);
+        }
+        finally { ((IDisposable)logger.ILogger).Dispose(); }
+    }
+
+    [TestMethod]
+    public async Task VerificationBatchesReadNotificationsInsteadOfPostingPerRead()
+    {
+        var path = Path.GetTempFileName();
+        try
+        {
+            var payload = new byte[3 * 1024 * 1024 + 17];
+            await File.WriteAllBytesAsync(path, payload);
+            using var cts = new CancellationTokenSource();
+            var progress = new ReadProgress();
+            Assert.IsFalse(await VerifyTask.ValidateGameFileAsync(Convert.ToHexString(MD5.HashData(payload)),
+                path, new DownloadState { CancelToken = cts }, cts, progress));
+            Assert.AreEqual((long)payload.Length, progress.Reports.Sum(x => x.Item3));
+            Assert.IsTrue(progress.Reports.Count <= 4);
+            Assert.AreEqual((long)payload.Length, progress.Reports[^1].Item5);
+        }
+        finally { File.Delete(path); }
+    }
+
+    private sealed class ReadProgress : IProgress<(GameContextActionType, bool, long, string, long, long)>
+    {
+        public List<(GameContextActionType, bool, long, string, long, long)> Reports { get; } = [];
+        public void Report((GameContextActionType, bool, long, string, long, long) value) => Reports.Add(value);
+    }
+
+    [TestMethod]
     public async Task HashMismatchRetriesNextCdnInsteadOfCompleting()
     {
         var folder = Path.Combine(Path.GetTempPath(), "haiyu-cdn-" + Guid.NewGuid().ToString("N"));
@@ -114,6 +183,7 @@ public sealed class ResourceDownloadTests
         Assert.IsTrue(await download.ExecuteAsync(true) is true);
         CollectionAssert.AreEqual(payload, await File.ReadAllBytesAsync(Path.Combine(folder, file.Dest)));
         CollectionAssert.AreEqual(new[] { "first.example", "second.example" }, handler.Hosts);
+        Assert.AreEqual(4L, download.UpdateFileProgress(GameContextActionType.Verify, 0, false).CurrentSize);
         ((IDisposable)logger.ILogger).Dispose();
     }
 
