@@ -37,7 +37,7 @@ public class StartGameOption
 
     public override string ToString()
     {
-        if(Type == GameType.Waves)
+        if (Type == GameType.Waves)
         {
             return WavesOption?.ToString()!;
         }
@@ -46,6 +46,10 @@ public class StartGameOption
             return PunishOption?.ToString()!;
         }
     }
+
+    public string GetGameArguments() => Type == GameType.Waves
+        ? WavesOption?.GetGameArguments() ?? string.Empty
+        : PunishOption?.ToString() ?? string.Empty;
 
     public static StartGameOption BuildWavesGameOption(
         bool dxEnable,
@@ -98,9 +102,10 @@ public class WavesLauncheOption
 
     public string BaseExe { get; internal set; }
 
-    public override string ToString() =>
-        $"Client "
-        + (IsDx == true ? " -dx11" : "")
+    public override string ToString() => "Client " + GetGameArguments();
+
+    public string GetGameArguments() =>
+        (IsDx == true ? " -dx11" : "")
         + (IsDx == true ? " -slno" : "")
         + $" {Arguments}";
 }

@@ -22,9 +22,72 @@ public sealed partial class KuroGameSettingViewModel : DialogViewModelBase
     [ObservableProperty]
     public partial bool FastVerify { get; set; }
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DefaultLaunchEnabled))]
+    public partial bool UseCustomLauncher { get; set; }
+
+    public bool DefaultLaunchEnabled => !UseCustomLauncher;
+
+    [ObservableProperty]
+    public partial string CustomLauncherPath { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string CustomLauncherArguments { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string CustomLaunchError { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool HasCustomLaunchError { get; set; }
+
+    private CustomLauncherOptions GetCustomLauncher() => new()
+    {
+        Enabled = UseCustomLauncher,
+        TargetPath = CustomLauncherPath.Trim(),
+        Arguments = CustomLauncherArguments,
+    };
+
+    [RelayCommand]
+    async Task BrowseCustomLauncher()
+    {
+        try
+        {
+            var file = await AppContext.WindowManager.Shell.PickersService.GetFileOpenPicker([".exe"]);
+            if (file is null) return;
+            CustomLauncherPath = file.Path;
+            UseCustomLauncher = true;
+            ValidateCustomLauncher();
+        }
+        catch (Exception ex)
+        {
+            CustomLaunchError = ex.Message;
+            HasCustomLaunchError = true;
+        }
+    }
+
+    [RelayCommand]
+    void ValidateCustomLauncher()
+    {
+        var error = GetCustomLauncher().Validate();
+        CustomLaunchError = error is null ? string.Empty : LanguageService.GetStringByText(error);
+        HasCustomLaunchError = CustomLaunchError.Length > 0;
+    }
+
+    [RelayCommand]
+    async Task SaveSettings()
+    {
+        ValidateCustomLauncher();
+        if (HasCustomLaunchError) return;
+        await CloseAsync();
+    }
+
     [RelayCommand]
     async Task Loaded()
     {
+        var custom = await CustomLauncherOptions.LoadAsync(GameContext.GameLocalConfig);
+        CustomLauncherPath = custom.TargetPath;
+        CustomLauncherArguments = custom.Arguments;
+        UseCustomLauncher = custom.Enabled;
         var speed = await this.GameContext.GameLocalConfig.GetConfigAsync(
             GameLocalSettingName.LimitSpeed
         );
@@ -35,7 +98,7 @@ public sealed partial class KuroGameSettingViewModel : DialogViewModelBase
         {
             this.DownloadSpeedLimit = speedValue;
         }
-        if(bool.TryParse(fastVerify,out var fastVerifyFlage))
+        if (bool.TryParse(fastVerify, out var fastVerifyFlage))
         {
             this.FastVerify = fastVerifyFlage;
         }
@@ -115,7 +178,7 @@ public sealed partial class KuroGameSettingViewModel : DialogViewModelBase
 
     public override async Task BeforeCloseAsync()
     {
-        await this.GameContext.SetDownloadSpeedAsync((long)DownloadSpeedLimit);
+        await this.GameContext.SetDownloadSpeedAsync((long) DownloadSpeedLimit);
         if (this.GameType == GameType.Waves)
         {
             await this.GameContext.GameLocalConfig.SaveConfigsAsync(
@@ -146,5 +209,8 @@ public sealed partial class KuroGameSettingViewModel : DialogViewModelBase
             );
         }
         await base.BeforeCloseAsync();
+        var custom = GetCustomLauncher();
+        if (custom.Validate() is null)
+            await custom.SaveAsync(GameContext.GameLocalConfig);
     }
 }
