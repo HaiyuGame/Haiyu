@@ -337,18 +337,30 @@
                             <StackPanel Grid.Column="1" Spacing="8">
                                 <TextBlock FontWeight="SemiBold" Text="{x:Bind helper:LanguageService.GetString('Display_FilterResults')}" />
                             </StackPanel>
-                            <Button
+                            <StackPanel
                                 Grid.Column="1"
                                 HorizontalAlignment="Right"
-                                Command="{x:Bind ViewModel.CopySessionCommand}">
+                                Orientation="Horizontal"
+                                Spacing="5">
+                                <Button Command="{x:Bind ViewModel.CopySessionCommand}">
                                 <StackPanel Orientation="Horizontal" Spacing="4">
                                     <FontIcon
                                         FontFamily="Segoe Fluent Icons"
                                         FontSize="12"
-                                        Glyph="" />
+                                        Glyph="" />
                                     <TextBlock FontSize="12" Text="{x:Bind helper:LanguageService.GetString('Display_Copy')}" />
                                 </StackPanel>
                             </Button>
+                                <Button Command="{x:Bind ViewModel.AddSessionAsAccountCommand}">
+                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                        <FontIcon
+                                            FontFamily="Segoe Fluent Icons"
+                                            FontSize="12"
+                                            Glyph="&#xE710;" />
+                                        <TextBlock FontSize="12" Text="{x:Bind helper:LanguageService.GetString('Display_AddAccount')}" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
                             <Grid
                                 Grid.Row="1"
                                 Grid.ColumnSpan="2"

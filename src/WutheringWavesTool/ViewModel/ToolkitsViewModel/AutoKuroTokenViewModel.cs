@@ -26,14 +26,23 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
     private string? _lastReadableResponseRequestId;
     private Dictionary<string, object?>? _requestHeader;
 
-    public AutoKuroTokenViewModel(WindowSession windowSession, IWindowManager windowManager)
+    public AutoKuroTokenViewModel(
+        WindowSession windowSession,
+        IWindowManager windowManager,
+        IKuroClient kuroClient,
+        IKuroAccountService kuroAccountService
+    )
     {
         WindowSession = windowSession;
         WindowManager = windowManager;
+        KuroClient = kuroClient;
+        KuroAccountService = kuroAccountService;
     }
 
     public WindowSession WindowSession { get; }
     public IWindowManager WindowManager { get; }
+    public IKuroClient KuroClient { get; }
+    public IKuroAccountService KuroAccountService { get; }
 
     [ObservableProperty]
     public partial string AdbPath { get; set; } = string.Empty;
@@ -517,6 +526,72 @@ public partial class AutoKuroTokenViewModel : ViewModelBase
             """
         );
         Clipboard.SetContent(package);
+    }
+
+    [RelayCommand]
+    async Task AddSessionAsAccount()
+    {
+        var tipShow = WindowSession.Context.TipShow;
+        if (
+            string.IsNullOrWhiteSpace(Did)
+            || string.IsNullOrWhiteSpace(Token)
+            || string.IsNullOrWhiteSpace(PlayerId)
+        )
+        {
+            await tipShow.ShowMessageAsync(
+                LanguageService.GetStringByText("尚未捕获到完整的账号信息"),
+                Symbol.Clear
+            );
+            return;
+        }
+
+        if (!long.TryParse(PlayerId, out var tokenId))
+        {
+            await tipShow.ShowMessageAsync(
+                LanguageService.GetStringByText("TokenId格式错误！"),
+                Symbol.Clear
+            );
+            return;
+        }
+
+        var account = KuroAccount.Create(PlayerId, Token, Did);
+        var (code, mine, message) = await TryInvokeAsync(() =>
+            KuroClient.GetWavesMineAsync(account, tokenId, CTS.Token)
+        );
+        if (code != 0 || mine is null)
+        {
+            await tipShow.ShowMessageAsync(
+                message ?? LanguageService.GetStringByText("检查一下你的网络"),
+                Symbol.Clear
+            );
+            return;
+        }
+
+        if (!mine.Success)
+        {
+            await tipShow.ShowMessageAsync(
+                mine.Msg ?? LanguageService.GetStringByText("操作失败"),
+                Symbol.Clear
+            );
+            return;
+        }
+
+        var localAccount = new LocalAccount() { Token = Token, TokenId = PlayerId, TokenDid = Did };
+        if (!await KuroAccountService.SaveUserAsync(localAccount))
+        {
+            await tipShow.ShowMessageAsync(
+                LanguageService.GetStringByText("操作失败"),
+                Symbol.Clear
+            );
+            return;
+        }
+        KuroAccountService.SetCurrentUser(localAccount);
+        var addedTip = LanguageService.FormatByText(
+            LanguageService.GetStringByText("账号{0}添加成功"),
+            mine.Data.Mine.UserName
+        );
+        await tipShow.ShowMessageAsync(addedTip, Symbol.Accept);
+        AppendLog(addedTip);
     }
 
     protected override void OnDisposing()

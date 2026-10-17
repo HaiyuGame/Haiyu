@@ -12,6 +12,10 @@ public sealed partial class AutoKuroTokenPage : Page
         InitializeComponent();
         this.ViewModel = viewModel;
         this.RequestedTheme = Instance.Host.Services.GetRequiredService<IThemeService>().CurrentTheme;
+        if (this.Content is Panel panel)
+        {
+            this.ViewModel.WindowSession.Context.TipShow.Owner = panel;
+        }
     }
 
     public AutoKuroTokenViewModel? ViewModel { get; private set; }
