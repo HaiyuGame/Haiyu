@@ -1,7 +1,7 @@
 using Waves.Core.Models;
 using Waves.Core.Models.OfficialLauncher;
 
-namespace Waves.Core.Contracts;
+namespace Haiyu.Services.Contracts;
 
 /// <summary>
 /// 官方启动器安装记录工具：向游戏目录写入官方启动器（KRLauncher）格式的

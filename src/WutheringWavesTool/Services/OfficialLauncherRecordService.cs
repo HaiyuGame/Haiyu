@@ -1,17 +1,18 @@
 using System.Text.Json.Serialization.Metadata;
 using Waves.Core.Contracts;
+using Waves.Core.GameContext.ContextsV2.Waves;
 using Waves.Core.Models;
 using Waves.Core.Models.Enums;
 using Waves.Core.Models.OfficialLauncher;
 using Waves.Core.Models.Options;
+using Waves.Core.Services;
 using Waves.Core.Services.GameResourceProvider;
 
-namespace Waves.Core.Services;
+namespace Haiyu.Services;
 
 /// <summary>
 /// 官方启动器安装记录工具：向游戏目录写入官方启动器（KRLauncher）格式的安装记录，
 /// 使官方启动器"定位游戏目录"时识别为已安装，避免触发全量重下。
-/// 独立工具，不与 Haiyu 下载/更新流程耦合；目录定位复用日志解密工具的上下文选择。
 /// </summary>
 public class OfficialLauncherRecordService : IOfficialLauncherRecordService
 {
@@ -41,7 +42,6 @@ public class OfficialLauncherRecordService : IOfficialLauncherRecordService
         {
             return new OfficialRecordLocateResult { State = OfficialRecordLocateState.GameFolderMissing };
         }
-        // 本工具仅适配鸣潮官方启动器的目录格式；其他游戏（战双等）的官方记录语义未经验证。
         if (context.GameType != GameType.Waves)
         {
             return new OfficialRecordLocateResult { State = OfficialRecordLocateState.NotWavesGame };
@@ -61,14 +61,12 @@ public class OfficialLauncherRecordService : IOfficialLauncherRecordService
         }
         catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
         {
-            // 目录可存在但不可枚举（ACL 受限等）：按非空继续，后续 exe 检查仍会兜底。
             Logger.WriteWarning($"游戏目录枚举失败，按非空处理：{gameFolder}；{ex.Message}");
         }
         if (isEmpty)
         {
             return new OfficialRecordLocateResult { State = OfficialRecordLocateState.GameFolderEmpty };
         }
-        // 游戏主程序必须存在：官方判定依赖 exe 存在性，缺失时写入记录无意义。
         if (string.IsNullOrWhiteSpace(context.Config.GameExeName)
             || !File.Exists(Path.Combine(gameFolder, context.Config.GameExeName)))
         {
@@ -100,7 +98,6 @@ public class OfficialLauncherRecordService : IOfficialLauncherRecordService
         var provider = context.GameResourceProvider;
         if (provider is not BundleGameResourceProvider bundleProvider)
         {
-            // 旧协议：官方格式为顶层 version/state，固定 default 包。
             try
             {
                 var summary = await provider.GetResourceSummaryAsync(null, token);
@@ -128,8 +125,6 @@ public class OfficialLauncherRecordService : IOfficialLauncherRecordService
         CancellationToken token = default
     )
     {
-        // 两阶段提交：全部内容先生成为 <目标>.<guid>.tmp 临时文件，全部成功后统一 Move 替换生效；
-        // 任一失败则删除全部临时文件并保持旧状态（不出现"半套记录"），失败文件逐项汇总提示。
         var staged = new List<(string TempPath, string TargetPath, string RelativePath)>();
         var failed = new List<string>();
         try
@@ -155,15 +150,11 @@ public class OfficialLauncherRecordService : IOfficialLauncherRecordService
         }
         if (failed.Count > 0)
         {
-            // 部分失败 → 全部不生效：清空临时文件，目标文件保持旧状态。
             CleanupStaged(staged);
             Logger.WriteWarning($"官方安装记录部分生成失败，本次写入全部不生效：{string.Join(", ", failed.Distinct())}");
             return new OfficialRecordWriteResult { FailedFiles = failed.Distinct(StringComparer.OrdinalIgnoreCase).ToList() };
         }
 
-        // 全部生成成功 → 统一替换生效。
-        // 幂等项（TempPath 为空）目标已是期望内容，直接计入成功。
-        // 替换前备份每个目标旧内容：替换阶段任一失败时恢复全部已替换目标（两阶段提交语义覆盖到最后一步）。
         var written = new List<string>();
         var backups = new List<(string TargetPath, string? OldContent, bool OldExists)>();
         try
@@ -195,7 +186,6 @@ public class OfficialLauncherRecordService : IOfficialLauncherRecordService
         }
         catch
         {
-            // 恢复所有已替换目标到替换前内容；未替换的临时文件随后清理。
             foreach (var (targetPath, oldContent, oldExists) in backups)
             {
                 try
@@ -218,16 +208,12 @@ public class OfficialLauncherRecordService : IOfficialLauncherRecordService
             Logger.WriteWarning($"官方记录替换阶段失败，已回滚全部已生效文件，游戏目录保持旧状态");
             return new OfficialRecordWriteResult { FailedFiles = failed.Distinct(StringComparer.OrdinalIgnoreCase).ToList() };
         }
-        // 多画质并存时同一分包（如 common）会出现在多个 bundle 的写入清单里；
-        // 按文件去重，保证"写入 N 个文件"与实际落盘文件数、移除计数一致。
         return new OfficialRecordWriteResult
         {
             WrittenFiles = written.Distinct(StringComparer.OrdinalIgnoreCase).ToList(),
             FailedFiles = failed.Distinct(StringComparer.OrdinalIgnoreCase).ToList(),
         };
     }
-
-    /// <summary>删除尚未生效的临时文件（尽力清理，保留最新错误便于排查）。</summary>
     private void CleanupStaged(List<(string TempPath, string TargetPath, string RelativePath)> staged)
     {
         foreach (var (tempPath, _, _) in staged)
@@ -335,10 +321,6 @@ public class OfficialLauncherRecordService : IOfficialLauncherRecordService
         return new OfficialRecordWriteResult { RemovedEntries = removed, FailedFiles = failed };
     }
 
-    /// <summary>
-    /// 按需移除分包版本目录中的记录文件：只删除官方记录格式的 .json 文件（逐项计数，与写入口径一致）；
-    /// 目录本身与任何非 .json 内容一律保留，避免误删其他工具写入的内容。
-    /// </summary>
     private void TryDeleteDirectory(string path, List<string> removed, List<string> failed)
     {
         try
@@ -578,7 +560,6 @@ public class OfficialLauncherRecordService : IOfficialLauncherRecordService
                 && (await File.ReadAllTextAsync(path, token)).Trim() == content.Trim()
             )
             {
-                // 幂等：目标已是期望内容，无需替换，直接计入成功。
                 staged.Add((string.Empty, path, $"{PackVersionDirName}/{pack.Name}.json"));
                 continue;
             }
@@ -593,7 +574,6 @@ public class OfficialLauncherRecordService : IOfficialLauncherRecordService
         }
     }
 
-    /// <summary>把内容写入 &lt;目标&gt;.&lt;guid&gt;.tmp 临时文件（不替换目标）；失败计入 failed。</summary>
     private async Task StageFileAsync(
         string path,
         string content,
@@ -666,7 +646,6 @@ public class OfficialLauncherRecordService : IOfficialLauncherRecordService
                 }
                 catch
                 {
-                    // 尽力清理临时文件。
                 }
             }
         }
@@ -698,7 +677,6 @@ public class OfficialLauncherRecordService : IOfficialLauncherRecordService
         }
     }
 
-    /// <summary>与 GameLogService 相同的上下文解析：读取最近一次在游戏页选择的鸣潮上下文。</summary>
     private async Task<IGameContextV2?> ResolveContextAsync(CancellationToken token)
     {
         var contextName = await AppSettings.GetWavesAutoOpenContextAsync(token);

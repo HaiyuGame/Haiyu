@@ -1,0 +1,51 @@
+{
+  "id": "demo",
+  "name": "基础计算样例（非游戏实际档位）",
+  "roleId": "demo-role",
+  "mainStatWeight": 0.3,
+  "subStatWeight": 0.7,
+  "mainStatMaximumBenefit": 1,
+  "subStatMaximumBenefit": 1.5,
+  "items": [
+    {
+      "entryNo": "atk",
+      "entryName": "攻击力加成",
+      "type": "Percentage",
+      "usage": "MainStatScoring",
+      "referenceValue": 30,
+      "weight": 1
+    },
+    {
+      "entryNo": "atk",
+      "entryName": "攻击力加成",
+      "type": "Percentage",
+      "usage": "SubStatScoring",
+      "referenceValue": 10,
+      "weight": 1
+    },
+    {
+      "entryNo": "atk",
+      "entryName": "固定攻击力",
+      "type": "Value",
+      "usage": "SubStatScoring",
+      "referenceValue": 40,
+      "weight": 0.5
+    },
+    {
+      "entryNo": "def",
+      "entryName": "防御力加成",
+      "type": "Percentage",
+      "usage": "SubStatScoring",
+      "referenceValue": 10,
+      "penaltyCoefficient": 0.3
+    },
+    {
+      "entryNo": "recharge",
+      "entryName": "共鸣效率",
+      "type": "Percentage",
+      "usage": "DevelopmentTarget",
+      "targetValue": 260,
+      "comparison": "GreaterThan"
+    }
+  ]
+}

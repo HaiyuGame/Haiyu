@@ -86,7 +86,7 @@ public sealed partial class ToolkitViewModel : ViewModelBase
             {
                 moniter.Close();
             }
-            if(this.AppContext.ABIRuntimeService.Runtime != null)
+            if (this.AppContext.ABIRuntimeService.Runtime != null)
             {
                 await this.AppContext.WindowManager.Shell.TipShow.ShowMessageAsync(
                     LanguageService.GetString("Toolkit_WaitABIExit"),
@@ -112,13 +112,15 @@ public sealed partial class ToolkitViewModel : ViewModelBase
                 LanguageService.GetString("Tool_ImportComplete"),
                 Symbol.Message
             );
-            await this.AppContext.ABIRuntimeService.Initialize(Waves.Settings.AppSettings.ABIRuntimeSavePath);
+            await this.AppContext.ABIRuntimeService.Initialize(
+                Waves.Settings.AppSettings.ABIRuntimeSavePath
+            );
             await this.Loaded();
         }
         catch (Exception ex)
         {
             await this.AppContext.WindowManager.Shell.TipShow.ShowMessageAsync(
-                LanguageService.GetString("Tool_ImportError")+ex.Message,
+                LanguageService.GetString("Tool_ImportError") + ex.Message,
                 Symbol.Message
             );
             return;
@@ -150,13 +152,8 @@ public sealed partial class ToolkitViewModel : ViewModelBase
                 this.MoniterInvokeStr = LanguageService.GetString("Display_Close");
             }
         }
-        catch (Exception)
-        {
-
-        }
-        finally
-        {
-        }
+        catch (Exception) { }
+        finally { }
     }
 
     [RelayCommand]
@@ -178,7 +175,6 @@ public sealed partial class ToolkitViewModel : ViewModelBase
     [RelayCommand]
     async Task DecryptGameLogs()
     {
-        // 核心层定位日志文件，按状态给出提示
         var locate = await GameLogService.LocateGameLogsAsync(this.CTS.Token);
         var tipShow = this.AppContext.WindowManager.Shell.TipShow;
         switch (locate.State)
@@ -204,7 +200,8 @@ public sealed partial class ToolkitViewModel : ViewModelBase
         }
 
         // 让用户选择解密结果输出目录
-        var outputFolder = await this.AppContext.WindowManager.Shell.PickersService.GetFolderPicker();
+        var outputFolder =
+            await this.AppContext.WindowManager.Shell.PickersService.GetFolderPicker();
         if (outputFolder == null || string.IsNullOrWhiteSpace(outputFolder.Path))
         {
             return;
@@ -220,7 +217,8 @@ public sealed partial class ToolkitViewModel : ViewModelBase
         {
             // key 不匹配：解密结果不是有效明文，已拦截未导出
             await tipShow.ShowMessageAsync(
-                string.Format(LanguageService.GetString("LogDecrypt_VerificationFailed"),
+                string.Format(
+                    LanguageService.GetString("LogDecrypt_VerificationFailed"),
                     result.KeyMismatchCount
                 ),
                 Symbol.Clear
@@ -229,7 +227,8 @@ public sealed partial class ToolkitViewModel : ViewModelBase
         else if (result.HasFailed)
         {
             await tipShow.ShowMessageAsync(
-                string.Format(LanguageService.GetString("LogDecrypt_CompletedWithErrors"),
+                string.Format(
+                    LanguageService.GetString("LogDecrypt_CompletedWithErrors"),
                     result.FailedCount
                 ),
                 Symbol.Clear
@@ -238,7 +237,8 @@ public sealed partial class ToolkitViewModel : ViewModelBase
         else
         {
             await tipShow.ShowMessageAsync(
-                string.Format(LanguageService.GetString("LogDecrypt_ShowCompletion"),
+                string.Format(
+                    LanguageService.GetString("LogDecrypt_ShowCompletion"),
                     result.DecryptedCount,
                     result.CopiedCount
                 ),
@@ -294,7 +294,6 @@ public sealed partial class ToolkitViewModel : ViewModelBase
                 return;
         }
 
-        // 组装安装记录（逐包版本取服务器当前配置）。
         var record = await OfficialLauncherRecordService.BuildInstallRecordAsync(this.CTS.Token);
         if (record is null)
         {
@@ -322,7 +321,6 @@ public sealed partial class ToolkitViewModel : ViewModelBase
             return;
         }
 
-        // 资源清单体积较大且非判定必需，拉取失败不回滚已写入的安装记录。
         var indexResult = await OfficialLauncherRecordService.WriteResourceIndexAsync(
             locate.GameFolder,
             record,
@@ -384,7 +382,12 @@ public sealed partial class ToolkitViewModel : ViewModelBase
                 );
                 return;
         }
-        if (!await OfficialLauncherRecordService.HasAnyRecordAsync(locate.GameFolder, this.CTS.Token))
+        if (
+            !await OfficialLauncherRecordService.HasAnyRecordAsync(
+                locate.GameFolder,
+                this.CTS.Token
+            )
+        )
         {
             await tipShow.ShowMessageAsync(
                 LanguageService.GetString("OfficialRecord_NothingToRemove"),
@@ -392,7 +395,10 @@ public sealed partial class ToolkitViewModel : ViewModelBase
             );
             return;
         }
-        var result = await OfficialLauncherRecordService.RemoveRecordsAsync(locate.GameFolder, this.CTS.Token);
+        var result = await OfficialLauncherRecordService.RemoveRecordsAsync(
+            locate.GameFolder,
+            this.CTS.Token
+        );
         if (result.HasFailed)
         {
             await tipShow.ShowMessageAsync(

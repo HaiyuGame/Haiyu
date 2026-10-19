@@ -33,6 +33,9 @@
       <Platform Solution="*|x86" Project="x86" />
       <Deploy />
     </Project>
+    <Project Path="Extensions/ProxyExtensions/ProxyExtensions.csproj">
+      <BuildType Solution="All|*" Project="Debug" />
+    </Project>
     <Project Path="Extensions/Waves.Api/Waves.Api.csproj">
       <BuildType Solution="All|Any CPU" Project="Release" />
       <BuildType Solution="All|x64" Project="Debug" />
@@ -49,15 +52,17 @@
     <Project Path="KuroAndroidMonitoring/ChromeCDPSharp.csproj">
       <BuildType Solution="All|*" Project="Debug" />
     </Project>
-    <Project Path="Extensions/ProxyExtensions/ProxyExtensions.csproj">
-      <BuildType Solution="All|*" Project="Debug" />
-    </Project>
   </Folder>
   <Folder Name="/Extensions/ABI/">
     <Project Path="Extensions/ABI/ABI.Models/ABI.Models.csproj" Id="ed8e98fa-4c2b-4955-b495-4e5c5f837a84">
       <BuildType Solution="All|*" Project="Debug" />
     </Project>
     <Project Path="Extensions/ABI/ABIRuntime/ABIRuntime.csproj" Id="9731ec3b-5b3f-4626-a7e1-22ff561aa55b">
+      <BuildType Solution="All|*" Project="Debug" />
+    </Project>
+  </Folder>
+  <Folder Name="/Extensions/Scoring/">
+    <Project Path="Extensions/ScoringService/ScoringService.csproj" Id="1af5ad06-a7ec-4feb-bcb0-5275ba1f7b47">
       <BuildType Solution="All|*" Project="Debug" />
     </Project>
   </Folder>
@@ -86,6 +91,9 @@
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="Tests/KuroGameDownloadProgram/KuroGameDownloadProgram.csproj" Id="3d00fcfd-9df9-4241-b422-ce04accdfa6f">
+      <BuildType Solution="All|*" Project="Debug" />
+    </Project>
+    <Project Path="Tests/ScoringService.Tests/ScoringService.Tests.csproj">
       <BuildType Solution="All|*" Project="Debug" />
     </Project>
   </Folder>

@@ -16,6 +16,9 @@
         <Project Path="Tests/KuroGameDownloadProgram/KuroGameDownloadProgram.csproj" Id="3d00fcfd-9df9-4241-b422-ce04accdfa6f">
       <BuildType Solution="All|*" Project="Debug" />
     </Project>
+    <Project Path="Tests/ScoringService.Tests/ScoringService.Tests.csproj">
+      <BuildType Solution="All|*" Project="Debug" />
+    </Project>
   </Folder>
   <Folder Name="/Core/">
     <Project Path="Extensions/Haiyu.Plugin/Haiyu.Plugin.csproj" Id="1d4b3247-f5e2-4702-890e-976aa3752a89">
@@ -28,6 +31,9 @@
       <BuildType Solution="All|*" Project="Debug" />
       <Build Solution="All|*" Project="false" />
       <Build Solution="Debug|*" Project="false" />
+    </Project>
+    <Project Path="Extensions/ScoringService/ScoringService.csproj">
+      <BuildType Solution="All|*" Project="Debug" />
     </Project>
     <Project Path="Extensions/Waves.Api/Waves.Api.csproj" Id="4ac0aeb5-4fe9-41cb-a457-fc739c7eb266">
       <BuildType Solution="All|Any CPU" Project="Release" />

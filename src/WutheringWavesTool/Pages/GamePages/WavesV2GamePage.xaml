@@ -642,8 +642,8 @@
                             Margin="0"
                             Padding="0"
                             Command="{x:Bind ViewModel.StartPreDownloadGameCommand}"
-                            IsEnabled="{x:Bind ViewModel.CanChangeResources, Mode=OneWay}"
                             CornerRadius="70"
+                            IsEnabled="{x:Bind ViewModel.CanChangeResources, Mode=OneWay}"
                             Style="{ThemeResource TitleBarButtonStyle}">
                             <ToolTipService.ToolTip>
                                 <Grid>

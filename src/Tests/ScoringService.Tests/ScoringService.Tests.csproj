@@ -1,0 +1,13 @@
+<Project Sdk="MSTest.Sdk/3.6.0">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../Extensions/ScoringService/ScoringService.csproj" />
+    <None Include="../../Extensions/ScoringService/Examples/basic-template.json"
+          Link="Fixtures/basic-template.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

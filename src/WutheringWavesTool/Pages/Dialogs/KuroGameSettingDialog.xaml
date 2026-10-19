@@ -57,39 +57,45 @@
                         <ComboBox
                             HorizontalAlignment="Stretch"
                             Header="{x:Bind helper:LanguageService.GetString('Display_StartupObject')}"
-                            ItemsSource="{x:Bind ViewModel.LuancheExeNames, Mode=OneWay}"
                             IsEnabled="{x:Bind ViewModel.DefaultLaunchEnabled, Mode=OneWay}"
+                            ItemsSource="{x:Bind ViewModel.LuancheExeNames, Mode=OneWay}"
                             SelectedItem="{x:Bind ViewModel.LauncheExeName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </Border>
                 </Grid>
-                <Border Padding="16,12"
-                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                        CornerRadius="5">
+                <Border
+                    Padding="16,12"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    CornerRadius="5">
                     <StackPanel Spacing="10">
-                        <CheckBox Content="使用自定义启动程序（如 Mod 启动器）"
-                                  IsChecked="{x:Bind ViewModel.UseCustomLauncher, Mode=TwoWay}" />
+                        <CheckBox Content="使用自定义启动程序（如 Mod 启动器）" IsChecked="{x:Bind ViewModel.UseCustomLauncher, Mode=TwoWay}" />
                         <Grid ColumnSpacing="8">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <TextBox Header="启动程序（.exe）" MinHeight="44"
-                                     AutomationProperties.Name="自定义启动程序完整路径"
-                                     Text="{x:Bind ViewModel.CustomLauncherPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <TextBox
+                                VerticalAlignment="Center"
+                                AutomationProperties.Name="自定义启动程序完整路径"
+                                Header="启动程序（.exe）"
+                                Text="{x:Bind ViewModel.CustomLauncherPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                                 <i:Interaction.Behaviors>
                                     <i:EventTriggerBehavior EventName="LostFocus">
                                         <i:InvokeCommandAction Command="{x:Bind ViewModel.ValidateCustomLauncherCommand}" />
                                     </i:EventTriggerBehavior>
                                 </i:Interaction.Behaviors>
                             </TextBox>
-                            <Button Grid.Column="1" Content="选择文件" MinHeight="44"
-                                    VerticalAlignment="Bottom" Command="{x:Bind ViewModel.BrowseCustomLauncherCommand}" />
+                            <Button
+                                Grid.Column="1"
+                                VerticalAlignment="Bottom"
+                                Command="{x:Bind ViewModel.BrowseCustomLauncherCommand}"
+                                Content="选择文件" />
                         </Grid>
-                        <TextBox Header="启动器附加参数（追加到游戏参数后）"
-                                 Text="{x:Bind ViewModel.CustomLauncherArguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <InfoBar IsOpen="{x:Bind ViewModel.HasCustomLaunchError, Mode=OneWay}"
-                                 Severity="Error" IsClosable="False"
-                                 Message="{x:Bind ViewModel.CustomLaunchError, Mode=OneWay}" />
+                        <TextBox Header="启动器附加参数（追加到游戏参数后）" Text="{x:Bind ViewModel.CustomLauncherArguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <InfoBar
+                            IsClosable="False"
+                            IsOpen="{x:Bind ViewModel.HasCustomLaunchError, Mode=OneWay}"
+                            Message="{x:Bind ViewModel.CustomLaunchError, Mode=OneWay}"
+                            Severity="Error" />
                     </StackPanel>
                 </Border>
                 <Border
