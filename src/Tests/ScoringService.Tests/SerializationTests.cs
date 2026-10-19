@@ -38,7 +38,7 @@ public sealed class SerializationTests
         };
         var json = JsonSerializer.Serialize(echo, ScoringJsonContext.Default.EchoData);
         using var document = JsonDocument.Parse(json);
-        AssertNames(document.RootElement, "id", "mainStats", "subStats");
+        AssertNames(document.RootElement, "cost", "rarity", "level", "id", "mainStats", "subStats");
         var stat = document.RootElement.GetProperty("subStats")[0];
         AssertNames(stat, "entryNo", "type", "value");
         Assert.AreEqual("Value", stat.GetProperty("type").GetString());

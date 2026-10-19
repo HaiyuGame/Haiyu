@@ -24,6 +24,9 @@
         HorizontalScrollBarVisibility="Hidden"
         VerticalScrollBarVisibility="Hidden">
         <StackPanel Orientation="Vertical" Spacing="5">
+            <cui:SettingsCard Header="声骸评分" Description="角色模板 · 声骸评分">
+                <Button Content="打开" Command="{x:Bind ViewModel.OpenSortingCommand}" AutomationProperties.AutomationId="OpenSorting"/>
+            </cui:SettingsCard>
             <Grid>
                 <TextBlock
                     FontFamily="{ThemeResource DefaultFont}"

@@ -193,9 +193,7 @@ public sealed partial class BundleGameResourceProvider : IGameResourceProvider
     private static BundlePredownload? GetPredownload(GameLauncherBunleSource source, string name)
     {
         var pre = source.Predownload;
-        var enabled =
-            source.Bundles[name].Config?.PredownloadSwitch ?? source.Config.PredownloadSwitch;
-        if (enabled == 0 || pre is null || !pre.Bundles.ContainsKey(name))
+        if (pre is null || !pre.Bundles.ContainsKey(name))
             return null;
         var bundle = SelectBundle(pre.Bundles, pre.ResourcePacks, name);
         return bundle.ResourcePacks.Any(n =>

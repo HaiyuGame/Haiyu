@@ -10,6 +10,8 @@ namespace Haiyu.ViewModel;
 
 public sealed partial class ToolkitViewModel : ViewModelBase
 {
+    [RelayCommand]
+    private void OpenSorting() => Instance.Host.Services.GetRequiredService<Haiyu.Contracts.Services.SortingViewFactory>().ShowManager();
     public ToolkitViewModel(
         IViewFactorys viewFactorys,
         ITaskManager taskManager,

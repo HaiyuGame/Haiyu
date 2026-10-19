@@ -8,13 +8,18 @@
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <Compile Include="../../WutheringWavesTool/Model/SortingModels.cs" Link="SortingModels.cs" />
+    <Compile Include="../../WutheringWavesTool/ViewModels/SortingViewModels/SortingEntryViewModel.cs" Link="SortingEntryViewModel.cs" />
     <Compile Include="../KuroGameDownloadProgram/Tests/SortingStatAdapter.cs" Link="SortingStatAdapter.cs" />
     <ProjectReference Include="../../Extensions/ScoringService/ScoringService.csproj" />
+    <ProjectReference Include="../../Extensions/Waves.Api/Waves.Api.csproj" />
     <None Include="../../Extensions/ScoringService/Examples/basic-template.json"
           Link="Fixtures/basic-template.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../../WutheringWavesTool/Pages/SortingView/SortingManagerPage.xaml"
           Link="Fixtures/SortingManagerPage.xaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../../WutheringWavesTool/Pages/SortingView/SortingEntryDialog.xaml"
           Link="Fixtures/SortingEntryDialog.xaml" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../WutheringWavesTool/Pages/SortingView/SortingTemplatePage.xaml"
+          Link="Fixtures/SortingTemplatePage.xaml" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Fixtures-camellya-live.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using ScoringService.Models.Enums;
 
 namespace ScoringService.Models;
@@ -20,15 +20,19 @@ public sealed class EntryItem
     [JsonPropertyName("usage")]
     public EntryUsage Usage { get; set; }
 
-    /// <summary>评分归一化基准，大于零。百分比 10% 存为 10。</summary>
+    /// <summary>旧版评分基准。新版从内置配置读取最大值，不使用本字段作为分母。</summary>
     [JsonPropertyName("referenceValue")]
     public decimal? ReferenceValue { get; set; }
 
-    /// <summary>收益权重，非负；与惩罚系数互斥。</summary>
+    /// <summary>当前角色模板独立的评分满收益基准；空值沿用游戏满档。百分比以百分点保存，例如 8% 存为 8。此值不改变游戏合法上限。</summary>
+    [JsonPropertyName("normalizationReference")]
+    public decimal? NormalizationReference { get; set; }
+
+    /// <summary>折算系数，新版为 0～1。零为无效，较低值为次要，1 为最高优先级；不参与扣分。</summary>
     [JsonPropertyName("weight")]
     public decimal? Weight { get; set; }
 
-    /// <summary>惩罚系数，非负；按实际数值归一化后参与减法。</summary>
+    /// <summary>旧版惩罚参数；新版只接受空或零，非零旧参数需要用户显式迁移。</summary>
     [JsonPropertyName("penaltyCoefficient")]
     public decimal? PenaltyCoefficient { get; set; }
 

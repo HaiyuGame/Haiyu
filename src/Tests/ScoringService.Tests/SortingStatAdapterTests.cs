@@ -88,7 +88,7 @@ public sealed class SortingStatAdapterTests
 
     private static EntryGroup Template() => new()
     {
-        MainStatMaximumBenefit = 1, SubStatMaximumBenefit = 1.5m,
+        ScoringVersion = 1, MainStatMaximumBenefit = 1, SubStatMaximumBenefit = 1.5m,
         Items =
         [
             new() { EntryNo = "main-atk", EntryName = "攻击力加成", Usage = EntryUsage.MainStatScoring,

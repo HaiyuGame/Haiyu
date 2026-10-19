@@ -14,7 +14,7 @@ public sealed class ScoringCalculationTests
     // 以下参数仅用于验证算术，不代表游戏实际档位或角色推荐值。
     private static EntryGroup Template() => new()
     {
-        Id = "demo", Name = "基础计算样例", RoleId = "demo-role",
+        ScoringVersion = 1, Id = "demo", Name = "基础计算样例", RoleId = "demo-role",
         MainStatMaximumBenefit = 1,
         SubStatMaximumBenefit = 1.5m,
         MainStatWeight = 0.3m, SubStatWeight = 0.7m,

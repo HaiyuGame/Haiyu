@@ -147,6 +147,7 @@ public sealed class ScoringStorageTests
     private static EntryGroup Group() => new()
     {
         Id = "group-test", Name = "测试模板", RoleId = "role-test",
+        MainStatWeight = 0, SubStatWeight = 1,
         MainStatMaximumBenefit = 1, SubStatMaximumBenefit = 1, Items = [Item()]
     };
 }

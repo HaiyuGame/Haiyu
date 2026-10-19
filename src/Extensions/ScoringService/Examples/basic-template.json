@@ -1,4 +1,5 @@
 {
+  "scoringVersion": 1,
   "id": "demo",
   "name": "基础计算样例（非游戏实际档位）",
   "roleId": "demo-role",

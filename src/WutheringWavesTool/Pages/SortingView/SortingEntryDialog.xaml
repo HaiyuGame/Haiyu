@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog
+    x:Class="Haiyu.Pages.SortingView.SortingEntryDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:models="using:Haiyu.Model"
+    Title="添加养成目标"
+    CloseButtonText="取消"
+    DefaultButton="Primary"
+    PrimaryButtonClick="Add_Click"
+    PrimaryButtonText="添加">
+    <StackPanel Width="360" Spacing="16">
+        <ComboBox
+            x:Name="Entry"
+            HorizontalAlignment="Stretch"
+            AutomationProperties.Name="目标词条"
+            Header="词条"
+            ItemsSource="{x:Bind Catalog}"
+            SelectedIndex="0"
+            SelectionChanged="Entry_SelectionChanged">
+            <ComboBox.ItemTemplate>
+                <DataTemplate x:DataType="models:SortingStatOption">
+                    <TextBlock Text="{x:Bind Label}" />
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+        <ComboBox
+            x:Name="Comparison"
+            HorizontalAlignment="Stretch"
+            Header="条件"
+            SelectedIndex="0">
+            <x:String>大于等于 ≥</x:String>
+            <x:String>大于 &gt;</x:String>
+            <x:String>小于等于 ≤</x:String>
+            <x:String>小于 &lt;</x:String>
+            <x:String>等于 =</x:String>
+        </ComboBox>
+        <NumberBox
+            x:Name="Target"
+            AutomationProperties.Name="目标值"
+            Header="目标值"
+            Maximum="1000000"
+            Minimum="0"
+            ToolTipService.ToolTip="百分比直接输入数值，例如260%填写260。"
+            Value="260" />
+        <StackPanel
+            x:Name="RuleFields"
+            Spacing="8"
+            Visibility="Collapsed">
+            <NumberBox
+                x:Name="Weight"
+                Header="收益系数"
+                Maximum="1"
+                Minimum="0"
+                SmallChange="0.05"
+                ToolTipService.ToolTip="0 为无收益，1 为最高优先级。"
+                Value="1" />
+            <NumberBox
+                x:Name="Reference"
+                Header="角色评分基准（留空使用游戏满档）"
+                Minimum="0.0001"
+                PlaceholderText="默认"
+                SmallChange="0.1"
+                ToolTipService.ToolTip="仅作用于当前角色模板。例如暴击率填8，单条达到8%即获得该项满收益；不改变游戏实际档位。" />
+            <TextBlock
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Text="达到基准按满收益计；主、副词条分别保存。"
+                TextWrapping="Wrap" />
+            <TextBlock x:Name="Normalization" TextWrapping="Wrap" />
+        </StackPanel>
+        <TextBlock
+            x:Name="Error"
+            Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+            TextWrapping="Wrap" />
+    </StackPanel>
+</ContentDialog>

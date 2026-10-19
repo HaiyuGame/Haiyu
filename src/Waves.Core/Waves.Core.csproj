@@ -11,6 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Extensions\ScoringService\ScoringService.csproj" />
     <Compile Remove="WebGameContext\**" />
     <EmbeddedResource Remove="WebGameContext\**" />
     <None Remove="WebGameContext\**" />

@@ -81,7 +81,7 @@ public sealed class ScoringEntryService
         ArgumentException.ThrowIfNullOrWhiteSpace(item.EntryName);
         ScoringService.ValidateTemplate(new()
         {
-            MainStatMaximumBenefit = 1, SubStatMaximumBenefit = 1, Items = [item]
+            ScoringVersion = 1, MainStatMaximumBenefit = 1, SubStatMaximumBenefit = 1, Items = [item]
         });
     }
 

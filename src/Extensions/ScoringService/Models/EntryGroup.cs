@@ -1,10 +1,34 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace ScoringService.Models;
 
-/// <summary>角色模板。理论最大收益由模板作者按合法最优组合配置，与实际装备无关。</summary>
+/// <summary>角色模板。新版分母由内置合法词条池自动计算，固定权重表示静态适配而非实际伤害。</summary>
 public sealed class EntryGroup
 {
+    public EntryGroup() { }
+
+    /// <summary>缺少版本字段的历史 JSON 按旧版读取，不悄悄改变旧模板的语义。</summary>
+    [JsonConstructor]
+    public EntryGroup(int scoringVersion = 1) => ScoringVersion = scoringVersion;
+    /// <summary>算法版本。2 为内置词条上限与合法组合归一化；1 仅用于显式读取旧测试和旧模板。</summary>
+    [JsonPropertyName("scoringVersion")]
+    public int ScoringVersion { get; set; } = 2;
+
+    /// <summary>毕业参考的有效副词条数量，范围1～5；旧模板缺省为4，不改变旧版ScoreEcho计算。</summary>
+    [JsonPropertyName("targetEffectiveStatCount")]
+    public int TargetEffectiveStatCount { get; set; } = 4;
+
+    /// <summary>角色模板独立的评级及毕业门槛，使用百分制；与面板养成检查分开。</summary>
+    [JsonPropertyName("gradeThresholds")]
+    public ScoreGradeThresholds GradeThresholds { get; set; } = new();
+
+    /// <summary>参考资料链接；数字系数是本工具的经验配置，并非来源网站发布的评分公式。</summary>
+    [JsonPropertyName("sourceUrl")]
+    public string SourceUrl { get; set; } = "";
+
+    /// <summary>配置备注，包括适用配装和参考日期。</summary>
+    [JsonPropertyName("notes")]
+    public string Notes { get; set; } = "";
     /// <summary>模板唯一编号。</summary>
     [JsonPropertyName("id")]
     public string Id { get; set; } = "";
@@ -29,11 +53,11 @@ public sealed class EntryGroup
     [JsonPropertyName("subStatWeight")]
     public decimal SubStatWeight { get; set; } = 0.7m;
 
-    /// <summary>主词条合法最优组合的理论最大收益，大于零，用作百分制分母。</summary>
+    /// <summary>旧版主词条分母；新版忽略此字段，按 COST 自动计算。</summary>
     [JsonPropertyName("mainStatMaximumBenefit")]
     public decimal MainStatMaximumBenefit { get; set; }
 
-    /// <summary>副词条合法最优组合的理论最大收益，大于零，不随实际有效词条数量变化。</summary>
+    /// <summary>旧版副词条分母；新版忽略此字段，取合法词条池中最高五项系数之和。</summary>
     [JsonPropertyName("subStatMaximumBenefit")]
     public decimal SubStatMaximumBenefit { get; set; }
 }

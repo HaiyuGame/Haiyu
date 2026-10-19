@@ -93,6 +93,14 @@ public static class InstanceBuilderExtensions
             {
                 #region View and ViewModel
                 Service
+                    .AddSingleton<SortingWorkspace>()
+                    .AddSingleton<KuroSortingService>()
+                    .AddSingleton<Haiyu.Contracts.Services.SortingViewFactory>()
+                    .AddTransient<Haiyu.Pages.SortingView.SortingManagerPage>()
+                    .AddTransient<Haiyu.Pages.SortingView.SortingTemplatePage>()
+                    .AddTransient<Haiyu.Pages.SortingView.SortingEntryDialog>()
+                    .AddTransient<Haiyu.ViewModels.SortingViewModels.SortingManagerViewModel>()
+                    .AddTransient<Haiyu.ViewModels.SortingViewModels.SortingTemplateViewModel>()
                     .AddHostedService<RpcService>(
                         (s) =>
                         {

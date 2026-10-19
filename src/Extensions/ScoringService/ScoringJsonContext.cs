@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using ScoringService.Models;
 
 namespace ScoringService;
@@ -17,6 +17,8 @@ namespace ScoringService;
 [JsonSerializable(typeof(EntryScoreDetail))]
 [JsonSerializable(typeof(StatScoreResult))]
 [JsonSerializable(typeof(EchoScoreResult))]
+[JsonSerializable(typeof(GraduationScoreResult))]
+[JsonSerializable(typeof(ScoreGradeThresholds))]
 [JsonSerializable(typeof(DevelopmentTargetResult))]
 [JsonSerializable(typeof(DevelopmentResult))]
 [JsonSerializable(typeof(CharacterEvaluationResult))]
