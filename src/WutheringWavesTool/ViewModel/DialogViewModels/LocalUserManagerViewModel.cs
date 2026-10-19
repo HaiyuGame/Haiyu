@@ -56,6 +56,7 @@ public sealed partial class LocalUserManagerViewModel : DialogViewModelBase
             account.CopyTokenText = LanguageService.GetString("Display_CopyToken")!;
             account.CopyDeviceDidText = LanguageService.GetString("Display_DuplicateDid")!;
             account.CopyUserIdText = LanguageService.GetString("Display_DuplicateAccountId")!;
+            account.ChooseText = LanguageService.GetString("Display_Choose")!;
         }
 
         Accounts = accounts.ToObservableCollection();
