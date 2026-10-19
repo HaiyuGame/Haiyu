@@ -7,11 +7,11 @@ namespace ScoringService;
 public sealed class ScoringService
 {
     /// <summary>词条存储服务入口，调用初始化方法后赋值；不参与模型序列化。</summary>
-    public ScoringEntryService? EntryService { get; private set; }
+    public ScoringEntryService EntryService { get; private set; }
 
-    public Task InitAsync(string baseFolder)
+    public Task InitAsync(SortingOption option)
     {
-        EntryService = new(baseFolder);
+        EntryService = new(option);
         return Task.CompletedTask;
     }
 

@@ -53,6 +53,8 @@ public partial class App : ClientApplication
         Directory.CreateDirectory(AppSettings.LocalUserFolder);
         Directory.CreateDirectory(Path.GetDirectoryName(AppSettings.LogPath)!);
         Directory.CreateDirectory(AppSettings.CloudFolderPath);
+        Directory.CreateDirectory(AppSettings.SortingGroupFolder);
+        Directory.CreateDirectory(AppSettings.SortingItemFolder);
     }
 
     private void App_UnhandledException(

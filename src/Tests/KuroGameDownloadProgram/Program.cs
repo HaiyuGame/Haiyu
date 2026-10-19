@@ -1,3 +1,3 @@
 using KuroGameDownloadProgram.Tests;
 
-await BunleTest.StartTaskAsync();
+await SortingTest.StartTask();

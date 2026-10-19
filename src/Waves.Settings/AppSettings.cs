@@ -62,6 +62,10 @@ public partial class AppSettings : SettingBase
 
     public static string ABIRuntimeSavePath => BassFolder+"\\Haiyu.ABI";
 
+    public static string SortingForder => BassFolder + "\\SortingFolder";
+    public static string SortingGroupFolder => BassFolder + "\\SortingFolder\\SortingGroup";
+    public static string SortingItemFolder => BassFolder + "\\SortingFolder\\SortingItem";
+
     private static readonly string SettingsFilePath = Path.Combine(BassFolder, "System.json");
 
     public static readonly string WebViewFixRuntime = Path.Combine(

@@ -354,6 +354,8 @@
 	<ItemGroup>
 		<Folder Include="Assets\GameAssets\Punish\" />
 		<Folder Include="Assets\Languages\" />
+		<Folder Include="Contracts\Services\" />
+		<Folder Include="Model\" />
 		<Folder Include="Services\DialogServices\" />
 	</ItemGroup>
 	<PropertyGroup Label="Globals">

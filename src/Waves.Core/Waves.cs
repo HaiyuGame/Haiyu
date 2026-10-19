@@ -11,8 +11,6 @@ public static class Waves
     /// <returns></returns>
     public static IServiceCollection AddGameContext(this IServiceCollection services)
     {
-        // AddGameContext 是完整的核心注册入口。TryAdd 保留宿主提供的自定义实现，
-        // 同时保证控制台、测试项目只调用 AddGameContext 也能解析游戏上下文。
         services.TryAddSingleton<AppSettings>();
         services.TryAddSingleton<IIoCircuitBreaker, IoCircuitBreaker>();
 

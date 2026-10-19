@@ -6,8 +6,15 @@
     <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <Compile Include="../../WutheringWavesTool/Model/SortingModels.cs" Link="SortingModels.cs" />
+    <Compile Include="../KuroGameDownloadProgram/Tests/SortingStatAdapter.cs" Link="SortingStatAdapter.cs" />
     <ProjectReference Include="../../Extensions/ScoringService/ScoringService.csproj" />
     <None Include="../../Extensions/ScoringService/Examples/basic-template.json"
           Link="Fixtures/basic-template.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../WutheringWavesTool/Pages/SortingView/SortingManagerPage.xaml"
+          Link="Fixtures/SortingManagerPage.xaml" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../WutheringWavesTool/Pages/SortingView/SortingEntryDialog.xaml"
+          Link="Fixtures/SortingEntryDialog.xaml" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

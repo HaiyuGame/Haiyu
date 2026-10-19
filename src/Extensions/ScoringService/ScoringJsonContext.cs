@@ -8,6 +8,7 @@ namespace ScoringService;
     WriteIndented = true, UseStringEnumConverter = true)]
 [JsonSerializable(typeof(EntryGroup))]
 [JsonSerializable(typeof(EntryItem))]
+[JsonSerializable(typeof(SortingOption))]
 [JsonSerializable(typeof(List<EntryGroup>))]
 [JsonSerializable(typeof(List<EntryItem>))]
 [JsonSerializable(typeof(StatValue))]

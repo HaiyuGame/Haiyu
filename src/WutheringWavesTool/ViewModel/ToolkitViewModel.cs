@@ -1,3 +1,4 @@
+
 using System;
 using System.Collections.Generic;
 using System.IO.Compression;
@@ -29,6 +30,7 @@ public sealed partial class ToolkitViewModel : ViewModelBase
     }
 
     public IViewFactorys ViewFactorys { get; }
+
 
     public ITaskManager TaskManager { get; }
 
