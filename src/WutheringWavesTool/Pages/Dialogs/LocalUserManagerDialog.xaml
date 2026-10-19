@@ -48,7 +48,7 @@
                                 <MenuFlyout>
                                     <MenuFlyoutItem
                                         Command="{x:Bind SetCurrentAccountCommand}"
-                                        Text="{x:Bind helper:LanguageService.GetString('Display_Choose')}"
+                                        Text="{x:Bind ChooseText, Mode=OneWay}"
                                         Visibility="{x:Bind IsSelect, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}" />
                                     <MenuFlyoutItem Command="{x:Bind CopyTokenCommand}" Text="{x:Bind CopyTokenText}" />
                                     <MenuFlyoutItem Command="{x:Bind CopyDeviceDidCommand}" Text="{x:Bind CopyDeviceDidText}" />
