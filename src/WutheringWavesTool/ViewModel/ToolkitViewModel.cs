@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 using System.IO.Compression;
@@ -11,7 +10,11 @@ namespace Haiyu.ViewModel;
 public sealed partial class ToolkitViewModel : ViewModelBase
 {
     [RelayCommand]
-    private void OpenSorting() => Instance.Host.Services.GetRequiredService<Haiyu.Contracts.Services.SortingViewFactory>().ShowManager();
+    private void OpenSorting() =>
+        Instance
+            .Host.Services.GetRequiredService<Haiyu.Contracts.Services.SortingViewFactory>()
+            .ShowManager();
+
     public ToolkitViewModel(
         IViewFactorys viewFactorys,
         ITaskManager taskManager,
@@ -31,8 +34,12 @@ public sealed partial class ToolkitViewModel : ViewModelBase
         WeakReferenceMessenger.Default.Register<SendTaskMessager>(this, SendTaskMethod);
     }
 
-    public IViewFactorys ViewFactorys { get; }
+    #region GrayId
+    public uint OfficialWriteGrayKey => GrayConfigId.OfficialLauncheWrite;
+    public uint SortingGrayKey => GrayConfigId.SoringTesing;
+    #endregion
 
+    public IViewFactorys ViewFactorys { get; }
 
     public ITaskManager TaskManager { get; }
 

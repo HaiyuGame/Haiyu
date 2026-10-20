@@ -1,3 +1,4 @@
+using GrayExtension;
 using Waves.Core.Services.GameResourceProvider;
 
 namespace Waves.Core.GameContext;
@@ -24,7 +25,7 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
     /// </summary>
     public IHttpClientService HttpClientService { get; set; }
 
-    public abstract bool IsBunle { get; }
+    public abstract bool IsBunle { get; internal set; }
 
     /// <summary>
     /// CDN测试工具
@@ -84,6 +85,7 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
 
     public string DisplayName { get; }
     public IIoCircuitBreaker IoCircuitBreaker { get; }
+    public GrayOpenService GrayOpenService { get; }
     public IGameResourceProvider GameResourceProvider { get; private set; }
 
     /// <summary>
@@ -99,7 +101,8 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
         KuroGameApiConfig config,
         string contextName,
         string display,
-        IIoCircuitBreaker ioCircuitBreaker
+        IIoCircuitBreaker ioCircuitBreaker,
+        GrayOpenService grayOpenService
     )
     {
         Logger = new LoggerService();
@@ -107,14 +110,7 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
         ContextName = contextName;
         this.DisplayName = display;
         IoCircuitBreaker = ioCircuitBreaker;
-        if (this.IsBunle)
-        {
-            this.GameResourceProvider = new BundleGameResourceProvider();
-        }
-        else
-        {
-            this.GameResourceProvider = new LegacyGameResourceProvider();
-        }
+        GrayOpenService = grayOpenService;
     }
 
     /// <summary>
@@ -123,6 +119,16 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
     /// <returns></returns>
     public virtual async Task InitAsync()
     {
+        //灰度开关
+        var bunleGray = GrayOpenService.GetOpen(GrayConfigId.WavesGameBunleOpen,false);
+        if (bunleGray && this.IsBunle)
+        {
+            this.GameResourceProvider = new BundleGameResourceProvider();
+        }
+        else
+        {
+            this.GameResourceProvider = new LegacyGameResourceProvider();
+        }
         this.HttpClientService.BuildClient();
         Directory.CreateDirectory(GamerConfigPath);
         this.GameLocalConfig = new GameLocalConfig(GamerConfigPath + "\\Settings.bat");

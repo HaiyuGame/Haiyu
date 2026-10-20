@@ -5,7 +5,7 @@ using ScoringService;
 using ScoringService.Models;
 using ScoringService.Models.Enums;
 
-namespace Haiyu.ViewModels.SortingViewModels;
+namespace Haiyu.ViewModel.SortingViewModels;
 
 /// <summary>一条折算规则；滑块与数字输入共享同一个值。</summary>
 public sealed partial class SortingEntryViewModel(EntryItem item) : ObservableObject

@@ -11,6 +11,7 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
     private List<PatchGameFileInfo> groupFileInfos;
     private string baseFolderPath;
     private string decompressTempFolder;
+    private bool isPreview;
 
     public InstallKrdiffGroupResource(LoggerService loggerService)
     {
@@ -60,11 +61,14 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
         {
             return false;
         }
+
+        Param.CheckParam<bool>("isPreview", out var isPreview);
         this.krdiffs = krdiffs!;
         this.diffFolderPath = diffFolderPath!;
         this.groupFileInfos = groupFileInfos!;
         this.baseFolderPath = baseFolderPath!;
         this.decompressTempFolder = decompressTempFolder!;
+        this.isPreview = isPreview;
         return true;
     }
 
@@ -82,7 +86,7 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
                 GameEventPublisher.Publish(
                     new GameContextOutputArgs
                     {
-            Generation = _generation,
+                        Generation = _generation,
                         Type = GameContextActionType.Error,
                         TipMessage = "初始化失败",
                     }
@@ -101,7 +105,7 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
                     GameEventPublisher.Publish(
                         new GameContextOutputArgs
                         {
-            Generation = _generation,
+                            Generation = _generation,
                             Type = GameContextActionType.TipMessage,
                             TipMessage =
                                 $"磁盘空间不足，剩余空间{GameProgressTracker.FormatBytes(diskSize)},需要空间{GameProgressTracker.FormatBytes(size)}，解压损坏！请修复游戏",
@@ -117,9 +121,10 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
                     GameEventPublisher.Publish(
                         new GameContextOutputArgs
                         {
-            Generation = _generation,
+                            Generation = _generation,
                             Type = GameContextActionType.Error,
-                            TipMessage = $"补丁文件不存在，跳过: {System.IO.Path.GetFileName(krdiffPath)}",
+                            TipMessage =
+                                $"补丁文件不存在，跳过: {System.IO.Path.GetFileName(krdiffPath)}",
                         }
                     );
                     return false;
@@ -131,7 +136,7 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
                             GameEventPublisher.Publish(
                                 new GameContextOutputArgs
                                 {
-            Generation = _generation,
+                                    Generation = _generation,
                                     Type = GameContextActionType.Decompress,
                                     CurrentSize = (long)s.Item3.PatchedCurrentBytes,
                                     TotalSize = (long)s.Item3.PatchTotalBytes,
@@ -145,29 +150,45 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
                                     FilePath = s.Item2,
                                     FileCurrentSize = (long)s.Item3.PatchedCurrentBytes,
                                     FileTotalSize = (long)s.Item3.PatchTotalBytes,
-                                    DiffSpeed=s.Item3.SpeedValue
+                                    DiffSpeed = s.Item3.SpeedValue,
                                 }
                             );
                             ProgressValue = s.Item3.TotalBytesProgress;
                         }
                     );
-                var decompressResult = await DiffDecompressTask.DecompressKrdiffFile(
-                    baseFolderPath,
-                    krdiffPath,
-                    i,
-                    groupFileInfos.Count,
-                    tempFolder,
-                    progress: progress
-                );
-                if (decompressResult != 0)
+                int diffValue = -1;
+                if (this.isPreview)
                 {
-                    Logger.WriteError($"补丁解压失败，退出码: {decompressResult}，跳过: {krdiffPath}");
+                    diffValue = await DiffDecompressTaskV2.DecompressKrdiffFile(
+                        baseFolderPath,
+                        krdiffPath,
+                        i,
+                        krdiffs.Count,
+                        progress: progress,
+                        tempFolder: tempFolder
+                    );
+                }
+                else
+                {
+                    diffValue = await DiffDecompressTask.DecompressKrdiffFile(
+                        baseFolderPath,
+                        krdiffPath,
+                        i,
+                        krdiffs.Count,
+                        progress: progress,
+                        tempFolder: tempFolder
+                    );
+                }
+                if (diffValue != 0)
+                {
+                    Logger.WriteError($"补丁解压失败，退出码: {diffValue}，跳过: {krdiffPath}");
                     GameEventPublisher.Publish(
                         new GameContextOutputArgs
                         {
-            Generation = _generation,
+                            Generation = _generation,
                             Type = GameContextActionType.Error,
-                            TipMessage = $"补丁解压失败，退出码: {decompressResult}，跳过: {System.IO.Path.GetFileName(krdiffPath)}",
+                            TipMessage =
+                                $"补丁解压失败，退出码: {diffValue}，跳过: {System.IO.Path.GetFileName(krdiffPath)}",
                         }
                     );
                     return false;
@@ -217,17 +238,22 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
         catch (Exception ex)
         {
             Logger.WriteError($"安装补丁组文件异常: {ex.Message}");
-            GameEventPublisher.Publish(new GameContextOutputArgs
-            {
-            Generation = _generation,
-                Type = GameContextActionType.Error,
-                TipMessage = $"安装补丁组文件异常: {ex.Message}"
-            });
+            GameEventPublisher.Publish(
+                new GameContextOutputArgs
+                {
+                    Generation = _generation,
+                    Type = GameContextActionType.Error,
+                    TipMessage = $"安装补丁组文件异常: {ex.Message}",
+                }
+            );
             return false;
         }
     }
 
-    public void SetParam(Dictionary<string, object> param, IGameEventPublisher<GameContextOutputArgs> gameEventPublisher)
+    public void SetParam(
+        Dictionary<string, object> param,
+        IGameEventPublisher<GameContextOutputArgs> gameEventPublisher
+    )
     {
         this.Param = param;
         this.GameEventPublisher = gameEventPublisher;

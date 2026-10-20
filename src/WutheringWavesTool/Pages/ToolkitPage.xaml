@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:animatedvisuals="using:Microsoft.UI.Xaml.Controls.AnimatedVisuals"
+    xmlns:conver="using:Haiyu.Converter"
     xmlns:cui="using:CommunityToolkit.WinUI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:helper="using:Haiyu.Helpers"
@@ -24,9 +25,7 @@
         HorizontalScrollBarVisibility="Hidden"
         VerticalScrollBarVisibility="Hidden">
         <StackPanel Orientation="Vertical" Spacing="5">
-            <cui:SettingsCard Header="声骸评分" Description="角色模板 · 声骸评分">
-                <Button Content="打开" Command="{x:Bind ViewModel.OpenSortingCommand}" AutomationProperties.AutomationId="OpenSorting"/>
-            </cui:SettingsCard>
+
             <Grid>
                 <TextBlock
                     FontFamily="{ThemeResource DefaultFont}"
@@ -72,7 +71,15 @@
                     </StackPanel>
                 </Button>
             </cui:SettingsCard>
-
+            <cui:SettingsCard
+                Description="角色模板 · 声骸评分"
+                Header="声骸评分"
+                Visibility="{x:Bind ViewModel.SortingGrayKey, Mode=OneWay, Converter={StaticResource GrayUIToVisiblityConverter}}">
+                <Button
+                    AutomationProperties.AutomationId="OpenSorting"
+                    Command="{x:Bind ViewModel.OpenSortingCommand}"
+                    Content="打开" />
+            </cui:SettingsCard>
             <cui:SettingsCard Description="{x:Bind helper:LanguageService.GetString('Tool_MoniterDescription')}" Header="{x:Bind helper:LanguageService.GetString('Tool_MoniterHeader')}">
                 <cui:SettingsCard.HeaderIcon>
                     <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE977;" />
@@ -152,7 +159,10 @@
                     </StackPanel>
                 </Button>
             </cui:SettingsCard>
-            <cui:SettingsCard Description="{x:Bind helper:LanguageService.GetString('Toolkit_OfficialRecordDescription')}" Header="{x:Bind helper:LanguageService.GetString('Toolkit_OfficialRecordHeader')}">
+            <cui:SettingsCard
+                Description="{x:Bind helper:LanguageService.GetString('Toolkit_OfficialRecordDescription')}"
+                Header="{x:Bind helper:LanguageService.GetString('Toolkit_OfficialRecordHeader')}"
+                Visibility="{x:Bind ViewModel.OfficialWriteGrayKey, Mode=OneWay, Converter={StaticResource GrayUIToVisiblityConverter}}">
                 <cui:SettingsCard.HeaderIcon>
                     <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8F1;" />
                 </cui:SettingsCard.HeaderIcon>

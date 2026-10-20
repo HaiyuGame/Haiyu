@@ -17,6 +17,7 @@
     Background="{ThemeResource AcrylicBackgroundFillColorBaseBrush}"
     CornerRadius="5"
     mc:Ignorable="d">
+
     <ContentDialog.Resources>
         <converter:BoolToLanguageConverter
             x:Key="BoolToLanguageConverter"

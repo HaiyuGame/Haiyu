@@ -3,16 +3,15 @@ namespace Waves.Core.GameContext.KruoGameContextBaseV2.Common;
 /// <summary>
 /// 安装库洛补丁包资源类
 /// </summary>
-public class InstallKrdiffResource:IProgressSetup,IAsyncDisposable
+public class InstallKrdiffResource : IProgressSetup, IAsyncDisposable
 {
     private long _generation;
     private List<PatchGameFileInfo> krdiffs;
     private string diffFolderPath;
     private string gameBaseFolder;
+    private bool isPreview;
 
-    public InstallKrdiffResource(
-        LoggerService loggerService
-    )
+    public InstallKrdiffResource(LoggerService loggerService)
     {
         this.Logger = loggerService;
     }
@@ -45,27 +44,29 @@ public class InstallKrdiffResource:IProgressSetup,IAsyncDisposable
         {
             return false;
         }
-        if(!Param.CheckParam<string>("gameBaseFolder",out var gameBaseFolder))
+        if (!Param.CheckParam<string>("gameBaseFolder", out var gameBaseFolder))
             return false;
+        Param.CheckParam<bool>("isPreview", out var isPreview);
         this.krdiffs = krdiffs!;
         this.diffFolderPath = diffFolderPath!;
         this.gameBaseFolder = gameBaseFolder!;
+        this.isPreview = isPreview;
         return true;
     }
 
     public async Task<bool> RunAsync()
     {
-        if (!await CheckAsync()) return false;
+        if (!await CheckAsync())
+            return false;
         for (int i = 0; i < krdiffs.Count; i++)
         {
-            //diffFolderPath 路径为下载补丁包路径
             var diskSize = await BuildFileHelper.GetDiskAvailableSize(gameBaseFolder);
             if (diskSize < krdiffs[i].Size)
             {
                 GameEventPublisher.Publish(
                     new GameContextOutputArgs
                     {
-            Generation = _generation,
+                        Generation = _generation,
                         Type = GameContextActionType.TipMessage,
                         ErrorString = $"磁盘空间不足，剩余可用空间{diskSize}字节,严重不足",
                     }
@@ -73,7 +74,8 @@ public class InstallKrdiffResource:IProgressSetup,IAsyncDisposable
                 return false;
             }
             var krdiffPath = BuildFileHelper.BuildFilePath(diffFolderPath, krdiffs[i]);
-            if (!File.Exists(krdiffPath)) return false;
+            if (!File.Exists(krdiffPath))
+                return false;
             IProgress<(GameContextActionType, string, KrDiffDecompressResult)> progress =
                 new Progress<(GameContextActionType, string, KrDiffDecompressResult)>(
                     (s) =>
@@ -81,7 +83,7 @@ public class InstallKrdiffResource:IProgressSetup,IAsyncDisposable
                         GameEventPublisher.Publish(
                             new GameContextOutputArgs
                             {
-            Generation = _generation,
+                                Generation = _generation,
                                 Type = GameContextActionType.Decompress,
                                 CurrentSize = (long)s.Item3.PatchedCurrentBytes,
                                 TotalSize = (long)s.Item3.PatchTotalBytes,
@@ -97,22 +99,38 @@ public class InstallKrdiffResource:IProgressSetup,IAsyncDisposable
                         ProgressValue = s.Item3.TotalBytesProgress;
                     }
                 );
-            var decompressResult =  await DiffDecompressTask.DecompressKrdiffFile(
-                gameBaseFolder,
-                krdiffPath,
-                i,
-                krdiffs.Count,
-                progress: progress
-            );
-            if (decompressResult != 0)
+            int diffValue = -1;
+            if (this.isPreview)
             {
-                Logger.WriteError($"补丁解压失败，退出码: {decompressResult}，跳过: {krdiffPath}");
+                diffValue = await DiffDecompressTaskV2.DecompressKrdiffFile(
+                    gameBaseFolder,
+                    krdiffPath,
+                    i,
+                    krdiffs.Count,
+                    progress: progress
+                );
+            }
+            else
+            {
+                diffValue = await DiffDecompressTask.DecompressKrdiffFile(
+                    gameBaseFolder,
+                    krdiffPath,
+                    i,
+                    krdiffs.Count,
+                    progress: progress
+                );
+            }
+
+            if (diffValue != 0)
+            {
+                Logger.WriteError($"补丁解压失败，退出码: {diffValue}，跳过: {krdiffPath}");
                 GameEventPublisher.Publish(
                     new GameContextOutputArgs
                     {
-            Generation = _generation,
+                        Generation = _generation,
                         Type = GameContextActionType.Error,
-                        TipMessage = $"补丁解压失败，退出码: {decompressResult}，跳过: {System.IO.Path.GetFileName(krdiffPath)}",
+                        TipMessage =
+                            $"补丁解压失败，退出码: {diffValue}，跳过: {System.IO.Path.GetFileName(krdiffPath)}",
                     }
                 );
                 return false;
@@ -121,7 +139,10 @@ public class InstallKrdiffResource:IProgressSetup,IAsyncDisposable
         return true;
     }
 
-    public void SetParam(Dictionary<string, object> param, IGameEventPublisher<GameContextOutputArgs> gameEventPublisher)
+    public void SetParam(
+        Dictionary<string, object> param,
+        IGameEventPublisher<GameContextOutputArgs> gameEventPublisher
+    )
     {
         this.Param = param;
         this.GameEventPublisher = gameEventPublisher;
@@ -144,7 +165,7 @@ public class InstallKrdiffResource:IProgressSetup,IAsyncDisposable
         }
         else
         {
-            Task.Run(async() => await RunAsync());
+            Task.Run(async () => await RunAsync());
             return true;
         }
     }

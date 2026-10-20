@@ -1,4 +1,5 @@
 using CommunityToolkit.WinUI;
+using GrayExtension;
 using Haiyu.Plugin.Contracts;
 using Microsoft.UI.Dispatching;
 using Waves.Core.Contracts.CloudGame;
@@ -21,7 +22,8 @@ public class AppContext<T> : IAppContext<T>
         [FromKeyedServices("AppLog")] LoggerService loggerService,
         IWindowManager windowManager,
         IAppActivation appActivation,
-        ABIRuntimeService aBIRuntimeService
+        ABIRuntimeService aBIRuntimeService,
+        GrayOpenService grayOpenService
     )
     {
         KuroClient = wavesClient;
@@ -30,6 +32,7 @@ public class AppContext<T> : IAppContext<T>
         WindowManager = windowManager;
         AppActivation = appActivation;
         ABIRuntimeService = aBIRuntimeService;
+        GrayOpenService = grayOpenService;
     }
 
     private ContentDialog _dialog;
@@ -42,7 +45,7 @@ public class AppContext<T> : IAppContext<T>
     public IWindowManager WindowManager { get; }
     public IAppActivation AppActivation { get; }
     public ABIRuntimeService ABIRuntimeService { get; }
-
+    public GrayOpenService GrayOpenService { get; }
     public NotifyIconWinUI NotifyIcon { get; private set; }
 
     public async Task LauncherAsync(T app)
@@ -150,6 +153,7 @@ public class AppContext<T> : IAppContext<T>
 
     private async Task InitGameCoreAsync()
     {
+        await this.GrayOpenService.InitAsync(AppSettings.GrayTestFile);
         foreach (var item in GameContextFactory.GetAllLocalContextName())
         {
             var context = Instance.Host.Services.GetRequiredKeyedService<IGameContextV2>(item);

@@ -2,11 +2,29 @@ namespace Waves.Core.Common;
 
 public class DiffDecompressManager
 {
+    [StructLayout(LayoutKind.Sequential)]
+    private struct IO_COUNTERS
+    {
+        public ulong ReadOperationCount;
+        public ulong WriteOperationCount;
+        public ulong OtherOperationCount;
+        public ulong ReadTransferCount;
+        public ulong WriteTransferCount;
+        public ulong OtherTransferCount;
+    }
+
+    [DllImport("kernel32.dll")]
+    private static extern bool GetProcessIoCounters(IntPtr ProcessHandle, out IO_COUNTERS IoCounters);
+
     private string? sharedKey;
     private SharedMemory? _sharedMemory;
     private Process? _process;
-    ManualResetEventSlim? _processExited;
-    public DiffDecompressManager(string oldFolder,string newFolder,string diffFile)
+    private ManualResetEventSlim? _processExited;
+
+    private ulong _lastTotalBytes;
+    private DateTime _lastCheckTime;
+
+    public DiffDecompressManager(string oldFolder, string newFolder, string diffFile)
     {
         OldFolder = oldFolder;
         NewFolder = newFolder;
@@ -17,7 +35,7 @@ public class DiffDecompressManager
     public string NewFolder { get; }
     public string DiffFile { get; }
 
-    public async Task<int> StartAsync(IProgress<(double, double)> progress)
+    public async Task<int> StartAsync(IProgress<KrDiffDecompressResult> progress)
     {
         try
         {
@@ -35,20 +53,46 @@ public class DiffDecompressManager
                 UseShellExecute = false,
                 CreateNoWindow = true,
             };
-            Process _process = new Process();
+
             _process = new Process { StartInfo = processStartInfo, EnableRaisingEvents = true };
             _process.Exited += PatchProgressExitedEventHandler;
+
             if (_process.Start())
             {
+                GetProcessIoCounters(_process.Handle, out IO_COUNTERS initIo);
+                _lastTotalBytes = initIo.ReadTransferCount + initIo.WriteTransferCount;
+                _lastCheckTime = DateTime.Now;
+
                 while (!_process.HasExited)
                 {
                     await Task.Delay(1000);
-                    ulong[]? values = GetProgress(TimeSpan.FromSeconds(1));
+                    var values = GetProgress(TimeSpan.FromSeconds(1));
                     if (values == null)
                         continue;
-                    progress.Report((values[4], values[5]));
+
+                    if (GetProcessIoCounters(_process.Handle, out IO_COUNTERS io))
+                    {
+                        var now = DateTime.Now;
+                        double sec = (now - _lastCheckTime).TotalSeconds;
+                        if (sec <= 0)
+                        {
+                            continue;
+                        }
+
+                        ulong currentTotal = io.ReadTransferCount + io.WriteTransferCount;
+                        ulong delta = currentTotal - _lastTotalBytes;
+
+                        double speedBytesPerSecond = delta / sec;
+                        var result = values.Value;
+                        result.SpeedValue = speedBytesPerSecond;
+
+                        _lastTotalBytes = currentTotal;
+                        _lastCheckTime = now;
+                        progress.Report(result);
+                    }
                 }
             }
+
             await _process.WaitForExitAsync();
             return _process.ExitCode;
         }
@@ -63,29 +107,26 @@ public class DiffDecompressManager
             _process = null;
             _processExited?.Dispose();
             _sharedMemory?.Dispose();
-            
         }
-
     }
 
-    ulong[]? GetProgress(TimeSpan? timeout = null)
+    KrDiffDecompressResult? GetProgress(TimeSpan? timeout = null)
     {
         if (_sharedMemory == null)
         {
             return null;
         }
         int count = 6;
-        var result =  _sharedMemory.ReadUlong(0,count,out var data,timeout);
+        var result = _sharedMemory.ReadUlong(0, count, out var data, timeout);
         if (result)
         {
-            return data;
+            return new KrDiffDecompressResult(data[0], data[1], data[2], data[3], data[4], data[5]);
         }
         return null;
     }
 
     private void PatchProgressExitedEventHandler(object? sender, EventArgs e)
     {
-        _processExited?.Set(); // 触发退出信号
+        _processExited?.Set();
     }
-
 }

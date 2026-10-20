@@ -1,5 +1,6 @@
 
 using Cacheing;
+using GrayExtension;
 using Haiyu.Common.Contracts;
 using Haiyu.Helpers;
 using Haiyu.Pages.Communitys;
@@ -17,6 +18,7 @@ using Haiyu.ViewModel.Communitys;
 using Haiyu.ViewModel.GameViewModels;
 using Haiyu.ViewModel.GameViewModels.GameContexts;
 using Haiyu.ViewModel.OOBEViewModels;
+using Haiyu.ViewModel.SortingViewModels;
 using Haiyu.ViewModel.ToolkitsViewModel;
 using Haiyu.ViewModel.WikiViewModels;
 using MemoryPack;
@@ -95,12 +97,14 @@ public static class InstanceBuilderExtensions
                 Service
                     .AddSingleton<SortingWorkspace>()
                     .AddSingleton<KuroSortingService>()
+                #region Sorting
                     .AddSingleton<Haiyu.Contracts.Services.SortingViewFactory>()
                     .AddTransient<Haiyu.Pages.SortingView.SortingManagerPage>()
                     .AddTransient<Haiyu.Pages.SortingView.SortingTemplatePage>()
                     .AddTransient<Haiyu.Pages.SortingView.SortingEntryDialog>()
-                    .AddTransient<Haiyu.ViewModels.SortingViewModels.SortingManagerViewModel>()
-                    .AddTransient<Haiyu.ViewModels.SortingViewModels.SortingTemplateViewModel>()
+                    .AddTransient<SortingManagerViewModel>()
+                    .AddTransient<SortingTemplateViewModel>()
+                #endregion
                     .AddHostedService<RpcService>(
                         (s) =>
                         {
@@ -189,6 +193,8 @@ public static class InstanceBuilderExtensions
                     .AddTransient<CloudSelectNodeViewModel>()
                     .AddTransient<ClearMemoryDialog>()
                     .AddTransient<ClearMemoryViewModel>()
+                    .AddTransient<GrayMenuDialog>()
+                    .AddTransient<GrayMenuViewModel>()
                     #endregion
                 #endregion
                     #region More
@@ -196,6 +202,7 @@ public static class InstanceBuilderExtensions
                     .AddSingleton<IWavesCloudGameService, WavesCloudGameService>()
                     .AddKeyedSingleton<IUpdateService, GithubUpdateService>("GitHub")
                     .AddKeyedSingleton<IUpdateService, MirrorUpdateService>("Mirror")
+                    .AddSingleton<GrayOpenService>()
                     #endregion
                     #region Base
                     .AddSingleton<IAppContext<App>, AppContext<App>>()

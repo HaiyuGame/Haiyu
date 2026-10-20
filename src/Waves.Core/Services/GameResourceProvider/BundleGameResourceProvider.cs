@@ -849,23 +849,24 @@ public sealed partial class BundleGameResourceProvider : IGameResourceProvider
 
     private static int CompareVersion(string left, string right)
     {
-        if (string.IsNullOrWhiteSpace(left))
-            return string.IsNullOrWhiteSpace(right) ? 0 : -1;
-        if (string.IsNullOrWhiteSpace(right))
-            return 1;
+        if (string.IsNullOrEmpty(left) || string.IsNullOrEmpty(right))
+        {
+            if (!string.IsNullOrEmpty(left))
+                return 1;
+            if (!string.IsNullOrEmpty(right))
+                return -1;
+            return 0;
+        }
         var a = left.Split('.');
         var b = right.Split('.');
-        for (int i = 0; i < Math.Max(a.Length, b.Length); i++)
+        var common = Math.Min(a.Length, b.Length);
+        for (int i = 0; i < common; i++)
         {
-            if (
-                !long.TryParse(i < a.Length ? a[i] : "0", out var av)
-                || !long.TryParse(i < b.Length ? b[i] : "0", out var bv)
-            )
-                return string.Compare(left, right, StringComparison.Ordinal);
-            var comparison = av.CompareTo(bv);
-            if (comparison != 0)
-                return comparison;
+            var av = int.Parse(a[i]);
+            var bv = int.Parse(b[i]);
+            if (av != bv)
+                return av.CompareTo(bv);
         }
-        return 0;
+        return a.Length.CompareTo(b.Length);
     }
 }

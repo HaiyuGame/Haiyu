@@ -69,6 +69,12 @@
 	<ItemGroup>
 		<Content Remove="Assets\Cursor\CursorResource.res" />
 		<Content Remove="Assets\HpatchzResource\hpatchz.exe" />
+		<Content Remove="Assets\HpatchzResource\hpatchz.exe.i64" />
+		<Content Remove="Assets\HpatchzResource\hpatchz.exe.id0" />
+		<Content Remove="Assets\HpatchzResource\hpatchz.exe.id1" />
+		<Content Remove="Assets\HpatchzResource\hpatchz.exe.id2" />
+		<Content Remove="Assets\HpatchzResource\hpatchz.exe.nam" />
+		<Content Remove="Assets\HpatchzResource\hpatchz.exe.til" />
 		<Content Remove="assets\Readme.md" />
 		<Content Remove="Assets\RolePage\appLogo.png" />
 	</ItemGroup>
@@ -117,6 +123,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Extensions\ABI\ABIRuntime\ABIRuntime.csproj" />
+		<ProjectReference Include="..\GrayExtension\GrayExtension.csproj" />
 		<ProjectReference Include="..\Haiyu.Analyzers\Haiyu.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 		<ProjectReference Include="..\Extensions\Haiyu.Plugin\Haiyu.Plugin.csproj" />
 		<ProjectReference Include="..\Extensions\Haiyu.ServiceHost\Haiyu.ServiceHost.csproj" />

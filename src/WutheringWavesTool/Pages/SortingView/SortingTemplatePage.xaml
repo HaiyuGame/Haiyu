@@ -1,10 +1,10 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <Page
     x:Class="Haiyu.Pages.SortingView.SortingTemplatePage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ui="using:Haiyu.Controls"
-    xmlns:vm="using:Haiyu.ViewModels.SortingViewModels">
+    xmlns:vm="using:Haiyu.ViewModel.SortingViewModels">
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" RowSpacing="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -75,19 +75,70 @@
                     </StackPanel>
                 </Grid>
             </Border>
-            <Expander Header="毕业标准" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" AutomationProperties.AutomationId="SortingGraduationSettings">
+            <Expander
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                AutomationProperties.AutomationId="SortingGraduationSettings"
+                Header="毕业标准">
                 <StackPanel Spacing="8">
-                    <Grid ColumnSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                        <NumberBox Header="目标有效副词条数" Value="{x:Bind ViewModel.TargetCount, Mode=TwoWay}" Minimum="1" Maximum="5" SmallChange="1" AutomationProperties.AutomationId="SortingTargetCount" />
-                        <NumberBox Grid.Column="1" Header="声骸毕业线" Value="{x:Bind ViewModel.GraduationLine, Mode=TwoWay}" Minimum="0" Maximum="100" />
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <NumberBox
+                            AutomationProperties.AutomationId="SortingTargetCount"
+                            Header="目标有效副词条数"
+                            Maximum="5"
+                            Minimum="1"
+                            SmallChange="1"
+                            Value="{x:Bind ViewModel.TargetCount, Mode=TwoWay}" />
+                        <NumberBox
+                            Grid.Column="1"
+                            Header="声骸毕业线"
+                            Maximum="100"
+                            Minimum="0"
+                            Value="{x:Bind ViewModel.GraduationLine, Mode=TwoWay}" />
                     </Grid>
-                    <TextBlock Text="评级最低分 · SSS ＞ SS ＞ S ＞ A ＞ B" FontSize="12"/>
-                    <Grid ColumnSpacing="8"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                        <NumberBox Grid.Column="0" Header="SSS" Value="{x:Bind ViewModel.GradeSSS, Mode=TwoWay}" Minimum="0" Maximum="100"/>
-                        <NumberBox Grid.Column="1" Header="SS" Value="{x:Bind ViewModel.GradeSS, Mode=TwoWay}" Minimum="0" Maximum="100"/>
-                        <NumberBox Grid.Column="2" Header="S" Value="{x:Bind ViewModel.GradeS, Mode=TwoWay}" Minimum="0" Maximum="100"/>
-                        <NumberBox Grid.Column="3" Header="A" Value="{x:Bind ViewModel.GradeA, Mode=TwoWay}" Minimum="0" Maximum="100"/>
-                        <NumberBox Grid.Column="4" Header="B" Value="{x:Bind ViewModel.GradeB, Mode=TwoWay}" Minimum="0" Maximum="100"/>
+                    <TextBlock FontSize="12" Text="评级最低分 · SSS ＞ SS ＞ S ＞ A ＞ B" />
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <NumberBox
+                            Grid.Column="0"
+                            Header="SSS"
+                            Maximum="100"
+                            Minimum="0"
+                            Value="{x:Bind ViewModel.GradeSSS, Mode=TwoWay}" />
+                        <NumberBox
+                            Grid.Column="1"
+                            Header="SS"
+                            Maximum="100"
+                            Minimum="0"
+                            Value="{x:Bind ViewModel.GradeSS, Mode=TwoWay}" />
+                        <NumberBox
+                            Grid.Column="2"
+                            Header="S"
+                            Maximum="100"
+                            Minimum="0"
+                            Value="{x:Bind ViewModel.GradeS, Mode=TwoWay}" />
+                        <NumberBox
+                            Grid.Column="3"
+                            Header="A"
+                            Maximum="100"
+                            Minimum="0"
+                            Value="{x:Bind ViewModel.GradeA, Mode=TwoWay}" />
+                        <NumberBox
+                            Grid.Column="4"
+                            Header="B"
+                            Maximum="100"
+                            Minimum="0"
+                            Value="{x:Bind ViewModel.GradeB, Mode=TwoWay}" />
                     </Grid>
                 </StackPanel>
             </Expander>

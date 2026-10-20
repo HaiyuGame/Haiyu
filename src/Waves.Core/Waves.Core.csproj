@@ -27,8 +27,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Extensions\Waves.Api\Waves.Api.csproj" />
+    <ProjectReference Include="..\GrayExtension\GrayExtension.csproj" />
     <ProjectReference Include="..\Haiyu.Analyzers\Haiyu.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\Haiyu.KuroClient\Haiyu.KuroClient.csproj" />
+    <ProjectReference Include="..\Waves.Diff\Waves.Diff.csproj" />
     <ProjectReference Include="..\Waves.Settings\Waves.Settings.csproj" />
   </ItemGroup>
 

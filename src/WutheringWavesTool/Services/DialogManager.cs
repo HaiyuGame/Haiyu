@@ -229,4 +229,9 @@ public sealed class DialogManager : IDialogManager
     {
         await this.ShowDialogAsync<ClearMemoryDialog>();
     }
+
+    public async Task ShowGrayConfigAsync()
+    {
+        await this.ShowDialogAsync<GrayMenuDialog>();
+    }
 }

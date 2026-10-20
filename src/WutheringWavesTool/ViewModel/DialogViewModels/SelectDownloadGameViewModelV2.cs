@@ -1,3 +1,4 @@
+using GrayExtension;
 using Haiyu.Common.Contracts;
 using Haiyu.Models.Dialogs;
 using Waves.Core.Models.Options;
@@ -7,10 +8,15 @@ namespace Haiyu.ViewModel.DialogViewModels;
 
 public sealed partial class SelectDownloadGameViewModelV2 : DialogViewModelBase
 {
-    public SelectDownloadGameViewModelV2(DialogSession dialogSession, IWindowManager windowManager)
+    public SelectDownloadGameViewModelV2(
+        DialogSession dialogSession,
+        IWindowManager windowManager,
+        GrayOpenService grayOpenService
+    )
         : base(dialogSession)
     {
         Pickers = windowManager.Shell.PickersService;
+        GrayOpenService = grayOpenService;
     }
 
     private GameResourceParameter? Parameter;
@@ -50,7 +56,8 @@ public sealed partial class SelectDownloadGameViewModelV2 : DialogViewModelBase
     public partial string FolderPath { get; set; } = string.Empty;
 
     [ObservableProperty]
-    public partial string TipMessage { get; set; } = LanguageService.GetString("GameDownload_CheckDiskSpace");
+    public partial string TipMessage { get; set; } =
+        LanguageService.GetString("GameDownload_CheckDiskSpace");
 
     private bool CanStartDownload() => CanDownload && !IsBusy;
 
@@ -75,6 +82,7 @@ public sealed partial class SelectDownloadGameViewModelV2 : DialogViewModelBase
 
     [ObservableProperty]
     public partial BunleResourceSize? SelectedBundle { get; set; }
+    public GrayOpenService GrayOpenService { get; }
 
     partial void OnFolderPathChanged(string value)
     {
@@ -99,26 +107,32 @@ public sealed partial class SelectDownloadGameViewModelV2 : DialogViewModelBase
     }
 
     [RelayCommand]
-    private Task Cancel() => CloseAsync(new SelectDownloadFolderResult
-    {
-        InstallFolder = FolderPath,
-        Result = ContentDialogResult.None,
-    });
+    private Task Cancel() =>
+        CloseAsync(
+            new SelectDownloadFolderResult
+            {
+                InstallFolder = FolderPath,
+                Result = ContentDialogResult.None,
+            }
+        );
 
     [RelayCommand(CanExecute = nameof(CanStartDownload))]
-    private Task Download() => RunBusyAsync(async () =>
-    {
-        await RefreshDiskCoreAsync();
-        if (!CanDownload || Launcher is null || IsDisposed)
-            return;
-        await CloseAsync(new SelectDownloadFolderResult
+    private Task Download() =>
+        RunBusyAsync(async () =>
         {
-            InstallFolder = FolderPath,
-            Result = ContentDialogResult.Primary,
-            Summary = Launcher,
-            Parameter = Parameter,
+            await RefreshDiskCoreAsync();
+            if (!CanDownload || Launcher is null || IsDisposed)
+                return;
+            await CloseAsync(
+                new SelectDownloadFolderResult
+                {
+                    InstallFolder = FolderPath,
+                    Result = ContentDialogResult.Primary,
+                    Summary = Launcher,
+                    Parameter = Parameter,
+                }
+            );
         });
-    });
 
     [RelayCommand]
     private async Task SelectFolder()
@@ -173,7 +187,11 @@ public sealed partial class SelectDownloadGameViewModelV2 : DialogViewModelBase
         double totalSizeMB = (double)selectedDrive.TotalSize / (1024 * 1024 * 1024);
         double freeSpaceMB = (double)selectedDrive.TotalFreeSpace / (1024 * 1024 * 1024);
         double usedSpaceMB = totalSizeMB - freeSpaceMB;
-        DiskSpaceText = string.Format(LanguageService.GetString("GameInstall_ShowAvailableSpace"), freeSpaceMB, totalSizeMB);
+        DiskSpaceText = string.Format(
+            LanguageService.GetString("GameInstall_ShowAvailableSpace"),
+            freeSpaceMB,
+            totalSizeMB
+        );
         MaxValue = totalSizeMB;
         var checkedPath = FolderPath;
         var checkedBundle = SelectedBundle;
@@ -255,8 +273,10 @@ public sealed partial class SelectDownloadGameViewModelV2 : DialogViewModelBase
 
     private async Task LoadCoreAsync()
     {
+        var bunleGray = this.GrayOpenService.GetOpen(GrayConfigId.WavesGameBunleOpen, false);
         if (
             !this.GameContext.IsBunle
+            || !bunleGray
             || this.GameContext.GameResourceProvider is not BundleGameResourceProvider p
         )
         {
@@ -267,7 +287,8 @@ public sealed partial class SelectDownloadGameViewModelV2 : DialogViewModelBase
         var bunleNames = await p.GetBunlesAsync();
         Bundles = bunleNames;
         this.Parameter = await p.GetLocalGameReosurceParamter();
-        SelectedBundle = bunleNames.FirstOrDefault(x => x.BunleName == Parameter.BundleName)
+        SelectedBundle =
+            bunleNames.FirstOrDefault(x => x.BunleName == Parameter.BundleName)
             ?? bunleNames.FirstOrDefault();
     }
 }

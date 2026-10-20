@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using GrayExtension;
 using Haiyu.Common.Contracts;
 using Haiyu.Models.Dialogs;
 using Waves.Core.Models.Options;
@@ -10,12 +11,14 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
 {
     public SelectGameFolderViewModelV2(
         DialogSession dialogSession,
-        IWindowManager windowManager
+        IWindowManager windowManager,
+        GrayOpenService grayOpenService
     )
         : base(dialogSession)
     {
         PickersService = this.AppContext.WindowManager.Shell.PickersService;
         WindowManager = windowManager;
+        GrayOpenService = grayOpenService;
     }
 
     public GameResourceParameter? Parameter { get; private set; }
@@ -78,7 +81,9 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
     public partial string TipMessage { get; set; } =
         LanguageService.GetStringByText("选择目标程序，以查看驱动器详情");
 
-    private bool CanImport() => IsVerify && !IsBusy
+    private bool CanImport() =>
+        IsVerify
+        && !IsBusy
         && !string.IsNullOrWhiteSpace(SelectedVersion)
         && (!HasBundleSelection || SelectedBundle is not null);
 
@@ -104,14 +109,13 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
     public partial double MaxValue { get; set; }
     public IPickersService PickersService { get; }
     public IWindowManager WindowManager { get; }
+    public GrayOpenService GrayOpenService { get; }
     public GameResourceSummary? Launcher { get; internal set; }
 
     [RelayCommand]
     async Task SelectGameProgram()
     {
-        var exe = await PickersService.GetFileOpenPicker(
-            [".exe"]
-        );
+        var exe = await PickersService.GetFileOpenPicker([".exe"]);
         if (exe == null)
             return;
         if (System.IO.Path.GetFileName(exe.Path) != GameContext.Config.GameExeName)
@@ -129,8 +133,14 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
     private async Task RefreshDiskCoreAsync()
     {
         IsVerify = false;
-        if (!File.Exists(ExePath)
-            || !string.Equals(Path.GetFileName(ExePath), GameContext.Config.GameExeName, StringComparison.OrdinalIgnoreCase))
+        if (
+            !File.Exists(ExePath)
+            || !string.Equals(
+                Path.GetFileName(ExePath),
+                GameContext.Config.GameExeName,
+                StringComparison.OrdinalIgnoreCase
+            )
+        )
         {
             TipMessage = LanguageService.GetString("GameImport_SelectValidExecutable");
             return;
@@ -165,7 +175,11 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
 
         var totalSpaceGB = BytesToGigabytes(driveInfo.TotalSize);
         var freeSpaceGB = BytesToGigabytes(driveInfo.TotalFreeSpace);
-        DiskSpaceText = string.Format(LanguageService.GetString("GameInstall_ShowAvailableSpace"), freeSpaceGB, totalSpaceGB);
+        DiskSpaceText = string.Format(
+            LanguageService.GetString("GameInstall_ShowAvailableSpace"),
+            freeSpaceGB,
+            totalSpaceGB
+        );
         this.MaxValue = totalSpaceGB;
         this.BarValues = new ObservableCollection<LayerData>([
             new LayerData()
@@ -192,41 +206,58 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
     }
 
     [RelayCommand(CanExecute = nameof(CanImport))]
-    Task StartVerify() => RunBusyAsync(async () =>
-    {
-        if (!IsVerify)
-            return;
-        var bundleConfig = await GetBundleConfigAsync();
-        if (bundleConfig.Count > 0
-            && !await GameContext.GameLocalConfig.SaveConfigsAsync(bundleConfig, CTS.Token))
+    Task StartVerify() =>
+        RunBusyAsync(async () =>
         {
-            TipMessage = LanguageService.GetString("GameImport_SaveTextureFailed");
-            return;
-        }
-        await CloseAsync(new SelectDownloadFolderResult
-        {
-            InstallFolder = Path.GetDirectoryName(ExePath)!,
-            Result = ContentDialogResult.Primary,
-            Summary = Launcher,
-            Parameter = Parameter,
+            if (!IsVerify)
+                return;
+            var bundleConfig = await GetBundleConfigAsync();
+            if (
+                bundleConfig.Count > 0
+                && !await GameContext.GameLocalConfig.SaveConfigsAsync(bundleConfig, CTS.Token)
+            )
+            {
+                TipMessage = LanguageService.GetString("GameImport_SaveTextureFailed");
+                return;
+            }
+            await CloseAsync(
+                new SelectDownloadFolderResult
+                {
+                    InstallFolder = Path.GetDirectoryName(ExePath)!,
+                    Result = ContentDialogResult.Primary,
+                    Summary = Launcher,
+                    Parameter = Parameter,
+                }
+            );
         });
-    });
 
     [RelayCommand]
     Task Loaded() => RunBusyAsync(LoadCoreAsync);
 
     private async Task LoadCoreAsync()
     {
-        HasBundleSelection = GameContext.IsBunle
+        var bunleGray = this.GrayOpenService.GetOpen(GrayConfigId.WavesGameBunleOpen, false);
+        HasBundleSelection =
+            GameContext.IsBunle
+            && bunleGray
             && GameContext.GameResourceProvider is BundleGameResourceProvider;
-        if (HasBundleSelection && GameContext.GameResourceProvider is BundleGameResourceProvider provider)
+        if (
+            HasBundleSelection
+            && GameContext.GameResourceProvider is BundleGameResourceProvider provider
+        )
         {
             Bundles = await provider.GetBunlesAsync();
-            var bundleName = Parameter?.BundleName
-                ?? await GameContext.GameLocalConfig.GetConfigAsync(GameLocalSettingName.BunleName, CTS.Token)
+            var bundleName =
+                Parameter?.BundleName
+                ?? await GameContext.GameLocalConfig.GetConfigAsync(
+                    GameLocalSettingName.BunleName,
+                    CTS.Token
+                )
                 ?? GameContext.Config.BunleDefaultBundleName;
-            SelectedBundle = Bundles.FirstOrDefault(x => string.Equals(x.BunleName, bundleName, StringComparison.OrdinalIgnoreCase))
-                ?? Bundles.FirstOrDefault();
+            SelectedBundle =
+                Bundles.FirstOrDefault(x =>
+                    string.Equals(x.BunleName, bundleName, StringComparison.OrdinalIgnoreCase)
+                ) ?? Bundles.FirstOrDefault();
             if (SelectedBundle is null)
             {
                 TipMessage = LanguageService.GetString("GameImport_LoadTextureFailed");
@@ -286,14 +317,24 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
         var config = new Dictionary<string, string>();
         if (!HasBundleSelection)
             return config;
-        var bundle = SelectedBundle
-            ?? throw new InvalidOperationException(LanguageService.GetString("GameImport_RequireTexture"));
+        var bundle =
+            SelectedBundle
+            ?? throw new InvalidOperationException(
+                LanguageService.GetString("GameImport_RequireTexture")
+            );
         if (string.IsNullOrWhiteSpace(bundle.Version))
-            throw new InvalidOperationException(LanguageService.GetString("GameImport_ReloadTextureVersion"));
+            throw new InvalidOperationException(
+                LanguageService.GetString("GameImport_ReloadTextureVersion")
+            );
 
-        var arguments = await GameContext.GameLocalConfig.GetConfigAsync(
-            GameLocalSettingName.StartGameArguments, CTS.Token) ?? string.Empty;
-        arguments = Regex.Replace(arguments, @"(?<!\S)-krqlv=(?:""[^""]*""|\S+)", "", RegexOptions.IgnoreCase).Trim();
+        var arguments =
+            await GameContext.GameLocalConfig.GetConfigAsync(
+                GameLocalSettingName.StartGameArguments,
+                CTS.Token
+            ) ?? string.Empty;
+        arguments = Regex
+            .Replace(arguments, @"(?<!\S)-krqlv=(?:""[^""]*""|\S+)", "", RegexOptions.IgnoreCase)
+            .Trim();
         var quality = string.IsNullOrWhiteSpace(bundle.ResourceCommand)
             ? bundle.BunleName.ToLowerInvariant()
             : bundle.ResourceCommand.ToLowerInvariant();

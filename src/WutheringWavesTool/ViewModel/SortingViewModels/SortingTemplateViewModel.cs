@@ -5,7 +5,7 @@ using ScoringService;
 using ScoringService.Models;
 using ScoringService.Models.Enums;
 
-namespace Haiyu.ViewModels.SortingViewModels;
+namespace Haiyu.ViewModel.SortingViewModels;
 
 /// <summary>非模态模板编辑，所有改动仅作用于副本；保存后通知管理窗口。</summary>
 public sealed partial class SortingTemplateViewModel(

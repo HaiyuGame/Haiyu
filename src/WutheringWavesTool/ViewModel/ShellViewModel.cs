@@ -2,6 +2,7 @@ using Haiyu.Common.WindowContext;
 using Haiyu.Pages.GamePages;
 using Haiyu.ViewModel.GameViewModels;
 using Haiyu.ViewModel.GameViewModels.GameContexts;
+using Microsoft.UI.Xaml.Input;
 using Waves.Api.Models.KuroClient;
 using Waves.Api.Models.KuroClient.Options;
 using Waves.Core.Contracts.Events;
@@ -415,6 +416,15 @@ public sealed partial class ShellViewModel : ViewModelBase
 
     [ObservableProperty]
     public partial double EncourageTotalGold { get; set; }
+
+    [RelayCommand]
+    public async Task OpenDevShellDialog(KeyRoutedEventArgs args)
+    {
+        if(args.Key == Windows.System.VirtualKey.F12)
+        {
+            await this.WindowManager.Shell.DialogManager.ShowGrayConfigAsync();
+        }
+    }
 
     [ObservableProperty]
     public partial ObservableCollection<EncourageDailyTask> EncourageDailys { get; set; }

@@ -84,4 +84,5 @@ public sealed partial class ShellPage : Page, IDisposable
         ViewModel.AppContext.WallpaperService.UnregisterMediaHost(mediaControl);
         Bindings.StopTracking();
     }
+
 }

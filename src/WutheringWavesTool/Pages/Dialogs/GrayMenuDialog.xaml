@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog
+    x:Class="Haiyu.Pages.Dialogs.GrayMenuDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:helper="using:Haiyu.Helpers"
+    xmlns:local="using:Haiyu.Pages.Dialogs"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    CornerRadius="5"
+    mc:Ignorable="d">
+    <Grid RowSpacing="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <TextBlock
+            FontFamily="{ThemeResource DefaultFont}"
+            Text="测试功能预览"
+            TextAlignment="Center" />
+        <TextBox
+            Grid.Row="1"
+            PlaceholderText="输入功能id开启"
+            Text="{x:Bind ViewModel.GrayValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+        <Button
+            Grid.Row="2"
+            HorizontalAlignment="Center"
+            Command="{x:Bind ViewModel.InvokeCommand}"
+            Content="切换" />
+    </Grid>
+</ContentDialog>

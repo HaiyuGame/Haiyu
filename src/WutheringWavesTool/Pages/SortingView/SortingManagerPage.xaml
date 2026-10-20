@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <Page
     x:Class="Haiyu.Pages.SortingView.SortingManagerPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -6,7 +6,7 @@
     xmlns:local="using:Haiyu.Pages.SortingView"
     xmlns:models="using:Haiyu.Model"
     xmlns:ui="using:Haiyu.Controls"
-    xmlns:vm="using:Haiyu.ViewModels.SortingViewModels">
+    xmlns:vm="using:Haiyu.ViewModel.SortingViewModels">
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" RowSpacing="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />

@@ -1,4 +1,4 @@
-﻿using Haiyu.Common.Contracts;
+using Haiyu.Common.Contracts;
 using Haiyu.Contracts.Services;
 using Haiyu.Model;
 using ScoringService;
@@ -6,7 +6,7 @@ using ScoringService.Models;
 using ScoringService.Models.Enums;
 using Waves.Core.Services;
 
-namespace Haiyu.ViewModels.SortingViewModels;
+namespace Haiyu.ViewModel.SortingViewModels;
 
 /// <summary>角色读取、模板选择与评分结果，不保存账号凭据或自动写入内置模板。</summary>
 public sealed partial class SortingManagerViewModel : ObservableObject, IDisposable

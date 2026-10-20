@@ -1,4 +1,5 @@
-
+using GrayExtension;
+using Waves.Core.Services.GameResourceProvider;
 
 namespace Waves.Core;
 
@@ -24,14 +25,16 @@ public static class Waves
                 (provider, c) =>
                 {
                     var context = GameContextFactory.GetMainPunishGameContextV2(
-                        provider.GetRequiredService<IIoCircuitBreaker>()
+                        provider.GetRequiredService<IIoCircuitBreaker>(),
+                        provider.GetRequiredService<GrayOpenService>()
                     );
                     context.HttpClientService = provider.GetRequiredService<IHttpClientService>();
                     context.GameEventPublisher =
                         provider.GetRequiredKeyedService<GameEventPublisher>(
                             nameof(PunishMainGameContextV2)
                         );
-                    context.SystemEventPublisher = provider.GetRequiredService<SystemEventPublisher>();
+                    context.SystemEventPublisher =
+                        provider.GetRequiredService<SystemEventPublisher>();
                     return context;
                 }
             )
@@ -41,14 +44,16 @@ public static class Waves
                 (provider, c) =>
                 {
                     var context = GameContextFactory.GetBiliBiliPunishGameContextV2(
-                        provider.GetRequiredService<IIoCircuitBreaker>()
+                        provider.GetRequiredService<IIoCircuitBreaker>(),
+                        provider.GetRequiredService<GrayOpenService>()
                     );
                     context.HttpClientService = provider.GetRequiredService<IHttpClientService>();
                     context.GameEventPublisher =
                         provider.GetRequiredKeyedService<GameEventPublisher>(
                             nameof(PunishBiliBiliGameContextV2)
                         );
-                    context.SystemEventPublisher = provider.GetRequiredService<SystemEventPublisher>();
+                    context.SystemEventPublisher =
+                        provider.GetRequiredService<SystemEventPublisher>();
                     return context;
                 }
             )
@@ -58,14 +63,16 @@ public static class Waves
                 (provider, c) =>
                 {
                     var context = GameContextFactory.GetGlobalPunishGameContextV2(
-                        provider.GetRequiredService<IIoCircuitBreaker>()
+                        provider.GetRequiredService<IIoCircuitBreaker>(),
+                        provider.GetRequiredService<GrayOpenService>()
                     );
                     context.HttpClientService = provider.GetRequiredService<IHttpClientService>();
                     context.GameEventPublisher =
                         provider.GetRequiredKeyedService<GameEventPublisher>(
                             nameof(PunishGlobalGameContextV2)
                         );
-                    context.SystemEventPublisher = provider.GetRequiredService<SystemEventPublisher>();
+                    context.SystemEventPublisher =
+                        provider.GetRequiredService<SystemEventPublisher>();
                     return context;
                 }
             )
@@ -75,14 +82,16 @@ public static class Waves
                 (provider, c) =>
                 {
                     var context = GameContextFactory.GetTwPunishGameContextV2(
-                        provider.GetRequiredService<IIoCircuitBreaker>()
+                        provider.GetRequiredService<IIoCircuitBreaker>(),
+                        provider.GetRequiredService<GrayOpenService>()
                     );
                     context.HttpClientService = provider.GetRequiredService<IHttpClientService>();
                     context.GameEventPublisher =
                         provider.GetRequiredKeyedService<GameEventPublisher>(
                             nameof(PunishTwGameContextV2)
                         );
-                    context.SystemEventPublisher = provider.GetRequiredService<SystemEventPublisher>();
+                    context.SystemEventPublisher =
+                        provider.GetRequiredService<SystemEventPublisher>();
                     return context;
                 }
             )
@@ -92,14 +101,16 @@ public static class Waves
                 (provider, c) =>
                 {
                     var context = GameContextFactory.GetMainWavesGameContextV2(
-                        provider.GetRequiredService<IIoCircuitBreaker>()
+                        provider.GetRequiredService<IIoCircuitBreaker>(),
+                        provider.GetRequiredService<GrayOpenService>()
                     );
                     context.HttpClientService = provider.GetRequiredService<IHttpClientService>();
                     context.GameEventPublisher =
                         provider.GetRequiredKeyedService<GameEventPublisher>(
                             nameof(WavesMainGameContextV2)
                         );
-                    context.SystemEventPublisher = provider.GetRequiredService<SystemEventPublisher>();
+                    context.SystemEventPublisher =
+                        provider.GetRequiredService<SystemEventPublisher>();
                     return context;
                 }
             )
@@ -109,14 +120,16 @@ public static class Waves
                 (provider, c) =>
                 {
                     var context = GameContextFactory.GetBilibiliWavesGameContextV2(
-                        provider.GetRequiredService<IIoCircuitBreaker>()
+                        provider.GetRequiredService<IIoCircuitBreaker>(),
+                        provider.GetRequiredService<GrayOpenService>()
                     );
                     context.HttpClientService = provider.GetRequiredService<IHttpClientService>();
                     context.GameEventPublisher =
                         provider.GetRequiredKeyedService<GameEventPublisher>(
                             nameof(WavesBiliBiliGameContextV2)
                         );
-                    context.SystemEventPublisher = provider.GetRequiredService<SystemEventPublisher>();
+                    context.SystemEventPublisher =
+                        provider.GetRequiredService<SystemEventPublisher>();
                     return context;
                 }
             )
@@ -126,14 +139,16 @@ public static class Waves
                 (provider, c) =>
                 {
                     var context = GameContextFactory.GetWavesGlobalGameContextV2(
-                        provider.GetRequiredService<IIoCircuitBreaker>()
+                        provider.GetRequiredService<IIoCircuitBreaker>(),
+                        provider.GetRequiredService<GrayOpenService>()
                     );
                     context.HttpClientService = provider.GetRequiredService<IHttpClientService>();
                     context.GameEventPublisher =
                         provider.GetRequiredKeyedService<GameEventPublisher>(
                             nameof(WavesGlobalGameContextV2)
                         );
-                    context.SystemEventPublisher = provider.GetRequiredService<SystemEventPublisher>();
+                    context.SystemEventPublisher =
+                        provider.GetRequiredService<SystemEventPublisher>();
                     return context;
                 }
             )
@@ -142,8 +157,11 @@ public static class Waves
                 nameof(KuroCloudGameContext),
                 (provider, c) =>
                 {
-                    var context = new KuroCloudGameContext(provider.GetRequiredService<IWavesCloudGameService>());
-                    context.GamerConfigPath = GameContextFactory.GameBassPath + "\\WavesCloudConfig";
+                    var context = new KuroCloudGameContext(
+                        provider.GetRequiredService<IWavesCloudGameService>()
+                    );
+                    context.GamerConfigPath =
+                        GameContextFactory.GameBassPath + "\\WavesCloudConfig";
                     context.CloudGameEventPublisher =
                         provider.GetRequiredKeyedService<CloudGameEventPublisher>(
                             nameof(KuroCloudGameContext)

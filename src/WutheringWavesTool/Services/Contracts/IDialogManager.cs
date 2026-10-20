@@ -50,4 +50,6 @@ public interface IDialogManager
     Task ShowClearMemoryAsync();
 
     Task<BunleResourceSize?> ShowBunleGameDialogAsync(string contextName);
+
+    Task ShowGrayConfigAsync();
 }

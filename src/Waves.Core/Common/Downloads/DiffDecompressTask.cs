@@ -13,7 +13,7 @@ public class DiffDecompressTask
     {
         if (krdiffPath == null)
             return -1000;
-        DiffDecompressManagerV2 manager = new DiffDecompressManagerV2(
+        DiffDecompressManager manager = new DiffDecompressManager(
             folder,
             tempFolder ?? folder,
             krdiffPath

@@ -78,7 +78,10 @@
             HorizontalAlignment="Right"
             VerticalAlignment="Top"
             Orientation="Horizontal">
-            <Button Padding="8" Style="{ThemeResource TitleBarButtonStyle}">
+            <Button
+                Padding="8"
+                Style="{ThemeResource TitleBarButtonStyle}"
+                Visibility="{x:Bind ViewModel.WavesGameBunleId, Mode=OneWay, Converter={StaticResource GrayUIToVisiblityConverter}}">
                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE712;" />
                 <Button.Flyout>
                     <MenuFlyout Placement="Bottom">
