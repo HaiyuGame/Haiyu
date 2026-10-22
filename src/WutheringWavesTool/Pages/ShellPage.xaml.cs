@@ -75,7 +75,6 @@ public sealed partial class ShellPage : Page, IDisposable
         {
             return;
         }
-
         _disposed = true;
         Loaded -= ShellPage_Loaded;
         ViewModel.HomeNavigationService.Navigated -= HomeNavigationService_Navigated;
@@ -85,4 +84,13 @@ public sealed partial class ShellPage : Page, IDisposable
         Bindings.StopTracking();
     }
 
+    private async void Page_PreviewKeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+    {
+
+        if (e.Key != Windows.System.VirtualKey.F12)
+            return;
+
+        e.Handled = true;
+        await ViewModel.OpenDevShellDialogCommand.ExecuteAsync(e);
+    }
 }

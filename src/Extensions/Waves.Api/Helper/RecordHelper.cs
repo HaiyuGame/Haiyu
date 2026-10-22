@@ -78,16 +78,21 @@ public static class RecordHelper
         }
     }
 
+    /// <summary>
+    /// 根据角色 ID 离线判断是否为常驻五星。
+    /// </summary>
+    public static bool IsResident(int id) => id is 1301 or 1203 or 1503 or 1104 or 1405;
+
     public static (List<Tuple<RecordCardItemWrapper, int, bool?>>?, int?) FormatStartFive(
         IEnumerable<RecordCardItemWrapper> source,
         out int lastCount,
-        List<int> ids = null
+        bool checkResident = false
     )
     {
         List<Tuple<RecordCardItemWrapper, int, bool?>> result = new();
         int count = 0;
         var items = source.Reverse();
-        if (ids == null)
+        if (!checkResident)
         {
             foreach (var item in items)
             {
@@ -108,14 +113,7 @@ public static class RecordHelper
         {
             if (item.QualityLevel == 5)
             {
-                if (ids.Any(x => x == item.ResourceId))
-                {
-                    result.Add(new(item, count, false));
-                }
-                else
-                {
-                    result.Add(new(item, count, true));
-                }
+                result.Add(new(item, count, IsResident(item.ResourceId)));
                 count = 0;
             }
             else

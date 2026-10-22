@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using GrayExtension;
 using Haiyu.Common.Contracts;
+using Microsoft.Windows.AppLifecycle;
+using Windows.ApplicationModel.Core;
 
 namespace Haiyu.ViewModel.DialogViewModels;
 
@@ -33,5 +35,7 @@ public sealed partial class GrayMenuViewModel : DialogViewModelBase
         {
             await this.GrayService.SetDataAsync((uint)item.Id, item.IsOpen);
         }
+
+        AppRestartFailureReason restartError = AppInstance.Restart(null);
     }
 }

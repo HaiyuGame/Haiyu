@@ -50,7 +50,6 @@ partial class WavesAnalysisRecordViewModel
         if (GuaranteItems == null)
             GuaranteItems = new();
         GuaranteItems.Clear();
-        var upIds = RecordHelper.FormatFiveRoleStar(FiveGroup);
         var allResources = Cards
             .Items.SelectMany(x => x.Resource ?? Enumerable.Empty<RecordCardItemWrapper>())
             .ToList();
@@ -59,7 +58,7 @@ partial class WavesAnalysisRecordViewModel
         //小保底扇形图
         foreach (var item in this.Cards.Items.Where(x => x.IsFlage()))
         {
-            var roleRange = RecordHelper.FormatStartFive(item.Resource, out var lastCount, upIds);
+            var roleRange = RecordHelper.FormatStartFive(item.Resource, out var lastCount, checkResident: true);
             ArgumentNullException.ThrowIfNull(roleRange.Item1);
             var data = RecordHelper.GetGuaranteedRange(roleRange.Item1);
 
@@ -94,7 +93,7 @@ partial class WavesAnalysisRecordViewModel
             crookedTotal += flaggedFiveStars.Count(x => x.Item3 == true);
         }
         //称号
-        var result = Cards.EvaluateLuck(upIds);
+        var result = Cards.EvaluateLuck();
         //平均出金抽数
         var fiveStarRecords = RecordHelper.FormatRecordFive(allResources);
         double avgPulls =
@@ -182,12 +181,11 @@ partial class WavesAnalysisRecordViewModel
         {
             var resources = this.Cards.Items.Where(x => x.PoolType == value.Id).FirstOrDefault();
             ArgumentNullException.ThrowIfNull(resources);
-            ArgumentNullException.ThrowIfNull(FiveGroup);
             var temp1 = RecordHelper
                 .FormatStartFive(
                     resources.Resource,
                     out var lastCount,
-                    RecordHelper.FormatFiveRoleStar(this.FiveGroup)
+                    checkResident: resources.IsFlage()
                 )
                 .Item1;
             ArgumentNullException.ThrowIfNull(temp1);
@@ -198,7 +196,7 @@ partial class WavesAnalysisRecordViewModel
                 || value.Id == (int)CardPoolType.WeaponCollaboration;
             StarItems = isWeaponPool
                 ? temp1.Format(this.AllWeapon, false).Reverse().ToObservableCollection()
-                : temp1.Format(this.AllRole, true).Reverse().ToObservableCollection();
+                : temp1.Format(this.AllRole, resources.IsFlage()).Reverse().ToObservableCollection();
             StarItems.Insert(
                 0,
                 new RecordActivityFiveStarItemWrapper()
