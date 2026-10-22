@@ -12,6 +12,7 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
     private string baseFolderPath;
     private string decompressTempFolder;
     private bool isPreview;
+    private TimeSpan algorithmElapsed;
 
     public InstallKrdiffGroupResource(LoggerService loggerService)
     {
@@ -79,8 +80,11 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
     /// <returns></returns>
     public async Task<object?> ExecuteAsync(bool isSync = false)
     {
+        Stopwatch watch = new Stopwatch();
+        watch.Start();
         try
         {
+            Logger.WriteInfo($"拆分补丁开始安装，引擎：{(isPreview ? "Waves.Diff" : "hpatchz")}");
             if (!await CheckAsync())
             {
                 GameEventPublisher.Publish(
@@ -98,6 +102,8 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
             Directory.CreateDirectory(tempFolder);
             for (int i = 0; i < groupFileInfos.Count; i++)
             {
+                var algorithmWatch = Stopwatch.StartNew();
+
                 var size = groupFileInfos[i].DstFiles.Sum(x => x.Size);
                 var diskSize = await BuildFileHelper.GetDiskAvailableSize(baseFolderPath);
                 if (diskSize < size)
@@ -144,7 +150,6 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
                                     VerifySpeed = 0,
                                     IsAction = true,
                                     IsPause = false,
-                                    TipMessage = "正在解压合并资源",
                                     CurrentDecompressCount = i,
                                     MaxDecompressValue = groupFileInfos.Count,
                                     FilePath = s.Item2,
@@ -179,6 +184,8 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
                         tempFolder: tempFolder
                     );
                 }
+                algorithmWatch.Stop();
+                algorithmElapsed += algorithmWatch.Elapsed;
                 if (diffValue != 0)
                 {
                     Logger.WriteError($"补丁解压失败，退出码: {diffValue}，跳过: {krdiffPath}");
@@ -232,7 +239,14 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
                     throw ex;
                 }
             }
+            watch.Stop();
 
+            Logger.WriteInfo(
+                $"拆分补丁安装结束，"
+                    + $"引擎：{(isPreview ? "Waves.Diff" : "hpatchz")}，"
+                    + $"算法耗时：{algorithmElapsed.TotalSeconds:F3} 秒，"
+                    + $"总耗时：{watch.Elapsed.TotalSeconds:F3} 秒"
+            );
             return true;
         }
         catch (Exception ex)
@@ -245,6 +259,9 @@ public sealed partial class InstallKrdiffGroupResource : IProgressSetup, IAsyncD
                     Type = GameContextActionType.Error,
                     TipMessage = $"安装补丁组文件异常: {ex.Message}",
                 }
+            );
+            Debug.WriteLine(
+                $"拆分补丁结束解压，耗时{TimeSpan.FromMilliseconds(watch.ElapsedMilliseconds).TotalSeconds}S"
             );
             return false;
         }

@@ -14,7 +14,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
 
 
     #region 灰度
-    public uint WavesGameBunleId { get; set; } = GrayConfigId.WavesGameBunleOpen;
+    public uint WavesGameBunleId { get; set; } = (uint) GrayConfigId.WavesGameBunleOpen;
     #endregion
 
     private const int ChartPointKeepSeconds = 5;
@@ -246,7 +246,6 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
     {
         if (!IsAlive || GameContext is null)
             return;
-        //渲染代数判定，CPU原子判断渲染次数
         var renderVersion = Interlocked.Increment(ref _progressRenderVersion);
         var context = GameContext;
         var args = tracker.LastArgs;

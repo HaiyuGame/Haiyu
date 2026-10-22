@@ -273,7 +273,7 @@ public sealed partial class SelectDownloadGameViewModelV2 : DialogViewModelBase
 
     private async Task LoadCoreAsync()
     {
-        var bunleGray = this.GrayOpenService.GetOpen(GrayConfigId.WavesGameBunleOpen, false);
+        var bunleGray = this.GrayOpenService.GetOpen((uint)GrayConfigId.WavesGameBunleOpen, false);
         if (
             !this.GameContext.IsBunle
             || !bunleGray

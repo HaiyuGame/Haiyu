@@ -12,23 +12,26 @@ public sealed partial class GrayMenuViewModel : DialogViewModelBase
         : base(dialogSession)
     {
         this.GrayService = grayOpenService;
+        this.GrayValue = GrayConfigItem.GetItems;
+        foreach (var item in this.GrayValue)
+        {
+            var isOpen = this.GrayService.GetOpen((uint) item.Id, false);
+            item.IsOpen = isOpen;
+        }
     }
 
     public GrayOpenService GrayService { get; }
 
     [ObservableProperty]
-    public partial string GrayValue { get; set; }
+    public partial ObservableCollection<GrayConfigItem> GrayValue { get; set; }
 
 
     [RelayCommand]
     public async Task Invoke()
     {
-        if(uint.TryParse(GrayValue,out var id))
+        foreach (var item in this.GrayValue)
         {
-            var isOpen = this.GrayService.GetOpen(id,false);
-            await this.GrayService.SetDataAsync(id,!isOpen);
-            this.GrayValue = "";
+            await this.GrayService.SetDataAsync((uint)item.Id, item.IsOpen);
         }
-
     }
 }

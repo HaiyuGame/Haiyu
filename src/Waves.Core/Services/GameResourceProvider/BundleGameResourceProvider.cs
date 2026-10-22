@@ -621,7 +621,9 @@ public sealed partial class BundleGameResourceProvider : IGameResourceProvider
             TargetSize = selections.Sum(x => x.Info.TargetSize),
             RequiredSpace =
                 availability == GameResourceAvailability.Ready
-                    ? checked(download + extra + groupPeak)
+                    // RequiredDiskSpace/UnCompressSize 已经是库洛接口给出的所需磁盘容量；
+                    // DownloadSize 仅用于展示和下载进度，不能在这里再次累加。
+                    ? checked(extra + groupPeak)
                     : 0,
         };
     }

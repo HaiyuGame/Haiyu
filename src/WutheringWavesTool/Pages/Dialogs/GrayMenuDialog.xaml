@@ -3,6 +3,7 @@
     x:Class="Haiyu.Pages.Dialogs.GrayMenuDialog"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="using:Waves.Core.Models"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:helper="using:Haiyu.Helpers"
     xmlns:local="using:Haiyu.Pages.Dialogs"
@@ -15,14 +16,41 @@
             <RowDefinition />
             <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
-        <TextBlock
-            FontFamily="{ThemeResource DefaultFont}"
-            Text="测试功能预览"
-            TextAlignment="Center" />
-        <TextBox
+        <TextBlock FontFamily="{ThemeResource DefaultFont}" TextAlignment="Center">
+            <Run Text="测试功能预览" />
+            <LineBreak />
+            <Run FontSize="12" Text="更改以下选项需要重启客户端" />
+        </TextBlock>
+        <ItemsView
             Grid.Row="1"
-            PlaceholderText="输入功能id开启"
-            Text="{x:Bind ViewModel.GrayValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            ItemsSource="{x:Bind ViewModel.GrayValue, Mode=OneWay}"
+            SelectionMode="None">
+            <ItemsView.ItemTemplate>
+                <DataTemplate x:DataType="c:GrayConfigItem">
+                    <ItemContainer Margin="0,5">
+                        <Grid
+                            Padding="10"
+                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefault}"
+                            BorderThickness="1"
+                            CornerRadius="5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto" />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <Border MaxWidth="25">
+                                <CheckBox IsChecked="{x:Bind IsOpen, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            </Border>
+                            <TextBlock
+                                Grid.Column="1"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Text="{x:Bind DisplayName, Mode=OneWay}" />
+                        </Grid>
+                    </ItemContainer>
+                </DataTemplate>
+            </ItemsView.ItemTemplate>
+        </ItemsView>
         <Button
             Grid.Row="2"
             HorizontalAlignment="Center"

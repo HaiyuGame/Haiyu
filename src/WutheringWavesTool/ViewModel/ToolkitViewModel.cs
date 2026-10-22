@@ -35,8 +35,8 @@ public sealed partial class ToolkitViewModel : ViewModelBase
     }
 
     #region GrayId
-    public uint OfficialWriteGrayKey => GrayConfigId.OfficialLauncheWrite;
-    public uint SortingGrayKey => GrayConfigId.SoringTesing;
+    public uint OfficialWriteGrayKey => (uint)GrayConfigId.OfficialLauncheWrite;
+    public uint SortingGrayKey => (uint) GrayConfigId.SoringTesing;
     #endregion
 
     public IViewFactorys ViewFactorys { get; }

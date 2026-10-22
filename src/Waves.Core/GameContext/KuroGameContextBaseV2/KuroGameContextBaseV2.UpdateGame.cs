@@ -416,7 +416,7 @@ partial class KuroGameContextBaseV2
         var patches = plan.PatchResources.Where(x => x.IsSelected && !x.IsGroup).ToList();
         var groups = plan.PatchResources.Where(x => x.IsSelected && x.IsGroup).ToList();
         #region 补丁V2版本
-        var grayPreView = this.GrayOpenService.GetOpen(GrayConfigId.CoreDiffV2,false);
+        var grayPreView = this.GrayOpenService.GetOpen((uint)GrayConfigId.CoreDiffV2,false);
         #endregion
         if (patches.Count != 0)
             Add(

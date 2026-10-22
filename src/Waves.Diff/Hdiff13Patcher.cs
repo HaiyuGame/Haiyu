@@ -6,12 +6,6 @@ using System.Text;
 
 namespace Waves.Diff;
 
-/// <summary>
-/// HDIFF13 单文件差分重建（hpatchz.exe sub_1400116A0/sub_1400111B0 逆向语义）。
-/// 头布局：\"HDIFF13&\" + 压缩类型 + '\0' + 3 个 varint(newSize, oldSize, coverCount) + 8 个 varint
-/// （cover/code/extra/insert 四流各自的 raw/comp 尺寸）；四流按此顺序物理排列，
-/// comp!=0 的流用头声明的压缩类型压缩。inc_oldPos 恒为 true（oldPos 随 len 前进，方向位允许回退）。
-/// </summary>
 internal sealed class Hdiff13Patcher
 {
     private sealed record Head(ulong NewSize, ulong OldSize, long CoverCount,
@@ -22,7 +16,7 @@ internal sealed class Hdiff13Patcher
 
     private readonly Stream _diffFile;
     private readonly string _diffName;
-    private readonly long _diffStart; // 区域起点（含头）
+    private readonly long _diffStart;
     private readonly long _diffEnd;
 
     private Hdiff13Patcher(Stream diffFile, string diffName, long start, long end)

@@ -9,6 +9,8 @@ public sealed partial class KuroGameSettingViewModel : DialogViewModelBase
     public KuroGameSettingViewModel(DialogSession dialogSession)
         : base(dialogSession) { }
 
+    public uint CustomLaunche => (uint)GrayConfigId.CustomLauncheExeMod;
+
     public IGameContextV2 GameContext { get; private set; }
 
     public GameType GameType { get; private set; }

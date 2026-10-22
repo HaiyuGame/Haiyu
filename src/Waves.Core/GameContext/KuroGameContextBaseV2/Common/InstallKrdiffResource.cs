@@ -91,7 +91,6 @@ public class InstallKrdiffResource : IProgressSetup, IAsyncDisposable
                                 VerifySpeed = 0,
                                 IsAction = true,
                                 IsPause = false,
-                                TipMessage = "正在解压合并资源",
                                 CurrentDecompressCount = i,
                                 MaxDecompressValue = krdiffs.Count,
                             }
