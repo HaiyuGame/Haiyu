@@ -3,6 +3,7 @@
     x:Class="Haiyu.Pages.GameWikis.PunishWikiPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ani="using:CommunityToolkit.WinUI.Animations"
     xmlns:helper="using:Haiyu.Helpers"
     xmlns:converter="using:Haiyu.Converter"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -25,7 +26,15 @@
             <i:InvokeCommandAction Command="{x:Bind ViewModel.LoadedCommand}" />
         </i:EventTriggerBehavior>
     </i:Interaction.Behaviors>
-    <ScrollViewer VerticalScrollBarVisibility="Hidden">
+    <Grid>
+    <ScrollViewer VerticalScrollBarVisibility="Hidden" Visibility="{x:Bind ViewModel.Loading, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}">
+            <ani:Implicit.ShowAnimations>
+                <ani:OpacityAnimation From="0" To="1" Duration="0:0:0.2" />
+            </ani:Implicit.ShowAnimations>
+            <ani:Implicit.HideAnimations>
+                <ani:OpacityAnimation To="0" Duration="0:0:0.2" />
+            </ani:Implicit.HideAnimations>
+
 
         <StackPanel>
             <TextBlock
@@ -125,6 +134,7 @@
                     </ItemsControl.ItemsPanel>
                 </ItemsControl>
             </ScrollViewer>
+
             <TextBlock
                 Margin="15,0,0,0"
                 FontFamily="{ThemeResource DefaultFont}"
@@ -708,5 +718,21 @@
 
         </StackPanel>
     </ScrollViewer>
+        <ProgressRing
+            Width="40"
+            Height="40"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            AutomationProperties.Name="{x:Bind helper:LanguageService.GetString('Display_RefreshData')}"
+            IsActive="{x:Bind ViewModel.Loading, Mode=OneWay}"
+            Visibility="{x:Bind ViewModel.Loading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+            <ani:Implicit.ShowAnimations>
+                <ani:OpacityAnimation From="0" To="1" Duration="0:0:0.2" />
+            </ani:Implicit.ShowAnimations>
+            <ani:Implicit.HideAnimations>
+                <ani:OpacityAnimation To="0" Duration="0:0:0.2" />
+            </ani:Implicit.HideAnimations>
+        </ProgressRing>
+    </Grid>
 
 </Page>

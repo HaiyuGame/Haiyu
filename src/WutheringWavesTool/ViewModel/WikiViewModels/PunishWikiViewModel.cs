@@ -22,37 +22,49 @@ public partial class PunishWikiViewModel : WikiViewModelBase
     [ObservableProperty]
     public partial PunishBannerWrapper BannerListContentWrapper { get; set; }
 
+    [ObservableProperty]
+    public partial bool Loading { get; set; } = true;
+
     [RelayCommand]
     Task Loaded() =>
         RunWhileAliveAsync(async token =>
         {
-            var wikiPage = await TryInvokeAsync(async () =>
-                await this.GameWikiClient.GetHomePageAsync(WikiType.BGR, token)
-            );
-            if (wikiPage.Code == -1)
-                return;
-            if (
-                wikiPage.Code == 0
-                || (wikiPage.Result != null && wikiPage.Result.Data.ContentJson.Shortcuts != null)
-            )
+            Loading = true;
+            try
             {
-                Sides = GameWikiClient.GetEventData(wikiPage.Result).Format(WikiType.BGR) ?? [];
-                if (EveryWeekContent == null)
-                    EveryWeekContent = new();
-                if (BannerListContentWrapper == null)
-                    BannerListContentWrapper = new();
-
-                var sideModule = wikiPage.Result.Data.ContentJson.SideModules;
-                var mainModule = wikiPage.Result.Data.ContentJson.MainModules;
-                EveryWeekContent.InitWeekContent(sideModule, mainModule);
-                BannerListContentWrapper.InitBanner(sideModule);
-            }
-            else
-            {
-                _windowManager.Shell.TipShow.ShowMessage(
-                    string.Format(LanguageService.GetString("Wiki_LoadDataFailed")),
-                    Symbol.Clear
+                var wikiPage = await TryInvokeAsync(async () =>
+                    await this.GameWikiClient.GetHomePageAsync(WikiType.BGR, token)
                 );
+                if (wikiPage.Code == -1)
+                    return;
+                if (
+                    wikiPage.Code == 0
+                    || (wikiPage.Result != null && wikiPage.Result.Data.ContentJson.Shortcuts != null)
+                )
+                {
+                    Sides = GameWikiClient.GetEventData(wikiPage.Result).Format(WikiType.BGR) ?? [];
+                    if (EveryWeekContent == null)
+                        EveryWeekContent = new();
+                    if (BannerListContentWrapper == null)
+                        BannerListContentWrapper = new();
+
+                    var sideModule = wikiPage.Result.Data.ContentJson.SideModules;
+                    var mainModule = wikiPage.Result.Data.ContentJson.MainModules;
+                    EveryWeekContent.InitWeekContent(sideModule, mainModule);
+                    BannerListContentWrapper.InitBanner(sideModule);
+                }
+                else
+                {
+                    _windowManager.Shell.TipShow.ShowMessage(
+                        string.Format(LanguageService.GetString("Wiki_LoadDataFailed")),
+                        Symbol.Clear
+                    );
+                }
+            }
+            finally
+            {
+                if (IsAlive)
+                    Loading = false;
             }
         });
 

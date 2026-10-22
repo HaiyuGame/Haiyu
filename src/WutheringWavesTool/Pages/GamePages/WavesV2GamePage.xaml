@@ -768,7 +768,7 @@
             CornerRadius="5"
             Visibility="{x:Bind ViewModel.PlayerCardVisibility, Mode=OneWay}">
             <ani:Implicit.ShowAnimations>
-                <ani:OpacityAnimation To="1" Duration="0:0:0.2" />
+                <ani:OpacityAnimation To="1" Duration="0:0:0.2" /> 
             </ani:Implicit.ShowAnimations>
             <ani:Implicit.HideAnimations>
                 <ani:OpacityAnimation To="0" Duration="0:0:0.2" />
