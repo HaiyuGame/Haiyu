@@ -38,7 +38,10 @@
         </Grid.RowDefinitions>
         <Grid Visibility="{x:Bind ViewModel.Loading, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}">
             <ani:Implicit.ShowAnimations>
-                <ani:OpacityAnimation From="0" To="1" Duration="0:0:0.2" />
+                <ani:OpacityAnimation
+                    From="0"
+                    To="1"
+                    Duration="0:0:0.2" />
             </ani:Implicit.ShowAnimations>
             <ani:Implicit.HideAnimations>
                 <ani:OpacityAnimation To="0" Duration="0:0:0.2" />
@@ -154,7 +157,10 @@
         </Grid>
         <Border Grid.Row="1" Visibility="{x:Bind ViewModel.Loading, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}">
             <ani:Implicit.ShowAnimations>
-                <ani:OpacityAnimation From="0" To="1" Duration="0:0:0.2" />
+                <ani:OpacityAnimation
+                    From="0"
+                    To="1"
+                    Duration="0:0:0.2" />
             </ani:Implicit.ShowAnimations>
             <ani:Implicit.HideAnimations>
                 <ani:OpacityAnimation To="0" Duration="0:0:0.2" />
@@ -193,7 +199,7 @@
                     CornerRadius="4"
                     Visibility="{x:Bind ViewModel.KuroLogin, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="380" />
+                        <ColumnDefinition Width="300" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <Grid.ContextFlyout>
@@ -625,7 +631,10 @@
             IsActive="{x:Bind ViewModel.Loading, Mode=OneWay}"
             Visibility="{x:Bind ViewModel.Loading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
             <ani:Implicit.ShowAnimations>
-                <ani:OpacityAnimation From="0" To="1" Duration="0:0:0.2" />
+                <ani:OpacityAnimation
+                    From="0"
+                    To="1"
+                    Duration="0:0:0.2" />
             </ani:Implicit.ShowAnimations>
             <ani:Implicit.HideAnimations>
                 <ani:OpacityAnimation To="0" Duration="0:0:0.2" />
