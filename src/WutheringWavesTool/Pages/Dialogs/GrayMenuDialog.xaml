@@ -17,9 +17,9 @@
             <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
         <TextBlock FontFamily="{ThemeResource DefaultFont}" TextAlignment="Center">
-            <Run Text="测试功能预览" />
+            <Run Text="{x:Bind helper:LanguageService.GetString('Develment_Title')}" />
             <LineBreak />
-            <Run FontSize="12" Text="更改以下选项需要重启客户端" />
+            <Run FontSize="12" Text="{x:Bind helper:LanguageService.GetString('Develment_TipMessage')}" />
         </TextBlock>
         <ItemsView
             Grid.Row="1"
@@ -55,6 +55,6 @@
             Grid.Row="2"
             HorizontalAlignment="Center"
             Command="{x:Bind ViewModel.InvokeCommand}"
-            Content="切换" />
+            Content="{x:Bind helper:LanguageService.GetString('Develment_Invoke')}" />
     </Grid>
 </ContentDialog>

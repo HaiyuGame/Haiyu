@@ -1286,6 +1286,7 @@
                 </Grid.Clip>
                 <Border
                     Height="150"
+                    Margin="0,0"
                     VerticalAlignment="Top"
                     Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -1370,14 +1371,14 @@
             <Button
                 x:Name="ServerSelectorButton"
                 Margin="0,-1,0,0"
-                Padding="20,9"
+                Padding="10,5"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Top"
                 AutomationProperties.Name="区服选择"
                 BorderBrush="{ThemeResource AccentAAFillColorDefaultBrush}"
                 BorderThickness="0,0,0,2"
                 Click="ToggleServerSelector"
-                CornerRadius="0"
+                CornerRadius="5"
                 Style="{ThemeResource TitleBarButtonStyle}">
                 <StackPanel Orientation="Horizontal" Spacing="12">
                     <FontIcon
@@ -1389,11 +1390,6 @@
                         Orientation="Horizontal"
                         Spacing="8">
                         <TextBlock
-                            FontSize="13"
-                            FontWeight="SemiBold"
-                            Text="区服选择" />
-                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="·" />
-                        <TextBlock
                             x:Name="SelectedServerLabel"
                             FontSize="13"
                             Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"
@@ -1402,7 +1398,7 @@
                     <TextBlock
                         x:Name="CollapseServerLabel"
                         FontSize="13"
-                        Text="收起区服"
+                        Text="{x:Bind helper:LanguageService.GetString('Game_CloseServerSelect')}"
                         Visibility="Collapsed" />
                     <FontIcon
                         x:Name="ServerSelectorChevron"

@@ -72,13 +72,24 @@
                 </Button>
             </cui:SettingsCard>
             <cui:SettingsCard
-                Description="角色模板 · 声骸评分"
-                Header="声骸评分"
+                Description="{x:Bind helper:LanguageService.GetString('Display_SortingSubtitle')}"
+                Header="{x:Bind helper:LanguageService.GetString('Tool_SortingHeader')}"
                 Visibility="{x:Bind ViewModel.SortingGrayKey, Mode=OneWay, Converter={StaticResource GrayUIToVisiblityConverter}}">
                 <Button
-                    AutomationProperties.AutomationId="OpenSorting"
+                    Grid.Row="2"
+                    Grid.Column="2"
+                    Padding="12,8"
+                    HorizontalAlignment="Right"
                     Command="{x:Bind ViewModel.OpenSortingCommand}"
-                    Content="打开" />
+                    Style="{ThemeResource TitleBarButtonStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <FontIcon
+                            FontFamily="Segoe Fluent Icons"
+                            FontSize="13"
+                            Glyph="&#xE8A7;" />
+                        <TextBlock FontSize="13" Text="{x:Bind helper:LanguageService.GetString('Display_Open')}" />
+                    </StackPanel>
+                </Button>
             </cui:SettingsCard>
             <cui:SettingsCard Description="{x:Bind helper:LanguageService.GetString('Tool_MoniterDescription')}" Header="{x:Bind helper:LanguageService.GetString('Tool_MoniterHeader')}">
                 <cui:SettingsCard.HeaderIcon>

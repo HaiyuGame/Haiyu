@@ -68,7 +68,7 @@
                     CornerRadius="5"
                     Visibility="{x:Bind ViewModel.CustomLaunche, Converter={StaticResource GrayUIToVisiblityConverter}}">
                     <StackPanel Spacing="10">
-                        <CheckBox Content="使用自定义启动程序（如 Mod 启动器）" IsChecked="{x:Bind ViewModel.UseCustomLauncher, Mode=TwoWay}" />
+                        <CheckBox Content="{x:Bind helper:LanguageService.GetString('GameSetting_CustomHeader')}" IsChecked="{x:Bind ViewModel.UseCustomLauncher, Mode=TwoWay}" />
                         <Grid ColumnSpacing="8">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -76,8 +76,8 @@
                             </Grid.ColumnDefinitions>
                             <TextBox
                                 VerticalAlignment="Center"
-                                AutomationProperties.Name="自定义启动程序完整路径"
-                                Header="启动程序（.exe）"
+                                AutomationProperties.Name="{x:Bind helper:LanguageService.GetString('GameSetting_CustomPath')}"
+                                Header="{x:Bind helper:LanguageService.GetString('GameSetting_CustomExePath')}"
                                 Text="{x:Bind ViewModel.CustomLauncherPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                                 <i:Interaction.Behaviors>
                                     <i:EventTriggerBehavior EventName="LostFocus">
@@ -89,9 +89,9 @@
                                 Grid.Column="1"
                                 VerticalAlignment="Bottom"
                                 Command="{x:Bind ViewModel.BrowseCustomLauncherCommand}"
-                                Content="选择文件" />
+                                Content="{x:Bind helper:LanguageService.GetString('GameSetting_CustomSelectPath')}" />
                         </Grid>
-                        <TextBox Header="启动器附加参数（追加到游戏参数后）" Text="{x:Bind ViewModel.CustomLauncherArguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox Header="{x:Bind helper:LanguageService.GetString('GameSetting_CustomGameArgent')}" Text="{x:Bind ViewModel.CustomLauncherArguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         <InfoBar
                             IsClosable="False"
                             IsOpen="{x:Bind ViewModel.HasCustomLaunchError, Mode=OneWay}"

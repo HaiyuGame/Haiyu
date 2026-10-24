@@ -248,10 +248,10 @@ public partial class WavesServerPreview : CommunityToolkit.Mvvm.ComponentModel.O
     public string Region =>
         Server.Tag switch
         {
-            "Main" => "中国大陆地区",
-            "BiliBili" => "哔哩哔哩渠道服",
-            "Global" => "全球多地区",
-            _ => Server.Display,
+            "Main" => LanguageService.GetString("Game_OfficialSubtitle"),
+            "BiliBili" => LanguageService.GetString("Game_BiliBiliSubtitle"),
+            "Global" => LanguageService.GetString("Game_GlobalSubtitle"),
+            _ => Server.Display
         };
 
     [ObservableProperty]

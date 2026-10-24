@@ -230,10 +230,10 @@ public partial class PunishServerPreview : CommunityToolkit.Mvvm.ComponentModel.
     public string Display => Server.Display;
     public string Region => Server.Tag switch
     {
-        "Main" => "中国大陆地区",
-        "BiliBili" => "哔哩哔哩渠道服",
-        "Global" => "全球多地区",
-        "Tw" => "中国台湾地区",
+        "Main" => LanguageService.GetString("Game_OfficialSubtitle"),
+        "BiliBili" => LanguageService.GetString("Game_BiliBiliSubtitle"),
+        "Global" => LanguageService.GetString("Game_GlobalSubtitle"),
+        "Tw" => LanguageService.GetString("Game_TwOfficialSubtitle"),
         _ => Server.Display
     };
     [ObservableProperty]

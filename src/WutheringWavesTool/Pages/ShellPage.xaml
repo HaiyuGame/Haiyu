@@ -26,7 +26,6 @@
     NavigationCacheMode="Disabled"
     PreviewKeyDown="Page_PreviewKeyDown"
     mc:Ignorable="d">
-
     <i:Interaction.Behaviors>
         <i:EventTriggerBehavior EventName="Loaded">
             <i:InvokeCommandAction Command="{x:Bind ViewModel.LoadedCommand}" />
@@ -175,7 +174,6 @@
                             CornerRadius="5"
                             Style="{ThemeResource TransparentButtonStyle}"
                             ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_AddAccount')}">
-
                             <FontIcon
                                 FontFamily="Segoe Fluent Icons"
                                 FontSize="14"
@@ -220,7 +218,6 @@
                             </Button.Flyout>
                         </Button>
                     </Grid>
-
                 </StackPanel>
             </ui:TitleBar.Header>
             <ui:TitleBar.Footer>
@@ -248,7 +245,6 @@
                                     Text="{x:Bind ViewModel.Messages.Count, Mode=OneWay}" />
                             </Grid>
                         </Button>
-
                     </Grid>
                     <Button
                         Width="37"
@@ -278,7 +274,6 @@
                         Style="{ThemeResource TitleBarButtonStyle}"
                         ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_Off')}"
                         Visibility="Visible">
-
                         <FontIcon
                             FontFamily="Segoe Fluent Icons"
                             FontSize="14"
@@ -286,7 +281,6 @@
                     </Button>
                 </StackPanel>
             </ui:TitleBar.Footer>
-
         </ui:TitleBar>
 
         <ui:ApplicationBackgroundControl
@@ -372,7 +366,6 @@
                 </NavigationView.MenuItems>
                 <NavigationView.PaneFooter>
                     <StackPanel Orientation="Vertical" Spacing="4">
-
                         <Button
                             Width="50"
                             Padding="15"
@@ -461,7 +454,6 @@
                             </ItemsControl>
                         </ScrollView>
                     </Grid>
-
                 </SplitView.Pane>
             </SplitView>
         </Grid>
