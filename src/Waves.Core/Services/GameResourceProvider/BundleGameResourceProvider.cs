@@ -193,9 +193,7 @@ public sealed partial class BundleGameResourceProvider : IGameResourceProvider
     private static BundlePredownload? GetPredownload(GameLauncherBunleSource source, string name)
     {
         var pre = source.Predownload;
-        var enabled =
-            source.Bundles[name].Config?.PredownloadSwitch ?? source.Config.PredownloadSwitch;
-        if (enabled == 0 || pre is null || !pre.Bundles.ContainsKey(name))
+        if (pre is null || !pre.Bundles.ContainsKey(name))
             return null;
         var bundle = SelectBundle(pre.Bundles, pre.ResourcePacks, name);
         return bundle.ResourcePacks.Any(n =>
@@ -623,7 +621,9 @@ public sealed partial class BundleGameResourceProvider : IGameResourceProvider
             TargetSize = selections.Sum(x => x.Info.TargetSize),
             RequiredSpace =
                 availability == GameResourceAvailability.Ready
-                    ? checked(download + extra + groupPeak)
+                    // RequiredDiskSpace/UnCompressSize 已经是库洛接口给出的所需磁盘容量；
+                    // DownloadSize 仅用于展示和下载进度，不能在这里再次累加。
+                    ? checked(extra + groupPeak)
                     : 0,
         };
     }
@@ -851,23 +851,24 @@ public sealed partial class BundleGameResourceProvider : IGameResourceProvider
 
     private static int CompareVersion(string left, string right)
     {
-        if (string.IsNullOrWhiteSpace(left))
-            return string.IsNullOrWhiteSpace(right) ? 0 : -1;
-        if (string.IsNullOrWhiteSpace(right))
-            return 1;
+        if (string.IsNullOrEmpty(left) || string.IsNullOrEmpty(right))
+        {
+            if (!string.IsNullOrEmpty(left))
+                return 1;
+            if (!string.IsNullOrEmpty(right))
+                return -1;
+            return 0;
+        }
         var a = left.Split('.');
         var b = right.Split('.');
-        for (int i = 0; i < Math.Max(a.Length, b.Length); i++)
+        var common = Math.Min(a.Length, b.Length);
+        for (int i = 0; i < common; i++)
         {
-            if (
-                !long.TryParse(i < a.Length ? a[i] : "0", out var av)
-                || !long.TryParse(i < b.Length ? b[i] : "0", out var bv)
-            )
-                return string.Compare(left, right, StringComparison.Ordinal);
-            var comparison = av.CompareTo(bv);
-            if (comparison != 0)
-                return comparison;
+            var av = int.Parse(a[i]);
+            var bv = int.Parse(b[i]);
+            if (av != bv)
+                return av.CompareTo(bv);
         }
-        return 0;
+        return a.Length.CompareTo(b.Length);
     }
 }

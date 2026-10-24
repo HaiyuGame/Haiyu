@@ -74,7 +74,10 @@ namespace Waves.Core.GameContext
                     }
                 }
 
-                var executablePath = ResolveStartGameExecutablePath(gameFolder, option);
+                var customLauncher = await CustomLauncherOptions.LoadAsync(GameLocalConfig);
+                var executablePath = customLauncher.Enabled
+                    ? customLauncher.TargetPath
+                    : ResolveStartGameExecutablePath(gameFolder, option);
                 if (string.IsNullOrWhiteSpace(executablePath))
                 {
                     this.GameEventPublisher.Publish(
@@ -89,13 +92,15 @@ namespace Waves.Core.GameContext
 
                 Process ps = new();
                 string? argument = option.ToString();
-                ProcessStartInfo info = new(executablePath)
-                {
-                    Arguments = argument,
-                    WorkingDirectory =  gameFolder,
-                    Verb = "runas",
-                    UseShellExecute = true,
-                };
+                ProcessStartInfo info = customLauncher.Enabled
+                    ? customLauncher.CreateStartInfo(option.GetGameArguments())
+                    : new(executablePath)
+                    {
+                        Arguments = argument,
+                        WorkingDirectory = gameFolder,
+                        Verb = "runas",
+                        UseShellExecute = true,
+                    };
                 this._gameProcess = ps;
                 _gameProcess.StartInfo = info;
                 _gameProcess.Start();
@@ -133,7 +138,7 @@ namespace Waves.Core.GameContext
                 {
                     ProcessScan.CheckGameAliveWithWin32(
                         Path.GetFileName(gameFile),
-                        (uint)this.gameId,
+                        (uint) this.gameId,
                         out bool contained,
                         out uint ppid,
                         out var filepath
@@ -196,7 +201,7 @@ namespace Waves.Core.GameContext
             {
                 return;
             }
-            Process.GetProcessById((int)ppid).Kill();
+            Process.GetProcessById((int) ppid).Kill();
             _gameProcess?.Kill(true);
             Logger.WriteInfo("退出游戏……");
             this._isStarting = false;

@@ -22,7 +22,7 @@ public partial class App : ClientApplication
     private const int PROCESS_PER_MONITOR_DPI_AWARE = 2;
     private AppInstance mainInstance;
 
-    public static string AppVersion => "1.4.5";
+    public static string AppVersion => "1.4.6";
 
     public AppSettings AppSettings { get; private set; }
 
@@ -53,6 +53,8 @@ public partial class App : ClientApplication
         Directory.CreateDirectory(AppSettings.LocalUserFolder);
         Directory.CreateDirectory(Path.GetDirectoryName(AppSettings.LogPath)!);
         Directory.CreateDirectory(AppSettings.CloudFolderPath);
+        Directory.CreateDirectory(AppSettings.SortingGroupFolder);
+        Directory.CreateDirectory(AppSettings.SortingItemFolder);
     }
 
     private void App_UnhandledException(

@@ -24,8 +24,12 @@ public sealed class LegacyResourceProviderTests
         var summary = await fixture.Provider.GetResourceSummaryAsync(new GameResourceParameter { BundleName = "ignored" });
         Assert.AreEqual("2", summary.OfficialVersion);
         Assert.AreEqual("3", summary.PredownloadVersion);
+        Assert.AreEqual(100L, summary.Install.DownloadSize);
+        Assert.AreEqual(200L, summary.Install.RequiredSpace);
         Assert.AreEqual(20L, summary.Update.DownloadSize);
+        Assert.AreEqual(200L, summary.Update.RequiredSpace);
         Assert.AreEqual(30L, summary.Predownload.DownloadSize);
+        Assert.AreEqual(250L, summary.Predownload.RequiredSpace);
         Assert.AreEqual(1, fixture.Handler.Requests.Count);
     }
 

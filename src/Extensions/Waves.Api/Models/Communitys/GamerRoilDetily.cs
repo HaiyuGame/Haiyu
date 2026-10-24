@@ -157,6 +157,13 @@ public class Role
 
 public class GamerRoilDetily
 {
+    /// <summary>接口返回的角色实际面板，与声骸附加属性列表区分，未返回时保留为空。</summary>
+    [JsonPropertyName("roleAttributeList")]
+    public List<MainProp>? RoleAttributeList { get; set; }
+
+    /// <summary>当前角色皮肤的立绘信息。</summary>
+    [JsonPropertyName("roleSkin")]
+    public RoleSkinData? RoleSkin { get; set; }
     [JsonPropertyName("chainList")]
     public List<ChainList> ChainList { get; set; }
 
@@ -174,6 +181,14 @@ public class GamerRoilDetily
 
     [JsonPropertyName("weaponData")]
     public WeaponData WeaponData { get; set; }
+}
+
+public sealed class RoleSkinData
+{
+    [JsonPropertyName("picUrl")]
+    public string? PicUrl { get; set; }
+    [JsonPropertyName("skinIcon")]
+    public string? SkinIcon { get; set; }
 }
 
 public class Skill

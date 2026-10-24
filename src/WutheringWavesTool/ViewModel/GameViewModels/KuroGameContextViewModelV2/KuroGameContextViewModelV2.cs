@@ -11,6 +11,12 @@ namespace Haiyu.ViewModel.GameViewModels;
 
 public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyuCacheOwner
 {
+
+
+    #region 灰度
+    public uint WavesGameBunleId { get; set; } = (uint) GrayConfigId.WavesGameBunleOpen;
+    #endregion
+
     private const int ChartPointKeepSeconds = 5;
     private const int ChartMaxPoints = 300;
     private static readonly TimeSpan ChartPointInterval = TimeSpan.FromMilliseconds(500);
@@ -240,7 +246,6 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
     {
         if (!IsAlive || GameContext is null)
             return;
-        //渲染代数判定，CPU原子判断渲染次数
         var renderVersion = Interlocked.Increment(ref _progressRenderVersion);
         var context = GameContext;
         var args = tracker.LastArgs;
@@ -252,15 +257,22 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
             if (!IsCurrentProgressRender(renderVersion, context))
                 return;
             var actionType = args.Type;
-            IsTransferPreparing = actionType is GameContextActionType.Preparing or GameContextActionType.CdnSelect;
+            IsTransferPreparing =
+                actionType is GameContextActionType.Preparing or GameContextActionType.CdnSelect;
             if (IsTransferPreparing)
             {
                 BunleBthEnable = false;
                 PauseStartEnable = false;
                 RemainingTimeText = "----";
-                CurrentStepText = LanguageService.GetStringByText(string.IsNullOrWhiteSpace(args.TipMessage)
-                    ? (actionType == GameContextActionType.CdnSelect ? "正在选择下载节点…" : "正在获取资源列表…")
-                    : args.TipMessage);
+                CurrentStepText = LanguageService.GetStringByText(
+                    string.IsNullOrWhiteSpace(args.TipMessage)
+                        ? (
+                            actionType == GameContextActionType.CdnSelect
+                                ? "正在选择下载节点…"
+                                : "正在获取资源列表…"
+                        )
+                        : args.TipMessage
+                );
                 SpeedText = "----";
                 CurrentProgressValue = 0;
                 MaxProgressValue = 100;
@@ -665,6 +677,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
         lastPointTime = now;
         points.Add(new DateTimeChartPoint(now, value));
     }
+
     private ButtonActionType _buttonAction = ButtonActionType.None;
     private bool disposedValue;
 
@@ -675,9 +688,16 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
         var loadAfterInvoked = false;
         try
         {
-            if (GameContext.ProgressState.LastArgs is { } snapshot
-                && (snapshot.Type is GameContextActionType.Preparing or GameContextActionType.CdnSelect
-                    || GameContext.DownloadState != null || GameContext.ProdDownloadState != null))
+            if (
+                GameContext.ProgressState.LastArgs is { } snapshot
+                && (
+                    snapshot.Type
+                        is GameContextActionType.Preparing
+                            or GameContextActionType.CdnSelect
+                    || GameContext.DownloadState != null
+                    || GameContext.ProdDownloadState != null
+                )
+            )
             {
                 ProgressState_OnProgressChanged(GameContext.ProgressState);
                 loadAfterInvoked = true;
@@ -848,8 +868,12 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
             // 保留上面的既有调用时机；仅在尚未调用时兜底执行一次。
             try
             {
-                if (!loadAfterInvoked && IsAlive && !refreshToken.IsCancellationRequested
-                    && ReferenceEquals(GameContext, refreshContext))
+                if (
+                    !loadAfterInvoked
+                    && IsAlive
+                    && !refreshToken.IsCancellationRequested
+                    && ReferenceEquals(GameContext, refreshContext)
+                )
                 {
                     await LoadAfter();
                 }
@@ -1120,7 +1144,11 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
     private void ShowGameDownloadingBth(GameContextStatus status)
     {
         // 较早的异步状态查询可能晚于完成通知返回，不能重新打开已结束的任务面板。
-        if (!IsTransferPreparing && GameContext.DownloadState is null && GameContext.ProdDownloadState is null)
+        if (
+            !IsTransferPreparing
+            && GameContext.DownloadState is null
+            && GameContext.ProdDownloadState is null
+        )
             return;
         Logger.WriteInfo($"游戏正在下载中");
         _buttonAction = ButtonActionType.Downloading;

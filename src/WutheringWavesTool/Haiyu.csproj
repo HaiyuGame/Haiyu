@@ -69,6 +69,12 @@
 	<ItemGroup>
 		<Content Remove="Assets\Cursor\CursorResource.res" />
 		<Content Remove="Assets\HpatchzResource\hpatchz.exe" />
+		<Content Remove="Assets\HpatchzResource\hpatchz.exe.i64" />
+		<Content Remove="Assets\HpatchzResource\hpatchz.exe.id0" />
+		<Content Remove="Assets\HpatchzResource\hpatchz.exe.id1" />
+		<Content Remove="Assets\HpatchzResource\hpatchz.exe.id2" />
+		<Content Remove="Assets\HpatchzResource\hpatchz.exe.nam" />
+		<Content Remove="Assets\HpatchzResource\hpatchz.exe.til" />
 		<Content Remove="assets\Readme.md" />
 		<Content Remove="Assets\RolePage\appLogo.png" />
 	</ItemGroup>
@@ -117,6 +123,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Extensions\ABI\ABIRuntime\ABIRuntime.csproj" />
+		<ProjectReference Include="..\GrayExtension\GrayExtension.csproj" />
 		<ProjectReference Include="..\Haiyu.Analyzers\Haiyu.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 		<ProjectReference Include="..\Extensions\Haiyu.Plugin\Haiyu.Plugin.csproj" />
 		<ProjectReference Include="..\Extensions\Haiyu.ServiceHost\Haiyu.ServiceHost.csproj" />
@@ -126,6 +133,7 @@
 		<ProjectReference Include="..\Haiyu.KuroClient\Haiyu.KuroClient.csproj" />
 		<ProjectReference Include="..\KuroAndroidMonitoring\ChromeCDPSharp.csproj" />
 		<ProjectReference Include="..\Waves.Core\Waves.Core.csproj" />
+		<ProjectReference Include="..\Extensions\ScoringService\ScoringService.csproj" />
 		<ProjectReference Include="..\Waves.Settings\Waves.Settings.csproj" />
 		<ProjectReference Include="..\Haiyu.Controls\Haiyu.Controls.csproj" />
 		<ProjectReference Include="..\Haiyu.Charts.WinUI\Haiyu.Charts.WinUI.csproj" />
@@ -354,6 +362,8 @@
 	<ItemGroup>
 		<Folder Include="Assets\GameAssets\Punish\" />
 		<Folder Include="Assets\Languages\" />
+		<Folder Include="Contracts\Services\" />
+		<Folder Include="Model\" />
 		<Folder Include="Services\DialogServices\" />
 	</ItemGroup>
 	<PropertyGroup Label="Globals">

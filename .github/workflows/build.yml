@@ -9,6 +9,7 @@ on:
     branches:
       - main
       - master
+      - development
   release:
     types: [published]
 
@@ -33,6 +34,9 @@ jobs:
 
       - name: Restore
         run: dotnet restore ${{ env.PROJECT_PATH }} -p:Platform=x64
+
+      - name: Test custom launcher
+        run: dotnet test src/Tests/CustomLauncher.Tests/CustomLauncher.Tests.csproj
 
       - name: Publish
         run: dotnet publish ${{ env.PROJECT_PATH }} -p:PublishProfile=win-x64

@@ -51,34 +51,17 @@
             VerticalAlignment="Top"
             Background="Transparent"
             IsIndeterminate="{x:Bind ViewModel.IsActivityIndicatorActive, Mode=OneWay}" />
-        <ComboBox
-            Margin="10,10,0,0"
-            Padding="10,5"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top"
-            CornerRadius="10"
-            ItemsSource="{x:Bind ViewModel.Servers, Mode=OneWay}"
-            SelectedItem="{x:Bind ViewModel.SelectServer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-            Style="{ThemeResource TitleBarComboBoxStyle}">
-            <ComboBox.ItemTemplate>
-                <DataTemplate x:DataType="m:ServerDisplay">
-                    <Border CornerRadius="5">
-                        <TextBlock
-                            FontFamily="{ThemeResource DefaultFont}"
-                            FontSize="15"
-                            Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"
-                            Text="{x:Bind Display}" />
-                    </Border>
-                </DataTemplate>
-            </ComboBox.ItemTemplate>
-        </ComboBox>
+
         <StackPanel
             Grid.ColumnSpan="2"
             Margin="0,5,10,0"
             HorizontalAlignment="Right"
             VerticalAlignment="Top"
             Orientation="Horizontal">
-            <Button Padding="8" Style="{ThemeResource TitleBarButtonStyle}">
+            <Button
+                Padding="8"
+                Style="{ThemeResource TitleBarButtonStyle}"
+                Visibility="{x:Bind ViewModel.WavesGameBunleId, Mode=OneWay, Converter={StaticResource GrayUIToVisiblityConverter}}">
                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE712;" />
                 <Button.Flyout>
                     <MenuFlyout Placement="Bottom">
@@ -642,8 +625,8 @@
                             Margin="0"
                             Padding="0"
                             Command="{x:Bind ViewModel.StartPreDownloadGameCommand}"
-                            IsEnabled="{x:Bind ViewModel.CanChangeResources, Mode=OneWay}"
                             CornerRadius="70"
+                            IsEnabled="{x:Bind ViewModel.CanChangeResources, Mode=OneWay}"
                             Style="{ThemeResource TitleBarButtonStyle}">
                             <ToolTipService.ToolTip>
                                 <Grid>
@@ -1277,5 +1260,152 @@
             Canvas.ZIndex="-2"
             Source="{x:Bind ViewModel.VersionLogo, Mode=OneWay}"
             Stretch="Uniform" />
+        <Border
+            x:Name="ServerSelectorScrim"
+            Grid.RowSpan="3"
+            Grid.ColumnSpan="2"
+            Background="{ThemeResource SmokeFillColorDefaultBrush}"
+            Canvas.ZIndex="19"
+            IsHitTestVisible="False"
+            Opacity="0"
+            Tapped="DismissServerSelector" />
+        <!--  The menu and its handle share a surface; only the menu height is animated.  -->
+        <StackPanel
+            Grid.RowSpan="3"
+            Grid.ColumnSpan="2"
+            VerticalAlignment="Top"
+            Canvas.ZIndex="20"
+            KeyDown="ServerSelectorKeyDown">
+            <Grid
+                x:Name="ServerSelectorMenu"
+                Height="0"
+                IsHitTestVisible="False"
+                SizeChanged="ServerSelectorMenuSizeChanged">
+                <Grid.Clip>
+                    <RectangleGeometry Rect="0,0,0,0" />
+                </Grid.Clip>
+                <Border
+                    Height="150"
+                    Margin="0,0"
+                    VerticalAlignment="Top"
+                    Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="0,0,0,1">
+                    <GridView
+                        x:Name="ServerCards"
+                        Margin="0,12"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        IsItemClickEnabled="True"
+                        ItemClick="SelectServerCard"
+                        ItemsSource="{x:Bind ServerPreviews}"
+                        ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                        ScrollViewer.HorizontalScrollMode="Enabled"
+                        ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                        ScrollViewer.VerticalScrollMode="Disabled"
+                        SelectionMode="None">
+                        <GridView.ItemContainerStyle>
+                            <Style TargetType="GridViewItem">
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Margin" Value="6,0" />
+                                <Setter Property="CornerRadius" Value="0" />
+                            </Style>
+                        </GridView.ItemContainerStyle>
+                        <GridView.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </GridView.ItemsPanel>
+                        <GridView.ItemTemplate>
+                            <DataTemplate x:DataType="local:WavesServerPreview">
+                                <Grid
+                                    Width="240"
+                                    Height="108"
+                                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                    CornerRadius="5"
+                                    PointerCanceled="ServerCardPointerExited"
+                                    PointerEntered="ServerCardPointerEntered"
+                                    PointerExited="ServerCardPointerExited">
+                                    <Grid.Clip>
+                                        <RectangleGeometry Rect="0,0,240,108" />
+                                    </Grid.Clip>
+                                    <Image Source="{x:Bind Background, Mode=OneWay}" Stretch="UniformToFill" />
+                                    <Border
+                                        Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
+                                        CornerRadius="5"
+                                        Opacity="0.72" />
+                                    <StackPanel
+                                        Margin="18,0"
+                                        VerticalAlignment="Center"
+                                        Spacing="5">
+                                        <TextBlock
+                                            FontSize="21"
+                                            FontWeight="SemiBold"
+                                            Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                            Text="{x:Bind Display}" />
+                                        <TextBlock
+                                            FontSize="12"
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Text="{x:Bind Region}" />
+                                    </StackPanel>
+                                    <Border
+                                        BorderBrush="{ThemeResource AccentAAFillColorDefaultBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="5"
+                                        IsHitTestVisible="False"
+                                        Visibility="{x:Bind IsCurrent, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                    <FontIcon
+                                        Margin="12"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Top"
+                                        FontSize="13"
+                                        Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"
+                                        Glyph="&#xE73E;"
+                                        Visibility="{x:Bind IsCurrent, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                </Grid>
+                            </DataTemplate>
+                        </GridView.ItemTemplate>
+                    </GridView>
+                </Border>
+            </Grid>
+            <Button
+                x:Name="ServerSelectorButton"
+                Margin="0,-1,0,0"
+                Padding="10,5"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Top"
+                AutomationProperties.Name="区服选择"
+                BorderBrush="{ThemeResource AccentAAFillColorDefaultBrush}"
+                BorderThickness="0,0,0,2"
+                Click="ToggleServerSelector"
+                CornerRadius="5"
+                Style="{ThemeResource TitleBarButtonStyle}">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <FontIcon
+                        FontSize="15"
+                        Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"
+                        Glyph="&#xE8FD;" />
+                    <StackPanel
+                        x:Name="CollapsedServerContent"
+                        Orientation="Horizontal"
+                        Spacing="8">
+                        <TextBlock
+                            x:Name="SelectedServerLabel"
+                            FontSize="13"
+                            Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"
+                            Text="{x:Bind ViewModel.SelectServer.Display, Mode=OneWay}" />
+                    </StackPanel>
+                    <TextBlock
+                        x:Name="CollapseServerLabel"
+                        FontSize="13"
+                        Text="{x:Bind helper:LanguageService.GetString('Game_CloseServerSelect')}"
+                        Visibility="Collapsed" />
+                    <FontIcon
+                        x:Name="ServerSelectorChevron"
+                        FontSize="10"
+                        Glyph="&#xE70D;" />
+                </StackPanel>
+            </Button>
+        </StackPanel>
     </Grid>
 </Page>

@@ -1,0 +1,458 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="Haiyu.Pages.SortingView.SortingManagerPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Haiyu.Pages.SortingView"
+    xmlns:models="using:Haiyu.Model"
+    xmlns:ui="using:Haiyu.Controls"
+    xmlns:vm="using:Haiyu.ViewModel.SortingViewModels">
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <ui:TitleBar
+            x:Name="TitleBar"
+            Title="声骸评分"
+            IsExtendsContentIntoTitleBar="True" />
+        <ContentControl
+            Grid.Row="1"
+            Margin="24,0,24,0"
+            HorizontalContentAlignment="Stretch"
+            VerticalContentAlignment="Stretch"
+            IsEnabled="{x:Bind ViewModel.CanInteract, Mode=OneWay}">
+            <Grid ColumnSpacing="24">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="240" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid RowSpacing="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <StackPanel Spacing="12">
+                        <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Text="角色" />
+                        <ComboBox
+                            HorizontalAlignment="Stretch"
+                            AutomationProperties.AutomationId="SortingRole"
+                            AutomationProperties.Name="选择角色"
+                            ItemsSource="{x:Bind ViewModel.Roles}"
+                            PlaceholderText="选择库街区角色"
+                            SelectedItem="{x:Bind ViewModel.SelectedRole, Mode=TwoWay}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="models:SortingRoleOption">
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <Border
+                                            Width="32"
+                                            Height="32"
+                                            Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                                            CornerRadius="{ThemeResource ControlCornerRadius}">
+                                            <Image
+                                                ImageFailed="Image_Failed"
+                                                Source="{x:Bind local:SortingManagerPage.LoadImage(IconUrl)}"
+                                                Stretch="UniformToFill" />
+                                        </Border>
+                                        <TextBlock VerticalAlignment="Center" Text="{x:Bind RoleName}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <Button
+                            HorizontalAlignment="Stretch"
+                            AutomationProperties.AutomationId="SortingRefresh"
+                            Command="{x:Bind ViewModel.RefreshCommand}"
+                            Content="刷新角色" />
+                    </StackPanel>
+                    <Grid Grid.Row="1">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Style="{StaticResource SubtitleTextBlockStyle}"
+                            Text="评分模板" />
+                        <Button
+                            HorizontalAlignment="Right"
+                            AutomationProperties.AutomationId="SortingTemplateMenu"
+                            AutomationProperties.Name="模板操作"
+                            ToolTipService.ToolTip="模板操作">
+                            <SymbolIcon Symbol="More" />
+                            <Button.Flyout>
+                                <MenuFlyout>
+                                    <MenuFlyoutItem
+                                        AutomationProperties.AutomationId="SortingDuplicate"
+                                        Command="{x:Bind ViewModel.DuplicateCommand}"
+                                        Text="复制为新模板" />
+                                    <MenuFlyoutItem Command="{x:Bind ViewModel.CopyTemplateCommand}" Text="复制模板 JSON" />
+                                    <MenuFlyoutSeparator />
+                                    <MenuFlyoutItem Command="{x:Bind ViewModel.ImportCommand}" Text="导入模板" />
+                                    <MenuFlyoutItem Command="{x:Bind ViewModel.ExportCommand}" Text="导出模板" />
+                                    <MenuFlyoutSeparator />
+                                    <MenuFlyoutItem
+                                        AutomationProperties.AutomationId="SortingDeleteSelectedTemplate"
+                                        Command="{x:Bind ViewModel.DeleteTemplateCommand}"
+                                        Text="删除当前模板" />
+                                </MenuFlyout>
+                            </Button.Flyout>
+                        </Button>
+                    </Grid>
+                    <ItemsView
+                        x:Name="TemplateItems"
+                        Grid.Row="2"
+                        AutomationProperties.AutomationId="SortingTemplates"
+                        ItemsSource="{x:Bind ViewModel.Templates}"
+                        SelectionChanged="Template_SelectionChanged"
+                        SelectionMode="Single">
+                        <ItemsView.ItemTemplate>
+                            <DataTemplate x:DataType="models:SortingTemplateCard">
+                                <ItemContainer
+                                    Margin="0,0,0,8"
+                                    HorizontalContentAlignment="Stretch"
+                                    IsSelected="{x:Bind IsSelect, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                    <Border
+                                        Padding="16"
+                                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                        CornerRadius="{ThemeResource ControlCornerRadius}">
+                                        <StackPanel Spacing="4">
+                                            <TextBlock
+                                                FontWeight="SemiBold"
+                                                Text="{x:Bind Name}"
+                                                TextTrimming="CharacterEllipsis" />
+                                            <TextBlock
+                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                Style="{StaticResource CaptionTextBlockStyle}"
+                                                Text="{x:Bind Caption}" />
+                                        </StackPanel>
+                                    </Border>
+                                </ItemContainer>
+                            </DataTemplate>
+                        </ItemsView.ItemTemplate>
+                    </ItemsView>
+                    <Expander
+                        Grid.Row="3"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Stretch"
+                        AutomationProperties.AutomationId="SortingCatalog"
+                        Header="内置词条 · 20">
+                        <ListView
+                            MaxHeight="220"
+                            ItemsSource="{x:Bind ViewModel.Catalog}"
+                            SelectionMode="None">
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="models:SortingStatOption">
+                                    <TextBlock
+                                        MaxLines="1"
+                                        Text="{x:Bind Label}"
+                                        TextTrimming="CharacterEllipsis"
+                                        ToolTipService.ToolTip="{x:Bind Label}" />
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Expander>
+                </Grid>
+                <Grid Grid.Column="1" RowSpacing="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Border
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="{ThemeResource ControlCornerRadius}">
+                        <Grid>
+                            <Image
+                                Width="240"
+                                Height="208"
+                                HorizontalAlignment="Right"
+                                AutomationProperties.AccessibilityView="Raw"
+                                ImageFailed="Image_Failed"
+                                IsHitTestVisible="False"
+                                Opacity="0.2"
+                                Source="{x:Bind local:SortingManagerPage.LoadImage(ViewModel.RolePortrait), Mode=OneWay}"
+                                Stretch="UniformToFill" />
+                            <Grid Padding="20" ColumnSpacing="20">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="72" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Border
+                                    Width="72"
+                                    Height="88"
+                                    VerticalAlignment="Top"
+                                    Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                                    CornerRadius="{ThemeResource ControlCornerRadius}">
+                                    <Grid>
+                                        <SymbolIcon Opacity="0.3" Symbol="Contact" />
+                                        <Image
+                                            ImageFailed="Image_Failed"
+                                            Source="{x:Bind local:SortingManagerPage.LoadImage(ViewModel.RoleIcon), Mode=OneWay}"
+                                            Stretch="UniformToFill" />
+                                    </Grid>
+                                </Border>
+                                <StackPanel Grid.Column="1" Spacing="6">
+                                    <StackPanel Orientation="Horizontal" Spacing="12">
+                                        <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Text="{x:Bind ViewModel.RoleTitle, Mode=OneWay}" />
+                                        <TextBlock
+                                            VerticalAlignment="Center"
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Style="{StaticResource CaptionTextBlockStyle}"
+                                            Text="{x:Bind ViewModel.RoleSubtitle, Mode=OneWay}" />
+                                    </StackPanel>
+                                    <TextBlock
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Style="{StaticResource CaptionTextBlockStyle}"
+                                        Text="声骸毕业评分"
+                                        ToolTipService.ToolTip="各件声骸综合分的平均，不代表伤害提升率。" />
+                                    <StackPanel Orientation="Horizontal" Spacing="12">
+                                        <TextBlock
+                                            AutomationProperties.AutomationId="SortingAverage"
+                                            Style="{StaticResource TitleLargeTextBlockStyle}"
+                                            Text="{x:Bind ViewModel.Average, Mode=OneWay}" />
+                                        <TextBlock
+                                            Margin="0,0,0,4"
+                                            VerticalAlignment="Bottom"
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Text="/100" />
+                                        <Border
+                                            Padding="10,4"
+                                            VerticalAlignment="Center"
+                                            Background="{ThemeResource AccentFillColorTertiaryBrush}"
+                                            CornerRadius="{ThemeResource ControlCornerRadius}">
+                                            <TextBlock
+                                                FontWeight="SemiBold"
+                                                Text="{x:Bind ViewModel.Grade, Mode=OneWay}"
+                                                ToolTipService.ToolTip="SSS≥95 · SS≥85 · S≥75 · A≥60 · B≥40 · C&lt;40" />
+                                        </Border>
+                                    </StackPanel>
+                                    <TextBlock Text="{x:Bind ViewModel.RatingComment, Mode=OneWay}" TextWrapping="Wrap" />
+                                    <StackPanel Orientation="Horizontal" Spacing="12">
+                                        <TextBlock
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Style="{StaticResource CaptionTextBlockStyle}"
+                                            Text="{x:Bind ViewModel.CountText, Mode=OneWay}" />
+                                        <TextBlock
+                                            Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                            Style="{StaticResource CaptionTextBlockStyle}"
+                                            Text="{x:Bind ViewModel.HitSummary, Mode=OneWay}" />
+                                    </StackPanel>
+                                </StackPanel>
+                                <StackPanel
+                                    Grid.Column="2"
+                                    VerticalAlignment="Center"
+                                    Spacing="8">
+                                    <Button
+                                        HorizontalAlignment="Stretch"
+                                        AutomationProperties.AutomationId="SortingEdit"
+                                        Command="{x:Bind ViewModel.EditCommand}"
+                                        Content="调整模板" />
+                                    <Button
+                                        HorizontalAlignment="Stretch"
+                                        AutomationProperties.AutomationId="SortingCopy"
+                                        Command="{x:Bind ViewModel.CopyCommand}"
+                                        Content="复制评分"
+                                        IsEnabled="{x:Bind ViewModel.HasResults, Mode=OneWay}" />
+                                </StackPanel>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                    <Grid Grid.Row="1">
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="选择角色后显示声骸评分"
+                            Visibility="{x:Bind Empty(ViewModel.HasResults), Mode=OneWay}" />
+                        <ListView
+                            AutomationProperties.AutomationId="SortingResults"
+                            ItemsSource="{x:Bind ViewModel.Results}"
+                            SelectionMode="None">
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                    <Setter Property="Padding" Value="0" />
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="models:SortingEchoCard">
+                                    <Expander
+                                        Margin="0,0,0,8"
+                                        HorizontalAlignment="Stretch"
+                                        HorizontalContentAlignment="Stretch">
+                                        <Expander.Header>
+                                            <Grid
+                                                MinWidth="400"
+                                                MinHeight="72"
+                                                ColumnSpacing="12">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="52" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="76" />
+                                                </Grid.ColumnDefinitions>
+                                                <Border
+                                                    Width="52"
+                                                    Height="52"
+                                                    Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                                                    CornerRadius="{ThemeResource ControlCornerRadius}">
+                                                    <Grid>
+                                                        <SymbolIcon Opacity="0.25" Symbol="Favorite" />
+                                                        <Image
+                                                            ImageFailed="Image_Failed"
+                                                            Source="{x:Bind local:SortingManagerPage.LoadImage(IconUrl)}"
+                                                            Stretch="Uniform" />
+                                                    </Grid>
+                                                </Border>
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    VerticalAlignment="Center"
+                                                    Spacing="4">
+                                                    <TextBlock
+                                                        FontWeight="SemiBold"
+                                                        Text="{x:Bind Name}"
+                                                        TextTrimming="CharacterEllipsis" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Style="{StaticResource CaptionTextBlockStyle}"
+                                                        Text="{x:Bind HeaderSummary}"
+                                                        TextTrimming="CharacterEllipsis" />
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                                        Style="{StaticResource CaptionTextBlockStyle}"
+                                                        Text="{x:Bind HitSummary}" />
+                                                </StackPanel>
+                                                <StackPanel
+                                                    Grid.Column="2"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Center">
+                                                    <TextBlock
+                                                        Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                                        Style="{StaticResource TitleTextBlockStyle}"
+                                                        Text="{x:Bind Score}" />
+                                                    <TextBlock
+                                                        HorizontalAlignment="Right"
+                                                        FontWeight="SemiBold"
+                                                        Text="{x:Bind Grade}" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Expander.Header>
+                                        <StackPanel Spacing="12">
+                                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind Comment}" />
+                                            <ItemsControl ItemsSource="{x:Bind StatDetails}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate x:DataType="models:SortingStatDetailCard">
+                                                        <Grid Margin="0,6" ColumnSpacing="12">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="48" />
+                                                                <ColumnDefinition Width="*" />
+                                                                <ColumnDefinition Width="76" />
+                                                                <ColumnDefinition Width="52" />
+                                                                <ColumnDefinition Width="72" />
+                                                            </Grid.ColumnDefinitions>
+                                                            <TextBlock
+                                                                VerticalAlignment="Center"
+                                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                                Style="{StaticResource CaptionTextBlockStyle}"
+                                                                Text="{x:Bind Usage}" />
+                                                            <TextBlock
+                                                                Grid.Column="1"
+                                                                VerticalAlignment="Center"
+                                                                Text="{x:Bind Name}"
+                                                                TextTrimming="CharacterEllipsis" />
+                                                            <TextBlock
+                                                                Grid.Column="2"
+                                                                HorizontalAlignment="Right"
+                                                                VerticalAlignment="Center"
+                                                                Text="{x:Bind Value}" />
+                                                            <TextBlock
+                                                                Grid.Column="3"
+                                                                VerticalAlignment="Center"
+                                                                Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                                                Text="有效"
+                                                                Visibility="{x:Bind local:SortingManagerPage.Shown(IsEffective)}" />
+                                                            <TextBlock
+                                                                Grid.Column="3"
+                                                                VerticalAlignment="Center"
+                                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                                Style="{StaticResource CaptionTextBlockStyle}"
+                                                                Text="无收益"
+                                                                Visibility="{x:Bind local:SortingManagerPage.Hidden(IsEffective)}" />
+                                                            <TextBlock
+                                                                Grid.Column="4"
+                                                                HorizontalAlignment="Right"
+                                                                VerticalAlignment="Center"
+                                                                Text="{x:Bind Contribution}" />
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </Expander>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Grid>
+                    <Expander
+                        Grid.Row="2"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Stretch"
+                        AutomationProperties.AutomationId="SortingDevelopment"
+                        Header="养成目标"
+                        IsEnabled="{x:Bind ViewModel.HasTargets, Mode=OneWay}">
+                        <StackPanel Spacing="8">
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{StaticResource CaptionTextBlockStyle}"
+                                Text="库街区面板"
+                                ToolTipService.ToolTip="实际值来自角色详情的roleAttributeList；与游戏内战斗增益面板可能存在差异。" />
+                            <ItemsControl ItemsSource="{x:Bind ViewModel.Targets}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:SortingTargetViewModel">
+                                        <Grid Margin="0,6" ColumnSpacing="12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="90" />
+                                                <ColumnDefinition Width="110" />
+                                                <ColumnDefinition Width="76" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock VerticalAlignment="Center" Text="{x:Bind Name}" />
+                                            <TextBlock
+                                                Grid.Column="1"
+                                                VerticalAlignment="Center"
+                                                Text="{x:Bind Condition}" />
+                                            <TextBlock
+                                                Grid.Column="2"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Center"
+                                                FontWeight="SemiBold"
+                                                Text="{x:Bind ActualText, Mode=OneWay}" />
+                                            <TextBlock
+                                                Grid.Column="3"
+                                                VerticalAlignment="Center"
+                                                Text="{x:Bind Status, Mode=OneWay}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Expander>
+                </Grid>
+            </Grid>
+        </ContentControl>
+        <Grid Grid.Row="2" Margin="24,0,24,16">
+            <ProgressRing
+                Width="16"
+                Height="16"
+                HorizontalAlignment="Left"
+                IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" />
+            <TextBlock
+                Margin="24,0,0,0"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                Text="{x:Bind ViewModel.Message, Mode=OneWay}"
+                TextTrimming="CharacterEllipsis" />
+        </Grid>
+    </Grid>
+</Page>

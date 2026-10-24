@@ -4,18 +4,16 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
 using Windows.Foundation;
 using Windows.UI.ViewManagement;
-using Windows.UI;
 
 namespace Haiyu.Charts.WinUI;
 
 public abstract partial class ChartControlBase : Grid, IDisposable
 {
     protected CanvasControl? Canvas { get; private set; }
-    private readonly TextBlock _tooltipText = new() { TextWrapping = TextWrapping.NoWrap };
-    private readonly Border _tooltipPresenter;
+    private readonly ChartSurface _surface = new();
+    private bool _pointerInside;
     protected Point PointerPosition;
     protected bool IsDragging;
     protected Point DragStart;
@@ -28,19 +26,7 @@ public abstract partial class ChartControlBase : Grid, IDisposable
 
     protected ChartControlBase()
     {
-        _tooltipPresenter = new Border
-        {
-            CornerRadius = new CornerRadius(4),
-            Padding = new Thickness(10, 6, 10, 6),
-            Child = _tooltipText,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            VerticalAlignment = VerticalAlignment.Top,
-            IsHitTestVisible = false,
-            Visibility = Visibility.Collapsed,
-        };
-        UpdateTooltipTheme();
-        Microsoft.UI.Xaml.Controls.Canvas.SetZIndex(_tooltipPresenter, 100);
-        Children.Add(_tooltipPresenter);
+        Children.Add(_surface);
         IsTabStop = true;
         ManipulationMode = ManipulationModes.TranslateX | ManipulationModes.TranslateY | ManipulationModes.Scale;
         AutomationProperties.SetName(this, "Interactive chart");
@@ -67,10 +53,8 @@ public abstract partial class ChartControlBase : Grid, IDisposable
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         if (_disposed || _active) return;
-        UpdateTooltipTheme();
-        var canvas = new CanvasControl { ClearColor = Colors.Transparent };
+        var canvas = _surface.CreateRenderingCanvas();
         Canvas = canvas;
-        Children.Insert(0, canvas);
         canvas.Draw += DrawCanvas;
         canvas.PointerMoved += OnPointerMoved;
         canvas.PointerPressed += OnPointerPressed;
@@ -91,6 +75,7 @@ public abstract partial class ChartControlBase : Grid, IDisposable
         _active = false;
         _animationTimer.Stop();
         AnimationProgress = 1;
+        _pointerInside = false;
         HideTooltip();
         SetDataSubscriptions(false);
         ClearRenderState();
@@ -104,7 +89,7 @@ public abstract partial class ChartControlBase : Grid, IDisposable
         canvas.PointerExited -= OnPointerExited;
         canvas.PointerWheelChanged -= OnPointerWheelChanged;
         canvas.DoubleTapped -= OnDoubleTapped;
-        Children.Remove(canvas);
+        _surface.RemoveRenderingCanvas(canvas);
         canvas.RemoveFromVisualTree();
     }
 
@@ -117,17 +102,10 @@ public abstract partial class ChartControlBase : Grid, IDisposable
     }
     protected void ShowTooltip(string text, Point anchor)
     {
-        _tooltipText.Text = text;
-        _tooltipPresenter.Visibility = Visibility.Visible;
-        _tooltipPresenter.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-        var size = _tooltipPresenter.DesiredSize;
-        var x = Math.Clamp(anchor.X - size.Width / 2, 4, Math.Max(4, ActualWidth - size.Width - 4));
-        var y = anchor.Y - size.Height - 10;
-        if (y < 4) y = Math.Min(ActualHeight - size.Height - 4, anchor.Y + 10);
-        
-        _tooltipPresenter.Margin = new Thickness(x, Math.Max(4, y), 0, 0);
+        if (!_pointerInside) { HideTooltip(); return; }
+        _surface.ShowTooltip(text, anchor);
     }
-    protected void HideTooltip() => _tooltipPresenter.Visibility = Visibility.Collapsed;
+    protected void HideTooltip() => _surface.HideTooltip();
     protected virtual void CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => BeginAnimation();
     protected void BeginAnimation()
     {
@@ -158,6 +136,7 @@ public abstract partial class ChartControlBase : Grid, IDisposable
     protected virtual void OnPointerMoved(object sender, PointerRoutedEventArgs e)
     {
         if (sender is not CanvasControl canvas) return;
+        _pointerInside = true;
         PointerPosition = e.GetCurrentPoint(canvas).Position;
         if (IsDragging)
         {
@@ -178,7 +157,7 @@ public abstract partial class ChartControlBase : Grid, IDisposable
         if (sender is not CanvasControl canvas) return;
         IsDragging = false; canvas.ReleasePointerCapture(e.Pointer); SelectAt(e.GetCurrentPoint(canvas).Position);
     }
-    private void OnPointerExited(object sender, PointerRoutedEventArgs e) { IsDragging = false; HideTooltip(); }
+    private void OnPointerExited(object sender, PointerRoutedEventArgs e) { _pointerInside = false; IsDragging = false; HideTooltip(); }
     private void OnPointerWheelChanged(object sender, PointerRoutedEventArgs e)
     {
         if (sender is not CanvasControl canvas) return;
@@ -187,17 +166,9 @@ public abstract partial class ChartControlBase : Grid, IDisposable
     private void OnDoubleTapped(object sender, DoubleTappedRoutedEventArgs e) => ResetView();
     private void OnActualThemeChanged(FrameworkElement sender, object args)
     {
-        UpdateTooltipTheme();
         Invalidate();
     }
 
-    private void UpdateTooltipTheme()
-    {
-        if (Parent is FrameworkElement ui)
-        {
-            _tooltipPresenter.RequestedTheme = ui.ActualTheme;
-        }
-    }
     private void OnKeyDown(object sender, KeyRoutedEventArgs e)
     {
         if (e.Key == Windows.System.VirtualKey.Escape) { ResetView(); e.Handled = true; }

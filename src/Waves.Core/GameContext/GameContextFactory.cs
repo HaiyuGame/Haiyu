@@ -1,3 +1,5 @@
+using GrayExtension;
+
 namespace Waves.Core.GameContext;
 
 public static class GameContextFactory
@@ -6,68 +8,105 @@ public static class GameContextFactory
 
     #region 新核心
 
-    internal static PunishMainGameContextV2 GetMainPunishGameContextV2(IIoCircuitBreaker ioBreak) =>
+    internal static PunishMainGameContextV2 GetMainPunishGameContextV2(
+        IIoCircuitBreaker ioBreak,
+        GrayOpenService grayOpenService
+    ) =>
         new PunishMainGameContextV2(
             KuroGameApiConfig.MainBGRConfig,
-            nameof(PunishMainGameContextV2), ioBreak
+            nameof(PunishMainGameContextV2),
+            ioBreak,
+            grayOpenService
         )
         {
             GamerConfigPath = GameContextFactory.GameBassPath + "\\MainPGRConfig",
             IsLimitSpeed = false,
         };
 
-    internal static PunishBiliBiliGameContextV2 GetBiliBiliPunishGameContextV2(IIoCircuitBreaker ioBreak) =>
+    internal static PunishBiliBiliGameContextV2 GetBiliBiliPunishGameContextV2(
+        IIoCircuitBreaker ioBreak,
+        GrayOpenService grayOpenService
+    ) =>
         new PunishBiliBiliGameContextV2(
             KuroGameApiConfig.BiliBiliBGRConfig,
-            nameof(PunishBiliBiliGameContextV2), ioBreak
+            nameof(PunishBiliBiliGameContextV2),
+            ioBreak,
+            grayOpenService
         )
         {
             GamerConfigPath = GameContextFactory.GameBassPath + "\\BilibiliPRGConfig",
             IsLimitSpeed = false,
         };
 
-    internal static PunishGlobalGameContextV2 GetGlobalPunishGameContextV2(IIoCircuitBreaker ioBreak) =>
+    internal static PunishGlobalGameContextV2 GetGlobalPunishGameContextV2(
+        IIoCircuitBreaker ioBreak,
+        GrayOpenService grayOpenService
+    ) =>
         new PunishGlobalGameContextV2(
             KuroGameApiConfig.GlobalBGRConfig,
-            nameof(PunishGlobalGameContextV2), ioBreak
+            nameof(PunishGlobalGameContextV2),
+            ioBreak,
+            grayOpenService
         )
         {
             GamerConfigPath = GameContextFactory.GameBassPath + "\\GlokbalPGRConfig",
             IsLimitSpeed = false,
         };
 
-    internal static PunishTwGameContextV2 GetTwPunishGameContextV2(IIoCircuitBreaker ioBreak) =>
-        new PunishTwGameContextV2(KuroGameApiConfig.TWBGRConfig, nameof(PunishTwGameContextV2),ioBreak)
+    internal static PunishTwGameContextV2 GetTwPunishGameContextV2(
+        IIoCircuitBreaker ioBreak,
+        GrayOpenService grayOpenService
+    ) =>
+        new PunishTwGameContextV2(
+            KuroGameApiConfig.TWBGRConfig,
+            nameof(PunishTwGameContextV2),
+            ioBreak,
+            grayOpenService
+        )
         {
             GamerConfigPath = GameContextFactory.GameBassPath + "\\TwPGRConfig",
             IsLimitSpeed = false,
-            
         };
 
-    internal static ContextsV2.Waves.WavesMainGameContextV2 GetMainWavesGameContextV2(IIoCircuitBreaker ioBreak) =>
+    internal static ContextsV2.Waves.WavesMainGameContextV2 GetMainWavesGameContextV2(
+        IIoCircuitBreaker ioBreak,
+        GrayOpenService grayOpenService
+    ) =>
         new ContextsV2.Waves.WavesMainGameContextV2(
             KuroGameApiConfig.MainAPiConfig,
-            nameof(WavesMainGameContextV2), ioBreak
+            nameof(WavesMainGameContextV2),
+            ioBreak,
+            grayOpenService
         )
         {
             GamerConfigPath = GameContextFactory.GameBassPath + "\\MainConfig",
             IsLimitSpeed = false,
         };
 
-    internal static ContextsV2.Waves.WavesBiliBiliGameContextV2 GetBilibiliWavesGameContextV2(IIoCircuitBreaker ioBreak) =>
+    internal static ContextsV2.Waves.WavesBiliBiliGameContextV2 GetBilibiliWavesGameContextV2(
+        IIoCircuitBreaker ioBreak,
+        GrayOpenService grayOpenService
+    ) =>
         new ContextsV2.Waves.WavesBiliBiliGameContextV2(
             KuroGameApiConfig.BilibiliConfig,
-            nameof(WavesBiliBiliGameContextV2), ioBreak
+            nameof(WavesBiliBiliGameContextV2),
+            ioBreak,
+            grayOpenService
         )
         {
             GamerConfigPath = GameContextFactory.GameBassPath + "\\BiliBiliConfig",
             IsLimitSpeed = false,
         };
 
-    internal static ContextsV2.Waves.WavesGlobalGameContextV2 GetWavesGlobalGameContextV2(IIoCircuitBreaker ioBreak) =>
+    internal static ContextsV2.Waves.WavesGlobalGameContextV2 GetWavesGlobalGameContextV2(
+        IIoCircuitBreaker ioBreak,
+        GrayOpenService grayOpenService
+    ) =>
         new ContextsV2.Waves.WavesGlobalGameContextV2(
             KuroGameApiConfig.GlobalConfig,
-            nameof(WavesGlobalGameContextV2), ioBreak
+            nameof(WavesGlobalGameContextV2),
+            ioBreak,
+            grayOpenService
         )
         {
             GamerConfigPath = GameContextFactory.GameBassPath + "\\GlobalConfig",
@@ -86,7 +125,6 @@ public static class GameContextFactory
             nameof(PunishTwGameContextV2),
         ];
 
-    public static IReadOnlyCollection<string> GetAllCloudContextName() => [
-        nameof(KuroCloudGameContext)
-        ];
+    public static IReadOnlyCollection<string> GetAllCloudContextName() =>
+        [nameof(KuroCloudGameContext)];
 }

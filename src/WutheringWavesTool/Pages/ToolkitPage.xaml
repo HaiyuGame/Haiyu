@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:animatedvisuals="using:Microsoft.UI.Xaml.Controls.AnimatedVisuals"
+    xmlns:conver="using:Haiyu.Converter"
     xmlns:cui="using:CommunityToolkit.WinUI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:helper="using:Haiyu.Helpers"
@@ -24,6 +25,7 @@
         HorizontalScrollBarVisibility="Hidden"
         VerticalScrollBarVisibility="Hidden">
         <StackPanel Orientation="Vertical" Spacing="5">
+
             <Grid>
                 <TextBlock
                     FontFamily="{ThemeResource DefaultFont}"
@@ -69,7 +71,26 @@
                     </StackPanel>
                 </Button>
             </cui:SettingsCard>
-
+            <cui:SettingsCard
+                Description="{x:Bind helper:LanguageService.GetString('Display_SortingSubtitle')}"
+                Header="{x:Bind helper:LanguageService.GetString('Tool_SortingHeader')}"
+                Visibility="{x:Bind ViewModel.SortingGrayKey, Mode=OneWay, Converter={StaticResource GrayUIToVisiblityConverter}}">
+                <Button
+                    Grid.Row="2"
+                    Grid.Column="2"
+                    Padding="12,8"
+                    HorizontalAlignment="Right"
+                    Command="{x:Bind ViewModel.OpenSortingCommand}"
+                    Style="{ThemeResource TitleBarButtonStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <FontIcon
+                            FontFamily="Segoe Fluent Icons"
+                            FontSize="13"
+                            Glyph="&#xE8A7;" />
+                        <TextBlock FontSize="13" Text="{x:Bind helper:LanguageService.GetString('Display_Open')}" />
+                    </StackPanel>
+                </Button>
+            </cui:SettingsCard>
             <cui:SettingsCard Description="{x:Bind helper:LanguageService.GetString('Tool_MoniterDescription')}" Header="{x:Bind helper:LanguageService.GetString('Tool_MoniterHeader')}">
                 <cui:SettingsCard.HeaderIcon>
                     <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE977;" />
@@ -148,6 +169,42 @@
                         <TextBlock FontSize="13" Text="{x:Bind helper:LanguageService.GetString('Toolkit_LogDecryptAction')}" />
                     </StackPanel>
                 </Button>
+            </cui:SettingsCard>
+            <cui:SettingsCard
+                Description="{x:Bind helper:LanguageService.GetString('Toolkit_OfficialRecordDescription')}"
+                Header="{x:Bind helper:LanguageService.GetString('Toolkit_OfficialRecordHeader')}"
+                Visibility="{x:Bind ViewModel.OfficialWriteGrayKey, Mode=OneWay, Converter={StaticResource GrayUIToVisiblityConverter}}">
+                <cui:SettingsCard.HeaderIcon>
+                    <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8F1;" />
+                </cui:SettingsCard.HeaderIcon>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button
+                        Padding="12,8"
+                        HorizontalAlignment="Right"
+                        Command="{x:Bind ViewModel.WriteOfficialInstallRecordCommand}"
+                        Style="{ThemeResource TitleBarButtonStyle}">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <FontIcon
+                                FontFamily="Segoe Fluent Icons"
+                                FontSize="13"
+                                Glyph="&#xE898;" />
+                            <TextBlock FontSize="13" Text="{x:Bind helper:LanguageService.GetString('Toolkit_OfficialRecordWriteAction')}" />
+                        </StackPanel>
+                    </Button>
+                    <Button
+                        Padding="12,8"
+                        HorizontalAlignment="Right"
+                        Command="{x:Bind ViewModel.RemoveOfficialInstallRecordCommand}"
+                        Style="{ThemeResource TitleBarButtonStyle}">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <FontIcon
+                                FontFamily="Segoe Fluent Icons"
+                                FontSize="13"
+                                Glyph="&#xE74D;" />
+                            <TextBlock FontSize="13" Text="{x:Bind helper:LanguageService.GetString('Toolkit_OfficialRecordRemoveAction')}" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
             </cui:SettingsCard>
             <Grid Margin="0,15,0,0" VerticalAlignment="Center">
                 <TextBlock

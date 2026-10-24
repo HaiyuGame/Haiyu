@@ -38,7 +38,7 @@ namespace Waves.Settings;
     JsonTypeInfoContextType = typeof(AppSettingJsonContext),
     JsonTypeInfoPropertyName = nameof(AppSettingJsonContext.Default.MainWindowSetting)
 )]
-[Settings<string>(Name = "ABIRuntimePackagePath",Nullable =true)]
+[Settings<string>(Name = "ABIRuntimePackagePath", Nullable = true)]
 public partial class AppSettings : SettingBase
 {
     public static string BassFolder =>
@@ -60,7 +60,13 @@ public partial class AppSettings : SettingBase
 
     public string ToolsPosionFilePath => BassFolder + "\\ToolsPostion.json";
 
-    public static string ABIRuntimeSavePath => BassFolder+"\\Haiyu.ABI";
+    public static string ABIRuntimeSavePath => BassFolder + "\\Haiyu.ABI";
+
+    public static string SortingForder => BassFolder + "\\SortingFolder";
+    public static string SortingGroupFolder => BassFolder + "\\SortingFolder\\SortingGroup";
+    public static string SortingItemFolder => BassFolder + "\\SortingFolder\\SortingItem";
+
+    public static string GrayTestFile => BassFolder + "\\grayconfig.bat";
 
     private static readonly string SettingsFilePath = Path.Combine(BassFolder, "System.json");
 
@@ -126,14 +132,15 @@ public class MainWindowSetting
     [JsonPropertyName("leftY")]
     public double? LeftY { get; set; }
 
-    public static MainWindowSetting Default => new MainWindowSetting
-    {
-        HeightRate = 1.0,
-        WidthRate = 1.0,
-        IsResize = true,
-        LeftX = null,
-        LeftY = null
-    };
+    public static MainWindowSetting Default =>
+        new MainWindowSetting
+        {
+            HeightRate = 1.0,
+            WidthRate = 1.0,
+            IsResize = true,
+            LeftX = null,
+            LeftY = null,
+        };
 }
 
 [JsonSerializable(typeof(List<string>))]

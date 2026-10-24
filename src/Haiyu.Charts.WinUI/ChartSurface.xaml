@@ -1,0 +1,34 @@
+<UserControl
+    x:Class="Haiyu.Charts.WinUI.ChartSurface"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:canvas="using:Microsoft.Graphics.Canvas.UI.Xaml">
+    <UserControl.Resources>
+        <!--  A fresh Win2D surface is created on each load after the old one is disposed.  -->
+        <DataTemplate x:Key="RenderingCanvasTemplate">
+            <canvas:CanvasControl ClearColor="Transparent" />
+        </DataTemplate>
+    </UserControl.Resources>
+    <Grid>
+        <Grid x:Name="RenderingHost" />
+        <!--  Canvas positioning keeps the pointer offset out of DesiredSize.  -->
+        <Canvas IsHitTestVisible="False">
+            <Border
+                x:Name="TooltipPresenter"
+                MaxWidth="400"
+                Padding="{StaticResource ToolTipBorderPadding}"
+                Background="{ThemeResource ToolTipBackgroundBrush}"
+                BorderBrush="{ThemeResource ToolTipBorderBrush}"
+                BorderThickness="{ThemeResource ToolTipBorderThemeThickness}"
+                CornerRadius="{ThemeResource ControlCornerRadius}"
+                Visibility="Collapsed">
+                <TextBlock
+                    x:Name="TooltipText"
+                    FontFamily="{ThemeResource ContentControlThemeFontFamily}"
+                    FontSize="13.333"
+                    Foreground="{ThemeResource ToolTipForegroundBrush}"
+                    TextWrapping="Wrap" />
+            </Border>
+        </Canvas>
+    </Grid>
+</UserControl>

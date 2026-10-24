@@ -41,6 +41,9 @@ public partial class LocalAccount:ObservableObject
 
     [MemoryPackIgnore]
     public string CopyUserIdText { get; set; } = string.Empty;
+
+    [MemoryPackIgnore]
+    public string ChooseText { get; set; } = string.Empty;
     
     [MemoryPackIgnore]
     public IRelayCommand DeleteLocalAccountCommand => new RelayCommand(() =>

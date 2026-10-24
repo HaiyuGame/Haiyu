@@ -372,3 +372,4 @@ FodyWeavers.xsd
 /reverse_kcp_new
 /reverse_output
 /tools/wuwa_kcp
+/tests/Waves.Diff.Tests

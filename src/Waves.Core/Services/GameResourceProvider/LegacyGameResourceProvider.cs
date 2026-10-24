@@ -466,7 +466,9 @@ public sealed partial class LegacyGameResourceProvider : IGameResourceProvider
             Availability = availability,
             DownloadSize = download,
             TargetSize = target,
-            RequiredSpace = checked(download + target),
+            // 库洛配置中的 unCompressSize 已经是完成安装所需的磁盘容量，
+            // 不是需要再与下载大小相加的额外工作区大小。
+            RequiredSpace = target,
         };
 
     private static string ReplaceOrigin(string url, string original, string candidate) =>

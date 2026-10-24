@@ -238,7 +238,7 @@ public sealed class BundleResourceProviderTests
         f.Handler.Config.Config.Experiment.Apply.ApplyMethodFeature = "group";
         var summary = await f.Provider.GetResourceSummaryAsync();
         Assert.AreEqual(55L, summary.Update.DownloadSize);
-        Assert.AreEqual(121L, summary.Update.RequiredSpace);
+        Assert.AreEqual(66L, summary.Update.RequiredSpace);
         var plan = await f.Provider.GetUpdateGameResourceAsync();
         Assert.AreEqual(7L, plan.ResourcePacks[0].DeltaSize);
     }

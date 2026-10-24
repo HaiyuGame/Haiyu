@@ -20,6 +20,28 @@ public sealed class LauncherResourceProviderTests
         """;
 
     [TestMethod]
+    public async Task BilibiliBundleConfigurationKeepsOldKeyAndUsesBilibiliContentRoutes()
+    {
+        var config = KuroGameApiConfig.BilibiliConfig;
+        Assert.AreEqual("j5GWFuUFlb8N31Wi2uS3ZAVHcb7ZGN7y", config.AppKey);
+        Assert.IsTrue(config.ConfigUrl.Contains("/G152/10004_j5GWF"));
+        Assert.AreEqual("IY6xmlAusbImBjWrpPj1OwNuirXEO44x", config.BunleAppKey);
+        Assert.AreEqual("HD", config.BunleDefaultBundleName);
+        Assert.AreEqual("bilibili", config.BunleServerCode);
+        Assert.AreEqual("prod-volcdn-gamestarter.kurogame.xyz", new Uri(config.BunleBackUpConfigUrl!).Host);
+        using var h = new Handler();
+        using var client = new HttpClient(h);
+        var provider = new BundleGameResourceProvider(client);
+        provider.SetConfig(new GameLocalConfig(Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".json")), config);
+        await provider.GetDefaultLauncherValue();
+        Assert.AreEqual(config.BunleConfigUrl, h.Requests.Last().AbsoluteUri);
+        await provider.GetLauncherStarterAsync();
+        Assert.AreEqual("/launcher/app/10004_IY6xmlAusbImBjWrpPj1OwNuirXEO44x/G152/bilibili/information/zh-Hans.json", h.Requests.Last().AbsolutePath);
+        await provider.GetLauncherBackgroundDataAsync("bg-code");
+        Assert.AreEqual("/launcher/game/10004_IY6xmlAusbImBjWrpPj1OwNuirXEO44x/G152/bilibili/background/bg-code/zh-Hans.json", h.Requests.Last().AbsolutePath);
+    }
+
+    [TestMethod]
     public async Task SavedBundleSelectionOverridesDefaultButExplicitParameterWins()
     {
         using var h = new Handler();

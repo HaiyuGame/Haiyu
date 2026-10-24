@@ -17,102 +17,144 @@
             <i:InvokeCommandAction Command="{x:Bind ViewModel.LoadedCommand}" />
         </i:EventTriggerBehavior>
     </i:Interaction.Behaviors>
-    <StackPanel
-        Width="450"
-        HorizontalAlignment="Stretch"
-        Orientation="Vertical"
-        Spacing="12">
-        <StackPanel.ChildrenTransitions>
-            <TransitionCollection>
-                <RepositionThemeTransition />
-            </TransitionCollection>
-        </StackPanel.ChildrenTransitions>
-
-        <TextBlock
-            HorizontalAlignment="Center"
-            FontFamily="{ThemeResource DefaultFont}"
-            FontSize="18"
-            Text="{x:Bind helper:LanguageService.GetString('Display_GameSettings')}" />
-        <Grid ColumnSpacing="12">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <Border
-                Padding="16,12"
-                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                CornerRadius="5">
-                <NumberBox
-                    HorizontalAlignment="Stretch"
-                    Header="{x:Bind helper:LanguageService.GetString('Display_UnlimitedSpeed')}"
-                    Value="{x:Bind ViewModel.DownloadSpeedLimit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-            </Border>
-            <Border
-                Grid.Column="1"
-                Padding="16,12"
-                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                CornerRadius="5">
-                <ComboBox
-                    HorizontalAlignment="Stretch"
-                    Header="{x:Bind helper:LanguageService.GetString('Display_StartupObject')}"
-                    ItemsSource="{x:Bind ViewModel.LuancheExeNames, Mode=OneWay}"
-                    SelectedItem="{x:Bind ViewModel.LauncheExeName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-            </Border>
-        </Grid>
-        <Border
-            Padding="16,12"
-            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-            CornerRadius="5"
-            Visibility="{x:Bind ViewModel.WavesSettingVisibility, Mode=OneWay}">
-            <ani:Implicit.ShowAnimations>
-                <ani:OpacityAnimation To="1" Duration="0:0:0.5" />
-            </ani:Implicit.ShowAnimations>
-            <ani:Implicit.HideAnimations>
-                <ani:OpacityAnimation To="1" Duration="0:0:0.5" />
-            </ani:Implicit.HideAnimations>
-            <Grid ColumnSpacing="24" RowSpacing="8">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="auto" />
-                    <RowDefinition Height="auto" />
-                </Grid.RowDefinitions>
-                <CheckBox
-                    VerticalAlignment="Center"
-                    Content="Directx11"
-                    IsChecked="{x:Bind ViewModel.Directx11Enable, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                <CheckBox
-                    Grid.Column="1"
-                    VerticalAlignment="Center"
-                    Content="{x:Bind helper:LanguageService.GetString('Display_DisableDlss')}"
-                    IsChecked="{x:Bind ViewModel.DlssEnable, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                <CheckBox
-                    Grid.Row="1"
-                    VerticalAlignment="Center"
-                    Content="{x:Bind helper:LanguageService.GetString('GameSettings_QuickVerify')}"
-                    IsChecked="{x:Bind ViewModel.FastVerify, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                <CheckBox
-                    Grid.Row="1"
-                    Grid.Column="1"
-                    VerticalAlignment="Center"
-                    Content="{x:Bind helper:LanguageService.GetString('Display_CleanGameLogsOnStart')}"
-                    IsChecked="{x:Bind ViewModel.CleanLogsOnStart, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-            </Grid>
-        </Border>
-        <Border
-            Padding="16,12"
-            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-            CornerRadius="5">
-            <TextBox
+    <StackPanel Spacing="12">
+        <ScrollViewer MaxHeight="460" VerticalScrollBarVisibility="Auto">
+            <StackPanel
+                Width="450"
                 HorizontalAlignment="Stretch"
-                Header="{x:Bind helper:LanguageService.GetString('Display_OtherStartupParameters')}"
-                Text="{x:Bind ViewModel.Arguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-        </Border>
+                Orientation="Vertical"
+                Spacing="12">
+                <StackPanel.ChildrenTransitions>
+                    <TransitionCollection>
+                        <RepositionThemeTransition />
+                    </TransitionCollection>
+                </StackPanel.ChildrenTransitions>
+
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    FontFamily="{ThemeResource DefaultFont}"
+                    FontSize="18"
+                    Text="{x:Bind helper:LanguageService.GetString('Display_GameSettings')}" />
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Border
+                        Padding="16,12"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        CornerRadius="5">
+                        <NumberBox
+                            HorizontalAlignment="Stretch"
+                            Header="{x:Bind helper:LanguageService.GetString('Display_UnlimitedSpeed')}"
+                            Value="{x:Bind ViewModel.DownloadSpeedLimit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </Border>
+                    <Border
+                        Grid.Column="1"
+                        Padding="16,12"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        CornerRadius="5">
+                        <ComboBox
+                            HorizontalAlignment="Stretch"
+                            Header="{x:Bind helper:LanguageService.GetString('Display_StartupObject')}"
+                            IsEnabled="{x:Bind ViewModel.DefaultLaunchEnabled, Mode=OneWay}"
+                            ItemsSource="{x:Bind ViewModel.LuancheExeNames, Mode=OneWay}"
+                            SelectedItem="{x:Bind ViewModel.LauncheExeName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </Border>
+                </Grid>
+                <Border
+                    Padding="16,12"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    CornerRadius="5"
+                    Visibility="{x:Bind ViewModel.CustomLaunche, Converter={StaticResource GrayUIToVisiblityConverter}}">
+                    <StackPanel Spacing="10">
+                        <CheckBox Content="{x:Bind helper:LanguageService.GetString('GameSetting_CustomHeader')}" IsChecked="{x:Bind ViewModel.UseCustomLauncher, Mode=TwoWay}" />
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox
+                                VerticalAlignment="Center"
+                                AutomationProperties.Name="{x:Bind helper:LanguageService.GetString('GameSetting_CustomPath')}"
+                                Header="{x:Bind helper:LanguageService.GetString('GameSetting_CustomExePath')}"
+                                Text="{x:Bind ViewModel.CustomLauncherPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                <i:Interaction.Behaviors>
+                                    <i:EventTriggerBehavior EventName="LostFocus">
+                                        <i:InvokeCommandAction Command="{x:Bind ViewModel.ValidateCustomLauncherCommand}" />
+                                    </i:EventTriggerBehavior>
+                                </i:Interaction.Behaviors>
+                            </TextBox>
+                            <Button
+                                Grid.Column="1"
+                                VerticalAlignment="Bottom"
+                                Command="{x:Bind ViewModel.BrowseCustomLauncherCommand}"
+                                Content="{x:Bind helper:LanguageService.GetString('GameSetting_CustomSelectPath')}" />
+                        </Grid>
+                        <TextBox Header="{x:Bind helper:LanguageService.GetString('GameSetting_CustomGameArgent')}" Text="{x:Bind ViewModel.CustomLauncherArguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <InfoBar
+                            IsClosable="False"
+                            IsOpen="{x:Bind ViewModel.HasCustomLaunchError, Mode=OneWay}"
+                            Message="{x:Bind ViewModel.CustomLaunchError, Mode=OneWay}"
+                            Severity="Error" />
+                    </StackPanel>
+                </Border>
+                <Border
+                    Padding="16,12"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    CornerRadius="5"
+                    Visibility="{x:Bind ViewModel.WavesSettingVisibility, Mode=OneWay}">
+                    <ani:Implicit.ShowAnimations>
+                        <ani:OpacityAnimation To="1" Duration="0:0:0.5" />
+                    </ani:Implicit.ShowAnimations>
+                    <ani:Implicit.HideAnimations>
+                        <ani:OpacityAnimation To="1" Duration="0:0:0.5" />
+                    </ani:Implicit.HideAnimations>
+                    <Grid ColumnSpacing="24" RowSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                        </Grid.RowDefinitions>
+                        <CheckBox
+                            VerticalAlignment="Center"
+                            Content="Directx11"
+                            IsChecked="{x:Bind ViewModel.Directx11Enable, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <CheckBox
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            Content="{x:Bind helper:LanguageService.GetString('Display_DisableDlss')}"
+                            IsChecked="{x:Bind ViewModel.DlssEnable, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <CheckBox
+                            Grid.Row="1"
+                            VerticalAlignment="Center"
+                            Content="{x:Bind helper:LanguageService.GetString('GameSettings_QuickVerify')}"
+                            IsChecked="{x:Bind ViewModel.FastVerify, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <CheckBox
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            Content="{x:Bind helper:LanguageService.GetString('Display_CleanGameLogsOnStart')}"
+                            IsChecked="{x:Bind ViewModel.CleanLogsOnStart, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </Grid>
+                </Border>
+                <Border
+                    Padding="16,12"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    CornerRadius="5">
+                    <TextBox
+                        HorizontalAlignment="Stretch"
+                        Header="{x:Bind helper:LanguageService.GetString('Display_OtherStartupParameters')}"
+                        Text="{x:Bind ViewModel.Arguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
         <Button
             HorizontalAlignment="Center"
-            Command="{x:Bind ViewModel.CloseCommand}"
+            Command="{x:Bind ViewModel.SaveSettingsCommand}"
             Content="{x:Bind helper:LanguageService.GetString('Display_SAVING')}" />
     </StackPanel>
 </ContentDialog>

@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="Haiyu.Pages.SortingView.SortingTemplatePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="using:Haiyu.Controls"
+    xmlns:vm="using:Haiyu.ViewModel.SortingViewModels">
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <ui:TitleBar
+            x:Name="TitleBar"
+            Title="编辑评分模板"
+            IsExtendsContentIntoTitleBar="True" />
+        <StackPanel
+            Grid.Row="1"
+            Margin="24,0"
+            Spacing="16">
+            <TextBox
+                AutomationProperties.AutomationId="SortingTemplateName"
+                Header="模板名称"
+                MaxLength="80"
+                Text="{x:Bind ViewModel.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <Border
+                Padding="16"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                CornerRadius="{ThemeResource ControlCornerRadius}">
+                <Grid ColumnSpacing="24">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="180" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="主词条占比" />
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="88" />
+                            </Grid.ColumnDefinitions>
+                            <Slider
+                                AutomationProperties.AutomationId="SortingMainPercent"
+                                AutomationProperties.Name="主词条占比百分数"
+                                Maximum="100"
+                                Minimum="0"
+                                StepFrequency="1"
+                                ToolTipService.ToolTip="百分比；副词条占比自动补足至100%。"
+                                Value="{x:Bind ViewModel.MainPercent, Mode=TwoWay}" />
+                            <NumberBox
+                                Grid.Column="1"
+                                AutomationProperties.AutomationId="SortingMainPercentNumber"
+                                AutomationProperties.Name="主词条占比百分数"
+                                Maximum="100"
+                                Minimum="0"
+                                SmallChange="1"
+                                Value="{x:Bind ViewModel.MainPercent, Mode=TwoWay}" />
+                        </Grid>
+                    </StackPanel>
+                    <StackPanel
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Spacing="8">
+                        <TextBlock
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Style="{StaticResource CaptionTextBlockStyle}"
+                            Text="装备预览" />
+                        <TextBlock
+                            FontWeight="SemiBold"
+                            Text="{x:Bind ViewModel.Preview, Mode=OneWay}"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+            <Expander
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                AutomationProperties.AutomationId="SortingGraduationSettings"
+                Header="毕业标准">
+                <StackPanel Spacing="8">
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <NumberBox
+                            AutomationProperties.AutomationId="SortingTargetCount"
+                            Header="目标有效副词条数"
+                            Maximum="5"
+                            Minimum="1"
+                            SmallChange="1"
+                            Value="{x:Bind ViewModel.TargetCount, Mode=TwoWay}" />
+                        <NumberBox
+                            Grid.Column="1"
+                            Header="声骸毕业线"
+                            Maximum="100"
+                            Minimum="0"
+                            Value="{x:Bind ViewModel.GraduationLine, Mode=TwoWay}" />
+                    </Grid>
+                    <TextBlock FontSize="12" Text="评级最低分 · SSS ＞ SS ＞ S ＞ A ＞ B" />
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <NumberBox
+                            Grid.Column="0"
+                            Header="SSS"
+                            Maximum="100"
+                            Minimum="0"
+                            Value="{x:Bind ViewModel.GradeSSS, Mode=TwoWay}" />
+                        <NumberBox
+                            Grid.Column="1"
+                            Header="SS"
+                            Maximum="100"
+                            Minimum="0"
+                            Value="{x:Bind ViewModel.GradeSS, Mode=TwoWay}" />
+                        <NumberBox
+                            Grid.Column="2"
+                            Header="S"
+                            Maximum="100"
+                            Minimum="0"
+                            Value="{x:Bind ViewModel.GradeS, Mode=TwoWay}" />
+                        <NumberBox
+                            Grid.Column="3"
+                            Header="A"
+                            Maximum="100"
+                            Minimum="0"
+                            Value="{x:Bind ViewModel.GradeA, Mode=TwoWay}" />
+                        <NumberBox
+                            Grid.Column="4"
+                            Header="B"
+                            Maximum="100"
+                            Minimum="0"
+                            Value="{x:Bind ViewModel.GradeB, Mode=TwoWay}" />
+                    </Grid>
+                </StackPanel>
+            </Expander>
+        </StackPanel>
+        <Border
+            Grid.Row="2"
+            Margin="24,0"
+            Padding="8"
+            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            CornerRadius="{ThemeResource ControlCornerRadius}">
+            <Grid RowSpacing="8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid Margin="8" ColumnSpacing="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="160" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Style="{StaticResource SubtitleTextBlockStyle}"
+                        Text="词条管理" />
+                    <ComboBox
+                        Grid.Column="1"
+                        HorizontalAlignment="Stretch"
+                        AutomationProperties.AutomationId="SortingRuleSection"
+                        AutomationProperties.Name="词条分类"
+                        SelectedIndex="{x:Bind ViewModel.RuleSectionIndex, Mode=TwoWay}"
+                        ToolTipService.ToolTip="按 COST 查看主词条；同名主词条共用系数，满值按 COST 分别计算。">
+                        <x:String>副词条</x:String>
+                        <x:String>1C 主词条</x:String>
+                        <x:String>3C 主词条</x:String>
+                        <x:String>4C 主词条</x:String>
+                    </ComboBox>
+                </Grid>
+                <Grid
+                    Grid.Row="1"
+                    Margin="8,0"
+                    ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox
+                        AutomationProperties.Name="搜索词条"
+                        PlaceholderText="搜索当前分类词条"
+                        Text="{x:Bind ViewModel.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <Button
+                        Grid.Column="1"
+                        AutomationProperties.AutomationId="SortingAddRule"
+                        Command="{x:Bind ViewModel.AddRuleCommand}"
+                        Content="新增词条" />
+                    <Button
+                        Grid.Column="2"
+                        Command="{x:Bind ViewModel.RestoreRulesCommand}"
+                        Content="补齐词条"
+                        ToolTipService.ToolTip="补回缺失的主副词条，已有系数不变。" />
+                </Grid>
+                <ListView
+                    Grid.Row="2"
+                    AutomationProperties.AutomationId="SortingRules"
+                    ItemsSource="{x:Bind ViewModel.VisibleRules}"
+                    SelectionMode="None">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="Padding" Value="0" />
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:SortingEntryViewModel">
+                            <Grid Padding="8,8" ColumnSpacing="16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="150" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="72" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    Text="{x:Bind Name}"
+                                    TextTrimming="CharacterEllipsis"
+                                    ToolTipService.ToolTip="{x:Bind Limit}" />
+                                <TextBlock
+                                    Grid.Row="1"
+                                    Grid.ColumnSpan="4"
+                                    FontSize="12"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Text="{x:Bind Limit}"
+                                    TextWrapping="Wrap" />
+                                <StackPanel
+                                    Grid.Column="3"
+                                    Orientation="Horizontal"
+                                    Spacing="4">
+                                    <Button
+                                        AutomationProperties.Name="编辑词条"
+                                        Click="EditRule_Click"
+                                        Content="编辑"
+                                        Tag="{x:Bind}" />
+                                    <Button
+                                        AutomationProperties.Name="删除词条"
+                                        Click="RemoveRule_Click"
+                                        Content="删除"
+                                        Tag="{x:Bind}" />
+                                </StackPanel>
+                                <Slider
+                                    Grid.Column="1"
+                                    AutomationProperties.AutomationId="{x:Bind SliderId}"
+                                    AutomationProperties.Name="{x:Bind Name}"
+                                    Maximum="1"
+                                    Minimum="0"
+                                    StepFrequency="0.05"
+                                    ToolTipService.ToolTip="0为无效，1为最高优先级。数值上限自动配置。"
+                                    Value="{x:Bind Coefficient, Mode=TwoWay}" />
+                                <NumberBox
+                                    Grid.Column="2"
+                                    AutomationProperties.AutomationId="{x:Bind NumberId}"
+                                    AutomationProperties.Name="{x:Bind Name}"
+                                    Maximum="1"
+                                    Minimum="0"
+                                    SmallChange="0.05"
+                                    Value="{x:Bind Coefficient, Mode=TwoWay}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
+        </Border>
+        <Expander
+            Grid.Row="3"
+            Margin="24,0"
+            HorizontalAlignment="Stretch"
+            HorizontalContentAlignment="Stretch"
+            AutomationProperties.AutomationId="SortingTargetSection"
+            Header="养成目标">
+            <StackPanel Spacing="8">
+                <Button
+                    AutomationProperties.AutomationId="SortingAddTarget"
+                    Command="{x:Bind ViewModel.AddTargetCommand}"
+                    Content="添加目标" />
+                <ListView
+                    MaxHeight="128"
+                    AutomationProperties.AutomationId="SortingEditTargets"
+                    ItemsSource="{x:Bind ViewModel.Targets}"
+                    SelectionMode="None">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:SortingTargetViewModel">
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="160" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock VerticalAlignment="Center" Text="{x:Bind Name}" />
+                                <NumberBox
+                                    Grid.Column="1"
+                                    AutomationProperties.Name="养成目标值"
+                                    Maximum="1000000"
+                                    Minimum="0"
+                                    ToolTipService.ToolTip="独立检查面板，不影响声骸分数。"
+                                    Value="{x:Bind Target, Mode=TwoWay}" />
+                                <Button
+                                    Grid.Column="2"
+                                    AutomationProperties.Name="移除养成目标"
+                                    Click="RemoveTarget_Click"
+                                    Content="移除"
+                                    Tag="{x:Bind}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </StackPanel>
+        </Expander>
+        <Grid
+            Grid.Row="4"
+            Margin="24,0,24,20"
+            ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel VerticalAlignment="Center" Spacing="4">
+                <Button
+                    AutomationProperties.AutomationId="SortingDeleteTemplate"
+                    Command="{x:Bind ViewModel.DeleteTemplateCommand}"
+                    Content="删除模板"
+                    IsEnabled="{x:Bind ViewModel.CanDeleteTemplate, Mode=OneWay}"
+                    ToolTipService.ToolTip="内置参考模板保留；用户模板删除前需确认。" />
+                <TextBlock
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Text="{x:Bind ViewModel.Message, Mode=OneWay}"
+                    TextWrapping="Wrap" />
+                <HyperlinkButton
+                    Padding="0"
+                    AutomationProperties.AutomationId="SortingSource"
+                    Click="Source_Click"
+                    Content="参考资料"
+                    IsEnabled="{x:Bind ViewModel.HasSource, Mode=OneWay}"
+                    ToolTipService.ToolTip="{x:Bind ViewModel.Notes, Mode=OneWay}" />
+            </StackPanel>
+            <Button
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                AutomationProperties.AutomationId="SortingCopyTemplate"
+                Command="{x:Bind ViewModel.CopyCommand}"
+                Content="复制模板" />
+            <Button
+                Grid.Column="2"
+                VerticalAlignment="Center"
+                AutomationProperties.AutomationId="SortingCloseEditor"
+                Command="{x:Bind ViewModel.CloseCommand}"
+                Content="关闭" />
+            <Button
+                Grid.Column="3"
+                VerticalAlignment="Center"
+                AutomationProperties.AutomationId="SortingSave"
+                Command="{x:Bind ViewModel.SaveCommand}"
+                Content="保存"
+                Style="{StaticResource AccentButtonStyle}" />
+        </Grid>
+    </Grid>
+</Page>

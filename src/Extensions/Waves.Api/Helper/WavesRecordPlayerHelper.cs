@@ -63,7 +63,7 @@ public static class WavesRecordPlayerHelper
 
     extension(WavesAnalysisPlayerCard card)
     {
-        public (string Title, double Score, double doubleCount) EvaluateLuck(List<int> upRoleIds)
+        public (string Title, double Score, double doubleCount) EvaluateLuck()
         {
             var rates = new List<double>();
             var allResources = new List<RecordCardItemWrapper>();
@@ -75,7 +75,7 @@ public static class WavesRecordPlayerHelper
 
                 if (item.IsFlage() && resources.Count > 0)
                 {
-                    var formatted = RecordHelper.FormatStartFive(resources, out _, upRoleIds);
+                    var formatted = RecordHelper.FormatStartFive(resources, out _, checkResident: true);
                     if (formatted.Item1?.Count > 0)
                     {
                         rates.Add(RecordHelper.GetGuaranteedRange(formatted.Item1));

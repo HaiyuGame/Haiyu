@@ -1,0 +1,45 @@
+{
+  "cost": 4,
+  "rarity": 5,
+  "level": 25,
+  "id": "slot-1",
+  "mainStats": [
+    {
+      "entryNo": "critDamage",
+      "type": "Percentage",
+      "value": 44.0
+    },
+    {
+      "entryNo": "atk",
+      "type": "Value",
+      "value": 150
+    }
+  ],
+  "subStats": [
+    {
+      "entryNo": "critDamage",
+      "type": "Percentage",
+      "value": 17.4
+    },
+    {
+      "entryNo": "critRate",
+      "type": "Percentage",
+      "value": 9.3
+    },
+    {
+      "entryNo": "hp",
+      "type": "Percentage",
+      "value": 8.6
+    },
+    {
+      "entryNo": "atk",
+      "type": "Percentage",
+      "value": 11.6
+    },
+    {
+      "entryNo": "basicDamage",
+      "type": "Percentage",
+      "value": 7.9
+    }
+  ]
+}
