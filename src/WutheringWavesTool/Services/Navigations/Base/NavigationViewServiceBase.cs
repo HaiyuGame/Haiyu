@@ -4,13 +4,12 @@ public class NavigationViewServiceBase : INavigationViewService
 {
     internal NavigationView _viewBase = null;
 
-    public NavigationViewServiceBase(INavigationService navigationService, IPageService pageService)
+    public NavigationViewServiceBase(IPageService pageService)
     {
-        NavigationService = navigationService;
         PageService = pageService;
     }
 
-    public INavigationService NavigationService { get; }
+    public INavigationService NavigationService { get; private set; }
     public IPageService PageService { get; }
 
     public IList<object> GetFooterMenuItems() => _viewBase.FooterMenuItems;
@@ -21,8 +20,9 @@ public class NavigationViewServiceBase : INavigationViewService
         GetSelectedItem(GetMenuItems(), pagetype)
         ?? GetSelectedItem(GetFooterMenuItems(), pagetype);
 
-    public void Register(NavigationView view)
+    public void Register(NavigationView view, INavigationService navigationService)
     {
+        this.NavigationService = navigationService;
         _viewBase = view;
         _viewBase.ItemInvoked += _viewBase_ItemInvoked;
         _viewBase.BackRequested += _viewBase_BackRequested;

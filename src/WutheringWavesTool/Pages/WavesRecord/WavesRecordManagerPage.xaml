@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="Haiyu.Pages.WavesRecord.WavesRecordManagerPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Haiyu.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:helper="using:Haiyu.Helpers"
+    xmlns:i="using:Microsoft.Xaml.Interactivity"
+    xmlns:local="using:Haiyu.Pages"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:qrModel="using:Waves.Api.Models.QRLogin"
+    xmlns:vmWrapper="using:Haiyu.ViewModel"
+    xmlns:wrapper="using:Waves.Api.Models"
+    xmlns:wui="using:CommunityToolkit.WinUI.Controls"
+    mc:Ignorable="d" >
+    
+</Page>

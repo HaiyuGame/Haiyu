@@ -14,11 +14,15 @@ public sealed partial class ShellPage : Page, IDisposable
         this.InitializeComponent();
         this.ViewModel = viewModel;
         this.Loaded += ShellPage_Loaded;
-        this.ViewModel.HomeNavigationService.Navigated += HomeNavigationService_Navigated;
-        this.ViewModel.HomeNavigationService.RegisterView(this.frame);
-        this.ViewModel.HomeNavigationViewService.Register(this.navigationView);
+        this.ViewModel.WindowManager.Shell.NavigationService.Navigated +=
+            HomeNavigationService_Navigated;
+        this.ViewModel.WindowManager.Shell.NavigationService.RegisterView(this.frame);
+        this.ViewModel.WindowManager.Shell.NavigationViewService.Register(
+            this.navigationView,
+            this.ViewModel.WindowManager.Shell.NavigationService
+        );
         this.ViewModel.WindowManager.Shell.TipShow.Owner = this.panel;
-        if(this.ViewModel.WindowManager.Shell is ShellWindowContext shell) 
+        if (this.ViewModel.WindowManager.Shell is ShellWindowContext shell)
         {
             shell.MainTitle = this.titlebar;
         }
@@ -30,7 +34,7 @@ public sealed partial class ShellPage : Page, IDisposable
         if (
             e.SourcePageType == typeof(PunishV2GamePage)
             || e.SourcePageType == typeof(WavesV2GamePage)
-            ||e.SourcePageType == typeof(WavesCloudGamePage)
+            || e.SourcePageType == typeof(WavesCloudGamePage)
         )
         {
             To0.Start();
@@ -43,7 +47,7 @@ public sealed partial class ShellPage : Page, IDisposable
             this.ViewModel.WallpaperService.PauseVideo();
         }
         ViewModel.SetSelectItem(e.SourcePageType);
-        this.ViewModel.HomeNavigationService.ClearHistory();
+        this.ViewModel.WindowManager.Shell.NavigationService.ClearHistory();
         GC.Collect();
     }
 
@@ -77,16 +81,19 @@ public sealed partial class ShellPage : Page, IDisposable
         }
         _disposed = true;
         Loaded -= ShellPage_Loaded;
-        ViewModel.HomeNavigationService.Navigated -= HomeNavigationService_Navigated;
-        ViewModel.HomeNavigationService.UnRegisterView();
-        ViewModel.HomeNavigationViewService.UnRegister();
+        ViewModel.WindowManager.Shell.NavigationService.Navigated -=
+            HomeNavigationService_Navigated;
+        ViewModel.WindowManager.Shell.NavigationService.UnRegisterView();
+        ViewModel.WindowManager.Shell.NavigationViewService.UnRegister();
         ViewModel.AppContext.WallpaperService.UnregisterMediaHost(mediaControl);
         Bindings.StopTracking();
     }
 
-    private async void Page_PreviewKeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+    private async void Page_PreviewKeyDown(
+        object sender,
+        Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e
+    )
     {
-
         if (e.Key != Windows.System.VirtualKey.F12)
             return;
 

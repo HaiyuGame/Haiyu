@@ -24,6 +24,8 @@ public interface IViewFactorys
 
     public void ShowMoniterSettingWindow();
     public void ShowMonitorToolWindow(PostionType postion = PostionType.TopCenter);
+
+    public void ShowWavesRecordManagerWindow();
     #endregion
 
 

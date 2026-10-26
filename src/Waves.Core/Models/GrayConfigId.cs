@@ -29,6 +29,11 @@ public enum GrayConfigId : uint
     /// 自定义启动路径，输入1004
     /// </summary>
     CustomLauncheExeMod = 1004,
+
+    /// <summary>
+    /// 抽卡记录V3
+    /// </summary>
+    WavesRecordManager = 1005,
 }
 
 public partial class GrayConfigItem : ObservableObject

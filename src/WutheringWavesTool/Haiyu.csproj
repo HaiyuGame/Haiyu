@@ -364,6 +364,7 @@
 		<Folder Include="Assets\Languages\" />
 		<Folder Include="Contracts\Services\" />
 		<Folder Include="Model\" />
+		<Folder Include="Pages\WavesRecord\" />
 		<Folder Include="Services\DialogServices\" />
 	</ItemGroup>
 	<PropertyGroup Label="Globals">

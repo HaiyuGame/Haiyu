@@ -2,9 +2,9 @@ using Haiyu.Common.Contracts;
 
 namespace Haiyu.Services.Navigations;
 
-public class HomeNavigationService : NavigationServiceBase
+public class ShellNavigationService : NavigationServiceBase
 {
-    public HomeNavigationService(IPageService pageService)
+    public ShellNavigationService(IPageService pageService)
         : base(pageService) { }
 
     public override bool NavigationTo(

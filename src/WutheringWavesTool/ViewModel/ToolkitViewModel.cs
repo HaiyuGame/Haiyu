@@ -37,6 +37,8 @@ public sealed partial class ToolkitViewModel : ViewModelBase
     #region GrayId
     public uint OfficialWriteGrayKey => (uint)GrayConfigId.OfficialLauncheWrite;
     public uint SortingGrayKey => (uint) GrayConfigId.SoringTesing;
+
+    public uint WavesRecordKey => (uint) GrayConfigId.WavesRecordManager;
     #endregion
 
     public IViewFactorys ViewFactorys { get; }
@@ -428,6 +430,14 @@ public sealed partial class ToolkitViewModel : ViewModelBase
             ),
             Symbol.Accept
         );
+    }
+
+    
+
+    [RelayCommand]
+    async Task OpenWavesRecord()
+    {
+        ViewFactorys.ShowWavesRecordManagerWindow();
     }
 
     private void SendTaskMethod(object recipient, SendTaskMessager message)

@@ -206,6 +206,9 @@
                     </Button>
                 </StackPanel>
             </cui:SettingsCard>
+            <cui:SettingsCard Header="抽卡分析V3" Visibility="{x:Bind ViewModel.WavesRecordKey, Converter={StaticResource GrayUIToVisiblityConverter}}">
+                <Button Command="{x:Bind ViewModel.OpenWavesRecordCommand}" Content="打开" />
+            </cui:SettingsCard>
             <Grid Margin="0,15,0,0" VerticalAlignment="Center">
                 <TextBlock
                     VerticalAlignment="Center"

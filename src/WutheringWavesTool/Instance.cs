@@ -1,10 +1,10 @@
-
 using Cacheing;
 using GrayExtension;
 using Haiyu.Common.Contracts;
 using Haiyu.Helpers;
 using Haiyu.Pages.Communitys;
 using Haiyu.Pages.Toolkits;
+using Haiyu.Pages.WavesRecord;
 using Haiyu.Plugin.Common;
 using Haiyu.Plugin.Contracts;
 using Haiyu.Plugin.Services;
@@ -20,6 +20,7 @@ using Haiyu.ViewModel.GameViewModels.GameContexts;
 using Haiyu.ViewModel.OOBEViewModels;
 using Haiyu.ViewModel.SortingViewModels;
 using Haiyu.ViewModel.ToolkitsViewModel;
+using Haiyu.ViewModel.WavesRecordManager;
 using Haiyu.ViewModel.WikiViewModels;
 using MemoryPack;
 using Microsoft.Extensions.Hosting;
@@ -97,14 +98,14 @@ public static class InstanceBuilderExtensions
                 Service
                     .AddSingleton<SortingWorkspace>()
                     .AddSingleton<KuroSortingService>()
-                #region Sorting
+                    #region Sorting
                     .AddSingleton<Haiyu.Contracts.Services.SortingViewFactory>()
                     .AddTransient<Haiyu.Pages.SortingView.SortingManagerPage>()
                     .AddTransient<Haiyu.Pages.SortingView.SortingTemplatePage>()
                     .AddTransient<Haiyu.Pages.SortingView.SortingEntryDialog>()
                     .AddTransient<SortingManagerViewModel>()
                     .AddTransient<SortingTemplateViewModel>()
-                #endregion
+                    #endregion
                     .AddHostedService<RpcService>(
                         (s) =>
                         {
@@ -132,8 +133,12 @@ public static class InstanceBuilderExtensions
                     .AddTransient<ShellViewModel>()
                     .AddTransient<OOBEPage>()
                     .AddTransient<OOBEViewModel>()
+                    #region WavesRecord
                     .AddTransient<WavesAnalysisRecordPage>()
                     .AddTransient<WavesAnalysisRecordViewModel>()
+                    .AddTransient<WavesRecordManagerPage>()
+                    .AddTransient<WavesRecordManagerViewModel>()
+                    #endregion
                     .AddTransient<SettingViewModel>()
                     .AddTransient<GamerSignPage>()
                     .AddTransient<GamerSignViewModel>()
@@ -237,18 +242,9 @@ public static class InstanceBuilderExtensions
                     )
                     #endregion
                     #region Navigation
-                    .AddKeyedSingleton<INavigationService, HomeNavigationService>(
-                        nameof(HomeNavigationService)
-                    )
-                    .AddKeyedSingleton<INavigationViewService, HomeNavigationViewService>(
-                        nameof(HomeNavigationViewService)
-                    )
-                    .AddKeyedTransient<INavigationService, CommunityNavigationService>(
-                        nameof(CommunityNavigationService)
-                    )
-                    .AddKeyedTransient<INavigationService, WebGameNavigationService>(
-                        nameof(WebGameNavigationService)
-                    )
+                    //作用域
+                    .AddScoped<INavigationService, ShellNavigationService>()
+                    .AddScoped<INavigationViewService, ShellNavigationViewService>()
                     .AddKeyedTransient<INavigationService, GameWikiNavigationService>(
                         nameof(GameWikiNavigationService)
                     )
