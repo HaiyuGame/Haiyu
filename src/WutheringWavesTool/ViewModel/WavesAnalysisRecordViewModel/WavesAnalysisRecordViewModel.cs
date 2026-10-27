@@ -1,4 +1,4 @@
-using Haiyu.Plugin.Common.LegacyMessageBox;
+﻿using Haiyu.Plugin.Common.LegacyMessageBox;
 using Haiyu.Plugin.Contracts;
 using Haiyu.Plugin.Models.Enums;
 using MemoryPack;
@@ -22,9 +22,7 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
     public IWavesPlayerCardCacheServices Cache { get; }
     public IPickersService PickersService { get; }
     public IWavesCloudGameService WavesCloudGameService { get; }
-    public FiveGroupModel FiveGroup { get; private set; }
-    public List<CommunityRoleData> AllRole { get; private set; }
-    public List<CommunityWeaponData> AllWeapon { get; private set; }
+    public WavesRecordAnalysisViewModel AnalysisViewModel { get; } = new();
     private WavesAnalysisPlayerCard Cards { get; set; }
 
     public WavesAnalysisRecordViewModel(
@@ -34,7 +32,6 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
         IWavesCloudGameService wavesCloudGameService
     )
     {
-        InitializeCharts();
         this.CloudGameContext = cloudGameContext;
         Cache = cache;
         PickersService = pickersService;
@@ -51,9 +48,7 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
         {
             await LoadDataAsync();
             IsLoading = true;
-            await InitAnalysis();
-            await AnalysisStarAsync();
-            IsLoading = false;
+            await AnalysisViewModel.InitializeAsync(Cards ?? new() { Items = [] });
         }
         catch (Exception ex)
         {
@@ -61,14 +56,17 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
                 .Host.Services.GetRequiredService<SystemEventPublisher>()
                 .Publish(new() { Message = ex.Message, Delay = 30 });
         }
+        finally
+        {
+            IsLoading = false;
+        }
     }
 
-    private async Task InitAnalysis()
+    protected override void OnDisposing()
     {
-        this.FiveGroup = await RecordHelper.GetFiveGroupAsync(this.CTS.Token) ?? new();
-        this.AllRole = await RecordHelper.GetAllRoleAsync(this.CTS.Token) ?? new();
-        this.AllWeapon = await RecordHelper.GetAllWeaponAsync(this.CTS.Token) ?? new();
-        InitNavItems();
+        AnalysisViewModel.Dispose();
+        Cards = null;
+        base.OnDisposing();
     }
 
     private async Task LoadDataAsync()
@@ -229,9 +227,14 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
             )
         );
         IsLoading = true;
-        await InitAnalysis();
-        await AnalysisStarAsync();
-        IsLoading = false;
+        try
+        {
+            await AnalysisViewModel.InitializeAsync(Cards);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
     }
 
     internal void SetSessionAsync(CloudGameLoginSession session)

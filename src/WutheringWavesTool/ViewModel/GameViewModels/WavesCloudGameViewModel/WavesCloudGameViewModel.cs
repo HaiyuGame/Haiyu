@@ -1,4 +1,5 @@
 using System.Text;
+using GrayExtension;
 using Haiyu.Controls.Models;
 using Waves.Api.Models.CloudGame;
 using Waves.Core.Common;
@@ -19,6 +20,8 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
     public IAppContext<App> App { get; }
     public IViewFactorys ViewFactorys { get; }
     public IWavesCloudGameService WavesCloudGameService { get; }
+    public GrayOpenService GrayOpenService { get; }
+    public Haiyu.Services.WavesRecordManager WavesRecordManager { get; }
     public IWallpaperService WallpaperService { get; }
 
     [ObservableProperty]
@@ -26,7 +29,6 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
 
     [ObservableProperty]
     public partial bool IsRefreshing { get; set; }
-
 
     [ObservableProperty]
     public partial WallDataWrapper WallData { get; set; } = CreateEmptyWallData();
@@ -55,7 +57,9 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
         IWindowManager windowManager,
         IAppContext<App> app,
         IViewFactorys viewFactorys,
-        IWavesCloudGameService wavesCloudGameService
+        IWavesCloudGameService wavesCloudGameService,
+        GrayOpenService grayOpenService,
+        Haiyu.Services.WavesRecordManager wavesRecordManager
     )
     {
         WallpaperService = wallpaperService;
@@ -64,6 +68,8 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
         App = app;
         ViewFactorys = viewFactorys;
         WavesCloudGameService = wavesCloudGameService;
+        GrayOpenService = grayOpenService;
+        WavesRecordManager = wavesRecordManager;
         KuroCloudGameContext.CloudGameProcessTracker.OnProgressChanged +=
             CloudGameProcessTracker_OnProgressChanged;
         ;
@@ -346,6 +352,7 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
     [RelayCommand]
     async Task ShowWavesAnalysis()
     {
+        var isPreview = GrayOpenService.GetOpen((uint)GrayConfigId.WavesRecordManager, false);
         var selectLogin = await this.WavesCloudGameService.GetCurrentUserSession();
         if (selectLogin == null)
         {
@@ -354,7 +361,19 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
             );
             return;
         }
-        ViewFactorys.ShowAnalysisRecordV2(selectLogin);
+        if (isPreview)
+        {
+            var session = this.WavesCloudGameService.GetCurrentUserSession();
+            await WavesRecordManager.CreateCloudRecordAsync(
+                selectLogin,
+                selectLogin.PhoneToken.Phone,
+                this.CTS.Token
+            );
+        }
+        else
+        {
+            ViewFactorys.ShowAnalysisRecordV2(selectLogin);
+        }
     }
 
     [RelayCommand]

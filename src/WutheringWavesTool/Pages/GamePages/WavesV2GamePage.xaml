@@ -254,7 +254,6 @@
                                                             </TextBlock>
                                                         </Grid>
                                                     </DataTemplate>
-
                                                 </ItemsControl.ItemTemplate>
                                                 <ItemsControl.ItemContainerTransitions>
                                                     <TransitionCollection>
@@ -531,7 +530,6 @@
                                         FontSize="10"
                                         Text="{x:Bind ViewModel.DisplayVersion, Mode=OneWay}" />
                                 </Grid>
-
                             </Button>
                             <Button
                                 Grid.Row="1"
@@ -672,7 +670,6 @@
                                         Glyph="{x:Bind ViewModel.PreDownloadIcon, Mode=OneWay}" />
                                 </Grid>
                             </Viewbox>
-
                         </Button>
 
                         <Button
@@ -730,7 +727,6 @@
                             FontSize="15"
                             Glyph="&#xE8D5;" />
                     </Button>
-
                 </StackPanel>
             </Grid>
         </Grid>
@@ -762,7 +758,6 @@
                 x:Name="switcher"
                 StartCardIndex="{x:Bind ViewModel.SwatchIndex, Mode=OneWay}"
                 Style="{ThemeResource DefaultCardsSwitcher}">
-
                 <control:CardSwitcher.Card1>
                     <Grid
                         HorizontalAlignment="Stretch"
@@ -914,7 +909,6 @@
                                                     FontFamily="{ThemeResource DefaultFont}"
                                                     FontSize="10"
                                                     Text="{x:Bind ViewModel.Base.EnergyRecoverEndTime, Mode=OneWay}" />
-
                                             </StackPanel>
                                         </StackPanel>
                                     </Grid>
@@ -954,14 +948,12 @@
                                                 Glyph="&#xE72E;"
                                                 Visibility="{x:Bind ViewModel.Base.LivenessUnlock, Mode=OneWay, Converter={StaticResource BoolToVisibilityReversalConverter}}" />
                                         </StackPanel>
-
                                     </Grid>
                                     <Grid
                                         Grid.Row="1"
                                         Grid.Column="0"
                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                         CornerRadius="8">
-
                                         <Grid.RowDefinitions>
                                             <RowDefinition />
                                         </Grid.RowDefinitions>
@@ -1007,7 +999,6 @@
                                         Grid.Column="2"
                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                         CornerRadius="8">
-
                                         <Grid.RowDefinitions>
                                             <RowDefinition />
                                             <RowDefinition />
@@ -1190,7 +1181,6 @@
                                 </PipsPager.SelectedPipStyle>
                                 <PipsPager.NormalPipStyle>
                                     <Style BasedOn="{StaticResource PipsPagerButtonBaseStyle}" TargetType="Button">
-
                                         <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
 
                                         <Setter Property="Content" Value="&#xE734;" />

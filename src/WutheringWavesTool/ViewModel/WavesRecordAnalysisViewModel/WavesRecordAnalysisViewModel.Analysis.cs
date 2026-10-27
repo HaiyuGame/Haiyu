@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,7 +7,7 @@ using Windows.ApplicationModel.VoiceCommands;
 
 namespace Haiyu.ViewModel;
 
-partial class WavesAnalysisRecordViewModel
+partial class WavesRecordAnalysisViewModel
 {
     [ObservableProperty]
     public partial ObservableCollection<GameRecordNavigationItem> NavItems { get; set; }
@@ -42,7 +42,7 @@ partial class WavesAnalysisRecordViewModel
         {
             this.NavItems.Add(item.GetRecordNavItem());
         }
-        SelectNavItem = NavItems[0];
+        SelectNavItem = NavItems.FirstOrDefault();
     }
 
     public async Task AnalysisStarAsync()
@@ -50,6 +50,9 @@ partial class WavesAnalysisRecordViewModel
         if (GuaranteItems == null)
             GuaranteItems = new();
         GuaranteItems.Clear();
+        SelectGuarante = null;
+        GuaranteeChart = new();
+        GuaranteeHeader = string.Empty;
         var allResources = Cards
             .Items.SelectMany(x => x.Resource ?? Enumerable.Empty<RecordCardItemWrapper>())
             .ToList();
@@ -197,6 +200,7 @@ partial class WavesAnalysisRecordViewModel
             StarItems = isWeaponPool
                 ? temp1.Format(this.AllWeapon, false).Reverse().ToObservableCollection()
                 : temp1.Format(this.AllRole, resources.IsFlage()).Reverse().ToObservableCollection();
+            StarAvgValue = StarItems.Count > 0 ? Math.Round(StarItems.Select(x => x.Count).Average(), 2) : 0;
             StarItems.Insert(
                 0,
                 new RecordActivityFiveStarItemWrapper()
@@ -208,7 +212,7 @@ partial class WavesAnalysisRecordViewModel
                     Name = LanguageService.FormatByText(LanguageService.GetStringByText("已经垫了{0}发"), lastCount),
                 }
             );
-            StarAvgValue = Math.Round(StarItems.Select(x => x.Count).Average(), 2);
+
         }
         catch (Exception)
         {

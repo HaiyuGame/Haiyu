@@ -261,6 +261,10 @@ public static class InstanceBuilderExtensions
                     .AddTransient<IWavesPlayerCardCacheServices, WavesPlayerCardCacheServices>(
                         _ => new WavesPlayerCardCacheServices(AppSettings.WavesRecordFolder)
                     )
+                    .AddKeyedTransient<IWavesPlayerCardCacheServices, WavesPlayerCardCacheServices>(
+                        $"{nameof(WavesPlayerCardCacheServices)}V3",
+                        (s, o) => new WavesPlayerCardCacheServices(AppSettings.WavesRecordFolderV3)
+                    )
                     .AddSingleton<ABIRuntimeService>()
                     #endregion
                     #region Toolkit

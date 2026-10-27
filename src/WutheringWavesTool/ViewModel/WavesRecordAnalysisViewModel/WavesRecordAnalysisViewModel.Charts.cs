@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 namespace Haiyu.ViewModel;
 
-partial class WavesAnalysisRecordViewModel
+partial class WavesRecordAnalysisViewModel
 {
     #region 小保底歪率饼图
     [ObservableProperty]

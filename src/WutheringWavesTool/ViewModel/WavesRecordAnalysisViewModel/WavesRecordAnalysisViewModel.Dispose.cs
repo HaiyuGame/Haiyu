@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Haiyu.ViewModel;
 
-partial class WavesAnalysisRecordViewModel
+partial class WavesRecordAnalysisViewModel
 {
     protected override void OnDisposing()
     {

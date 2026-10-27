@@ -11,7 +11,8 @@ public partial class CreateForGameContextViewModel : DialogViewModelBase
         DialogSession dialogSession,
         IGameLogService gameLogService,
         IWindowManager windowManager,
-        Haiyu.Services.WavesRecordManager wavesRecordManager
+        Haiyu.Services.WavesRecordManager wavesRecordManager,
+        IViewFactorys viewFactorys
     )
         : base(dialogSession)
     {
@@ -19,6 +20,7 @@ public partial class CreateForGameContextViewModel : DialogViewModelBase
         GameLogService = gameLogService;
         WindowManager = windowManager;
         WavesRecordManager = wavesRecordManager;
+        ViewFactorys = viewFactorys;
     }
 
     [GeneratedRegex(
@@ -39,6 +41,7 @@ public partial class CreateForGameContextViewModel : DialogViewModelBase
     public IGameLogService GameLogService { get; }
     public IWindowManager WindowManager { get; }
     public Haiyu.Services.WavesRecordManager WavesRecordManager { get; }
+    public IViewFactorys ViewFactorys { get; }
     public string ContextName { get; internal set; }
     public IGameContextV2 GameContext { get; private set; }
 
@@ -54,7 +57,7 @@ public partial class CreateForGameContextViewModel : DialogViewModelBase
             return;
         }
         foreach (var item in Servers)
-        {
+        { 
             if (this.ContextName == item.Key)
             {
                 this.SelectServer = item;
@@ -87,6 +90,7 @@ public partial class CreateForGameContextViewModel : DialogViewModelBase
             );
             return;
         }
+        
         await this.WavesRecordManager.CreateDefaultRecordAsync(
             new()
             {
@@ -95,5 +99,7 @@ public partial class CreateForGameContextViewModel : DialogViewModelBase
                 GameContextName = this.GameContext.ContextName,
             }
         );
+        ViewFactorys.ShowWavesRecordManagerWindow();
+        await this.CloseAsync(null);
     }
 }

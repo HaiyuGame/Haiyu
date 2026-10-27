@@ -47,6 +47,7 @@ public partial class AppSettings : SettingBase
     public static string RecordFolder => BassFolder + "\\RecordCache";
 
     public static string WavesRecordFolder => BassFolder + "\\WavesRecordCache";
+    public static string WavesRecordFolderV3 => BassFolder + "\\WavesRecordCacheV3";
 
     public static string WrallpaperFolder => BassFolder + "\\WallpaperImages";
 

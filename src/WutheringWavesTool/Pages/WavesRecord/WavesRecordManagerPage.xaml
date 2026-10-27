@@ -10,13 +10,20 @@
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:local="using:Haiyu.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:page="using:Haiyu.Pages.WavesRecord"
     xmlns:qrModel="using:Waves.Api.Models.QRLogin"
     xmlns:ui="using:Haiyu.Controls"
     xmlns:vmWrapper="using:Haiyu.ViewModel"
+    xmlns:wr="using:Haiyu.ViewModel.WavesRecordManager"
     xmlns:wrapper="using:Waves.Api.Models"
     xmlns:wui="using:CommunityToolkit.WinUI.Controls"
     Loaded="Page_Loaded"
     mc:Ignorable="d">
+    <i:Interaction.Behaviors>
+        <i:EventTriggerBehavior EventName="Loaded">
+            <i:InvokeCommandAction Command="{x:Bind ViewModel.LoadedCommand}" />
+        </i:EventTriggerBehavior>
+    </i:Interaction.Behaviors>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
@@ -63,12 +70,12 @@
             CornerRadius="5">
             <StackPanel Orientation="Vertical" Spacing="10">
                 <TextBlock Text="本地档案" />
-                <ListView>
-                    <ListViewItem>
-                        <Grid>
-                            <TextBlock Text="怪的档案" />
-                        </Grid>
-                    </ListViewItem>
+                <ListView ItemsSource="{x:Bind ViewModel.LocalFiles, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectFile, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="wr:WavesRecordDisplayWrapper">
+                            <TextBlock Text="{x:Bind DisplayName}" />
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
                 </ListView>
             </StackPanel>
         </Grid>
@@ -85,6 +92,8 @@
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
             BorderThickness="1"
-            CornerRadius="5" />
+            CornerRadius="5">
+            <controls:WavesRecordAnalysisControl ViewModel="{x:Bind ViewModel.AnalysisViewModel, Mode=OneWay}" />
+        </Grid>
     </Grid>
 </Page>
