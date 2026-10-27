@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Cacheing.Contracts;
 using Waves.Core.Common;
 using Waves.Core.Models.CoreApi;
@@ -9,13 +10,18 @@ namespace Haiyu.ViewModel.GameViewModels.GameContexts;
 
 public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
 {
-    public WavesV2GameContextViewModel(IAppContext<App> appContext, IWindowManager windowManager)
+    public WavesV2GameContextViewModel(
+        IAppContext<App> appContext,
+        IWindowManager windowManager,
+        IGameLogService gameLogService
+    )
         : base(appContext, windowManager)
     {
         WeakReferenceMessenger.Default.Register<LocalGameRefreshBindUser>(
             this,
             LocalGameRefreshBindUserMethod
         );
+        GameLogService = gameLogService;
     }
 
     private async void LocalGameRefreshBindUserMethod(
@@ -150,6 +156,7 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
 
     [ObservableProperty]
     public partial MotorData MotorData { get; private set; }
+    public IGameLogService GameLogService { get; }
 
     #endregion
 
@@ -182,7 +189,11 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
                 {
                     tags.Remove(LanguageService.GetStringByText("公告"));
                 }
-                else if (Activity == null || Activity.Contents == null || Activity.Contents.Count == 0)
+                else if (
+                    Activity == null
+                    || Activity.Contents == null
+                    || Activity.Contents.Count == 0
+                )
                 {
                     tags.Remove(LanguageService.GetStringByText("活动"));
                 }
@@ -193,7 +204,7 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
                 Tabs = tags;
                 PlayerCardVisibility = Visibility.Visible;
                 this.SelectTab = null;
-                if(Tabs.Count != 0)
+                if (Tabs.Count != 0)
                 {
                     this.SelectTab = Tabs[0];
                 }
@@ -366,5 +377,13 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
         var package = new DataPackage();
         package.SetText(Base.Id.ToString());
         Clipboard.SetContent(package);
+    }
+
+    [RelayCommand]
+    public async Task BuildRecordPlanDataAsync()
+    {
+        await this.AppContext.WindowManager.Shell.DialogManager.ShowWavesRecordCreateForGameAsync(
+            this.GameContext.ContextName
+        );
     }
 }

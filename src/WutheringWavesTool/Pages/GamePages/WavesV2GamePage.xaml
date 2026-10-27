@@ -590,6 +590,7 @@
                                                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE713;" />
                                             </MenuFlyoutItem.Icon>
                                         </MenuFlyoutItem>
+                                        <MenuFlyoutItem Command="{x:Bind ViewModel.BuildRecordPlanDataCommand}" Text="查询抽卡数据" />
                                         <MenuFlyoutSeparator />
                                         <MenuFlyoutItem
                                             Command="{x:Bind ViewModel.DeleteGameResourceCommand}"

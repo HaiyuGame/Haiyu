@@ -84,10 +84,10 @@ public class ViewFactorys : IViewFactorys
     {
         Width = 900,
         Height = 650,
-        MaxWidth = 900,
-        MaxHeight = 650,
-        IsResizable = false,
-        IsMaximizable = false,
+        MinWidth = 900,
+        MinHeight = 650,
+        IsResizable = true,
+        IsMaximizable = true,
         CenterOnScreen = true,
         IsExtendWindowTitle = true,
     };

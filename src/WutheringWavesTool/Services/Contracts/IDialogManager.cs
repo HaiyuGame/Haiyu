@@ -52,4 +52,5 @@ public interface IDialogManager
     Task<BunleResourceSize?> ShowBunleGameDialogAsync(string contextName);
 
     Task ShowGrayConfigAsync();
+    Task ShowWavesRecordCreateForGameAsync(string contextName);
 }

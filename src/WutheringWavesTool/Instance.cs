@@ -3,6 +3,7 @@ using GrayExtension;
 using Haiyu.Common.Contracts;
 using Haiyu.Helpers;
 using Haiyu.Pages.Communitys;
+using Haiyu.Pages.Dialogs.WavesRecords;
 using Haiyu.Pages.Toolkits;
 using Haiyu.Pages.WavesRecord;
 using Haiyu.Plugin.Common;
@@ -15,6 +16,7 @@ using Haiyu.ServiceHost.XBox.Commons;
 using Haiyu.Services.Navigations.NavigationViewServices;
 using Haiyu.Services.Tasks;
 using Haiyu.ViewModel.Communitys;
+using Haiyu.ViewModel.DialogViewModels.WavesRecords;
 using Haiyu.ViewModel.GameViewModels;
 using Haiyu.ViewModel.GameViewModels.GameContexts;
 using Haiyu.ViewModel.OOBEViewModels;
@@ -200,6 +202,8 @@ public static class InstanceBuilderExtensions
                     .AddTransient<ClearMemoryViewModel>()
                     .AddTransient<GrayMenuDialog>()
                     .AddTransient<GrayMenuViewModel>()
+                    .AddTransient<CreateForGameContextDialog>()
+                    .AddTransient<CreateForGameContextViewModel>()
                     #endregion
                 #endregion
                     #region More
@@ -208,6 +212,7 @@ public static class InstanceBuilderExtensions
                     .AddKeyedSingleton<IUpdateService, GithubUpdateService>("GitHub")
                     .AddKeyedSingleton<IUpdateService, MirrorUpdateService>("Mirror")
                     .AddSingleton<GrayOpenService>()
+                    .AddSingleton<WavesRecordManager>()
                     #endregion
                     #region Base
                     .AddSingleton<IAppContext<App>, AppContext<App>>()

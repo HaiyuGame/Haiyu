@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentDialog
+    x:Class="Haiyu.Pages.Dialogs.WavesRecords.CreateForGameContextDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="using:Haiyu.Models"
+    xmlns:control="using:Haiyu.Controls"
+    xmlns:cui="using:CommunityToolkit.WinUI.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:h="using:Haiyu.Helpers"
+    xmlns:helper="using:Haiyu.Helpers"
+    xmlns:i="using:Microsoft.Xaml.Interactivity"
+    xmlns:local="using:Haiyu.Pages.Dialogs"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    HorizontalAlignment="Stretch"
+    Background="{ThemeResource AcrylicBackgroundFillColorBaseBrush}"
+    CornerRadius="5"
+    mc:Ignorable="d">
+    <i:Interaction.Behaviors>
+        <i:EventTriggerBehavior EventName="Loaded">
+            <i:InvokeCommandAction Command="{x:Bind ViewModel.LoadedCommand}" />
+        </i:EventTriggerBehavior>
+    </i:Interaction.Behaviors>
+    <Grid
+        Width="300"
+        HorizontalAlignment="Stretch"
+        RowSpacing="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <TextBlock Text="选择游戏核心创建抽卡副本" />
+        <StackPanel
+            Grid.Row="1"
+            HorizontalAlignment="Stretch"
+            Spacing="10">
+            <ComboBox
+                Width="300"
+                Header="区服"
+                ItemsSource="{x:Bind ViewModel.Servers, Mode=OneWay}"
+                SelectedItem="{x:Bind ViewModel.SelectServer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="c:ServerDisplay">
+                        <TextBlock Text="{x:Bind Display, Mode=OneWay}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <AutoSuggestBox
+                Width="300"
+                Header="档案名称"
+                Text="{x:Bind ViewModel.RecordName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+        </StackPanel>
+        <Button
+            Grid.Row="2"
+            HorizontalAlignment="Center"
+            Command="{x:Bind ViewModel.InvokeCommand}"
+            Content="创建" />
+    </Grid>
+</ContentDialog>

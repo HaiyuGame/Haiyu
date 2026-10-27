@@ -17,6 +17,16 @@ public partial class WavesAnalysisPlayerCard
     public string SessionId { get; set; }
 
     public IList<WavesAnalysisPlayerCardItem> Items { get; set; }
+
+    /// <summary>
+    /// 更新源，Cloud为账号名称，GameContext为日志输入并匹配游戏ID
+    /// </summary>
+    public string UpdateSource { get; set;  }
+
+    /// <summary>
+    /// 更新类型：GameContext、CloudGame
+    /// </summary>
+    public string UpdateType { get; set;  }
 }
 
 [MemoryPackable]

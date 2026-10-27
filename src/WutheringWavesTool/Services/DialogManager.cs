@@ -1,10 +1,11 @@
-using Waves.Core.Models.Options;
 using Haiyu.Common.Contracts;
 using Haiyu.Models.Dialogs;
+using Haiyu.Pages.Dialogs.WavesRecords;
 using Haiyu.Plugin.Models;
 using Waves.Api.Models.CloudGame;
 using Waves.Core.Models.CloudGame;
 using Waves.Core.Models.Enums;
+using Waves.Core.Models.Options;
 
 namespace Haiyu.Services;
 
@@ -117,9 +118,13 @@ public sealed class DialogManager : IDialogManager
         return default;
     }
 
-    public async Task<SelectDownloadFolderResult> ShowSelectGameFolderV2Async(Type type, GameResourceParameter? parameter = null) =>
-        await GetDialogResultAsync<SelectGameFolderDialogV2, SelectDownloadFolderResult>(new GameFolderDialogRequest(type, parameter));
-
+    public async Task<SelectDownloadFolderResult> ShowSelectGameFolderV2Async(
+        Type type,
+        GameResourceParameter? parameter = null
+    ) =>
+        await GetDialogResultAsync<SelectGameFolderDialogV2, SelectDownloadFolderResult>(
+            new GameFolderDialogRequest(type, parameter)
+        );
 
     public async Task<UpdateGameResult?> ShowUpdateGameDialogAsyncV2(
         string contextName,
@@ -130,8 +135,7 @@ public sealed class DialogManager : IDialogManager
             new UpdateGameDialogRequest(contextName, type, parameter)
         );
 
-    public async Task<BunleResourceSize?> ShowBunleGameDialogAsync(string contextName)
-    =>
+    public async Task<BunleResourceSize?> ShowBunleGameDialogAsync(string contextName) =>
         await GetDialogResultAsync<SelectGameBunleDialog, BunleResourceSize>(
             new SelectGameBunleRequest(contextName)
         );
@@ -142,8 +146,13 @@ public sealed class DialogManager : IDialogManager
     public async Task ShowDeleteGameResource(string contentName) =>
         await ShowDialogAsync<DeleteFileDialog>(contentName);
 
-    public async Task<SelectDownloadFolderResult?> ShowSelectDownloadFolderV2Async(Type type, GameResourceParameter? parameter = null) =>
-        await GetDialogResultAsync<SelectDownloadGameDialogV2, SelectDownloadFolderResult>(new GameFolderDialogRequest(type, parameter));
+    public async Task<SelectDownloadFolderResult?> ShowSelectDownloadFolderV2Async(
+        Type type,
+        GameResourceParameter? parameter = null
+    ) =>
+        await GetDialogResultAsync<SelectDownloadGameDialogV2, SelectDownloadFolderResult>(
+            new GameFolderDialogRequest(type, parameter)
+        );
 
     public async Task<CloseWindowResult?> ShowCloseWindowResult() =>
         await GetDialogResultAsync<CloseDialog, CloseWindowResult>(null);
@@ -234,4 +243,7 @@ public sealed class DialogManager : IDialogManager
     {
         await this.ShowDialogAsync<GrayMenuDialog>();
     }
+
+    public async Task ShowWavesRecordCreateForGameAsync(string contextName) =>
+        await this.ShowDialogAsync<CreateForGameContextDialog>(contextName);
 }

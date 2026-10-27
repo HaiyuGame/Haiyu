@@ -36,41 +36,15 @@ public class GameLogService : IGameLogService
     public AppSettings AppSettings { get; }
     public IServiceProvider ServiceProvider { get; }
 
-    public async Task<GameLogLocateResult> LocateGameLogsAsync(CancellationToken token = default)
+    public async Task<GameLogLocateResult?> LocateGameLogsAsync(CancellationToken token = default)
     {
-        // 读取最近一次在游戏页选择的鸣潮上下文（与游戏页共享 GameLauncherBassFolder 配置）
         var contextName = await AppSettings.GetWavesAutoOpenContextAsync(token);
         if (string.IsNullOrWhiteSpace(contextName))
         {
             contextName = nameof(WavesMainGameContextV2);
         }
         var context = ServiceProvider.GetRequiredKeyedService<IGameContextV2>(contextName);
-        var gameFolder = await context.GameLocalConfig.GetConfigAsync(
-            GameLocalSettingName.GameLauncherBassFolder,
-            token
-        );
-        if (string.IsNullOrWhiteSpace(gameFolder) || !Directory.Exists(gameFolder))
-        {
-            return new GameLogLocateResult { State = GameLogLocateState.GameFolderMissing };
-        }
-
-        var logsFolder = Path.Combine(gameFolder, LogsRelativeFolder);
-        if (!Directory.Exists(logsFolder))
-        {
-            return new GameLogLocateResult { State = GameLogLocateState.LogsFolderMissing };
-        }
-
-        var logFiles = new DirectoryInfo(logsFolder)
-            .EnumerateFiles(LogSearchPattern, SearchOption.TopDirectoryOnly)
-            .OrderByDescending(x => x.LastWriteTime)
-            .Select(x => x.FullName)
-            .ToList();
-        if (logFiles.Count == 0)
-        {
-            return new GameLogLocateResult { State = GameLogLocateState.NoLogFiles };
-        }
-
-        return new GameLogLocateResult { State = GameLogLocateState.Ready, LogFiles = logFiles };
+        return await this.LocateGameLogsAsync(context, token);
     }
 
     public async Task<GameLogDecryptResult> DecryptGameLogsAsync(
@@ -141,5 +115,65 @@ public class GameLogService : IGameLogService
             FailedCount = failedCount,
             KeyMismatchCount = keyMismatchCount,
         };
+    }
+
+    public async Task<string> DecryptGameLogsAsync(string filePath,CancellationToken token = default)
+    {
+        var input = await File.ReadAllBytesAsync(filePath, token);
+
+        // UTF-8 BOM 开头即未加密的明文日志，原样复制；否则按 ELog 双 key 异或解密
+        if (!KrKeyHelper.IsELogEncrypted(input))
+        {
+            return Encoding.UTF8.GetString(input);
+        }
+
+        var decrypted = KrKeyHelper.TransformELog(input);
+        return Encoding.UTF8.GetString(decrypted);
+    }
+
+    public async Task<GameLogLocateResult?> LocateGameLogsAsync(
+        IGameContextV2 contextV2,
+        CancellationToken token = default
+    )
+    {
+        try
+        {
+            var contextName = await AppSettings.GetWavesAutoOpenContextAsync(token);
+            if (string.IsNullOrWhiteSpace(contextName))
+            {
+                contextName = nameof(WavesMainGameContextV2);
+            }
+            var gameFolder = await contextV2.GameLocalConfig.GetConfigAsync(
+                GameLocalSettingName.GameLauncherBassFolder,
+                token
+            );
+            if (string.IsNullOrWhiteSpace(gameFolder) || !Directory.Exists(gameFolder))
+            {
+                return new GameLogLocateResult { State = GameLogLocateState.GameFolderMissing };
+            }
+
+            var logsFolder = Path.Combine(gameFolder, LogsRelativeFolder);
+            if (!Directory.Exists(logsFolder))
+            {
+                return new GameLogLocateResult { State = GameLogLocateState.LogsFolderMissing };
+            }
+
+            var logFiles = new DirectoryInfo(logsFolder)
+                .EnumerateFiles(LogSearchPattern, SearchOption.TopDirectoryOnly)
+                .OrderByDescending(x => x.LastWriteTime)
+                .Select(x => x.FullName)
+                .ToList();
+            if (logFiles.Count == 0)
+            {
+                return new GameLogLocateResult { State = GameLogLocateState.NoLogFiles };
+            }
+
+            return new GameLogLocateResult { State = GameLogLocateState.Ready, LogFiles = logFiles };
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+        
     }
 }

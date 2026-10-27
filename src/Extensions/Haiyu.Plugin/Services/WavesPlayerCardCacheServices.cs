@@ -63,7 +63,6 @@ public sealed class WavesPlayerCardCacheServices : IWavesPlayerCardCacheServices
         var newPath = Path.Combine(_baseFolder, $"{Guid.NewGuid():N}.record");
         var bytes = MemoryPackSerializer.Serialize(card, SerializerOptions);
         await File.WriteAllBytesAsync(newPath, bytes);
-
         if (oldFile != null && oldFile != newPath)
         {
             File.Delete(oldFile);
