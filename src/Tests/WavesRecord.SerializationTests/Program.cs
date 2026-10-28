@@ -1,4 +1,5 @@
 using MemoryPack;
+using Waves.Api.Helper;
 using Waves.Api.Models.Record;
 using Waves.Api.Models.Wrappers;
 
@@ -34,6 +35,28 @@ var current = MemoryPackSerializer.Serialize(new WavesAnalysisPlayerCard
 }, options);
 Verify(current, 2, "游戏日志档案", "GameContext");
 Console.WriteLine("PASS: original 3-member layout, 5-member layout, current round-trip");
+
+// 手动迁移不依赖 SessionId；重合度与目标优先的合并使用相同规则。
+var existingPool = items[0];
+var oldPool = new WavesAnalysisPlayerCardItem
+{
+    PoolType = 1,
+    Resource = [items[0].Resource.Single(), new RecordCardItemWrapper
+    {
+        ResourceId = 1504, QualityLevel = 5, Name = "历史角色", Count = 1,
+        CardPoolType = "1", ResourceType = "角色", Time = "2026-01-01 12:00:00",
+        RecordTime = new DateTime(2026, 1, 1, 12, 0, 0),
+    }],
+};
+var mergedPool = existingPool.Merge(oldPool);
+Check(mergedPool.Resource.Count() == 2, "merge retains new and old pulls");
+var duplicateCount = existingPool.Resource.Count() + oldPool.Resource.Count() - mergedPool.Resource.Count();
+Check(duplicateCount == 1 && duplicateCount * 100d / oldPool.Resource.Count() == 50d, "50 percent overlap");
+Check(mergedPool.Merge(oldPool).Resource.Count() == 2, "repeated import is idempotent");
+Check(existingPool.Merge(existingPool).Resource.Count() == 1, "100 percent overlap");
+var separatePool = new WavesAnalysisPlayerCardItem { PoolType = 1, Resource = [oldPool.Resource.Last()] };
+Check(existingPool.Merge(separatePool).Resource.Count() == 2, "zero overlap retains both pulls");
+Console.WriteLine("PASS: partial/full/zero overlap and repeated merge");
 
 void Verify(byte[] bytes, int version, string? name, string? type)
 {

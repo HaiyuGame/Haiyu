@@ -246,4 +246,10 @@ public sealed class DialogManager : IDialogManager
 
     public async Task ShowWavesRecordCreateForGameAsync(string contextName) =>
         await this.ShowDialogAsync<CreateForGameContextDialog>(contextName);
+
+    public async Task<bool> ShowWavesRecordMergeAsync(WavesRecordMergeRequest request) =>
+        await ShowDialogAsync<MergeRecordDialog>(request) is true;
+
+    public async Task<bool> ShowWutheringWavesToolImportAsync(WavesRecordMergeRequest request) =>
+        await ShowDialogAsync<WutheringWavesToolImportDialog>(request) is true;
 }

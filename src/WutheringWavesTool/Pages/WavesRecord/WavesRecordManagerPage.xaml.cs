@@ -25,5 +25,6 @@ public sealed partial class WavesRecordManagerPage : Page, IWindowInitializable
     private void Page_Loaded(object sender, RoutedEventArgs e)
     {
         this.titleBar.Window = this.ViewModel.WinSession.Context.GetWindow();
+        this.ViewModel.WinSession.Context.DialogManager.RegisterRoot(this.XamlRoot);
     }
 }

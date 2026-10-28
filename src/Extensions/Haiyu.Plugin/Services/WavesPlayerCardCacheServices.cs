@@ -9,8 +9,10 @@ public sealed class WavesPlayerCardCacheServices : IWavesPlayerCardCacheServices
 {
     private readonly string _baseFolder;
 
-    private static readonly MemoryPackSerializerOptions SerializerOptions =
-        new() { StringEncoding = StringEncoding.Utf8 };
+    private static readonly MemoryPackSerializerOptions SerializerOptions = new()
+    {
+        StringEncoding = StringEncoding.Utf8,
+    };
 
     public WavesPlayerCardCacheServices(string baseFolder)
     {
@@ -21,10 +23,12 @@ public sealed class WavesPlayerCardCacheServices : IWavesPlayerCardCacheServices
         }
     }
 
-    public async Task<WavesAnalysisPlayerCard> SaveAsync(WavesAnalysisPlayerCard card)
+    public async Task<Tuple<WavesAnalysisPlayerCard, string>> SaveAsync(
+        WavesAnalysisPlayerCard card
+    )
     {
         var oldFile = await FindFileBySessionIdAsync(card.SessionId);
-
+        var newPath = Path.Combine(_baseFolder, $"{Guid.NewGuid():N}.record");
         if (oldFile != null)
         {
             await using var fs = new FileStream(
@@ -60,14 +64,13 @@ public sealed class WavesPlayerCardCacheServices : IWavesPlayerCardCacheServices
             }
         }
         card.LastUpdater = DateTime.Now;
-        var newPath = Path.Combine(_baseFolder, $"{Guid.NewGuid():N}.record");
         var bytes = MemoryPackSerializer.Serialize(card, SerializerOptions);
         await File.WriteAllBytesAsync(newPath, bytes);
         if (oldFile != null && oldFile != newPath)
         {
             File.Delete(oldFile);
         }
-        return card;
+        return Tuple.Create(card, newPath);
     }
 
     public async Task<WavesAnalysisPlayerCard?> LoadAsync(string sessionId)

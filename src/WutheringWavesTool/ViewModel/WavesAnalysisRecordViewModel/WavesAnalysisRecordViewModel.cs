@@ -1,4 +1,4 @@
-﻿using Haiyu.Plugin.Common.LegacyMessageBox;
+using Haiyu.Plugin.Common.LegacyMessageBox;
 using Haiyu.Plugin.Contracts;
 using Haiyu.Plugin.Models.Enums;
 using MemoryPack;
@@ -39,6 +39,9 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
     }
 
     [ObservableProperty]
+    public partial string SavePath { get; private set; }
+
+    [ObservableProperty]
     public partial bool IsLoading { get; set; } = true;
 
     [RelayCommand]
@@ -59,6 +62,33 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
         finally
         {
             IsLoading = false;
+        }
+    }
+
+    [RelayCommand]
+    void OpenFolderFile()
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(SavePath) || !System.IO.File.Exists(SavePath))
+            {
+                throw new FileNotFoundException("抽卡记录文件尚未生成或已被移动。", SavePath);
+            }
+
+            string parameters = $"/select,\"{Path.GetFullPath(SavePath)}\"";
+            var result = WindowExtension.ShellExecute(
+                IntPtr.Zero, "open", "explorer.exe", parameters, null,
+                WindowExtension.SW_SHOWNORMAL
+            );
+            if (result.ToInt64() <= 32)
+            {
+                throw new InvalidOperationException($"打开资源管理器失败，错误码：{result.ToInt64()}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Instance.Host.Services.GetRequiredService<SystemEventPublisher>()
+                .Publish(new() { Message = ex.Message, Delay = 30 });
         }
     }
 
@@ -109,7 +139,9 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
                 );
             }
         }
-        this.Cards = await Cache.SaveAsync(cards);
+        var cacheCard = await Cache.SaveAsync(cards);
+        this.SavePath = cacheCard.Item2;
+        this.Cards = cacheCard.Item1;
     }
 
     [RelayCommand]
@@ -216,8 +248,9 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
             );
             return;
         }
-
-        this.Cards = await Cache.SaveAsync(mergedCard);
+        var cacheCard = await Cache.SaveAsync(mergedCard);
+        this.SavePath = cacheCard.Item2;
+        this.Cards = cacheCard.Item1;
         var names = string.Join("、", loadedNames);
         LegacyMessageBox.ShowInformation(
             LanguageService.FormatByText(
@@ -241,5 +274,4 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
     {
         this.Session = session;
     }
-
 }

@@ -369,6 +369,7 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
                 selectLogin.PhoneToken.Phone,
                 this.CTS.Token
             );
+            ViewFactorys.ShowWavesRecordManagerWindow();
         }
         else
         {

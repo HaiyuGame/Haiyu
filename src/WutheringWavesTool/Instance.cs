@@ -204,6 +204,9 @@ public static class InstanceBuilderExtensions
                     .AddTransient<GrayMenuViewModel>()
                     .AddTransient<CreateForGameContextDialog>()
                     .AddTransient<CreateForGameContextViewModel>()
+                    .AddTransient<MergeRecordDialog>()
+                    .AddTransient<WutheringWavesToolImportDialog>()
+                    .AddTransient<MergeRecordViewModel>()
                     #endregion
                 #endregion
                     #region More

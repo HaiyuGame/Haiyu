@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <Page
     x:Class="Haiyu.Pages.WavesAnalysisRecordPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -71,6 +71,9 @@
                         <MenuBarItem Title="{x:Bind helper:LanguageService.GetString('Display_Import')}">
                             <MenuFlyoutItem Command="{x:Bind ViewModel.ImportDefaultFolderCommand}" Text="{x:Bind helper:LanguageService.GetString('Display_LegacyDataDefault')}" />
                             <MenuFlyoutItem Command="{x:Bind ViewModel.ImportFolderCommand}" Text="{x:Bind helper:LanguageService.GetString('Display_LegacyDataCustomFolders')}" />
+                        </MenuBarItem>
+                        <MenuBarItem Title="数据">
+                            <MenuFlyoutItem Command="{x:Bind ViewModel.OpenFolderFileCommand}" Text="查看当前抽卡文件位置" />
                         </MenuBarItem>
                         <MenuBarItem Title="{x:Bind helper:LanguageService.GetString('Display_Data')}" Visibility="Collapsed">
                             <MenuFlyoutItem Text="{x:Bind helper:LanguageService.GetString('Display_DerivedData')}" />

@@ -44,18 +44,13 @@
             <ui:TitleBar.Header>
                 <MenuBar>
                     <MenuBarItem Title="导入">
-                        <MenuFlyoutItem Text="Haiyu V2 抽卡记录" />
+                        <MenuFlyoutItem Command="{x:Bind ViewModel.MergeLocalHaiyuV2RecordCommand}" Text="Haiyu V2 抽卡记录" />
                         <MenuFlyoutSeparator />
-                        <MenuFlyoutItem Text="WutheringWavesTool 工具" />
-                        <MenuFlyoutItem Text="WavesTool 工具" />
+                        <MenuFlyoutItem Command="{x:Bind ViewModel.ImportWutheringWavesToolCommand}" Text="WutheringWavesTool 工具" />
+
                     </MenuBarItem>
-                    <MenuBarItem Title="新建">
-                        <MenuFlyoutItem Text="根据云鸣潮新建" />
-                        <MenuFlyoutItem Text="选择游戏核心新建" />
-                    </MenuBarItem>
-                    <MenuBarItem Title="导出与合并">
-                        <MenuFlyoutItem Text="合并抽卡记录信息" />
-                        <MenuFlyoutItem Text="备份本地所有抽卡信息" />
+                    <MenuBarItem Title="导出">
+                        <MenuFlyoutItem Command="{x:Bind ViewModel.ExportAllRecordsCommand}" Text="导出本地所有抽卡信息" />
                     </MenuBarItem>
                 </MenuBar>
             </ui:TitleBar.Header>

@@ -11,7 +11,7 @@ public interface IWavesPlayerCardCacheServices
     /// </summary>
     /// <param name="card"></param>
     /// <returns></returns>
-    Task<WavesAnalysisPlayerCard> SaveAsync(WavesAnalysisPlayerCard card);
+    Task<Tuple<WavesAnalysisPlayerCard, string>> SaveAsync(WavesAnalysisPlayerCard card);
     /// <summary>
     /// 加载抽卡
     /// </summary>
