@@ -11,7 +11,6 @@ namespace Haiyu.ABI;
 
 public static unsafe class CoreExports
 {
-
     /// <summary>
     /// 导出函数
     /// </summary>
@@ -19,54 +18,61 @@ public static unsafe class CoreExports
     /// <param name="module"></param>
     /// <param name="commandLine"></param>
     /// <param name="showCommand"></param>
-    [UnmanagedCallersOnly(EntryPoint = "ElevatedEntry",
-        CallConvs = new[] { typeof(CallConvStdcall) })]
-    public static void ElevatedEntry(
-        nint window, nint module, byte* commandLine, int showCommand)
+    [UnmanagedCallersOnly(
+        EntryPoint = "ElevatedEntry",
+        CallConvs = new[] { typeof(CallConvStdcall) }
+    )]
+    public static void ElevatedEntry(nint window, nint module, byte* commandLine, int showCommand)
     {
         try
         {
-            string arguments = Marshal.PtrToStringAnsi((nint) commandLine) ?? string.Empty;
+            string arguments = Marshal.PtrToStringAnsi((nint)commandLine) ?? string.Empty;
             string[] parts = arguments.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length != 2) return;
+            if (parts.Length != 2)
+                return;
             using var services = new ServiceCollection()
                 .AddSingleton<XBoxController>()
                 .AddBuiltInServices()
-                .BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true, ValidateOnBuild = true });
-            ElevatedHost.RunAsync(parts[0], parts[1], services)
-                .GetAwaiter().GetResult();
+                .BuildServiceProvider(
+                    new ServiceProviderOptions { ValidateScopes = true, ValidateOnBuild = true }
+                );
+            ElevatedHost.RunAsync(parts[0], parts[1], services).GetAwaiter().GetResult();
         }
-        catch
-        {
-            
-        }
+        catch { }
     }
 
     /// <summary>由自动化测试程序调用，验证已发布 NativeAOT DLL 的真实硬件采集和序列化。</summary>
-    [UnmanagedCallersOnly(EntryPoint = "MonitorSelfTest",
-        CallConvs = new[] { typeof(CallConvStdcall) })]
-    public static void MonitorSelfTest(
-        nint window, nint module, byte* commandLine, int showCommand)
+    [UnmanagedCallersOnly(
+        EntryPoint = "MonitorSelfTest",
+        CallConvs = new[] { typeof(CallConvStdcall) }
+    )]
+    public static void MonitorSelfTest(nint window, nint module, byte* commandLine, int showCommand)
     {
         string reportPath = (Marshal.PtrToStringAnsi((nint)commandLine) ?? string.Empty)
-            .Trim().Trim('"');
-        if (string.IsNullOrWhiteSpace(reportPath)) return;
+            .Trim()
+            .Trim('"');
+        if (string.IsNullOrWhiteSpace(reportPath))
+            return;
 
         try
         {
             int samples = 0;
             int largestPayload = 0;
             using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20));
-            using var services = new ServiceCollection().AddBuiltInServices()
-                .BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true, ValidateOnBuild = true });
+            using var services = new ServiceCollection()
+                .AddBuiltInServices()
+                .BuildServiceProvider(
+                    new ServiceProviderOptions { ValidateScopes = true, ValidateOnBuild = true }
+                );
             using var scope = services.CreateScope();
             var service = scope.ServiceProvider.GetRequiredKeyedService<
-                IPrivilegedService<CMonitorRequest, CMonitorProgress, RunResult>>(
-                ABIRuntime.Contract.ComputerMonitorContract.Operation);
+                IPrivilegedService<CMonitorRequest, CMonitorProgress, RunResult>
+            >(ABIRuntime.Contract.ComputerMonitorContract.Operation);
             var progress = new InlineProgress<CMonitorProgress>(value =>
             {
-                int payloadSize = MemoryPack.MemoryPackSerializer.Serialize(
-                    value, ABIMemoryPack.Options).Length;
+                int payloadSize = MemoryPack
+                    .MemoryPackSerializer.Serialize(value, ABIMemoryPack.Options)
+                    .Length;
                 largestPayload = Math.Max(largestPayload, payloadSize);
                 if (Interlocked.Increment(ref samples) >= 3)
                     timeout.Cancel();
@@ -74,16 +80,20 @@ public static unsafe class CoreExports
 
             try
             {
-                service.ExecuteAsync(new CMonitorRequest(), progress, timeout.Token)
-                    .AsTask().GetAwaiter().GetResult();
+                service
+                    .ExecuteAsync(new CMonitorRequest(), progress, timeout.Token)
+                    .AsTask()
+                    .GetAwaiter()
+                    .GetResult();
             }
-            catch (OperationCanceledException) when (timeout.IsCancellationRequested)
-            {
-            }
+            catch (OperationCanceledException) when (timeout.IsCancellationRequested) { }
 
-            File.WriteAllText(reportPath, samples >= 3
-                ? $"PASS|{samples}|{largestPayload}"
-                : $"FAIL|采样不足|{samples}|{largestPayload}");
+            File.WriteAllText(
+                reportPath,
+                samples >= 3
+                    ? $"PASS|{samples}|{largestPayload}"
+                    : $"FAIL|采样不足|{samples}|{largestPayload}"
+            );
         }
         catch (Exception exception)
         {
