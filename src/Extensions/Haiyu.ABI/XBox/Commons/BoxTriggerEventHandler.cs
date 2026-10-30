@@ -1,18 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Haiyu.ServiceHost.XBox.Commons;
+namespace Haiyu.ABI.XBox.Commons;
 
-public class BoxTriggerEventArgs : EventArgs
+public class BoxTriggerEventArgs : EventArgs.ValueChangeArgs<bool>
 {
     public BoxTriggerEventArgs(bool isEnable)
-    {
-        IsEnable = isEnable;
-    }
-
-    public bool IsEnable { get; }
+        : base(isEnable) { }
 }
-
 
 public delegate void BoxTriggerEventHandler(object sender, BoxTriggerEventArgs e);

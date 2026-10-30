@@ -12,7 +12,6 @@ using Haiyu.Plugin.Services;
 using Haiyu.ServiceHost;
 using Haiyu.ServiceHost.Contracts;
 using Haiyu.ServiceHost.Services;
-using Haiyu.ServiceHost.XBox.Commons;
 using Haiyu.Services.Navigations.NavigationViewServices;
 using Haiyu.Services.Tasks;
 using Haiyu.ViewModel.Communitys;
@@ -127,8 +126,6 @@ public static class InstanceBuilderExtensions
                     .AddTransient<IAppActivation, AppActivation>()
                     #region XBox
                     .AddSingleton<XBoxConfig>()
-                    .AddSingleton<XBoxController>()
-                    .AddSingleton<XBoxService>()
                     #endregion
                     .AddTransient<IRpcMethodService, RpcMethodService>()
                     .AddTransient<ShellPage>()

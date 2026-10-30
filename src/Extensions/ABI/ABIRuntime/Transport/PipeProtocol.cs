@@ -23,14 +23,16 @@ internal static class PipeProtocol
     internal static async ValueTask WriteAsync(
         Stream stream,
         PipeMessage message,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         ABIMemoryPack.EnsureFormatters();
         byte[] payload = MemoryPackSerializer.Serialize(message, ABIMemoryPack.Options);
 
         if (payload.Length > MaxMessageLength)
             throw new InvalidDataException(
-                $"管道消息超过 {MaxMessageLength / 1024 / 1024} MiB 限制：{payload.Length} 字节。");
+                $"管道消息超过 {MaxMessageLength / 1024 / 1024} MiB 限制：{payload.Length} 字节。"
+            );
 
         byte[] lengthPrefix = BitConverter.GetBytes(payload.Length);
         await stream.WriteAsync(lengthPrefix, cancellationToken).ConfigureAwait(false);
@@ -40,7 +42,8 @@ internal static class PipeProtocol
 
     internal static async ValueTask<PipeMessage> ReadAsync(
         Stream stream,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         byte[] lengthBytes = new byte[sizeof(int)];
         await ReadExactlyAsync(stream, lengthBytes, cancellationToken).ConfigureAwait(false);
@@ -60,12 +63,14 @@ internal static class PipeProtocol
     private static async ValueTask ReadExactlyAsync(
         Stream stream,
         Memory<byte> buffer,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         int offset = 0;
         while (offset < buffer.Length)
         {
-            int read = await stream.ReadAsync(buffer[offset..], cancellationToken)
+            int read = await stream
+                .ReadAsync(buffer[offset..], cancellationToken)
                 .ConfigureAwait(false);
             if (read == 0)
                 throw new EndOfStreamException("命名管道连接已关闭。");

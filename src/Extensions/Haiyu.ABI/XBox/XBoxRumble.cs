@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Haiyu.ServiceHost.XBox
+namespace Haiyu.ABI.XBox
 {
     public class XBoxRumble : XBoxComponent<float>
     {

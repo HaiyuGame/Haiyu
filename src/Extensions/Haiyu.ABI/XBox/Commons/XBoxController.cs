@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Haiyu.ServiceHost.XBox.helpers;
+using Haiyu.ABI.XBox.Helpers;
 using SharpDX.XInput;
 using Waves.Settings;
 
-namespace Haiyu.ServiceHost.XBox.Commons;
+namespace Haiyu.ABI.XBox.Commons;
 
 //using https://github.com/okmer/XBoxController/tree/master
 

@@ -1,25 +1,18 @@
 using System.Numerics;
-using System.Runtime.InteropServices;
-using Haiyu.ServiceHost;
-using Haiyu.ServiceHost.XBox;
-using Haiyu.ServiceHost.XBox.Commons;
-using Haiyu.ServiceHost.XBox.helpers;
-using Microsoft.Extensions.Hosting;
-using Waves.Api.Models;
+using ABI.Models;
+using Haiyu.ABI.XBox;
+using Haiyu.ABI.XBox.Commons;
 using Waves.Settings;
 
-namespace Haiyu.Services;
+namespace Haiyu.ABI.Services;
 
 public class XBoxService
 {
     public XBoxController Controller { get; private set; }
 
-    public XBoxConfig Config { get; }
-    public IWindowManager WindowManager { get; }
-    public ITipShow TipShow => WindowManager.Shell.TipShow;
-
     private CancellationTokenSource? _cts;
     private Task? _pollTask;
+
     /// <summary> 触发信号 </summary>
     private const float LeftThumbDeadZone = 0.15f;
     private const int MouseSensitivity = 18;
@@ -27,40 +20,36 @@ public class XBoxService
     private const float ScrollSensitivity = 1.0f;
     private const int PollIntervalMs = 12;
 
+    private System.Threading.SemaphoreSlim _slim = new(1, 1);
+    private bool _isRuning = false;
+
     private bool _xPressed;
     private bool _bPressed;
 
-    public XBoxService(XBoxController xBoxController,XBoxConfig xBoxConfig,IWindowManager windowManager)
+    public XBoxService(XBoxController xBoxController)
     {
         Controller = xBoxController;
-        Config = xBoxConfig;
-        WindowManager = windowManager;
-    }
-
-
-    public async Task StartAsync()
-    {
         _cts = new CancellationTokenSource();
         Controller = new XBoxController();
         _pollTask = Task.Run(() => PollLoopAsync(_cts.Token), _cts.Token);
     }
 
-    public async Task StopAsync()
+    public async Task<RunResult> SetModelAsync(bool model)
     {
+        await _slim.WaitAsync();
         try
         {
-            if (_cts != null)
-            {
-                _cts.Cancel();
-                if (_pollTask != null)
-                {
-                    await Task.WhenAny(_pollTask, Task.Delay(3000, _cts.Token));
-                }
-                _cts.Dispose();
-                _cts = null;
-            }
+            _isRuning = model;
+            return RunResult.Success;
         }
-        catch (OperationCanceledException) { }
+        catch (Exception ex)
+        {
+            return new(-1, ex.Message);
+        }
+        finally
+        {
+            _slim.Release();
+        }
     }
 
     private async Task PollLoopAsync(CancellationToken token)
@@ -69,18 +58,16 @@ public class XBoxService
         {
             while (!token.IsCancellationRequested)
             {
-                var isEnable = await Config.GetIsEnableAsync(token);
-                if (isEnable == false)
+                if (_isRuning == false)
                 {
                     await Task.Delay(3000);
                     continue;
                 }
                 if (Controller != null)
                 {
-                    // 按键控制模拟
                     var leftClick = Controller.LeftThumbclick.Value;
                     var rightClick = Controller.LeftThumbclick.Value;
-                    if(leftClick && rightClick)
+                    if (leftClick && rightClick)
                     {
                         this.Controller.BoxTrigger = !this.Controller.BoxTrigger;
                     }
@@ -90,7 +77,10 @@ public class XBoxService
                         continue;
                     }
                     Vector2 left = Controller.LeftThumbstick.Value;
-                    if (Math.Abs(left.X) > LeftThumbDeadZone || Math.Abs(left.Y) > LeftThumbDeadZone)
+                    if (
+                        Math.Abs(left.X) > LeftThumbDeadZone
+                        || Math.Abs(left.Y) > LeftThumbDeadZone
+                    )
                     {
                         int dx = (int)(left.X * MouseSensitivity);
                         int dy = (int)(-left.Y * MouseSensitivity);
@@ -136,7 +126,6 @@ public class XBoxService
             }
         }
         catch (OperationCanceledException) { }
-        catch (Exception) {}
+        catch (Exception) { }
     }
-
 }

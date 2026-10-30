@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Numerics;
-using Haiyu.ServiceHost.XBox.helpers;
+using Haiyu.ABI.XBox.Helpers;
 
-namespace Haiyu.ServiceHost.XBox
+namespace Haiyu.ABI.XBox
 {
     public class XBoxThumbstick : XBoxComponent<Vector2>
     {

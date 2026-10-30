@@ -4,6 +4,8 @@ using ABI.Models;
 using ABIRuntime.Abstractions;
 using ABIRuntime.Runtime;
 using Haiyu.ABI.Services;
+using Haiyu.ABI.XBox.Commons;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Haiyu.ABI;
 
@@ -27,9 +29,10 @@ public static unsafe class CoreExports
             string arguments = Marshal.PtrToStringAnsi((nint) commandLine) ?? string.Empty;
             string[] parts = arguments.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             if (parts.Length != 2) return;
-
-            var services = new PrivilegedServiceRegistry();
-            services.Register();
+            using var services = new ServiceCollection()
+                .AddSingleton<XBoxController>()
+                .AddBuiltInServices()
+                .BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true, ValidateOnBuild = true });
             ElevatedHost.RunAsync(parts[0], parts[1], services)
                 .GetAwaiter().GetResult();
         }
@@ -54,7 +57,12 @@ public static unsafe class CoreExports
             int samples = 0;
             int largestPayload = 0;
             using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20));
-            var service = new ComputerMonitorService();
+            using var services = new ServiceCollection().AddBuiltInServices()
+                .BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true, ValidateOnBuild = true });
+            using var scope = services.CreateScope();
+            var service = scope.ServiceProvider.GetRequiredKeyedService<
+                IPrivilegedService<CMonitorRequest, CMonitorProgress, RunResult>>(
+                ABIRuntime.Contract.ComputerMonitorContract.Operation);
             var progress = new InlineProgress<CMonitorProgress>(value =>
             {
                 int payloadSize = MemoryPack.MemoryPackSerializer.Serialize(

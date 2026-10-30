@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Haiyu.ServiceHost.XBox.helpers;
+using Haiyu.ABI.XBox.Helpers;
 
-namespace Haiyu.ServiceHost.XBox
+namespace Haiyu.ABI.XBox
 {
     public class XBoxTrigger : XBoxComponent<float>
     {

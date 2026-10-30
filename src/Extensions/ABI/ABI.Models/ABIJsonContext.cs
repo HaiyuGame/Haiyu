@@ -19,6 +19,9 @@ namespace ABI.Models;
 [JsonSerializable(typeof(HardwareInfo))]
 [JsonSerializable(typeof(ABISystemConfigRequest))]
 [JsonSerializable(typeof(ABISystemConfigProgress))]
+[JsonSerializable(typeof(XboxExtOpenRequest))]
+[JsonSerializable(typeof(XboxExtCloseRequest))]
+[JsonSerializable(typeof(XboxReportProcess))]
 public partial class ABIJsonContext : JsonSerializerContext
 {
     

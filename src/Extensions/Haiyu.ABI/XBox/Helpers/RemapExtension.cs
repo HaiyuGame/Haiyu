@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Haiyu.ServiceHost.XBox.helpers
+namespace Haiyu.ABI.XBox.Helpers
 {
     public static class RemapExtension
     {

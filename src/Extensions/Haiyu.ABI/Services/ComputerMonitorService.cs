@@ -8,9 +8,9 @@ namespace Haiyu.ABI.Services;
 /// 硬件监控
 /// </summary>
 public sealed partial class ComputerMonitorService
-    : IPrivilegedService<CMonitorRequest, RunResult, CMonitorProgress>
+    : IPrivilegedService<CMonitorRequest, CMonitorProgress, RunResult>
 {
-    public PrivilegedServiceContract<CMonitorRequest, RunResult, CMonitorProgress> Contract =>
+    public PrivilegedServiceContract<CMonitorRequest, CMonitorProgress, RunResult> Contract =>
         ABIRuntime.Contract.ComputerMonitorContract;
 
     public async ValueTask<RunResult> ExecuteAsync(

@@ -588,7 +588,14 @@
                                                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE713;" />
                                             </MenuFlyoutItem.Icon>
                                         </MenuFlyoutItem>
-                                        <MenuFlyoutItem Command="{x:Bind ViewModel.BuildRecordPlanDataCommand}" Text="查询抽卡数据" />
+                                        <MenuFlyoutItem Command="{x:Bind ViewModel.BuildRecordPlanDataCommand}" Text="{x:Bind helper:LanguageService.GetString('WavesGamePage_RecordHeader')}">
+                                            <MenuFlyoutItem.Icon>
+                                                <FontIcon
+                                                    FontFamily="Segoe Fluent Icons"
+                                                    FontSize="13"
+                                                    Glyph="&#xE8A7;" />
+                                            </MenuFlyoutItem.Icon>
+                                        </MenuFlyoutItem>
                                         <MenuFlyoutSeparator />
                                         <MenuFlyoutItem
                                             Command="{x:Bind ViewModel.DeleteGameResourceCommand}"

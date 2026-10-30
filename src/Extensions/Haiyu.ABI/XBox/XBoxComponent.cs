@@ -1,7 +1,7 @@
-﻿using Haiyu.ServiceHost.XBox.eventargs;
+using Haiyu.ABI.XBox.EventArgs;
 using System;
 
-namespace Haiyu.ServiceHost.XBox
+namespace Haiyu.ABI.XBox
 {
     public abstract class XBoxComponent<T>
     {

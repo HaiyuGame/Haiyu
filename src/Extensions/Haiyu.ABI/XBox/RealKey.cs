@@ -1,6 +1,6 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 
-namespace Haiyu.ServiceHost.XBox;
+namespace Haiyu.ABI.XBox;
 
 public static class RealKey
 {

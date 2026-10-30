@@ -31,9 +31,9 @@ public sealed class PrivilegedRuntime : IAsyncDisposable
 
     public async ValueTask<IPrivilegedResult<TResponse>> InvokeAsync<
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TRequest,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TResponse,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TProgress>(
-        PrivilegedServiceContract<TRequest, TResponse, TProgress> contract,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TProgress,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TResponse>(
+        PrivilegedServiceContract<TRequest, TProgress, TResponse> contract,
         TRequest request,
         IProgress<IPrivilegedProgress<TProgress>>? progress = null,
         CancellationToken cancellationToken = default)
@@ -63,9 +63,9 @@ public sealed class PrivilegedRuntime : IAsyncDisposable
 
     private async ValueTask<TResponse> InvokeCoreAsync<
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TRequest,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TResponse,
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TProgress>(
-        PrivilegedServiceContract<TRequest, TResponse, TProgress> contract,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TProgress,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TResponse>(
+        PrivilegedServiceContract<TRequest, TProgress, TResponse> contract,
         TRequest request,
         IProgress<IPrivilegedProgress<TProgress>>? progress,
         CancellationToken cancellationToken)

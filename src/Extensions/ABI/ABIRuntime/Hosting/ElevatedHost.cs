@@ -3,6 +3,7 @@ using System.IO.Pipes;
 using ABI.Models;
 using ABIRuntime.Abstractions;
 using MemoryPack;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ABIRuntime.Runtime;
 
@@ -10,15 +11,15 @@ namespace ABIRuntime.Runtime;
 public static class ElevatedHost
 {
     public static async Task<int> RunAsync(string controlPipeName, string secret,
-        PrivilegedServiceRegistry services)
+        IServiceProvider services)
         => await RunCoreAsync(controlPipeName, secret, services, true).ConfigureAwait(false);
 
     internal static Task<int> RunForTestAsync(string controlPipeName, string secret,
-        PrivilegedServiceRegistry services) =>
+        IServiceProvider services) =>
         RunCoreAsync(controlPipeName, secret, services, false);
 
     private static async Task<int> RunCoreAsync(string controlPipeName, string secret,
-        PrivilegedServiceRegistry services, bool requireElevation)
+        IServiceProvider services, bool requireElevation)
     {
         ArgumentNullException.ThrowIfNull(services);
         ABIMemoryPack.EnsureFormatters();
@@ -107,7 +108,7 @@ public static class ElevatedHost
 
     /// <summary>独立请求调用链：连接、握手、执行、进度/结果、关闭。</summary>
     private static async Task HandleRequestPipeAsync(Guid requestId,
-        OpenRequestMessage openRequest, PrivilegedServiceRegistry services,
+        OpenRequestMessage openRequest, IServiceProvider services,
         CancellationToken hostShutdownToken)
     {
         await using var pipe = new NamedPipeClientStream(".", openRequest.PipeName,
@@ -132,7 +133,9 @@ public static class ElevatedHost
                 throw new InvalidDataException("请求管道握手信息不匹配。");
             }
 
-            if (!services.TryGet(request.Operation, out IServiceInvoker service))
+            await using var scope = services.CreateAsyncScope();
+            IServiceInvoker? service = scope.ServiceProvider.GetKeyedService<IServiceInvoker>(request.Operation);
+            if (service is null)
             {
                 await SendErrorAsync(pipe, request, unchecked((int)0x80004001),
                     $"没有注册 Service：{request.Operation}").ConfigureAwait(false);

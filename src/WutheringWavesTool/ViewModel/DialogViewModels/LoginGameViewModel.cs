@@ -40,6 +40,9 @@ public sealed partial class LoginGameViewModel : DialogViewModelBase
     public partial Visibility TokenVisibility { get; set; }
 
     [ObservableProperty]
+    public partial string SendCodeText { get; set; } = LanguageService.GetString("Display_Item4");
+
+    [ObservableProperty]
     public partial string Phone { get; set; }
 
     [ObservableProperty]
@@ -57,6 +60,14 @@ public sealed partial class LoginGameViewModel : DialogViewModelBase
     [ObservableProperty]
     public partial string TipMessage { get; set; }
     public string GeetValue { get; set; }
+
+    DispatcherTimer _timer { get; set; }
+
+    [ObservableProperty]
+    public partial int TimeCount { get; set; } = 60;
+
+    [ObservableProperty]
+    public partial bool SendCodeEnable { get; set; } = true;
 
     public IAppContext<App> AppContext { get; }
     public IViewFactorys ViewFactorys { get; }
@@ -85,11 +96,37 @@ public sealed partial class LoginGameViewModel : DialogViewModelBase
             if (sendSMS.Data.GeeTest == false)
             {
                 TipMessage = LanguageService.GetStringByText("验证码发送成功！");
+                SetDispatcherTimer();
             }
             else
             {
                 TipMessage = "";
             }
+        }
+    }
+
+    private void SetDispatcherTimer()
+    {
+        if (_timer == null)
+        {
+            _timer = new DispatcherTimer();
+            _timer.Interval = TimeSpan.FromSeconds(1);
+            _timer.Tick += _timer_Tick;
+        }
+        _timer.Start();
+    }
+
+    private void _timer_Tick(object? sender, object e)
+    {
+        SendCodeEnable = false;
+        TimeCount--;
+        this.SendCodeText = $"{TimeCount}S";
+        if (TimeCount == 0)
+        {
+            SendCodeEnable = true;
+            TimeCount = 60;
+            this.SendCodeText = LanguageService.GetString("Display_Item4");
+            _timer.Stop();
         }
     }
 
@@ -128,7 +165,8 @@ public sealed partial class LoginGameViewModel : DialogViewModelBase
             var login = await WavesClient.LoginAsync(mobile: Phone, code: Code, IdV2);
             if (login == null || !login.Success)
             {
-                TipMessage = login == null ? LanguageService.GetString("Dialog_ShowError") : login.Msg;
+                TipMessage =
+                    login == null ? LanguageService.GetString("Dialog_ShowError") : login.Msg;
                 await Task.Delay(2000);
                 return;
             }
