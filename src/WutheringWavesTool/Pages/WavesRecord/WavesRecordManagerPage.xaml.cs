@@ -16,15 +16,18 @@ public sealed partial class WavesRecordManagerPage : Page, IWindowInitializable
 
     public WavesRecordManagerViewModel ViewModel { get; private set; }
 
-    public void Dispose() { }
-
-    public void Initialize()
+    public void Dispose() 
     {
+        this.ViewModel.WinSession.Context.DialogManager.UnRegisterRoot();
+        this.ViewModel.WinSession.Context.TipShow.Owner = null;
     }
+
+    public void Initialize() { }
 
     private void Page_Loaded(object sender, RoutedEventArgs e)
     {
         this.titleBar.Window = this.ViewModel.WinSession.Context.GetWindow();
         this.ViewModel.WinSession.Context.DialogManager.RegisterRoot(this.XamlRoot);
+        this.ViewModel.WinSession.Context.TipShow.Owner = this.grid;
     }
 }

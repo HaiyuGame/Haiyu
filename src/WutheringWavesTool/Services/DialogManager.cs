@@ -160,8 +160,6 @@ public sealed class DialogManager : IDialogManager
     public async Task ShowLocalUserManagerAsync() =>
         await ShowDialogAsync<LocalUserManagerDialog>();
 
-    public async Task ShowGameEnhancedDialogAsync() =>
-        await ShowDialogAsync<GameEnhancedDialog>("");
 
     public async Task<QRScanResult> GetQRLoginResultAsync() =>
         await GetDialogResultAsync<QRLoginDialog, QRScanResult>(null);
@@ -252,4 +250,8 @@ public sealed class DialogManager : IDialogManager
 
     public async Task<bool> ShowWutheringWavesToolImportAsync(WavesRecordMergeRequest request) =>
         await ShowDialogAsync<WutheringWavesToolImportDialog>(request) is true;
+    public void UnRegisterRoot()
+    {
+        this.Root = null;
+    }
 }

@@ -41,7 +41,7 @@ public partial class WavesRecordManagerViewModel : WindowViewModelBase
         catch (OperationCanceledException) { }
         catch (Exception ex)
         {
-            SystemEventMessager.Publish(new() { Message = ex.Message, Delay = 30 });
+            await this.WinSession.Context.TipShow.ShowMessageAsync(ex.Message, Symbol.Clear);
         }
     }
 
@@ -72,25 +72,38 @@ public partial class WavesRecordManagerViewModel : WindowViewModelBase
             var cards = await WavesRecordManager.GetLocalWavesRecordsAsync(CTS.Token);
             if (cards.Count == 0)
             {
-                SystemEventMessager.Publish(new() { Message = "暂无本地档案可导出。" });
+                await this.WinSession.Context.TipShow.ShowMessageAsync(
+                    "暂无本地档案可导出",
+                    Symbol.Clear
+                );
                 return;
             }
 
             var file = await WinSession.Context.PickersService.GetFileSavePicker(
-                [".xlsx"], $"Haiyu-全部抽卡记录-{DateTime.Now:yyyyMMdd-HHmmss}.xlsx");
-            if (file == null) return;
-            SystemEventMessager.Publish(new() { Message = "正在导出全部抽卡记录…" });
+                [".xlsx"],
+                $"Haiyu-全部抽卡记录-{DateTime.Now:yyyyMMdd-HHmmss}.xlsx"
+            );
+            if (file == null)
+                return;
+
+            await this.WinSession.Context.TipShow.ShowMessageAsync(
+                "正在导出全部抽卡记录",
+                Symbol.Message
+            );
             var result = await WavesRecordManager.ExportAllRecordsAsync(file.Path, CTS.Token);
-            SystemEventMessager.Publish(new()
-            {
-                Message = $"已导出 {result.Archives} 个档案、{result.Records} 条抽卡记录至：{file.Path}",
-                Delay = 15,
-            });
+
+            await this.WinSession.Context.TipShow.ShowMessageAsync(
+                $"已导出 {result.Archives} 个档案、{result.Records} 条抽卡记录至：{file.Path}",
+                Symbol.Message
+            );
         }
         catch (OperationCanceledException) { }
         catch (Exception ex)
         {
-            SystemEventMessager.Publish(new() { Message = $"导出失败：{ex.Message}", Delay = 30 });
+            await this.WinSession.Context.TipShow.ShowMessageAsync(
+                $"导出失败：{ex.Message}",
+                Symbol.Clear
+            );
         }
     }
 
@@ -100,13 +113,17 @@ public partial class WavesRecordManagerViewModel : WindowViewModelBase
         var targetSessionId = selected?.SessionId;
         if (string.IsNullOrWhiteSpace(targetSessionId))
         {
-            SystemEventMessager.Publish(new() { Message = "请先在左侧选择要合并到的目标档案。" });
+            await this.WinSession.Context.TipShow.ShowMessageAsync(
+                $"请先在左侧选择要合并到的目标档案。",
+                Symbol.Clear
+            );
             return;
         }
         try
         {
             var request = new Haiyu.Models.Dialogs.WavesRecordMergeRequest(
-                targetSessionId, selected!.DisplayName,
+                targetSessionId,
+                selected!.DisplayName,
                 WinSession.Context.GetWindow().GetWindowHandle()
             );
             var merged = isExcel
@@ -116,12 +133,16 @@ public partial class WavesRecordManagerViewModel : WindowViewModelBase
                 return;
             playerCards = await WavesRecordManager.GetLocalWavesRecordsAsync();
             await RefreshViewModelAsync();
-            SystemEventMessager.Publish(new() { Message = "抽卡记录已合并，原文件已保留。" });
+            await this.WinSession.Context.TipShow.ShowMessageAsync(
+                $"抽卡记录已合并，原文件已保留。",
+                Symbol.Clear
+            );
         }
         catch (Exception ex)
         {
-            SystemEventMessager.Publish(
-                new() { Message = $"合并抽卡记录失败：{ex.Message}", Delay = 30 }
+            await this.WinSession.Context.TipShow.ShowMessageAsync(
+                $"合并抽卡记录失败：{ex.Message}",
+                Symbol.Clear
             );
         }
     }

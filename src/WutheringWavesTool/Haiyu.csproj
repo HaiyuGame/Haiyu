@@ -357,9 +357,6 @@
 		<Page Update="Pages\GamePages\WavesV2GamePage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
-		<Page Update="Pages\Dialogs\GameEnhancedDialog.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
 		<Page Update="Pages\Dialogs\LocalUserManagerDialog.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>

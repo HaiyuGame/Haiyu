@@ -15,6 +15,9 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
 
     #region 灰度
     public uint WavesGameBunleId { get; set; } = (uint) GrayConfigId.WavesGameBunleOpen;
+
+
+    public uint WavesRecordManagerID => (uint) GrayConfigId.WavesRecordManager;
     #endregion
 
     private const int ChartPointKeepSeconds = 5;

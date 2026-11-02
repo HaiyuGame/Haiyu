@@ -588,7 +588,10 @@
                                                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE713;" />
                                             </MenuFlyoutItem.Icon>
                                         </MenuFlyoutItem>
-                                        <MenuFlyoutItem Command="{x:Bind ViewModel.BuildRecordPlanDataCommand}" Text="{x:Bind helper:LanguageService.GetString('WavesGamePage_RecordHeader')}">
+                                        <MenuFlyoutItem
+                                            Command="{x:Bind ViewModel.BuildRecordPlanDataCommand}"
+                                            Text="{x:Bind helper:LanguageService.GetString('WavesGamePage_RecordHeader')}"
+                                            Visibility="{x:Bind ViewModel.WavesRecordManagerID, Mode=OneWay, Converter={StaticResource GrayUIToVisiblityConverter}}">
                                             <MenuFlyoutItem.Icon>
                                                 <FontIcon
                                                     FontFamily="Segoe Fluent Icons"

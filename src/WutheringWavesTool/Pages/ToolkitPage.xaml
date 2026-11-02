@@ -173,10 +173,7 @@
                     </StackPanel>
                 </Button>
             </cui:SettingsCard>
-            <cui:SettingsCard
-                Description="{x:Bind helper:LanguageService.GetString('Toolkit_OfficialRecordDescription')}"
-                Header="{x:Bind helper:LanguageService.GetString('Toolkit_OfficialRecordHeader')}"
-                Visibility="{x:Bind ViewModel.OfficialWriteGrayKey, Mode=OneWay, Converter={StaticResource GrayUIToVisiblityConverter}}">
+            <cui:SettingsCard Description="{x:Bind helper:LanguageService.GetString('Toolkit_OfficialRecordDescription')}" Header="{x:Bind helper:LanguageService.GetString('Toolkit_OfficialRecordHeader')}">
                 <cui:SettingsCard.HeaderIcon>
                     <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8F1;" />
                 </cui:SettingsCard.HeaderIcon>

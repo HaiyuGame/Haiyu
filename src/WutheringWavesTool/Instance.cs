@@ -189,8 +189,6 @@ public static class InstanceBuilderExtensions
                     .AddTransient<LocalGameTokenViewModel>()
                     .AddTransient<WebViewCabManagerDialog>()
                     .AddTransient<WavesCloudUserViewModel>()
-                    .AddTransient<GameEnhancedDialog>()
-                    .AddTransient<GameEnhancedViewModel>()
                     .AddTransient<WavesCloudUserDialog>()
                     .AddTransient<WebViewCabManagerViewModel>()
                     .AddTransient<CloudSelectNodeDialog>()

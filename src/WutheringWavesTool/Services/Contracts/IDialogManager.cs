@@ -13,6 +13,8 @@ public interface IDialogManager
     public XamlRoot Root { get; }
     public void SetDialog(ContentDialog contentDialog);
     public void RegisterRoot(XamlRoot root);
+
+    public void UnRegisterRoot();
     public Task ShowLoginDialogAsync();
     public Task<Result> GetDialogResultAsync<T, Result>(object? data)
         where T : ContentDialog, IDialog;
@@ -43,7 +45,6 @@ public interface IDialogManager
     Task ShowWebViewCabManangerAsync();
     Task<ContentDialogResult> ShowOKDialogAsync(string header, string content);
     Task ShowGameSettingAsync(string contextName);
-    Task ShowGameEnhancedDialogAsync();
 
     Task ShowGameLocalTokenAsync(string contextName);
 

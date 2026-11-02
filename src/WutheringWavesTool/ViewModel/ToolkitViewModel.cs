@@ -35,7 +35,6 @@ public sealed partial class ToolkitViewModel : ViewModelBase
     }
 
     #region GrayId
-    public uint OfficialWriteGrayKey => (uint)GrayConfigId.OfficialLauncheWrite;
     public uint SortingGrayKey => (uint) GrayConfigId.SoringTesing;
 
     public uint WavesRecordKey => (uint) GrayConfigId.WavesRecordManager;

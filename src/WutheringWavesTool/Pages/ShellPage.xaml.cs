@@ -85,6 +85,8 @@ public sealed partial class ShellPage : Page, IDisposable
             HomeNavigationService_Navigated;
         ViewModel.WindowManager.Shell.NavigationService.UnRegisterView();
         ViewModel.WindowManager.Shell.NavigationViewService.UnRegister();
+        ViewModel.WindowManager.Shell.TipShow.Owner = null;
+        ViewModel.WindowManager.Shell.DialogManager.UnRegisterRoot();
         ViewModel.AppContext.WallpaperService.UnregisterMediaHost(mediaControl);
         Bindings.StopTracking();
     }
