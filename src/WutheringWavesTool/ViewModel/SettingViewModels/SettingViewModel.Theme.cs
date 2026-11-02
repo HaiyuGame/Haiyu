@@ -76,12 +76,6 @@ partial class SettingViewModel
         await AppSettings.SetElementThemeAsync(value.ToString());
     }
 
-    [RelayCommand]
-    async Task ShowGameEnhancedDialog()
-    {
-        await this.WindowManager.Shell.DialogManager.ShowGameEnhancedDialogAsync();
-    }
-
     [ObservableProperty]
     public partial WallpaperType SelectWallpaperName { get; set; }
 

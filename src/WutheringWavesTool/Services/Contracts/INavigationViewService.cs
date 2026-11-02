@@ -1,4 +1,4 @@
-﻿namespace Haiyu.Services.Contracts;
+namespace Haiyu.Services.Contracts;
 
 public interface INavigationViewService
 {
@@ -7,7 +7,7 @@ public interface INavigationViewService
     /// </summary>
     /// <param name="view"></param>
     /// <param name="navigationType"></param>
-    void Register(NavigationView view);
+    void Register(NavigationView view, INavigationService navigationService);
 
     /// <summary>
     /// 卸载导航视图

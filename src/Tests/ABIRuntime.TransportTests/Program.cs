@@ -8,6 +8,7 @@ using ABIRuntime.Abstractions;
 using ABIRuntime.Runtime;
 using Haiyu.ABI.Services;
 using MemoryPack;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ABIRuntime.TransportTests;
 
@@ -22,6 +23,7 @@ internal static class Program
         ABIMemoryPack.EnsureFormatters();
         var tests = new (string Name, Func<Task> Run)[]
         {
+            ("DI 构造注入、作用域与释放", TestDependencyInjectionAsync),
             ("MonitorRecord JSON/MemoryPack AOT 序列化", TestMonitorSerializationAsync),
             ("64 MiB 分帧与双向完整性", TestLargeMessagesAsync),
             ("并发独立请求管道", TestConcurrentPipesAsync),
@@ -72,6 +74,54 @@ internal static class Program
         }
         Console.WriteLine(failures == 0 ? "ALL TESTS PASSED" : $"FAILED: {failures}");
         return failures == 0 ? 0 : 1;
+    }
+
+    private static async Task TestDependencyInjectionAsync()
+    {
+        var services = new ServiceCollection();
+        services.AddScoped<ProbeDependency>();
+        services.AddPrivilegedService<CleanMemoryRequest, CleanMemoryProgress, RunResult, ProbeService>(Contract.CleanMemoryContract);
+        try
+        {
+            services.AddPrivilegedService<CleanMemoryRequest, CleanMemoryProgress, RunResult, ProbeService>(Contract.CleanMemoryContract);
+            throw new InvalidDataException("重复操作名未被拒绝。");
+        }
+        catch (InvalidOperationException) { }
+
+        await using var provider = services.BuildServiceProvider(new ServiceProviderOptions
+        {
+            ValidateScopes = true, ValidateOnBuild = true,
+        });
+        ProbeDependency dependency;
+        await using (var scope = provider.CreateAsyncScope())
+        {
+            var service = (ProbeService)scope.ServiceProvider
+                .GetRequiredKeyedService<IPrivilegedService<CleanMemoryRequest, CleanMemoryProgress, RunResult>>(Contract.CleanMemoryContract.Operation);
+            dependency = service.Dependency;
+            Equal(dependency, scope.ServiceProvider.GetRequiredService<ProbeDependency>());
+            var invoker = scope.ServiceProvider.GetRequiredKeyedService<IServiceInvoker>(Contract.CleanMemoryContract.Operation);
+            Equal(invoker, scope.ServiceProvider.GetRequiredKeyedService<IServiceInvoker>(Contract.CleanMemoryContract.Operation));
+            Equal(true, scope.ServiceProvider.GetKeyedService<IServiceInvoker>("unknown") is null);
+            await using var other = provider.CreateAsyncScope();
+            Equal(false, ReferenceEquals(dependency, other.ServiceProvider.GetRequiredService<ProbeDependency>()));
+        }
+        Equal(true, dependency.Disposed);
+    }
+
+    private sealed class ProbeDependency : IAsyncDisposable
+    {
+        public bool Disposed { get; private set; }
+        public ValueTask DisposeAsync() { Disposed = true; return ValueTask.CompletedTask; }
+    }
+
+    private sealed class ProbeService(ProbeDependency dependency)
+        : IPrivilegedService<CleanMemoryRequest, CleanMemoryProgress, RunResult>
+    {
+        public ProbeDependency Dependency { get; } = dependency;
+        public PrivilegedServiceContract<CleanMemoryRequest, CleanMemoryProgress, RunResult> Contract => ABIRuntime.Contract.CleanMemoryContract;
+        public ValueTask<RunResult> ExecuteAsync(CleanMemoryRequest request,
+            IProgress<CleanMemoryProgress> progress, CancellationToken cancellationToken) =>
+            ValueTask.FromResult(new RunResult(0, "ok"));
     }
 
     private static Task TestMonitorSerializationAsync()
@@ -218,13 +268,11 @@ internal static class Program
         await server.WaitForConnectionAsync(timeout.Token);
         await connection;
 
-        var registry = new PrivilegedServiceRegistry();
-        registry.Add(new ComputerMonitorService());
-        if (!registry.TryGet(Contract.ComputerMonitorContract.Operation,
-                out IServiceInvoker invoker))
-        {
-            throw new InvalidOperationException("监控服务注册失败。");
-        }
+        await using var registry = new ServiceCollection()
+            .AddBuiltInServices().BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
+        await using var scope = registry.CreateAsyncScope();
+        IServiceInvoker invoker = scope.ServiceProvider.GetRequiredKeyedService<IServiceInvoker>(
+            Contract.ComputerMonitorContract.Operation);
 
         byte[] requestPayload = MemoryPackSerializer.Serialize(
             new CMonitorRequest(), ABIMemoryPack.Options);
@@ -279,8 +327,8 @@ internal static class Program
         string controlSecret = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
         await using var control = new NamedPipeServerStream(controlName, PipeDirection.InOut, 1,
             PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
-        var registry = new PrivilegedServiceRegistry();
-        registry.Add(new ComputerMonitorService());
+        await using var registry = new ServiceCollection()
+            .AddBuiltInServices().BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
         Task<int> hostTask = ElevatedHost.RunForTestAsync(controlName, controlSecret, registry);
@@ -322,7 +370,16 @@ internal static class Program
         int samples = 0;
         while (true)
         {
-            PipeMessage message = await PipeProtocol.ReadAsync(requestPipe, timeout.Token);
+            PipeMessage message;
+            try
+            {
+                message = await PipeProtocol.ReadAsync(requestPipe, timeout.Token);
+            }
+            catch (EndOfStreamException) when (samples >= 3)
+            {
+                // 宿主取消后关闭当前请求管道，控制管道继续存活。
+                break;
+            }
             if (message.Kind == PipeMessageKind.Progress)
             {
                 CMonitorProgress progress = MemoryPackSerializer.Deserialize<CMonitorProgress>(

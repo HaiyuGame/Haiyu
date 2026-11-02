@@ -1,4 +1,4 @@
-
+﻿
 using System.Diagnostics.CodeAnalysis;
 using MemoryPack;
 using Waves.Api.Models.Wrappers;
@@ -17,6 +17,21 @@ public partial class WavesAnalysisPlayerCard
     public string SessionId { get; set; }
 
     public IList<WavesAnalysisPlayerCardItem> Items { get; set; }
+
+    /// <summary>
+    /// 更新源，Cloud为账号名称，GameContext为日志输入并匹配游戏ID
+    /// </summary>
+    public string UpdateSource { get; set;  }
+
+    /// <summary>
+    /// 更新类型：GameContext、CloudGame
+    /// </summary>
+    public string UpdateType { get; set;  }
+
+    // MemoryPack 按成员顺序序列化。已有成员顺序必须保留，新成员只能追加。
+    public int Version { get; set; }
+
+    public string RecordName { get; set; }
 }
 
 [MemoryPackable]

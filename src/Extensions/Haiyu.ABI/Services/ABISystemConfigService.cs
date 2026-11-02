@@ -6,14 +6,14 @@ using LibreHardwareMonitor.PawnIo;
 namespace Haiyu.ABI.Services;
 
 public sealed class ABISystemConfigService
-    : IPrivilegedService<ABISystemConfigRequest, RunResult, ABISystemConfigProgress>
+    : IPrivilegedService<ABISystemConfigRequest, ABISystemConfigProgress, RunResult>
 {
     private string path;
 
     public PrivilegedServiceContract<
         ABISystemConfigRequest,
-        RunResult,
-        ABISystemConfigProgress
+        ABISystemConfigProgress,
+        RunResult
     > Contract => ABIRuntime.Contract.ABISystemConfigContract;
 
     public async ValueTask<RunResult> ExecuteAsync(

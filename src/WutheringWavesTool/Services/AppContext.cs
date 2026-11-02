@@ -54,10 +54,6 @@ public class AppContext<T> : IAppContext<T>
         {
             RegisterNotifyIcon();
             var xboxConfig = Instance.Host.Services.GetRequiredService<XBoxConfig>();
-            if ((await xboxConfig.GetIsEnableAsync()) == true)
-            {
-                await Instance.Host.Services.GetRequiredService<XBoxService>().StartAsync();
-            }
             this.App = app;
             #region Mirror
             if (

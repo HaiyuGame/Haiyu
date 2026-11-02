@@ -12,6 +12,9 @@ public sealed partial class KuroDataCenterWindow : Window, IWindowInitializable
     {
         InitializeComponent();
         this.titleBar.Window = this;
+        grid.RequestedTheme = Instance
+            .Host.Services.GetRequiredService<IThemeService>()
+            .CurrentTheme;
         Session = session;
     }
 
@@ -31,9 +34,9 @@ public sealed partial class KuroDataCenterWindow : Window, IWindowInitializable
 
     private async void grid_Loaded(object sender, RoutedEventArgs e)
     {
-        if(this.Content is FrameworkElement element)
+        if (this.Content is FrameworkElement element)
         {
-            element.RequestedTheme =  Instance
+            element.RequestedTheme = Instance
                 .Host.Services.GetRequiredService<IThemeService>()
                 .CurrentTheme;
         }
@@ -42,7 +45,6 @@ public sealed partial class KuroDataCenterWindow : Window, IWindowInitializable
         this.webView2.CoreWebView2.Navigate(Context.GetPageUrl());
         this.AppWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
     }
-
 
     private void ToggleMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
     {

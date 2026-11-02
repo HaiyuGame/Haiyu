@@ -98,6 +98,7 @@
 		<PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" Version="8.3.260402-preview2" />
 		<PackageReference Include="CommunityToolkit.WinUI.Controls.Segmented" Version="8.3.260402-preview2" />
 		<PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.3.260402-preview2" />
+		<PackageReference Include="CommunityToolkit.WinUI.Controls.Sizers" Version="8.3.260402-preview2" />
 		<PackageReference Include="CommunityToolkit.WinUI.Extensions" Version="8.3.260402-preview2" />
 		<PackageReference Include="CommunityToolkit.WinUI.Helpers" Version="8.3.260402-preview2" />
 		<PackageReference Include="CommunityToolkit.WinUI.Media" Version="8.3.260402-preview2" />
@@ -107,6 +108,7 @@
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.12" />
 		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4258.31" />
 		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2705" />
+		<PackageReference Include="Microsoft.WindowsAppSDK.InteractiveExperiences" Version="2.1.9" />
 		<PackageReference Include="Microsoft.WindowsAppSDK.Runtime" Version="2.5.1" />
 		<PackageReference Include="Microsoft.WindowsAppSDK.WinUI" Version="2.3.9" />
 		<PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="3.0.1" />
@@ -295,6 +297,9 @@
 		<Page Update="Pages\Dialogs\SelectGameBunleDialog.xaml">
 		  <SubType>Designer</SubType>
 		</Page>
+		<Page Update="Pages\Dialogs\WavesRecords\CreateForGameContextDialog.xaml">
+		  <SubType>Designer</SubType>
+		</Page>
 		<Page Update="Pages\Toolkits\MonitorSettingPage.xaml">
 		  <SubType>Designer</SubType>
 		</Page>
@@ -352,9 +357,6 @@
 		<Page Update="Pages\GamePages\WavesV2GamePage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
-		<Page Update="Pages\Dialogs\GameEnhancedDialog.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
 		<Page Update="Pages\Dialogs\LocalUserManagerDialog.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</Page>
@@ -364,6 +366,7 @@
 		<Folder Include="Assets\Languages\" />
 		<Folder Include="Contracts\Services\" />
 		<Folder Include="Model\" />
+		<Folder Include="Pages\WavesRecord\" />
 		<Folder Include="Services\DialogServices\" />
 	</ItemGroup>
 	<PropertyGroup Label="Globals">

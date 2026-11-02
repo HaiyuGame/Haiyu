@@ -3,6 +3,7 @@ using Haiyu.Models.Enums;
 using Haiyu.Models.Options;
 using Haiyu.Pages.Communitys;
 using Haiyu.Pages.Toolkits;
+using Haiyu.Pages.WavesRecord;
 using Waves.Api.Models.CloudGame;
 using Waves.Core.Models.CloudGame;
 
@@ -76,6 +77,17 @@ public class ViewFactorys : IViewFactorys
         MaxHeight = 650,
         IsResizable = false,
         IsMaximizable = false,
+        CenterOnScreen = true,
+        IsExtendWindowTitle = true,
+    };
+    private static readonly WindowsOption WavesRecordManagerOption = new()
+    {
+        Width = 900,
+        Height = 650,
+        MinWidth = 900,
+        MinHeight = 650,
+        IsResizable = true,
+        IsMaximizable = true,
         CenterOnScreen = true,
         IsExtendWindowTitle = true,
     };
@@ -170,6 +182,17 @@ public class ViewFactorys : IViewFactorys
                 BottomMargin = 10,
                 IsTopMost = true,
                 IsClickThrough = true,
+            }
+        );
+    }
+
+    public void ShowWavesRecordManagerWindow()
+    {
+        AppContext.WindowManager.CreateWindow<WavesRecordManagerPage>(
+            new WindowManagerOption()
+            {
+                Key = "WavesRecordManager",
+                WindowConfig = WavesRecordManagerOption,
             }
         );
     }

@@ -13,9 +13,9 @@ namespace Haiyu.ABI.Services;
 /// 清理内存接口
 /// </summary>
 public class MemoryCleanerService
-    : IPrivilegedService<CleanMemoryRequest, RunResult, CleanMemoryProgress>
+    : IPrivilegedService<CleanMemoryRequest, CleanMemoryProgress, RunResult>
 {
-    public PrivilegedServiceContract<CleanMemoryRequest, RunResult, CleanMemoryProgress> Contract =>
+    public PrivilegedServiceContract<CleanMemoryRequest, CleanMemoryProgress, RunResult> Contract =>
         ABIRuntime.Contract.CleanMemoryContract;
 
     public ValueTask<RunResult> ExecuteAsync(
@@ -137,11 +137,7 @@ public class MemoryCleanerService
             cancellationToken.ThrowIfCancellationRequested();
 
             cancellationToken.ThrowIfCancellationRequested();
-            var processHandle = NativeProcessMemory.OpenProcess(
-                access,
-                false,
-                (uint) process.Id
-            );
+            var processHandle = NativeProcessMemory.OpenProcess(access, false, (uint)process.Id);
             if (processHandle == 0)
             {
                 continue;

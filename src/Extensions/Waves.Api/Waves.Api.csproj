@@ -16,6 +16,7 @@
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
 	 <PackageReference Include="MemoryPack" Version="1.21.4" />
+	 <PackageReference Include="MiniExcel" Version="1.46.0" />
   </ItemGroup>
 
 </Project>

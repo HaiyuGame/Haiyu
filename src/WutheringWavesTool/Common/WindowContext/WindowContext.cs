@@ -34,6 +34,8 @@ public class WindowContext : IDisposable
         this.DialogManager = service.ServiceProvider.GetRequiredService<IDialogManager>();
         this.SystemPublisher = service.ServiceProvider.GetRequiredService<SystemEventPublisher>();
         this.PickersService = service.ServiceProvider.GetRequiredService<IPickersService>();
+        this.NavigationService = service.ServiceProvider.GetRequiredService<INavigationService>();
+        this.NavigationViewService = service.ServiceProvider.GetRequiredService<INavigationViewService>();
         Key = key;
     }
 
@@ -53,6 +55,8 @@ public class WindowContext : IDisposable
     public IDialogManager DialogManager { get; }
 
     public IPickersService PickersService { get; }
+    public INavigationService NavigationService { get; }
+    public INavigationViewService NavigationViewService { get; }
 
     /// <summary>
     /// 系统事件

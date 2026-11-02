@@ -75,6 +75,9 @@
                 Description="{x:Bind helper:LanguageService.GetString('Display_SortingSubtitle')}"
                 Header="{x:Bind helper:LanguageService.GetString('Tool_SortingHeader')}"
                 Visibility="{x:Bind ViewModel.SortingGrayKey, Mode=OneWay, Converter={StaticResource GrayUIToVisiblityConverter}}">
+                <cui:SettingsCard.HeaderIcon>
+                    <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xF1AD;" />
+                </cui:SettingsCard.HeaderIcon>
                 <Button
                     Grid.Row="2"
                     Grid.Column="2"
@@ -170,10 +173,7 @@
                     </StackPanel>
                 </Button>
             </cui:SettingsCard>
-            <cui:SettingsCard
-                Description="{x:Bind helper:LanguageService.GetString('Toolkit_OfficialRecordDescription')}"
-                Header="{x:Bind helper:LanguageService.GetString('Toolkit_OfficialRecordHeader')}"
-                Visibility="{x:Bind ViewModel.OfficialWriteGrayKey, Mode=OneWay, Converter={StaticResource GrayUIToVisiblityConverter}}">
+            <cui:SettingsCard Description="{x:Bind helper:LanguageService.GetString('Toolkit_OfficialRecordDescription')}" Header="{x:Bind helper:LanguageService.GetString('Toolkit_OfficialRecordHeader')}">
                 <cui:SettingsCard.HeaderIcon>
                     <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8F1;" />
                 </cui:SettingsCard.HeaderIcon>
@@ -205,6 +205,29 @@
                         </StackPanel>
                     </Button>
                 </StackPanel>
+            </cui:SettingsCard>
+            <cui:SettingsCard
+                Description="{x:Bind helper:LanguageService.GetString('ToolPage_RecordSubtitle')}"
+                Header="{x:Bind helper:LanguageService.GetString('ToolPage_RecordHeader')}"
+                Visibility="{x:Bind ViewModel.WavesRecordKey, Converter={StaticResource GrayUIToVisiblityConverter}}">
+                <cui:SettingsCard.HeaderIcon>
+                    <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xF272;" />
+                </cui:SettingsCard.HeaderIcon>
+                <Button
+                    Grid.Row="2"
+                    Grid.Column="2"
+                    Padding="12,8"
+                    HorizontalAlignment="Right"
+                    Command="{x:Bind ViewModel.OpenWavesRecordCommand}"
+                    Style="{ThemeResource TitleBarButtonStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <FontIcon
+                            FontFamily="Segoe Fluent Icons"
+                            FontSize="13"
+                            Glyph="&#xE8A7;" />
+                        <TextBlock FontSize="13" Text="{x:Bind helper:LanguageService.GetString('Display_Open')}" />
+                    </StackPanel>
+                </Button>
             </cui:SettingsCard>
             <Grid Margin="0,15,0,0" VerticalAlignment="Center">
                 <TextBlock

@@ -22,9 +22,7 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
     public IWavesPlayerCardCacheServices Cache { get; }
     public IPickersService PickersService { get; }
     public IWavesCloudGameService WavesCloudGameService { get; }
-    public FiveGroupModel FiveGroup { get; private set; }
-    public List<CommunityRoleData> AllRole { get; private set; }
-    public List<CommunityWeaponData> AllWeapon { get; private set; }
+    public WavesRecordAnalysisViewModel AnalysisViewModel { get; } = new();
     private WavesAnalysisPlayerCard Cards { get; set; }
 
     public WavesAnalysisRecordViewModel(
@@ -34,12 +32,14 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
         IWavesCloudGameService wavesCloudGameService
     )
     {
-        InitializeCharts();
         this.CloudGameContext = cloudGameContext;
         Cache = cache;
         PickersService = pickersService;
         WavesCloudGameService = wavesCloudGameService;
     }
+
+    [ObservableProperty]
+    public partial string SavePath { get; private set; }
 
     [ObservableProperty]
     public partial bool IsLoading { get; set; } = true;
@@ -51,9 +51,7 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
         {
             await LoadDataAsync();
             IsLoading = true;
-            await InitAnalysis();
-            await AnalysisStarAsync();
-            IsLoading = false;
+            await AnalysisViewModel.InitializeAsync(Cards ?? new() { Items = [] });
         }
         catch (Exception ex)
         {
@@ -61,14 +59,44 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
                 .Host.Services.GetRequiredService<SystemEventPublisher>()
                 .Publish(new() { Message = ex.Message, Delay = 30 });
         }
+        finally
+        {
+            IsLoading = false;
+        }
     }
 
-    private async Task InitAnalysis()
+    [RelayCommand]
+    void OpenFolderFile()
     {
-        this.FiveGroup = await RecordHelper.GetFiveGroupAsync(this.CTS.Token) ?? new();
-        this.AllRole = await RecordHelper.GetAllRoleAsync(this.CTS.Token) ?? new();
-        this.AllWeapon = await RecordHelper.GetAllWeaponAsync(this.CTS.Token) ?? new();
-        InitNavItems();
+        try
+        {
+            if (string.IsNullOrWhiteSpace(SavePath) || !System.IO.File.Exists(SavePath))
+            {
+                throw new FileNotFoundException("抽卡记录文件尚未生成或已被移动。", SavePath);
+            }
+
+            string parameters = $"/select,\"{Path.GetFullPath(SavePath)}\"";
+            var result = WindowExtension.ShellExecute(
+                IntPtr.Zero, "open", "explorer.exe", parameters, null,
+                WindowExtension.SW_SHOWNORMAL
+            );
+            if (result.ToInt64() <= 32)
+            {
+                throw new InvalidOperationException($"打开资源管理器失败，错误码：{result.ToInt64()}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Instance.Host.Services.GetRequiredService<SystemEventPublisher>()
+                .Publish(new() { Message = ex.Message, Delay = 30 });
+        }
+    }
+
+    protected override void OnDisposing()
+    {
+        AnalysisViewModel.Dispose();
+        Cards = null;
+        base.OnDisposing();
     }
 
     private async Task LoadDataAsync()
@@ -111,7 +139,9 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
                 );
             }
         }
-        this.Cards = await Cache.SaveAsync(cards);
+        var cacheCard = await Cache.SaveAsync(cards);
+        this.SavePath = cacheCard.Item2;
+        this.Cards = cacheCard.Item1;
     }
 
     [RelayCommand]
@@ -218,8 +248,9 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
             );
             return;
         }
-
-        this.Cards = await Cache.SaveAsync(mergedCard);
+        var cacheCard = await Cache.SaveAsync(mergedCard);
+        this.SavePath = cacheCard.Item2;
+        this.Cards = cacheCard.Item1;
         var names = string.Join("、", loadedNames);
         LegacyMessageBox.ShowInformation(
             LanguageService.FormatByText(
@@ -229,14 +260,18 @@ public sealed partial class WavesAnalysisRecordViewModel : WindowViewModelBase
             )
         );
         IsLoading = true;
-        await InitAnalysis();
-        await AnalysisStarAsync();
-        IsLoading = false;
+        try
+        {
+            await AnalysisViewModel.InitializeAsync(Cards);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
     }
 
     internal void SetSessionAsync(CloudGameLoginSession session)
     {
         this.Session = session;
     }
-
 }

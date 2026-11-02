@@ -20,9 +20,6 @@ public sealed partial class ShellViewModel : ViewModelBase
     private IGameEventSubscription? _systemEventSubscription;
 
     public ShellViewModel(
-        [FromKeyedServices(nameof(HomeNavigationService))] INavigationService homeNavigationService,
-        [FromKeyedServices(nameof(HomeNavigationViewService))]
-            INavigationViewService homeNavigationViewService,
         IAppContext<App> appContext,
         IWindowManager windowManager,
         IViewFactorys viewFactorys,
@@ -33,8 +30,6 @@ public sealed partial class ShellViewModel : ViewModelBase
         ITaskManager taskManager
     )
     {
-        HomeNavigationService = homeNavigationService;
-        HomeNavigationViewService = homeNavigationViewService;
         AppContext = appContext;
         this.WindowManager = windowManager;
         ViewFactorys = viewFactorys;
@@ -49,8 +44,6 @@ public sealed partial class ShellViewModel : ViewModelBase
     [ObservableProperty]
     public partial NotifyIconMenu SystemMenu { get; set; }
 
-    public INavigationService HomeNavigationService { get; }
-    public INavigationViewService HomeNavigationViewService { get; }
     public IAppContext<App> AppContext { get; }
     public IViewFactorys ViewFactorys { get; }
     public IWallpaperService WallpaperService { get; }
@@ -166,25 +159,25 @@ public sealed partial class ShellViewModel : ViewModelBase
         switch (launcheArgs)
         {
             case "Home":
-                this.HomeNavigationService.NavigationTo<HomeViewModel>(
+                this.WindowManager.Shell.NavigationService.NavigationTo<HomeViewModel>(
                     null,
                     new DrillInNavigationTransitionInfo()
                 );
                 break;
             case "WutheringWaves":
-                this.HomeNavigationService.NavigationTo<WavesV2GameContextViewModel>(
+                this.WindowManager.Shell.NavigationService.NavigationTo<WavesV2GameContextViewModel>(
                     null,
                     new DrillInNavigationTransitionInfo()
                 );
                 break;
             case "PunishingGrayRaven":
-                this.HomeNavigationService.NavigationTo<PunishV2GameContextViewModel>(
+                this.WindowManager.Shell.NavigationService.NavigationTo<PunishV2GameContextViewModel>(
                     null,
                     new DrillInNavigationTransitionInfo()
                 );
                 break;
             case "CloudWutheringWaves":
-                this.HomeNavigationService.NavigationTo<WavesCloudGameViewModel>(
+                this.WindowManager.Shell.NavigationService.NavigationTo<WavesCloudGameViewModel>(
                     null,
                     new DrillInNavigationTransitionInfo()
                 );
@@ -210,8 +203,8 @@ public sealed partial class ShellViewModel : ViewModelBase
     [RelayCommand]
     void BackPage()
     {
-        if (HomeNavigationService.CanGoBack)
-            HomeNavigationService.GoBack();
+        if (this.WindowManager.Shell.NavigationService.CanGoBack)
+            this.WindowManager.Shell.NavigationService.GoBack();
     }
 
     [RelayCommand]
@@ -261,7 +254,7 @@ public sealed partial class ShellViewModel : ViewModelBase
     [RelayCommand]
     void OpenSetting()
     {
-        this.HomeNavigationService.NavigationTo<SettingViewModel>(
+        this.WindowManager.Shell.NavigationService.NavigationTo<SettingViewModel>(
             "Setting",
             new DrillInNavigationTransitionInfo()
         );
@@ -410,7 +403,7 @@ public sealed partial class ShellViewModel : ViewModelBase
 
     internal void SetSelectItem(Type sourcePageType)
     {
-        var page = this.HomeNavigationViewService.GetSelectItem(sourcePageType);
+        var page = WindowManager.Shell.NavigationViewService.GetSelectItem(sourcePageType);
         SelectItem = page;
     }
 
@@ -420,7 +413,7 @@ public sealed partial class ShellViewModel : ViewModelBase
     [RelayCommand]
     public async Task OpenDevShellDialog(KeyRoutedEventArgs args)
     {
-        if(args.Key == Windows.System.VirtualKey.F12)
+        if (args.Key == Windows.System.VirtualKey.F12)
         {
             await this.WindowManager.Shell.DialogManager.ShowGrayConfigAsync();
         }

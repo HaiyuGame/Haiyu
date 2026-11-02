@@ -6,9 +6,9 @@ namespace Haiyu.ABI.Services;
 
 /// <summary>ETW FPS 监控服务。</summary>
 public sealed class FpsMonitorService
-    : IPrivilegedService<FpsMonitorRequest, RunResult, FpsMonitorProgress>
+    : IPrivilegedService<FpsMonitorRequest, FpsMonitorProgress, RunResult>
 {
-    public PrivilegedServiceContract<FpsMonitorRequest, RunResult, FpsMonitorProgress> Contract =>
+    public PrivilegedServiceContract<FpsMonitorRequest, FpsMonitorProgress, RunResult> Contract =>
         ABIRuntime.Contract.FpsMonitorContract;
 
     public async ValueTask<RunResult> ExecuteAsync(

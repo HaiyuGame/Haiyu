@@ -20,15 +20,11 @@ public enum GrayConfigId : uint
     /// </summary>
     WavesGameBunleOpen = 1002u,
 
-    /// <summary>
-    /// 官方启动器支持回写开关，输入1003
-    /// </summary>
-    OfficialLauncheWrite = 1003u,
 
     /// <summary>
-    /// 自定义启动路径，输入1004
+    /// 抽卡记录V3
     /// </summary>
-    CustomLauncheExeMod = 1004,
+    WavesRecordManager = 1005,
 }
 
 public partial class GrayConfigItem : ObservableObject

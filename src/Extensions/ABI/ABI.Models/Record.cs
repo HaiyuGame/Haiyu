@@ -66,7 +66,10 @@ public sealed partial record FpsMonitorProgress([property: JsonPropertyName("dat
 /// <param name="code"></param>
 /// <param name="msg"></param>
 [MemoryPackable]
-public sealed partial record RunResult(int code, string msg);
+public sealed partial record RunResult(int code, string msg)
+{
+    public static RunResult Success => new RunResult(0, "Success");
+}
 
 public enum PipeMessageKind
 {
