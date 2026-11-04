@@ -244,7 +244,6 @@ partial class KuroGameContextBaseV2
         var list = files.ToList();
         if (list.Count == 0)
             return false;
-        // 对真实的每文件候选 URL 测速，保留不同 FromFolder 和失败后的 CDN 重试。
         var sample = list.MinBy(x => Math.Abs(x.Size - 50L * 1024 * 1024))!;
         GameEventPublisher.Publish(
             new()
@@ -381,8 +380,6 @@ partial class KuroGameContextBaseV2
         await ResolveDownloadFolderAsync(option);
         var cache = option.ResolveDownloadFolder(baseFolder);
         _installGameResourceCts = state.CancelToken;
-        // 提前安装和普通更新始终按清单目标版本获取完整校验索引，缺失时停止安装。
-        // 校验锁定本次下载清单的逐包目标，避免沿用界面中的本地版本而误选预下载配置。
         var verificationParameter = new GameResourceParameter
         {
             BundleName = plan.BundleName ?? parameter?.BundleName,
@@ -390,8 +387,6 @@ partial class KuroGameContextBaseV2
                 plan.ResourceVersion == "2"
                     ? plan.ResourcePacks.ToDictionary(x => x.Name, x => x.TargetVersion)
                     : null,
-            // 预下载只下载；普通更新和预下载发布后的安装使用正式配置。
-            // 只有提前安装仍未发布的版本才使用预下载配置。
             VerificationSource = option.IsAdvance
                 ? GameVerificationSource.Predownload
                 : GameVerificationSource.Official,
@@ -474,7 +469,7 @@ partial class KuroGameContextBaseV2
                         ),
                 }
             );
-        Setups = steps.Select(x => x.Name).Append("重新校验文件").Append("写入配置文件").ToList();
+        Setups = steps.Select(x => x.Name).Append("重新校验文件").Append("删除旧文件").Append("写入配置文件").ToList();
         for (var i = 0; i < steps.Count; i++)
         {
             state.CancelToken.Token.ThrowIfCancellationRequested();
@@ -504,14 +499,21 @@ partial class KuroGameContextBaseV2
         )
             return false;
         state.CancelToken.Token.ThrowIfCancellationRequested();
-        foreach (var dest in plan.DeleteFiles)
-        {
-            var path = BuildFileHelper.ResolveFilePath(baseFolder, dest);
-            if (File.Exists(path))
-                File.Delete(path);
-        }
-        state.CancelToken.Token.ThrowIfCancellationRequested();
         CurrentSetups = steps.Count + 1;
+        await GameEventPublisher.PublishStepAsync("删除旧文件", CurrentSetups, Setups, isProd: false);
+        await using var deletion = new global::Waves.Core.GameContext.Common.FilesAction.FileDeleteResource();
+        deletion.SetParam(new()
+        {
+            ["files"] = plan.DeleteFiles.Select(dest => BuildFileHelper.ResolveFilePath(baseFolder, dest)),
+            ["downloadState"] = state
+        }, GameEventPublisher);
+        _currentRunningAction = deletion;
+        Logger.WriteInfo($"开始删除旧文件：{plan.DeleteFiles.Count} 个");
+        if (await deletion.ExecuteAsync(true) is not true)
+            return false;
+        Logger.WriteInfo("旧文件删除完成");
+        state.CancelToken.Token.ThrowIfCancellationRequested();
+        CurrentSetups = steps.Count + 2;
         await GameEventPublisher.PublishStepAsync(
             "写入配置文件",
             CurrentSetups,
@@ -697,3 +699,4 @@ partial class KuroGameContextBaseV2
         }
     }
 }
+

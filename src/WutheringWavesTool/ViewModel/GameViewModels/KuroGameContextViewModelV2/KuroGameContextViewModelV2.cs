@@ -402,6 +402,8 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
                     ShowGameDownloadingBth(status);
                     this.MaxProgressValue = args.FileTotal;
                     this.CurrentProgressValue = args.CurrentFile;
+                    this.BottomBarContent = args.DeleteString;
+                    this.ActiveFile = args.DeleteString;
                     PauseStartEnable = false;
                     this.BunleBthEnable = false;
                 }
@@ -421,7 +423,13 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
                     || args.Type == GameContextActionType.Decompress
                 )
                 {
-                    this.BunleBthEnable = false;
+                    BunleBthEnable = false;
+                    // 预下载只叠加预下载控制，不切走正式版本的启动和工具入口。
+                    PredCardVisibility = Visibility.Visible;
+                    PredDownloadingVisibility = Visibility.Visible;
+                    PredDownloadBthVisibility = Visibility.Collapsed;
+                    PredDownloadDoneVisibility = Visibility.Collapsed;
+                    PreAdvanceVisiblity = Visibility.Collapsed;
                     if (GameContext.IsDownloadTaskCancel())
                     {
                         return;
@@ -693,6 +701,8 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
         {
             if (
                 GameContext.ProgressState.LastArgs is { } snapshot
+                // 只跳过占用正式安装目录的任务；预下载仍需恢复启动入口和页面内容。
+                && !snapshot.Prod
                 && (
                     snapshot.Type
                         is GameContextActionType.Preparing
@@ -710,14 +720,13 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
             ProcessAction = true;
             var token = LifetimeToken;
             this.BunleBthEnable = false;
-            var renderVersion = Volatile.Read(ref _progressRenderVersion);
             var context = GameContext;
             var status = await context.GetGameContextStatusAsync(token);
             var hasAdvanceInstalled = await HasAdvanceInstalledAsync(status);
-            if (!IsCurrentProgressRender(renderVersion, context))
+            if (!IsAlive || refreshToken.IsCancellationRequested || !ReferenceEquals(GameContext, context))
                 return;
             _lastGameStatus = status;
-            if (IsTransferPreparing || context.ProgressState.IsActive)
+            if ((IsTransferPreparing || context.ProgressState.IsActive) && !context.ProgressState.Prod)
                 return;
             if (!status.IsGameExists)
             {
@@ -759,7 +768,7 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
                 token
             );
             var wallpaperType = await AppSettings.GetWallpaperTypeAsync(token);
-            if (!IsCurrentProgressRender(renderVersion, context))
+            if (!IsAlive || refreshToken.IsCancellationRequested || !ReferenceEquals(GameContext, context))
                 return;
 
             if (status.IsPredownloaded && !hasAdvanceInstalled)
