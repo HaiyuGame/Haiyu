@@ -1,6 +1,6 @@
 using Haiyu.Common.Contracts;
 
-namespace Haiyu.ViewModel.WavesRecordManager;
+namespace Haiyu.ViewModel.WavesRecordManagerVM;
 
 public partial class WavesRecordManagerViewModel : WindowViewModelBase
 {

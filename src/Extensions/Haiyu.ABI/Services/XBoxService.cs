@@ -26,11 +26,16 @@ public class XBoxService
     private bool _xPressed;
     private bool _bPressed;
 
-    public XBoxService(XBoxController xBoxController)
+    private readonly IXboxSessionSource _sessionSource;
+
+    /// <summary>读取所有四个槽位，不要求开启鼠标映射。</summary>
+    public XboxSession[] GetSessions() => _sessionSource.GetSessions();
+
+    public XBoxService(XBoxController xBoxController, IXboxSessionSource sessionSource)
     {
         Controller = xBoxController;
+        _sessionSource = sessionSource;
         _cts = new CancellationTokenSource();
-        Controller = new XBoxController();
         _pollTask = Task.Run(() => PollLoopAsync(_cts.Token), _cts.Token);
     }
 

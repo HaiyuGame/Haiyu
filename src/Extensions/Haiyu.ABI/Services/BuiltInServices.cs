@@ -50,6 +50,10 @@ public static class BuiltInServices
             RunResult,
             XboxCloseControllerService
         >(Contract.XboxCloseControllerContract);
+        services.AddSingleton<IXboxSessionSource, XInputSessionSource>();
+        services.AddPrivilegedService<
+            XboxSessionRequest, XboxSessionReportProcess, RunResult, XboxSessionService
+        >(Contract.XboxSessionContract);
         return services;
     }
 }

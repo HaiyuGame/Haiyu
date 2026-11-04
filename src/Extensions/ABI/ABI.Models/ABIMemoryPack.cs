@@ -23,6 +23,9 @@ public static class ABIMemoryPack
         MemoryPackFormatterProvider.Register<CMonitorProgress>();
         MemoryPackFormatterProvider.Register<FpsMonitorRequest>();
         MemoryPackFormatterProvider.Register<FpsMonitorProgress>();
+        MemoryPackFormatterProvider.Register<XboxSessionRequest>();
+        MemoryPackFormatterProvider.Register<XboxSessionReportProcess>();
+        MemoryPackFormatterProvider.Register<XboxSession>();
         MemoryPackFormatterProvider.Register<RunResult>();
         MemoryPackFormatterProvider.Register<MonitorRecord>();
         MemoryPackFormatterProvider.Register<HardwareInfo>();

@@ -22,6 +22,8 @@ namespace ABI.Models;
 [JsonSerializable(typeof(XboxExtOpenRequest))]
 [JsonSerializable(typeof(XboxExtCloseRequest))]
 [JsonSerializable(typeof(XboxReportProcess))]
+[JsonSerializable(typeof(XboxSessionRequest))]
+[JsonSerializable(typeof(XboxSessionReportProcess))]
 public partial class ABIJsonContext : JsonSerializerContext
 {
     

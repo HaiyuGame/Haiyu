@@ -48,3 +48,4 @@ public class XboxCloseControllerService
         return await XBoxService.SetModelAsync(false);
     }
 }
+

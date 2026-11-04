@@ -56,4 +56,8 @@ public interface IDialogManager
     Task ShowWavesRecordCreateForGameAsync(string contextName);
     Task<bool> ShowWavesRecordMergeAsync(WavesRecordMergeRequest request);
     Task<bool> ShowWutheringWavesToolImportAsync(WavesRecordMergeRequest request);
+
+
+    Task ShowWavesRenameAsync(WavesRecordMergeRequest request);
+
 }
