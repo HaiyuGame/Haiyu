@@ -1,3 +1,7 @@
 namespace Haiyu.Models.Dialogs;
 
-public sealed record WavesRecordMergeRequest(string SessionId, string RecordName, nint WindowHandle);
+public sealed record WavesRecordMergeRequest(
+    string SessionId,
+    string RecordName,
+    nint WindowHandle = 0
+);

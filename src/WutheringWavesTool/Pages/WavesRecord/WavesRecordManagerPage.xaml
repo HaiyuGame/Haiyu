@@ -14,7 +14,7 @@
     xmlns:qrModel="using:Waves.Api.Models.QRLogin"
     xmlns:ui="using:Haiyu.Controls"
     xmlns:vmWrapper="using:Haiyu.ViewModel"
-    xmlns:wr="using:Haiyu.ViewModel.WavesRecordManager"
+    xmlns:wr="using:Haiyu.ViewModel.WavesRecordManagerVM"
     xmlns:wrapper="using:Waves.Api.Models"
     xmlns:wui="using:CommunityToolkit.WinUI.Controls"
     Loaded="Page_Loaded"
@@ -68,13 +68,13 @@
                     HorizontalAlignment="Right"
                     Orientation="Horizontal"
                     Spacing="5">
-                    <Button ToolTipService.ToolTip="新增">
+                    <Button Command="{x:Bind ViewModel.ShowAddGameContextLogCommand}" ToolTipService.ToolTip="新增">
                         <FontIcon
                             FontFamily="Segoe Fluent Icons"
                             FontSize="12"
                             Glyph="&#xE710;" />
                     </Button>
-                    <Button ToolTipService.ToolTip="编辑选中名称">
+                    <Button Command="{x:Bind ViewModel.ShowRenameDialogCommand}" ToolTipService.ToolTip="编辑选中名称">
                         <FontIcon
                             FontFamily="Segoe Fluent Icons"
                             FontSize="12"

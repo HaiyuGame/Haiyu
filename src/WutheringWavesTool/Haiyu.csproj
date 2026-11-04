@@ -294,6 +294,9 @@
 		<None Update="Assets\HpatchzResource\hpatchz.exe">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
+		<Page Update="Pages\Dialogs\WavesRecords\RenameRecordDialog.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</Page>
 		<Page Update="Pages\Dialogs\SelectGameBunleDialog.xaml">
 		  <SubType>Designer</SubType>
 		</Page>
@@ -399,6 +402,7 @@
 	  <None Remove="Pages\Dialogs\CloudSelectNodeDialog.xaml" />
 	  <None Remove="Pages\Dialogs\GameSettings\CloudGameSettingDialog.xaml" />
 	  <None Remove="Pages\Dialogs\KuroGameSettingDialog.xaml" />
+	  <None Remove="Pages\Dialogs\WavesRecords\RenameRecordDialog.xaml" />
 	  <None Remove="Pages\GamePages\WavesCloudGamePage.xaml" />
 	  <None Remove="Pages\ToolkitPage.xaml" />
 	  <None Remove="Pages\Toolkits\AutoKuroTokenPage.xaml" />

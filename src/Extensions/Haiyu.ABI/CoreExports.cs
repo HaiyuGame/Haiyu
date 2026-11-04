@@ -32,6 +32,7 @@ public static unsafe class CoreExports
                 return;
             using var services = new ServiceCollection()
                 .AddSingleton<XBoxController>()
+                .AddSingleton<XBoxService>()
                 .AddBuiltInServices()
                 .BuildServiceProvider(
                     new ServiceProviderOptions { ValidateScopes = true, ValidateOnBuild = true }

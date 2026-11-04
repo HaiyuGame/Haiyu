@@ -23,6 +23,7 @@ internal static class Program
         ABIMemoryPack.EnsureFormatters();
         var tests = new (string Name, Func<Task> Run)[]
         {
+            ("Xbox 档位、序列化、服务与本机 XInput", TestXboxSessionsAsync),
             ("DI 构造注入、作用域与释放", TestDependencyInjectionAsync),
             ("MonitorRecord JSON/MemoryPack AOT 序列化", TestMonitorSerializationAsync),
             ("64 MiB 分帧与双向完整性", TestLargeMessagesAsync),
@@ -74,6 +75,60 @@ internal static class Program
         }
         Console.WriteLine(failures == 0 ? "ALL TESTS PASSED" : $"FAILED: {failures}");
         return failures == 0 ? 0 : 1;
+    }
+
+    private static async Task TestXboxSessionsAsync()
+    {
+        static void Check(bool condition, string message)
+        {
+            if (!condition) throw new InvalidDataException(message);
+        }
+        foreach (byte type in new byte[] { 0, 1, 2, 3, 255 })
+        foreach (byte level in new byte[] { 0, 1, 2, 3, 255 })
+        {
+            var session = new XboxSession { IsConnected = true, Power = 99 };
+            XInputSessionSource.ApplyBattery(session, type, level);
+            var expected = type is 2 or 3 && level <= 3
+                ? (XboxBatteryLevel)(level + 1) : XboxBatteryLevel.Unknown;
+            Check(session.BatteryLevel == expected && session.Power is null, "电量有效性错误");
+        }
+        var snapshot = new XboxSessionReportProcess([
+            new() { UserIndex = 0, BatteryType = XboxBatteryType.Disconnected },
+            new() { UserIndex = 1, IsConnected = true, ConnectionType = XboxConnectionType.Wired, BatteryType = XboxBatteryType.Wired },
+            new() { UserIndex = 2, IsConnected = true, ConnectionType = XboxConnectionType.Wireless, BatteryType = XboxBatteryType.Alkaline, BatteryLevel = XboxBatteryLevel.Low },
+            new() { UserIndex = 3, StateErrorCode = 123 },
+        ]);
+        var json = JsonSerializer.Serialize(snapshot, ABIJsonContext.Default.XboxSessionReportProcess);
+        var jsonCopy = JsonSerializer.Deserialize(json, ABIJsonContext.Default.XboxSessionReportProcess)!;
+        var bytes = MemoryPackSerializer.Serialize(snapshot, ABIMemoryPack.Options);
+        var copy = MemoryPackSerializer.Deserialize<XboxSessionReportProcess>(bytes, ABIMemoryPack.Options)!;
+        Check(jsonCopy.Controllers.Length == 4 && copy.Controllers[2].BatteryLevel == XboxBatteryLevel.Low
+            && copy.Controllers[3].StateErrorCode == 123 && copy.Controllers[0].Power is null, "Xbox 序列化错误");
+        XboxSessionReportProcess? reported = null;
+        var service = new XboxSessionService(new XboxFixtureSource(snapshot.Controllers));
+        var result = await service.ExecuteAsync(new(), new InlineProgress<XboxSessionReportProcess>(p => reported = p), default);
+        Check(result == RunResult.Success && reported?.Controllers.Length == 4, "Xbox 快照服务错误");
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+        try
+        {
+            await service.ExecuteAsync(new(), new InlineProgress<XboxSessionReportProcess>(_ => throw new Exception()), cts.Token);
+            throw new InvalidDataException("Xbox 取消未生效");
+        }
+        catch (OperationCanceledException) { }
+        using var provider = new ServiceCollection().AddBuiltInServices().BuildServiceProvider();
+        using var scope = provider.CreateScope();
+        var registered = scope.ServiceProvider.GetRequiredKeyedService<IPrivilegedService<XboxSessionRequest, XboxSessionReportProcess, RunResult>>(Contract.XboxSessionContract.Operation);
+        reported = null;
+        result = await registered.ExecuteAsync(new(), new InlineProgress<XboxSessionReportProcess>(p => reported = p), default);
+        Check(result == RunResult.Success && reported?.Controllers.Length == 4, "本机 XInput 查询失败");
+        Check(reported!.Controllers.Select(x => x.UserIndex).SequenceEqual(new[] { 0, 1, 2, 3 }), "槽位顺序错误");
+        Console.WriteLine("Xbox connected slots: " + string.Join(",", reported.Controllers.Where(x => x.IsConnected).Select(x => x.UserIndex)));
+    }
+
+    private sealed class XboxFixtureSource(XboxSession[] sessions) : IXboxSessionSource
+    {
+        public XboxSession[] GetSessions() => sessions;
     }
 
     private static async Task TestDependencyInjectionAsync()

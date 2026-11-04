@@ -21,7 +21,7 @@ using Haiyu.ViewModel.GameViewModels.GameContexts;
 using Haiyu.ViewModel.OOBEViewModels;
 using Haiyu.ViewModel.SortingViewModels;
 using Haiyu.ViewModel.ToolkitsViewModel;
-using Haiyu.ViewModel.WavesRecordManager;
+using Haiyu.ViewModel.WavesRecordManagerVM;
 using Haiyu.ViewModel.WikiViewModels;
 using MemoryPack;
 using Microsoft.Extensions.Hosting;
@@ -202,6 +202,8 @@ public static class InstanceBuilderExtensions
                     .AddTransient<MergeRecordDialog>()
                     .AddTransient<WutheringWavesToolImportDialog>()
                     .AddTransient<MergeRecordViewModel>()
+                    .AddTransient<RenameRecordDialog>()
+                    .AddTransient<RenameRecordViewModel>()
                     #endregion
                 #endregion
                     #region More

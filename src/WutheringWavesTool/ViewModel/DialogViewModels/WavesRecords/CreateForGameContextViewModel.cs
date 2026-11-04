@@ -48,9 +48,12 @@ public partial class CreateForGameContextViewModel : DialogViewModelBase
     [RelayCommand]
     async Task Loaded()
     {
-        this.GameContext = Instance.Host.Services.GetRequiredKeyedService<IGameContextV2>(
-            this.ContextName
-        );
+        if (!string.IsNullOrWhiteSpace(ContextName))
+        {
+            this.GameContext = Instance.Host.Services.GetRequiredKeyedService<IGameContextV2>(
+                this.ContextName
+            );
+        }
         Servers = ServerDisplay.GetWavesV2Games;
         if (string.IsNullOrWhiteSpace(ContextName))
         {

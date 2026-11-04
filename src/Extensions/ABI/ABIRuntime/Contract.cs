@@ -79,4 +79,11 @@ public static class Contract
             ABIJsonContext.Default.XboxReportProcess,
             ABIJsonContext.Default.RunResult
         );
+    /// <summary>单次采集四个 XInput 槽位，通过进度返回快照。</summary>
+    public static PrivilegedServiceContract<XboxSessionRequest, XboxSessionReportProcess, RunResult>
+        XboxSessionContract => new(
+            "haiyu.xboxSession.v1",
+            ABIJsonContext.Default.XboxSessionRequest,
+            ABIJsonContext.Default.XboxSessionReportProcess,
+            ABIJsonContext.Default.RunResult);
 }

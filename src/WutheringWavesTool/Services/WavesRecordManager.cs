@@ -181,6 +181,11 @@ public class WavesRecordManager
         return await CacheService.LoadAllAsync();
     }
 
+    public async Task<WavesAnalysisPlayerCard?> GetLocalWavesRecordAsync(string sessionId)
+    {
+        return await CacheService.LoadAsync(sessionId);
+    }
+
     public async Task<bool> ImportRecordCardsAsync(string filePath, string targetSessionId)
     {
         var preview = await PreviewRecordImportAsync(filePath, targetSessionId);

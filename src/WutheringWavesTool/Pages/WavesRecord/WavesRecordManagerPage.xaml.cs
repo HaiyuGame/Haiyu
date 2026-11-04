@@ -1,5 +1,5 @@
 using Haiyu.Common.Contracts;
-using Haiyu.ViewModel.WavesRecordManager;
+using Haiyu.ViewModel.WavesRecordManagerVM;
 
 namespace Haiyu.Pages.WavesRecord;
 
