@@ -6,7 +6,7 @@ using Waves.Settings;
 
 namespace Haiyu.ABI.Services;
 
-public class XBoxService
+public class XBoxService : IDisposable
 {
     public XBoxController Controller { get; private set; }
 
@@ -132,5 +132,16 @@ public class XBoxService
         }
         catch (OperationCanceledException) { }
         catch (Exception) { }
+    }
+
+    /// <summary>
+    /// 停止轮询循环。轮询线程持有 XInput P/Invoke 资源，
+    /// 宿主进程退出时若不停止，进程终止路径上的调用会触发 fail-fast（0xC0000409）。
+    /// </summary>
+    public void Dispose()
+    {
+        _cts?.Cancel();
+        _cts?.Dispose();
+        _cts = null;
     }
 }
