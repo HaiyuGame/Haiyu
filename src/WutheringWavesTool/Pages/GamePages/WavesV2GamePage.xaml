@@ -21,6 +21,7 @@
     xmlns:n="using:System.Numerics"
     xmlns:property="using:Haiyu.Controls.Propertys"
     xmlns:ui="using:CommunityToolkit.WinUI"
+    xmlns:w="using:Haiyu.Controls.Models"
     xmlns:wui="using:CommunityToolkit.WinUI.Controls"
     Background="Transparent"
     NavigationCacheMode="Disabled"
@@ -460,13 +461,23 @@
                             BorderThickness="1,1,1,0"
                             CornerRadius="5 5 0 0"
                             Visibility="{x:Bind ViewModel.GameLauncherBthVisibility, Mode=OneWay}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto" />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
                             <SystemBackdropElement Grid.ColumnSpan="2" CornerRadius="5 5 0 0">
                                 <SystemBackdropElement.SystemBackdrop>
                                     <DesktopAcrylicBackdrop />
                                 </SystemBackdropElement.SystemBackdrop>
                             </SystemBackdropElement>
+                            <FontIcon
+                                Margin="5,5,0,0"
+                                FontFamily="Segoe Fluent Icons"
+                                FontSize="12"
+                                Glyph="&#xEC92;" />
                             <TextBlock
-                                Margin="4"
+                                Grid.Column="1"
+                                Margin="0,5,0,0"
                                 HorizontalAlignment="Center"
                                 FontFamily="{ThemeResource DefaultFont}"
                                 Text="{x:Bind ViewModel.BottomBarContent, Mode=OneWay}" />
@@ -1369,44 +1380,68 @@
                     </GridView>
                 </Border>
             </Grid>
-            <Button
-                x:Name="ServerSelectorButton"
-                Margin="0,-1,0,0"
-                Padding="10,5"
+            <StackPanel
+                Margin="0,-30,0,0"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Top"
-                AutomationProperties.Name="区服选择"
-                BorderBrush="{ThemeResource AccentAAFillColorDefaultBrush}"
-                BorderThickness="0,0,0,2"
-                Click="ToggleServerSelector"
-                CornerRadius="5"
-                Style="{ThemeResource TitleBarButtonStyle}">
-                <StackPanel Orientation="Horizontal" Spacing="12">
-                    <FontIcon
-                        FontSize="15"
-                        Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"
-                        Glyph="&#xE8FD;" />
-                    <StackPanel
-                        x:Name="CollapsedServerContent"
-                        Orientation="Horizontal"
-                        Spacing="8">
-                        <TextBlock
-                            x:Name="SelectedServerLabel"
-                            FontSize="13"
+                Orientation="Horizontal"
+                Spacing="10">
+                <Button
+                    x:Name="ServerSelectorButton"
+                    Padding="10,5"
+                    AutomationProperties.Name="区服选择"
+                    BorderBrush="{ThemeResource AccentAAFillColorDefaultBrush}"
+                    BorderThickness="0,0,0,2"
+                    Click="ToggleServerSelector"
+                    CornerRadius="5"
+                    Style="{ThemeResource TitleBarButtonStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <FontIcon
+                            FontSize="15"
                             Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"
-                            Text="{x:Bind ViewModel.SelectServer.Display, Mode=OneWay}" />
+                            Glyph="&#xE8FD;" />
+                        <StackPanel
+                            x:Name="CollapsedServerContent"
+                            Orientation="Horizontal"
+                            Spacing="8">
+                            <TextBlock
+                                x:Name="SelectedServerLabel"
+                                FontSize="13"
+                                Foreground="{ThemeResource AccentAAFillColorDefaultBrush}"
+                                Text="{x:Bind ViewModel.SelectServer.Display, Mode=OneWay}" />
+                        </StackPanel>
+                        <TextBlock
+                            x:Name="CollapseServerLabel"
+                            FontSize="13"
+                            Text="{x:Bind helper:LanguageService.GetString('Game_CloseServerSelect')}"
+                            Visibility="Collapsed" />
+                        <FontIcon
+                            x:Name="ServerSelectorChevron"
+                            FontSize="10"
+                            Glyph="&#xE70D;" />
                     </StackPanel>
-                    <TextBlock
-                        x:Name="CollapseServerLabel"
-                        FontSize="13"
-                        Text="{x:Bind helper:LanguageService.GetString('Game_CloseServerSelect')}"
-                        Visibility="Collapsed" />
-                    <FontIcon
-                        x:Name="ServerSelectorChevron"
-                        FontSize="10"
-                        Glyph="&#xE70D;" />
-                </StackPanel>
-            </Button>
+                </Button>
+                <Button
+                    Padding="10,5"
+                    BorderBrush="{ThemeResource AccentAAFillColorDefaultBrush}"
+                    BorderThickness="0,0,0,2"
+                    Content="下载壁纸"
+                    CornerRadius="5"
+                    Style="{ThemeResource TitleBarButtonStyle}">
+                    <Button.Flyout>
+                        <MenuFlyout>
+                            <MenuFlyoutItem
+                                Command="{x:Bind ViewModel.CopyWallpaperSourceCommand}"
+                                CommandParameter="{x:Bind w:WallpaperShowType.Image}"
+                                Text="复制首帧链接" />
+                            <MenuFlyoutItem
+                                Command="{x:Bind ViewModel.CopyWallpaperSourceCommand}"
+                                CommandParameter="{x:Bind w:WallpaperShowType.Video}"
+                                Text="复制视频链接" />
+                        </MenuFlyout>
+                    </Button.Flyout>
+                </Button>
+            </StackPanel>
         </StackPanel>
     </Grid>
 </Page>

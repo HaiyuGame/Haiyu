@@ -34,7 +34,7 @@ public sealed partial class WavesV2GamePage : Page, IPage
         var animation = new DoubleAnimation
         {
             From = from,
-            To = open ? 140 : 0,
+            To = open ? 175 : 0,
             Duration = new Duration(TimeSpan.FromMilliseconds(220)),
             EnableDependentAnimation = true,
             EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },

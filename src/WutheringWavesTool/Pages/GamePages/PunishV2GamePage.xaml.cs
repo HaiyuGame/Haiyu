@@ -49,10 +49,10 @@ public sealed partial class PunishV2GamePage : Page,IPage
         var animation = new DoubleAnimation
         {
             From = from,
-            To = open ? 140 : 0,
+            To = open ? 175 : 0,
             Duration = new Duration(TimeSpan.FromMilliseconds(220)),
             EnableDependentAnimation = true,
-            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },
         };
         Storyboard.SetTarget(animation, ServerSelectorMenu);
         Storyboard.SetTargetProperty(animation, "Height");

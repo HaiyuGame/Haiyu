@@ -6,6 +6,7 @@ using Waves.Core.Models.Enums;
 using Waves.Core.Models.Options;
 using Waves.Core.Services;
 using Waves.Core.Services.GameResourceProvider;
+using Windows.ApplicationModel.DataTransfer;
 
 namespace Haiyu.ViewModel.GameViewModels;
 
@@ -180,6 +181,29 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
     public abstract GameType GameType { get; }
 
     public IHaiyuMemoryCacheService CacheService { get; }
+
+    [ObservableProperty]
+    public partial string GameImageWallpaper { get; set; }
+
+    [ObservableProperty]
+    public partial string GameVideoWallpaper { get; set; }
+
+    [RelayCommand]
+    public void CopyWallpaperSource(WallpaperShowType sourceType)
+    {
+        var package = new DataPackage();
+        if(sourceType == WallpaperShowType.Image)
+        {
+            package.SetText(this.GameImageWallpaper);
+        }
+        else
+        {
+            package.SetText(this.GameVideoWallpaper);
+        }
+        Clipboard.SetContent(package);
+
+    }
+
 
     async partial void OnSelectServerChanged(ServerDisplay value)
     {
@@ -826,6 +850,8 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
             }
             if (isRefreshBackground && background != null) //是否刷新资源背景
             {
+                this.GameImageWallpaper = background.FirstFrameImage;
+                this.GameVideoWallpaper = background.BackgroundFile;
                 if (status.Gameing)
                 {
                     WallpaperService.SetMediaForUrl(
