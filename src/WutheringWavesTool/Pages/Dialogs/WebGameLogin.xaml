@@ -36,7 +36,8 @@
                         Grid.Column="1"
                         Margin="5,0,0,0"
                         Command="{x:Bind ViewModel.ShowGetGeetCommand}"
-                        Content="{x:Bind helper:LanguageService.GetString('Display_Item4')}" />
+                        Content="{x:Bind ViewModel.SendCodeText, Mode=OneWay}"
+                        IsEnabled="{x:Bind ViewModel.SendCodeEnable, Mode=OneWay}" />
                 </Grid>
             </Grid>
         </Border>

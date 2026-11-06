@@ -561,7 +561,11 @@
                                         <ToggleMenuFlyoutItem
                                             IsChecked="{x:Bind ViewModel.IsDx11Launcher, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                             Text="{x:Bind helper:LanguageService.GetString('Display_DX11Startup')}"
-                                            ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_ToggleStartupMode')}" />
+                                            ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_ToggleStartupMode')}">
+                                            <ToggleMenuFlyoutItem.Icon>
+                                                <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE723;" />
+                                            </ToggleMenuFlyoutItem.Icon>
+                                        </ToggleMenuFlyoutItem>
                                         <MenuFlyoutItem
                                             Command="{x:Bind ViewModel.RepirGameCommand}"
                                             IsEnabled="{x:Bind ViewModel.CanManageGameResources, Mode=OneWay}"

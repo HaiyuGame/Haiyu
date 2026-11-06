@@ -306,12 +306,9 @@
                                 Margin="0,0,8,0"
                                 HorizontalAlignment="Stretch"
                                 VerticalAlignment="Stretch"
-                                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
-                                BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
                                 BorderThickness="1"
                                 Command="{x:Bind ViewModel.OpenDataCenterCommand}"
-                                CornerRadius="3"
-                                Style="{ThemeResource TitleBarButtonStyle}">
+                                CornerRadius="3">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition />
@@ -335,12 +332,9 @@
                                 Margin="8,0"
                                 HorizontalAlignment="Stretch"
                                 VerticalAlignment="Stretch"
-                                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
-                                BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
                                 BorderThickness="1"
                                 Command="{x:Bind ViewModel.OpenResourceBriefingCommand}"
-                                CornerRadius="3"
-                                Style="{ThemeResource TitleBarButtonStyle}">
+                                CornerRadius="3">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition />
@@ -362,12 +356,9 @@
                                 Margin="8,0,0,0"
                                 HorizontalAlignment="Stretch"
                                 VerticalAlignment="Stretch"
-                                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
-                                BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
                                 BorderThickness="1"
                                 Command="{x:Bind ViewModel.OpenGrowthCalculatorCommand}"
-                                CornerRadius="3"
-                                Style="{ThemeResource TitleBarButtonStyle}">
+                                CornerRadius="3">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition />
@@ -392,12 +383,9 @@
                                 Margin="0,0,8,0"
                                 HorizontalAlignment="Stretch"
                                 VerticalAlignment="Stretch"
-                                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
-                                BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
                                 BorderThickness="1"
                                 Command="{x:Bind ViewModel.OpenCalendarCommand}"
-                                CornerRadius="3"
-                                Style="{ThemeResource TitleBarButtonStyle}">
+                                CornerRadius="3">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition />
@@ -422,12 +410,9 @@
                                 Margin="8,0"
                                 HorizontalAlignment="Stretch"
                                 VerticalAlignment="Stretch"
-                                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
-                                BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
                                 BorderThickness="1"
                                 Command="{x:Bind ViewModel.OpenMapCommand}"
-                                CornerRadius="3"
-                                Style="{ThemeResource TitleBarButtonStyle}">
+                                CornerRadius="3">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition />
@@ -452,12 +437,9 @@
                                 Margin="8,0,0,0"
                                 HorizontalAlignment="Stretch"
                                 VerticalAlignment="Stretch"
-                                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
-                                BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
                                 BorderThickness="1"
                                 Command="{x:Bind ViewModel.OpenGameSignCommand}"
-                                CornerRadius="3"
-                                Style="{ThemeResource TitleBarButtonStyle}">
+                                CornerRadius="3">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition />

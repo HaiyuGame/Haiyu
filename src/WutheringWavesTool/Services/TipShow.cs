@@ -23,6 +23,7 @@ public class TipShow : ITipShow
             PopupMessage popup = new(message, Owner, icon,theme);
             popup.ShowPopup();
         });
+        
     }
 
     public async Task ShowMessageAsync(string message,Symbol icon)
