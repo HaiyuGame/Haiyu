@@ -11,7 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Setup\FluentWPF\FluentWPF.csproj" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.142" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.161" />
   </ItemGroup>
 
   <!--
@@ -19,13 +19,8 @@
     FluentWPF reference has produced its net10 assembly during Rebuild.  App.xaml
     loads a dictionary from that assembly, so make the dependency explicit.
   -->
-  <Target Name="BuildFluentWpfBeforeMarkupCompile"
-          BeforeTargets="MarkupCompilePass1"
-          Condition="'$(DesignTimeBuild)' != 'true'">
-    <MSBuild Projects="..\Setup\FluentWPF\FluentWPF.csproj"
-             Targets="Build"
-             BuildInParallel="false"
-             Properties="Configuration=$(Configuration);TargetFramework=net10.0-windows" />
+  <Target Name="BuildFluentWpfBeforeMarkupCompile" BeforeTargets="MarkupCompilePass1" Condition="'$(DesignTimeBuild)' != 'true'">
+    <MSBuild Projects="..\Setup\FluentWPF\FluentWPF.csproj" Targets="Build" BuildInParallel="false" Properties="Configuration=$(Configuration);TargetFramework=net10.0-windows" />
   </Target>
 
 </Project>

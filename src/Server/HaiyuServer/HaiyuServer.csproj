@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3" />
-    <PackageReference Include="SqlSugarCore" Version="5.1.4.214" />
+    <PackageReference Include="SqlSugarCore" Version="5.1.4.221" />
   </ItemGroup>
 
   <ItemGroup>
