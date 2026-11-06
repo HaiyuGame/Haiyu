@@ -4,7 +4,6 @@ using ABI.Models;
 using ABIRuntime.Abstractions;
 using ABIRuntime.Runtime;
 using Haiyu.ABI.Services;
-using Haiyu.ABI.XBox.Commons;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Haiyu.ABI;
@@ -31,13 +30,38 @@ public static unsafe class CoreExports
             if (parts.Length != 2)
                 return;
             using var services = new ServiceCollection()
-                .AddSingleton<XBoxController>()
-                .AddSingleton<XBoxService>()
                 .AddBuiltInServices()
                 .BuildServiceProvider(
                     new ServiceProviderOptions { ValidateScopes = true, ValidateOnBuild = true }
                 );
             ElevatedHost.RunAsync(parts[0], parts[1], services).GetAwaiter().GetResult();
+        }
+        catch (Exception exception)
+        {
+            // 宿主启动失败必须留痕——此前 catch{} 静默吞掉 DI 验证异常，
+            // 宿主无声死亡，UI 侧只能看到管道连接超时，根因完全不可见。
+            TryWriteHostCrashLog(exception);
+        }
+    }
+
+    /// <summary>
+    /// 宿主启动失败的兜底日志（尽力而为，失败不可再抛）。
+    /// 路径固定为 Documents\Waves\appLogs\abi-host-crash.log，与主程序 appLog 同目录。
+    /// </summary>
+    private static void TryWriteHostCrashLog(Exception exception)
+    {
+        try
+        {
+            string directory = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                "Waves",
+                "appLogs"
+            );
+            Directory.CreateDirectory(directory);
+            File.AppendAllText(
+                Path.Combine(directory, "abi-host-crash.log"),
+                $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {exception}{Environment.NewLine}"
+            );
         }
         catch { }
     }
