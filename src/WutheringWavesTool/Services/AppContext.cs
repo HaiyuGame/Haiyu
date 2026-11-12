@@ -72,6 +72,9 @@ public class AppContext<T> : IAppContext<T>
             WindowManager.Shell.GetWindow().Activate();
             await InitGameCoreAsync();
             await CreateJumpListAsync();
+
+            bool usingSatori = GC.GetConfigurationVariables().ContainsKey("SatoriGC");
+            WindowExtension.MessageBox(IntPtr.Zero, $"SatoriGC开启状态：{usingSatori}", "Haiyu", 0);
         }
         catch (Exception ex)
         {
@@ -124,28 +127,30 @@ public class AppContext<T> : IAppContext<T>
         };
     }
 
-    IAsyncRelayCommand ShowWindowCommand => new AsyncRelayCommand(async () =>
-    {
-        if(WindowManager.GetWindowContext(IWindowManager.ShellKey) == null)
+    IAsyncRelayCommand ShowWindowCommand =>
+        new AsyncRelayCommand(async () =>
         {
-            await WindowManager.CreateShellWindowAsync();
-        }
-        else
+            if (WindowManager.GetWindowContext(IWindowManager.ShellKey) == null)
+            {
+                await WindowManager.CreateShellWindowAsync();
+            }
+            else
+            {
+                WindowManager.GetWindowContext(IWindowManager.ShellKey)!.Show();
+            }
+        });
+
+    IAsyncRelayCommand LowPowerModeCommand =>
+        new AsyncRelayCommand(async () =>
         {
-            WindowManager.GetWindowContext(IWindowManager.ShellKey)!.Show();
-        }
-    });
+            await WindowManager.RemoveShellWindowAsync();
+        });
 
-    IAsyncRelayCommand LowPowerModeCommand => new AsyncRelayCommand(async () =>
-    {
-        await WindowManager.RemoveShellWindowAsync();
-    });
-
-    IRelayCommand ExitWindowCommand => new RelayCommand(() =>
-    {
-        Process.GetCurrentProcess().Kill();
-    });
-
+    IRelayCommand ExitWindowCommand =>
+        new RelayCommand(() =>
+        {
+            Process.GetCurrentProcess().Kill();
+        });
 
     private async Task InitGameCoreAsync()
     {
@@ -193,8 +198,6 @@ public class AppContext<T> : IAppContext<T>
         args.Cancel = true;
     }
 
-
-
     public async Task UpdateAppAsync(bool isApply = false, CancellationToken token = default)
     {
         try
@@ -225,12 +228,15 @@ public class AppContext<T> : IAppContext<T>
                 var info = await service.GetLasterProgramInfoAsync(token);
                 if (info != null)
                 {
-                    if (!isApply && info.Version == await WindowManager.AppSettings.GetSkipAppVersionAsync())
+                    if (
+                        !isApply
+                        && info.Version == await WindowManager.AppSettings.GetSkipAppVersionAsync()
+                    )
                     {
                         return;
                     }
                     info.IsApply = isApply;
-                    if(WindowManager.Shell == null)
+                    if (WindowManager.Shell == null)
                     {
                         return;
                     }

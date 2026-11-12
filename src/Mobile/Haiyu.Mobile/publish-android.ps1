@@ -23,7 +23,7 @@
 [CmdletBinding()]
 param(
     [string]$Configuration = "Release",
-    [string]$Framework = "net10.0-android",
+    [string]$Framework = "net11.0-android",
     [string]$RuntimeIdentifier = "android-arm64",
     [string]$KeystorePath,
     [string]$Alias,

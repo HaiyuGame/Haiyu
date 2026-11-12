@@ -1,7 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
+	<Sdk Name="PublishWithSatoriGC"
+       Version="11.0.0-satori.42242472725.2"/>
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <TargetFramework>net11.0-windows10.0.19041.0</TargetFramework>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
     <RootNamespace>Haiyu</RootNamespace>
     <Platforms>x64</Platforms>
@@ -95,29 +97,17 @@
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.WinUI.Animations" Version="8.3.260402-preview2" />
     <PackageReference Include="CommunityToolkit.WinUI.Behaviors" Version="8.3.260402-preview2" />
-    <PackageReference
-      Include="CommunityToolkit.WinUI.Controls.Primitives"
-      Version="8.3.260402-preview2"
-    />
-    <PackageReference
-      Include="CommunityToolkit.WinUI.Controls.Segmented"
-      Version="8.3.260402-preview2"
-    />
-    <PackageReference
-      Include="CommunityToolkit.WinUI.Controls.SettingsControls"
-      Version="8.3.260402-preview2"
-    />
-    <PackageReference
-      Include="CommunityToolkit.WinUI.Controls.Sizers"
-      Version="8.3.260402-preview2"
-    />
+    <PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" Version="8.3.260402-preview2" />
+    <PackageReference Include="CommunityToolkit.WinUI.Controls.Segmented" Version="8.3.260402-preview2" />
+    <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.3.260402-preview2" />
+    <PackageReference Include="CommunityToolkit.WinUI.Controls.Sizers" Version="8.3.260402-preview2" />
     <PackageReference Include="CommunityToolkit.WinUI.Extensions" Version="8.3.260402-preview2" />
     <PackageReference Include="CommunityToolkit.WinUI.Helpers" Version="8.3.260402-preview2" />
     <PackageReference Include="CommunityToolkit.WinUI.Media" Version="8.3.260402-preview2" />
     <PackageReference Include="MemoryPack" Version="1.21.4" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.14" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="11.0.0" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.14" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="11.0.0" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4314.35" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2957" />
     <PackageReference Include="Microsoft.WindowsAppSDK.InteractiveExperiences" Version="2.6.5" />
@@ -130,7 +120,7 @@
     <PackageReference Include="WinUIEx" Version="2.9.3" />
     <PackageReference Include="ZLinq" Version="1.6.1" />
     <PackageReference Include="ZXing.Net" Version="0.16.11" />
-    <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.367">
+    <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.371">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -138,11 +128,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Extensions\ABI\ABIRuntime\ABIRuntime.csproj" />
     <ProjectReference Include="..\GrayExtension\GrayExtension.csproj" />
-    <ProjectReference
-      Include="..\Haiyu.Analyzers\Haiyu.Analyzers.csproj"
-      OutputItemType="Analyzer"
-      ReferenceOutputAssembly="false"
-    />
+    <ProjectReference Include="..\Haiyu.Analyzers\Haiyu.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\Extensions\Haiyu.Plugin\Haiyu.Plugin.csproj" />
     <ProjectReference Include="..\Extensions\Haiyu.ServiceHost\Haiyu.ServiceHost.csproj" />
     <ProjectReference Include="..\Extensions\Cacheing\Cacheing.csproj" />
@@ -425,10 +411,17 @@
     <None Remove="Pages\WavesAnalysisRecordPage.xaml" />
     <None Remove="WindowModels\CloudGameWindows.xaml" />
   </ItemGroup>
-  <ItemGroup>
-    <PRIResource Remove="Common\Plugins\**" />
-  </ItemGroup>
-  <ItemGroup>
-    <PRIResource Remove="Services\CloudGameServices\**" />
-  </ItemGroup>
+	<Target Name="CopyXamlResourcesForAot" AfterTargets="Publish" Condition="'$(PublishAot)' == 'true' and '$(WindowsPackageType)' != 'MSIX'">
+		<ItemGroup>
+			<_XamlResources Include="$(OutputPath)**\*.xbf" />
+			<_XamlResources Include="$(OutputPath)$(AssemblyName).pri" />
+		</ItemGroup>
+		<Copy SourceFiles="@(_XamlResources)" DestinationFiles="@(_XamlResources->'$(PublishDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+	</Target>
+	<ItemGroup>
+		<PRIResource Remove="Common\Plugins\**" />
+	</ItemGroup>
+	<ItemGroup>
+		<PRIResource Remove="Services\CloudGameServices\**" />
+	</ItemGroup>
 </Project>

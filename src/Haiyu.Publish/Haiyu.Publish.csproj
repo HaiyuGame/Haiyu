@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows</TargetFramework>
+    <TargetFramework>net11.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
@@ -20,7 +20,7 @@
     loads a dictionary from that assembly, so make the dependency explicit.
   -->
   <Target Name="BuildFluentWpfBeforeMarkupCompile" BeforeTargets="MarkupCompilePass1" Condition="'$(DesignTimeBuild)' != 'true'">
-    <MSBuild Projects="..\Setup\FluentWPF\FluentWPF.csproj" Targets="Build" BuildInParallel="false" Properties="Configuration=$(Configuration);TargetFramework=net10.0-windows" />
+    <MSBuild Projects="..\Setup\FluentWPF\FluentWPF.csproj" Targets="Build" BuildInParallel="false" Properties="Configuration=$(Configuration);TargetFramework=net11.0-windows" />
   </Target>
 
 </Project>

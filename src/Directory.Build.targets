@@ -1,0 +1,6 @@
+<Project>
+  <!-- Runtime Async requires .NET 11 CoreCLR; keep Mono/Android and older targets unchanged. -->
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(TargetFrameworkVersion)' == 'v11.0' and '$(TargetPlatformIdentifier)' != 'android' and '$(UseRuntimeAsync)' != 'false'">
+    <Features>$(Features);runtime-async=on</Features>
+  </PropertyGroup>
+</Project>
