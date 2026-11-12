@@ -50,11 +50,7 @@
                     HorizontalAlignment="Left"
                     Orientation="Horizontal">
                     <Grid>
-                        <SystemBackdropElement>
-                            <SystemBackdropElement.SystemBackdrop>
-                                <DesktopAcrylicBackdrop />
-                            </SystemBackdropElement.SystemBackdrop>
-                        </SystemBackdropElement>
+                        <control:InAppAcrylicVisual />
                         <Button
                             Width="65"
                             Margin="0,0,0,0"
@@ -88,14 +84,11 @@
                             <ColumnDefinition />
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
-                        <SystemBackdropElement
+
+                        <control:InAppAcrylicVisual
                             Grid.ColumnSpan="4"
                             HorizontalAlignment="Stretch"
-                            CornerRadius="5">
-                            <SystemBackdropElement.SystemBackdrop>
-                                <DesktopAcrylicBackdrop />
-                            </SystemBackdropElement.SystemBackdrop>
-                        </SystemBackdropElement>
+                            CornerRadius="5" />
                         <Button
                             Width="40"
                             Height="40"

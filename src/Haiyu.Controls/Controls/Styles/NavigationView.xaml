@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:animations="using:CommunityToolkit.WinUI.Animations"
+    xmlns:control="using:Haiyu.Controls"
     xmlns:helpers="using:Haiyu.Controls.Propertys"
     xmlns:ui="using:CommunityToolkit.WinUI">
 
@@ -999,11 +1000,8 @@
                             <Grid.RenderTransform>
                                 <CompositeTransform x:Name="PaneTransform" />
                             </Grid.RenderTransform>
-                            <SystemBackdropElement>
-                                <SystemBackdropElement.SystemBackdrop>
-                                    <DesktopAcrylicBackdrop />
-                                </SystemBackdropElement.SystemBackdrop>
-                            </SystemBackdropElement>
+
+                            <control:InAppAcrylicVisual />
                             <Border Child="{TemplateBinding Pane}" />
                             <Rectangle
                                 x:Name="HCPaneBorder"

@@ -88,14 +88,10 @@
                         <RepositionThemeTransition />
                     </TransitionCollection>
                 </Grid.ChildrenTransitions>
-                <SystemBackdropElement
+                <control:InAppAcrylicVisual
                     Grid.RowSpan="2"
                     CornerRadius="5"
-                    Visibility="{x:Bind ViewModel.GameDownloadingBthVisibility, Mode=OneWay}">
-                    <SystemBackdropElement.SystemBackdrop>
-                        <DesktopAcrylicBackdrop />
-                    </SystemBackdropElement.SystemBackdrop>
-                </SystemBackdropElement>
+                    Visibility="{x:Bind ViewModel.GameDownloadingBthVisibility, Mode=OneWay}" />
                 <Grid
                     Grid.Row="1"
                     Width="300"
@@ -440,11 +436,8 @@
                                 <ColumnDefinition Width="auto" />
                                 <ColumnDefinition />
                             </Grid.ColumnDefinitions>
-                            <SystemBackdropElement Grid.ColumnSpan="2" CornerRadius="5 5 0 0">
-                                <SystemBackdropElement.SystemBackdrop>
-                                    <DesktopAcrylicBackdrop />
-                                </SystemBackdropElement.SystemBackdrop>
-                            </SystemBackdropElement>
+
+                            <control:InAppAcrylicVisual Grid.ColumnSpan="2" CornerRadius="5 5 0 0" />
                             <FontIcon
                                 Margin="5,5,0,0"
                                 FontFamily="Segoe Fluent Icons"
@@ -467,11 +460,8 @@
                                 <ColumnDefinition />
                                 <ColumnDefinition Width="auto" />
                             </Grid.ColumnDefinitions>
-                            <SystemBackdropElement Grid.ColumnSpan="2" CornerRadius="5">
-                                <SystemBackdropElement.SystemBackdrop>
-                                    <DesktopAcrylicBackdrop />
-                                </SystemBackdropElement.SystemBackdrop>
-                            </SystemBackdropElement>
+
+                            <control:InAppAcrylicVisual Grid.ColumnSpan="2" CornerRadius="5" />
                             <Button
                                 Grid.Row="1"
                                 Height="60"
@@ -752,11 +742,7 @@
                             <RowDefinition Height="auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
-                        <SystemBackdropElement Grid.RowSpan="8" CornerRadius="5">
-                            <SystemBackdropElement.SystemBackdrop>
-                                <DesktopAcrylicBackdrop />
-                            </SystemBackdropElement.SystemBackdrop>
-                        </SystemBackdropElement>
+                        <control:InAppAcrylicVisual Grid.RowSpan="8" CornerRadius="5" />
                         <TextBlock
                             Margin="15,5,0,0"
                             HorizontalAlignment="Left"
@@ -1058,11 +1044,7 @@
                             <RowDefinition Height="6*" />
                             <RowDefinition Height="4*" />
                         </Grid.RowDefinitions>
-                        <SystemBackdropElement Grid.RowSpan="2" CornerRadius="5">
-                            <SystemBackdropElement.SystemBackdrop>
-                                <DesktopAcrylicBackdrop />
-                            </SystemBackdropElement.SystemBackdrop>
-                        </SystemBackdropElement>
+                        <control:InAppAcrylicVisual Grid.RowSpan="2" CornerRadius="5" />
                         <FlipView
                             x:Name="fileView"
                             Grid.Row="0"
