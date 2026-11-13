@@ -53,6 +53,29 @@
             Background="Transparent"
             IsIndeterminate="{x:Bind ViewModel.IsActivityIndicatorActive, Mode=OneWay}" />
 
+        <StackPanel
+            Grid.ColumnSpan="2"
+            Margin="0,5,10,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            Orientation="Horizontal">
+            <Button Padding="8" Style="{ThemeResource TitleBarButtonStyle}">
+                <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE712;" />
+                <Button.Flyout>
+                    <MenuFlyout Placement="Bottom">
+                        <MenuFlyoutItem
+                            Command="{x:Bind ViewModel.CopyWallpaperSourceCommand}"
+                            CommandParameter="{x:Bind w:WallpaperShowType.Image}"
+                            Text="复制壁纸首帧链接" />
+                        <MenuFlyoutItem
+                            Command="{x:Bind ViewModel.CopyWallpaperSourceCommand}"
+                            CommandParameter="{x:Bind w:WallpaperShowType.Video}"
+                            Text="复制壁纸视频链接" />
+                    </MenuFlyout>
+
+                </Button.Flyout>
+            </Button>
+        </StackPanel>
         <!--  下载游戏  -->
         <Grid
             Grid.Row="0"

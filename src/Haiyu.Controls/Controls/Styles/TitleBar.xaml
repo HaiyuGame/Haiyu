@@ -5,18 +5,18 @@
     xmlns:local="using:Haiyu.Controls">
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Light">
-            <SolidColorBrush x:Key="TitleBarButtonBackgroundBrush" Color="#E6FFFFFF" />
-            <SolidColorBrush x:Key="TitleBarButtonBackgroundPointerOverBrush" Color="#FFFFFFFF" />
-            <SolidColorBrush x:Key="TitleBarButtonBackgroundPressedBrush" Color="#FFDCE8F2" />
+            <SolidColorBrush x:Key="TitleBarButtonBackgroundBrush" Color="Transparent" />
+            <SolidColorBrush x:Key="TitleBarButtonBackgroundPointerOverBrush" Color="#30FFFFFF" />
+            <SolidColorBrush x:Key="TitleBarButtonBackgroundPressedBrush" Color="#18000000" />
             <SolidColorBrush x:Key="TitleBarButtonForegroundBrush" Color="#E4000000" />
             <SolidColorBrush x:Key="TitleBarButtonForegroundDisabledBrush" Color="#72000000" />
             <SolidColorBrush x:Key="TitleBarButtonBorderBrush" Color="#29000000" />
             <SolidColorBrush x:Key="TitleBarButtonBorderPointerOverBrush" Color="#47000000" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="Dark">
-            <SolidColorBrush x:Key="TitleBarButtonBackgroundBrush" Color="#D9212121" />
-            <SolidColorBrush x:Key="TitleBarButtonBackgroundPointerOverBrush" Color="#F23A3A3A" />
-            <SolidColorBrush x:Key="TitleBarButtonBackgroundPressedBrush" Color="#F20E0E0E" />
+            <SolidColorBrush x:Key="TitleBarButtonBackgroundBrush" Color="Transparent" />
+            <SolidColorBrush x:Key="TitleBarButtonBackgroundPointerOverBrush" Color="#18FFFFFF" />
+            <SolidColorBrush x:Key="TitleBarButtonBackgroundPressedBrush" Color="#26000000" />
             <SolidColorBrush x:Key="TitleBarButtonForegroundBrush" Color="#FFFFFFFF" />
             <SolidColorBrush x:Key="TitleBarButtonForegroundDisabledBrush" Color="#72FFFFFF" />
             <SolidColorBrush x:Key="TitleBarButtonBorderBrush" Color="#3DFFFFFF" />
@@ -43,7 +43,7 @@
         <Setter Property="Foreground" Value="{ThemeResource TitleBarButtonForegroundBrush}" />
         <Setter Property="BorderBrush" Value="{ThemeResource TitleBarButtonBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="CornerRadius" Value="6" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="HorizontalAlignment" Value="Stretch" />
@@ -53,15 +53,22 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border
+                    <Grid
                         x:Name="ButtonChrome"
-                        Background="{TemplateBinding Background}"
+                        Background="Transparent"
                         BorderBrush="{TemplateBinding BorderBrush}"
                         BorderThickness="{TemplateBinding BorderThickness}"
                         CornerRadius="{TemplateBinding CornerRadius}">
-                        <Border.BackgroundTransition>
-                            <BrushTransition Duration="0:0:0.10" />
-                        </Border.BackgroundTransition>
+                        <local:InAppAcrylicVisual CornerRadius="{TemplateBinding CornerRadius}" />
+                        <Border
+                            x:Name="BackgroundOverlay"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            IsHitTestVisible="False">
+                            <Border.BackgroundTransition>
+                                <BrushTransition Duration="0:0:0.10" />
+                            </Border.BackgroundTransition>
+                        </Border>
                         <ContentPresenter
                             x:Name="ContentPresenter"
                             Padding="{TemplateBinding Padding}"
@@ -81,13 +88,13 @@
                                 <VisualState x:Name="Normal" />
                                 <VisualState x:Name="PointerOver">
                                     <VisualState.Setters>
-                                        <Setter Target="ButtonChrome.Background" Value="{ThemeResource TitleBarButtonBackgroundPointerOverBrush}" />
+                                        <Setter Target="BackgroundOverlay.Background" Value="{ThemeResource TitleBarButtonBackgroundPointerOverBrush}" />
                                         <Setter Target="ButtonChrome.BorderBrush" Value="{ThemeResource TitleBarButtonBorderPointerOverBrush}" />
                                     </VisualState.Setters>
                                 </VisualState>
                                 <VisualState x:Name="Pressed">
                                     <VisualState.Setters>
-                                        <Setter Target="ButtonChrome.Background" Value="{ThemeResource TitleBarButtonBackgroundPressedBrush}" />
+                                        <Setter Target="BackgroundOverlay.Background" Value="{ThemeResource TitleBarButtonBackgroundPressedBrush}" />
                                         <Setter Target="ContentPresenter.Opacity" Value="0.78" />
                                         <Setter Target="PressedScaleTransform.ScaleX" Value="0.92" />
                                         <Setter Target="PressedScaleTransform.ScaleY" Value="0.92" />
@@ -101,7 +108,7 @@
                                 </VisualState>
                             </VisualStateGroup>
                         </VisualStateManager.VisualStateGroups>
-                    </Border>
+                    </Grid>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

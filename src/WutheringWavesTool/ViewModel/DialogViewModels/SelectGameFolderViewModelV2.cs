@@ -236,10 +236,8 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
 
     private async Task LoadCoreAsync()
     {
-        var bunleGray = this.GrayOpenService.GetOpen((uint)GrayConfigId.WavesGameBunleOpen, false);
         HasBundleSelection =
             GameContext.IsBunle
-            && bunleGray
             && GameContext.GameResourceProvider is BundleGameResourceProvider;
         if (
             HasBundleSelection

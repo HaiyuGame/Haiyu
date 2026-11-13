@@ -59,10 +59,7 @@
             HorizontalAlignment="Right"
             VerticalAlignment="Top"
             Orientation="Horizontal">
-            <Button
-                Padding="8"
-                Style="{ThemeResource TitleBarButtonStyle}"
-                Visibility="{x:Bind ViewModel.WavesGameBunleId, Mode=OneWay, Converter={StaticResource GrayUIToVisiblityConverter}}">
+            <Button Padding="8" Style="{ThemeResource TitleBarButtonStyle}">
                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE712;" />
                 <Button.Flyout>
                     <MenuFlyout Placement="Bottom">
@@ -74,7 +71,17 @@
                                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8AB;" />
                             </MenuFlyoutItem.Icon>
                         </MenuFlyoutItem>
+                        <MenuFlyoutSeparator />
+                        <MenuFlyoutItem
+                            Command="{x:Bind ViewModel.CopyWallpaperSourceCommand}"
+                            CommandParameter="{x:Bind w:WallpaperShowType.Image}"
+                            Text="复制壁纸首帧链接" />
+                        <MenuFlyoutItem
+                            Command="{x:Bind ViewModel.CopyWallpaperSourceCommand}"
+                            CommandParameter="{x:Bind w:WallpaperShowType.Video}"
+                            Text="复制壁纸视频链接" />
                     </MenuFlyout>
+
                 </Button.Flyout>
             </Button>
         </StackPanel>
@@ -1409,26 +1416,7 @@
                             Glyph="&#xE70D;" />
                     </StackPanel>
                 </Button>
-                <Button
-                    Padding="10,5"
-                    BorderBrush="{ThemeResource AccentAAFillColorDefaultBrush}"
-                    BorderThickness="0,0,0,2"
-                    Content="下载壁纸"
-                    CornerRadius="5"
-                    Style="{ThemeResource TitleBarButtonStyle}">
-                    <Button.Flyout>
-                        <MenuFlyout>
-                            <MenuFlyoutItem
-                                Command="{x:Bind ViewModel.CopyWallpaperSourceCommand}"
-                                CommandParameter="{x:Bind w:WallpaperShowType.Image}"
-                                Text="复制首帧链接" />
-                            <MenuFlyoutItem
-                                Command="{x:Bind ViewModel.CopyWallpaperSourceCommand}"
-                                CommandParameter="{x:Bind w:WallpaperShowType.Video}"
-                                Text="复制视频链接" />
-                        </MenuFlyout>
-                    </Button.Flyout>
-                </Button>
+
             </StackPanel>
         </StackPanel>
     </Grid>

@@ -15,10 +15,6 @@ public enum GrayConfigId : uint
     /// </summary>
     SoringTesing = 1001u,
 
-    /// <summary>
-    /// 材质分包支持，输入1002
-    /// </summary>
-    WavesGameBunleOpen = 1002u,
 
 
     /// <summary>

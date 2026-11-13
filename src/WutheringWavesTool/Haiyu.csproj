@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 	<Sdk Name="PublishWithSatoriGC"
        Version="11.0.0-satori.42242472725.2"/>
   <PropertyGroup>
@@ -424,4 +424,5 @@
 	<ItemGroup>
 		<PRIResource Remove="Services\CloudGameServices\**" />
 	</ItemGroup>
+  <Import Project="Build\MsixNativeAotPayload.targets" />
 </Project>

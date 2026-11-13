@@ -72,9 +72,6 @@ public class AppContext<T> : IAppContext<T>
             WindowManager.Shell.GetWindow().Activate();
             await InitGameCoreAsync();
             await CreateJumpListAsync();
-
-            bool usingSatori = GC.GetConfigurationVariables().ContainsKey("SatoriGC");
-            WindowExtension.MessageBox(IntPtr.Zero, $"SatoriGC开启状态：{usingSatori}", "Haiyu", 0);
         }
         catch (Exception ex)
         {

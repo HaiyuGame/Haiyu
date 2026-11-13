@@ -597,6 +597,9 @@
                         <ui:SettingsCard Header="{x:Bind helper:LanguageService.GetString('Display_RunType')}">
                             <TextBlock IsTextSelectionEnabled="True" Text="{x:Bind ViewModel.RunType, Mode=OneWay}" />
                         </ui:SettingsCard>
+                        <ui:SettingsCard Header="Satori GC">
+                            <TextBlock IsTextSelectionEnabled="True" Text="{x:Bind ViewModel.SatoriGc, Mode=OneWay}" />
+                        </ui:SettingsCard>
                         <ui:SettingsCard Header="{x:Bind helper:LanguageService.GetString('Display_FrameworkVersion')}">
                             <TextBlock IsTextSelectionEnabled="True" Text="{x:Bind ViewModel.FrameworkType, Mode=OneWay}" />
                         </ui:SettingsCard>

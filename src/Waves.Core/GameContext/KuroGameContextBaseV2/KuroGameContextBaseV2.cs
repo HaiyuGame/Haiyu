@@ -120,8 +120,8 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
     public virtual async Task InitAsync()
     {
         //灰度开关
-        var bunleGray = GrayOpenService.GetOpen((uint)GrayConfigId.WavesGameBunleOpen,false);
-        if (bunleGray && this.IsBunle)
+        
+        if (this.IsBunle)
         {
             this.GameResourceProvider = new BundleGameResourceProvider();
         }
