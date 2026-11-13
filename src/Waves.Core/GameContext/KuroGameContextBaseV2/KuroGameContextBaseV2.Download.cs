@@ -31,6 +31,9 @@ partial class KuroGameContextBaseV2
                 Interlocked.Exchange(ref _resourceOperationActive, 0);
                 return false;
             }
+            if (GameResourceProvider is Services.GameResourceProvider.BundleGameResourceProvider provider
+                && plan.PackageType is { } packageType)
+                await provider.SavePackageTypeAsync(plan.BundleName!, packageType, token);
             var saveConfig = new Dictionary<string, string>
             {
                 [GameLocalSettingName.GameLauncherBassFolder] = folder,
@@ -104,7 +107,7 @@ partial class KuroGameContextBaseV2
                 state,
                 false,
                 "下载校验",
-                deleteExtra,
+                deleteExtra && plan.ResourceVersion != "2",
                 skip,
                 cdns: plan.CdnCandidates
             )
@@ -148,6 +151,7 @@ partial class KuroGameContextBaseV2
             var repairParameter = new GameResourceParameter
             {
                 BundleName = parameter?.BundleName,
+                PackageType = parameter?.PackageType,
                 VerificationSource = GameVerificationSource.Official
             };
             var summary = await GetResourceSummaryAsync(repairParameter);

@@ -43,12 +43,22 @@
             Background="Transparent"
             Maximum="100"
             Value="{x:Bind ViewModel.Progress, Mode=OneWay}" />
-        <TextBlock
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            FontFamily="{ThemeResource DefaultFont}"
-            FontSize="16"
-            Text="{x:Bind h:LanguageService.GetString('GameBunleSelect')}" />
+        <StackPanel Spacing="12">
+            <TextBlock
+                HorizontalAlignment="Center"
+                Style="{ThemeResource BodyStrongTextBlockStyle}"
+                Text="{x:Bind h:LanguageService.GetString('GameBunleSelect')}" />
+            <ComboBox
+                HorizontalAlignment="Stretch"
+                AutomationProperties.AutomationId="SelectGameBunleDialog_PackageType"
+                Header="{x:Bind h:LanguageService.GetStringByText('资源量')}"
+                IsEnabled="{x:Bind ViewModel.InvokeEnable, Mode=OneWay}"
+                SelectedIndex="{x:Bind ViewModel.SelectedPackageIndex, Mode=TwoWay}"
+                Visibility="{x:Bind ViewModel.PackageVisibility, Mode=OneWay}">
+                <ComboBoxItem Content="{x:Bind h:LanguageService.GetStringByText('全量资源')}" />
+                <ComboBoxItem Content="{x:Bind h:LanguageService.GetStringByText('精简资源')}" />
+            </ComboBox>
+        </StackPanel>
         <ItemsView
             Grid.Row="2"
             IsEnabled="{x:Bind ViewModel.InvokeEnable, Mode=OneWay}"

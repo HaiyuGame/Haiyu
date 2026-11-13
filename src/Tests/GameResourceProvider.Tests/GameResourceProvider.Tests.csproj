@@ -6,6 +6,8 @@
     <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
   </PropertyGroup>
   <ItemGroup>
+    <!-- 官方私有安装记录服务已移除，旧测试不再属于当前协议。 -->
+    <Compile Remove="OfficialLauncherRecordServiceTests.cs" />
     <None Update="Fixtures/OfficialBundleConfig.json" CopyToOutputDirectory="PreserveNewest" />
     <None Update="Fixtures/OfficialGlobalBundleConfig.json" CopyToOutputDirectory="PreserveNewest" />
     <ProjectReference Include="../../Waves.Core/Waves.Core.csproj" />

@@ -193,7 +193,8 @@ public sealed partial class BundleGameResourceProvider : IGameResourceProvider
     private static BundlePredownload? GetPredownload(GameLauncherBunleSource source, string name)
     {
         var pre = source.Predownload;
-        if (pre is null || !pre.Bundles.ContainsKey(name))
+        if (pre is null || !pre.Bundles.ContainsKey(name)
+            || (source.Bundles[name].Config.PredownloadSwitch ?? source.Config.PredownloadSwitch) != 1)
             return null;
         var bundle = SelectBundle(pre.Bundles, pre.ResourcePacks, name);
         return bundle.ResourcePacks.Any(n =>
@@ -274,6 +275,9 @@ public sealed partial class BundleGameResourceProvider : IGameResourceProvider
         if (verificationVersion is not null && verificationVersion != target)
             throw new InvalidOperationException($"目标版本配置已失效：{verificationVersion}");
         var versions = await ReadVersionsAsync(bundle.ResourcePacks, token);
+        var packageType = SupportsPackageType
+            ? parameter?.PackageType ?? await ReadPackageTypeAsync(name, token)
+            : (GamePackageType?)null;
         var apply = ResolveApplyMethod(source, bundle);
         var selected = Describe(
             packs,
@@ -288,6 +292,8 @@ public sealed partial class BundleGameResourceProvider : IGameResourceProvider
         {
             ResourceVersion = "2",
             BundleName = name,
+            PackageType = packageType,
+            SyncPackageTypeToGame = packageType is not null,
             OldGameVersion = versions[bundle.ResourcePacks[0]],
             NewGameVersion = target,
             Availability = size.Availability,
@@ -308,6 +314,8 @@ public sealed partial class BundleGameResourceProvider : IGameResourceProvider
         // 已是目标版本等非执行状态不请求索引；Legacy 的缺补丁规则不混入分包协议。
         if (result.Availability != GameResourceAvailability.Ready)
             return result;
+        var comparison = new GameVersionInfo();
+        var indexes = new Dictionary<string, PatchIndexGameResource>();
         foreach (
             var selection in selected.Where(x =>
                 x.Info.Availability == GameResourceAvailability.Ready
@@ -323,7 +331,45 @@ public sealed partial class BundleGameResourceProvider : IGameResourceProvider
                 .ToList();
             selection.Info.IndexHash = hash;
             var index = await ReadIndexAsync(selection.Info.IndexUrlCandidates, hash, token);
-            MapIndex(result, index, selection, cdns, apply, verificationVersion is not null);
+            indexes[indexPath] = index;
+            var minimal = BundleIndexFilter.Apply(index, GamePackageType.Minimal);
+            var filtered = BundleIndexFilter.Apply(index, packageType);
+            result.HasPackageTags |= index.TagGroups?.Any(x =>
+                string.Equals(x.Key, "min", StringComparison.OrdinalIgnoreCase) && x.Value is not null) == true;
+            MapIndex(result, filtered, selection, cdns, apply, verificationVersion is not null);
+            if (update && packageType is not null)
+                MapIndex(comparison, packageType == GamePackageType.Minimal ? index : minimal,
+                    selection, cdns, apply, verificationVersion is not null);
+        }
+        if (packageType is not null)
+        {
+            await ApplyGroupFallbackAsync(result, parameter, usePredownload, token);
+            var ratioText = bundle.Config.Experiment.Download.DiskSpaceCalculationRatio
+                ?? source.Config.Experiment.Download.DiskSpaceCalculationRatio;
+            var ratio = double.TryParse(ratioText, System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.InvariantCulture, out var configuredRatio) && configuredRatio > 0
+                ? configuredRatio : 1.2;
+            var gameFolder = await LocalConfig.GetConfigAsync(GameLocalSettingName.GameLauncherBassFolder, token);
+            RecalculatePackageSizes(result, usePredownload, ratio, gameFolder);
+            foreach (var selection in selected.Where(_ => result.HasPackageTags))
+            {
+                var urls = OrderCdns(cdns).Select(c => JoinUrl(c.Url, selection.Pack.IndexFile)).ToList();
+                var origin = indexes.TryGetValue(selection.Pack.IndexFile, out var cachedIndex)
+                    ? cachedIndex : await ReadIndexAsync(urls, selection.Pack.IndexFileMd5, token);
+                var originPlan = new GameVersionInfo();
+                MapIndex(originPlan, BundleIndexFilter.Apply(origin, packageType), selection, cdns, apply, true);
+                selection.Info.TargetSize = originPlan.DefaultResource.Sum(x => x.Size);
+            }
+            result.TargetSize = selected.Sum(x => x.Info.TargetSize);
+        }
+        // 更新范围不区分资源量时，保留游戏侧状态，避免覆盖游戏内的资源操作。
+        if (update && packageType is not null)
+        {
+            await ApplyGroupFallbackAsync(comparison, parameter, usePredownload, token);
+            result.SyncPackageTypeToGame = SelectedFiles(result).Sum(x => x.Size)
+                != SelectedFiles(comparison).Sum(x => x.Size);
+            result.NeedsPackageTypeConfirmation = result.HasPackageTags && result.SyncPackageTypeToGame
+                && await HasPackageStateChangedAsync(name, token);
         }
         result.DeleteFiles = result.DeleteFiles.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
         return result;
@@ -452,15 +498,11 @@ public sealed partial class BundleGameResourceProvider : IGameResourceProvider
         return result;
     }
 
-    public async Task<GameResourceParameter> GetLocalGameReosurceParamter()
+    public async Task<GameResourceParameter> GetLocalGameReosurceParamter(CancellationToken token = default)
     {
-        return new GameResourceParameter()
+        return new GameResourceParameter
         {
-            BundleName = await LocalConfig.GetConfigAsync(GameLocalSettingName.BunleName),
-            TargetPackVersions = (await GetBunlesAsync()).ToDictionary(
-                x => x.BunleName,
-                x => x.Version
-            ),
+            BundleName = await LocalConfig.GetConfigAsync(GameLocalSettingName.BunleName, token)
         };
     }
 

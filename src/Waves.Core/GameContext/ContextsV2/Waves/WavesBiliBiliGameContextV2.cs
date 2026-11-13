@@ -13,4 +13,5 @@ public class WavesBiliBiliGameContextV2 : KuroGameContextBaseV2
 
 
     public override bool IsBunle { get; internal set; } = true;
+    public override bool SupportsPackageType { get; internal set; } = true;
 }

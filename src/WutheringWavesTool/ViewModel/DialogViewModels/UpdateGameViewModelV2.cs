@@ -1,4 +1,5 @@
 using Waves.Core.Models.Options;
+using Waves.Core.Services.GameResourceProvider;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -46,6 +47,9 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
     public partial double PatcherFileSize { get; set; }
 
     [ObservableProperty]
+    public partial double DownloadFileSize { get; set; }
+
+    [ObservableProperty]
     public partial double FreeDiskSpace { get; set; }
 
     [ObservableProperty]
@@ -54,8 +58,29 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
     [ObservableProperty]
     public partial string DiffSavePath { get; set; }
 
+    [ObservableProperty]
+    public partial bool NeedsPackageTypeConfirmation { get; set; }
+
+    private bool _packageInitialized;
+
+    [ObservableProperty]
+    public partial bool IsBusy { get; set; }
+
+    [ObservableProperty]
+    public partial Visibility PackageVisibility { get; set; } = Visibility.Collapsed;
+
+    [ObservableProperty]
+    public partial int SelectedPackageIndex { get; set; }
+
+    partial void OnSelectedPackageIndexChanged(int value)
+    {
+        EnableContinue = false;
+        if (!IsBusy && _packageInitialized)
+            _ = Loaded();
+    }
+
     private string? _localPath;
-    private long _downloadBytes;
+    private long _requiredBytes;
     private bool _resourceReady;
     private readonly IWindowManager _windowManager;
 
@@ -99,7 +124,7 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
         }
         double totalSizeGB = ByteConversion.BytesToGigabytes(driveInfo.TotalSize, 2);
         double freeSpaceGB = ByteConversion.BytesToGigabytes(driveInfo.TotalFreeSpace, 2);
-        if (driveInfo.TotalFreeSpace < _downloadBytes)
+        if (driveInfo.TotalFreeSpace < _requiredBytes)
         {
             WindowExtension.MessageBox(
                 0,
@@ -111,17 +136,18 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
             return;
         }
         FreeDiskSpace = freeSpaceGB;
-        EnableContinue = _resourceReady;
+        await Loaded();
     }
 
     [RelayCommand]
     async Task Loaded()
     {
-        if (!IsAlive) return;
+        if (!IsAlive || IsBusy) return;
+        IsBusy = true;
         var token = LifetimeToken;
         EnableContinue = false;
         _resourceReady = false;
-        _downloadBytes = 0;
+        _requiredBytes = 0;
         try
         {
             await LoadDetailsAsync(token);
@@ -132,6 +158,10 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
             _resourceReady = false;
             EnableContinue = false;
             if (IsAlive) ShowLoadError(string.Format(LanguageService.GetString("GameUpdate_LoadResourcesFailed"), ex.Message));
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
 
@@ -145,9 +175,37 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
     private async Task LoadDetailsAsync(CancellationToken token)
     {
         string? localVersion = "";
+        NeedsPackageTypeConfirmation = false;
         var summary = await GameContext.GetResourceSummaryAsync(Parameter, token);
         token.ThrowIfCancellationRequested();
         var resourceSize = InvokeType == UpdateGameType.UpdateGame ? summary.Update : summary.Predownload;
+        if (GameContext.GameResourceProvider is BundleGameResourceProvider provider && provider.SupportsPackageType)
+        {
+            PackageVisibility = Visibility.Visible;
+            if (!_packageInitialized)
+            {
+                var type = Parameter?.PackageType ?? await provider.ReadPackageTypeAsync(summary.BundleName!, token);
+                SelectedPackageIndex = type == GamePackageType.Minimal ? 1 : 0;
+                _packageInitialized = true;
+            }
+            Parameter = new GameResourceParameter
+            {
+                BundleName = summary.BundleName,
+                PackageType = SelectedPackageIndex == 1 ? GamePackageType.Minimal : GamePackageType.Full,
+                DownloadFolder = DiffSavePath
+            };
+            var plan = InvokeType == UpdateGameType.UpdateGame
+                ? await GameContext.GetUpdateGameResourceAsync(Parameter, token)
+                : await GameContext.GetGameProdownloadResourceAsync(Parameter, token);
+            NeedsPackageTypeConfirmation = plan.NeedsPackageTypeConfirmation;
+            resourceSize = new GameResourceSize
+            {
+                Availability = plan.Availability,
+                DownloadSize = plan.DownloadSize,
+                TargetSize = plan.TargetSize,
+                RequiredSpace = plan.RequiredSpace
+            };
+        }
         LocalVersion = summary.LocalVersion;
         NewVersion = InvokeType == UpdateGameType.UpdateGame ? summary.OfficialVersion : summary.PredownloadVersion ?? "";
         if (resourceSize.Availability != global::Waves.Core.Models.GameResourceAvailability.Ready)
@@ -191,11 +249,12 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
         );
         token.ThrowIfCancellationRequested();
         LocalFileSize = ByteConversion.BytesToGigabytes(localSize, 2);
-        _downloadBytes = resourceSize.DownloadSize;
+        _requiredBytes = resourceSize.RequiredSpace;
+        DownloadFileSize = ByteConversion.BytesToGigabytes(resourceSize.DownloadSize, 2);
         _resourceReady = true;
         if (string.IsNullOrWhiteSpace(DiffSavePath))
             DiffSavePath = InstallOption.BuildCacheFolder(_localPath!, InvokeType != UpdateGameType.UpdateGame);
-        PatcherFileSize = ByteConversion.BytesToGigabytes(_downloadBytes, 2);
+        PatcherFileSize = ByteConversion.BytesToGigabytes(_requiredBytes, 2);
         string? driveLetter = Path.GetPathRoot(DiffSavePath);
         DriveInfo? driveInfo = DriveInfo
             .GetDrives()
@@ -236,7 +295,7 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
             };
         }
         FreeDiskSpace = freeSpaceGB;
-        if (driveInfo.TotalFreeSpace < _downloadBytes)
+        if (driveInfo.TotalFreeSpace < _requiredBytes)
         {
             this.Logger.WriteError("磁盘空间不足");
             WindowExtension.MessageBox(

@@ -45,6 +45,11 @@ public class GameLocalSettingName
         };
     }
 
+    public static string GetPackageTypeKey(string bundleName) => "PackageType_" + bundleName.ToUpperInvariant();
+
+    public const string ProdDownloadBundleName = nameof(ProdDownloadBundleName);
+    public const string ProdDownloadPackageType = nameof(ProdDownloadPackageType);
+
     public const string LocalGameUpdateing = nameof(LocalGameUpdateing);
 
     /// <summary>

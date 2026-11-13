@@ -26,6 +26,7 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
     public IHttpClientService HttpClientService { get; set; }
 
     public abstract bool IsBunle { get; internal set; }
+    public abstract bool SupportsPackageType { get; internal set; }
 
     /// <summary>
     /// CDN测试工具
@@ -123,7 +124,10 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
         
         if (this.IsBunle)
         {
-            this.GameResourceProvider = new BundleGameResourceProvider();
+            this.GameResourceProvider = new BundleGameResourceProvider(HttpClientService)
+            {
+                SupportsPackageType = this.SupportsPackageType
+            };
         }
         else
         {
@@ -480,7 +484,9 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
                 );
                 if (bool.TryParse(donwResult, out var predDown) && Directory.Exists(prePath))
                 {
-                    status.PredownloadedDone = predDown;
+                    status.PredownloadedDone = predDown && prodDownVersion == indexSource.PredownloadVersion
+                        && (GameResourceProvider is not BundleGameResourceProvider provider
+                            || await provider.MatchesPredownloadSelectionAsync(indexSource.BundleName, token));
                 }
                 else
                 {

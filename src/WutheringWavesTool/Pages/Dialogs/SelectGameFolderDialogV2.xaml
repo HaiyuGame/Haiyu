@@ -160,6 +160,21 @@
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
+                    <ComboBox
+                        HorizontalAlignment="Stretch"
+                        AutomationProperties.AutomationId="SelectGameFolderDialogV2_PackageType"
+                        Header="{x:Bind helper:LanguageService.GetStringByText('资源量')}"
+                        PlaceholderText="{x:Bind helper:LanguageService.GetStringByText('请选择已安装的资源量')}"
+                        SelectedIndex="{x:Bind ViewModel.SelectedPackageIndex, Mode=TwoWay}"
+                        Visibility="{x:Bind ViewModel.HasPackageSelection, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <ComboBoxItem Content="{x:Bind helper:LanguageService.GetStringByText('全量资源')}" />
+                        <ComboBoxItem Content="{x:Bind helper:LanguageService.GetStringByText('精简资源')}" />
+                    </ComboBox>
+                    <TextBlock
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="{x:Bind helper:LanguageService.GetStringByText('请手动选择该目录实际已有的资源量，不自动识别。直接导入按所选类型记录状态，校验并导入按所选范围补齐资源。')}"
+                        TextWrapping="Wrap"
+                        Visibility="{x:Bind ViewModel.HasPackageSelection, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
                     <InfoBar
                         IsClosable="False"
                         IsOpen="True"

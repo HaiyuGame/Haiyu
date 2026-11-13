@@ -51,6 +51,31 @@
                         Glyph="&#xE72C;" />
                 </Button>
             </StackPanel>
+            <InfoBar
+                Margin="0,12,0,0"
+                AutomationProperties.AutomationId="UpdateGameDialogV2_PackageStateChanged"
+                IsClosable="False"
+                IsOpen="{x:Bind ViewModel.NeedsPackageTypeConfirmation, Mode=OneWay}"
+                Message="{x:Bind helper:LanguageService.GetStringByText('游戏侧资源量状态与启动器偏好不一致，可能在游戏内清理或补充过资源。本次任务可能需要重新下载部分资源，请重新确认全量或精简选择。')}"
+                Severity="Warning"
+                Title="{x:Bind helper:LanguageService.GetStringByText('请重新确认资源量')}" />
+            <ComboBox
+                Margin="0,16,0,0"
+                HorizontalAlignment="Stretch"
+                AutomationProperties.AutomationId="UpdateGameDialogV2_PackageType"
+                Header="{x:Bind helper:LanguageService.GetStringByText('资源量')}"
+                IsEnabled="{x:Bind ViewModel.IsBusy, Mode=OneWay, Converter={StaticResource BoolReversalConvert}}"
+                SelectedIndex="{x:Bind ViewModel.SelectedPackageIndex, Mode=TwoWay}"
+                Visibility="{x:Bind ViewModel.PackageVisibility, Mode=OneWay}">
+                <ComboBoxItem Content="{x:Bind helper:LanguageService.GetStringByText('全量资源')}" />
+                <ComboBoxItem Content="{x:Bind helper:LanguageService.GetStringByText('精简资源')}" />
+            </ComboBox>
+            <TextBlock
+                Margin="0,8,0,0"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Text="{x:Bind helper:LanguageService.GetStringByText('资源量不影响材质质量；大小为估算值。')}"
+                TextWrapping="Wrap"
+                Visibility="{x:Bind ViewModel.PackageVisibility, Mode=OneWay}" />
             <TextBlock Margin="0,30,0,0" FontSize="15">
                 <Run Text="{x:Bind helper:LanguageService.GetString('Display_TargetVersionSize')}" />
                 <Run Text="{x:Bind ViewModel.NewFileSize, Mode=OneWay}" />
@@ -60,6 +85,11 @@
                 <Run Text="{x:Bind helper:LanguageService.GetString('Display_OldVersionTargetSize')}" />
                 <Run Text="{x:Bind ViewModel.LocalFileSize, Mode=OneWay}" />
                 <Run Text="GB" />
+            </TextBlock>
+            <TextBlock Margin="0,10,0,0" Style="{ThemeResource BodyTextBlockStyle}">
+                <Run Text="{x:Bind helper:LanguageService.GetStringByText('预计下载：')}" />
+                <Run Text="{x:Bind ViewModel.DownloadFileSize, Mode=OneWay}" />
+                <Run Text="GiB" />
             </TextBlock>
             <TextBlock Margin="0,10,0,0" FontSize="15">
                 <Run Text="{x:Bind helper:LanguageService.GetString('Display_ReserveDiskStorage')}" />
@@ -84,7 +114,7 @@
             HorizontalAlignment="Stretch"
             Command="{x:Bind ViewModel.SelectDiffPathCommand}"
             Content="{x:Bind ViewModel.DiffSavePath, Mode=OneWay}"
-            IsEnabled="True"
+            IsEnabled="{x:Bind ViewModel.IsBusy, Mode=OneWay, Converter={StaticResource BoolReversalConvert}}"
             ToolTipService.ToolTip="{x:Bind helper:LanguageService.GetString('Display_DownloadLocation')}" />
         <Grid
             Grid.Row="2"

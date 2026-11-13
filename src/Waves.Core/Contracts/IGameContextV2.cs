@@ -23,6 +23,8 @@ public interface IGameContextV2
     /// </summary>
     public bool IsBunle { get;  }
 
+    public bool SupportsPackageType { get; }
+
     public string DisplayName { get; }
     public string GamerConfigPath { get; internal set; }
     GameLocalConfig GameLocalConfig { get; }

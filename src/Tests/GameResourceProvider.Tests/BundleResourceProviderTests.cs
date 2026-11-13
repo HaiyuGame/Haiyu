@@ -12,7 +12,7 @@ using Waves.Core.Services.GameResourceProvider;
 namespace Project.Test;
 
 [TestClass]
-public sealed class BundleResourceProviderTests
+public sealed partial class BundleResourceProviderTests
 {
     private const string PlainIndex = """
         {"resource":[{"dest":"game.bin","size":10,"md5":"file-hash","chunkInfos":[{"start":0,"end":9,"md5":"chunk-hash"}]}]}

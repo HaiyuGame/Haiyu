@@ -66,6 +66,9 @@ public class ZipFileInfo
 
 public class PatchIndexGameResource : IndexGameResource
 {
+    [JsonPropertyName("tagGroups")]
+    public Dictionary<string, ResourceTagRule>? TagGroups { get; set; }
+
     [JsonPropertyName("groupResource")]
     public List<IndexResource>? GroupResource { get; set; }
 

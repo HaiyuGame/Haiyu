@@ -136,6 +136,20 @@
                     </Border>
                     <ComboBox
                         HorizontalAlignment="Stretch"
+                        AutomationProperties.AutomationId="SelectDownloadGameDialogV2_PackageType"
+                        Header="{x:Bind helper:LanguageService.GetStringByText('资源量')}"
+                        SelectedIndex="{x:Bind ViewModel.SelectedPackageIndex, Mode=TwoWay}"
+                        Visibility="{x:Bind ViewModel.PackageVisibility, Mode=OneWay}">
+                        <ComboBoxItem Content="{x:Bind helper:LanguageService.GetStringByText('全量资源')}" />
+                        <ComboBoxItem Content="{x:Bind helper:LanguageService.GetStringByText('精简资源')}" />
+                    </ComboBox>
+                    <TextBlock
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="{x:Bind helper:LanguageService.GetStringByText('资源量不影响材质质量；部分剧情资源仍会在游戏内下载。大小为估算值。')}"
+                        TextWrapping="Wrap"
+                        Visibility="{x:Bind ViewModel.PackageVisibility, Mode=OneWay}" />
+                    <ComboBox
+                        HorizontalAlignment="Stretch"
                         AutomationProperties.AutomationId="SelectDownloadGameDialogV2_ResourceSelection"
                         Header="{x:Bind helper:LanguageService.GetString('GameDownload_SelectResourceQuality')}"
                         ItemsSource="{x:Bind ViewModel.Bundles, Mode=OneWay}"
@@ -145,7 +159,7 @@
                             <DataTemplate x:DataType="md:BunleResourceSize">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock Text="{x:Bind BunleName}" />
-                                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind BunleSize}" />
+                                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind BunleSize, Mode=OneWay}" />
                                 </StackPanel>
                             </DataTemplate>
                         </ComboBox.ItemTemplate>

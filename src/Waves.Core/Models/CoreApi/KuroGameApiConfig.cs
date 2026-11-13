@@ -2,8 +2,11 @@ namespace Waves.Core.Models.CoreApi
 {
     public class KuroGameApiConfig:IGameAPIConfig
     {
+        private const string WavesPackageStatePath = "Client/Saved/LauncherBridge/PackageState.json";
+
         /// <summary>分包协议专用地址，与旧服 ConfigUrl 分离。</summary>
         public string? BunleConfigUrl { get; set; }
+        public string? PackageStatePath { get; set; }
         public string? BunleBackUpConfigUrl { get; set; }
         public string? BunleDefaultBundleName { get; set; }
         public string? BunleAppKey { get; set; }
@@ -51,6 +54,7 @@ namespace Waves.Core.Models.CoreApi
             new KuroGameApiConfig()
             {
                 AppId = "10003",
+                PackageStatePath = WavesPackageStatePath,
                 GameID = "G152",
                 AppKey = "Y8xXrXk65DqFHEDgApn3cpK5lfczpFx5",
                 AppKeyV2 = "oLNgHF1CESo51DGHN2odtp40e3oI1HfZ",
@@ -77,6 +81,7 @@ namespace Waves.Core.Models.CoreApi
             new KuroGameApiConfig()
             {
                 AppId = "50004",
+                PackageStatePath = WavesPackageStatePath,
                 GameID = "G153",
                 AppKey = "obOHXFrFanqsaIEOmuKroCcbZkQRBC7c",
                 BunleConfigUrl = "https://prod-alicdn-gamestarter.kurogame.com/launcher/game/50004_P7xcUZnEr1AXIGON25E6KjpOgTlVrg6e/G153/official/index.json",
@@ -102,6 +107,7 @@ namespace Waves.Core.Models.CoreApi
             new KuroGameApiConfig()
             {
                 AppId = "10004",
+                PackageStatePath = WavesPackageStatePath,
                 GameID = "G152",
                 AppKey = "j5GWFuUFlb8N31Wi2uS3ZAVHcb7ZGN7y",
                 BunleConfigUrl = "https://prod-cn-alicdn-gamestarter.kurogame.com/launcher/game/10004_IY6xmlAusbImBjWrpPj1OwNuirXEO44x/G152/bilibili/index.json",

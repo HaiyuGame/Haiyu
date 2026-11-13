@@ -17,4 +17,5 @@ public class PunishTwGameContextV2 : KuroGameContextBaseV2
     public override Type ContextType => typeof(PunishTwGameContextV2);
     public override GameType GameType => GameType.Punish;
     public override bool IsBunle { get; internal set; } = false;
+    public override bool SupportsPackageType { get; internal set; } = false;
 }

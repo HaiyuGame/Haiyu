@@ -21,12 +21,13 @@ public sealed class GlobalBundleProviderTests
         Assert.AreEqual("obOHXFrFanqsaIEOmuKroCcbZkQRBC7c", config.AppKey);
         Assert.IsTrue(config.ConfigUrl.Contains("/launcher/game/G153/50004_obOHX"));
         Assert.AreEqual(NewKey, config.BunleAppKey);
+        Assert.AreEqual(KuroGameApiConfig.MainAPiConfig.PackageStatePath, config.PackageStatePath);
         Assert.AreEqual(NewKey, config.BunleLauncherAppKey);
         Assert.AreEqual("prod-volcdn-gamestarter.kurogame.net", new Uri(config.BunleBackUpConfigUrl!).Host);
-        Assert.IsTrue(new WavesGlobalGameContextV2(config, "global", new Breaker()).IsBunle);
+        Assert.IsTrue(new WavesGlobalGameContextV2(config, "global", new Breaker(), new GrayExtension.GrayOpenService()).IsBunle);
         using var handler = new SnapshotHandler();
         using var client = new HttpClient(handler);
-        var provider = new BundleGameResourceProvider(client);
+        var provider = new BundleGameResourceProvider(client) { SupportsPackageType = true };
         provider.SetConfig(new GameLocalConfig(Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".json")), config);
         foreach (var bundle in new[] { "HD", "SD", "UHD" })
         {
@@ -65,9 +66,10 @@ public sealed class GlobalBundleProviderTests
             var expected = KuroGameApiConfig.GlobalConfig;
             using var handler = new SnapshotHandler();
             using var client = new HttpClient(handler);
-            var provider = new BundleGameResourceProvider(client);
+            var provider = new BundleGameResourceProvider(client) { SupportsPackageType = true };
             provider.SetConfig(new GameLocalConfig(Path.Combine(root, "settings.json")), config);
             await provider.ConfigureFromLauncherAsync(root);
+            Assert.IsTrue(provider.SupportsPackageType);
             Assert.AreEqual(expected.BunleConfigUrl, config.BunleConfigUrl);
             Assert.AreEqual(expected.BunleBackUpConfigUrl, config.BunleBackUpConfigUrl);
             Assert.AreEqual(expected.BunleLauncherConfigUrl, config.BunleLauncherConfigUrl);
@@ -97,7 +99,7 @@ public sealed class GlobalBundleProviderTests
         });
         using var client = new HttpClient(new HttpClientHandler { AutomaticDecompression = DecompressionMethods.All })
             { Timeout = TimeSpan.FromSeconds(60) };
-        var provider = new BundleGameResourceProvider(client);
+        var provider = new BundleGameResourceProvider(client) { SupportsPackageType = true };
         provider.SetConfig(local, KuroGameApiConfig.GlobalConfig);
         try
         {

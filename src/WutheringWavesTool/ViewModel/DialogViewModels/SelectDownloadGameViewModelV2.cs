@@ -1,6 +1,7 @@
 using GrayExtension;
 using Haiyu.Common.Contracts;
 using Haiyu.Models.Dialogs;
+using Waves.Core.Models.Enums;
 using Waves.Core.Models.Options;
 using Waves.Core.Services.GameResourceProvider;
 
@@ -20,6 +21,24 @@ public sealed partial class SelectDownloadGameViewModelV2 : DialogViewModelBase
     }
 
     private GameResourceParameter? Parameter;
+    private string? _packageBundleName;
+
+    [ObservableProperty]
+    public partial Visibility PackageVisibility { get; set; } = Visibility.Collapsed;
+
+    [ObservableProperty]
+    public partial int SelectedPackageIndex { get; set; }
+
+    partial void OnSelectedPackageIndexChanged(int value)
+    {
+        _packageBundleName = SelectedBundle?.BunleName;
+        foreach (var bundle in Bundles)
+            bundle.PackageType = value == 1 ? GamePackageType.Minimal : GamePackageType.Full;
+        CanDownload = false;
+        if (!IsBusy && IsInstallDirectory(FolderPath))
+            _ = RefreshDiskAsync();
+    }
+
     public IGameContextV2 GameContext { get; private set; } = null!;
     public IPickersService Pickers { get; }
     public GameResourceSummary? Launcher { get; private set; }
@@ -90,7 +109,12 @@ public sealed partial class SelectDownloadGameViewModelV2 : DialogViewModelBase
         DiskVisibility = Visibility.Collapsed;
     }
 
-    partial void OnSelectedBundleChanged(BunleResourceSize? value) => CanDownload = true;
+    partial void OnSelectedBundleChanged(BunleResourceSize? value)
+    {
+        CanDownload = false;
+        if (!IsBusy && IsInstallDirectory(FolderPath))
+            _ = RefreshDiskAsync();
+    }
 
     internal void SetData(object data)
     {
@@ -160,9 +184,28 @@ public sealed partial class SelectDownloadGameViewModelV2 : DialogViewModelBase
             && Bundles is ObservableCollection<BunleResourceSize> bunles
         )
         {
+            if (
+                GameContext.GameResourceProvider is BundleGameResourceProvider provider
+                && provider.SupportsPackageType
+                && _packageBundleName != size.BunleName
+            )
+            {
+                SelectedPackageIndex =
+                    await provider.ReadPackageTypeAsync(size.BunleName, CTS.Token)
+                    == GamePackageType.Minimal
+                        ? 1
+                        : 0;
+                _packageBundleName = size.BunleName;
+            }
             this.Parameter = new GameResourceParameter()
             {
                 BundleName = size.BunleName,
+                PackageType =
+                    PackageVisibility == Visibility.Visible
+                        ? SelectedPackageIndex == 1
+                            ? GamePackageType.Minimal
+                            : GamePackageType.Full
+                        : null,
                 TargetPackVersions = bunles.ToDictionary(x => x.BunleName, x => x.Version),
             };
         }
@@ -203,8 +246,24 @@ public sealed partial class SelectDownloadGameViewModelV2 : DialogViewModelBase
             TipMessage = LanguageService.GetStringByText("数据拉取失败");
             return;
         }
+        var installSize = Launcher.Install;
+        if (
+            GameContext.GameResourceProvider is BundleGameResourceProvider bundleProvider
+            && bundleProvider.SupportsPackageType
+        )
+        {
+            var preview = await GameContext.GetInstallGameResourceAsync(Parameter, CTS.Token);
+            if (IsDisposed || checkedPath != FolderPath || checkedBundle != SelectedBundle)
+                return;
+            installSize = new GameResourceSize
+            {
+                DownloadSize = preview.DownloadSize,
+                TargetSize = preview.TargetSize,
+                RequiredSpace = preview.RequiredSpace,
+            };
+        }
         DiskVisibility = Visibility.Visible;
-        var updateSize = usedSpaceMB + Launcher.Install.DownloadSize / 1024d / 1024 / 1024;
+        var updateSize = usedSpaceMB + installSize.DownloadSize / 1024d / 1024 / 1024;
         BarValues = new ObservableCollection<LayerData>()
         {
             new LayerData()
@@ -226,7 +285,7 @@ public sealed partial class SelectDownloadGameViewModelV2 : DialogViewModelBase
                 Value = updateSize,
             },
         };
-        if (selectedDrive.TotalFreeSpace < Launcher.Install.RequiredSpace)
+        if (selectedDrive.TotalFreeSpace < installSize.RequiredSpace)
         {
             TipMessage = LanguageService.GetStringByText("空间不足，请清理一些文件进行下载");
             CanDownload = false;
@@ -236,7 +295,7 @@ public sealed partial class SelectDownloadGameViewModelV2 : DialogViewModelBase
         {
             TipMessage = LanguageService.FormatByText(
                 LanguageService.GetStringByText("本次更新大小约为{0}GB"),
-                Math.Round(Launcher.Install.DownloadSize / 1024d / 1024 / 1024, 2)
+                Math.Round(installSize.DownloadSize / 1024d / 1024 / 1024, 2)
             );
             CanDownload = true;
         }
@@ -282,11 +341,22 @@ public sealed partial class SelectDownloadGameViewModelV2 : DialogViewModelBase
             return;
         }
         BundleVisibility = Visibility.Visible;
+        PackageVisibility = p.SupportsPackageType ? Visibility.Visible : Visibility.Collapsed;
         var bunleNames = await p.GetBunlesAsync();
+        await p.LoadPackageSizesAsync(bunleNames, CTS.Token);
         Bundles = bunleNames;
         this.Parameter = await p.GetLocalGameReosurceParamter();
         SelectedBundle =
             bunleNames.FirstOrDefault(x => x.BunleName == Parameter.BundleName)
             ?? bunleNames.FirstOrDefault();
+        if (p.SupportsPackageType && SelectedBundle is { } selected)
+        {
+            SelectedPackageIndex =
+                await p.ReadPackageTypeAsync(selected.BunleName, CTS.Token)
+                == GamePackageType.Minimal
+                    ? 1
+                    : 0;
+            _packageBundleName = selected.BunleName;
+        }
     }
 }

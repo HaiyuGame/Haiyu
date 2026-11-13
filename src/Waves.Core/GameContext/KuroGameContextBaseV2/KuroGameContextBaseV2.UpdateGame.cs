@@ -12,7 +12,7 @@ partial class KuroGameContextBaseV2
         GameResourceParameter? parameter = null
     ) =>
         QueueResourceOperationAsync(
-            () => GetUpdateGameResourceAsync(parameter),
+            selection => GetUpdateGameResourceAsync(selection),
             new InstallOption { DownloadFolder = downloadFolder },
             parameter
         );
@@ -22,7 +22,7 @@ partial class KuroGameContextBaseV2
         GameResourceParameter? parameter = null
     ) =>
         QueueResourceOperationAsync(
-            () => GetGameProdownloadResourceAsync(parameter),
+            selection => GetGameProdownloadResourceAsync(selection),
             new InstallOption { IsProd = true, DownloadFolder = downloadFolder },
             parameter
         );
@@ -37,7 +37,7 @@ partial class KuroGameContextBaseV2
         );
 
     private async Task<bool> QueueResourceOperationAsync(
-        Func<Task<GameVersionInfo>> query,
+        Func<GameResourceParameter?, Task<GameVersionInfo>> query,
         InstallOption option,
         GameResourceParameter? parameter
     )
@@ -59,12 +59,31 @@ partial class KuroGameContextBaseV2
         );
         try
         {
-            var plan = await query();
+            var folder = await GameLocalConfig.GetConfigAsync(GameLocalSettingName.GameLauncherBassFolder);
+            if (string.IsNullOrWhiteSpace(folder))
+            {
+                Interlocked.Exchange(ref _resourceOperationActive, 0);
+                return false;
+            }
+            await ResolveDownloadFolderAsync(option);
+            parameter = new GameResourceParameter
+            {
+                BundleName = parameter?.BundleName,
+                PackageType = parameter?.PackageType,
+                DownloadFolder = option.ResolveDownloadFolder(folder),
+                TargetPackVersions = parameter?.TargetPackVersions,
+                VerificationPackVersions = parameter?.VerificationPackVersions,
+                VerificationSource = parameter?.VerificationSource ?? GameVerificationSource.Official
+            };
+            var plan = await query(parameter);
             if (!IsExecutable(plan))
             {
                 Interlocked.Exchange(ref _resourceOperationActive, 0);
                 return false;
             }
+            if (GameResourceProvider is Services.GameResourceProvider.BundleGameResourceProvider provider
+                && plan.PackageType is { } packageType)
+                await provider.SavePackageTypeAsync(plan.BundleName!, packageType);
             var baseFolder = await GameLocalConfig.GetConfigAsync(
                 GameLocalSettingName.GameLauncherBassFolder
             );
@@ -160,6 +179,9 @@ partial class KuroGameContextBaseV2
                 {
                     [GameLocalSettingName.ProdDownloadPath] = cache,
                     [GameLocalSettingName.ProdDownloadVersion] = plan.NewGameVersion,
+                    [GameLocalSettingName.ProdDownloadBundleName] = plan.BundleName ?? "",
+                    [GameLocalSettingName.ProdDownloadPackageType] = plan.PackageType is { } type
+                        ? GamePackageStateService.ToValue(type) : "",
                     [GameLocalSettingName.ProdDownloadFolderDone] = "False",
                 }
             );
@@ -220,6 +242,9 @@ partial class KuroGameContextBaseV2
                 {
                     [GameLocalSettingName.ProdDownloadFolderDone] = "True",
                     [GameLocalSettingName.ProdDownloadVersion] = plan.NewGameVersion,
+                    [GameLocalSettingName.ProdDownloadBundleName] = plan.BundleName ?? "",
+                    [GameLocalSettingName.ProdDownloadPackageType] = plan.PackageType is { } type
+                        ? GamePackageStateService.ToValue(type) : "",
                     [GameLocalSettingName.ProdDownloadPath] = cache,
                 },
                 state.CancelToken.Token
@@ -383,6 +408,7 @@ partial class KuroGameContextBaseV2
         var verificationParameter = new GameResourceParameter
         {
             BundleName = plan.BundleName ?? parameter?.BundleName,
+            PackageType = plan.PackageType,
             VerificationPackVersions =
                 plan.ResourceVersion == "2"
                     ? plan.ResourcePacks.ToDictionary(x => x.Name, x => x.TargetVersion)
@@ -538,8 +564,8 @@ partial class KuroGameContextBaseV2
                     plan.PatchResources.Where(x => x.IsSelected && x.IsGroup).Cast<GameFileInfo>(),
                     "patchGroup"
                 ),
-                (plan.ZipResources.Cast<GameFileInfo>(), "zips"),
-                (plan.DefaultResource.AsEnumerable(), "resources"),
+                (plan.ZipResources.Where(x => x.IsSelected).Cast<GameFileInfo>(), "zips"),
+                (plan.DefaultResource.Where(x => x.IsSelected), "resources"),
             }
         )
         foreach (var file in files)
@@ -562,6 +588,8 @@ partial class KuroGameContextBaseV2
 
     public async Task AdvanceInstallGameResourceAsync(GameResourceParameter? parameter = null)
     {
+        if (GameResourceProvider is Services.GameResourceProvider.BundleGameResourceProvider provider)
+            parameter = await provider.ReadPredownloadParameterAsync(parameter);
         var summary = await GetResourceSummaryAsync(parameter);
         var local = await GameLocalConfig.GetConfigAsync(GameLocalSettingName.LocalGameVersion);
         if (
@@ -570,7 +598,7 @@ partial class KuroGameContextBaseV2
         )
             return;
         await QueueResourceOperationAsync(
-            () => GetGameProdownloadResourceAsync(parameter),
+            selection => GetGameProdownloadResourceAsync(selection),
             new InstallOption { IsAdvance = true },
             parameter
         );
@@ -581,6 +609,9 @@ partial class KuroGameContextBaseV2
         GameResourceParameter? parameter = null
     )
     {
+        if ((option.IsProd || option.IsAdvance)
+            && GameResourceProvider is Services.GameResourceProvider.BundleGameResourceProvider provider)
+            parameter = await provider.ReadPredownloadParameterAsync(parameter);
         var summary = await GetResourceSummaryAsync(parameter);
         var recorded = await GameLocalConfig.GetConfigAsync(
             GameLocalSettingName.ProdDownloadVersion

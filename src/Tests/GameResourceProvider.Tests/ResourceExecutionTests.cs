@@ -20,7 +20,7 @@ using Waves.Core.Services.GameResourceProvider;
 namespace Project.Test;
 
 [TestClass]
-public sealed class ResourceExecutionTests
+public sealed partial class ResourceExecutionTests
 {
     [DataTestMethod]
     [DataRow("stale-summary", "1")]
@@ -420,10 +420,20 @@ public sealed class ResourceExecutionTests
     }
 
     [TestMethod]
-    public void BundleRouteNeverCreatesLegacyProvider()
+    public async Task BundleRouteNeverCreatesLegacyProvider()
     {
-        Assert.IsInstanceOfType<BundleGameResourceProvider>(new BundleContext().GameResourceProvider);
-        Assert.IsInstanceOfType<LegacyGameResourceProvider>(new Context().GameResourceProvider);
+        using var client = new HttpClient(new Handler());
+        foreach (var context in new Context[] { new BundleContext(), new Context() })
+        {
+            context.GamerConfigPath = Path.Combine(Path.GetTempPath(), "haiyu-route-" + Guid.NewGuid());
+            context.HttpClientService = new Service(client);
+            await context.InitAsync();
+            if (context.IsBunle)
+                Assert.IsInstanceOfType<BundleGameResourceProvider>(context.GameResourceProvider);
+            else
+                Assert.IsInstanceOfType<LegacyGameResourceProvider>(context.GameResourceProvider);
+            ((IDisposable)context.Logger.ILogger).Dispose();
+        }
     }
 
     [TestMethod]
@@ -438,13 +448,14 @@ public sealed class ResourceExecutionTests
 
     private class Context : KuroGameContextBaseV2
     {
-        public Context() : base(new KuroGameApiConfig { ConfigUrl = "https://fixture.example/config", GameExeName = "game.bin" }, "fixture", "fixture", new Breaker()) { }
-        public override bool IsBunle => false;
+        public Context() : base(new KuroGameApiConfig { ConfigUrl = "https://fixture.example/config", GameExeName = "game.bin" }, "fixture", "fixture", new Breaker(), new GrayExtension.GrayOpenService()) { }
+        public override bool IsBunle { get; internal set; }
+        public override bool SupportsPackageType { get; internal set; }
         public override string GameContextNameKey => "fixture";
         public override GameType GameType => GameType.Punish;
         public override Type ContextType => GetType();
     }
-    private sealed class BundleContext : Context { public override bool IsBunle => true; }
+    private sealed class BundleContext : Context { public override bool IsBunle { get; internal set; } = true; }
     private sealed class Breaker : IIoCircuitBreaker { public bool TryAcquire() => true; public void Release() { } }
     private sealed class Service(HttpClient client) : IHttpClientService
     {
@@ -459,6 +470,7 @@ public sealed class ResourceExecutionTests
         public ConcurrentBag<string> Paths { get; } = [];
         public string OfficialVersion { get; set; } = "2";
         public bool HasPredownload { get; set; } = true;
+        public bool PackageProtocol { get; set; }
         public bool InvalidFinalHash { get; set; }
         public bool DelayDownloads { get; set; }
         public bool ZipFullInstall { get; set; }
@@ -477,6 +489,27 @@ public sealed class ResourceExecutionTests
                 ManifestStarted.TrySetResult();
                 await gate.Task.WaitAsync(token);
             }
+            if (path == "/config" && PackageProtocol)
+            {
+                global::Waves.Api.Models.BundleResourcePack Pack(string version) => new()
+                {
+                    Version = version, IndexFile = "/full-index", BaseUrl = "/full", Size = 22, UnCompressSize = 22,
+                    PatchConfig = [new() { Version = "1", IndexFile = "/full-index", BaseUrl = "/full", Size = 22, UnCompressSize = 22 }]
+                };
+                var config = new global::Waves.Api.Models.GameLauncherBunleSource
+                {
+                    CdnList = [new() { Url = "https://fixture.example", P = 1 }],
+                    Bundles = new() { ["HD"] = new() { ResourcePacks = ["common"] } },
+                    ResourcePacks = new() { ["common"] = Pack(OfficialVersion) },
+                    Config = new() { PredownloadSwitch = 1 },
+                    Predownload = new()
+                    {
+                        Bundles = new() { ["HD"] = new() { ResourcePacks = ["common"] } },
+                        ResourcePacks = new() { ["common"] = Pack("3") }
+                    }
+                };
+                return Json(JsonSerializer.Serialize(config, global::Waves.Api.Models.GameLauncherBunleSourceContext.Default.GameLauncherBunleSource));
+            }
             if (path == "/config")
             {
                 var pre = HasPredownload ? ",\"predownload\":{\"version\":\"3\",\"resourcesBasePath\":\"/next/\",\"config\":{\"size\":11,\"unCompressSize\":11,\"baseUrl\":\"/next/\",\"indexFile\":\"/next-index\",\"patchConfig\":[{\"version\":\"1\",\"size\":11,\"baseUrl\":\"/diff/\",\"indexFile\":\"/next-patch\"},{\"version\":\"2\",\"size\":11,\"baseUrl\":\"/diff/\",\"indexFile\":\"/next-patch\"}]}}" : "";
@@ -487,6 +520,8 @@ public sealed class ResourceExecutionTests
             if (!path.EndsWith("game.bin") && !path.EndsWith("game.krzip"))
             {
                 var hash = InvalidFinalHash && path == "/full-index" ? "bad-hash" : Hash;
+                if (PackageProtocol)
+                    return Json("{\"resource\":[{\"dest\":\"game.bin\",\"md5\":\"" + hash + "\",\"size\":11},{\"dest\":\"Client/Saved/Resources/story.bin\",\"md5\":\"" + hash + "\",\"size\":11}],\"tagGroups\":{\"min\":{\"exclude_prefixes\":[\"Client/Saved/Resources/\"]}}}");
                 return Json("{\"resource\":[{\"dest\":\"game.bin\",\"md5\":\"" + hash + "\",\"size\":11}],\"deleteFiles\":" + (DeleteObsolete ? "[\"obsolete.bin\"]" : "[]") + "}");
             }
             var range = request.Headers.Range?.Ranges.Single();
@@ -522,9 +557,18 @@ public sealed class ResourceExecutionTests
         public string Game => Path.Combine(Root, "game");
         public string Cache => Path.Combine(Root, "cache");
         private HttpClient Client = null!;
-        public static async Task<Fixture> Create()
+        public static async Task<Fixture> Create(bool packages = false)
         {
             var fixture = new Fixture();
+            if (packages)
+            {
+                fixture.Context.IsBunle = true;
+                fixture.Context.Config.BunleConfigUrl = "https://fixture.example/config";
+                fixture.Context.Config.BunleDefaultBundleName = "HD";
+                fixture.Context.SupportsPackageType = true;
+                fixture.Context.Config.PackageStatePath = "bridge/state.json";
+                fixture.Handler.PackageProtocol = true;
+            }
             Directory.CreateDirectory(fixture.Game);
             fixture.Client = new HttpClient(fixture.Handler);
             fixture.Context.HttpClientService = new Service(fixture.Client);

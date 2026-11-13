@@ -5,6 +5,7 @@ using Waves.Core.GameContext.ContextsV2.Punish;
 using Waves.Core.GameContext.ContextsV2.Waves;
 using Waves.Core.Models.Enums;
 using Waves.Core.Models.Options;
+using Waves.Core.Services.GameResourceProvider;
 
 namespace Haiyu.ViewModel.GameViewModels;
 
@@ -52,6 +53,23 @@ partial class KuroGameContextViewModelV2
             );
             if(bool.TryParse(diffDone,out var done) && done)
             {
+                if (GameContext.GameResourceProvider is BundleGameResourceProvider provider && provider.SupportsPackageType)
+                {
+                    var parameter = await provider.ReadPredownloadParameterAsync(ResourceParameter, CTS.Token);
+                    var plan = await GameContext.GetUpdateGameResourceAsync(parameter, CTS.Token);
+                    if (plan.NeedsPackageTypeConfirmation)
+                    {
+                        var confirmation = await WindowManager.Shell.DialogManager.ShowMessageDialog(new ShowDialogOption
+                        {
+                            Context = LanguageService.GetStringByText("游戏侧资源量状态与启动器偏好不一致，可能在游戏内清理或补充过资源。按缓存资源量安装更新时，可能需要重新下载部分资源。"),
+                            ShowPrimaryButton = true,
+                            PrimaryText = LanguageService.GetStringByText("按缓存资源量继续安装"),
+                            CloseText = LanguageService.GetStringByText("返回")
+                        });
+                        if (confirmation != ContentDialogResult.Primary)
+                            return;
+                    }
+                }
                 this.PauseIcon = "\uE769";
                 _ = Task.Run(async () => await GameContext.StartInstallGameResource(InstallOption.CreateProdownlad(), ResourceParameter));
             }
