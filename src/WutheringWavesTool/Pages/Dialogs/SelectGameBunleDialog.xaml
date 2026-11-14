@@ -51,12 +51,12 @@
             <ComboBox
                 HorizontalAlignment="Stretch"
                 AutomationProperties.AutomationId="SelectGameBunleDialog_PackageType"
-                Header="{x:Bind h:LanguageService.GetStringByText('资源量')}"
+                Header="{x:Bind helper:LanguageService.GetString('ResourceQuantity')}"
                 IsEnabled="{x:Bind ViewModel.InvokeEnable, Mode=OneWay}"
                 SelectedIndex="{x:Bind ViewModel.SelectedPackageIndex, Mode=TwoWay}"
-                Visibility="{x:Bind ViewModel.PackageVisibility, Mode=OneWay}">
-                <ComboBoxItem Content="{x:Bind h:LanguageService.GetStringByText('全量资源')}" />
-                <ComboBoxItem Content="{x:Bind h:LanguageService.GetStringByText('精简资源')}" />
+                Visibility="{x:Bind ViewModel.SupportsPackageTypeId, Mode=OneWay, Converter={StaticResource GrayUIToVisiblityConverter}}">
+                <ComboBoxItem Content="{x:Bind helper:LanguageService.GetString('ResourceFull')}" />
+                <ComboBoxItem Content="{x:Bind helper:LanguageService.GetString('ResourceStreamlined')}" />
             </ComboBox>
         </StackPanel>
         <ItemsView

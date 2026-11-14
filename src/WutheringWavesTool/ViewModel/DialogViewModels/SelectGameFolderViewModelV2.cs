@@ -11,6 +11,10 @@ namespace Haiyu.ViewModel.DialogViewModels;
 
 public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
 {
+    public uint? SupportsPackageTypeId =>
+        GameContext is { IsBunle: true, GameType: GameType.Waves }
+            ? (uint)GrayConfigId.SupportsPackageType : null;
+
     public SelectGameFolderViewModelV2(
         DialogSession dialogSession,
         IWindowManager windowManager,
@@ -429,5 +433,6 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
         Parameter = parameter;
         var name = type.Name;
         this.GameContext = Instance.Host.Services.GetRequiredKeyedService<IGameContextV2>(name);
+        OnPropertyChanged(nameof(SupportsPackageTypeId));
     }
 }

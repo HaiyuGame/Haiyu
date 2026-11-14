@@ -39,6 +39,9 @@ public interface IGameContextV2
     Task<FileVersion> GetLocalDLSSAsync();
     Task<FileVersion> GetLocalDLSSGenerateAsync();
     Task<FileVersion> GetLocalXeSSGenerateAsync();
+
+    Task<bool> ClearConfigAsync();
+
     public Type ContextType { get; }
 
     public DownloadState? DownloadState { get; }

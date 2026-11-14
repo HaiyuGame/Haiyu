@@ -75,11 +75,11 @@
                         <MenuFlyoutItem
                             Command="{x:Bind ViewModel.CopyWallpaperSourceCommand}"
                             CommandParameter="{x:Bind w:WallpaperShowType.Image}"
-                            Text="复制壁纸首帧链接" />
+                            Text="{x:Bind helper:LanguageService.GetString('CopyWallpaperImageUrl')}" />
                         <MenuFlyoutItem
                             Command="{x:Bind ViewModel.CopyWallpaperSourceCommand}"
                             CommandParameter="{x:Bind w:WallpaperShowType.Video}"
-                            Text="复制壁纸视频链接" />
+                            Text="{x:Bind helper:LanguageService.GetString('CopyWallpaperVideoUrl')}" />
                     </MenuFlyout>
 
                 </Button.Flyout>
@@ -581,6 +581,15 @@
                                                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE838;" />
                                             </MenuFlyoutItem.Icon>
                                         </MenuFlyoutItem>
+                                        <MenuFlyoutItem Command="{x:Bind ViewModel.ClearGameConfigCommand}" Text="{x:Bind helper:LanguageService.GetString('GamePage_ClearConfig')}">
+                                            <ToolTipService.ToolTip>
+                                                <TextBlock Text="{x:Bind helper:LanguageService.GetString('GamePage_ClearConfigTipMesage')}" />
+                                            </ToolTipService.ToolTip>
+                                            <MenuFlyoutItem.Icon>
+                                                <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xED62;" />
+                                            </MenuFlyoutItem.Icon>
+                                        </MenuFlyoutItem>
+                                        <MenuFlyoutSeparator />
                                         <MenuFlyoutItem
                                             Command="{x:Bind ViewModel.ShowGameLocalTokenWindowCommand}"
                                             IsEnabled="{x:Bind ViewModel.EnableStartGameBth, Mode=OneWay}"
@@ -590,7 +599,6 @@
                                                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE631;" />
                                             </MenuFlyoutItem.Icon>
                                         </MenuFlyoutItem>
-                                        <MenuFlyoutSeparator />
                                         <MenuFlyoutItem Command="{x:Bind ViewModel.ShowGameResourceCommand}" Text="{x:Bind helper:LanguageService.GetString('Display_GameResourceManagement')}">
                                             <MenuFlyoutItem.Icon>
                                                 <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xEF19;" />

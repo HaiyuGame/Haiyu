@@ -163,28 +163,18 @@
                     <ComboBox
                         HorizontalAlignment="Stretch"
                         AutomationProperties.AutomationId="SelectGameFolderDialogV2_PackageType"
-                        Header="{x:Bind helper:LanguageService.GetStringByText('资源量')}"
-                        PlaceholderText="{x:Bind helper:LanguageService.GetStringByText('请选择已安装的资源量')}"
+                        Header="{x:Bind helper:LanguageService.GetString('ResourceQuantity')}"
+                        PlaceholderText="{x:Bind helper:LanguageService.GetString('ResourceQuantitySelect')}"
                         SelectedIndex="{x:Bind ViewModel.SelectedPackageIndex, Mode=TwoWay}"
-                        Visibility="{x:Bind ViewModel.HasPackageSelection, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <ComboBoxItem Content="{x:Bind helper:LanguageService.GetStringByText('全量资源')}" />
-                        <ComboBoxItem Content="{x:Bind helper:LanguageService.GetStringByText('精简资源')}" />
+                        Visibility="{x:Bind ViewModel.SupportsPackageTypeId, Mode=OneWay, Converter={StaticResource GrayUIToVisiblityConverter}}">
+                        <ComboBoxItem Content="{x:Bind helper:LanguageService.GetString('ResourceFull')}" />
+                        <ComboBoxItem Content="{x:Bind helper:LanguageService.GetString('ResourceStreamlined')}" />
                     </ComboBox>
-                    <TextBlock
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        Text="{x:Bind helper:LanguageService.GetStringByText('请手动选择该目录实际已有的资源量，不自动识别。直接导入按所选类型记录状态，校验并导入按所选范围补齐资源。')}"
-                        TextWrapping="Wrap"
-                        Visibility="{x:Bind ViewModel.HasPackageSelection, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
                     <InfoBar
                         IsClosable="False"
                         IsOpen="True"
                         Message="{x:Bind ViewModel.TipMessage, Mode=OneWay}"
                         Severity="Informational" />
-                    <TextBlock
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        Style="{ThemeResource CaptionTextBlockStyle}"
-                        Text="{x:Bind helper:LanguageService.GetString('Display_SkipChecksum')}"
-                        TextWrapping="Wrap" />
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>

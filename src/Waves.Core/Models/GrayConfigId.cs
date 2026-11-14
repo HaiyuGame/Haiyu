@@ -15,12 +15,15 @@ public enum GrayConfigId : uint
     /// </summary>
     SoringTesing = 1001u,
 
-
+    /// <summary>
+    /// 资源分级功能，输入1006
+    /// </summary>
+    SupportsPackageType= 1006u,
 
     /// <summary>
     /// 抽卡记录V3
     /// </summary>
-    WavesRecordManager = 1005,
+    WavesRecordManager = 1005u,
 }
 
 public partial class GrayConfigItem : ObservableObject

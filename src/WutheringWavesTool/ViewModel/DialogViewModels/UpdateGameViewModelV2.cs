@@ -26,6 +26,9 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
         PickersService = this.AppContext.WindowManager.Shell.PickersService;
     }
 
+    public uint? SupportsPackageTypeId =>
+        GameContext is { IsBunle: true, GameType: GameType.Waves }
+            ? (uint)GrayConfigId.SupportsPackageType : null;
     public IGameContextV2 GameContext { get; private set; }
     public GameResourceParameter? Parameter { get; private set; }
     public UpdateGameType InvokeType { get; private set; }
@@ -65,9 +68,6 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
 
     [ObservableProperty]
     public partial bool IsBusy { get; set; }
-
-    [ObservableProperty]
-    public partial Visibility PackageVisibility { get; set; } = Visibility.Collapsed;
 
     [ObservableProperty]
     public partial int SelectedPackageIndex { get; set; }
@@ -181,7 +181,6 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
         var resourceSize = InvokeType == UpdateGameType.UpdateGame ? summary.Update : summary.Predownload;
         if (GameContext.GameResourceProvider is BundleGameResourceProvider provider && provider.SupportsPackageType)
         {
-            PackageVisibility = Visibility.Visible;
             if (!_packageInitialized)
             {
                 var type = Parameter?.PackageType ?? await provider.ReadPackageTypeAsync(summary.BundleName!, token);
@@ -323,6 +322,7 @@ public sealed partial class UpdateGameViewModelV2 : DialogViewModelBase
     internal void SetData(IGameContextV2 context, UpdateGameType item2, GameResourceParameter? parameter = null)
     {
         this.GameContext = context;
+        OnPropertyChanged(nameof(SupportsPackageTypeId));
         Parameter = parameter;
         this.InvokeType = item2;
         if (this.InvokeType == UpdateGameType.UpdateGame)

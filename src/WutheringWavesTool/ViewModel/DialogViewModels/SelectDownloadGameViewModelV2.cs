@@ -9,6 +9,10 @@ namespace Haiyu.ViewModel.DialogViewModels;
 
 public sealed partial class SelectDownloadGameViewModelV2 : DialogViewModelBase
 {
+    public uint? SupportsPackageTypeId =>
+        GameContext is { IsBunle: true, GameType: GameType.Waves }
+            ? (uint)GrayConfigId.SupportsPackageType : null;
+
     public SelectDownloadGameViewModelV2(
         DialogSession dialogSession,
         IWindowManager windowManager,
@@ -24,7 +28,7 @@ public sealed partial class SelectDownloadGameViewModelV2 : DialogViewModelBase
     private string? _packageBundleName;
 
     [ObservableProperty]
-    public partial Visibility PackageVisibility { get; set; } = Visibility.Collapsed;
+    public partial bool HasPackageSelection { get; set; }
 
     [ObservableProperty]
     public partial int SelectedPackageIndex { get; set; }
@@ -127,6 +131,7 @@ public sealed partial class SelectDownloadGameViewModelV2 : DialogViewModelBase
         {
             var name = type.Name;
             this.GameContext = Instance.Host.Services.GetRequiredKeyedService<IGameContextV2>(name);
+            OnPropertyChanged(nameof(SupportsPackageTypeId));
         }
     }
 
@@ -201,7 +206,7 @@ public sealed partial class SelectDownloadGameViewModelV2 : DialogViewModelBase
             {
                 BundleName = size.BunleName,
                 PackageType =
-                    PackageVisibility == Visibility.Visible
+                    HasPackageSelection
                         ? SelectedPackageIndex == 1
                             ? GamePackageType.Minimal
                             : GamePackageType.Full
@@ -341,7 +346,7 @@ public sealed partial class SelectDownloadGameViewModelV2 : DialogViewModelBase
             return;
         }
         BundleVisibility = Visibility.Visible;
-        PackageVisibility = p.SupportsPackageType ? Visibility.Visible : Visibility.Collapsed;
+        HasPackageSelection = p.SupportsPackageType;
         var bunleNames = await p.GetBunlesAsync();
         await p.LoadPackageSizesAsync(bunleNames, CTS.Token);
         Bundles = bunleNames;

@@ -12,6 +12,10 @@ namespace Haiyu.ViewModel.DialogViewModels;
 
 public partial class SelectGameBunleViewModel : DialogViewModelBase
 {
+    public uint? SupportsPackageTypeId =>
+        GameContext is { IsBunle: true, GameType: GameType.Waves }
+            ? (uint)GrayConfigId.SupportsPackageType : null;
+
     public SelectGameBunleViewModel(DialogSession dialogSession)
         : base(dialogSession)
     {
@@ -21,7 +25,7 @@ public partial class SelectGameBunleViewModel : DialogViewModelBase
     private readonly Dictionary<string, GamePackageType> _packageTypes = new();
 
     [ObservableProperty]
-    public partial Visibility PackageVisibility { get; set; } = Visibility.Collapsed;
+    public partial bool HasPackageSelection { get; set; }
 
     [ObservableProperty]
     public partial int SelectedPackageIndex { get; set; }
@@ -85,6 +89,7 @@ public partial class SelectGameBunleViewModel : DialogViewModelBase
         this.GameContext = Instance.Host.Services.GetRequiredKeyedService<IGameContextV2>(
             contextName
         );
+        OnPropertyChanged(nameof(SupportsPackageTypeId));
     }
 
     [ObservableProperty]
@@ -112,7 +117,7 @@ public partial class SelectGameBunleViewModel : DialogViewModelBase
                 foreach (var item in Bunles)
                     item.PropertyChanged -= OnBundlePropertyChanged;
                 Bunles = bundles;
-                PackageVisibility = provider.SupportsPackageType ? Visibility.Visible : Visibility.Collapsed;
+                HasPackageSelection = provider.SupportsPackageType;
                 foreach (var item in Bunles)
                     item.PropertyChanged += OnBundlePropertyChanged;
             }
@@ -140,7 +145,7 @@ public partial class SelectGameBunleViewModel : DialogViewModelBase
         );
         var packageType = SelectedPackageIndex == 1 ? GamePackageType.Minimal : GamePackageType.Full;
         if (string.Equals(currentBundle, select.BunleName, StringComparison.Ordinal)
-            && (PackageVisibility != Visibility.Visible
+            && (!HasPackageSelection
                 || packageType == _packageTypes.GetValueOrDefault(select.BunleName)))
         {
             await this.CloseAsync(null);
@@ -153,7 +158,7 @@ public partial class SelectGameBunleViewModel : DialogViewModelBase
         var parameter = new GameResourceParameter
         {
             BundleName = select.BunleName,
-            PackageType = PackageVisibility == Visibility.Visible ? packageType : null
+            PackageType = HasPackageSelection ? packageType : null
         };
         _ = Task.Run(async () =>
         {

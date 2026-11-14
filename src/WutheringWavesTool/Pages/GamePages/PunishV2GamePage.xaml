@@ -66,11 +66,11 @@
                         <MenuFlyoutItem
                             Command="{x:Bind ViewModel.CopyWallpaperSourceCommand}"
                             CommandParameter="{x:Bind w:WallpaperShowType.Image}"
-                            Text="复制壁纸首帧链接" />
+                            Text="{x:Bind helper:LanguageService.GetString('CopyWallpaperImageUrl')}" />
                         <MenuFlyoutItem
                             Command="{x:Bind ViewModel.CopyWallpaperSourceCommand}"
                             CommandParameter="{x:Bind w:WallpaperShowType.Video}"
-                            Text="复制壁纸视频链接" />
+                            Text="{x:Bind helper:LanguageService.GetString('CopyWallpaperVideoUrl')}" />
                     </MenuFlyout>
 
                 </Button.Flyout>
@@ -1339,26 +1339,7 @@
                             Glyph="&#xE70D;" />
                     </StackPanel>
                 </Button>
-                <Button
-                    Padding="10,5"
-                    BorderBrush="{ThemeResource AccentAAFillColorDefaultBrush}"
-                    BorderThickness="0,0,0,2"
-                    Content="下载壁纸"
-                    CornerRadius="5"
-                    Style="{ThemeResource TitleBarButtonStyle}">
-                    <Button.Flyout>
-                        <MenuFlyout>
-                            <MenuFlyoutItem
-                                Command="{x:Bind ViewModel.CopyWallpaperSourceCommand}"
-                                CommandParameter="{x:Bind w:WallpaperShowType.Image}"
-                                Text="复制首帧链接" />
-                            <MenuFlyoutItem
-                                Command="{x:Bind ViewModel.CopyWallpaperSourceCommand}"
-                                CommandParameter="{x:Bind w:WallpaperShowType.Video}"
-                                Text="复制视频链接" />
-                        </MenuFlyout>
-                    </Button.Flyout>
-                </Button>
+
             </StackPanel>
         </StackPanel>
     </Grid>

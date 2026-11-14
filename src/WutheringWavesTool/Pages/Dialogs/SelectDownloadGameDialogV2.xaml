@@ -25,7 +25,7 @@
     <Grid Width="480" RowSpacing="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid ColumnSpacing="16">
@@ -137,17 +137,12 @@
                     <ComboBox
                         HorizontalAlignment="Stretch"
                         AutomationProperties.AutomationId="SelectDownloadGameDialogV2_PackageType"
-                        Header="{x:Bind helper:LanguageService.GetStringByText('资源量')}"
+                        Header="{x:Bind helper:LanguageService.GetString('ResourceQuantity')}"
                         SelectedIndex="{x:Bind ViewModel.SelectedPackageIndex, Mode=TwoWay}"
-                        Visibility="{x:Bind ViewModel.PackageVisibility, Mode=OneWay}">
-                        <ComboBoxItem Content="{x:Bind helper:LanguageService.GetStringByText('全量资源')}" />
-                        <ComboBoxItem Content="{x:Bind helper:LanguageService.GetStringByText('精简资源')}" />
+                        Visibility="{x:Bind ViewModel.SupportsPackageTypeId, Mode=OneWay, Converter={StaticResource GrayUIToVisiblityConverter}}">
+                        <ComboBoxItem Content="{x:Bind helper:LanguageService.GetString('ResourceFull')}" />
+                        <ComboBoxItem Content="{x:Bind helper:LanguageService.GetString('ResourceStreamlined')}" />
                     </ComboBox>
-                    <TextBlock
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        Text="{x:Bind helper:LanguageService.GetStringByText('资源量不影响材质质量；部分剧情资源仍会在游戏内下载。大小为估算值。')}"
-                        TextWrapping="Wrap"
-                        Visibility="{x:Bind ViewModel.PackageVisibility, Mode=OneWay}" />
                     <ComboBox
                         HorizontalAlignment="Stretch"
                         AutomationProperties.AutomationId="SelectDownloadGameDialogV2_ResourceSelection"

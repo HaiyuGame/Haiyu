@@ -1358,6 +1358,12 @@ public abstract partial class KuroGameContextViewModelV2 : ViewModelBase, IHaiyu
         );
     }
 
+    [RelayCommand]
+    async Task ClearGameConfig()
+    {
+        await this.GameContext.ClearConfigAsync();
+    }
+
     public abstract Task LoadAfter();
 
     public abstract void DisposeAfter();
