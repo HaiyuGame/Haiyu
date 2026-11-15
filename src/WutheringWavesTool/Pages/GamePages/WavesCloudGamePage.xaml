@@ -281,7 +281,9 @@
                         Margin="4"
                         HorizontalAlignment="Center"
                         FontFamily="{ThemeResource DefaultFont}"
-                        Text="{x:Bind ViewModel.BottomText, Mode=OneWay}" />
+                        Text="{x:Bind ViewModel.BottomText, Mode=OneWay}"
+                        TextAlignment="Center"
+                        TextWrapping="Wrap" />
                 </Grid>
                 <Grid
                     Grid.Row="1"

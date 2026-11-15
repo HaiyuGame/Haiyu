@@ -10,8 +10,10 @@ public interface IKuroCloudGameContext
     IGameEventPublisher<CloudMessageArgs> CloudGameEventPublisher { get; }
     CloudGameProcessTracker CloudGameProcessTracker { get; }
     GameLocalConfig GameLocalConfig { get; }
-    
+    bool AutoSelectLowestLatencyNode { get; }
+
     Task InitAsync();
+    Task<bool> SetAutoSelectLowestLatencyNodeAsync(bool enabled);
 
     Task StartGameAsync(
         CloudGameLoginSession session,

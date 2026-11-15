@@ -31,6 +31,9 @@ public sealed partial class CloudGameSettingViewModel : DialogViewModelBase
     public partial bool ShowNetworkState { get; set; }
 
     [ObservableProperty]
+    public partial bool AutoSelectLowestLatencyNode { get; set; }
+
+    [ObservableProperty]
     public partial int CodeType { get; set; } = CloudGameMethod.DefaultCodecType;
 
     public IKuroCloudGameContext CloudGameContext { get; internal set; }
@@ -42,6 +45,7 @@ public sealed partial class CloudGameSettingViewModel : DialogViewModelBase
         : base(dialogSession)
     {
         this.CloudGameContext = cloudGameContext;
+        this.AutoSelectLowestLatencyNode = cloudGameContext.AutoSelectLowestLatencyNode;
     }
 
     [RelayCommand]
@@ -154,6 +158,15 @@ public sealed partial class CloudGameSettingViewModel : DialogViewModelBase
             this.CTS.Token
         );
         SeedUpdateQuality();
+    }
+
+    async partial void OnAutoSelectLowestLatencyNodeChanged(bool value)
+    {
+        if (value == CloudGameContext.AutoSelectLowestLatencyNode)
+            return;
+
+        if (!await CloudGameContext.SetAutoSelectLowestLatencyNodeAsync(value))
+            Logger.WriteError("保存云鸣潮自动选节点设置失败");
     }
 
     public void SeedUpdateQuality()

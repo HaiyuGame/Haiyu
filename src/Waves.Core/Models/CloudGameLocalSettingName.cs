@@ -1,4 +1,4 @@
-﻿namespace Waves.Core.Models;
+namespace Waves.Core.Models;
 
 public class CloudGameLocalSettingName
 {
@@ -22,4 +22,5 @@ public class CloudGameLocalSettingName
     /// </summary>
     public const string EnableNetworkPanel = nameof(EnableNetworkPanel);
 
+    public const string AutoSelectLowestLatencyNode = nameof(AutoSelectLowestLatencyNode);
 }

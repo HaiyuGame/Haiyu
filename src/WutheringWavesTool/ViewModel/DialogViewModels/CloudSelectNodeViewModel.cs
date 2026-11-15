@@ -47,7 +47,7 @@ public sealed partial class CloudSelectNodeViewModel : DialogViewModelBase
         }
 
         var nodes = await KuroCloudGameContext.GetPingGameNodeAsync(session, this.CTS.Token);
-        this.Nodes = new(nodes.Data);
+        this.Nodes = new(nodes?.Data ?? []);
         IsRefreshing = false;
     }
 
