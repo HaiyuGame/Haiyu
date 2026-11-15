@@ -90,6 +90,11 @@ namespace Waves.Core.GameContext
                     return false;
                 }
 
+                if (GameResourceProvider is Services.GameResourceProvider.BundleGameResourceProvider provider
+                    && option.WavesOption is { } wavesOption)
+                {
+                    wavesOption.Arguments = await provider.ResolveLaunchArgumentsAsync(gameFolder, wavesOption.Arguments);
+                }
                 Process ps = new();
                 string? argument = option.ToString();
                 ProcessStartInfo info = customLauncher.Enabled

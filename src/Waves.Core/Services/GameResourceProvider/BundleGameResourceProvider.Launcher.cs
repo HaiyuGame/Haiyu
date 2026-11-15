@@ -54,6 +54,8 @@ public sealed partial class BundleGameResourceProvider
         if (string.IsNullOrWhiteSpace(selected.ConfigUrl) || string.IsNullOrWhiteSpace(selected.AppKey)
             || string.IsNullOrWhiteSpace(selected.ServerCode)) throw new InvalidDataException("启动器分包引导配置缺少地址、key 或服务器编号。");
         token.ThrowIfCancellationRequested();
+        if (!string.IsNullOrWhiteSpace(selected.PackageStatePath))
+            ApiConfig.PackageStatePath = selected.PackageStatePath;
         ApiConfig.BunleConfigUrl = selected.ConfigUrl;
         ApiConfig.BunleBackUpConfigUrl = selected.BackUpConfigUrl;
         ApiConfig.BunleAppKey = selected.AppKey;
@@ -105,6 +107,7 @@ internal sealed class BundleLauncherBootstrap
 }
 internal sealed class BundleGameBootstrap
 {
+    [JsonPropertyName("packageStatePath")] public string? PackageStatePath { get; set; }
     [JsonPropertyName("gameId")] public string GameId { get; set; } = "";
     [JsonPropertyName("resId")] public string ResId { get; set; } = "";
     [JsonPropertyName("appKey")] public string AppKey { get; set; } = "";

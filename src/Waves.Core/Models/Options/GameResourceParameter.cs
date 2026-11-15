@@ -11,6 +11,12 @@ public sealed class GameResourceParameter
     /// </summary>
     public string? BundleName { get; init; }
 
+    public GamePackageType? PackageType { get; init; }
+
+    /// <summary>实际缓存目录，供任务预览检查差分与完整目标文件。</summary>
+    public string? DownloadFolder { get; init; }
+
+
     /// <summary>完整校验索引的明确来源；正式更新不回退到预下载配置。</summary>
     public GameVerificationSource VerificationSource { get; init; } = GameVerificationSource.Official;
 

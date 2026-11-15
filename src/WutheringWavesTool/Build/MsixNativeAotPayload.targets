@@ -1,0 +1,20 @@
+<Project>
+  <!-- MSIX 1.7 uses _AssembliesToSkipPublish, which .NET 11 no longer fills.
+       Keep binary payloads aligned with the completed Native AOT publish list.
+       Preserve PRI/XBF, resource packages, assets, and native runtime libraries. -->
+  <Target Name="HaiyuAlignMsixNativeAotPayload"
+          AfterTargets="GetPackagingOutputs"
+          BeforeTargets="_ComputeAppxPackagePayload"
+          DependsOnTargets="ComputeFilesToPublish"
+          Condition="'$(PublishAot)' == 'true' and '$(WindowsPackageType)' == 'MSIX' and '$(TargetFrameworkVersion)' == 'v11.0'">
+    <ItemGroup>
+      <_HaiyuNonPublishedBinary Include="@(PackagingOutputs)"
+          Condition="'%(Extension)' == '.dll' or '%(Extension)' == '.exe' or '%(Extension)' == '.pdb'" />
+      <_HaiyuPublishedFile Include="@(ResolvedFileToPublish)" />
+      <_HaiyuNonPublishedBinary Remove="@(_HaiyuPublishedFile)"
+          MatchOnMetadata="FullPath" MatchOnMetadataOptions="PathLike" />
+      <PackagingOutputs Remove="@(_HaiyuNonPublishedBinary)" />
+    </ItemGroup>
+    <Message Importance="High" Text="Native AOT MSIX: excluded @(_HaiyuNonPublishedBinary->Count()) non-publish binary entries." />
+  </Target>
+</Project>

@@ -5,6 +5,7 @@ using Waves.Core.GameContext.ContextsV2.Punish;
 using Waves.Core.GameContext.ContextsV2.Waves;
 using Waves.Core.Models.Enums;
 using Waves.Core.Models.Options;
+using Waves.Core.Services.GameResourceProvider;
 
 namespace Haiyu.ViewModel.GameViewModels;
 
@@ -52,6 +53,23 @@ partial class KuroGameContextViewModelV2
             );
             if(bool.TryParse(diffDone,out var done) && done)
             {
+                if (GameContext.GameResourceProvider is BundleGameResourceProvider provider && provider.SupportsPackageType)
+                {
+                    var parameter = await provider.ReadPredownloadParameterAsync(ResourceParameter, CTS.Token);
+                    var plan = await GameContext.GetUpdateGameResourceAsync(parameter, CTS.Token);
+                    if (plan.NeedsPackageTypeConfirmation)
+                    {
+                        var confirmation = await WindowManager.Shell.DialogManager.ShowMessageDialog(new ShowDialogOption
+                        {
+                            Context = LanguageService.GetString("ResourceQuantityUpdateTipMessage"),
+                            ShowPrimaryButton = true,
+                            PrimaryText = LanguageService.GetString("Code_5b232e2ec655bd5b"),
+                            CloseText = LanguageService.GetString("Display_SDecline")
+                        });
+                        if (confirmation != ContentDialogResult.Primary)
+                            return;
+                    }
+                }
                 this.PauseIcon = "\uE769";
                 _ = Task.Run(async () => await GameContext.StartInstallGameResource(InstallOption.CreateProdownlad(), ResourceParameter));
             }

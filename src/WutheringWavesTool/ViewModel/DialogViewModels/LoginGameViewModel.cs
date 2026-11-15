@@ -39,8 +39,6 @@ public sealed partial class LoginGameViewModel : DialogViewModelBase
     [ObservableProperty]
     public partial Visibility TokenVisibility { get; set; }
 
-    [ObservableProperty]
-    public partial string SendCodeText { get; set; } = LanguageService.GetString("Display_Item4");
 
     [ObservableProperty]
     public partial string Phone { get; set; }
@@ -68,6 +66,10 @@ public sealed partial class LoginGameViewModel : DialogViewModelBase
 
     [ObservableProperty]
     public partial bool SendCodeEnable { get; set; } = true;
+
+
+    [ObservableProperty]
+    public partial string SendCodeText { get; set; } = LanguageService.GetString("Display_Item4");
 
     public IAppContext<App> AppContext { get; }
     public IViewFactorys ViewFactorys { get; }
@@ -148,7 +150,7 @@ public sealed partial class LoginGameViewModel : DialogViewModelBase
     [RelayCommand]
     void ShowGetGeet()
     {
-        if (string.IsNullOrWhiteSpace(Phone))
+        if (string.IsNullOrWhiteSpace(Phone) || this.TimeCount != 60)
             return;
         var view = ViewFactorys.CreateGeetWindow(
             AppContext.WindowManager.Shell.GetWindow().GetWindowHandle(),

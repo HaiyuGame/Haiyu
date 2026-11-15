@@ -248,6 +248,9 @@ public sealed class BundleResourceCheckExperiment
 
 public sealed class BundleDownloadExperiment
 {
+    [JsonPropertyName("diskSpaceCalculationRatio")]
+    public string? DiskSpaceCalculationRatio { get; set; }
+
     [JsonPropertyName("downloadReadBlockTimeout")]
     public string DownloadReadBlockTimeout { get; set; } = string.Empty;
 

@@ -5,16 +5,42 @@ using CommunityToolkit.Mvvm.Messaging;
 using Haiyu.Common.Contracts;
 using Waves.Core.Models.Messanger;
 using Waves.Core.Models.Options;
+using Waves.Core.Models.Enums;
 using Waves.Core.Services.GameResourceProvider;
 
 namespace Haiyu.ViewModel.DialogViewModels;
 
 public partial class SelectGameBunleViewModel : DialogViewModelBase
 {
+    public uint? SupportsPackageTypeId =>
+        GameContext is { IsBunle: true, GameType: GameType.Waves }
+            ? (uint)GrayConfigId.SupportsPackageType : null;
+
     public SelectGameBunleViewModel(DialogSession dialogSession)
         : base(dialogSession)
     {
         RegisterMessager();
+    }
+
+    private readonly Dictionary<string, GamePackageType> _packageTypes = new();
+
+    [ObservableProperty]
+    public partial bool HasPackageSelection { get; set; }
+
+    [ObservableProperty]
+    public partial int SelectedPackageIndex { get; set; }
+
+    partial void OnSelectedPackageIndexChanged(int value)
+    {
+        foreach (var item in Bunles)
+            item.PackageType = value == 1 ? GamePackageType.Minimal : GamePackageType.Full;
+    }
+
+    private void OnBundlePropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs args)
+    {
+        if (args.PropertyName == nameof(BunleResourceSize.IsSelect)
+            && sender is BunleResourceSize { IsSelect: true } item)
+            SelectedPackageIndex = _packageTypes.GetValueOrDefault(item.BunleName) == GamePackageType.Minimal ? 1 : 0;
     }
 
     [ObservableProperty]
@@ -63,10 +89,11 @@ public partial class SelectGameBunleViewModel : DialogViewModelBase
         this.GameContext = Instance.Host.Services.GetRequiredKeyedService<IGameContextV2>(
             contextName
         );
+        OnPropertyChanged(nameof(SupportsPackageTypeId));
     }
 
     [ObservableProperty]
-    public partial ObservableCollection<BunleResourceSize> Bunles { get; set; }
+    public partial ObservableCollection<BunleResourceSize> Bunles { get; set; } = new();
 
     [RelayCommand]
     async Task Loaded()
@@ -77,20 +104,33 @@ public partial class SelectGameBunleViewModel : DialogViewModelBase
             return;
         }
         NullEnable = false;
-        if (GameContext.IsBunle && GameContext.GameResourceProvider is BundleGameResourceProvider p)
+        InvokeEnable = false;
+        try
         {
-            this.Bunles = await p.GetBunlesAsync();
-        }
-        var selectQuality = await this.GameContext.GameLocalConfig.GetConfigAsync(
-            GameLocalSettingName.BunleName
-        );
-        foreach (var item in Bunles)
-        {
-            if (selectQuality == item.BunleName)
+            if (GameContext.IsBunle && GameContext.GameResourceProvider is BundleGameResourceProvider provider)
             {
-                item.IsSelect = true;
-                item.Select = true;
+                var bundles = await provider.GetBunlesAsync();
+                await provider.LoadPackageSizesAsync(bundles, CTS.Token);
+                _packageTypes.Clear();
+                foreach (var item in bundles)
+                    _packageTypes[item.BunleName] = await provider.ReadPackageTypeAsync(item.BunleName, CTS.Token);
+                foreach (var item in Bunles)
+                    item.PropertyChanged -= OnBundlePropertyChanged;
+                Bunles = bundles;
+                HasPackageSelection = provider.SupportsPackageType;
+                foreach (var item in Bunles)
+                    item.PropertyChanged += OnBundlePropertyChanged;
             }
+            var selected = await GameContext.GameLocalConfig.GetConfigAsync(GameLocalSettingName.BunleName);
+            foreach (var item in Bunles)
+            {
+                item.IsSelect = selected == item.BunleName;
+                item.Select = item.IsSelect;
+            }
+        }
+        finally
+        {
+            InvokeEnable = true;
         }
     }
 
@@ -103,56 +143,30 @@ public partial class SelectGameBunleViewModel : DialogViewModelBase
         var currentBundle = await GameContext.GameLocalConfig.GetConfigAsync(
             GameLocalSettingName.BunleName
         );
-        if (string.Equals(currentBundle, select.BunleName, StringComparison.Ordinal))
+        var packageType = SelectedPackageIndex == 1 ? GamePackageType.Minimal : GamePackageType.Full;
+        if (string.Equals(currentBundle, select.BunleName, StringComparison.Ordinal)
+            && (!HasPackageSelection
+                || packageType == _packageTypes.GetValueOrDefault(select.BunleName)))
         {
             await this.CloseAsync(null);
             return;
         }
-        var arguments =
-            await GameContext.GameLocalConfig.GetConfigAsync(
-                GameLocalSettingName.StartGameArguments
-            ) ?? "";
-        arguments = System
-            .Text.RegularExpressions.Regex.Replace(
-                arguments,
-                @"(?<!\S)-krqlv=(?:""[^""]*""|\S+)",
-                "",
-                System.Text.RegularExpressions.RegexOptions.IgnoreCase
-            )
-            .Trim();
-        var quality = string.IsNullOrWhiteSpace(select.ResourceCommand)
-            ? select.BunleName.ToLowerInvariant()
-            : select.ResourceCommand.ToLowerInvariant();
-        arguments = string.IsNullOrWhiteSpace(arguments)
-            ? $"-krqlv={quality}"
-            : $"{arguments} -krqlv={quality}";
-        if (
-            !await GameContext.GameLocalConfig.SaveConfigsAsync(
-                new Dictionary<string, string>
-                {
-                    [GameLocalSettingName.BunleName] = select.BunleName,
-                    [GameLocalSettingName.StartGameArguments] = arguments,
-                }
-            )
-        )
-            return;
+        if (GameContext.GameResourceProvider is BundleGameResourceProvider provider)
+            await provider.SavePackageTypeAsync(select.BunleName, packageType, CTS.Token);
         var filePaths = await AppSettings.GetskipVerifyFilesAsync();
         var skipDelete = await AppSettings.GetverifySkilDeleteAsync();
-        if (
-            !await GameContext.GameLocalConfig.SaveConfigAsync(
-                GameLocalSettingName.GetBunlePackVersionKey(select.BunleName),
-                select.Version
-            )
-        )
-            return;
-
+        var parameter = new GameResourceParameter
+        {
+            BundleName = select.BunleName,
+            PackageType = HasPackageSelection ? packageType : null
+        };
         _ = Task.Run(async () =>
+        {
             await GameContext.RepairGameAsync(
                 isDelete: !skipDelete,
                 skipFilePath: filePaths,
-                parameter: new GameResourceParameter { BundleName = select.BunleName }
-            )
-        );
+                parameter: parameter);
+        });
         await CloseAsync(select);
     }
 }

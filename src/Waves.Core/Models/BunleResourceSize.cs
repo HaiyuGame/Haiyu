@@ -7,7 +7,6 @@ public sealed partial class BunleResourceSize : ObservableObject
     public BunleResourceSize(long size)
     {
         Size = size;
-        BunleSize = $"{(Size / (1024.0 * 1024.0 * 1024.0)):F2} GB";
     }
 
     [ObservableProperty]
@@ -20,8 +19,15 @@ public sealed partial class BunleResourceSize : ObservableObject
     [ObservableProperty]
     public partial bool Install { get; set; }
 
+    public string BunleSize => $"{((PackageType == GamePackageType.Minimal ? MinimalSize ?? Size : Size) / (1024.0 * 1024.0 * 1024.0)):F2} GB";
+
     [ObservableProperty]
-    public partial string BunleSize { get; set; }
+    [NotifyPropertyChangedFor(nameof(BunleSize))]
+    public partial long? MinimalSize { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(BunleSize))]
+    public partial GamePackageType PackageType { get; set; }
 
     [ObservableProperty]
     public partial string Version { get; set; }

@@ -24,6 +24,10 @@ partial class SettingViewModel
     public partial string FrameworkType { get; set; }
 
     [ObservableProperty]
+    public partial bool SatoriGc { get; set; } =
+        GC.GetConfigurationVariables().ContainsKey("SatoriGC");
+
+    [ObservableProperty]
     public partial string RpcToken { get; set; }
 
     [ObservableProperty]
@@ -46,7 +50,9 @@ partial class SettingViewModel
     private async Task LoadWebViewRuntimeModeAsync()
     {
         var mode = await AppSettings.GetWebViewRuntimeModeAsync(CTS.Token) ?? "Evergreen";
-        var evergreen = CoreWebView2Environment.GetAvailableBrowserVersionString() ?? LanguageService.GetString("WebViewEnv_NotInstalled");
+        var evergreen =
+            CoreWebView2Environment.GetAvailableBrowserVersionString()
+            ?? LanguageService.GetString("WebViewEnv_NotInstalled");
 
         var options = new ObservableCollection<WebViewRuntimeWrapper>
         {
@@ -85,11 +91,17 @@ partial class SettingViewModel
     {
         if (string.IsNullOrWhiteSpace(this.RpcToken))
         {
-            await WindowManager.Shell.TipShow.ShowMessageAsync(LanguageService.GetStringByText("密钥不能为空"), Symbol.Clear);
+            await WindowManager.Shell.TipShow.ShowMessageAsync(
+                LanguageService.GetStringByText("密钥不能为空"),
+                Symbol.Clear
+            );
             return;
         }
         await RpcSettings.SetAuthTokenAsync(Md5Helper.ComputeMd532(RpcToken));
-        await WindowManager.Shell.TipShow.ShowMessageAsync(LanguageService.GetStringByText("密钥已经更新"), Symbol.Accept);
+        await WindowManager.Shell.TipShow.ShowMessageAsync(
+            LanguageService.GetStringByText("密钥已经更新"),
+            Symbol.Accept
+        );
     }
 
     [RelayCommand]

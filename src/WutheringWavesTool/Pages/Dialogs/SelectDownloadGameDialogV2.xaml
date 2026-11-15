@@ -25,7 +25,7 @@
     <Grid Width="480" RowSpacing="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid ColumnSpacing="16">
@@ -136,6 +136,15 @@
                     </Border>
                     <ComboBox
                         HorizontalAlignment="Stretch"
+                        AutomationProperties.AutomationId="SelectDownloadGameDialogV2_PackageType"
+                        Header="{x:Bind helper:LanguageService.GetString('ResourceQuantity')}"
+                        SelectedIndex="{x:Bind ViewModel.SelectedPackageIndex, Mode=TwoWay}"
+                        Visibility="{x:Bind ViewModel.SupportsPackageTypeId, Mode=OneWay, Converter={StaticResource GrayUIToVisiblityConverter}}">
+                        <ComboBoxItem Content="{x:Bind helper:LanguageService.GetString('ResourceFull')}" />
+                        <ComboBoxItem Content="{x:Bind helper:LanguageService.GetString('ResourceStreamlined')}" />
+                    </ComboBox>
+                    <ComboBox
+                        HorizontalAlignment="Stretch"
                         AutomationProperties.AutomationId="SelectDownloadGameDialogV2_ResourceSelection"
                         Header="{x:Bind helper:LanguageService.GetString('GameDownload_SelectResourceQuality')}"
                         ItemsSource="{x:Bind ViewModel.Bundles, Mode=OneWay}"
@@ -145,7 +154,7 @@
                             <DataTemplate x:DataType="md:BunleResourceSize">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock Text="{x:Bind BunleName}" />
-                                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind BunleSize}" />
+                                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind BunleSize, Mode=OneWay}" />
                                 </StackPanel>
                             </DataTemplate>
                         </ComboBox.ItemTemplate>

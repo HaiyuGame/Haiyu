@@ -162,22 +162,27 @@ public partial class WavesV2GameContextViewModel : KuroGameContextViewModelV2
 
     public async override Task ShowCardAsync(bool showCard)
     {
+        var context = GameContext;
+        var token = LifetimeToken;
         if (showCard)
         {
             var starter = await this.TryCacheInvokeAsync(async ct =>
                 await this.LoadStarterAsync(
-                    $"{nameof(WavesV2GameContextViewModel)}:{this.GameContext.ContextName}",
+                    $"{nameof(WavesV2GameContextViewModel)}:{context.ContextName}",
                     async _ =>
                     {
-                        var starter = await this.GameContext.GetLauncherStarterAsync(
-                            this.CTS.Token
+                        var starter = await context.GetLauncherStarterAsync(
+                            token
                         );
                         return starter;
                     },
                     HaiyuCacheMode.Default,
                     ct
-                )
+                ),
+                token
             );
+            if (!IsAlive || token.IsCancellationRequested || !ReferenceEquals(GameContext, context))
+                return;
             if (starter.Code == 0 && starter.Result != null)
             {
                 this.SlideShows = starter.Result.Slideshow.ToObservableCollection();

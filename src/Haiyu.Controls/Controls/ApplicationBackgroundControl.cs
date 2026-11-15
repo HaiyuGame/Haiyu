@@ -1,5 +1,10 @@
 using System.Diagnostics;
+using System.Threading.Tasks;
 using Haiyu.Controls.Models;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Imaging;
 using Windows.Media.Core;
 using Windows.Media.Playback;
 
@@ -18,6 +23,9 @@ public partial class ApplicationBackgroundControl : Control
     private bool isLoaded;
     private bool isPaused;
     private bool suppressSourceUpdate;
+    private SystemBackdropImageRenderer? systemImage;
+    private string? requestedSystemImageSource;
+    private int systemImageVersion;
 
     public ApplicationBackgroundControl()
     {
@@ -28,6 +36,7 @@ public partial class ApplicationBackgroundControl : Control
 
     protected override void OnApplyTemplate()
     {
+        ReleaseSystemImage();
         if (ImageControl is not null)
         {
             ImageControl.ImageExFailed -= ImageControl_ImageExFailed;
@@ -107,7 +116,7 @@ public partial class ApplicationBackgroundControl : Control
         nameof(ShowType),
         typeof(WallpaperShowType),
         typeof(ApplicationBackgroundControl),
-        new PropertyMetadata(WallpaperShowType.Image)
+        new PropertyMetadata(WallpaperShowType.Image, OnSourceChanged)
     );
 
     public Stretch Stretch
@@ -120,7 +129,7 @@ public partial class ApplicationBackgroundControl : Control
         nameof(Stretch),
         typeof(Stretch),
         typeof(ApplicationBackgroundControl),
-        new PropertyMetadata(Stretch.Uniform)
+        new PropertyMetadata(Stretch.Uniform, OnStretchChanged)
     );
 
     public ImageEx? ImageControl { get; private set; }
@@ -148,6 +157,7 @@ public partial class ApplicationBackgroundControl : Control
     {
         isLoaded = false;
         ReleaseMediaPlayer();
+        ReleaseSystemImage();
     }
 
     public void UpdateMedia()
@@ -164,7 +174,7 @@ public partial class ApplicationBackgroundControl : Control
                 ReleaseMediaPlayer();
                 if (!string.IsNullOrWhiteSpace(ImageSource))
                 {
-                    ImageControl.Source = new BitmapImage(new Uri(ImageSource));
+                    SetBackgroundImage(ImageSource);
                 }
 
                 VisualStateManager.GoToState(this, "ShowImage", false);
@@ -179,7 +189,7 @@ public partial class ApplicationBackgroundControl : Control
 
             if (!string.IsNullOrWhiteSpace(ImageSource))
             {
-                ImageControl.Source = new BitmapImage(new Uri(ImageSource));
+                SetBackgroundImage(ImageSource);
             }
 
             EnsureMediaPlayer();
@@ -277,13 +287,68 @@ public partial class ApplicationBackgroundControl : Control
 
         try
         {
-            ImageControl.Source = new BitmapImage(new Uri(DefaultImageSource));
+            SetBackgroundImage(DefaultImageSource);
             VisualStateManager.GoToState(this, "ShowImage", false);
         }
         catch (Exception ex)
         {
             Debug.WriteLine($"Default application background failed: {ex}");
         }
+    }
+
+    private static void OnStretchChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
+    {
+        var control = (ApplicationBackgroundControl)sender;
+        control.systemImage?.SetStretch(control.Stretch);
+    }
+
+    private void SetBackgroundImage(string path)
+    {
+        if (ImageControl is null) return;
+        if (requestedSystemImageSource == path) return;
+        ImageControl.Source = new BitmapImage(new Uri(path));
+        requestedSystemImageSource = path;
+        var version = ++systemImageVersion;
+        _ = UpdateSystemImageAsync(ImageControl, path, version);
+    }
+
+    private async Task UpdateSystemImageAsync(ImageEx host, string path, int version)
+    {
+        SystemBackdropImageRenderer? next = null;
+        try
+        {
+            next = await SystemBackdropImageRenderer.CreateAsync(host, path);
+            // A load may finish after a new source, template, or unload. Never
+            // attach that stale image or let it clear a newer placement visual.
+            if (!isLoaded || version != systemImageVersion || host != ImageControl) return;
+            systemImage?.Dispose();
+            systemImage = null;
+            next.Attach(Stretch);
+            systemImage = next;
+            next = null;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"System composition background image failed: {ex}");
+            if (version == systemImageVersion)
+            {
+                requestedSystemImageSource = null;
+                systemImage?.Dispose();
+                systemImage = null;
+            }
+        }
+        finally
+        {
+            next?.Dispose();
+        }
+    }
+
+    private void ReleaseSystemImage()
+    {
+        ++systemImageVersion;
+        requestedSystemImageSource = null;
+        systemImage?.Dispose();
+        systemImage = null;
     }
 
     private void ReleaseMediaPlayer()

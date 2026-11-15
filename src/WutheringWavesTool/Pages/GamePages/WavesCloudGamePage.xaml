@@ -27,16 +27,15 @@
             Background="Transparent"
             IsIndeterminate="{x:Bind ViewModel.IsRefreshing, Mode=OneWay}" />
 
-        <Border
+        <Grid
             Width="380"
             Height="220"
             Margin="12"
             HorizontalAlignment="Left"
             VerticalAlignment="Bottom"
-            Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
-            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
             BorderThickness="1"
             CornerRadius="6">
+            <ui:InAppAcrylicVisual Grid.RowSpan="4" CornerRadius="6" />
             <Grid Padding="16" RowSpacing="8">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto" />
@@ -44,7 +43,6 @@
                     <RowDefinition Height="auto" />
                     <RowDefinition Height="auto" />
                 </Grid.RowDefinitions>
-
                 <Grid ColumnSpacing="5">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition />
@@ -260,7 +258,7 @@
                     </Border>
                 </Grid>
             </Grid>
-        </Border>
+        </Grid>
         <Grid
             Grid.Row="1"
             Width="220"
@@ -278,11 +276,7 @@
                     BorderBrush="{ThemeResource LayerOnMicaBaseAltFillColorSecondaryBrush}"
                     BorderThickness="1,1,1,0"
                     CornerRadius="5 5 0 0">
-                    <SystemBackdropElement Grid.ColumnSpan="2" CornerRadius="5 5 0 0">
-                        <SystemBackdropElement.SystemBackdrop>
-                            <DesktopAcrylicBackdrop />
-                        </SystemBackdropElement.SystemBackdrop>
-                    </SystemBackdropElement>
+                    <ui:InAppAcrylicVisual Grid.ColumnSpan="2" CornerRadius="5 5 0 0" />
                     <TextBlock
                         Margin="4"
                         HorizontalAlignment="Center"
@@ -298,11 +292,8 @@
                         <ColumnDefinition />
                         <ColumnDefinition Width="auto" />
                     </Grid.ColumnDefinitions>
-                    <SystemBackdropElement Grid.ColumnSpan="2" CornerRadius="5">
-                        <SystemBackdropElement.SystemBackdrop>
-                            <DesktopAcrylicBackdrop />
-                        </SystemBackdropElement.SystemBackdrop>
-                    </SystemBackdropElement>
+                    <ui:InAppAcrylicVisual Grid.ColumnSpan="2" CornerRadius="5" />
+
                     <Button
                         Grid.Row="1"
                         Height="60"
@@ -314,9 +305,6 @@
                         CornerRadius="4"
                         Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
                         Style="{StaticResource ALauncherButtonStyle}">
-                        <!--
-                            Background="{ThemeResource SystemFillColorSuccess}"
-                        -->
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="auto" />

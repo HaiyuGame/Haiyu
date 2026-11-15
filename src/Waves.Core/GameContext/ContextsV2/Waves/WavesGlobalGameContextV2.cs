@@ -12,5 +12,11 @@ public class WavesGlobalGameContextV2 : KuroGameContextBaseV2
     public override GameType GameType => Models.Enums.GameType.Waves;
 
 
-    public override bool IsBunle { get; internal set; } = true;
+    public override bool IsBunle => true;
+
+
+    public override bool SupportsPackageType =>
+        IsBunle
+        && GameType == GameType.Waves
+        && GrayOpenService.GetOpen((uint) GrayConfigId.SupportsPackageType, false);
 }

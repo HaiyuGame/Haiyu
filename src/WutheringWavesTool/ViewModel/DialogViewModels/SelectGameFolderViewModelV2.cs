@@ -3,12 +3,18 @@ using GrayExtension;
 using Haiyu.Common.Contracts;
 using Haiyu.Models.Dialogs;
 using Waves.Core.Models.Options;
+using Waves.Core.Models.Enums;
+using Waves.Core.Services;
 using Waves.Core.Services.GameResourceProvider;
 
 namespace Haiyu.ViewModel.DialogViewModels;
 
 public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
 {
+    public uint? SupportsPackageTypeId =>
+        GameContext is { IsBunle: true, GameType: GameType.Waves }
+            ? (uint)GrayConfigId.SupportsPackageType : null;
+
     public SelectGameFolderViewModelV2(
         DialogSession dialogSession,
         IWindowManager windowManager,
@@ -35,14 +41,33 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
     [NotifyCanExecuteChangedFor(nameof(StartVerifyCommand), nameof(SelectVersionCommand))]
     public partial BunleResourceSize? SelectedBundle { get; set; }
 
-    partial void OnSelectedBundleChanged(BunleResourceSize? value)
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(StartVerifyCommand), nameof(SelectVersionCommand))]
+    public partial bool HasPackageSelection { get; set; }
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(StartVerifyCommand), nameof(SelectVersionCommand))]
+    public partial int SelectedPackageIndex { get; set; } = -1;
+
+    partial void OnSelectedBundleChanged(BunleResourceSize? value) => UpdateParameter();
+
+    partial void OnSelectedPackageIndexChanged(int value)
     {
-        if (value is null)
+        foreach (var bundle in Bundles)
+            bundle.PackageType = value == 1 ? GamePackageType.Minimal : GamePackageType.Full;
+        UpdateParameter();
+    }
+
+    private void UpdateParameter()
+    {
+        if (SelectedBundle is not { } bundle)
             return;
         Parameter = new GameResourceParameter
         {
-            BundleName = value.BunleName,
-            TargetPackVersions = Bundles.ToDictionary(x => x.BunleName, x => x.Version),
+            BundleName = bundle.BunleName,
+            PackageType = HasPackageSelection && SelectedPackageIndex >= 0
+                ? SelectedPackageIndex == 1 ? GamePackageType.Minimal : GamePackageType.Full : null,
+            TargetPackVersions = Bundles.ToDictionary(x => x.BunleName, x => x.Version)
         };
     }
 
@@ -85,7 +110,8 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
         IsVerify
         && !IsBusy
         && !string.IsNullOrWhiteSpace(SelectedVersion)
-        && (!HasBundleSelection || SelectedBundle is not null);
+        && (!HasBundleSelection || SelectedBundle is not null)
+        && (!HasPackageSelection || SelectedPackageIndex >= 0);
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(StartVerifyCommand), nameof(SelectVersionCommand))]
@@ -211,7 +237,7 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
         {
             if (!IsVerify)
                 return;
-            var bundleConfig = await GetBundleConfigAsync();
+            var bundleConfig = GetBundleConfig();
             if (
                 bundleConfig.Count > 0
                 && !await GameContext.GameLocalConfig.SaveConfigsAsync(bundleConfig, CTS.Token)
@@ -236,17 +262,19 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
 
     private async Task LoadCoreAsync()
     {
-        var bunleGray = this.GrayOpenService.GetOpen((uint)GrayConfigId.WavesGameBunleOpen, false);
         HasBundleSelection =
             GameContext.IsBunle
-            && bunleGray
             && GameContext.GameResourceProvider is BundleGameResourceProvider;
+        HasPackageSelection = HasBundleSelection && GameContext.SupportsPackageType;
+        SelectedPackageIndex = -1;
         if (
             HasBundleSelection
             && GameContext.GameResourceProvider is BundleGameResourceProvider provider
         )
         {
-            Bundles = await provider.GetBunlesAsync();
+            var bundles = await provider.GetBunlesAsync();
+            await provider.LoadPackageSizesAsync(bundles, CTS.Token);
+            Bundles = bundles;
             var bundleName =
                 Parameter?.BundleName
                 ?? await GameContext.GameLocalConfig.GetConfigAsync(
@@ -293,7 +321,7 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
             || string.IsNullOrWhiteSpace(folder)
         )
             return;
-        var config = await GetBundleConfigAsync();
+        var config = GetBundleConfig();
         config[GameLocalSettingName.LocalGameVersion] = SelectedVersion;
         config[GameLocalSettingName.GameLauncherBassFolder] = folder;
         config[GameLocalSettingName.LocalGameUpdateing] = "False";
@@ -303,6 +331,9 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
             TipMessage = LanguageService.GetString("GameImport_SaveConfigFailed");
             return;
         }
+        if (HasPackageSelection && Parameter?.PackageType is { } packageType)
+            await GamePackageStateService.WriteAsync(folder, GameContext.Config.PackageStatePath!,
+                SelectedBundle!.BunleName, packageType, CTS.Token);
         this.GameContext.GameEventPublisher.Publish(
             new GameContextOutputArgs()
             {
@@ -312,7 +343,7 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
         await this.Close();
     }
 
-    private async Task<Dictionary<string, string>> GetBundleConfigAsync()
+    private Dictionary<string, string> GetBundleConfig()
     {
         var config = new Dictionary<string, string>();
         if (!HasBundleSelection)
@@ -327,23 +358,11 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
                 LanguageService.GetString("GameImport_ReloadTextureVersion")
             );
 
-        var arguments =
-            await GameContext.GameLocalConfig.GetConfigAsync(
-                GameLocalSettingName.StartGameArguments,
-                CTS.Token
-            ) ?? string.Empty;
-        arguments = Regex
-            .Replace(arguments, @"(?<!\S)-krqlv=(?:""[^""]*""|\S+)", "", RegexOptions.IgnoreCase)
-            .Trim();
-        var quality = string.IsNullOrWhiteSpace(bundle.ResourceCommand)
-            ? bundle.BunleName.ToLowerInvariant()
-            : bundle.ResourceCommand.ToLowerInvariant();
         config[GameLocalSettingName.BunleName] = bundle.BunleName;
         config[GameLocalSettingName.GetBunlePackVersionKey(bundle.BunleName)] = bundle.Version;
         config[GameLocalSettingName.BunlePackVersion_Common] = SelectedVersion;
-        config[GameLocalSettingName.StartGameArguments] = string.IsNullOrWhiteSpace(arguments)
-            ? $"-krqlv={quality}"
-            : $"{arguments} -krqlv={quality}";
+        if (Parameter?.PackageType is { } packageType)
+            config[GameLocalSettingName.GetPackageTypeKey(bundle.BunleName)] = GamePackageStateService.ToValue(packageType);
         return config;
     }
 
@@ -414,5 +433,6 @@ public sealed partial class SelectGameFolderViewModelV2 : DialogViewModelBase
         Parameter = parameter;
         var name = type.Name;
         this.GameContext = Instance.Host.Services.GetRequiredKeyedService<IGameContextV2>(name);
+        OnPropertyChanged(nameof(SupportsPackageTypeId));
     }
 }

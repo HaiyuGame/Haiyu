@@ -11,5 +11,6 @@ public class PunishBiliBiliGameContextV2: KuroGameContextBaseV2
     public override Type ContextType => typeof(PunishBiliBiliGameContextV2);
     public override GameType GameType => GameType.Punish;
 
-    public override bool IsBunle { get; internal set; } = false;
+    public override bool IsBunle => false;
+    public override bool SupportsPackageType => false;
 }

@@ -41,9 +41,15 @@ public class GameLocalSettingName
             "HD" => BunlePackVersion_HD,
             "SD" => BunlePackVersion_SD,
             "UHD" => BunlePackVersion_UHD,
-            _ => "BunlePackVersion_" + char.ToUpperInvariant(packName[0]) + packName[1..]
+            _ => "BunlePackVersion_" + char.ToUpperInvariant(packName[0]) + packName[1..],
         };
     }
+
+    public static string GetPackageTypeKey(string bundleName) =>
+        "PackageType_" + bundleName.ToUpperInvariant();
+
+    public const string ProdDownloadBundleName = nameof(ProdDownloadBundleName);
+    public const string ProdDownloadPackageType = nameof(ProdDownloadPackageType);
 
     public const string LocalGameUpdateing = nameof(LocalGameUpdateing);
 
@@ -104,7 +110,6 @@ public class GameLocalSettingName
     public const string GameTime = nameof(GameTime);
 }
 
-
 public class GameLocalConfig
 {
     private Dictionary<string, string> _settings = new Dictionary<string, string>();
@@ -115,10 +120,7 @@ public class GameLocalConfig
     private long _cachedLength = -1;
 
     private readonly LocalSettingsJsonContext _jsonContext = new LocalSettingsJsonContext(
-        new JsonSerializerOptions
-        {
-            WriteIndented = true
-        }
+        new JsonSerializerOptions { WriteIndented = true }
     );
 
     public string SettingPath { get; set; }
@@ -257,7 +259,11 @@ public class GameLocalConfig
     /// <param name="key"></param>
     /// <param name="value"></param>
     /// <returns></returns>
-    public async Task<bool> SaveConfigAsync(string key, string value, CancellationToken token = default)
+    public async Task<bool> SaveConfigAsync(
+        string key,
+        string value,
+        CancellationToken token = default
+    )
     {
         return await SaveConfigsAsync(new Dictionary<string, string> { [key] = value }, token);
     }
@@ -332,4 +338,3 @@ public class GameLocalConfig
         }
     }
 }
-

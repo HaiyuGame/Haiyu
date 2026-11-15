@@ -25,7 +25,8 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
     /// </summary>
     public IHttpClientService HttpClientService { get; set; }
 
-    public abstract bool IsBunle { get; internal set; }
+    public abstract bool IsBunle { get; }
+    public abstract bool SupportsPackageType { get; }
 
     /// <summary>
     /// CDN测试工具
@@ -120,10 +121,13 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
     public virtual async Task InitAsync()
     {
         //灰度开关
-        var bunleGray = GrayOpenService.GetOpen((uint)GrayConfigId.WavesGameBunleOpen,false);
-        if (bunleGray && this.IsBunle)
+
+        if (this.IsBunle)
         {
-            this.GameResourceProvider = new BundleGameResourceProvider();
+            this.GameResourceProvider = new BundleGameResourceProvider(HttpClientService)
+            {
+                SupportsPackageType = this.SupportsPackageType,
+            };
         }
         else
         {
@@ -241,10 +245,12 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
             }
             foreach (var state in new[] { DownloadState, ProdDownloadState })
             {
-                if (state is null) continue;
+                if (state is null)
+                    continue;
                 state.IsStop = true;
                 state.IsActive = false;
-                if (state.CancelToken is not null) await state.CancelToken.CancelAsync();
+                if (state.CancelToken is not null)
+                    await state.CancelToken.CancelAsync();
             }
             var cancelGen = Interlocked.Increment(ref _operationGeneration);
             GameContextOutputArgs.CurrentGeneration.Value = cancelGen;
@@ -424,13 +430,14 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
             status.IsLauncher = true;
         }
         var indexSource = await this.GetResourceSummaryAsync(token: token);
-        if (!IsBunle) localVersion = indexSource.LocalVersion;
+        if (!IsBunle)
+            localVersion = indexSource.LocalVersion;
         // 两种 Provider 均已计算更新状态；分包更新还可能只有材质包变更。
-        var gameNeedsUpdate = indexSource.Update.Availability != GameResourceAvailability.AlreadyCurrent;
+        var gameNeedsUpdate =
+            indexSource.Update.Availability != GameResourceAvailability.AlreadyCurrent;
         if (indexSource != null)
         {
             await ClearVersion(gameNeedsUpdate);
-
 
             var predownloadVFlage = Version.TryParse(
                 indexSource.PredownloadVersion ?? "0.0.1",
@@ -455,7 +462,8 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
                 && bool.TryParse(updateing, out var updateResult)
             )
             {
-                status.IsUpdateing = updateResult && (!IsBunle || gameNeedsUpdate || IsResourceOperationActive);
+                status.IsUpdateing =
+                    updateResult && (!IsBunle || gameNeedsUpdate || IsResourceOperationActive);
             }
             if (
                 (
@@ -480,7 +488,16 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
                 );
                 if (bool.TryParse(donwResult, out var predDown) && Directory.Exists(prePath))
                 {
-                    status.PredownloadedDone = predDown;
+                    status.PredownloadedDone =
+                        predDown
+                        && prodDownVersion == indexSource.PredownloadVersion
+                        && (
+                            GameResourceProvider is not BundleGameResourceProvider provider
+                            || await provider.MatchesPredownloadSelectionAsync(
+                                indexSource.BundleName,
+                                token
+                            )
+                        );
                 }
                 else
                 {
@@ -1044,5 +1061,34 @@ public abstract partial class KuroGameContextBaseV2 : IGameContextV2
                 DownloadState.CancelToken == null
                 || DownloadState.CancelToken.IsCancellationRequested
             );
+    }
+
+    public async Task<bool> ClearConfigAsync()
+    {
+        var saved = await GameLocalConfig.SaveConfigsAsync(new Dictionary<string, string>
+        {
+            [GameLocalSettingName.GameLauncherBassFolder] = "",
+            [GameLocalSettingName.GameLauncherBassProgram] = "",
+            [GameLocalSettingName.LocalGameVersion] = "",
+            [GameLocalSettingName.LocalGameUpdateing] = "",
+            [GameLocalSettingName.BunleName] = "",
+            [GameLocalSettingName.BunlePackVersion_Common] = "",
+            [GameLocalSettingName.BunlePackVersion_HD] = "",
+            [GameLocalSettingName.BunlePackVersion_SD] = "",
+            [GameLocalSettingName.BunlePackVersion_UHD] = "",
+            [GameLocalSettingName.GetPackageTypeKey("HD")] = "",
+            [GameLocalSettingName.GetPackageTypeKey("SD")] = "",
+            [GameLocalSettingName.GetPackageTypeKey("UHD")] = "",
+            [GameLocalSettingName.ProdIsAdvance] = "",
+            [GameLocalSettingName.ProdDownloadFolderDone] = "",
+            [GameLocalSettingName.ProdDownloadPath] = "",
+            [GameLocalSettingName.ProdDownloadVersion] = "",
+            [GameLocalSettingName.ProdDownloadBundleName] = "",
+            [GameLocalSettingName.ProdDownloadPackageType] = "",
+        });
+        if (!saved)
+            return false;
+        await GameEventPublisher.PublisAsync(GameContextActionType.None, "ClearGameConfig");
+        return true;
     }
 }

@@ -7,13 +7,21 @@ public sealed partial class PopupMessage : UserControl
 
     private Popup _popup = null;
 
+    public ElementTheme Theme { get; }
+
     public PopupMessage(ElementTheme theme)
     {
         this.InitializeComponent();
-        _popup = new Popup();
-        _popup.Child = this;
-        this.RequestedTheme = theme;
-        this.Loaded += PopupNoticeLoaded;
+        Theme = theme;
+    }
+
+    private void PopupNoticeUnload(object sender, RoutedEventArgs e)
+    {
+        this.PopupIn.Completed -= PopupInCompleted;
+        this.PopupOut.Completed -= PopupOutCompleted;
+        _popup.Child = new TextBlock();
+        _popup = null;
+        GC.Collect();
     }
 
     public PopupMessage(string popupContentString, Panel uIElement, Symbol symbol, ElementTheme theme)
@@ -22,13 +30,20 @@ public sealed partial class PopupMessage : UserControl
         PopupIcon.Symbol = symbol;
         _popupContent = popupContentString;
         this.uIElement = uIElement;
-        _popup.XamlRoot = uIElement.XamlRoot;
     }
 
     public void ShowPopup()
     {
+        _popup = new Popup();
+        _popup.Child = this;
+        this.RequestedTheme = Theme;
+        this.Loaded += PopupNoticeLoaded;
+        this.Unloaded += PopupNoticeUnload;
+        _popup.XamlRoot = uIElement.XamlRoot;
         _popup.IsOpen = true;
     }
+
+
 
     private void PopupNoticeLoaded(object sender, RoutedEventArgs e)
     {
@@ -43,13 +58,14 @@ public sealed partial class PopupMessage : UserControl
     public async void PopupInCompleted(object sender, object e)
     {
         await Task.Delay(1000);
-
         this.PopupOut.Begin();
+        this.PopupIn.Completed -= PopupInCompleted;
         this.PopupOut.Completed += PopupOutCompleted;
     }
 
     public void PopupOutCompleted(object sender, object e)
     {
         _popup.IsOpen = false;
+        this.PopupOut.Completed -= PopupOutCompleted;
     }
 }

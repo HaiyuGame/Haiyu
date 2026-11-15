@@ -6,6 +6,11 @@ namespace Waves.Core.Models;
 public class GameVersionInfo
 {
     public string? BundleName { get; set; }
+    public GamePackageType? PackageType { get; set; }
+    public bool SyncPackageTypeToGame { get; set; }
+    public bool NeedsPackageTypeConfirmation { get; set; }
+    public bool HasPackageTags { get; set; }
+
     public IList<GameResourcePackInfo> ResourcePacks { get; set; } = [];
     public GameResourceAvailability Availability { get; set; } = GameResourceAvailability.Ready;
     public IList<GameResourceCdn> CdnCandidates { get; set; } = [];

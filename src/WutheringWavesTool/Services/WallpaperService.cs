@@ -160,7 +160,6 @@ public class WallpaperService : IWallpaperService
 
     public void PauseVideo()
     {
-
         this.Media?.Pause();
     }
 

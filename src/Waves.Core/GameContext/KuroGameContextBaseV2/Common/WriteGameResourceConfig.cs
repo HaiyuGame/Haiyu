@@ -82,6 +82,8 @@ public class WriteGameResourceConfig : IAsyncDisposable
             if (string.IsNullOrWhiteSpace(plan.BundleName) || plan.ResourcePacks.Count == 0)
                 throw new InvalidOperationException("分包安装清单缺少资源组合或分包版本，未提交版本配置。");
             values[GameLocalSettingName.BunleName] = plan.BundleName;
+            if (plan.PackageType is { } packageType)
+                values[GameLocalSettingName.GetPackageTypeKey(plan.BundleName)] = GamePackageStateService.ToValue(packageType);
             foreach (var pack in plan.ResourcePacks)
             {
                 if (string.IsNullOrWhiteSpace(pack.Name) || string.IsNullOrWhiteSpace(pack.TargetVersion))
@@ -94,11 +96,26 @@ public class WriteGameResourceConfig : IAsyncDisposable
             values[GameLocalSettingName.ProdDownloadFolderDone] = "False";
             values[GameLocalSettingName.ProdDownloadPath] = "";
             values[GameLocalSettingName.ProdDownloadVersion] = "";
+            values[GameLocalSettingName.ProdDownloadBundleName] = "";
+            values[GameLocalSettingName.ProdDownloadPackageType] = "";
         }
         // 主版本、逐包版本及任务标记在同一次原子配置替换中提交。
         // SaveConfigsAsync 会以 false 返回磁盘写入失败，必须将失败传播给任务。
         if (!await GameLocalConfig.SaveConfigsAsync(values, token))
             throw new IOException($"版本配置保存失败：{GameLocalConfig.SettingPath}。目标版本：{targetVersion}；保留下载缓存。");
+        if (plan?.SyncPackageTypeToGame == true && plan.PackageType is { } type
+            && !string.IsNullOrWhiteSpace(kuroGameApiConfig.PackageStatePath))
+        {
+            try
+            {
+                await GamePackageStateService.WriteAsync(installFolder, kuroGameApiConfig.PackageStatePath,
+                    plan.BundleName!, type, token);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                logger.WriteWarning($"游戏资源量状态同步失败：{ex.Message}");
+            }
+        }
         logger.WriteInfo($"安装配置已提交，主版本：{targetVersion}；分包：{string.Join(", ", plan?.ResourcePacks.Select(x => $"{x.Name}={x.TargetVersion}") ?? [])}");
     }
 }

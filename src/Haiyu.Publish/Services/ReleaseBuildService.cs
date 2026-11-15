@@ -43,26 +43,54 @@ public sealed class ReleaseBuildService
         string msbuild = ResolveMsBuildPath();
         string outDir = Path.GetFullPath(packageOutput).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         string appxPackageDir = outDir.Replace('\\', '/') + "/";
+        // Haiyu.csproj aligns .NET 11 Native AOT packaging inputs with the
+        // completed publish list before the MSIX payload is computed.
         await RunAsync(msbuild,
             $"\"{project}\" /restore /t:Rebuild,Publish /v:minimal " +
             "/p:Configuration=Release /p:Platform=x64 /p:RuntimeIdentifier=win-x64 " +
-            "/p:WindowsPackageType=MSIX /p:GenerateAppxPackageOnBuild=true " +
+            "/p:WindowsPackageType=MSIX " +
+            "/p:GenerateAppxPackageOnBuild=true " +
+            "/p:IncludeDebugSymbolsProjectOutputGroup=false " +
             "/p:AppxBundle=Always /p:AppxBundlePlatforms=x64 " +
             "/p:UapAppxPackageBuildMode=StoreUpload /p:AppxPackageSigningEnabled=true " +
             $"/p:AppxPackageDir=\"{appxPackageDir}\"");
 
-        string? bundle = Directory.EnumerateFiles(packageOutput, "*.msixbundle", SearchOption.AllDirectories).FirstOrDefault();
+        string? bundle = Directory.EnumerateFiles(packageOutput, $"Haiyu_{packageVersion}_*.msixbundle", SearchOption.AllDirectories)
+            .OrderByDescending(File.GetLastWriteTimeUtc).FirstOrDefault();
         if (bundle == null) throw new FileNotFoundException($"MSIX 构建结束，但输出目录中没有捆绑包：{packageOutput}");
+        ValidateNativeAotBundle(bundle);
+        AppendLog("AOT 包检查通过：未混入 CoreCLR、JIT 或托管 SDK 投影。");
 
         string finalBundle = Path.Combine(packageOutput, $"Haiyu_{packageVersion}_x64.msixbundle");
         if (!string.Equals(bundle, finalBundle, StringComparison.OrdinalIgnoreCase))
             File.Copy(bundle, finalBundle, true);
 
-        string? storeUpload = Directory.EnumerateFiles(packageOutput, "*.msixupload", SearchOption.AllDirectories).FirstOrDefault();
+        string? storeUpload = Directory.EnumerateFiles(packageOutput, $"Haiyu_{packageVersion}_*.msixupload", SearchOption.AllDirectories)
+            .OrderByDescending(File.GetLastWriteTimeUtc).FirstOrDefault();
         CleanupMsixIntermediates(packageOutput);
         SetStep("MSIX 捆绑包生成完成", 100);
         AppendLog($"捆绑包：{finalBundle}");
         if (storeUpload != null) AppendLog($"Microsoft Store 上传包：{storeUpload}");
+    }
+
+    private static void ValidateNativeAotBundle(string bundlePath)
+    {
+        using var bundle = ZipFile.OpenRead(bundlePath);
+        foreach (var entry in bundle.Entries)
+        {
+            if (!entry.Name.EndsWith(".msix", StringComparison.OrdinalIgnoreCase) &&
+                !entry.Name.EndsWith(".appx", StringComparison.OrdinalIgnoreCase)) continue;
+            using var stream = entry.Open();
+            using var package = new ZipArchive(stream, ZipArchiveMode.Read);
+            var unexpected = package.Entries.Where(file =>
+                file.Name.Equals("coreclr.dll", StringComparison.OrdinalIgnoreCase) ||
+                file.Name.Equals("clrjit.dll", StringComparison.OrdinalIgnoreCase) ||
+                file.Name.Equals("System.Private.CoreLib.dll", StringComparison.OrdinalIgnoreCase) ||
+                file.Name.Equals("Microsoft.Windows.SDK.NET.dll", StringComparison.OrdinalIgnoreCase))
+                .Select(file => file.FullName).ToArray();
+            if (unexpected.Length > 0)
+                throw new InvalidDataException($"AOT MSIX 混入了托管构建文件：{string.Join(", ", unexpected)}。本次发布未通过包内容检查。");
+        }
     }
 
     public async Task BuildExeAsync(string version, string configuration, string output, bool buildInstaller, bool exportZip)

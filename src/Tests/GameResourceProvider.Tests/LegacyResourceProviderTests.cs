@@ -141,8 +141,10 @@ public sealed class LegacyResourceProviderTests
     public async Task SuccessfulAdvanceInstallWritesExplicitTargetVersion()
     {
         using var fixture = await Fixture.Create("1");
+        var logger = new global::Waves.Core.Services.LoggerService();
+        logger.InitLogger(Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".log"), Serilog.RollingInterval.Infinite);
         var writer = new global::Waves.Core.GameContext.KruoGameContextBaseV2.Common.WriteGameResourceConfig(
-            fixture.Local, "3", fixture.Provider.ApiConfig, new global::Waves.Core.Services.LoggerService());
+            fixture.Local, "3", fixture.Provider.ApiConfig, logger);
         await writer.WriteDownloadAndUpDateResultAsync(InstallOption.CreateAdvance());
         Assert.AreEqual("3", await fixture.Local.GetConfigAsync(GameLocalSettingName.LocalGameVersion));
         Assert.AreEqual("True", await fixture.Local.GetConfigAsync(GameLocalSettingName.ProdIsAdvance));

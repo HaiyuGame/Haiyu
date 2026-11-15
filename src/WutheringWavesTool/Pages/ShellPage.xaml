@@ -50,11 +50,7 @@
                     HorizontalAlignment="Left"
                     Orientation="Horizontal">
                     <Grid>
-                        <SystemBackdropElement>
-                            <SystemBackdropElement.SystemBackdrop>
-                                <DesktopAcrylicBackdrop />
-                            </SystemBackdropElement.SystemBackdrop>
-                        </SystemBackdropElement>
+                        <control:InAppAcrylicVisual />
                         <Button
                             Width="65"
                             Margin="0,0,0,0"
@@ -88,14 +84,11 @@
                             <ColumnDefinition />
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
-                        <SystemBackdropElement
+
+                        <control:InAppAcrylicVisual
                             Grid.ColumnSpan="4"
                             HorizontalAlignment="Stretch"
-                            CornerRadius="5">
-                            <SystemBackdropElement.SystemBackdrop>
-                                <DesktopAcrylicBackdrop />
-                            </SystemBackdropElement.SystemBackdrop>
-                        </SystemBackdropElement>
+                            CornerRadius="5" />
                         <Button
                             Width="40"
                             Height="40"
@@ -429,12 +422,21 @@
                                                     <RowDefinition />
                                                     <RowDefinition />
                                                 </Grid.RowDefinitions>
-                                                <TextBlock Text="{x:Bind Message}" />
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition />
+                                                    <ColumnDefinition Width="auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock
+                                                    Text="{x:Bind Message}"
+                                                    TextAlignment="Left"
+                                                    TextWrapping="Wrap" />
                                                 <TextBlock
                                                     Grid.Row="1"
                                                     Foreground="{ThemeResource SystemColorGrayTextBrush}"
                                                     Text="{x:Bind TimeString}" />
                                                 <Button
+                                                    Grid.RowSpan="2"
+                                                    Grid.Column="1"
                                                     HorizontalAlignment="Right"
                                                     VerticalAlignment="Top"
                                                     Command="{x:Bind RemoveCommand}"
