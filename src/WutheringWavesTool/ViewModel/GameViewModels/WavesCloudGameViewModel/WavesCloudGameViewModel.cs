@@ -232,7 +232,7 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
             {
                 Logger.WriteError(ex.Message + ex.StackTrace);
                 if (IsAlive)
-                    await ShowStartErrorAsync(LanguageService.GetString("CloudGame_LaunchFailed"));
+                    await ShowStartErrorAsync("云鸣潮启动失败，请重试。");
             }
         }
         else if (_startBthActive == CloudGameUIActive.QueueUp)

@@ -79,12 +79,12 @@
         <TextBlock
             Grid.Row="4"
             VerticalAlignment="Center"
-            Text="{x:Bind helper:LanguageService.GetString('CloudGame_AutoSelectLowestLatencyNode')}" />
+            Text="自动选择最低延迟节点" />
         <ToggleSwitch
             Grid.Row="4"
             Grid.Column="1"
             VerticalAlignment="Center"
-            AutomationProperties.Name="{x:Bind helper:LanguageService.GetString('CloudGame_AutoSelectLowestLatencyNode')}"
+            AutomationProperties.Name="自动选择最低延迟节点"
             IsOn="{x:Bind ViewModel.AutoSelectLowestLatencyNode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
             OffContent="{x:Bind helper:LanguageService.GetString('Display_LatchingPowerDown')}"
             OnContent="{x:Bind helper:LanguageService.GetString('Display_On')}" />

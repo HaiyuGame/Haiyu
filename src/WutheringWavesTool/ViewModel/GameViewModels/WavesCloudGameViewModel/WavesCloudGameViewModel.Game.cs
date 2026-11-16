@@ -36,7 +36,7 @@ partial class WavesCloudGameViewModel
         if (selection?.SelectNode is not { } node)
         {
             if (autoSelect)
-                BottomText = LanguageService.GetString("CloudGame_NoMeasuredNode");
+                BottomText = "未测到可用节点，请检查网络后重试。";
             else
                 await ShowStartErrorAsync(LanguageService.GetStringByText("请选择节点或节点失效"));
 
@@ -69,7 +69,7 @@ partial class WavesCloudGameViewModel
         timeout.CancelAfter(TimeSpan.FromSeconds(25));
 
         var previousText = BottomText;
-        var testingText = LanguageService.GetString("CloudGame_TestingNodes");
+        const string testingText = "正在测试节点延迟…";
         BottomText = testingText;
         try
         {
