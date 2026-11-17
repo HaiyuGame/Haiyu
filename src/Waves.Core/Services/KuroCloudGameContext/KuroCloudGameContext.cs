@@ -22,6 +22,7 @@ public class KuroCloudGameContext : IKuroCloudGameContext
     public CloudGameProcessTracker CloudGameProcessTracker { get; private set; }
 
     public GameLocalConfig GameLocalConfig { get; private set; }
+    public bool AutoSelectLowestLatencyNode { get; private set; } = true;
 
     public string GamerConfigPath { get; internal set; }
     public uint CurrentPayType { get; private set; }
@@ -43,6 +44,19 @@ public class KuroCloudGameContext : IKuroCloudGameContext
         await CloudGameProcessTracker.StartTrackingAsync(this.CloudGameEventPublisher);
         Directory.CreateDirectory(GamerConfigPath);
         this.GameLocalConfig = new GameLocalConfig(GamerConfigPath + "\\Settings.bat");
+        var autoSelect = await GameLocalConfig.GetConfigAsync(
+            CloudGameLocalSettingName.AutoSelectLowestLatencyNode
+        );
+        AutoSelectLowestLatencyNode = !bool.TryParse(autoSelect, out var enabled) || enabled;
+    }
+
+    public Task<bool> SetAutoSelectLowestLatencyNodeAsync(bool enabled)
+    {
+        AutoSelectLowestLatencyNode = enabled;
+        return GameLocalConfig.SaveConfigAsync(
+            CloudGameLocalSettingName.AutoSelectLowestLatencyNode,
+            enabled.ToString()
+        );
     }
 
     public async Task StartGameAsync(

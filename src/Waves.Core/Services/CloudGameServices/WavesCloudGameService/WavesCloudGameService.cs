@@ -48,7 +48,7 @@ public sealed partial class WavesCloudGameService : IWavesCloudGameService
 
     #endregion
 
-    public WavesCloudGameService(CloudConfigManager cloudConfigManager,AppSettings appSettings)
+    public WavesCloudGameService(CloudConfigManager cloudConfigManager, AppSettings appSettings)
     {
         this.ConfigManager = cloudConfigManager;
         AppSettings = appSettings;
@@ -229,12 +229,31 @@ public sealed partial class WavesCloudGameService : IWavesCloudGameService
     public async Task<CloudApiResponse<List<CloudGameNode>>?> GetPingGameNodeAsync(
         CloudGameLoginSession session,
         CancellationToken ct = default
+    ) => (await GetScoredGameNodesAsync(session, ct)).Response;
+
+    public async Task<LauncheNodeConfig?> GetFastestGameNodeAsync(
+        CloudGameLoginSession session,
+        CancellationToken ct = default
     )
+    {
+        var (response, measurements) = await GetScoredGameNodesAsync(session, ct);
+        if (response is not { Code: 0, Data: { } regions } || measurements.Count == 0)
+            return null;
+
+        return LauncheNodeConfig.SelectFastest(
+            regions,
+            measurements.ToDictionary(node => node.NodeId, node => node.Delay)
+        );
+    }
+
+    private async Task<(CloudApiResponse<List<CloudGameNode>>? Response, List<NodeList> Measurements)>
+        GetScoredGameNodesAsync(CloudGameLoginSession session, CancellationToken ct)
     {
         try
         {
             var pingNode = await this.CloudNetworkSpeedTestService.RunSpeedTestAsync(ct);
             var nodeList = pingNode
+                .Where(x => !string.IsNullOrWhiteSpace(x.NodeId))
                 .Select(x => new NodeList() { Delay = x.Delay, NodeId = x.NodeId })
                 .ToList();
             using var client = BuildClientData(
@@ -248,20 +267,18 @@ public sealed partial class WavesCloudGameService : IWavesCloudGameService
                 "application/json"
             );
             client.Content = content;
-            var result = await _cloudClient.SendAsync(client, ct);
-            var str = await result.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize(
+            using var result = await _cloudClient.SendAsync(client, ct);
+            result.EnsureSuccessStatusCode();
+            var str = await result.Content.ReadAsStringAsync(ct);
+            var response = JsonSerializer.Deserialize(
                 str,
                 CloudGameContext.Default.CloudApiResponseListCloudGameNode
             );
+            return (response, nodeList);
         }
-        catch (TaskCanceledException)
+        catch (Exception)
         {
-            return null;
-        }
-        catch(Exception)
-        {
-            return null;
+            return (null, []);
         }
     }
 
@@ -289,7 +306,7 @@ public sealed partial class WavesCloudGameService : IWavesCloudGameService
         CommStartModel model = new CommStartModel()
         {
             NodeList = startParameters.Node.NodeList,
-            PayType = (int)payType,
+            PayType = (int) payType,
             ResourceData = new ResourceData()
             {
                 WlResourceData = new WlResourceData()
@@ -402,13 +419,13 @@ public sealed partial class WavesCloudGameService : IWavesCloudGameService
             "User-Agent",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36 Edg/139.0.0.0"
         );
-        using(HttpClient client = new(new WavesGameHandler()))
+        using (HttpClient client = new(new WavesGameHandler()))
         {
             var result = await client.SendAsync(message, token);
             var str = await result.Content.ReadAsStringAsync(token);
             return JsonSerializer.Deserialize(str, PlayerCardRecordContext.Default.PlayerReponse);
         }
-        
+
     }
 
     /// <summary>
@@ -454,7 +471,7 @@ public sealed partial class WavesCloudGameService : IWavesCloudGameService
         if (!string.IsNullOrWhiteSpace(lastLoginName))
         {
             var user = await this.ConfigManager.GetUserAsync(lastLoginName);
-            if(user != null)
+            if (user != null)
             {
                 await this.SetCurrentUserSession(lastLoginName);
             }

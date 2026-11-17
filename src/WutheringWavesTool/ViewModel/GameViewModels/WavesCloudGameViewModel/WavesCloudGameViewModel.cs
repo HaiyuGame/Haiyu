@@ -107,7 +107,7 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
                 window.Title = title;
                 window.Activate();
 
-                this.KuroCloudGameContext.SetGameingWindow((nint)window.GetWindowHandle(), title);
+                this.KuroCloudGameContext.SetGameingWindow((nint) window.GetWindowHandle(), title);
                 this._startBthActive = CloudGameUIActive.StopGame;
             }
             else if (obj.CoreType == CloudCoreType.QueueUp)
@@ -135,7 +135,7 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
                 {
                     Span<char> buffer = new char[512];
                     var len = Windows.Win32.PInvoke.GetWindowText(
-                        new HWND((IntPtr)state.WindowHandle),
+                        new HWND((IntPtr) state.WindowHandle),
                         buffer
                     );
                     var text = new string(buffer[..len]) ?? "";
@@ -224,58 +224,16 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
     {
         if (this._startBthActive == CloudGameUIActive.StartGame)
         {
-            var selectLogin = await this.WavesCloudGameService.GetCurrentUserSession();
-            if (selectLogin == null)
+            try
             {
-                await WindowManager.Shell.TipShow.ShowMessageAsync(
-                    LanguageService.GetStringByText("请在左侧卡片登录一个账号"),
-                    Symbol.Clear
-                );
-                return;
+                await RunWhileAliveAsync(StartGameAsync);
             }
-            var wallData = await this.WavesCloudGameService.GetWalletDataAsync(
-                selectLogin,
-                this.CTS.Token
-            );
-
-            if (wallData == null || wallData.Data == null)
+            catch (Exception ex) when (ex is not OutOfMemoryException)
             {
-                await WindowManager.Shell.TipShow.ShowMessageAsync(
-                    wallData.Msg ?? LanguageService.GetStringByText("获取余额失败！"),
-                    Symbol.Clear
-                );
-                return;
+                Logger.WriteError(ex.Message + ex.StackTrace);
+                if (IsAlive)
+                    await ShowStartErrorAsync("云鸣潮启动失败，请重试。");
             }
-            var result = await this.WindowManager.Shell.DialogManager.ShowSelectGameNodeAsync(
-                selectLogin.GetId()
-            );
-
-            if (result == null || result.SelectNode == null)
-            {
-                await WindowManager.Shell.TipShow.ShowMessageAsync(
-                    LanguageService.GetStringByText("请选择节点或节点失效"),
-                    Symbol.Clear
-                );
-                return;
-            }
-            var qualityOpt = await this.GetOptionsAsync();
-            if (qualityOpt == null)
-            {
-                await WindowManager.Shell.TipShow.ShowMessageAsync(
-                    LanguageService.GetStringByText("构建清晰度失败，日志已记录"),
-                    Symbol.Clear
-                );
-                return;
-            }
-            _ = Task.Run(async () =>
-                await this.KuroCloudGameContext.StartGameAsync(
-                    selectLogin,
-                    result.Nodes,
-                    result.SelectNode,
-                    qualityOpt,
-                    this.GetDefaultPayType(wallData.Data)
-                )
-            );
         }
         else if (_startBthActive == CloudGameUIActive.QueueUp)
         {
@@ -298,7 +256,7 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
             ).TotalSeconds > 0
         )
         {
-            return (uint)CloudPayType.Pay;
+            return (uint) CloudPayType.Pay;
         }
         if (
             walletInfo.ExperienceCardInfo is not null
@@ -310,15 +268,15 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
             )
         )
         {
-            return (uint)CloudPayType.Experience; // 体验卡 → Experience(4)
+            return (uint) CloudPayType.Experience; // 体验卡 → Experience(4)
         }
         var freeSeconds = walletInfo.FreeTimeInfo?.LeftSeconds ?? 0;
         var paySeconds = walletInfo.PayTimeInfo?.LeftSeconds ?? 0;
         if (freeSeconds > 0)
-            return (uint)CloudPayType.Free;
+            return (uint) CloudPayType.Free;
         if (paySeconds > 0)
-            return (uint)CloudPayType.Pay;
-        return (uint)CloudPayType.Pay;
+            return (uint) CloudPayType.Pay;
+        return (uint) CloudPayType.Pay;
     }
 
     /// <summary>
@@ -352,7 +310,7 @@ public sealed partial class WavesCloudGameViewModel : ViewModelBase
     [RelayCommand]
     async Task ShowWavesAnalysis()
     {
-        var isPreview = GrayOpenService.GetOpen((uint)GrayConfigId.WavesRecordManager, false);
+        var isPreview = GrayOpenService.GetOpen((uint) GrayConfigId.WavesRecordManager, false);
         var selectLogin = await this.WavesCloudGameService.GetCurrentUserSession();
         if (selectLogin == null)
         {

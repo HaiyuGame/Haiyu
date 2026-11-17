@@ -153,7 +153,7 @@ public class CloudNetworkSpeedTestService : IDisposable
                                 Addr = node.LineH5Addr,
                                 Port = node.LineH5Port,
                                 Type = node.Type,
-                                Delay = (int)Math.Round(delay.Value),
+                                Delay = (int) Math.Round(delay.Value),
                             }
                         );
                     }
@@ -179,8 +179,8 @@ public class CloudNetworkSpeedTestService : IDisposable
         var wsUrl = $"wss://{node.LineH5Addr}/ws";
         using var ws = new ClientWebSocket();
 
-        var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        linkedCts.CancelAfter(TimeSpan.FromSeconds(_pingTimeoutMs * _pingCount + 5000));
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        linkedCts.CancelAfter(TimeSpan.FromMilliseconds((long) _pingTimeoutMs * _pingCount + 5000));
 
         var rtts = new List<double>();
 
@@ -204,16 +204,19 @@ public class CloudNetworkSpeedTestService : IDisposable
                     linkedCts.Token
                 );
                 var buffer = new byte[4096];
-                var receiveTask = ws.ReceiveAsync(new ArraySegment<byte>(buffer), linkedCts.Token);
-                var timeoutTask = Task.Delay(_pingTimeoutMs, linkedCts.Token);
+                using var receiveCts = CancellationTokenSource.CreateLinkedTokenSource(linkedCts.Token);
+                receiveCts.CancelAfter(_pingTimeoutMs);
 
-                var completed = await Task.WhenAny(receiveTask, timeoutTask);
-                if (completed == timeoutTask)
+                WebSocketReceiveResult recvResult;
+                try
                 {
-                    continue;
+                    recvResult = await ws.ReceiveAsync(new ArraySegment<byte>(buffer), receiveCts.Token);
+                }
+                catch (OperationCanceledException) when (!linkedCts.IsCancellationRequested)
+                {
+                    break;
                 }
 
-                var recvResult = await receiveTask;
                 var responseText = Encoding.UTF8.GetString(buffer, 0, recvResult.Count);
 
                 using var doc = JsonDocument.Parse(responseText);

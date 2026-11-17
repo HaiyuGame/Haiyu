@@ -75,6 +75,11 @@ public interface IWavesCloudGameService
         CancellationToken ct = default
     );
 
+    Task<LauncheNodeConfig?> GetFastestGameNodeAsync(
+        CloudGameLoginSession session,
+        CancellationToken ct = default
+    );
+
     /// <summary>
     /// 开始排队
     /// </summary>
