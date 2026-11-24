@@ -87,9 +87,7 @@
                                 Glyph="&#xE912;" />
                         </Button>
                     </StackPanel>
-
                 </Grid>
-
 
                 <TextBlock
                     Grid.Row="2"
@@ -265,7 +263,6 @@
             HorizontalAlignment="Right"
             VerticalAlignment="Bottom"
             CornerRadius="5">
-
             <Grid Grid.Column="1" Padding="5">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto" />
@@ -325,7 +322,6 @@
                                 FontSize="15"
                                 Text="{x:Bind ViewModel.StartGameText, Mode=OneWay}" />
                         </Grid>
-
                     </Button>
                     <Button
                         Grid.Row="1"

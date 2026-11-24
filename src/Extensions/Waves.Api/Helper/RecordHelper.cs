@@ -1,4 +1,3 @@
-
 using System.Text.Json;
 using MemoryPack;
 using Waves.Api.Models;
@@ -15,7 +14,7 @@ public static class RecordHelper
         HttpRequestMessage message = new()
         {
             RequestUri = new Uri($"https://gmserver-api.aki-game2.com/gacha/record/query"),
-            Method = HttpMethod.Post
+            Method = HttpMethod.Post,
         };
         recordRequest.CardPoolType = (int)type;
         var str = new StringContent(
@@ -92,35 +91,19 @@ public static class RecordHelper
         List<Tuple<RecordCardItemWrapper, int, bool?>> result = new();
         int count = 0;
         var items = source.Reverse();
-        if (!checkResident)
-        {
-            foreach (var item in items)
-            {
-                if (item.QualityLevel == 5)
-                {
-                    result.Add(new(item, count, null));
-                    count = 0;
-                }
-                else
-                {
-                    count++;
-                }
-            }
-            lastCount = 0;
-            return (result, count);
-        }
         foreach (var item in items)
         {
             if (item.QualityLevel == 5)
             {
-                result.Add(new(item, count, IsResident(item.ResourceId)));
+                result.Add(
+                    new(item, count, checkResident == true ? IsResident(item.ResourceId) : false)
+                );
                 count = 0;
             }
             else
             {
                 count++;
             }
-            
         }
         if (count > 0)
         {
@@ -133,7 +116,6 @@ public static class RecordHelper
 
         return (result, count);
     }
-
 
     public static List<Tuple<RecordCardItemWrapper, int>> FormatRecordFive(
         IEnumerable<RecordCardItemWrapper> source
@@ -169,7 +151,8 @@ public static class RecordHelper
             try
             {
                 var response = await client.GetAsync(
-                    "https://api3.sanyueqi.cn/api/v1/pool/draw_config_infos", token
+                    "https://api3.sanyueqi.cn/api/v1/pool/draw_config_infos",
+                    token
                 );
                 response.EnsureSuccessStatusCode();
                 var model = JsonSerializer.Deserialize(
@@ -185,13 +168,18 @@ public static class RecordHelper
         }
     }
 
-    public static async Task<List<CommunityRoleData>?> GetAllRoleAsync(CancellationToken token= default)
+    public static async Task<List<CommunityRoleData>?> GetAllRoleAsync(
+        CancellationToken token = default
+    )
     {
         using (HttpClient client = new HttpClient())
         {
             try
             {
-                var response = await client.GetAsync("https://mc.appfeng.com/json/avatar.json", token);
+                var response = await client.GetAsync(
+                    "https://mc.appfeng.com/json/avatar.json",
+                    token
+                );
                 response.EnsureSuccessStatusCode();
                 var model = JsonSerializer.Deserialize(
                     await response.Content.ReadAsStringAsync(token),
@@ -208,13 +196,18 @@ public static class RecordHelper
         }
     }
 
-    public static async Task<List<CommunityWeaponData>?> GetAllWeaponAsync(CancellationToken token =default)
+    public static async Task<List<CommunityWeaponData>?> GetAllWeaponAsync(
+        CancellationToken token = default
+    )
     {
         using (HttpClient client = new HttpClient())
         {
             try
             {
-                var response = await client.GetAsync("https://mc.appfeng.com/json/weapon.json?", token);
+                var response = await client.GetAsync(
+                    "https://mc.appfeng.com/json/weapon.json?",
+                    token
+                );
                 response.EnsureSuccessStatusCode();
                 var model = JsonSerializer.Deserialize(
                     await response.Content.ReadAsStringAsync(token),
@@ -313,7 +306,8 @@ public static class RecordHelper
         double weightedScore1 =
             (1 - ((guaranteedRange - minScore1) / (maxScore1 - minScore1))) * weight1;
         double weightedScore2 = (1 - ((roleAAvg - minScore2) / (maxScore2 - minScore2))) * weight2;
-        double weightedScore3 = (1 - ((weaponAAvg - minScore3) / (maxScore3 - minScore3))) * weight3;
+        double weightedScore3 =
+            (1 - ((weaponAAvg - minScore3) / (maxScore3 - minScore3))) * weight3;
         double weightedScore4 = (1 - ((resident - minScore4) / (maxScore4 - minScore4))) * weight4;
         double totalScore =
             (weightedScore1 + weightedScore2 + weightedScore3 + weightedScore4) * 100;
@@ -420,7 +414,10 @@ public static class RecordHelper
                     )
                     .OrderByDescending(x => x.RecordTime)
                     .ToList(),
-                BeginnerItems = SyncCompareLists(sortedCache.BeginnerItems, sortedLocal.BeginnerItems)
+                BeginnerItems = SyncCompareLists(
+                        sortedCache.BeginnerItems,
+                        sortedLocal.BeginnerItems
+                    )
                     .OrderByDescending(x => x.RecordTime)
                     .ToList(),
                 GratitudeOrientationItems = SyncCompareLists(
@@ -446,14 +443,14 @@ public static class RecordHelper
                     .Concat(mergedRecord.GratitudeOrientationItems)
                     .Concat(mergedRecord.RoleJourneyItems)
                     .Concat(mergedRecord.WeaponJourneyItems)
-                    .Count()
-            , mergedRecord);
+                    .Count(),
+                mergedRecord
+            );
         }
         catch (Exception)
         {
             return (0, 0, null);
         }
-        
     }
 
     public static RecordCacheDetily? SortItemsByTime(RecordCacheDetily recordCache)
@@ -488,8 +485,9 @@ public static class RecordHelper
     }
 
     public static List<RecordCardItemWrapper> SyncCompareLists(
-     IList<RecordCardItemWrapper> oldRecords,
-     IList<RecordCardItemWrapper> newRecords)
+        IList<RecordCardItemWrapper> oldRecords,
+        IList<RecordCardItemWrapper> newRecords
+    )
     {
         var safeOldRecords = oldRecords ?? new List<RecordCardItemWrapper>();
         var safeNewRecords = newRecords ?? new List<RecordCardItemWrapper>();
