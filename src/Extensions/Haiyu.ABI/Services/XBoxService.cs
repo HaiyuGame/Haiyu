@@ -6,6 +6,13 @@ using Waves.Settings;
 
 namespace Haiyu.ABI.Services;
 
+
+/*
+    Xbox 增强
+    1. 自定义按键，关闭当前活动游戏，按下对应一个按键时，触发手柄震动，直到全部按下之后，等待2秒杀死当前焦点窗口
+    2. 自定义按键，启动鼠标模拟
+ 
+ */
 public class XBoxService : IDisposable
 {
     public XBoxController Controller { get; private set; }

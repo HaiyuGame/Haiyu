@@ -99,7 +99,7 @@
         return parseInt(Math.random() * 10000) + (new Date()).valueOf();
     };
 
-    // bind 鍑芥暟polify, 涓嶅甫new鍔熻兘鐨刡ind
+    // bind 函数polify, 不带new功能的bind
 
     var bind = function (target, context) {
         if (typeof target !== 'function') {
@@ -174,14 +174,14 @@
         script.charset = "UTF-8";
         script.async = true;
 
-        // 瀵筭eetest鐨勯潤鎬佽祫婧愭坊鍔� crossOrigin
+        // 对geetest的静态资源添加 crossOrigin
         if (/static\.geetest\.com/g.test(url)) {
             script.crossOrigin = "anonymous";
         }
 
         script.onerror = function () {
             cb(true);
-            // 閿欒瑙﹀彂浜嗭紝瓒呮椂閫昏緫灏变笉鐢ㄤ簡
+            // 错误触发了，超时逻辑就不用了
             loaded = true;
         };
         var loaded = false;
@@ -250,17 +250,17 @@
 
     var load = function (config, protocol, domains, path, query, cb, handleCb) {
         var tryRequest = function (at) {
-            // 澶勭悊jsonp鍥炶皟锛岃繖閲屼负浜嗕繚璇佹瘡涓笉鍚宩sonp閮芥湁鍞竴鐨勫洖璋冨嚱鏁�
+            // 处理jsonp回调，这里为了保证每个不同jsonp都有唯一的回调函数
             if (handleCb) {
                 var cbName = "geetest_" + random();
-                // 闇€瑕佷笌棰勫厛瀹氫箟濂絚bname鍙傛暟锛屽垹闄ゅ璞�
+                // 需要与预先定义好cbname参数，删除对象
                 window[cbName] = bind(handleCb, null, cbName);
                 query.callback = cbName;
             }
             var url = makeURL(protocol, domains[at], path, query);
             loadScript(url, function (err) {
                 if (err) {
-                    // 瓒呮椂鎴栬€呭嚭閿欑殑鏃跺€� 绉婚櫎鍥炶皟
+                    // 超时或出错的时候 移除回调
                     if (cbName) {
                         try {
                             window[cbName] = function () {
@@ -288,14 +288,14 @@
 
         var handleCb = function (cbName, data) {
 
-            // 淇濊瘉鍙墽琛屼竴娆★紝鍏ㄩ儴瓒呮椂鐨勬儏鍐典笅涓嶄細鍐嶈Е鍙�;
+            // 保证只执行一次，全部超时的情况下不会再触发;
 
             if (data.status == 'success') {
                 callback(data.data);
             } else if (!data.status) {
                 callback(data);
             } else {
-                //鎺ュ彛鏈夎繑鍥烇紝浣嗘槸杩斿洖浜嗛敊璇姸鎬侊紝杩涘叆鎶ラ敊閫昏緫
+                //接口有返回，但是返回了错误状态，进入报错逻辑
                 callback(data);
             }
             window[cbName] = undefined;
@@ -314,10 +314,10 @@
             call_type: config.callType,
             lang: config.language ? config.language : navigator.appName === 'Netscape' ? navigator.language.toLowerCase() : navigator.userLanguage.toLowerCase()
         }, function (err) {
-            // 缃戠粶闂鎺ュ彛娌℃湁杩斿洖锛岀洿鎺ヤ娇鐢ㄦ湰鍦伴獙璇佺爜锛岃蛋瀹曟満妯″紡
-            // 杩欓噷鍙互娣诲姞鐢ㄦ埛鐨勯€昏緫
+            // 网络问题接口没有返回，直接使用本地验证码，走宕机模式
+            // 这里可以添加用户的逻辑
             if (err && typeof config.offlineCb === 'function') {
-                // 鎵ц鑷繁鐨勫畷鏈�
+                // 执行自己的宕机
                 config.offlineCb();
                 return;
             }
@@ -339,8 +339,8 @@
 
     var throwError = function (errorType, config, errObj) {
         var errors = {
-            networkError: '缃戠粶閿欒',
-            gtTypeError: 'gt瀛楁涓嶆槸瀛楃涓茬被鍨�'
+            networkError: '网络错误',
+            gtTypeError: 'gt字段不是字符串类型'
         };
         if (typeof config.onError === 'function') {
             config.onError({
@@ -390,7 +390,7 @@
         }
 
         jsonp(config.apiServers, config.typePath, config, function (newConfig) {
-            //閿欒鎹曡幏锛岀涓€涓猯oad璇锋眰鍙兘鐩存帴鎶ラ敊
+            //错误捕获，第一个load请求可能直接报错
             var newConfig = camelizeKeys(newConfig);
 
             if (newConfig.status === 'error') {
@@ -453,7 +453,7 @@
                     }
                 });
             } else if (s === "loaded") {
-                // 鍒ゆ柇gct鏄惁闇€瑕侀噸鏂板姞杞�
+                // 判断gct是否需要重新加载
                 if (newConfig.gctPath && !GeetestIsLoad(newConfig.gctPath)) {
                     load(config, config.protocol, Object.hasOwnProperty.call(config, 'staticServers') ? config.staticServers : newConfig.staticServers || config.staticServers, newConfig.gctPath, null, function (err) {
                         if (err) {

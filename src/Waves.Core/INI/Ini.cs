@@ -1,7 +1,7 @@
 namespace Waves.Core.INI;
 
 /// <summary>
-/// Ini ��д��
+/// Ini 读写类
 /// </summary>
 public partial class Ini
 {
@@ -83,17 +83,17 @@ public partial class Ini
                 {
                     var match = Ini.Inner().Match(line);
                     if (!match.Success)
-                        throw new Exception("�ļ��𻵣�");
+                        throw new Exception("文件损坏！");
                     var sectionName = match.Groups["inner"].Value.Trim();
                     if (keyPairs.ContainsKey(sectionName))
-                        throw new Exception("�ظ���Key");
+                        throw new Exception("重复的Key");
                     keyPairs.Add(sectionName, new List<Tuple<string, string>>());
                     currentSection = sectionName;
                 }
                 else
                 {
                     if (string.IsNullOrEmpty(currentSection))
-                        throw new Exception("�ļ���ʽ�����ڽ�֮ǰ���ڼ�ֵ��");
+                        throw new Exception("文件格式错误：在节之前存在键值对");
                     var idx = line.IndexOf('=');
                     if (idx < 0)
                     {

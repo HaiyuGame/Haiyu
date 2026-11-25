@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" ?>
 <Page
     x:Class="Haiyu.Pages.ToolkitPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -229,6 +229,10 @@
                     </StackPanel>
                 </Button>
             </cui:SettingsCard>
+            <cui:SettingsCard
+                Command="{x:Bind ViewModel.OpenXboxMouseCommand}"
+                Header="Xbox 手柄模拟"
+                IsClickEnabled="True" />
             <Grid Margin="0,15,0,0" VerticalAlignment="Center">
                 <TextBlock
                     VerticalAlignment="Center"

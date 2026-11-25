@@ -37,21 +37,14 @@ public static class BuiltInServices
             RunResult,
             ABISystemConfigService
         >(Contract.ABISystemConfigContract);
-
-        // XBoxService 是 XboxOpen/CloseControllerService 的构造依赖，必须先注册。
-        // XBoxController 是 XBoxService 的构造依赖（Haiyu.ABI.XBox.Commons）。
-        // 注册收敛到 AddBuiltInServices：ElevatedEntry 与 MonitorSelfTest 两个宿主入口
-        // 共用同一份注册，避免入口间不一致导致 DI 验证失败。
         services.AddSingleton<XBoxController>();
         services.AddSingleton<XBoxService>();
-
         services.AddPrivilegedService<
             XboxExtOpenRequest,
             XboxReportProcess,
             RunResult,
             XboxOpenControllerService
         >(Contract.XboxOpenControllerContract);
-
         services.AddPrivilegedService<
             XboxExtCloseRequest,
             XboxReportProcess,

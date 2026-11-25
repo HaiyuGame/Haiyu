@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO.Compression;
 using System.Text;
+using ABI.Models;
+using ABIRuntime.Abstractions;
 using Waves.Core.Models.Enums;
 using Waves.Core.Models.Tasks;
 
@@ -35,9 +37,9 @@ public sealed partial class ToolkitViewModel : ViewModelBase
     }
 
     #region GrayId
-    public uint SortingGrayKey => (uint) GrayConfigId.SoringTesing;
+    public uint SortingGrayKey => (uint)GrayConfigId.SoringTesing;
 
-    public uint WavesRecordKey => (uint) GrayConfigId.WavesRecordManager;
+    public uint WavesRecordKey => (uint)GrayConfigId.WavesRecordManager;
     #endregion
 
     public IViewFactorys ViewFactorys { get; }
@@ -431,12 +433,27 @@ public sealed partial class ToolkitViewModel : ViewModelBase
         );
     }
 
-    
-
     [RelayCommand]
     async Task OpenWavesRecord()
     {
         ViewFactorys.ShowWavesRecordManagerWindow();
+    }
+
+    [RelayCommand]
+    async Task OpenXboxMouse()
+    {
+        var result1 = await this.AppContext.ABIRuntimeService.Initialize(
+            AppSettings.ABIRuntimeSavePath
+        );
+        var result = await this.AppContext.ABIRuntimeService.Runtime!.InvokeAsync<
+            XboxExtOpenRequest,
+            XboxReportProcess,
+            RunResult
+        >(
+            ABIRuntime.Contract.XboxOpenControllerContract,
+            new XboxExtOpenRequest(""),
+            new Progress<IPrivilegedProgress<XboxReportProcess>>(x => { })
+        );
     }
 
     private void SendTaskMethod(object recipient, SendTaskMessager message)

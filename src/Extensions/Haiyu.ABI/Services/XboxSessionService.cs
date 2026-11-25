@@ -10,7 +10,6 @@ public interface IXboxSessionSource
     XboxSession[] GetSessions();
 }
 
-/// <summary>直接调用系统 XInput 1.4，不依赖 Windows SDK/WinRT。</summary>
 public sealed partial class XInputSessionSource : IXboxSessionSource
 {
     public XboxSession[] GetSessions()

@@ -61,3 +61,13 @@
 #*.PDF   diff=astextplain
 #*.rtf   diff=astextplain
 #*.RTF   diff=astextplain
+
+# Visual Studio code page 1200. Git stores normalized UTF-8.
+/src/Extensions/Haiyu.ABI/CoreExports.cs text working-tree-encoding=UTF-16LE-BOM eol=crlf
+/src/Extensions/Haiyu.ABI/Services/BuiltInServices.cs text working-tree-encoding=UTF-16LE-BOM eol=crlf
+/src/Extensions/Haiyu.ABI/Services/XBoxService.cs text working-tree-encoding=UTF-16LE-BOM eol=crlf
+/src/Extensions/Haiyu.ABI/Services/XboxSessionService.cs text working-tree-encoding=UTF-16LE-BOM eol=crlf
+/src/WutheringWavesTool/Pages/ToolkitPage.xaml text working-tree-encoding=UTF-16LE-BOM eol=crlf
+/src/WutheringWavesTool/ViewModel/ToolkitViewModel.cs text working-tree-encoding=UTF-16LE-BOM eol=crlf
+/src/Waves.Core/INI/Ini.cs text working-tree-encoding=UTF-16LE-BOM eol=crlf
+/src/WutheringWavesTool/Package.txt text working-tree-encoding=UTF-16LE-BOM eol=crlf
