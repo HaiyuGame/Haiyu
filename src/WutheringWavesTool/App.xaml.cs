@@ -2,6 +2,7 @@ using System.Globalization;
 using Haiyu.Helpers;
 using Haiyu.Plugin.Common.LegacyMessageBox;
 using Microsoft.Extensions.Hosting;
+using Microsoft.UI.Xaml.Settings;
 using Microsoft.Windows.ApplicationModel.Resources;
 using Microsoft.Windows.AppLifecycle;
 using Waves.Core.Services;
@@ -34,6 +35,7 @@ public partial class App : ClientApplication
             "Haiyu_Main"
         );
         mainInstance.Activated += MainInstance_Activated;
+        
     }
 
     private async void MainInstance_Activated(object? sender, AppActivationArguments e)

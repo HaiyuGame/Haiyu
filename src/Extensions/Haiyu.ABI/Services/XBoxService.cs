@@ -20,7 +20,6 @@ public class XBoxService : IDisposable
     private CancellationTokenSource? _cts;
     private Task? _pollTask;
 
-    /// <summary> 触发信号 </summary>
     private const float LeftThumbDeadZone = 0.15f;
     private const int MouseSensitivity = 18;
     private const float RightThumbDeadZone = 0.2f;
@@ -35,7 +34,6 @@ public class XBoxService : IDisposable
 
     private readonly IXboxSessionSource _sessionSource;
 
-    /// <summary>读取所有四个槽位，不要求开启鼠标映射。</summary>
     public XboxSession[] GetSessions() => _sessionSource.GetSessions();
 
     public XBoxService(XBoxController xBoxController, IXboxSessionSource sessionSource)
@@ -77,12 +75,12 @@ public class XBoxService : IDisposable
                 }
                 if (Controller != null)
                 {
-                    var leftClick = Controller.LeftThumbclick.Value;
-                    var rightClick = Controller.LeftThumbclick.Value;
-                    if (leftClick && rightClick)
-                    {
-                        this.Controller.BoxTrigger = !this.Controller.BoxTrigger;
-                    }
+                    //var leftClick = Controller.LeftThumbclick.Value;
+                    //var rightClick = Controller.LeftThumbclick.Value;
+                    //if (leftClick && rightClick)
+                    //{
+                    //    this.Controller.BoxTrigger = !this.Controller.BoxTrigger;
+                    //}
                     if (!this.Controller.BoxTrigger)
                     {
                         await Task.Delay(10);
